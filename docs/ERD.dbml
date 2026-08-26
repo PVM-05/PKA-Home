@@ -1,0 +1,67 @@
+// Copy nội dung này dán vào https://dbdiagram.io/ để xem biểu đồ
+
+Table users {
+  id uuid [primary key, note: 'gen_random_uuid()']
+  full_name varchar [not null]
+  phone varchar
+  role varchar [not null, note: 'resident hoặc management']
+  created_at timestamp [default: `now()`]
+}
+
+Table apartments {
+  id uuid [primary key]
+  code varchar [unique, not null]
+  area decimal
+  is_empty boolean [default: true]
+  created_at timestamp [default: `now()`]
+}
+
+Table residents_apartments {
+  id uuid [primary key]
+  user_id uuid [ref: > users.id]
+  apartment_id uuid [ref: > apartments.id]
+  relation_role varchar [note: 'owner hoặc tenant']
+}
+
+Table invoices {
+  id uuid [primary key]
+  apartment_id uuid [ref: > apartments.id]
+  period varchar [note: 'Ví dụ: 08/2026']
+  due_date date
+  total_amount decimal
+  status varchar [note: 'unpaid, pending_confirmation, paid']
+  created_at timestamp [default: `now()`]
+}
+
+Table invoice_items {
+  id uuid [primary key]
+  invoice_id uuid [ref: > invoices.id]
+  fee_type varchar [note: 'Nước, Điện, Phí quản lý...']
+  unit_price decimal
+  quantity decimal
+  subtotal decimal
+}
+
+Table issue_reports {
+  id uuid [primary key]
+  apartment_id uuid [ref: > apartments.id]
+  reporter_id uuid [ref: > users.id]
+  assigned_staff_id uuid [ref: > users.id, null]
+  status varchar [note: 'pending, in_progress, resolved']
+  description text
+  created_at timestamp [default: `now()`]
+}
+
+Table issue_images {
+  id uuid [primary key]
+  issue_report_id uuid [ref: > issue_reports.id]
+  image_url varchar
+}
+
+Table announcements {
+  id uuid [primary key]
+  title varchar
+  content text
+  is_urgent boolean [default: false]
+  created_at timestamp [default: `now()`]
+}
