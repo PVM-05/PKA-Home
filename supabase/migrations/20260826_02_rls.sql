@@ -69,18 +69,6 @@ USING (
   )
 );
 
-CREATE POLICY "Resident update status invoices" 
-ON public.invoices FOR UPDATE 
-USING (
-  EXISTS (
-    SELECT 1 FROM public.residents_apartments 
-    WHERE apartment_id = invoices.apartment_id AND user_id = auth.uid()
-  )
-)
-WITH CHECK (
-  status = 'pending_confirmation'::invoice_status
-);
-
 CREATE POLICY "Management có toàn quyền trên invoices" 
 ON public.invoices FOR ALL 
 USING (public.is_management());
@@ -122,9 +110,22 @@ ON public.issue_reports FOR ALL
 USING (public.is_management());
 
 -- issue_images
-CREATE POLICY "Mọi người xem issue_images" 
+CREATE POLICY "Người liên quan xem issue_images" 
 ON public.issue_images FOR SELECT 
-USING (true);
+USING (
+  EXISTS (
+    SELECT 1 FROM public.issue_reports ir
+    WHERE ir.id = issue_images.issue_report_id
+    AND (
+      ir.reporter_id = auth.uid() OR 
+      public.is_management() OR 
+      EXISTS (
+        SELECT 1 FROM public.residents_apartments 
+        WHERE apartment_id = ir.apartment_id AND user_id = auth.uid()
+      )
+    )
+  )
+);
 
 CREATE POLICY "Resident tạo issue_images" 
 ON public.issue_images FOR INSERT 

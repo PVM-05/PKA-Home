@@ -61,7 +61,8 @@ CREATE TABLE public.residents_apartments (
     apartment_id UUID REFERENCES public.apartments(id) ON DELETE CASCADE,
     relation_role relation_type NOT NULL DEFAULT 'owner',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, apartment_id)
 );
 CREATE TRIGGER update_residents_apartments_modtime BEFORE UPDATE ON public.residents_apartments FOR EACH ROW EXECUTE FUNCTION update_modified_column();
 
@@ -124,3 +125,36 @@ CREATE TABLE public.announcements (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE TRIGGER update_announcements_modtime BEFORE UPDATE ON public.announcements FOR EACH ROW EXECUTE FUNCTION update_modified_column();
+
+-- =========================================================================
+-- Trigger tính tổng tiền hóa đơn (total_amount) tự động
+-- =========================================================================
+CREATE OR REPLACE FUNCTION public.recalc_invoice_total() RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.invoices SET total_amount = (
+    SELECT COALESCE(SUM(subtotal), 0) FROM public.invoice_items 
+    WHERE invoice_id = COALESCE(NEW.invoice_id, OLD.invoice_id)
+  ) WHERE id = COALESCE(NEW.invoice_id, OLD.invoice_id);
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER trg_recalc_invoice_total
+AFTER INSERT OR UPDATE OR DELETE ON public.invoice_items
+FOR EACH ROW EXECUTE FUNCTION public.recalc_invoice_total();
+
+-- =========================================================================
+-- RPC xác nhận thanh toán an toàn (Tránh user tự update amount)
+-- =========================================================================
+CREATE OR REPLACE FUNCTION public.confirm_payment(p_invoice_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE public.invoices 
+  SET status = 'pending_confirmation'::invoice_status, updated_at = NOW()
+  WHERE id = p_invoice_id 
+  AND EXISTS (
+    SELECT 1 FROM public.residents_apartments 
+    WHERE apartment_id = invoices.apartment_id AND user_id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
