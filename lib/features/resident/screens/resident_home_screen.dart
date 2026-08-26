@@ -27,7 +27,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Xin chào, ${user?.hoTen ?? 'Cư dân'}'),
+        title: Text('Xin chào, ${user?.fullName ?? 'Cư dân'}'),
         actions: [
           IconButton(
             icon: const Icon(FluentIcons.sign_out_24_regular),
