@@ -4,7 +4,7 @@ VALUES ('issue-images', 'issue-images', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Bật RLS cho storage.objects (nơi chứa file)
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- (Bỏ qua vì Supabase đã tự động bật RLS cho bảng này, và chạy lệnh ALTER TABLE có thể gây lỗi quyền)
 
 -- 1. Cho phép bất kỳ ai đọc ảnh trong bucket issue-images
 CREATE POLICY "Public Access" 
