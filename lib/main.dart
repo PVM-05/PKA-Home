@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/supabase_config.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/resident/screens/resident_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,9 +34,7 @@ class MyApp extends ConsumerWidget {
               body: Center(child: Text('Trang chủ Ban Quản lý')),
             );
           } else {
-            return const Scaffold(
-              body: Center(child: Text('Trang chủ Cư dân')),
-            );
+            return const ResidentHomeScreen();
           }
         },
         loading: () => const Scaffold(
