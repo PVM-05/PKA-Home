@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/supabase_config.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/management/screens/management_home_screen.dart';
 import 'features/resident/screens/resident_home_screen.dart';
 
 void main() async {
@@ -30,9 +31,7 @@ class MyApp extends ConsumerWidget {
             return const LoginScreen();
           }
           if (user.vaiTro == 'banquanly') {
-            return const Scaffold(
-              body: Center(child: Text('Trang chủ Ban Quản lý')),
-            );
+            return const ManagementHomeScreen();
           } else {
             return const ResidentHomeScreen();
           }
