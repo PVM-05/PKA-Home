@@ -32,7 +32,7 @@ class MyApp extends ConsumerWidget {
           if (user == null) {
             return const LoginScreen();
           }
-          if (user.vaiTro == 'banquanly') {
+          if (user.role == 'management') {
             return const ManagementHomeScreen();
           } else {
             return const ResidentHomeScreen();

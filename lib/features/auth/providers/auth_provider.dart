@@ -36,7 +36,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     try {
       state = const AsyncValue.loading();
       final data = await SupabaseConfig.client
-          .from('NguoiDung')
+          .from('users')
           .select()
           .eq('id', userId)
           .single();
