@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
-import '../providers/auth_provider.dart';
+import '../../../data/providers/auth_provider.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -16,12 +16,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  void _login() {
+  void _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     if (email.isNotEmpty && password.isNotEmpty) {
-      ref.read(authProvider.notifier).login(email, password);
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+      try {
+        await ref.read(authProvider.notifier).login(email, password);
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại.';
+          });
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -34,8 +54,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -114,12 +132,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             onSubmitted: (_) => _login(),
                           ),
                           
-                          if (authState.hasError) ...[
+                          if (_errorMessage != null) ...[
                             const SizedBox(height: 16),
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppTheme.error.withOpacity(0.1),
+                                color: AppTheme.error.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -128,7 +146,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      '${authState.error}',
+                                      _errorMessage!,
                                       style: const TextStyle(color: AppTheme.error),
                                     ),
                                   ),
@@ -141,8 +159,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           
                           // Nút đăng nhập
                           ElevatedButton(
-                            onPressed: authState.isLoading ? null : _login,
-                            child: authState.isLoading
+                            onPressed: _isLoading ? null : _login,
+                            child: _isLoading
                                 ? const SizedBox(
                                     height: 20,
                                     width: 20,

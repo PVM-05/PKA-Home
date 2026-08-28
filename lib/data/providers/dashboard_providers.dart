@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/repositories/management_repository.dart';
+import '../../../core/supabase_config.dart';
 
 final managementRepositoryProvider = Provider((ref) => ManagementRepository());
 
@@ -18,4 +19,12 @@ final unpaidInvoicesTotalProvider = StreamProvider<double>((ref) {
       return sum;
     });
   });
+});
+
+final totalApartmentsProvider = StreamProvider<int>((ref) {
+  return SupabaseConfig.client.from('apartments').stream(primaryKey: ['id']).map((list) => list.length);
+});
+
+final totalResidentsProvider = StreamProvider<int>((ref) {
+  return SupabaseConfig.client.from('users').stream(primaryKey: ['id']).eq('role', 'resident').map((list) => list.length);
 });

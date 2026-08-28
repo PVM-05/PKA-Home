@@ -6,7 +6,8 @@ trigger: always_on
 
 ## 1. Ngôn ngữ và Trình bày
 - Sử dụng hoàn toàn tiếng Việt chuẩn mực trong giao diện, nhãn dán, và nút bấm. 
-- Tuyệt đối không dùng từ tiếng Anh đặt trong ngoặc đơn hoặc viết lẫn với tiếng Việt.
+- Ngoại lệ: Được phép giữ nguyên các thuật ngữ tiếng Anh đã quá phổ biến và khó dịch sát nghĩa (VD: Email, App, Internet, Wifi).
+- Tuyệt đối không dùng từ tiếng Anh đặt trong ngoặc đơn để giải nghĩa kiểu (Password) hoặc viết lẫn lộn Anh-Việt không cần thiết.
 - Câu từ phải ngắn gọn, rõ nghĩa, chuẩn xác ngữ pháp tiếng Việt.
 
 ## 2. Quy tắc Kiến trúc và Phân chia Chức năng Màn hình
@@ -18,7 +19,7 @@ trigger: always_on
 
 ## 3. Quy tắc Giao diện và Font chữ
 - **Font chữ**: Sử dụng package `google_fonts` (hoặc bundle file `.ttf`) để đảm bảo Segoe UI/Google Fonts hiển thị nhất quán trên cả iOS và Android.
-- **Icon**: Dùng 1 bộ icon nhất quán trong toàn ứng dụng (Fluent, Material Symbols hoặc Lucide). Không trộn lẫn nhiều bộ. Không sử dụng Emoji.
+- **Icon**: Ưu tiên sử dụng thư viện Icon mặc định của Flutter (`Icons.*` thuộc Material Design) để giảm thiểu phụ thuộc package ngoài. Đảm bảo sự nhất quán trên toàn ứng dụng. Không sử dụng Emoji.
 - **Màu sắc**: Định nghĩa bảng màu (palette) trong `core/theme/`. Tuyệt đối không hardcode mã màu rời rạc trong từng widget.
 - **Bố cục (Layout)**: 
   - Các thẻ nội dung (Card) phải được thiết lập để tự động xuống dòng (Word-wrap) khi văn bản dài.

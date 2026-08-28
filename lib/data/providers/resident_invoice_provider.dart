@@ -1,0 +1,41 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/supabase_config.dart';
+import '../../../data/models/invoice_model.dart';
+
+final _invoicesStreamProvider = StreamProvider((ref) => SupabaseConfig.client.from('invoices').stream(primaryKey: ['id']));
+
+final residentInvoiceProvider = FutureProvider<List<InvoiceModel>>((ref) async {
+  // Đăng ký lắng nghe Stream Realtime từ Supabase
+  ref.watch(_invoicesStreamProvider);
+  
+  final response = await SupabaseConfig.client
+      .from('invoices')
+      .select('*, apartments(*)')
+      .order('created_at', ascending: false);
+  
+  return (response as List).map((e) => InvoiceModel.fromJson(e)).toList();
+});
+
+final _invoiceItemsStreamProvider = StreamProvider.family<List<Map<String, dynamic>>, String>((ref, invoiceId) => SupabaseConfig.client.from('invoice_items').stream(primaryKey: ['id']).eq('invoice_id', invoiceId));
+
+final residentInvoiceDetailProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, invoiceId) async {
+  // Lắng nghe thay đổi của invoice items
+  ref.watch(_invoiceItemsStreamProvider(invoiceId));
+  
+  final response = await SupabaseConfig.client
+      .from('invoice_items')
+      .select()
+      .eq('invoice_id', invoiceId)
+      .order('created_at', ascending: true);
+  
+  return List<Map<String, dynamic>>.from(response);
+});
+
+class ResidentInvoiceService {
+  static Future<void> confirmPayment(WidgetRef ref, String invoiceId, {SupabaseClient? client}) async {
+    final supabase = client ?? SupabaseConfig.client;
+    await supabase.rpc('confirm_payment', params: {'p_invoice_id': invoiceId});
+    ref.invalidate(residentInvoiceProvider);
+  }
+}

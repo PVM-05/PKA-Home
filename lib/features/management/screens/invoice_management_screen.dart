@@ -4,7 +4,9 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/management_provider.dart';
-import '../../../data/models/invoice_model.dart';
+
+import 'create_invoice_screen.dart';
+import 'management_invoice_detail_screen.dart';
 
 class InvoiceManagementScreen extends ConsumerStatefulWidget {
   const InvoiceManagementScreen({super.key});
@@ -17,21 +19,6 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
   final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
   int _tabIndex = 0; // 0 = Chưa thanh toán, 1 = Đã thanh toán
 
-  void _updateStatus(InvoiceModel invoice, String newStatus) async {
-    try {
-      await ref.read(managementRepositoryProvider).updateInvoiceStatus(invoice.id, newStatus);
-      ref.invalidate(invoicesProvider);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cập nhật trạng thái thành công'), backgroundColor: AppTheme.success),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +60,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(FluentIcons.receipt_24_regular, size: 64, color: AppTheme.textSecondary.withOpacity(0.5)),
+                        Icon(FluentIcons.receipt_24_regular, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
                         const SizedBox(height: 16),
                         Text(
                           'Không có hóa đơn nào.',
@@ -93,73 +80,71 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final invoice = filtered[index];
-                      final isPending = invoice.status == 'pending_confirmation';
                       
                       return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(FluentIcons.building_24_regular, color: AppTheme.primary, size: 20),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(invoice.status).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      _getStatusText(invoice.status),
-                                      style: TextStyle(
-                                        color: _getStatusColor(invoice.status),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ManagementInvoiceDetailScreen(invoice: invoice),
                               ),
-                              const SizedBox(height: 12),
-                              Text('Kỳ hóa đơn: ${invoice.period}', style: Theme.of(context).textTheme.bodyMedium),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}', 
-                                style: const TextStyle(
-                                  color: AppTheme.error, 
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16
-                                )
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              if (_tabIndex == 0)
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Expanded(
-                                      child: OutlinedButton(
-                                        onPressed: () => _updateStatus(invoice, 'paid'),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: AppTheme.success,
-                                          side: const BorderSide(color: AppTheme.success),
+                                    Row(
+                                      children: [
+                                        const Icon(FluentIcons.building_24_regular, color: AppTheme.primary, size: 20),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                         ),
-                                        child: Text(isPending ? 'Xác nhận Đã thu (Chuyển khoản)' : 'Xác nhận Đã thu'),
+                                      ],
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: _getStatusColor(invoice.status).withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        _getStatusText(invoice.status),
+                                        style: TextStyle(
+                                          color: _getStatusColor(invoice.status),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-                            ],
+                                const SizedBox(height: 12),
+                                Text('Kỳ hóa đơn: ${invoice.period}', style: Theme.of(context).textTheme.bodyMedium),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}', 
+                                      style: const TextStyle(
+                                        color: AppTheme.error, 
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16
+                                      )
+                                    ),
+                                    const Text('Xem chi tiết >', style: TextStyle(color: AppTheme.primary, fontSize: 12)),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -173,6 +158,14 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()));
+        },
+        backgroundColor: AppTheme.primary,
+        icon: const Icon(FluentIcons.add_24_regular, color: Colors.white),
+        label: const Text('Lập hóa đơn', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 
@@ -184,7 +177,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withOpacity(0.1) : AppTheme.surface,
+          color: isActive ? activeColor.withValues(alpha: 0.1) : AppTheme.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isActive ? activeColor : const Color(0xFFE0E0E0),

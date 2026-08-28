@@ -5,10 +5,10 @@ class InvoiceSummary extends StatelessWidget {
   final int unpaidCount;
 
   const InvoiceSummary({
-    Key? key,
+    super.key,
     required this.totalAmount,
     required this.unpaidCount,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

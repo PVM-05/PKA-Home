@@ -11,6 +11,7 @@ class IssueModel {
   final DateTime createdAt;
   final ApartmentModel? apartment;
   final ResidentModel? reporter;
+  final List<String> imageUrls;
 
   IssueModel({
     required this.id,
@@ -22,9 +23,17 @@ class IssueModel {
     required this.createdAt,
     this.apartment,
     this.reporter,
+    this.imageUrls = const [],
   });
 
   factory IssueModel.fromJson(Map<String, dynamic> json) {
+    List<String> parsedImages = [];
+    if (json['issue_images'] != null) {
+      if (json['issue_images'] is List) {
+        parsedImages = (json['issue_images'] as List).map((e) => e['image_url'] as String).toList();
+      }
+    }
+
     return IssueModel(
       id: json['id'] ?? '',
       apartmentId: json['apartment_id'] ?? '',
@@ -35,6 +44,7 @@ class IssueModel {
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
       apartment: json['apartments'] != null ? ApartmentModel.fromJson(json['apartments']) : null,
       reporter: json['users'] != null ? ResidentModel.fromJson(json['users']) : null,
+      imageUrls: parsedImages,
     );
   }
 }

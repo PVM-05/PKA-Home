@@ -179,7 +179,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                               // Avatar
                               CircleAvatar(
                                 radius: 24,
-                                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                                backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
                                 child: Text(
                                   resident.fullName.isNotEmpty ? resident.fullName[0].toUpperCase() : '?',
                                   style: const TextStyle(
@@ -226,17 +226,60 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                               ),
                               
                               // Action Button
-                              IconButton(
-                                tooltip: hasApartment ? 'Đổi căn hộ' : 'Gán căn hộ',
-                                icon: Icon(
-                                  hasApartment ? FluentIcons.edit_24_regular : FluentIcons.add_circle_24_regular,
-                                  color: AppTheme.primary,
-                                ),
-                                onPressed: () {
-                                  apartmentsAsync.whenData((apartments) {
-                                    _showAssignApartmentDialog(context, resident, apartments);
-                                  });
-                                },
+                              Row(
+                                children: [
+                                  if (hasApartment)
+                                    IconButton(
+                                      tooltip: 'Gỡ khỏi căn hộ',
+                                      icon: const Icon(FluentIcons.dismiss_circle_24_regular, color: AppTheme.error),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text('Gỡ căn hộ'),
+                                            content: Text('Bạn có chắc chắn muốn gỡ cư dân ${resident.fullName} khỏi căn hộ ${resident.apartment!.code}?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                child: const Text('Hủy'),
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
+                                                onPressed: () async {
+                                                  try {
+                                                    await ref.read(managementRepositoryProvider).unlinkResidentFromApartment(resident.id, resident.apartment!.id);
+                                                    ref.invalidate(residentsProvider);
+                                                    ref.invalidate(apartmentsProvider);
+                                                    if (context.mounted) {
+                                                      Navigator.pop(context);
+                                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã gỡ cư dân khỏi căn hộ'), backgroundColor: AppTheme.success));
+                                                    }
+                                                  } catch (e) {
+                                                    if (context.mounted) {
+                                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error));
+                                                    }
+                                                  }
+                                                },
+                                                child: const Text('Xác nhận'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  IconButton(
+                                    tooltip: hasApartment ? 'Đổi căn hộ' : 'Gán căn hộ',
+                                    icon: Icon(
+                                      hasApartment ? FluentIcons.edit_24_regular : FluentIcons.add_circle_24_regular,
+                                      color: AppTheme.primary,
+                                    ),
+                                    onPressed: () {
+                                      apartmentsAsync.whenData((apartments) {
+                                        _showAssignApartmentDialog(context, resident, apartments);
+                                      });
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),

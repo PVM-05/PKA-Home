@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import '../../../core/theme/app_theme.dart';
 import '../widgets/stat_card.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../providers/dashboard_providers.dart';
+import '../../../data/providers/auth_provider.dart';
+import '../../../data/providers/dashboard_providers.dart';
 import 'resident_management_screen.dart';
 import 'invoice_management_screen.dart';
 import 'issue_management_screen.dart';
+import 'link_request_management_screen.dart';
+import 'announcement_management_screen.dart';
+import 'apartment_management_screen.dart';
+import '../../auth/screens/change_password_screen.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
@@ -30,12 +35,40 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       appBar: AppBar(
         title: const Text('Ban Quản Lý'),
         actions: [
-          IconButton(
-            icon: const Icon(FluentIcons.sign_out_24_regular),
-            onPressed: () {
-              ref.read(authProvider.notifier).logout();
+          PopupMenuButton<String>(
+            icon: const Icon(FluentIcons.person_circle_24_regular),
+            onSelected: (value) {
+              if (value == 'password') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+                );
+              } else if (value == 'logout') {
+                ref.read(authProvider.notifier).logout();
+              }
             },
-          )
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'password',
+                child: Row(
+                  children: [
+                    Icon(FluentIcons.key_24_regular, size: 20),
+                    SizedBox(width: 8),
+                    Text('Đổi mật khẩu'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(FluentIcons.sign_out_24_regular, size: 20, color: AppTheme.error),
+                    SizedBox(width: 8),
+                    Text('Đăng xuất', style: TextStyle(color: AppTheme.error)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: IndexedStack(
@@ -45,6 +78,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           const ResidentManagementScreen(),
           const InvoiceManagementScreen(),
           const IssueManagementScreen(),
+          const AnnouncementManagementScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -72,6 +106,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             activeIcon: Icon(FluentIcons.chat_warning_24_filled),
             label: 'Phản ánh',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(FluentIcons.alert_24_regular),
+            activeIcon: Icon(FluentIcons.alert_24_filled),
+            label: 'Thông báo',
+          ),
         ],
       ),
     );
@@ -93,7 +132,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           value: pendingIssuesAsync.when(
             data: (count) => '$count',
             loading: () => '...',
-            error: (_, __) => 'Lỗi',
+            error: (_, _) => 'Lỗi',
           ),
           icon: FluentIcons.warning_24_filled,
           color: Colors.orange,
@@ -103,22 +142,90 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           value: unpaidInvoicesAsync.when(
             data: (total) => '${(total / 1000000).toStringAsFixed(1)} Tr',
             loading: () => '...',
-            error: (_, __) => 'Lỗi',
+            error: (_, _) => 'Lỗi',
           ),
           icon: FluentIcons.money_24_filled,
           color: Colors.redAccent,
         ),
-        const StatCard(
-          title: 'Số căn hộ',
-          value: '120',
+        StatCard(
+          title: 'Tổng số Căn hộ',
+          value: ref.watch(totalApartmentsProvider).when(
+            data: (count) => '$count',
+            loading: () => '...',
+            error: (_, _) => 'Lỗi',
+          ),
           icon: FluentIcons.building_24_filled,
           color: Colors.blue,
         ),
-        const StatCard(
-          title: 'Đã thanh toán',
-          value: '85%',
-          icon: FluentIcons.checkmark_circle_24_filled,
+        StatCard(
+          title: 'Tổng Cư dân',
+          value: ref.watch(totalResidentsProvider).when(
+            data: (count) => '$count',
+            loading: () => '...',
+            error: (_, _) => 'Lỗi',
+          ),
+          icon: FluentIcons.people_24_filled,
           color: Colors.green,
+        ),
+        Card(
+          color: AppTheme.primary,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const LinkRequestManagementScreen()),
+              );
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(FluentIcons.person_add_24_filled, color: Colors.white, size: 32),
+                  Spacer(),
+                  Text(
+                    'Duyệt yêu cầu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Card(
+          color: Colors.teal,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ApartmentManagementScreen()),
+              );
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(FluentIcons.building_24_filled, color: Colors.white, size: 32),
+                  Spacer(),
+                  Text(
+                    'Quản lý Căn hộ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );

@@ -19,6 +19,7 @@ trigger: always_on
 - `issue_reports` (id, apartment_id, reporter_id, assigned_staff_id, status, description, created_at)
 - `issue_images` (id, issue_report_id, image_url)
 - `announcements` (id, title, content, is_urgent, created_at)
+- `apartment_link_requests` (id, user_id, apartment_id, requested_relation_role, status, created_at)
 
 ## 3. Quy tắc bảo mật dữ liệu (RLS)
 - Bật RLS cho tất cả bảng ngay khi tạo, không để mặc định public.

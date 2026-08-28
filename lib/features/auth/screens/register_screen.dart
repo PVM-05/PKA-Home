@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
-import '../providers/auth_provider.dart';
+import '../../../data/providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -15,20 +15,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
   void _register() async {
     final fullName = _fullNameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (fullName.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+    String? errorMessage;
+    if (fullName.isEmpty) {
+      errorMessage = 'Vui lòng nhập họ và tên';
+    } else if (email.isEmpty) {
+      errorMessage = 'Vui lòng nhập email';
+    } else if (password.length < 6) {
+      errorMessage = 'Mật khẩu phải có ít nhất 6 ký tự (yêu cầu của Supabase)';
+    } else if (password != confirmPassword) {
+      errorMessage = 'Xác nhận mật khẩu không khớp';
+    }
+
+    if (errorMessage == null) {
+      setState(() {
+        _isLoading = true;
+      });
       try {
         await ref.read(authProvider.notifier).register(email, password, fullName);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Đăng ký thành công! Vui lòng đăng nhập.'),
+              content: Text('Đăng ký thành công!'),
               backgroundColor: AppTheme.success,
             ),
           );
@@ -43,11 +61,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           );
         }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng điền đầy đủ thông tin'),
+        SnackBar(
+          content: Text(errorMessage),
           backgroundColor: AppTheme.warning,
         ),
       );
@@ -56,8 +80,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tạo tài khoản'),
@@ -138,14 +160,37 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             ),
                             obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.next,
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            controller: _confirmPasswordController,
+                            decoration: InputDecoration(
+                              labelText: 'Xác nhận mật khẩu',
+                              prefixIcon: const Icon(FluentIcons.password_24_regular),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureConfirmPassword 
+                                    ? FluentIcons.eye_24_regular 
+                                    : FluentIcons.eye_off_24_regular,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            obscureText: _obscureConfirmPassword,
                             textInputAction: TextInputAction.done,
                             onSubmitted: (_) => _register(),
                           ),
                           const SizedBox(height: 32),
                           
                           ElevatedButton(
-                            onPressed: authState.isLoading ? null : _register,
-                            child: authState.isLoading
+                            onPressed: _isLoading ? null : _register,
+                            child: _isLoading
                                 ? const SizedBox(
                                     height: 20,
                                     width: 20,
@@ -196,6 +241,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 }

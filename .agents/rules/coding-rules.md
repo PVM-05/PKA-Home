@@ -19,13 +19,11 @@ lib/
 ├── features/
 │   ├── auth/                  # Đăng nhập, phân quyền
 │   ├── resident/              # Toàn bộ màn hình cư dân
-│   │   ├── home/
-│   │   ├── payment/
-│   │   └── report_issue/
+│   │   ├── screens/           # Các màn hình (home, invoice, profile...)
+│   │   └── widgets/           # Component con của màn hình
 │   └── management/            # Toàn bộ màn hình ban quản lý
-│       ├── resident_list/
-│       ├── billing/
-│       └── issue_handling/
+│       ├── screens/           # Các màn hình (dashboard, resident, issue...)
+│       └── widgets/           # Component con của màn hình
 └── main.dart
 ```
 > **Lý do**: Tách theo tính năng thay vì theo layer giúp dễ tìm code khi 2 vai trò có luồng UI khác hẳn nhau.

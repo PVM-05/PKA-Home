@@ -3,16 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/supabase_config.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/providers/auth_provider.dart';
+import 'data/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/management/screens/management_home_screen.dart';
-import 'features/resident/screens/resident_home_screen.dart';
+import 'features/resident/screens/resident_shell.dart';
+import 'core/utils/provider_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await SupabaseConfig.initialize();
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(
+      observers: [ProviderLogger()],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends ConsumerWidget {
@@ -33,7 +39,7 @@ class MyApp extends ConsumerWidget {
           if (user.role == 'management') {
             return const ManagementHomeScreen();
           } else {
-            return const ResidentHomeScreen();
+            return const ResidentShell();
           }
         },
         loading: () => const Scaffold(

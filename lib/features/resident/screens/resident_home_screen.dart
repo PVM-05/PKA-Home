@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../widgets/invoice_summary.dart';
 import '../widgets/notification_card.dart';
-import '../../auth/providers/auth_provider.dart';
+import '../../../data/providers/auth_provider.dart';
+import '../../../data/providers/announcement_provider.dart';
+import 'resident_invoice_screen.dart';
+import 'resident_issue_screen.dart';
+import 'resident_profile_screen.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   const ResidentHomeScreen({super.key});
@@ -41,9 +45,9 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         index: _selectedIndex,
         children: [
           _buildDashboard(),
-          const Center(child: Text('Trang Hóa đơn')),
-          const Center(child: Text('Trang Phản ánh')),
-          const Center(child: Text('Trang Tài khoản')),
+          const ResidentInvoiceScreen(),
+          const ResidentIssueScreen(),
+          const ResidentProfileScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -77,13 +81,15 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
   }
 
   Widget _buildDashboard() {
+    final announcementsAsync = ref.watch(announcementsStreamProvider);
+
     return ListView(
-      children: const [
-        InvoiceSummary(
+      children: [
+        const InvoiceSummary(
           totalAmount: 1500000,
           unpaidCount: 1,
         ),
-        Padding(
+        const Padding(
           padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
           child: Text(
             'Thông báo mới nhất',
@@ -93,15 +99,26 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             ),
           ),
         ),
-        NotificationCard(
-          title: 'Cắt nước toàn tòa nhà để bảo trì',
-          content: 'Kính gửi Quý cư dân, ban quản lý sẽ tiến hành cắt nước từ 8h00 đến 12h00 ngày mai để bảo trì hệ thống máy bơm.',
-          date: '26/08/2026',
-        ),
-        NotificationCard(
-          title: 'Thu phí quản lý tháng 8',
-          content: 'Ban quản lý đã lên hóa đơn phí quản lý tháng 8. Quý cư dân vui lòng thanh toán trước ngày 05/09.',
-          date: '25/08/2026',
+        announcementsAsync.when(
+          data: (announcements) {
+            if (announcements.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Không có thông báo nào.'),
+              );
+            }
+            return Column(
+              children: announcements.map((announcement) {
+                return NotificationCard(
+                  title: announcement.title,
+                  content: announcement.content,
+                  date: '${announcement.createdAt.day}/${announcement.createdAt.month}/${announcement.createdAt.year}',
+                );
+              }).toList(),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Lỗi tải thông báo: $error')),
         ),
       ],
     );

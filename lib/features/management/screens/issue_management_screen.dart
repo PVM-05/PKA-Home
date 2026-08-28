@@ -68,7 +68,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(FluentIcons.chat_warning_24_regular, size: 64, color: AppTheme.textSecondary.withOpacity(0.5)),
+                        Icon(FluentIcons.chat_warning_24_regular, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
                         const SizedBox(height: 16),
                         Text(
                           'Không có phản ánh nào.',
@@ -95,7 +95,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
-                            color: isHighPriority ? AppTheme.error.withOpacity(0.5) : Colors.transparent,
+                            color: isHighPriority ? AppTheme.error.withValues(alpha: 0.5) : Colors.transparent,
                             width: isHighPriority ? 2 : 0,
                           ),
                         ),
@@ -132,6 +132,19 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                               ),
                               const SizedBox(height: 12),
                               Text(issue.description, style: Theme.of(context).textTheme.bodyMedium),
+                              
+                              if (issue.imageUrls.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    issue.imageUrls.first,
+                                    height: 120,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ],
                               
                               if (issue.reporter != null) ...[
                                 const SizedBox(height: 8),
@@ -187,7 +200,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
           setState(() => _selectedStatus = status);
         }
       },
-      selectedColor: color.withOpacity(0.2),
+      selectedColor: color.withValues(alpha: 0.2),
       labelStyle: TextStyle(
         color: isSelected ? color : AppTheme.textSecondary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
