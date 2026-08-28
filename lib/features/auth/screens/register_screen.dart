@@ -3,29 +3,51 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  void _login() {
+  void _register() async {
+    final fullName = _fullNameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    if (email.isNotEmpty && password.isNotEmpty) {
-      ref.read(authProvider.notifier).login(email, password);
+
+    if (fullName.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+      try {
+        await ref.read(authProvider.notifier).register(email, password, fullName);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đăng ký thành công! Vui lòng đăng nhập.'),
+              backgroundColor: AppTheme.success,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi đăng ký: $e'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng nhập thư điện tử và mật khẩu'),
+          content: Text('Vui lòng điền đầy đủ thông tin'),
           backgroundColor: AppTheme.warning,
         ),
       );
@@ -37,6 +59,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tạo tài khoản'),
+        leading: IconButton(
+          icon: const Icon(FluentIcons.chevron_left_24_regular),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -47,17 +76,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Logo / Icon
-                  const Icon(
-                    FluentIcons.building_home_24_filled,
-                    size: 80,
-                    color: AppTheme.primary,
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Tiêu đề
                   Text(
-                    'PKA Home',
+                    'Đăng ký Cư dân',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       color: AppTheme.primary,
@@ -65,21 +85,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Chào mừng bạn trở lại',
+                    'Điền thông tin để tham gia PKA-Home',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppTheme.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
-                  // Form đăng nhập trong Card
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          TextField(
+                            controller: _fullNameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Họ và tên',
+                              prefixIcon: Icon(FluentIcons.person_24_regular),
+                            ),
+                            textInputAction: TextInputAction.next,
+                          ),
+                          const SizedBox(height: 20),
                           TextField(
                             controller: _emailController,
                             decoration: const InputDecoration(
@@ -111,37 +139,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             obscureText: _obscurePassword,
                             textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => _login(),
+                            onSubmitted: (_) => _register(),
                           ),
+                          const SizedBox(height: 32),
                           
-                          if (authState.hasError) ...[
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppTheme.error.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(FluentIcons.error_circle_24_filled, color: AppTheme.error),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      '${authState.error}',
-                                      style: const TextStyle(color: AppTheme.error),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Nút đăng nhập
                           ElevatedButton(
-                            onPressed: authState.isLoading ? null : _login,
+                            onPressed: authState.isLoading ? null : _register,
                             child: authState.isLoading
                                 ? const SizedBox(
                                     height: 20,
@@ -151,7 +154,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Đăng nhập'),
+                                : const Text('Đăng ký'),
                           ),
                         ],
                       ),
@@ -159,21 +162,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   
                   const SizedBox(height: 24),
-                  
-                  // Nút chuyển trang đăng ký
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                      );
+                      Navigator.of(context).pop();
                     },
                     child: RichText(
                       text: TextSpan(
                         style: Theme.of(context).textTheme.bodyMedium,
                         children: const [
-                          TextSpan(text: 'Chưa có tài khoản? '),
+                          TextSpan(text: 'Đã có tài khoản? '),
                           TextSpan(
-                            text: 'Đăng ký ngay',
+                            text: 'Đăng nhập ngay',
                             style: TextStyle(
                               color: AppTheme.primary,
                               fontWeight: FontWeight.bold,
@@ -194,6 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();

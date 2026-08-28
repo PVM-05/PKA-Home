@@ -6,7 +6,7 @@ import '../widgets/notification_card.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
-  const ResidentHomeScreen({Key? key}) : super(key: key);
+  const ResidentHomeScreen({super.key});
 
   @override
   ConsumerState<ResidentHomeScreen> createState() => _ResidentHomeScreenState();

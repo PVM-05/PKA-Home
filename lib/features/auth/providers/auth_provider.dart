@@ -60,6 +60,21 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     }
   }
 
+  Future<void> register(String email, String password, String fullName) async {
+    try {
+      state = const AsyncValue.loading();
+      await SupabaseConfig.client.auth.signUp(
+        email: email,
+        password: password,
+        data: {'full_name': fullName},
+      );
+      // State is updated via onAuthStateChange listener if email verification is not required
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
   Future<void> logout() async {
     await SupabaseConfig.client.auth.signOut();
   }

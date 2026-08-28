@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/supabase_config.dart';
+import 'core/theme/app_theme.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/management/screens/management_home_screen.dart';
@@ -15,7 +16,7 @@ void main() async {
 }
 
 class MyApp extends ConsumerWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,10 +24,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       title: 'Quản lý Chung cư',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Segoe UI',
-      ),
+      theme: AppTheme.lightTheme,
       home: authState.when(
         data: (user) {
           if (user == null) {

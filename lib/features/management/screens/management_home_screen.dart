@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../widgets/stat_card.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/dashboard_providers.dart';
+import 'resident_management_screen.dart';
+import 'invoice_management_screen.dart';
+import 'issue_management_screen.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
-  const ManagementHomeScreen({Key? key}) : super(key: key);
+  const ManagementHomeScreen({super.key});
 
   @override
   ConsumerState<ManagementHomeScreen> createState() => _ManagementHomeScreenState();
@@ -38,9 +42,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         index: _selectedIndex,
         children: [
           _buildDashboard(),
-          const Center(child: Text('Danh sách Cư dân')),
-          const Center(child: Text('Quản lý Hóa đơn')),
-          const Center(child: Text('Xử lý Phản ánh')),
+          const ResidentManagementScreen(),
+          const InvoiceManagementScreen(),
+          const IssueManagementScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -74,32 +78,43 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
   }
 
   Widget _buildDashboard() {
+    final pendingIssuesAsync = ref.watch(pendingIssuesCountProvider);
+    final unpaidInvoicesAsync = ref.watch(unpaidInvoicesTotalProvider);
+
     return GridView.count(
       padding: const EdgeInsets.all(16),
       crossAxisCount: 2,
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       childAspectRatio: 1.2,
-      children: const [
+      children: [
         StatCard(
           title: 'Phản ánh mới',
-          value: '5',
+          value: pendingIssuesAsync.when(
+            data: (count) => '$count',
+            loading: () => '...',
+            error: (_, __) => 'Lỗi',
+          ),
           icon: FluentIcons.warning_24_filled,
           color: Colors.orange,
         ),
         StatCard(
           title: 'Tổng nợ phí',
-          value: '15 Tr',
+          value: unpaidInvoicesAsync.when(
+            data: (total) => '${(total / 1000000).toStringAsFixed(1)} Tr',
+            loading: () => '...',
+            error: (_, __) => 'Lỗi',
+          ),
           icon: FluentIcons.money_24_filled,
           color: Colors.redAccent,
         ),
-        StatCard(
+        const StatCard(
           title: 'Số căn hộ',
           value: '120',
           icon: FluentIcons.building_24_filled,
           color: Colors.blue,
         ),
-        StatCard(
+        const StatCard(
           title: 'Đã thanh toán',
           value: '85%',
           icon: FluentIcons.checkmark_circle_24_filled,
