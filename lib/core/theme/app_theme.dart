@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class AppStatusColors {
+  static const Color paid = Color(0xFF4CAF50); // Xanh lá
+  static const Color unpaid = Color(0xFFF44336); // Đỏ
+  static const Color pendingConfirmation = Color(0xFFFFB300); // Vàng/Cam
+  
+  static const Color priorityHigh = Color(0xFFD32F2F); // Đỏ đậm
+  static const Color priorityMedium = Color(0xFFFF9800); // Cam
+  static const Color priorityLow = Color(0xFF64B5F6); // Xanh dương nhạt
+  
+  static const Color pending = Color(0xFFFF9800); // Cam
+  static const Color rejected = Color(0xFFE57373); // Đỏ nhạt
+}
+
 class AppTheme {
   // 1. Màu Sắc (Color Palette)
   static const Color primary = Color(0xFF1E88E5); // Xanh biển

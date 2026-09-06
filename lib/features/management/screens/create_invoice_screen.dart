@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/management_provider.dart';
@@ -201,7 +200,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                             const Text('Thông tin chung', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
                             const SizedBox(height: 16),
                             DropdownButtonFormField<ApartmentModel>(
-                              decoration: const InputDecoration(labelText: 'Chọn Căn hộ', prefixIcon: Icon(FluentIcons.building_home_24_regular)),
+                              decoration: const InputDecoration(labelText: 'Chọn Căn hộ', prefixIcon: Icon(Icons.apartment_outlined)),
                               initialValue: _selectedApartment,
                               items: apartments.map((apt) {
                                 return DropdownMenuItem(
@@ -217,7 +216,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _periodController,
-                                    decoration: const InputDecoration(labelText: 'Kỳ hóa đơn', prefixIcon: Icon(FluentIcons.calendar_ltr_24_regular)),
+                                    decoration: const InputDecoration(labelText: 'Kỳ hóa đơn', prefixIcon: Icon(Icons.circle)),
                                     validator: (val) => (val == null || val.isEmpty) ? 'Vui lòng nhập kỳ' : null,
                                   ),
                                 ),
@@ -226,7 +225,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                   child: InkWell(
                                     onTap: () => _selectDueDate(context),
                                     child: InputDecorator(
-                                      decoration: const InputDecoration(labelText: 'Hạn thanh toán', prefixIcon: Icon(FluentIcons.calendar_clock_24_regular)),
+                                      decoration: const InputDecoration(labelText: 'Hạn thanh toán', prefixIcon: Icon(Icons.circle)),
                                       child: Text(DateFormat('dd/MM/yyyy').format(_dueDate)),
                                     ),
                                   ),

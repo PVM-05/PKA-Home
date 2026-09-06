@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/auth_provider.dart';
 import 'register_screen.dart';
@@ -67,7 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   // Logo / Icon
                   const Icon(
-                    FluentIcons.building_home_24_filled,
+                    Icons.apartment_rounded,
                     size: 80,
                     color: AppTheme.primary,
                   ),
@@ -102,7 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             controller: _emailController,
                             decoration: const InputDecoration(
                               labelText: 'Thư điện tử',
-                              prefixIcon: Icon(FluentIcons.mail_24_regular),
+                              prefixIcon: Icon(Icons.email_outlined),
                             ),
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
@@ -112,12 +111,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             controller: _passwordController,
                             decoration: InputDecoration(
                               labelText: 'Mật khẩu',
-                              prefixIcon: const Icon(FluentIcons.password_24_regular),
+                              prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword 
-                                    ? FluentIcons.eye_24_regular 
-                                    : FluentIcons.eye_off_24_regular,
+                                    ? Icons.visibility_outlined 
+                                    : Icons.visibility_off_outlined,
                                   color: AppTheme.textSecondary,
                                 ),
                                 onPressed: () {
@@ -142,7 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(FluentIcons.error_circle_24_filled, color: AppTheme.error),
+                                  const Icon(Icons.error, color: AppTheme.error),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(

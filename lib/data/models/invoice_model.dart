@@ -7,6 +7,7 @@ class InvoiceModel {
   final DateTime dueDate;
   final double totalAmount;
   final String status;
+  final DateTime createdAt;
   final ApartmentModel? apartment;
 
   InvoiceModel({
@@ -16,6 +17,7 @@ class InvoiceModel {
     required this.dueDate,
     required this.totalAmount,
     required this.status,
+    required this.createdAt,
     this.apartment,
   });
 
@@ -27,6 +29,7 @@ class InvoiceModel {
       dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : DateTime.now(),
       totalAmount: (json['total_amount'] ?? 0).toDouble(),
       status: json['status'] ?? 'unpaid',
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
       apartment: json['apartments'] != null ? ApartmentModel.fromJson(json['apartments']) : null,
     );
   }

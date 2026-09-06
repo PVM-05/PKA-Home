@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/link_request_provider.dart';
@@ -59,7 +58,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         actions: [
           if (!Navigator.of(context).canPop())
             IconButton(
-              icon: const Icon(FluentIcons.sign_out_24_regular),
+              icon: const Icon(Icons.logout_outlined),
               onPressed: () => ref.read(authProvider.notifier).logout(),
             )
         ],
@@ -95,7 +94,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
   Widget _buildPendingState() {
     return Column(
       children: [
-        const Icon(FluentIcons.clock_24_regular, size: 80, color: Colors.orange),
+        const Icon(Icons.schedule, size: 80, color: Colors.orange),
         const SizedBox(height: 24),
         Text(
           'Đang chờ phê duyệt',
@@ -113,7 +112,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
   Widget _buildRejectedState() {
     return Column(
       children: [
-        const Icon(FluentIcons.error_circle_24_regular, size: 80, color: AppTheme.error),
+        const Icon(Icons.error_outline, size: 80, color: AppTheme.error),
         const SizedBox(height: 24),
         Text(
           'Yêu cầu bị từ chối',
@@ -140,7 +139,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(FluentIcons.building_home_24_regular, size: 60, color: AppTheme.primary),
+            const Icon(Icons.apartment_outlined, size: 60, color: AppTheme.primary),
             const SizedBox(height: 16),
             const Text(
               'Liên kết căn hộ của bạn',
@@ -157,7 +156,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                       padding: EdgeInsets.all(16.0),
                       child: Column(
                         children: [
-                          Icon(FluentIcons.warning_24_regular, color: Color(0xFF856404), size: 32),
+                          Icon(Icons.warning_amber_outlined, color: Color(0xFF856404), size: 32),
                           SizedBox(height: 8),
                           Text(
                             'Không tải được danh sách căn hộ.\nVui lòng kiểm tra RLS Policy của bảng "apartments" trên Supabase.\nCần cấp quyền SELECT cho user.',
@@ -183,7 +182,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                     InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'Tòa nhà',
-                        prefixIcon: Icon(FluentIcons.building_24_regular),
+                        prefixIcon: Icon(Icons.domain),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
                       child: DropdownButtonHideUnderline(
@@ -206,7 +205,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                     InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'Tầng',
-                        prefixIcon: Icon(FluentIcons.layer_24_regular),
+                        prefixIcon: Icon(Icons.layers_outlined),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
                       child: DropdownButtonHideUnderline(
@@ -228,7 +227,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                     InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'Phòng',
-                        prefixIcon: Icon(FluentIcons.home_24_regular),
+                        prefixIcon: Icon(Icons.home_outlined),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
                       child: DropdownButtonHideUnderline(
@@ -253,7 +252,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                 controller: _codeController,
                 decoration: const InputDecoration(
                   labelText: 'Mã căn hộ (VD: A101)',
-                  prefixIcon: Icon(FluentIcons.number_symbol_24_regular),
+                  prefixIcon: Icon(Icons.tag),
                 ),
                 textInputAction: TextInputAction.done,
               ),
@@ -263,7 +262,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
               initialValue: _relationRole,
               decoration: const InputDecoration(
                 labelText: 'Vai trò',
-                prefixIcon: Icon(FluentIcons.person_24_regular),
+                prefixIcon: Icon(Icons.person_outline),
               ),
               items: const [
                 DropdownMenuItem(value: 'owner', child: Text('Chủ hộ')),

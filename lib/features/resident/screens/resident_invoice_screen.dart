@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
+import '../../../data/models/invoice_model.dart';
 import 'resident_invoice_detail_screen.dart';
 
 class ResidentInvoiceScreen extends ConsumerWidget {
@@ -13,59 +13,114 @@ class ResidentInvoiceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final invoiceState = ref.watch(residentInvoiceProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hóa đơn của bạn'),
-      ),
-      body: invoiceState.when(
-        data: (invoices) {
-          if (invoices.isEmpty) {
-            return _buildEmptyState(context);
-          }
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Hóa Đơn & Thanh Toán'),
+          bottom: const TabBar(
+            labelColor: AppTheme.primary,
+            unselectedLabelColor: AppTheme.textSecondary,
+            indicatorColor: AppTheme.primary,
+            tabs: [
+              Tab(icon: Icon(Icons.pending_actions_outlined), text: 'Cần thanh toán'),
+              Tab(icon: Icon(Icons.history_outlined), text: 'Lịch sử đã đóng'),
+            ],
+          ),
+        ),
+        body: invoiceState.when(
+          data: (invoices) {
+            final unpaidInvoices = invoices
+                .where((i) => i.status != 'paid')
+                .toList();
+            final paidInvoices = invoices
+                .where((i) => i.status == 'paid')
+                .toList()
+              ..sort((a, b) => b.dueDate.compareTo(a.dueDate));
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: invoices.length,
-            itemBuilder: (context, index) {
-              final invoice = invoices[index];
-              return _buildInvoiceCard(context, invoice);
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text(
-            'Lỗi tải dữ liệu: $error',
-            style: TextStyle(color: AppTheme.error),
+            return TabBarView(
+              children: [
+                _buildInvoiceList(
+                  context,
+                  ref,
+                  unpaidInvoices,
+                  emptyMessage: 'Tuyệt vời! Bạn không còn hóa đơn nào cần thanh toán.',
+                  emptyIcon: Icons.check_circle_outline,
+                  emptyColor: AppStatusColors.paid,
+                ),
+                _buildInvoiceList(
+                  context,
+                  ref,
+                  paidInvoices,
+                  emptyMessage: 'Chưa có lịch sử hóa đơn đã thanh toán.',
+                  emptyIcon: Icons.receipt_long_outlined,
+                  emptyColor: AppTheme.textSecondary,
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Text(
+              'Lỗi tải dữ liệu: $error',
+              style: const TextStyle(color: AppTheme.error),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            FluentIcons.receipt_24_regular,
-            size: 64,
-            color: AppTheme.textSecondary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Bạn chưa có hóa đơn nào',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.textSecondary,
+  Widget _buildInvoiceList(
+    BuildContext context,
+    WidgetRef ref,
+    List<InvoiceModel> invoices, {
+    required String emptyMessage,
+    required IconData emptyIcon,
+    required Color emptyColor,
+  }) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(residentInvoiceProvider);
+      },
+      child: invoices.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      emptyIcon,
+                      size: 64,
+                      color: emptyColor.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      emptyMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-          ),
-        ],
-      ),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: invoices.length,
+              itemBuilder: (context, index) {
+                final invoice = invoices[index];
+                return _buildInvoiceCard(context, invoice);
+              },
+            ),
     );
   }
 
-  Widget _buildInvoiceCard(BuildContext context, dynamic invoice) {
+  Widget _buildInvoiceCard(BuildContext context, InvoiceModel invoice) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
 
@@ -75,25 +130,31 @@ class ResidentInvoiceScreen extends ConsumerWidget {
 
     switch (invoice.status) {
       case 'paid':
-        statusColor = AppTheme.success;
+        statusColor = AppStatusColors.paid;
         statusText = 'Đã thanh toán';
-        statusIcon = FluentIcons.checkmark_circle_24_filled;
+        statusIcon = Icons.check_circle_outline;
         break;
       case 'pending_confirmation':
-        statusColor = AppTheme.warning;
+        statusColor = AppStatusColors.pending;
         statusText = 'Chờ xác nhận';
-        statusIcon = FluentIcons.clock_24_filled;
+        statusIcon = Icons.schedule;
         break;
       default:
-        statusColor = AppTheme.error;
+        statusColor = AppStatusColors.unpaid;
         statusText = 'Chưa thanh toán';
-        statusIcon = FluentIcons.error_circle_24_filled;
+        statusIcon = Icons.error_outline;
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 0,
+      color: Colors.white,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -117,7 +178,7 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -132,7 +193,7 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                           style: TextStyle(
                             color: statusColor,
                             fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -154,6 +215,7 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                             fontSize: 12,
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           formatDate.format(invoice.dueDate),
                           style: const TextStyle(fontWeight: FontWeight.w500),
@@ -172,6 +234,7 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                             fontSize: 12,
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           formatCurrency.format(invoice.totalAmount),
                           style: const TextStyle(

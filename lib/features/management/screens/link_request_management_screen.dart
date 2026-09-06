@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_state_view.dart';
 import '../../../data/providers/link_request_management_provider.dart';
 
 class LinkRequestManagementScreen extends ConsumerWidget {
@@ -15,25 +15,16 @@ class LinkRequestManagementScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Duyệt yêu cầu liên kết'),
         leading: IconButton(
-          icon: const Icon(FluentIcons.chevron_left_24_regular),
+          icon: const Icon(Icons.chevron_left),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: requestsState.when(
-        data: (requests) {
-          if (requests.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(FluentIcons.checkmark_circle_48_regular, size: 64, color: AppTheme.success),
-                  SizedBox(height: 16),
-                  Text('Không có yêu cầu nào đang chờ duyệt', style: TextStyle(color: AppTheme.textSecondary)),
-                ],
-              ),
-            );
-          }
-
+      body: AppStateView<List<Map<String, dynamic>>>(
+        asyncValue: requestsState,
+        emptyMessage: 'Không có yêu cầu nào đang chờ duyệt',
+        emptyIcon: Icons.check_circle_outline,
+        onRetry: () => ref.invalidate(linkRequestManagementProvider),
+        dataBuilder: (requests) {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: requests.length,
@@ -45,6 +36,11 @@ class LinkRequestManagementScreen extends ConsumerWidget {
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -61,7 +57,7 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: AppTheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               roleLabel,
@@ -73,7 +69,7 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(FluentIcons.building_home_16_regular, size: 16, color: AppTheme.textSecondary),
+                          const Icon(Icons.apartment_outlined, size: 16, color: AppTheme.textSecondary),
                           const SizedBox(width: 8),
                           Text('Căn hộ: ${apartment['code']}', style: const TextStyle(color: AppTheme.textSecondary)),
                         ],
@@ -83,13 +79,13 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton.icon(
-                            icon: const Icon(FluentIcons.dismiss_24_regular, color: AppTheme.error),
+                            icon: const Icon(Icons.close, color: AppTheme.error),
                             label: const Text('Từ chối', style: TextStyle(color: AppTheme.error)),
                             onPressed: () => _handleReject(context, ref, req['id']),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton.icon(
-                            icon: const Icon(FluentIcons.checkmark_24_regular),
+                            icon: const Icon(Icons.check),
                             label: const Text('Phê duyệt'),
                             onPressed: () => _handleApprove(context, ref, req['id']),
                           ),
@@ -102,8 +98,6 @@ class LinkRequestManagementScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );
   }

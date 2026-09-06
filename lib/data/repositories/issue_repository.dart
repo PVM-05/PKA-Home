@@ -52,8 +52,15 @@ class IssueRepository {
     }
   }
 
-  Stream<List<Map<String, dynamic>>> streamIssues() {
-    return _client.from('issue_reports').stream(primaryKey: ['id']).map((list) => list);
+  Stream<List<Map<String, dynamic>>> streamIssues({String? userId}) async* {
+    if (userId == null) yield* const Stream<List<Map<String, dynamic>>>.empty();
+    try {
+      final linkData = await _client.from('residents_apartments').select('apartment_id').eq('user_id', userId!).single();
+      final apartmentId = linkData['apartment_id'];
+      yield* _client.from('issue_reports').stream(primaryKey: ['id']).eq('apartment_id', apartmentId).map((list) => list);
+    } catch (_) {
+      yield* const Stream<List<Map<String, dynamic>>>.empty();
+    }
   }
 
   Future<List<Map<String, dynamic>>> fetchIssues() async {

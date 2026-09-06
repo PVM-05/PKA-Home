@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_state_view.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/resident_model.dart';
 import '../../../data/models/apartment_model.dart';
@@ -40,7 +40,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   child: ListTile(
                     leading: Icon(
-                      FluentIcons.building_24_regular,
+                      Icons.domain,
                       color: apt.isEmpty ? AppTheme.primary : AppTheme.textSecondary,
                     ),
                     title: Text(
@@ -106,26 +106,12 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
         children: [
           // Search Bar
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Tìm kiếm theo tên...',
-                prefixIcon: const Icon(FluentIcons.search_24_regular, color: AppTheme.textSecondary),
-                filled: true,
-                fillColor: AppTheme.surface,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
-                ),
+                prefixIcon: const Icon(Icons.search),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               onChanged: (val) {
                 setState(() {
@@ -136,8 +122,15 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
           ),
           
           Expanded(
-            child: residentsAsync.when(
-              data: (residents) {
+            child: AppStateView<List<ResidentModel>>(
+              asyncValue: residentsAsync,
+              emptyMessage: 'Không có cư dân nào',
+              emptyIcon: Icons.group_outlined,
+              onRetry: () {
+                ref.invalidate(residentsProvider);
+                ref.invalidate(apartmentsProvider);
+              },
+              dataBuilder: (residents) {
                 final filteredResidents = residents.where((r) {
                   return r.fullName.toLowerCase().contains(_searchQuery);
                 }).toList();
@@ -147,7 +140,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(FluentIcons.people_search_24_regular, size: 64, color: AppTheme.textSecondary),
+                        const Icon(Icons.person_search, size: 64, color: AppTheme.textSecondary),
                         const SizedBox(height: 16),
                         Text(
                           'Không tìm thấy cư dân nào',
@@ -207,7 +200,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                                     Row(
                                       children: [
                                         Icon(
-                                          hasApartment ? FluentIcons.building_24_regular : FluentIcons.building_24_regular,
+                                          hasApartment ? Icons.domain : Icons.domain,
                                           size: 16,
                                           color: hasApartment ? AppTheme.success : AppTheme.error,
                                         ),
@@ -231,7 +224,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                                   if (hasApartment)
                                     IconButton(
                                       tooltip: 'Gỡ khỏi căn hộ',
-                                      icon: const Icon(FluentIcons.dismiss_circle_24_regular, color: AppTheme.error),
+                                      icon: const Icon(Icons.cancel_outlined, color: AppTheme.error),
                                       onPressed: () {
                                         showDialog(
                                           context: context,
@@ -270,7 +263,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                                   IconButton(
                                     tooltip: hasApartment ? 'Đổi căn hộ' : 'Gán căn hộ',
                                     icon: Icon(
-                                      hasApartment ? FluentIcons.edit_24_regular : FluentIcons.add_circle_24_regular,
+                                      hasApartment ? Icons.edit_outlined : Icons.add_circle_outline,
                                       color: AppTheme.primary,
                                     ),
                                     onPressed: () {
@@ -289,8 +282,6 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Lỗi: $error')),
             ),
           ),
         ],

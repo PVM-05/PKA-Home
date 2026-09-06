@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/apartment_model.dart';
@@ -20,7 +19,25 @@ class ApartmentManagementScreen extends ConsumerWidget {
       body: apartmentsAsync.when(
         data: (apartments) {
           if (apartments.isEmpty) {
-            return const Center(child: Text('Chưa có dữ liệu căn hộ.'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.apartment_outlined,
+                    size: 64,
+                    color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Chưa có dữ liệu căn hộ',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            );
           }
           return RefreshIndicator(
             onRefresh: () async {
@@ -32,12 +49,17 @@ class ApartmentManagementScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final apt = apartments[index];
                 return Card(
+                  elevation: 0,
                   margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: apt.isEmpty ? AppTheme.success.withValues(alpha: 0.2) : AppTheme.primary.withValues(alpha: 0.2),
                       child: Icon(
-                        apt.isEmpty ? FluentIcons.door_arrow_left_24_regular : FluentIcons.door_tag_24_regular,
+                        apt.isEmpty ? Icons.apartment_outlined : Icons.home,
                         color: apt.isEmpty ? AppTheme.success : AppTheme.primary,
                       ),
                     ),
@@ -51,11 +73,11 @@ class ApartmentManagementScreen extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(FluentIcons.edit_24_regular, color: AppTheme.primary),
+                          icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
                           onPressed: () => _showApartmentDialog(context, ref, apartment: apt),
                         ),
                         IconButton(
-                          icon: const Icon(FluentIcons.delete_24_regular, color: AppTheme.error),
+                          icon: const Icon(Icons.delete_outline, color: AppTheme.error),
                           onPressed: () => _deleteApartment(context, ref, apt),
                         ),
                       ],
@@ -71,7 +93,7 @@ class ApartmentManagementScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showApartmentDialog(context, ref),
-        child: const Icon(FluentIcons.add_24_regular),
+        child: const Icon(Icons.add),
       ),
     );
   }

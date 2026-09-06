@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/auth_provider.dart';
 
@@ -84,7 +83,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
         title: const Text('Tạo tài khoản'),
         leading: IconButton(
-          icon: const Icon(FluentIcons.chevron_left_24_regular),
+          icon: const Icon(Icons.chevron_left),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -125,7 +124,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _fullNameController,
                             decoration: const InputDecoration(
                               labelText: 'Họ và tên',
-                              prefixIcon: Icon(FluentIcons.person_24_regular),
+                              prefixIcon: Icon(Icons.person_outline),
                             ),
                             textInputAction: TextInputAction.next,
                           ),
@@ -134,7 +133,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _emailController,
                             decoration: const InputDecoration(
                               labelText: 'Thư điện tử',
-                              prefixIcon: Icon(FluentIcons.mail_24_regular),
+                              prefixIcon: Icon(Icons.email_outlined),
                             ),
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
@@ -144,12 +143,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _passwordController,
                             decoration: InputDecoration(
                               labelText: 'Mật khẩu',
-                              prefixIcon: const Icon(FluentIcons.password_24_regular),
+                              prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword 
-                                    ? FluentIcons.eye_24_regular 
-                                    : FluentIcons.eye_off_24_regular,
+                                    ? Icons.visibility_outlined 
+                                    : Icons.visibility_off_outlined,
                                   color: AppTheme.textSecondary,
                                 ),
                                 onPressed: () {
@@ -167,12 +166,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _confirmPasswordController,
                             decoration: InputDecoration(
                               labelText: 'Xác nhận mật khẩu',
-                              prefixIcon: const Icon(FluentIcons.password_24_regular),
+                              prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscureConfirmPassword 
-                                    ? FluentIcons.eye_24_regular 
-                                    : FluentIcons.eye_off_24_regular,
+                                    ? Icons.visibility_outlined 
+                                    : Icons.visibility_off_outlined,
                                   color: AppTheme.textSecondary,
                                 ),
                                 onPressed: () {

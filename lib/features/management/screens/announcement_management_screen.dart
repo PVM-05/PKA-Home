@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/repositories/announcement_repository.dart';
@@ -19,39 +18,96 @@ class AnnouncementManagementScreen extends ConsumerWidget {
       body: announcementsAsync.when(
         data: (announcements) {
           if (announcements.isEmpty) {
-            return const Center(child: Text('Chưa có thông báo nào.'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_none_outlined,
+                    size: 64,
+                    color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Chưa có thông báo nào',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: announcements.length,
-            itemBuilder: (context, index) {
-              final announcement = announcements[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  title: Text(
-                    announcement.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: announcement.isUrgent ? AppTheme.error : null,
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(announcementsStreamProvider);
+            },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: announcements.length,
+              itemBuilder: (context, index) {
+                final announcement = announcements[index];
+                return Card(
+                  elevation: 0,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            if (announcement.isUrgent)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.error.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
+                                    SizedBox(width: 4),
+                                    Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                            Expanded(
+                              child: Text(
+                                announcement.title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: announcement.isUrgent ? AppTheme.error : null,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                              onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          announcement.content,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: AppTheme.textSecondary),
+                        ),
+                      ],
                     ),
                   ),
-                  subtitle: Text(
-                    announcement.content,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(FluentIcons.delete_24_regular, color: AppTheme.error),
-                    onPressed: () async {
-                      final repo = ref.read(announcementRepositoryProvider);
-                      await repo.deleteAnnouncement(announcement.id);
-                    },
-                  ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -59,7 +115,36 @@ class AnnouncementManagementScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateDialog(context, ref),
-        child: const Icon(FluentIcons.add_24_regular),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref, String id, String title) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Xóa thông báo'),
+        content: Text('Bạn có chắc chắn muốn xóa thông báo "$title"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final repo = ref.read(announcementRepositoryProvider);
+              await repo.deleteAnnouncement(id);
+            },
+            child: const Text('Xóa'),
+          ),
+        ],
       ),
     );
   }

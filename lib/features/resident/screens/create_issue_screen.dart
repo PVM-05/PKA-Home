@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/supabase_config.dart';
@@ -124,7 +124,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(FluentIcons.camera_add_24_regular, size: 48, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
+                          Icon(Icons.add_a_photo_outlined, size: 48, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
                           const SizedBox(height: 8),
                           Text('Bấm để chọn ảnh', style: TextStyle(color: AppTheme.textSecondary)),
                         ],

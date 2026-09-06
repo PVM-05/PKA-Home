@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/resident_issue_provider.dart';
@@ -23,12 +23,17 @@ class ResidentIssueScreen extends ConsumerWidget {
             return _buildEmptyState(context);
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: issues.length,
-            itemBuilder: (context, index) {
-              return _buildIssueCard(context, issues[index]);
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(residentIssueProvider);
             },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: issues.length,
+              itemBuilder: (context, index) {
+                return _buildIssueCard(context, issues[index]);
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -42,7 +47,7 @@ class ResidentIssueScreen extends ConsumerWidget {
             ),
           );
         },
-        icon: const Icon(FluentIcons.add_24_regular),
+        icon: const Icon(Icons.add),
         label: const Text('Tạo phản ánh'),
       ),
     );
@@ -54,7 +59,7 @@ class ResidentIssueScreen extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            FluentIcons.chat_warning_24_regular,
+            Icons.chat_bubble_outline,
             size: 64,
             color: AppTheme.textSecondary.withValues(alpha: 0.5),
           ),
@@ -117,7 +122,7 @@ class ResidentIssueScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(FluentIcons.clock_24_regular, size: 16, color: AppTheme.textSecondary),
+                    Icon(Icons.access_time, size: 16, color: AppTheme.textSecondary),
                     const SizedBox(width: 4),
                     Text(
                       formatDate.format(issue.createdAt),

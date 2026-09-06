@@ -4,20 +4,31 @@ class NotificationCard extends StatelessWidget {
   final String title;
   final String content;
   final String date;
+  final VoidCallback? onTap;
 
   const NotificationCard({
     super.key,
     required this.title,
     required this.content,
     required this.date,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -49,6 +60,7 @@ class NotificationCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
