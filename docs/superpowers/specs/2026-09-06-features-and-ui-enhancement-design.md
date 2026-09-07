@@ -39,7 +39,7 @@
 ### Module 2: Cải tiến Luồng Cư Dân (Resident Flow)
 1. **Tích hợp VietQR trong Màn hình Chi tiết Hóa đơn (`resident_invoice_detail_screen.dart`)**:
    - Khi cư dân mở hóa đơn chưa thanh toán và bấm "Thanh toán ngay":
-     - Hiển thị Modal/BottomSheet thanh toán gồm: Mã QR ngân hàng tạo từ `VietQrHelper`, thông tin số tài khoản, số tiền, cú pháp chuyển khoản `[Mã căn hộ] [Kỳ phí]` (ví dụ: `A101 Thang 09-2026`).
+     - Hiển thị Modal/BottomSheet thanh toán gồm: Mã QR ngân hàng tạo từ `VietQrHelper`, thông tin số tài khoản, số tiền, cú pháp chuyển khoản `[Mã căn hộ] [Kỳ phí]` (ví dụ: `A0110 Thang 09-2026`).
      - Nút "Sao chép số tài khoản" và "Sao chép nội dung" (sử dụng `Clipboard.setData`).
      - Nút bấm "Xác nhận đã thanh toán" để chuyển trạng thái hóa đơn sang `pending_confirmation` (chờ duyệt) và kích hoạt Realtime cập nhật trạng thái.
 2. **Màn hình Xem Chi tiết Thông báo (`resident_announcement_detail_screen.dart`)**:
@@ -58,7 +58,7 @@
      - Thống kê tóm tắt: Tổng số tiền đã thu, Tổng số tiền còn nợ, Số căn hộ đã hoàn tất đóng phí.
      - Thiết kế bằng Flutter thuần (Progress Bar phân đoạn nhiều màu / Card tỷ lệ) chuẩn Material 3.
 2. **Bộ Lọc & Tìm Kiếm Hóa Đơn (`invoice_management_screen.dart`)**:
-   - Bổ sung thanh tìm kiếm nhanh theo mã căn hộ (ví dụ: gõ "A101").
+   - Bổ sung thanh tìm kiếm nhanh theo mã căn hộ (ví dụ: gõ "A0110").
    - Bổ sung hàng Filter Chip trạng thái: "Tất cả", "Chờ duyệt", "Chưa đóng", "Đã thanh toán".
 3. **Bộ Lọc Phản Ánh Sự Cố (`issue_management_screen.dart`)**:
    - Bổ sung Filter Chip: "Tất cả", "Chờ tiếp nhận", "Đang xử lý", "Đã xử lý".

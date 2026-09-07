@@ -9,6 +9,7 @@ trigger: always_on
 - **Khóa chính**: `id` (uuid, dùng `gen_random_uuid()` mặc định của Supabase).
 - **Khóa ngoại**: `<ten_bang_so_it>_id` (VD: `apartment_id`, `user_id`).
 - **Timestamp**: Bắt buộc trên mọi bảng phải có `created_at` và `updated_at`.
+- **Định dạng mã phòng/căn hộ (`apartments.code`)**: Định dạng chuẩn có dạng `a0110` (hoặc `A0110`) — cấu trúc `<Block><Tầng 2 chữ số><Phòng 2 chữ số>` (ví dụ: `a0110` là Block a, Tầng 01, Phòng 10), thay vì `a101` / `A101`.
 
 ## 2. Schema Đề Xuất
 - `users` (id, full_name, phone, role, created_at)

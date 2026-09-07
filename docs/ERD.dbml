@@ -10,7 +10,7 @@ Table users {
 
 Table apartments {
   id uuid [primary key]
-  code varchar [unique, not null]
+  code varchar [unique, not null, note: 'Định dạng chuẩn: a0110 thay vì a101 (Block + Tầng 2 chữ số + Phòng 2 chữ số)']
   area decimal
   is_empty boolean [default: true]
   created_at timestamp [default: `now()`]

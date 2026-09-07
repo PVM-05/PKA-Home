@@ -35,6 +35,7 @@ lib/
 - **Hằng số**: `lowerCamelCase` + tiền tố `k` (tùy chọn) (VD: `kPrimaryColor`)
 - **Riverpod Provider**: tên + hậu tố loại (VD: `invoiceListProvider`, `authStateProvider`)
 - **Route/màn hình**: đặt theo path (VD: `/resident/home`)
+- **Mã phòng/căn hộ**: Sử dụng định dạng chuẩn `A0110` / `a0110` (Block + Tầng 2 chữ số + Phòng 2 chữ số) trong placeholder, validate và mock data thay vì dạng `A101`.
 
 ## 3. Git workflow
 - **Branch**: `feature/<ten-tinh-nang>`, `fix/<ten-loi>`, `docs/<ten-tai-lieu>`

@@ -7,9 +7,9 @@ Kiểm tra tính an toàn của dữ liệu, đảm bảo phân quyền đúng �
 
 | ID | Kịch bản Test | Điều kiện tiên quyết | Các bước thực hiện | Kết quả mong đợi |
 | :--- | :--- | :--- | :--- | :--- |
-| RLS-01 | Cư dân đọc hóa đơn căn hộ mình | Đăng nhập tài khoản Cư dân A (căn hộ 101) | Query bảng `invoices` với `apartment_id` của 101. | Trả về danh sách hóa đơn của 101. |
-| RLS-02 | Cư dân đọc hóa đơn căn hộ khác | Đăng nhập tài khoản Cư dân A (căn hộ 101) | Query bảng `invoices` với `apartment_id` của 102. | Trả về mảng rỗng `[]` (bị RLS chặn). |
-| RLS-03 | Cư dân sửa trạng thái hóa đơn | Đăng nhập tài khoản Cư dân A (căn hộ 101) | Gửi request UPDATE `status` thành `paid`. | Lỗi `403 Forbidden` hoặc không có row nào bị đổi (chỉ Ban QL mới được phép). |
+| RLS-01 | Cư dân đọc hóa đơn căn hộ mình | Đăng nhập tài khoản Cư dân A (căn hộ A0110) | Query bảng `invoices` với `apartment_id` của A0110. | Trả về danh sách hóa đơn của A0110. |
+| RLS-02 | Cư dân đọc hóa đơn căn hộ khác | Đăng nhập tài khoản Cư dân A (căn hộ A0110) | Query bảng `invoices` với `apartment_id` của A0111. | Trả về mảng rỗng `[]` (bị RLS chặn). |
+| RLS-03 | Cư dân sửa trạng thái hóa đơn | Đăng nhập tài khoản Cư dân A (căn hộ A0110) | Gửi request UPDATE `status` thành `paid`. | Lỗi `403 Forbidden` hoặc không có row nào bị đổi (chỉ Ban QL mới được phép). |
 | RLS-04 | BQL xem dữ liệu toàn khu | Đăng nhập tài khoản Ban Quản lý | Query bảng `apartments`, `invoices`. | Trả về toàn bộ dữ liệu. |
 
 ## 2. Kiểm thử Chức năng (E2E Workflows)
