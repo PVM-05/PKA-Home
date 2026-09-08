@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -25,13 +26,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     String? errorMessage;
     if (fullName.isEmpty) {
       errorMessage = 'Vui lòng nhập họ và tên';
-    } else if (email.isEmpty) {
-      errorMessage = 'Vui lòng nhập email';
+    } else if (email.isEmpty || !emailRegex.hasMatch(email)) {
+      errorMessage = 'Định dạng Email không hợp lệ';
     } else if (password.length < 6) {
-      errorMessage = 'Mật khẩu phải có ít nhất 6 ký tự (yêu cầu của Supabase)';
+      errorMessage = 'Mật khẩu phải có ít nhất 6 ký tự';
+    } else if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(password)) {
+      errorMessage = 'Mật khẩu phải bao gồm cả chữ cái và chữ số';
     } else if (password != confirmPassword) {
       errorMessage = 'Xác nhận mật khẩu không khớp';
     }
@@ -55,7 +59,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi đăng ký: $e'),
+              content: Text(formatErrorMessage(e)),
               backgroundColor: AppTheme.error,
             ),
           );

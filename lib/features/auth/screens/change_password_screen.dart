@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -46,7 +47,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi đổi mật khẩu: $e'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -78,7 +79,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'Nhập mật khẩu mới của bạn. Mật khẩu nên chứa ít nhất 6 ký tự để đảm bảo an toàn.',
+                'Nhập mật khẩu mới của bạn. Mật khẩu phải chứa ít nhất 6 ký tự, bao gồm cả chữ cái và chữ số để đảm bảo an toàn.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
               ),
@@ -100,6 +101,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   }
                   if (value.length < 6) {
                     return 'Mật khẩu phải từ 6 ký tự trở lên';
+                  }
+                  if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
+                    return 'Mật khẩu phải bao gồm cả chữ cái và chữ số';
                   }
                   return null;
                 },

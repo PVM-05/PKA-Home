@@ -3,7 +3,27 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/models/invoice_model.dart';
 
-final _invoicesStreamProvider = StreamProvider((ref) => SupabaseConfig.client.from('invoices').stream(primaryKey: ['id']));
+final _invoicesStreamProvider = StreamProvider((ref) {
+  final user = SupabaseConfig.client.auth.currentUser;
+  if (user == null) return const Stream.empty();
+
+  return Stream.fromFuture(
+    SupabaseConfig.client
+        .from('residents_apartments')
+        .select('apartment_id')
+        .eq('user_id', user.id)
+        .maybeSingle(),
+  ).asyncExpand((linkData) {
+    if (linkData == null || linkData['apartment_id'] == null) {
+      return const Stream.empty();
+    }
+    final aptId = linkData['apartment_id'] as String;
+    return SupabaseConfig.client
+        .from('invoices')
+        .stream(primaryKey: ['id'])
+        .eq('apartment_id', aptId);
+  });
+});
 
 final residentInvoiceProvider = FutureProvider<List<InvoiceModel>>((ref) async {
   // Đăng ký lắng nghe Stream Realtime từ Supabase

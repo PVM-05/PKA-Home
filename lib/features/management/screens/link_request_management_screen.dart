@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../data/providers/link_request_management_provider.dart';
 
@@ -110,7 +111,7 @@ class LinkRequestManagementScreen extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error));
       }
     }
   }
@@ -123,7 +124,7 @@ class LinkRequestManagementScreen extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error));
       }
     }
   }

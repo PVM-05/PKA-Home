@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/apartment_model.dart';
 
@@ -202,7 +203,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi lập hóa đơn: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
         );
       }
     } finally {
@@ -250,6 +251,29 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                               }).toList(),
                               onChanged: (val) => setState(() => _selectedApartment = val),
                             ),
+                            if (_selectedApartment != null && (_selectedApartment!.area == null || _selectedApartment!.area! <= 0)) ...[
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.warningBackground,
+                                  borderRadius: AppTheme.radiusSm,
+                                  border: Border.all(color: AppTheme.warningBorder),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.warning_amber_rounded, color: AppTheme.warningText, size: 20),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Căn hộ này chưa có diện tích (0 m²). Tiền phí quản lý sẽ bằng 0 đ.',
+                                        style: TextStyle(color: AppTheme.warningText, fontSize: 13, fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 16),
                             Row(
                               children: [

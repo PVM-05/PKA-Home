@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
@@ -138,7 +139,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
         );
       }
     } finally {

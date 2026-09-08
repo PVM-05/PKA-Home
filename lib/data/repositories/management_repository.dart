@@ -47,23 +47,37 @@ class ManagementRepository {
   }
 
   Future<void> assignResidentToApartment(String userId, String apartmentId) async {
-    // Upsert or insert into residents_apartments
-    // Check if user already assigned, for simplicity we just insert
-    // But table has UNIQUE(user_id, apartment_id). We might want to remove old assignments if any, or just insert.
-    // Assuming a resident can only have one apartment in this simple system:
-    
-    // First, delete existing assignments for this user if any
+    // 1. Lấy danh sách căn hộ cũ của cư dân trước khi xóa liên kết
+    final oldLinks = await _client
+        .from('residents_apartments')
+        .select('apartment_id')
+        .eq('user_id', userId);
+
+    // 2. Xóa liên kết cũ của cư dân
     await _client.from('residents_apartments').delete().eq('user_id', userId);
     
-    // Then insert new
+    // 3. Tạo liên kết với căn hộ mới
     await _client.from('residents_apartments').insert({
       'user_id': userId,
       'apartment_id': apartmentId,
       'relation_role': 'owner',
     });
     
-    // Update apartment to not empty
+    // 4. Đánh dấu căn hộ mới là có người ở
     await _client.from('apartments').update({'is_empty': false}).eq('id', apartmentId);
+
+    // 5. Giải phóng căn hộ cũ nếu không còn ai cư trú
+    for (final link in (oldLinks as List)) {
+      final oldAptId = link['apartment_id'];
+      if (oldAptId == apartmentId) continue;
+      final remaining = await _client
+          .from('residents_apartments')
+          .select('id')
+          .eq('apartment_id', oldAptId);
+      if ((remaining as List).isEmpty) {
+        await _client.from('apartments').update({'is_empty': true}).eq('id', oldAptId);
+      }
+    }
   }
 
   Future<void> unlinkResidentFromApartment(String userId, String apartmentId) async {

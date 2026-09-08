@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/apartment_model.dart';
 
@@ -89,7 +90,7 @@ class ApartmentManagementScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi: $e')),
+        error: (e, _) => Center(child: Text(formatErrorMessage(e), style: const TextStyle(color: AppTheme.error))),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showApartmentDialog(context, ref),
@@ -149,7 +150,7 @@ class ApartmentManagementScreen extends ConsumerWidget {
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
+                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
                     );
                   }
                 }
@@ -190,7 +191,7 @@ class ApartmentManagementScreen extends ConsumerWidget {
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
+                    SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
                   );
                 }
               }

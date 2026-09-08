@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/resident_model.dart';
@@ -70,7 +71,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Lỗi: $e'),
+                            content: Text(formatErrorMessage(e)),
                             backgroundColor: AppTheme.error,
                           ),
                         );
@@ -252,7 +253,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                                                     }
                                                   } catch (e) {
                                                     if (context.mounted) {
-                                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error));
+                                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error));
                                                     }
                                                   }
                                                 },

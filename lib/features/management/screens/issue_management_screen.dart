@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
@@ -40,7 +41,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
+        SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
       );
     }
   }
