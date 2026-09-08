@@ -51,3 +51,4 @@ app.*.map.json
 # Local agents plugins and MCP config
 .agents/plugins/
 .agents/mcp_config.json
+supabase/.temp/

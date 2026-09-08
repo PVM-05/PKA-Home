@@ -134,12 +134,16 @@ class ManagementRepository {
   Future<List<IssueModel>> fetchIssues() async {
     final response = await _client
         .from('issue_reports')
-        .select('*, apartments(*), users!issue_reports_reporter_id_fkey(*), issue_images(image_url)')
+        .select('*, apartments(*), users!issue_reports_reporter_id_fkey(*), assigned_staff:users!issue_reports_assigned_staff_id_fkey(*), issue_images(image_url)')
         .order('created_at', ascending: false);
     return (response as List).map((e) => IssueModel.fromJson(e)).toList();
   }
 
-  Future<void> updateIssueStatus(String id, String status) async {
-    await _client.from('issue_reports').update({'status': status}).eq('id', id);
+  Future<void> updateIssueStatus(String id, String status, {String? assignedStaffId}) async {
+    final data = <String, dynamic>{'status': status};
+    if (assignedStaffId != null) {
+      data['assigned_staff_id'] = assignedStaffId;
+    }
+    await _client.from('issue_reports').update(data).eq('id', id);
   }
 }

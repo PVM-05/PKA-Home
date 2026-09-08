@@ -31,6 +31,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   final _waterQtyController = TextEditingController();
   final _waterPriceController = TextEditingController(text: '18000');
 
+  // Phí gửi xe (Theo quy định tòa nhà: 100.000đ/xe máy, 1.200.000đ/ô tô)
+  final _motorbikeQtyController = TextEditingController();
+  final _carQtyController = TextEditingController();
+
   bool _isSubmitting = false;
 
   @override
@@ -45,6 +49,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     _elecPriceController.addListener(_updateState);
     _waterQtyController.addListener(_updateState);
     _waterPriceController.addListener(_updateState);
+    _motorbikeQtyController.addListener(_updateState);
+    _carQtyController.addListener(_updateState);
   }
   
   void _updateState() {
@@ -59,6 +65,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     _elecPriceController.dispose();
     _waterQtyController.dispose();
     _waterPriceController.dispose();
+    _motorbikeQtyController.dispose();
+    _carQtyController.dispose();
     super.dispose();
   }
 
@@ -79,6 +87,18 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     final price = double.tryParse(_waterPriceController.text) ?? 0.0;
     return qty * price;
   }
+
+  double _getMotorbikeTotal() {
+    final qty = double.tryParse(_motorbikeQtyController.text) ?? 0.0;
+    return qty * 100000.0;
+  }
+
+  double _getCarTotal() {
+    final qty = double.tryParse(_carQtyController.text) ?? 0.0;
+    return qty * 1200000.0;
+  }
+
+  double _getParkingTotal() => _getMotorbikeTotal() + _getCarTotal();
 
   Future<void> _selectDueDate(BuildContext context) async {
     final picked = await showDatePicker(
@@ -136,6 +156,26 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         });
       }
 
+      // Phí gửi xe máy
+      final mbQty = double.tryParse(_motorbikeQtyController.text) ?? 0;
+      if (mbQty > 0) {
+        items.add({
+          'fee_type': 'Phí gửi xe máy',
+          'unit_price': 100000.0,
+          'quantity': mbQty,
+        });
+      }
+
+      // Phí gửi ô tô
+      final carQty = double.tryParse(_carQtyController.text) ?? 0;
+      if (carQty > 0) {
+        items.add({
+          'fee_type': 'Phí gửi ô tô',
+          'unit_price': 1200000.0,
+          'quantity': carQty,
+        });
+      }
+
       if (items.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Hóa đơn phải có ít nhất 1 loại phí > 0'), backgroundColor: AppTheme.warning),
@@ -173,7 +213,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   @override
   Widget build(BuildContext context) {
     final apartmentsAsync = ref.watch(apartmentsProvider);
-    final total = _getManagementTotal() + _getElecTotal() + _getWaterTotal();
+    final total = _getManagementTotal() + _getElecTotal() + _getWaterTotal() + _getParkingTotal();
 
     return Scaffold(
       appBar: AppBar(
@@ -348,6 +388,52 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                   child: TextFormField(
                                     controller: _waterPriceController,
                                     decoration: const InputDecoration(labelText: 'Đơn giá (đ/m³)'),
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Phí gửi xe
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Phí gửi xe', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                Text(_currencyFormat.format(_getParkingTotal()), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _motorbikeQtyController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Số xe máy (100.000đ/xe)',
+                                      prefixIcon: Icon(Icons.two_wheeler_outlined),
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _carQtyController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Số ô tô (1.200.000đ/xe)',
+                                      prefixIcon: Icon(Icons.directions_car_outlined),
+                                    ),
                                     keyboardType: TextInputType.number,
                                   ),
                                 ),

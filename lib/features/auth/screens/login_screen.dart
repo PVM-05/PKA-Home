@@ -21,33 +21,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    if (email.isNotEmpty && password.isNotEmpty) {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-      try {
-        await ref.read(authProvider.notifier).login(email, password);
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại.';
-          });
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    } else {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng nhập thư điện tử và mật khẩu'),
+          content: Text('Vui lòng nhập Email và mật khẩu'),
           backgroundColor: AppTheme.warning,
         ),
       );
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      setState(() {
+        _errorMessage = 'Định dạng Email không hợp lệ.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      await ref.read(authProvider.notifier).login(email, password);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

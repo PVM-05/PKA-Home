@@ -33,34 +33,42 @@ void main() {
   });
 
   group('Kiểm thử RLS Bảo mật (Integration)', () {
-    test('Cư dân chỉ đọc được hóa đơn của căn hộ mình (RLS-01 & RLS-02)', () async {
-      // 1. Đăng nhập với tư cách cư dân
-      final AuthResponse res = await client.auth.signInWithPassword(
-        email: testResidentEmail,
-        password: testResidentPassword,
-      );
-      
-      expect(res.user, isNotNull, reason: 'Đăng nhập thất bại. Kiểm tra lại user test.');
+    final shouldSkip = testResidentApartmentId == 'FILL_UUID_HERE';
 
-      // 2. Query hóa đơn chung (không filter căn hộ)
-      final List<dynamic> invoices = await client.from('invoices').select();
-
-      // RLS Policy nên giới hạn kết quả chỉ trả về các hóa đơn thuộc về user này
-      for (var invoice in invoices) {
-        expect(
-          invoice['apartment_id'], 
-          testResidentApartmentId, 
-          reason: 'Bảo mật RLS bị lọt! Cư dân đang đọc được hóa đơn của căn hộ khác.'
+    test(
+      'Cư dân chỉ đọc được hóa đơn của căn hộ mình (RLS-01 & RLS-02)',
+      () async {
+        // 1. Đăng nhập với tư cách cư dân
+        final AuthResponse res = await client.auth.signInWithPassword(
+          email: testResidentEmail,
+          password: testResidentPassword,
         );
-      }
-    });
+        
+        expect(res.user, isNotNull, reason: 'Đăng nhập thất bại. Kiểm tra lại user test.');
 
-    test('Cư dân không được tự sửa trạng thái hóa đơn (RLS-03)', () async {
-      // 1. Đăng nhập với tư cách cư dân
-      await client.auth.signInWithPassword(
-        email: testResidentEmail,
-        password: testResidentPassword,
-      );
+        // 2. Query hóa đơn chung (không filter căn hộ)
+        final List<dynamic> invoices = await client.from('invoices').select();
+
+        // RLS Policy nên giới hạn kết quả chỉ trả về các hóa đơn thuộc về user này
+        for (var invoice in invoices) {
+          expect(
+            invoice['apartment_id'], 
+            testResidentApartmentId, 
+            reason: 'Bảo mật RLS bị lọt! Cư dân đang đọc được hóa đơn của căn hộ khác.'
+          );
+        }
+      },
+      skip: shouldSkip ? 'Chưa cấu hình tài khoản test thực tế trong .env' : null,
+    );
+
+    test(
+      'Cư dân không được tự sửa trạng thái hóa đơn (RLS-03)',
+      () async {
+        // 1. Đăng nhập với tư cách cư dân
+        await client.auth.signInWithPassword(
+          email: testResidentEmail,
+          password: testResidentPassword,
+        );
 
       // 2. Cố gắng update trạng thái hóa đơn bất kỳ
       try {
@@ -78,6 +86,8 @@ void main() {
         // Exception là mong đợi vì bị chặn quyền
         expect(e, isA<PostgrestException>());
       }
-    });
-  });
+    },
+    skip: shouldSkip ? 'Chưa cấu hình tài khoản test thực tế trong .env' : null,
+  );
+});
 }

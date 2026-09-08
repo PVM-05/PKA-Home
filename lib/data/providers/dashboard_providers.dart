@@ -17,24 +17,19 @@ final pendingConfirmationInvoicesProvider = StreamProvider<int>((ref) {
   return SupabaseConfig.client.from('invoices').stream(primaryKey: ['id']).eq('status', 'pending_confirmation').map((list) => list.length);
 });
 
-final unpaidInvoicesTotalProvider = StreamProvider<double>((ref) {
-  final repo = ref.watch(managementRepositoryProvider);
-  return repo.watchUnpaidInvoices().map((invoices) {
-    return invoices.fold(0.0, (sum, item) {
-      final amount = item['total_amount'];
-      if (amount is int) return sum + amount.toDouble();
-      if (amount is double) return sum + amount;
-      return sum;
-    });
-  });
+final unpaidInvoicesTotalProvider = Provider<AsyncValue<double>>((ref) {
+  // Thống nhất với financialStatsProvider: tính tất cả hóa đơn chưa thanh toán (unpaid + pending_confirmation)
+  return ref.watch(financialStatsProvider).whenData((stats) => stats.unpaidTotal);
 });
 
-
-final totalApartmentsProvider = StreamProvider<int>((ref) {
+final apartmentsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
   return SupabaseConfig.client
       .from('apartments')
-      .stream(primaryKey: ['id'])
-      .map((list) => list.length);
+      .stream(primaryKey: ['id']);
+});
+
+final totalApartmentsProvider = Provider<AsyncValue<int>>((ref) {
+  return ref.watch(apartmentsStreamProvider).whenData((list) => list.length);
 });
 
 final totalResidentsProvider = StreamProvider<int>((ref) {
@@ -45,12 +40,12 @@ final totalResidentsProvider = StreamProvider<int>((ref) {
       .map((list) => list.length);
 });
 
-final occupancyRateProvider = FutureProvider<double>((ref) async {
-  final repo = ref.watch(managementRepositoryProvider);
-  final apartments = await repo.fetchApartments();
-  if (apartments.isEmpty) return 0.0;
-  final occupied = apartments.where((a) => !a.isEmpty).length;
-  return occupied / apartments.length;
+final occupancyRateProvider = Provider<AsyncValue<double>>((ref) {
+  return ref.watch(apartmentsStreamProvider).whenData((apartments) {
+    if (apartments.isEmpty) return 0.0;
+    final occupied = apartments.where((a) => a['is_empty'] == false).length;
+    return occupied / apartments.length;
+  });
 });
 
 class FinancialStats {

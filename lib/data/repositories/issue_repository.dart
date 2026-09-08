@@ -14,6 +14,7 @@ class IssueRepository {
     required String reporterId,
     required String description,
     File? imageFile,
+    List<File>? imageFiles,
   }) async {
     // 1. Get apartment_id
     final linkData = await _client
@@ -32,14 +33,22 @@ class IssueRepository {
     
     final issueId = issueData['id'];
 
-    // 3. Upload image if provided
-    if (imageFile != null) {
-      final fileExt = imageFile.path.split('.').last;
-      final fileName = '$reporterId/${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+    // 3. Upload images if provided
+    final filesToUpload = <File>[];
+    if (imageFiles != null && imageFiles.isNotEmpty) {
+      filesToUpload.addAll(imageFiles);
+    } else if (imageFile != null) {
+      filesToUpload.add(imageFile);
+    }
+
+    for (int i = 0; i < filesToUpload.length; i++) {
+      final file = filesToUpload[i];
+      final fileExt = file.path.split('.').last;
+      final fileName = '$issueId/${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
       
       await _client.storage
           .from('issue-images')
-          .upload(fileName, imageFile);
+          .upload(fileName, file);
           
       final imageUrl = _client.storage
           .from('issue-images')

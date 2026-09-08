@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
 
@@ -24,9 +25,13 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
     super.dispose();
   }
 
-  void _updateStatus(IssueModel issue, String newStatus) async {
+  void _updateStatus(IssueModel issue, String newStatus, {String? assignedStaffId}) async {
     try {
-      await ref.read(managementRepositoryProvider).updateIssueStatus(issue.id, newStatus);
+      await ref.read(managementRepositoryProvider).updateIssueStatus(
+        issue.id, 
+        newStatus,
+        assignedStaffId: assignedStaffId,
+      );
       // Dữ liệu sẽ tự động nhảy nhờ Stream Realtime Provider
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -37,6 +42,84 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
       );
+    }
+  }
+
+  void _showAssignStaffDialog(IssueModel issue) async {
+    try {
+      final usersResponse = await SupabaseConfig.client
+          .from('users')
+          .select('id, full_name, role')
+          .eq('role', 'management');
+      
+      final staffList = (usersResponse as List).map((u) => {
+        'id': u['id'] as String,
+        'name': (u['full_name'] as String?) ?? 'Nhân viên Ban Quản lý',
+      }).toList();
+
+      String? selectedStaffId = issue.assignedStaffId ?? (staffList.isNotEmpty ? staffList.first['id'] : null);
+
+      if (!mounted) return;
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                title: const Text('Tiếp nhận & Phân công'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Sự cố: ${issue.description}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 16),
+                    const Text('Chọn nhân viên xử lý:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    if (staffList.isEmpty)
+                      const Text('Chưa có nhân viên nào trong hệ thống', style: TextStyle(color: AppTheme.textSecondary))
+                    else
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedStaffId,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                        items: staffList.map((s) {
+                          return DropdownMenuItem<String>(
+                            value: s['id'],
+                            child: Text(s['name']!),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setDialogState(() {
+                            selectedStaffId = val;
+                          });
+                        },
+                      ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Hủy'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Xác nhận tiếp nhận'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+
+      if (confirmed == true) {
+        _updateStatus(issue, 'in_progress', assignedStaffId: selectedStaffId);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _updateStatus(issue, 'in_progress');
     }
   }
 
@@ -223,23 +306,39 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                 ),
                               ],
                               
+                              if (issue.assignedStaff != null) ...[
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.engineering_outlined, size: 16, color: AppTheme.primary),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Phụ trách: ${issue.assignedStaff!.fullName}', 
+                                      style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              
                               const SizedBox(height: 16),
                               
                               if (issue.status == 'pending')
                                 SizedBox(
                                   width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () => _updateStatus(issue, 'in_progress'),
-                                    child: const Text('Tiếp nhận & Xử lý'),
+                                  child: ElevatedButton.icon(
+                                    onPressed: () => _showAssignStaffDialog(issue),
+                                    icon: const Icon(Icons.person_add_outlined, size: 18),
+                                    label: const Text('Tiếp nhận & Phân công'),
                                   ),
                                 )
                               else if (issue.status == 'in_progress')
                                 SizedBox(
                                   width: double.infinity,
-                                  child: ElevatedButton(
+                                  child: ElevatedButton.icon(
                                     onPressed: () => _updateStatus(issue, 'resolved'),
                                     style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
-                                    child: const Text('Đánh dấu Hoàn thành'),
+                                    icon: const Icon(Icons.check_circle_outline, size: 18),
+                                    label: const Text('Đánh dấu Hoàn thành'),
                                   ),
                                 ),
                             ],

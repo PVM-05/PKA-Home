@@ -1,67 +1,120 @@
 // Copy nội dung này dán vào https://dbdiagram.io/ để xem biểu đồ
 
 Table users {
-  id uuid [primary key, note: 'gen_random_uuid()']
+  id uuid [primary key, note: 'Khóa ngoại tới auth.users(id) ON DELETE CASCADE']
   full_name varchar [not null]
   phone varchar
-  role varchar [not null, note: 'resident hoặc management']
+  role user_role [not null, default: 'resident', note: 'resident hoặc management']
   created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table apartments {
-  id uuid [primary key]
-  code varchar [unique, not null, note: 'Định dạng chuẩn: a0110 thay vì a101 (Block + Tầng 2 chữ số + Phòng 2 chữ số)']
+  id uuid [primary key, default: `gen_random_uuid()`]
+  code varchar [unique, not null, note: 'Định dạng chuẩn: A0110 thay vì A101 (Block + Tầng 2 chữ số + Phòng 2 chữ số)']
+  building_code varchar [note: 'Mã tòa: A, B, C']
+  floor_number integer [note: 'Số tầng: 1-10']
   area decimal
   is_empty boolean [default: true]
   created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table residents_apartments {
-  id uuid [primary key]
+  id uuid [primary key, default: `gen_random_uuid()`]
   user_id uuid [ref: > users.id]
   apartment_id uuid [ref: > apartments.id]
-  relation_role varchar [note: 'owner hoặc tenant']
+  relation_role relation_type [default: 'owner', note: 'owner hoặc tenant']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table apartment_link_requests {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid [ref: > users.id]
+  apartment_id uuid [ref: > apartments.id]
+  requested_relation_role relation_type [not null]
+  status link_request_status [default: 'pending', note: 'pending, approved, rejected']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table invoices {
-  id uuid [primary key]
+  id uuid [primary key, default: `gen_random_uuid()`]
   apartment_id uuid [ref: > apartments.id]
-  period varchar [note: 'Ví dụ: 08/2026']
+  period varchar [not null, note: 'Ví dụ: 08/2026']
   due_date date
-  total_amount decimal
-  status varchar [note: 'unpaid, pending_confirmation, paid']
+  total_amount decimal [default: 0]
+  status invoice_status [default: 'unpaid', note: 'unpaid, pending_confirmation, paid']
   created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table invoice_items {
-  id uuid [primary key]
+  id uuid [primary key, default: `gen_random_uuid()`]
   invoice_id uuid [ref: > invoices.id]
-  fee_type varchar [note: 'Nước, Điện, Phí quản lý...']
-  unit_price decimal
-  quantity decimal
-  subtotal decimal
+  fee_type varchar [not null, note: 'Tiền nước, Tiền điện, Phí quản lý...']
+  unit_price decimal [default: 0]
+  quantity decimal [default: 1]
+  subtotal decimal [default: 0]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table issue_reports {
-  id uuid [primary key]
+  id uuid [primary key, default: `gen_random_uuid()`]
   apartment_id uuid [ref: > apartments.id]
   reporter_id uuid [ref: > users.id]
   assigned_staff_id uuid [ref: > users.id, null]
-  status varchar [note: 'pending, in_progress, resolved']
+  status issue_status [default: 'pending', note: 'pending, in_progress, resolved']
+  priority issue_priority [default: 'medium', note: 'high, medium, low']
   description text
   created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table issue_images {
-  id uuid [primary key]
+  id uuid [primary key, default: `gen_random_uuid()`]
   issue_report_id uuid [ref: > issue_reports.id]
-  image_url varchar
+  image_url varchar [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table announcements {
-  id uuid [primary key]
-  title varchar
+  id uuid [primary key, default: `gen_random_uuid()`]
+  title varchar [not null]
   content text
   is_urgent boolean [default: false]
   created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table building_amenities {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  name varchar [not null]
+  description text
+  open_hours varchar
+  display_order integer [default: 0]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table building_rules {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  title varchar [not null]
+  content text [not null]
+  display_order integer [default: 0]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table emergency_contacts {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  name varchar [not null]
+  phone varchar [not null]
+  contact_type varchar [default: 'security', note: 'hotline, security, technician']
+  display_order integer [default: 0]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }

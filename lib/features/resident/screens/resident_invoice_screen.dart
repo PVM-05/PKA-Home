@@ -36,7 +36,7 @@ class ResidentInvoiceScreen extends ConsumerWidget {
             final paidInvoices = invoices
                 .where((i) => i.status == 'paid')
                 .toList()
-              ..sort((a, b) => b.dueDate.compareTo(a.dueDate));
+              ..sort((a, b) => (b.updatedAt ?? b.dueDate).compareTo(a.updatedAt ?? a.dueDate));
 
             return TabBarView(
               children: [
