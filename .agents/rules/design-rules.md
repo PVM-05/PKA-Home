@@ -6,7 +6,7 @@ trigger: always_on
 
 ## 1. Ngôn ngữ và Trình bày
 - Sử dụng hoàn toàn tiếng Việt chuẩn mực trong giao diện, nhãn dán, và nút bấm. 
-- Ngoại lệ: Được phép giữ nguyên các thuật ngữ tiếng Anh đã quá phổ biến và khó dịch sát nghĩa (VD: Email, App, Internet, Wifi).
+- Ngoại lệ: Được phép giữ nguyên các thuật ngữ tiếng Anh/quốc tế đã rất quen thuộc và phổ biến (VD: Hotline, Gmail, Email, App, Internet, Wifi, QR/VietQR). Không ép dịch thô cứng làm mất tự nhiên.
 - Tuyệt đối không dùng từ tiếng Anh đặt trong ngoặc đơn để giải nghĩa kiểu (Password) hoặc viết lẫn lộn Anh-Việt không cần thiết.
 - Câu từ phải ngắn gọn, rõ nghĩa, chuẩn xác ngữ pháp tiếng Việt.
 

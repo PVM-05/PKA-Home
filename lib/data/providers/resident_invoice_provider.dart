@@ -32,6 +32,9 @@ final residentInvoiceDetailProvider = FutureProvider.family<List<Map<String, dyn
   return List<Map<String, dynamic>>.from(response);
 });
 
+/// Provider chi tiết hóa đơn (invoice_items) dùng chung cho cả Cư dân và Ban Quản lý
+final invoiceDetailProvider = residentInvoiceDetailProvider;
+
 class ResidentInvoiceService {
   static Future<void> confirmPayment(WidgetRef ref, String invoiceId, {SupabaseClient? client}) async {
     final supabase = client ?? SupabaseConfig.client;

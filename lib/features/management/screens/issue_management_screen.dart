@@ -274,7 +274,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       ),
       backgroundColor: AppTheme.surface,
       side: BorderSide(
-        color: isSelected ? color : const Color(0xFFE0E0E0),
+        color: isSelected ? color : AppTheme.border,
       ),
     );
   }

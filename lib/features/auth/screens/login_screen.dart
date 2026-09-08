@@ -170,6 +170,72 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   )
                                 : const Text('Đăng nhập'),
                           ),
+                          const SizedBox(height: 24),
+                          
+                          // Tài khoản thử nghiệm (Demo quick fill)
+                          Row(
+                            children: [
+                              Expanded(child: Divider(color: Colors.grey.shade300)),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  'Tài khoản thử nghiệm',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              Expanded(child: Divider(color: Colors.grey.shade300)),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _emailController.text = 'resident@pka.vn';
+                                      _passwordController.text = '123456';
+                                    });
+                                  },
+                                  icon: const Icon(Icons.person_outline, size: 16, color: AppTheme.primary),
+                                  label: const Text(
+                                    'Cư dân',
+                                    style: TextStyle(fontSize: 13, color: AppTheme.primary),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    side: BorderSide(color: Colors.indigo.withValues(alpha: 0.3)),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _emailController.text = 'admin@pka.vn';
+                                      _passwordController.text = '123456';
+                                    });
+                                  },
+                                  icon: const Icon(Icons.shield_outlined, size: 16, color: Colors.indigo),
+                                  label: const Text(
+                                    'BQL',
+                                    style: TextStyle(fontSize: 13, color: Colors.indigo),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),

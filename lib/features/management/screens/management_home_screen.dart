@@ -352,16 +352,23 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.pie_chart_outline, color: AppTheme.primary, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'Tiến độ thu phí tòa nhà',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                    Expanded(
+                      child: Row(
+                        children: const [
+                          Icon(Icons.pie_chart_outline, color: AppTheme.primary, size: 20),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Tiến độ thu phí tòa nhà',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -400,6 +407,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           const SizedBox(height: 4),
                           Text(
                             formatCurrency.format(stats.paidTotal),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -411,12 +420,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     ),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const Text('Còn nợ', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
                           const SizedBox(height: 4),
                           Text(
                             formatCurrency.format(stats.unpaidTotal),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -426,20 +437,24 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         ],
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text('Căn đã đóng', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${stats.paidCount}/${stats.paidCount + stats.unpaidCount}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text('Căn đã đóng', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${stats.paidCount}/${stats.paidCount + stats.unpaidCount}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textPrimary,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

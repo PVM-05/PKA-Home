@@ -117,16 +117,63 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                   color: AppTheme.background,
                 ),
                 child: _imageFile != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(_imageFile!, fit: BoxFit.cover),
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(_imageFile!, fit: BoxFit.cover),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Material(
+                              color: Colors.black54,
+                              shape: const CircleBorder(),
+                              child: InkWell(
+                                customBorder: const CircleBorder(),
+                                onTap: () {
+                                  setState(() {
+                                    _imageFile = null;
+                                  });
+                                },
+                                child: const Padding(
+                                  padding: EdgeInsets.all(6.0),
+                                  child: Icon(Icons.close, color: Colors.white, size: 20),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.edit, color: Colors.white, size: 14),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Đổi ảnh',
+                                    style: TextStyle(color: Colors.white, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       )
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.add_a_photo_outlined, size: 48, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
                           const SizedBox(height: 8),
-                          Text('Bấm để chọn ảnh', style: TextStyle(color: AppTheme.textSecondary)),
+                          const Text('Bấm để chọn ảnh từ thư viện', style: TextStyle(color: AppTheme.textSecondary)),
                         ],
                       ),
               ),
@@ -136,7 +183,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               onPressed: _isLoading ? null : _submit,
               child: _isLoading 
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text('GỬI PHẢN ÁNH'),
+                : const Text('Gửi phản ánh'),
             ),
           ],
         ),

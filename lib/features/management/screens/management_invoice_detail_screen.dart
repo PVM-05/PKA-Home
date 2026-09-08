@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
-import '../../../data/providers/resident_invoice_provider.dart' show residentInvoiceDetailProvider;
+import '../../../data/providers/resident_invoice_provider.dart' show invoiceDetailProvider;
 
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
   final InvoiceModel invoice;
@@ -15,7 +15,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
-    final detailState = ref.watch(residentInvoiceDetailProvider(invoice.id)); // Tái sử dụng provider từ Cư dân để fetch invoice_items
+    final detailState = ref.watch(invoiceDetailProvider(invoice.id)); // Provider dùng chung để lấy chi tiết invoice_items
 
     return Scaffold(
       appBar: AppBar(

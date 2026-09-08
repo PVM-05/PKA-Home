@@ -48,5 +48,6 @@ app.*.map.json
 .env.*
 !.env.example
 
-# Local agents plugins
+# Local agents plugins and MCP config
 .agents/plugins/
+.agents/mcp_config.json

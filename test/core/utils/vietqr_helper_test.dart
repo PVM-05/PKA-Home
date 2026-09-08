@@ -20,14 +20,14 @@ void main() {
 
     test('generateBqlInvoiceQrUrl uses default BQL account correctly', () {
       final url = VietQrHelper.generateBqlInvoiceQrUrl(
-        apartmentCode: 'A101',
+        apartmentCode: 'A0110',
         period: '09/2026',
         amount: 1250000.0,
       );
 
       expect(url, startsWith('https://img.vietqr.io/image/MB-0987654321-compact2.png'));
       expect(url, contains('amount=1250000'));
-      expect(url, contains('addInfo=A101%2009%2F2026'));
+      expect(url, contains('addInfo=A0110%2009%2F2026'));
     });
 
     test('buildTransferMemo creates concise and standard memo format', () {

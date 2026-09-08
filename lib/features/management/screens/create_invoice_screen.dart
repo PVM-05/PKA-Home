@@ -216,7 +216,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _periodController,
-                                    decoration: const InputDecoration(labelText: 'Kỳ hóa đơn', prefixIcon: Icon(Icons.circle)),
+                                    decoration: const InputDecoration(labelText: 'Kỳ hóa đơn', prefixIcon: Icon(Icons.calendar_today_outlined)),
                                     validator: (val) => (val == null || val.isEmpty) ? 'Vui lòng nhập kỳ' : null,
                                   ),
                                 ),
@@ -225,7 +225,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                   child: InkWell(
                                     onTap: () => _selectDueDate(context),
                                     child: InputDecorator(
-                                      decoration: const InputDecoration(labelText: 'Hạn thanh toán', prefixIcon: Icon(Icons.circle)),
+                                      decoration: const InputDecoration(labelText: 'Hạn thanh toán', prefixIcon: Icon(Icons.event_outlined)),
                                       child: Text(DateFormat('dd/MM/yyyy').format(_dueDate)),
                                     ),
                                   ),

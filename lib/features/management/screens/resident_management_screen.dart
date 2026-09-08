@@ -109,7 +109,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Tìm kiếm theo tên...',
+                hintText: 'Tìm kiếm theo tên hoặc mã căn hộ...',
                 prefixIcon: const Icon(Icons.search),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -132,7 +132,10 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
               },
               dataBuilder: (residents) {
                 final filteredResidents = residents.where((r) {
-                  return r.fullName.toLowerCase().contains(_searchQuery);
+                  if (_searchQuery.isEmpty) return true;
+                  final nameMatch = r.fullName.toLowerCase().contains(_searchQuery);
+                  final aptMatch = r.apartment?.code.toLowerCase().contains(_searchQuery) ?? false;
+                  return nameMatch || aptMatch;
                 }).toList();
 
                 if (filteredResidents.isEmpty) {

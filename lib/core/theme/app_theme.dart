@@ -25,6 +25,22 @@ class AppTheme {
   static const Color surface = Color(0xFFFFFFFF); // Trắng
   static const Color textPrimary = Color(0xFF212121); // Xám đen
   static const Color textSecondary = Color(0xFF757575); // Xám trung tính
+  static const Color border = Color(0xFFE0E0E0); // Viền xám nhạt
+  static const Color warningBackground = Color(0xFFFFF3CD); // Nền thông báo cảnh báo/chú ý
+  static const Color warningText = Color(0xFF856404); // Chữ cảnh báo/chú ý
+  static const Color warningBorder = Color(0xFFFFEEBA); // Viền cảnh báo/chú ý
+
+  // Spacing chuẩn (theme_spec.md)
+  static const double spacingXs = 4.0;
+  static const double spacingSm = 8.0;
+  static const double spacingMd = 16.0;
+  static const double spacingLg = 24.0;
+  static const double spacingXl = 32.0;
+
+  // BorderRadius chuẩn (theme_spec.md)
+  static final BorderRadius radiusSm = BorderRadius.circular(8.0);
+  static final BorderRadius radiusMd = BorderRadius.circular(12.0);
+  static final BorderRadius radiusLg = BorderRadius.circular(16.0);
 
   // 2. ThemeData
   static ThemeData get lightTheme {

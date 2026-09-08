@@ -150,18 +150,24 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
             ref.watch(availableApartmentsProvider).when(
               data: (apartments) {
                 if (apartments.isEmpty) {
-                  return const Card(
-                    color: Color(0xFFFFF3CD),
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Column(
+                  return Card(
+                    elevation: 0,
+                    color: AppTheme.warningBackground,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppTheme.radiusMd,
+                      side: const BorderSide(color: AppTheme.warningBorder),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(AppTheme.spacingMd),
+                      child: Row(
                         children: [
-                          Icon(Icons.warning_amber_outlined, color: Color(0xFF856404), size: 32),
-                          SizedBox(height: 8),
-                          Text(
-                            'Không tải được danh sách căn hộ.\nVui lòng kiểm tra RLS Policy của bảng "apartments" trên Supabase.\nCần cấp quyền SELECT cho user.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Color(0xFF856404)),
+                          Icon(Icons.info_outline, color: AppTheme.warningText, size: 28),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Chưa tải được danh mục căn hộ tự động. Bạn vui lòng nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
+                              style: TextStyle(color: AppTheme.warningText, fontSize: 13),
+                            ),
                           ),
                         ],
                       ),
@@ -251,7 +257,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
               error: (err, st) => TextField(
                 controller: _codeController,
                 decoration: const InputDecoration(
-                  labelText: 'Mã căn hộ (VD: A101)',
+                  labelText: 'Mã căn hộ (VD: A0110)',
                   prefixIcon: Icon(Icons.tag),
                 ),
                 textInputAction: TextInputAction.done,

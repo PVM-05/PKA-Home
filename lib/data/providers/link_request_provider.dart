@@ -168,7 +168,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
     try {
       state = ResidentLinkStatus(status: LinkStatus.loading);
       
-      // Lấy ID căn hộ từ mã (code) (Chuyển sang viết hoa để không bị lỗi A101 vs a101)
+      // Lấy ID căn hộ từ mã (code) (Chuyển sang viết hoa để không bị lỗi A0110 vs a0110)
       final res = await SupabaseConfig.client
           .rpc('find_apartment_by_code', params: {'p_code': code.toUpperCase()});
           

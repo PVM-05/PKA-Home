@@ -113,7 +113,7 @@ class ApartmentManagementScreen extends ConsumerWidget {
             children: [
               TextField(
                 controller: codeController,
-                decoration: const InputDecoration(labelText: 'Mã căn hộ (VD: A101)'),
+                decoration: const InputDecoration(labelText: 'Mã căn hộ (VD: A0110)'),
               ),
               const SizedBox(height: 12),
               TextField(

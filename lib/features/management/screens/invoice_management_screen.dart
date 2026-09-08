@@ -45,7 +45,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Tìm theo căn hộ (VD: A101, B502)...',
+                hintText: 'Tìm theo căn hộ (VD: A0110, B0502)...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -228,7 +228,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
           Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()));
         },
         backgroundColor: AppTheme.primary,
-        icon: const Icon(Icons.circle, color: Colors.white),
+        icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Lập hóa đơn', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );

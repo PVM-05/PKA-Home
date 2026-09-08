@@ -457,7 +457,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         ),
         const SizedBox(height: 24),
         Text(
-          'Câu Hỏi Thường Gặp (FAQ)',
+          'Câu Hỏi Thường Gặp',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primary,

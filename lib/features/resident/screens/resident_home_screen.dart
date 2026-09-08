@@ -12,6 +12,10 @@ import 'resident_issue_screen.dart';
 import 'resident_profile_screen.dart';
 import 'resident_announcement_detail_screen.dart';
 import 'resident_handbook_screen.dart';
+import '../../../data/models/invoice_model.dart';
+import '../../../data/models/issue_model.dart';
+import '../../../data/models/announcement_model.dart';
+import '../../../data/providers/link_request_provider.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   const ResidentHomeScreen({super.key});
@@ -29,8 +33,117 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     });
   }
 
+  void _showNotificationToast({
+    required IconData icon,
+    required String message,
+    required Color backgroundColor,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: duration,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 1. Lắng nghe cập nhật hóa đơn thời gian thực
+    ref.listen<AsyncValue<List<InvoiceModel>>>(residentInvoiceProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevList = previous!.value!;
+        final nextList = next.value!;
+        for (final nextInv in nextList) {
+          final prevInv = prevList.cast<InvoiceModel?>().firstWhere(
+                (p) => p?.id == nextInv.id,
+                orElse: () => null,
+              );
+          if (prevInv != null && prevInv.status != nextInv.status && nextInv.status == 'paid') {
+            _showNotificationToast(
+              icon: Icons.check_circle,
+              message: 'Hóa đơn kỳ ${nextInv.period} đã được Ban Quản Lý xác nhận thanh toán thành công!',
+              backgroundColor: AppTheme.success,
+            );
+          }
+        }
+      }
+    });
+
+    // 2. Lắng nghe cập nhật phản ánh sự cố thời gian thực
+    ref.listen<AsyncValue<List<IssueModel>>>(residentIssueProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevList = previous!.value!;
+        final nextList = next.value!;
+        for (final nextIssue in nextList) {
+          final prevIssue = prevList.cast<IssueModel?>().firstWhere(
+                (p) => p?.id == nextIssue.id,
+                orElse: () => null,
+              );
+          if (prevIssue != null && prevIssue.status != nextIssue.status) {
+            if (nextIssue.status == 'in_progress') {
+              _showNotificationToast(
+                icon: Icons.engineering,
+                message: 'Phản ánh "${nextIssue.description}" đang được Ban Quản Lý xử lý.',
+                backgroundColor: AppTheme.primary,
+              );
+            } else if (nextIssue.status == 'resolved') {
+              _showNotificationToast(
+                icon: Icons.verified,
+                message: 'Phản ánh "${nextIssue.description}" đã được giải quyết hoàn tất!',
+                backgroundColor: AppTheme.success,
+              );
+            }
+          }
+        }
+      }
+    });
+
+    // 3. Lắng nghe thông báo mới đăng thời gian thực
+    ref.listen<AsyncValue<List<AnnouncementModel>>>(announcementsStreamProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevList = previous!.value!;
+        final nextList = next.value!;
+        if (nextList.length > prevList.length) {
+          final newest = nextList.first;
+          _showNotificationToast(
+            icon: newest.isUrgent ? Icons.warning_amber_rounded : Icons.campaign,
+            message: newest.isUrgent ? 'THÔNG BÁO KHẨN: ${newest.title}' : 'Thông báo mới: ${newest.title}',
+            backgroundColor: newest.isUrgent ? AppTheme.error : AppTheme.primary,
+            duration: const Duration(seconds: 5),
+          );
+        }
+      }
+    });
+
+    // 4. Lắng nghe phê duyệt liên kết căn hộ thời gian thực
+    ref.listen<ResidentLinkStatus>(residentLinkProvider, (previous, next) {
+      if (previous?.status == LinkStatus.pending && next.status == LinkStatus.linked) {
+        _showNotificationToast(
+          icon: Icons.apartment,
+          message: 'Yêu cầu liên kết căn hộ đã được Ban Quản Lý phê duyệt thành công!',
+          backgroundColor: AppTheme.success,
+        );
+      }
+    });
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
@@ -217,27 +330,32 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Cần thanh toán',
-                                  style: TextStyle(
-                                    color: AppTheme.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Cần thanh toán',
+                                      style: TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(totalUnpaid),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: totalUnpaid > 0 ? AppTheme.error : AppTheme.success,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(totalUnpaid),
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: totalUnpaid > 0 ? AppTheme.error : AppTheme.success,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 12),
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(

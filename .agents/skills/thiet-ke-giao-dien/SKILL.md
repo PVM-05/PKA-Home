@@ -6,7 +6,7 @@ description: Kích hoạt khi phát triển, chỉnh sửa hoặc kiểm thử g
 # Quy trình Thiết kế và Phát triển Giao diện
 
 ## 1. Nguyên tắc Cốt lõi
-- **Ngôn ngữ**: 100% Tiếng Việt chuẩn mực. Không kèm từ tiếng Anh trong ngoặc đơn.
+- **Ngôn ngữ**: 100% Tiếng Việt chuẩn mực. Cho phép giữ nguyên các từ khóa quốc tế/kỹ thuật quen thuộc (Hotline, Gmail, Email, VietQR/QR, Wifi, App). Không kèm từ tiếng Anh trong ngoặc đơn để giải nghĩa.
 - **Biểu tượng**: Sử dụng thống nhất bộ biểu tượng Fluent Icons (hoặc Material/Lucide nếu đã chốt). Không dùng biểu tượng cảm xúc (emoji).
 - **Phông chữ**: Segoe UI (hoặc Google Fonts) sắc nét, phối màu hiện đại và đồng nhất theo `theme_spec.md`.
 
