@@ -48,8 +48,13 @@ Luồng Cư dân đã được nâng cấp lên mức **Smart Dashboard** (Giao 
   - **Giải pháp:** Sử dụng `ref.keepAlive()` kết hợp với việc huỷ Stream (dispose) đúng vòng đời Riverpod. Tối ưu bằng `.eq('user_id', userId)` để chỉ lắng nghe dòng dữ liệu liên quan.
 - **Đồng bộ Design System:** Ban đầu dính nhiều thư viện Icon thừa (`fluentui_system_icons`).
   - **Giải pháp:** Refactor toàn hệ thống, gỡ hoàn toàn thư viện ngoài, chỉ dùng Material Design theo quy tắc `design-rules.md`.
+- **Ràng buộc tính toàn vẹn tài chính cấp Server (Generated Column):** Trước đây `subtotal` của từng mục hóa đơn được tính toán từ Client và gửi lên DB, tiềm ẩn rủi ro sai lệch dữ liệu tài chính nếu có client khác can thiệp hoặc FE gặp lỗi tính toán.
+  - **Giải pháp:** Chuyển đổi cột `subtotal` trong bảng `invoice_items` thành **PostgreSQL Generated Column** (`GENERATED ALWAYS AS (unit_price * quantity) STORED`), loại bỏ hoàn toàn tính toán từ client, đảm bảo tính nhất quán tuyệt đối và tuân thủ nguyên tắc an toàn dữ liệu tài chính.
+- **Bảo toàn phản ánh sự cố khi upload ảnh gián đoạn:** Khi mạng yếu, việc tải ảnh lên Supabase Storage có thể thất bại sau khi bản ghi `issue_reports` đã được tạo, gây ra tình trạng ném ngoại lệ toàn phần và người dùng bấm gửi lại gây trùng lặp bản ghi.
+  - **Giải pháp:** Phân tách khối upload ảnh bằng cơ chế bọc lỗi độc lập (`CreateIssueResult(imageUploadFailed: true)`). Nếu upload ảnh lỗi, hệ thống vẫn bảo toàn nội dung mô tả phản ánh trong DB và thông báo rõ ràng cho cư dân: *"Đã gửi phản ánh nhưng ảnh tải lên thất bại, vui lòng thử đính kèm lại sau"*.
 
 ## 4. Hướng phát triển tiếp theo (Next Steps)
 1. **Tinh chỉnh UI Ban quản lý:** Áp dụng mô hình Smart Dashboard cho luồng Management (Vẽ biểu đồ hình tròn cho Nợ đọng).
 2. **Push Notifications:** Bắn thông báo đẩy về máy điện thoại qua Firebase (FCM) khi có hóa đơn mới.
-3. **Hoàn thiện Hồ sơ Đồ án:** Cập nhật lại sơ đồ ERD, Test Plan và làm Slide bảo vệ (Phase 7-8).
+3. **Tối ưu hóa Truy vấn & Phân trang (Pagination / Infinite Scroll):** Hiện tại ở phạm vi đồ án và dữ liệu thử nghiệm, các phương thức truy vấn danh sách (`fetchInvoices`, `fetchResidents`, `fetchApartments`, `fetchIssues`) đang lấy toàn bộ dữ liệu. Khi mở rộng sang tòa nhà thực tế với hàng nghìn căn hộ và lịch sử giao dịch nhiều năm, hệ thống sẽ triển khai cơ chế phân trang tải cuộn (Infinite Scroll / Cursor-based Pagination) bằng `.range(from, to)` của Supabase SDK kết hợp `ScrollController` của Flutter để tối ưu hiệu năng bộ nhớ và băng thông mạng.
+4. **Hoàn thiện Hồ sơ Đồ án:** Cập nhật lại sơ đồ ERD, Test Plan và làm Slide bảo vệ (Phase 7-8).
