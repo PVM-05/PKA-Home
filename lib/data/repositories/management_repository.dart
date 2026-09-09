@@ -134,7 +134,6 @@ class ManagementRepository {
       'fee_type': item['fee_type'],
       'unit_price': item['unit_price'],
       'quantity': item['quantity'],
-      'subtotal': (item['unit_price'] as num) * (item['quantity'] as num),
     }).toList();
     
     await _client.from('invoice_items').insert(insertItems);
