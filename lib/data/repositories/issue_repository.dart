@@ -7,10 +7,22 @@ final issueRepositoryProvider = Provider<IssueRepository>((ref) {
   return IssueRepository();
 });
 
-class IssueRepository {
-  final SupabaseClient _client = SupabaseConfig.client;
+class CreateIssueResult {
+  final String issueId;
+  final bool imageUploadFailed;
 
-  Future<void> createIssue({
+  const CreateIssueResult({
+    required this.issueId,
+    this.imageUploadFailed = false,
+  });
+}
+
+class IssueRepository {
+  final SupabaseClient _client;
+
+  IssueRepository([SupabaseClient? client]) : _client = client ?? SupabaseConfig.client;
+
+  Future<CreateIssueResult> createIssue({
     required String reporterId,
     required String description,
     File? imageFile,
@@ -31,9 +43,9 @@ class IssueRepository {
       'description': description,
     }).select().single();
     
-    final issueId = issueData['id'];
+    final issueId = issueData['id'] as String;
 
-    // 3. Upload images if provided
+    // 3. Upload images if provided (bọc try-catch để cách ly lỗi upload ảnh)
     final filesToUpload = <File>[];
     if (imageFiles != null && imageFiles.isNotEmpty) {
       filesToUpload.addAll(imageFiles);
@@ -41,24 +53,34 @@ class IssueRepository {
       filesToUpload.add(imageFile);
     }
 
+    bool imageUploadFailed = false;
     for (int i = 0; i < filesToUpload.length; i++) {
-      final file = filesToUpload[i];
-      final fileExt = file.path.split('.').last;
-      final fileName = '$issueId/${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
-      
-      await _client.storage
-          .from('issue-images')
-          .upload(fileName, file);
-          
-      final imageUrl = _client.storage
-          .from('issue-images')
-          .getPublicUrl(fileName);
+      try {
+        final file = filesToUpload[i];
+        final fileExt = file.path.split('.').last;
+        final fileName = '$issueId/${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
+        
+        await _client.storage
+            .from('issue-images')
+            .upload(fileName, file);
+            
+        final imageUrl = _client.storage
+            .from('issue-images')
+            .getPublicUrl(fileName);
 
-      await _client.from('issue_images').insert({
-        'issue_report_id': issueId,
-        'image_url': imageUrl,
-      });
+        await _client.from('issue_images').insert({
+          'issue_report_id': issueId,
+          'image_url': imageUrl,
+        });
+      } catch (_) {
+        imageUploadFailed = true;
+      }
     }
+
+    return CreateIssueResult(
+      issueId: issueId,
+      imageUploadFailed: imageUploadFailed,
+    );
   }
 
   Stream<List<Map<String, dynamic>>> streamIssues({String? userId}) async* {
