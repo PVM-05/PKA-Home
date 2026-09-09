@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/invoice_model.dart';
 
 import 'create_invoice_screen.dart';
+import 'edit_invoice_screen.dart';
 import 'management_invoice_detail_screen.dart';
 
 class InvoiceManagementScreen extends ConsumerStatefulWidget {
@@ -176,20 +178,62 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                         ]
                                       ],
                                     ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: _getStatusColor(invoice.status).withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        _getStatusText(invoice.status),
-                                        style: TextStyle(
-                                          color: _getStatusColor(invoice.status),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: _getStatusColor(invoice.status).withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            _getStatusText(invoice.status),
+                                            style: TextStyle(
+                                              color: _getStatusColor(invoice.status),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        PopupMenuButton<String>(
+                                          icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          onSelected: (value) {
+                                            if (value == 'edit') {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (_) => EditInvoiceScreen(invoice: invoice),
+                                                ),
+                                              );
+                                            } else if (value == 'delete') {
+                                              _confirmDeleteInvoice(invoice);
+                                            }
+                                          },
+                                          itemBuilder: (ctx) => [
+                                            const PopupMenuItem(
+                                              value: 'edit',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
+                                                  SizedBox(width: 8),
+                                                  Text('Sửa hóa đơn'),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: 'delete',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.delete_outline, size: 18, color: AppTheme.error),
+                                                  SizedBox(width: 8),
+                                                  Text('Xóa hóa đơn', style: TextStyle(color: AppTheme.error)),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -274,6 +318,56 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
       case 'paid': return 'Đã thanh toán';
       case 'pending_confirmation': return 'Chờ xác nhận';
       case 'unpaid': default: return 'Đang nợ';
+    }
+  }
+
+  Future<void> _confirmDeleteInvoice(InvoiceModel invoice) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Xác nhận xóa hóa đơn'),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa hóa đơn kỳ ${invoice.period} của căn hộ ${invoice.apartment?.code ?? ''}?\n\nToàn bộ các khoản phí liên quan sẽ bị xóa và không thể khôi phục.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(managementRepositoryProvider).deleteInvoice(invoice.id);
+        ref.invalidate(invoicesProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã xóa hóa đơn thành công!'),
+              backgroundColor: AppTheme.success,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(formatErrorMessage(e)),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      }
     }
   }
 }
