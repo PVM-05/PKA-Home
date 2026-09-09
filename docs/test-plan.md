@@ -30,3 +30,14 @@ Dựa theo skill `flutter-build-responsive-layout` và `flutter-fix-layout-issue
 | UI-01 | Mobile nhỏ (iPhone SE) | Mở màn hình danh sách Hóa đơn & Phản ánh | Không bị lỗi RenderFlex Overflow. Chữ tự động wrap xuống dòng. |
 | UI-02 | Tablet (iPad) | Mở màn hình Dashboard Ban Quản Lý | Bố cục trải rộng hợp lý, hiển thị dạng lưới (Grid) thay vì Danh sách (List) nếu có thể. |
 | UI-03 | Nhập liệu form dài | Nhập text dài vào ô Mô tả sự cố | Bàn phím ảo không che khuất TextField. Nút Submit không bị đẩy ra ngoài. |
+
+## 4. Kiểm thử Khả năng Phục hồi & Toàn vẹn Dữ liệu (Resilience & Data Integrity)
+Kiểm định tính bền bỉ của hệ thống trước sự cố mạng và đảm bảo nguyên tắc toàn vẹn dữ liệu tài chính.
+
+| ID | Tên Kịch Bản | Điều kiện tiên quyết | Các bước thực hiện | Kết quả mong đợi |
+| :--- | :--- | :--- | :--- | :--- |
+| **RES-01** | Upload ảnh phản ánh thất bại (Mất mạng Storage) | Đăng nhập tài khoản Cư dân | 1. Mở màn hình Tạo phản ánh sự cố.<br>2. Nhập mô tả hợp lệ và chọn 1 hoặc nhiều ảnh.<br>3. Giả lập ngắt mạng hoặc quyền bucket storage bị từ chối.<br>4. Nhấn nút "Gửi phản ánh". | 1. Bản ghi phản ánh trong bảng `issue_reports` vẫn được bảo toàn (không mất công mô tả).<br>2. Không văng exception màu đỏ ra màn hình.<br>3. Màn hình đóng lại về trang danh sách và hiển thị SnackBar cảnh báo màu cam: *"Đã gửi phản ánh nhưng ảnh tải lên thất bại, vui lòng thử đính kèm lại sau"*.<br>4. Cư dân không bị thao tác bấm gửi lại làm trùng lặp bản ghi. |
+| **INT-01** | Toàn vẹn tài chính cấp Server (Generated Column) | Đăng nhập tài khoản Ban Quản lý | 1. Vào màn hình Lập hóa đơn.<br>2. Nhập các mục: Tiền điện (đơn giá: 3.500, số lượng: 100), Phí quản lý (đơn giá: 150.000, số lượng: 1).<br>3. Client chỉ gửi `fee_type`, `unit_price`, `quantity` lên DB.<br>4. Kiểm tra dữ liệu lưu trên bảng `invoice_items` và `invoices`. | 1. PostgreSQL tự động tính `subtotal = unit_price * quantity` chính xác (350.000 và 150.000) qua GENERATED ALWAYS STORED.<br>2. Trigger `trg_recalc_invoice_total` tự động cộng `total_amount = 500.000` trên bảng `invoices`.<br>3. Tuyệt đối không thể giả mạo `subtotal` từ phía client. |
+| **AUTH-01** | Hướng dẫn Quên mật khẩu nội bộ | Mở màn hình Đăng nhập | 1. Nhấn vào nút liên kết *"Quên mật khẩu?"* bên dưới ô nhập mật khẩu. | Hiển thị Dialog giải thích rõ ràng: Căn hộ cần bảo mật cao nên phải liên hệ Văn phòng BQL/Hotline tòa nhà để được xác minh danh tính và cấp lại mật khẩu. |
+| **SCAL-01** | Sẵn sàng mở rộng và Phân trang (Scalability) | Danh sách dữ liệu > 100 bản ghi | Gọi API danh sách qua client bằng `.range(from, to)`. | Dữ liệu trả về đúng phân đoạn giới hạn, thời gian truy vấn duy trì dưới 2 giây và tiết kiệm RAM/băng thông thiết bị di động. |
+
