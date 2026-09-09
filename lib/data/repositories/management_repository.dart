@@ -139,6 +139,40 @@ class ManagementRepository {
     await _client.from('invoice_items').insert(insertItems);
   }
 
+  Future<void> deleteInvoice(String invoiceId) async {
+    await _client.from('invoices').delete().eq('id', invoiceId);
+  }
+
+  Future<void> updateInvoice({
+    required String invoiceId,
+    required String period,
+    required DateTime dueDate,
+    required List<Map<String, dynamic>> items,
+    String? apartmentId,
+  }) async {
+    final invoiceData = <String, dynamic>{
+      'period': period,
+      'due_date': dueDate.toIso8601String().split('T')[0],
+    };
+    if (apartmentId != null) {
+      invoiceData['apartment_id'] = apartmentId;
+    }
+    await _client.from('invoices').update(invoiceData).eq('id', invoiceId);
+
+    await _client.from('invoice_items').delete().eq('invoice_id', invoiceId);
+
+    final List<Map<String, dynamic>> insertItems = items.map((item) => {
+      'invoice_id': invoiceId,
+      'fee_type': item['fee_type'],
+      'unit_price': item['unit_price'],
+      'quantity': item['quantity'],
+    }).toList();
+
+    if (insertItems.isNotEmpty) {
+      await _client.from('invoice_items').insert(insertItems);
+    }
+  }
+
   // Issues Management
   Stream<List<Map<String, dynamic>>> watchRawIssues() {
     return _client.from('issue_reports').stream(primaryKey: ['id']);
