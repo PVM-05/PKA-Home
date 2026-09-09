@@ -18,6 +18,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
   ApartmentModel? _selectedApartment;
+  String? _selectedBuilding;
   final _periodController = TextEditingController();
   DateTime _dueDate = DateTime.now().add(const Duration(days: 5));
 
@@ -225,6 +226,25 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text('Lỗi tải dữ liệu: $err')),
           data: (apartments) {
+            final occupiedApartments = apartments.where((a) => !a.isEmpty).toList();
+            final buildings = occupiedApartments
+                .map((a) => a.buildingCode.toUpperCase())
+                .where((b) => b.isNotEmpty)
+                .toSet()
+                .toList()
+              ..sort();
+
+            if (_selectedBuilding == null && buildings.isNotEmpty) {
+              _selectedBuilding = buildings.first;
+            }
+
+            final displayedApartments = occupiedApartments
+                .where((a) => _selectedBuilding == null || a.buildingCode.toUpperCase() == _selectedBuilding)
+                .toList()
+              ..sort((a, b) => a.code.compareTo(b.code));
+
+            final currentSelectedApartment = displayedApartments.contains(_selectedApartment) ? _selectedApartment : null;
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Form(
@@ -240,17 +260,84 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                           children: [
                             const Text('Thông tin chung', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
                             const SizedBox(height: 16),
-                            DropdownButtonFormField<ApartmentModel>(
-                              decoration: const InputDecoration(labelText: 'Chọn Căn hộ', prefixIcon: Icon(Icons.apartment_outlined)),
-                              initialValue: _selectedApartment,
-                              items: apartments.map((apt) {
-                                return DropdownMenuItem(
-                                  value: apt,
-                                  child: Text('${apt.code} (${apt.area ?? 0} m²)'),
-                                );
-                              }).toList(),
-                              onChanged: (val) => setState(() => _selectedApartment = val),
-                            ),
+                            if (occupiedApartments.isEmpty)
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.warningBackground,
+                                  borderRadius: AppTheme.radiusSm,
+                                  border: Border.all(color: AppTheme.warningBorder),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.warning_amber_rounded, color: AppTheme.warningText, size: 20),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Không có căn hộ nào đang có người ở. Vui lòng kiểm tra lại danh sách cư dân.',
+                                        style: TextStyle(color: AppTheme.warningText, fontSize: 13, fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else ...[
+                              if (buildings.isNotEmpty) ...[
+                                const Text(
+                                  'Chọn Tòa nhà:',
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+                                ),
+                                const SizedBox(height: 8),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: buildings.map((b) {
+                                      final isSelected = _selectedBuilding == b;
+                                      return Padding(
+                                        padding: const EdgeInsets.only(right: 8.0),
+                                        child: ChoiceChip(
+                                          label: Text(
+                                            'Tòa $b',
+                                            style: TextStyle(
+                                              color: isSelected ? Colors.white : AppTheme.textPrimary,
+                                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                            ),
+                                          ),
+                                          selected: isSelected,
+                                          selectedColor: AppTheme.primary,
+                                          backgroundColor: AppTheme.background,
+                                          onSelected: (selected) {
+                                            if (selected && _selectedBuilding != b) {
+                                              setState(() {
+                                                _selectedBuilding = b;
+                                                _selectedApartment = null;
+                                              });
+                                            }
+                                          },
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              DropdownButtonFormField<ApartmentModel>(
+                                key: ValueKey(_selectedBuilding),
+                                decoration: const InputDecoration(
+                                  labelText: 'Chọn Căn hộ (có người ở)',
+                                  prefixIcon: Icon(Icons.apartment_outlined),
+                                ),
+                                initialValue: currentSelectedApartment,
+                                items: displayedApartments.map((apt) {
+                                  return DropdownMenuItem(
+                                    value: apt,
+                                    child: Text('${apt.code} (${apt.area ?? 0} m²)'),
+                                  );
+                                }).toList(),
+                                onChanged: (val) => setState(() => _selectedApartment = val),
+                                validator: (val) => val == null ? 'Vui lòng chọn căn hộ' : null,
+                              ),
+                            ],
                             if (_selectedApartment != null && (_selectedApartment!.area == null || _selectedApartment!.area! <= 0)) ...[
                               const SizedBox(height: 12),
                               Container(
