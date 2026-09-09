@@ -149,6 +149,7 @@ class ManagementRepository {
     required DateTime dueDate,
     required List<Map<String, dynamic>> items,
     String? apartmentId,
+    String? status,
   }) async {
     final invoiceData = <String, dynamic>{
       'period': period,
@@ -156,6 +157,9 @@ class ManagementRepository {
     };
     if (apartmentId != null) {
       invoiceData['apartment_id'] = apartmentId;
+    }
+    if (status != null) {
+      invoiceData['status'] = status;
     }
     await _client.from('invoices').update(invoiceData).eq('id', invoiceId);
 
