@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
+import '../../core/utils/app_logger.dart';
 
 final issueRepositoryProvider = Provider<IssueRepository>((ref) {
   return IssueRepository();
@@ -58,7 +59,7 @@ class IssueRepository {
       try {
         final file = filesToUpload[i];
         final fileExt = file.path.split('.').last;
-        final fileName = '$issueId/${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
+        final fileName = '$reporterId/$issueId/${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
         
         await _client.storage
             .from('issue-images')
@@ -72,7 +73,8 @@ class IssueRepository {
           'issue_report_id': issueId,
           'image_url': imageUrl,
         });
-      } catch (_) {
+      } catch (e, stack) {
+        AppLogger.e('Lỗi tải ảnh sự cố lên Storage: $e', e, stack);
         imageUploadFailed = true;
       }
     }
