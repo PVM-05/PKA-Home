@@ -23,7 +23,20 @@ class ResidentIssueScreen extends ConsumerWidget {
       body: issueState.when(
         data: (issues) {
           if (issues.isEmpty) {
-            return _buildEmptyState(context);
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(residentIssueProvider);
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: _buildEmptyState(context),
+                  ),
+                ],
+              ),
+            );
           }
 
           return RefreshIndicator(

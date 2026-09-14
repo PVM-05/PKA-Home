@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/validators.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/apartment_model.dart';
 
@@ -103,61 +104,89 @@ class ApartmentManagementScreen extends ConsumerWidget {
     final isEditing = apartment != null;
     final codeController = TextEditingController(text: apartment?.code ?? '');
     final areaController = TextEditingController(text: apartment?.area?.toString() ?? '');
+    final formKey = GlobalKey<FormState>();
+    bool isSaving = false;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(isEditing ? 'Cập nhật Căn hộ' : 'Thêm Căn hộ mới'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: codeController,
-                decoration: const InputDecoration(labelText: 'Mã căn hộ (VD: A0110)'),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text(isEditing ? 'Cập nhật Căn hộ' : 'Thêm Căn hộ mới'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: codeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Mã căn hộ (VD: A0110)',
+                        prefixIcon: Icon(Icons.tag),
+                      ),
+                      textCapitalization: TextCapitalization.characters,
+                      validator: validateApartmentCode,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: areaController,
+                      decoration: const InputDecoration(
+                        labelText: 'Diện tích (m²)',
+                        prefixIcon: Icon(Icons.square_foot),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: validateArea,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: areaController,
-                decoration: const InputDecoration(labelText: 'Diện tích (m²)'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final code = codeController.text.trim();
-                final area = double.tryParse(areaController.text.trim());
-                
-                if (code.isEmpty || area == null) {
-                  return;
-                }
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Hủy'),
+                ),
+                ElevatedButton(
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) return;
 
-                final repo = ref.read(managementRepositoryProvider);
-                try {
-                  if (isEditing) {
-                    await repo.updateApartment(apartment.id, code, area);
-                  } else {
-                    await repo.createApartment(code, area);
-                  }
-                  ref.invalidate(apartmentsProvider);
-                  if (context.mounted) Navigator.pop(context);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
-                    );
-                  }
-                }
-              },
-              child: const Text('Lưu'),
-            ),
-          ],
+                          setDialogState(() => isSaving = true);
+                          final code = codeController.text.trim();
+                          final area = double.parse(areaController.text.trim());
+
+                          final repo = ref.read(managementRepositoryProvider);
+                          try {
+                            if (isEditing) {
+                              await repo.updateApartment(apartment.id, code, area);
+                            } else {
+                              await repo.createApartment(code, area);
+                            }
+                            ref.invalidate(apartmentsProvider);
+                            if (context.mounted) Navigator.pop(context);
+                          } catch (e) {
+                            setDialogState(() => isSaving = false);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                              );
+                            }
+                          }
+                        },
+                  child: isSaving
+                      ? const SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Lưu'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

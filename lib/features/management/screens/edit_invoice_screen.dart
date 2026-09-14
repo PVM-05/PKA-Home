@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/validators.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart' show invoiceDetailProvider;
@@ -438,11 +439,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             ),
-                            validator: (val) {
-                              if (val == null || val.isEmpty) return 'Nhập đơn giá';
-                              if (double.tryParse(val) == null) return 'Sai định dạng';
-                              return null;
-                            },
+                            validator: (val) => validatePositiveNumber(val, 'Đơn giá', true),
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -456,11 +454,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             ),
-                            validator: (val) {
-                              if (val == null || val.isEmpty) return 'Nhập SL';
-                              if (double.tryParse(val) == null) return 'Sai';
-                              return null;
-                            },
+                            validator: (val) => validateNonNegativeNumber(val, 'Số lượng', true),
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
                           ),
                         ),
                         const SizedBox(width: 8),

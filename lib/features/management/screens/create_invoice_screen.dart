@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/validators.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/apartment_model.dart';
 
@@ -420,6 +421,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                     controller: _managementPriceController,
                                     decoration: const InputDecoration(labelText: 'Đơn giá (đ/m²)'),
                                     keyboardType: TextInputType.number,
+                                    validator: (v) => validatePositiveNumber(v, 'Đơn giá quản lý', true),
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),
                               ],
@@ -452,6 +455,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                     controller: _elecQtyController,
                                     decoration: const InputDecoration(labelText: 'Số điện tiêu thụ (kWh)'),
                                     keyboardType: TextInputType.number,
+                                    validator: (v) => validateNonNegativeNumber(v, 'Số điện'),
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -460,6 +465,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                     controller: _elecPriceController,
                                     decoration: const InputDecoration(labelText: 'Đơn giá (đ/kWh)'),
                                     keyboardType: TextInputType.number,
+                                    validator: (v) => validatePositiveNumber(v, 'Đơn giá điện', true),
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),
                               ],
@@ -492,6 +499,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                     controller: _waterQtyController,
                                     decoration: const InputDecoration(labelText: 'Số khối nước (m³)'),
                                     keyboardType: TextInputType.number,
+                                    validator: (v) => validateNonNegativeNumber(v, 'Số khối nước'),
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -500,6 +509,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                     controller: _waterPriceController,
                                     decoration: const InputDecoration(labelText: 'Đơn giá (đ/m³)'),
                                     keyboardType: TextInputType.number,
+                                    validator: (v) => validatePositiveNumber(v, 'Đơn giá nước', true),
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),
                               ],
@@ -535,6 +546,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                       prefixIcon: Icon(Icons.two_wheeler_outlined),
                                     ),
                                     keyboardType: TextInputType.number,
+                                    validator: (v) => validateNonNegativeInt(v, 'Số xe máy'),
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -546,6 +559,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                       prefixIcon: Icon(Icons.directions_car_outlined),
                                     ),
                                     keyboardType: TextInputType.number,
+                                    validator: (v) => validateNonNegativeInt(v, 'Số ô tô'),
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),
                               ],

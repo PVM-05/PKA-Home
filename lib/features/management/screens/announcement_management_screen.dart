@@ -152,7 +152,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
   void _showCreateDialog(BuildContext context, WidgetRef ref) {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
     bool isUrgent = false;
+    bool isSubmitting = false;
 
     showDialog(
       context: context,
@@ -160,52 +162,98 @@ class AnnouncementManagementScreen extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: const Text('Tạo thông báo mới'),
               content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(labelText: 'Tiêu đề'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: contentController,
-                      decoration: const InputDecoration(labelText: 'Nội dung'),
-                      maxLines: 4,
-                    ),
-                    const SizedBox(height: 12),
-                    CheckboxListTile(
-                      title: const Text('Đánh dấu Khẩn cấp'),
-                      value: isUrgent,
-                      onChanged: (val) {
-                        setState(() {
-                          isUrgent = val ?? false;
-                        });
-                      },
-                    ),
-                  ],
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: titleController,
+                        decoration: const InputDecoration(
+                          labelText: 'Tiêu đề *',
+                          prefixIcon: Icon(Icons.title),
+                        ),
+                        maxLength: 100,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Vui lòng nhập tiêu đề thông báo'
+                            : null,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: contentController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nội dung *',
+                          prefixIcon: Icon(Icons.notes),
+                          alignLabelWithHint: true,
+                        ),
+                        maxLines: 4,
+                        maxLength: 1000,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Vui lòng nhập nội dung thông báo'
+                            : null,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                      const SizedBox(height: 12),
+                      CheckboxListTile(
+                        title: const Text('Đánh dấu Khẩn cấp'),
+                        subtitle: const Text(
+                          'Thông báo sẽ được hiển thị nổi bật cho cư dân',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        value: isUrgent,
+                        activeColor: AppTheme.error,
+                        onChanged: (val) {
+                          setState(() {
+                            isUrgent = val ?? false;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: isSubmitting ? null : () => Navigator.pop(context),
                   child: const Text('Hủy'),
                 ),
                 ElevatedButton(
-                  onPressed: () async {
-                    if (titleController.text.isEmpty || contentController.text.isEmpty) return;
-                    
-                    final repo = ref.read(announcementRepositoryProvider);
-                    await repo.createAnnouncement(
-                      title: titleController.text,
-                      content: contentController.text,
-                      isUrgent: isUrgent,
-                    );
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                  child: const Text('Đăng'),
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) return;
+
+                          setState(() => isSubmitting = true);
+                          try {
+                            final repo = ref.read(announcementRepositoryProvider);
+                            await repo.createAnnouncement(
+                              title: titleController.text.trim(),
+                              content: contentController.text.trim(),
+                              isUrgent: isUrgent,
+                            );
+                            if (context.mounted) Navigator.pop(context);
+                          } catch (e) {
+                            setState(() => isSubmitting = false);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Lỗi đăng thông báo: $e'),
+                                  backgroundColor: AppTheme.error,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Đăng'),
                 ),
               ],
             );
