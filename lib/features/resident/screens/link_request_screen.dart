@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/validators.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/link_request_provider.dart';
 
@@ -22,9 +23,10 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
 
   void _submit() async {
     final code = _codeController.text.trim();
-    if (code.isEmpty) {
+    final validationError = validateApartmentCode(code);
+    if (validationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập mã căn hộ'), backgroundColor: AppTheme.warning),
+        SnackBar(content: Text(validationError), backgroundColor: AppTheme.warning),
       );
       return;
     }
@@ -254,13 +256,16 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, st) => TextField(
+              error: (err, st) => TextFormField(
                 controller: _codeController,
                 decoration: const InputDecoration(
                   labelText: 'Mã căn hộ (VD: A0110)',
                   prefixIcon: Icon(Icons.tag),
                 ),
+                textCapitalization: TextCapitalization.characters,
                 textInputAction: TextInputAction.done,
+                validator: validateApartmentCode,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
             ),
             const SizedBox(height: 20),

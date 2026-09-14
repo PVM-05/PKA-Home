@@ -10,6 +10,23 @@ class UserRepository {
     String? fullName,
     String? phone,
   }) async {
+    try {
+      // 1. Ưu tiên gọi RPC bảo mật cao update_own_profile (chỉ nhận full_name và phone)
+      final rpcParams = <String, dynamic>{};
+      if (fullName != null) rpcParams['p_full_name'] = fullName;
+      if (phone != null) rpcParams['p_phone'] = phone;
+
+      final rpcRes = await _client.rpc(
+        'update_own_profile',
+        params: rpcParams,
+      );
+      if (rpcRes != null) {
+        return UserModel.fromJson(Map<String, dynamic>.from(rpcRes));
+      }
+    } catch (_) {
+      // Fallback: Nếu CSDL chưa chạy migration RPC thì gọi update trực tiếp (không chạm vào cột role)
+    }
+
     final updateData = <String, dynamic>{};
     if (fullName != null) updateData['full_name'] = fullName;
     if (phone != null) updateData['phone'] = phone;

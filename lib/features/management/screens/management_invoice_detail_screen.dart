@@ -6,6 +6,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart' show invoiceDetailProvider;
+import 'edit_invoice_screen.dart';
 
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
   final InvoiceModel invoice;
@@ -21,6 +22,28 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Chi tiết Hóa đơn ${invoice.period}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Sửa hóa đơn',
+            onPressed: () async {
+              final updated = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => EditInvoiceScreen(invoice: invoice),
+                ),
+              );
+              if (updated == true) {
+                ref.invalidate(invoiceDetailProvider(invoice.id));
+                ref.invalidate(invoicesProvider);
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: AppTheme.error),
+            tooltip: 'Xóa hóa đơn',
+            onPressed: () => _confirmDeleteInvoice(context, ref),
+          ),
+        ],
       ),
       body: detailState.when(
         data: (items) {
@@ -220,5 +243,56 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
         child: Text(isPending ? 'XÁC NHẬN ĐÃ THU (Cư dân báo đã CK)' : 'XÁC NHẬN ĐÃ THU (Tiền mặt)'),
       ),
     );
+  }
+
+  Future<void> _confirmDeleteInvoice(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Xác nhận xóa hóa đơn'),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa hóa đơn kỳ ${invoice.period} của căn hộ ${invoice.apartment?.code ?? ''}?\n\nToàn bộ các khoản phí liên quan sẽ bị xóa và không thể khôi phục.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        await ref.read(managementRepositoryProvider).deleteInvoice(invoice.id);
+        ref.invalidate(invoicesProvider);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã xóa hóa đơn thành công!'),
+              backgroundColor: AppTheme.success,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(formatErrorMessage(e)),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      }
+    }
   }
 }

@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
+import '../../../data/repositories/issue_repository.dart';
 import 'create_issue_screen.dart';
+import 'edit_issue_screen.dart';
 
 class ResidentIssueScreen extends ConsumerWidget {
   const ResidentIssueScreen({super.key});
@@ -20,7 +23,20 @@ class ResidentIssueScreen extends ConsumerWidget {
       body: issueState.when(
         data: (issues) {
           if (issues.isEmpty) {
-            return _buildEmptyState(context);
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(residentIssueProvider);
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: _buildEmptyState(context),
+                  ),
+                ],
+              ),
+            );
           }
 
           return RefreshIndicator(
@@ -31,7 +47,7 @@ class ResidentIssueScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               itemCount: issues.length,
               itemBuilder: (context, index) {
-                return _buildIssueCard(context, issues[index]);
+                return _buildIssueCard(context, ref, issues[index]);
               },
             ),
           );
@@ -75,7 +91,70 @@ class ResidentIssueScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildIssueCard(BuildContext context, dynamic issue) {
+  Future<void> _confirmDeleteIssue(BuildContext context, WidgetRef ref, IssueModel issue) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppTheme.error),
+            SizedBox(width: 8),
+            Text('Xác nhận xóa'),
+          ],
+        ),
+        content: const Text(
+          'Bạn có chắc chắn muốn xóa phản ánh sự cố này? Dữ liệu và hình ảnh đính kèm sẽ bị xóa hoàn toàn khỏi hệ thống.',
+          style: TextStyle(height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Xóa phản ánh'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        final issueRepo = ref.read(issueRepositoryProvider);
+        await issueRepo.deleteIssue(
+          issueId: issue.id,
+          imageUrls: issue.imageUrls,
+        );
+
+        ref.invalidate(residentIssueProvider);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã xóa phản ánh sự cố thành công'),
+              backgroundColor: AppTheme.success,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi khi xóa phản ánh: $e'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Widget _buildIssueCard(BuildContext context, WidgetRef ref, IssueModel issue) {
     final formatDate = DateFormat('dd/MM/yyyy HH:mm');
 
     Color statusColor;
@@ -130,20 +209,64 @@ class ResidentIssueScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        statusText,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (issue.status == 'pending') ...[
+                      const SizedBox(width: 4),
+                      PopupMenuButton<String>(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => EditIssueScreen(issue: issue),
+                              ),
+                            );
+                          } else if (value == 'delete') {
+                            _confirmDeleteIssue(context, ref, issue);
+                          }
+                        },
+                        itemBuilder: (ctx) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
+                                SizedBox(width: 8),
+                                Text('Chỉnh sửa'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_outline, size: 18, color: AppTheme.error),
+                                SizedBox(width: 8),
+                                Text('Xóa phản ánh', style: TextStyle(color: AppTheme.error)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),

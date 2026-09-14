@@ -32,7 +32,16 @@ class ResidentInvoiceScreen extends ConsumerWidget {
           data: (invoices) {
             final unpaidInvoices = invoices
                 .where((i) => i.status != 'paid')
-                .toList();
+                .toList()
+              ..sort((a, b) {
+                // Sắp xếp: quá hạn lên đầu, sau đó theo ngày đến hạn gần nhất
+                final now = DateTime.now();
+                final aOverdue = a.status == 'unpaid' && a.dueDate.isBefore(now);
+                final bOverdue = b.status == 'unpaid' && b.dueDate.isBefore(now);
+                if (aOverdue && !bOverdue) return -1;
+                if (!aOverdue && bOverdue) return 1;
+                return a.dueDate.compareTo(b.dueDate);
+              });
             final paidInvoices = invoices
                 .where((i) => i.status == 'paid')
                 .toList()
@@ -84,30 +93,38 @@ class ResidentInvoiceScreen extends ConsumerWidget {
         ref.invalidate(residentInvoiceProvider);
       },
       child: invoices.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      emptyIcon,
-                      size: 64,
-                      color: emptyColor.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      emptyMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            emptyIcon,
+                            size: 64,
+                            color: emptyColor.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            emptyMessage,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -128,6 +145,10 @@ class ResidentInvoiceScreen extends ConsumerWidget {
     String statusText;
     IconData statusIcon;
 
+    // Kiểm tra quá hạn
+    final isOverdue = invoice.status == 'unpaid' && invoice.dueDate.isBefore(DateTime.now());
+    final overdueDays = isOverdue ? DateTime.now().difference(invoice.dueDate).inDays : 0;
+
     switch (invoice.status) {
       case 'paid':
         statusColor = AppStatusColors.paid;
@@ -140,18 +161,28 @@ class ResidentInvoiceScreen extends ConsumerWidget {
         statusIcon = Icons.schedule;
         break;
       default:
-        statusColor = AppStatusColors.unpaid;
-        statusText = 'Chưa thanh toán';
-        statusIcon = Icons.error_outline;
+        if (isOverdue) {
+          statusColor = AppTheme.error;
+          statusText = 'Quá hạn $overdueDays ngày';
+          statusIcon = Icons.warning_amber_rounded;
+        } else {
+          statusColor = AppStatusColors.unpaid;
+          statusText = 'Chưa thanh toán';
+          statusIcon = Icons.error_outline;
+        }
     }
 
     return Card(
-      elevation: 0,
+      elevation: isOverdue ? 2 : 0,
       color: Colors.white,
+      shadowColor: isOverdue ? AppTheme.error.withValues(alpha: 0.3) : null,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(
+          color: isOverdue ? AppTheme.error.withValues(alpha: 0.6) : Colors.grey.shade200,
+          width: isOverdue ? 1.5 : 1,
+        ),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -211,14 +242,17 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                         Text(
                           'Hạn thanh toán',
                           style: TextStyle(
-                            color: AppTheme.textSecondary,
+                            color: isOverdue ? AppTheme.error : AppTheme.textSecondary,
                             fontSize: 12,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           formatDate.format(invoice.dueDate),
-                          style: const TextStyle(fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: isOverdue ? AppTheme.error : null,
+                          ),
                         ),
                       ],
                     ),
@@ -237,10 +271,10 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                         const SizedBox(height: 2),
                         Text(
                           formatCurrency.format(invoice.totalAmount),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: AppTheme.primary,
+                            color: isOverdue ? AppTheme.error : AppTheme.primary,
                           ),
                         ),
                       ],

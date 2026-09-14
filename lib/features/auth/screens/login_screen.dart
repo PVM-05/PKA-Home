@@ -60,6 +60,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  void _showForgotPasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.help_outline, color: AppTheme.primary),
+            SizedBox(width: 8),
+            Text('Quên mật khẩu?'),
+          ],
+        ),
+        content: const Text(
+          'Để bảo mật dữ liệu căn hộ, hệ thống quản lý nội bộ yêu cầu xác minh trực tiếp. Vui lòng liên hệ Văn phòng Ban Quản lý hoặc Hotline tòa nhà để được hỗ trợ cấp lại mật khẩu.',
+          style: TextStyle(height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Đã hiểu'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,6 +163,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             obscureText: _obscurePassword,
                             textInputAction: TextInputAction.done,
                             onSubmitted: (_) => _login(),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _showForgotPasswordDialog,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 30),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                'Quên mật khẩu?',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ),
                           ),
                           
                           if (_errorMessage != null) ...[

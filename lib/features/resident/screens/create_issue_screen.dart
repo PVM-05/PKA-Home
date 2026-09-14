@@ -122,7 +122,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
       if (user == null) throw Exception('Chưa đăng nhập');
 
       final issueRepo = ref.read(issueRepositoryProvider);
-      await issueRepo.createIssue(
+      final result = await issueRepo.createIssue(
         reporterId: user.id,
         description: description,
         imageFiles: _imageFiles,
@@ -131,9 +131,18 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
       ref.invalidate(residentIssueProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gửi phản ánh thành công!'), backgroundColor: AppTheme.success),
-        );
+        if (result.imageUploadFailed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã gửi phản ánh nhưng ảnh tải lên thất bại, vui lòng thử đính kèm lại sau'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gửi phản ánh thành công!'), backgroundColor: AppTheme.success),
+          );
+        }
         Navigator.pop(context);
       }
     } catch (e) {

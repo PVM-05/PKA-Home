@@ -38,3 +38,6 @@
 - **Hiệu năng**: Ứng dụng phải tải dữ liệu hóa đơn và thông báo dưới 2 giây. Hình ảnh tải lên phải được tự động tối ưu hóa.
 - **Giao diện (UI/UX)**: Hỗ trợ tự động xuống dòng (word-wrap) ở mọi thẻ nội dung, tương thích với cả điện thoại màn hình nhỏ và máy tính bảng.
 - **Định dạng mã căn hộ (ID phòng)**: Quy chuẩn định dạng `a0110` (hoặc `A0110`) tương ứng `[Tòa][Tầng 01-99][Phòng 01-99]` thay vì dạng `a101`.
+- **Cơ chế xác thực & Khôi phục mật khẩu (Security by Design)**: Nhằm đảm bảo an toàn thông tin căn hộ và ngăn ngừa rủi ro giả mạo tài khoản cư dân, quy trình cấp và đặt lại mật khẩu được quản lý nội bộ qua Ban quản lý tòa nhà (Internal Admin Verification). Ứng dụng cung cấp hộp thoại hướng dẫn liên hệ trực tiếp thay vì mở luồng tự khôi phục công khai.
+- **Khả năng mở rộng & Phân trang dữ liệu (Scalability Roadmap)**: Các danh sách dữ liệu (Hóa đơn, Cư dân, Căn hộ, Phản ánh) được định hướng mở rộng cơ chế phân trang cuộn vô tận (Infinite Scroll / Cursor-based Pagination) bằng `.range(from, to)` của Supabase SDK nhằm duy trì thời gian tải dưới 2 giây khi quy mô tòa nhà mở rộng.
+- **Toàn vẹn dữ liệu tài chính cấp CSDL**: Các phép tính chi tiết (`subtotal`) và tổng hóa đơn (`total_amount`) được tính toán và kiểm soát tự động tại CSDL (PostgreSQL Generated Column và Database Triggers), bảo đảm nguyên tắc không tin tưởng tính toán từ client.
