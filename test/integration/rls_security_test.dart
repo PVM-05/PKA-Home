@@ -89,5 +89,43 @@ void main() {
     },
     skip: shouldSkip ? 'Chưa cấu hình tài khoản test thực tế trong .env' : null,
   );
-});
+
+    test(
+      'Cư dân không thể tự đổi role thành management (RLS-05: Chống leo thang quyền)',
+      () async {
+        // 1. Đăng nhập với tư cách cư dân
+        final AuthResponse res = await client.auth.signInWithPassword(
+          email: testResidentEmail,
+          password: testResidentPassword,
+        );
+        final residentId = res.user?.id;
+        expect(residentId, isNotNull, reason: 'Đăng nhập thất bại.');
+
+        // 2. Cố tình gửi lệnh UPDATE trực tiếp qua API để tự phong mình thành management
+        try {
+          await client
+              .from('users')
+              .update({'role': 'management'})
+              .eq('id', residentId!);
+
+          // 3. Kiểm tra xem role trong DB có thực sự bị thay đổi không
+          final userCheck = await client
+              .from('users')
+              .select('role')
+              .eq('id', residentId)
+              .single();
+
+          expect(
+            userCheck['role'], 
+            isNot('management'),
+            reason: 'LỖ HỔNG BẢO MẬT: Cư dân đã tự nâng quyền thành management thành công!',
+          );
+        } catch (e) {
+          // Ngoại lệ ném ra từ Trigger (trg_prevent_role_self_escalation) hoặc RLS WITH CHECK
+          expect(e, isA<PostgrestException>());
+        }
+      },
+      skip: shouldSkip ? 'Chưa cấu hình tài khoản test thực tế trong .env' : null,
+    );
+  });
 }
