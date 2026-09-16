@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/invoice_model.dart';
@@ -87,8 +89,25 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
           Expanded(
             child: AppStateView<List<InvoiceModel>>(
               asyncValue: invoicesAsync,
-              emptyMessage: 'Không có hóa đơn nào.',
+              emptyMessage: 'Chưa có hóa đơn nào được tạo.',
               emptyIcon: Icons.receipt_long_outlined,
+              actionButton: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()),
+                  );
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Lập hóa đơn mới'),
+              ),
+              skeletonBuilder: (_) => ListView(
+                padding: const EdgeInsets.all(16),
+                children: const [
+                  InvoiceCardSkeleton(),
+                  InvoiceCardSkeleton(),
+                  InvoiceCardSkeleton(),
+                ],
+              ),
               onRetry: () => ref.invalidate(invoicesProvider),
               dataBuilder: (invoices) {
                 final filtered = invoices.where((inv) {
@@ -113,15 +132,37 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                 }).toList();
 
                 if (filtered.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  return RefreshIndicator(
+                    color: AppTheme.primary,
+                    onRefresh: () async {
+                      HapticFeedback.lightImpact();
+                      ref.invalidate(invoicesProvider);
+                    },
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        Icon(Icons.receipt_long_outlined, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Không có hóa đơn nào ở trạng thái này.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.4,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primary.withValues(alpha: 0.08),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.receipt_long_outlined, size: 48, color: AppTheme.primary),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Không có hóa đơn nào phù hợp với bộ lọc.',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -129,7 +170,9 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                 }
 
                 return RefreshIndicator(
+                  color: AppTheme.primary,
                   onRefresh: () async {
+                    HapticFeedback.lightImpact();
                     ref.invalidate(invoicesProvider);
                   },
                   child: ListView.builder(
@@ -157,28 +200,35 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.domain, color: AppTheme.primary, size: 20),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                        ),
-                                        if (isNew) ...[
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.domain, color: AppTheme.primary, size: 20),
                                           const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: AppStatusColors.paid,
-                                              borderRadius: BorderRadius.circular(4),
+                                          Flexible(
+                                            child: Text(
+                                              'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
+                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            child: const Text('MỚI', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                          )
-                                        ]
-                                      ],
+                                          ),
+                                          if (isNew) ...[
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppStatusColors.paid,
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: const Text('MỚI', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                            )
+                                          ]
+                                        ],
+                                      ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -210,14 +260,14 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                               _confirmDeleteInvoice(invoice);
                                             }
                                           },
-                                          itemBuilder: (ctx) => [
+                                          itemBuilder: (context) => [
                                             const PopupMenuItem(
                                               value: 'edit',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
+                                                  Icon(Icons.edit, size: 18),
                                                   SizedBox(width: 8),
-                                                  Text('Sửa hóa đơn'),
+                                                  Text('Chỉnh sửa'),
                                                 ],
                                               ),
                                             ),
@@ -225,9 +275,9 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                               value: 'delete',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.delete_outline, size: 18, color: AppTheme.error),
+                                                  Icon(Icons.delete, color: AppTheme.error, size: 18),
                                                   SizedBox(width: 8),
-                                                  Text('Xóa hóa đơn', style: TextStyle(color: AppTheme.error)),
+                                                  Text('Xóa', style: TextStyle(color: AppTheme.error)),
                                                 ],
                                               ),
                                             ),
@@ -268,6 +318,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'invoice_management_fab',
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()));
         },

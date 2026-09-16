@@ -5,16 +5,24 @@ import '../../../core/supabase_config.dart';
 final managementRepositoryProvider = Provider((ref) => ManagementRepository());
 
 final pendingIssuesCountProvider = StreamProvider<int>((ref) {
-  return SupabaseConfig.client.from('issue_reports').stream(primaryKey: ['id']).eq('status', 'pending').map((list) => list.length);
+  return SupabaseConfig.client
+      .from('issue_reports')
+      .stream(primaryKey: ['id'])
+      .map((list) => list.where((issue) => issue['status'] == 'pending').length);
 });
 
 final pendingLinkRequestsCountProvider = StreamProvider<int>((ref) {
-  return SupabaseConfig.client.from('apartment_link_requests').stream(primaryKey: ['id']).eq('status', 'pending').map((list) => list.length);
+  return SupabaseConfig.client
+      .from('apartment_link_requests')
+      .stream(primaryKey: ['id'])
+      .map((list) => list.where((req) => req['status'] == 'pending').length);
 });
 
-
 final pendingConfirmationInvoicesProvider = StreamProvider<int>((ref) {
-  return SupabaseConfig.client.from('invoices').stream(primaryKey: ['id']).eq('status', 'pending_confirmation').map((list) => list.length);
+  return SupabaseConfig.client
+      .from('invoices')
+      .stream(primaryKey: ['id'])
+      .map((list) => list.where((inv) => inv['status'] == 'pending_confirmation').length);
 });
 
 final unpaidInvoicesTotalProvider = Provider<AsyncValue<double>>((ref) {
@@ -45,6 +53,12 @@ final occupancyRateProvider = Provider<AsyncValue<double>>((ref) {
     if (apartments.isEmpty) return 0.0;
     final occupied = apartments.where((a) => a['is_empty'] == false).length;
     return occupied / apartments.length;
+  });
+});
+
+final emptyApartmentsProvider = Provider<AsyncValue<int>>((ref) {
+  return ref.watch(apartmentsStreamProvider).whenData((apartments) {
+    return apartments.where((a) => a['is_empty'] == true).length;
   });
 });
 

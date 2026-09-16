@@ -190,12 +190,16 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
           label,
           style: const TextStyle(color: AppTheme.textSecondary),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

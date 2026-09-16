@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
@@ -51,11 +53,18 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       final usersResponse = await SupabaseConfig.client
           .from('users')
           .select('id, full_name, role')
-          .eq('role', 'management');
+          .inFilter('role', ['technician', 'admin', 'management']);
       
-      final staffList = (usersResponse as List).map((u) => {
-        'id': u['id'] as String,
-        'name': (u['full_name'] as String?) ?? 'Nhân viên Ban Quản lý',
+      final staffList = (usersResponse as List).map((u) {
+        final role = u['role'] as String?;
+        final roleLabel = role == 'technician'
+            ? 'Kỹ thuật viên'
+            : (role == 'admin' ? 'Quản trị viên' : 'Ban Quản lý');
+        final name = (u['full_name'] as String?) ?? 'Nhân viên';
+        return {
+          'id': u['id'] as String,
+          'name': '$name ($roleLabel)',
+        };
       }).toList();
 
       String? selectedStaffId = issue.assignedStaffId ?? (staffList.isNotEmpty ? staffList.first['id'] : null);
@@ -181,6 +190,14 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
           Expanded(
             child: AppStateView<List<IssueModel>>(
               asyncValue: issuesAsync,
+              skeletonBuilder: (_) => ListView(
+                padding: const EdgeInsets.all(16),
+                children: const [
+                  IssueCardSkeleton(),
+                  IssueCardSkeleton(),
+                  IssueCardSkeleton(),
+                ],
+              ),
               emptyMessage: 'Không có phản ánh nào.',
               emptyIcon: Icons.report_problem_outlined,
               onRetry: () => ref.invalidate(allIssuesProvider),
@@ -199,15 +216,41 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                 }).toList();
 
                 if (filtered.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  return RefreshIndicator(
+                    color: AppTheme.primary,
+                    onRefresh: () async {
+                      HapticFeedback.lightImpact();
+                      ref.invalidate(allIssuesProvider);
+                    },
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        Icon(Icons.report_problem_outlined, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Không có phản ánh nào ở trạng thái này.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.border.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.report_problem_outlined,
+                                  size: 48,
+                                  color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Không có phản ánh nào ở trạng thái này.',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -215,11 +258,14 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                 }
 
                 return RefreshIndicator(
+                  color: AppTheme.primary,
                   onRefresh: () async {
+                    HapticFeedback.lightImpact();
                     ref.invalidate(allIssuesProvider);
                   },
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final issue = filtered[index];
@@ -248,35 +294,41 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        isHighPriority ? Icons.warning : Icons.info_outline, 
-                                        color: priorityColor, 
-                                        size: 20
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'Căn hộ ${issue.apartment?.code ?? 'N/A'}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold, 
-                                          fontSize: 16,
-                                          color: isHighPriority ? AppStatusColors.priorityHigh : AppTheme.textPrimary,
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          isHighPriority ? Icons.warning : Icons.info_outline, 
+                                          color: priorityColor, 
+                                          size: 20
                                         ),
-                                      ),
-                                      if (isNew) ...[
                                         const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: AppStatusColors.paid,
-                                            borderRadius: BorderRadius.circular(4),
+                                        Flexible(
+                                          child: Text(
+                                            'Căn hộ ${issue.apartment?.code ?? 'N/A'}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold, 
+                                              fontSize: 16,
+                                              color: isHighPriority ? AppStatusColors.priorityHigh : AppTheme.textPrimary,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                          child: const Text('MỚI', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                        )
-                                      ]
-                                    ],
+                                        ),
+                                        if (isNew) ...[
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppStatusColors.paid,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: const Text('MỚI', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                          )
+                                        ]
+                                      ],
+                                    ),
                                   ),
+                                  const SizedBox(width: 8),
                                   Text(
                                     dateFormat.format(issue.createdAt),
                                     style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
@@ -313,9 +365,12 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                   children: [
                                     const Icon(Icons.engineering_outlined, size: 16, color: AppTheme.primary),
                                     const SizedBox(width: 6),
-                                    Text(
-                                      'Phụ trách: ${issue.assignedStaff!.fullName}', 
-                                      style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                    Expanded(
+                                      child: Text(
+                                        'Phụ trách: ${issue.assignedStaff!.fullName}', 
+                                        style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ],
                                 ),

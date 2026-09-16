@@ -32,4 +32,27 @@ class ResidentModel {
       apartment: apt,
     );
   }
+
+  bool get isAdmin => role == 'admin' || role == 'management';
+  bool get isAccountant => role == 'accountant';
+  bool get isTechnician => role == 'technician';
+  bool get isResident => role == 'resident';
+  bool get isManagement => isAdmin || isAccountant || isTechnician;
+
+  String get roleDisplayName {
+    switch (role) {
+      case 'admin':
+      case 'management':
+        return 'Quản trị viên';
+      case 'accountant':
+        return 'Kế toán';
+      case 'technician':
+        return 'Kỹ thuật viên';
+      case 'resident':
+        return 'Cư dân';
+      default:
+        return role;
+    }
+  }
 }
+

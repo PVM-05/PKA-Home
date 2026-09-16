@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
@@ -203,11 +204,31 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
         );
         Navigator.of(context).pop(true);
       }
-    } catch (e) {
+    } on PostgrestException catch (pe) {
       if (mounted) {
+        final isDuplicate = pe.code == '23505' ||
+            pe.message.contains('uq_invoice_apartment_period') ||
+            (pe.details?.toString().contains('uq_invoice_apartment_period') ?? false);
+        final errorText = isDuplicate
+            ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
+            : formatErrorMessage(pe);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(formatErrorMessage(e)),
+            content: Text(errorText),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorStr = e.toString();
+        final isDuplicate = errorStr.contains('23505') || errorStr.contains('uq_invoice_apartment_period');
+        final errorText = isDuplicate
+            ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
+            : formatErrorMessage(e);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorText),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -329,8 +350,10 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Kỳ hóa đơn',
                       prefixIcon: Icon(Icons.calendar_today_outlined),
+                      hintText: 'MM/yyyy (VD: 09/2026)',
                     ),
-                    validator: (val) => (val == null || val.trim().isEmpty) ? 'Vui lòng nhập kỳ' : null,
+                    validator: validateInvoicePeriod,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
                 ),
                 const SizedBox(width: 12),

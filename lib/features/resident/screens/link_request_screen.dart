@@ -38,6 +38,9 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đã gửi yêu cầu liên kết thành công!'), backgroundColor: AppTheme.success),
         );
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop(true);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -82,7 +85,12 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
   Widget _buildContent(LinkStatus status) {
     switch (status) {
       case LinkStatus.loading:
-      case LinkStatus.linked: // Màn hình này không nên hiển thị nếu đã linked, nhưng phòng hờ
+        return const Center(child: CircularProgressIndicator());
+      case LinkStatus.linked:
+        // Nếu mở từ Profile (Navigator.canPop), cho phép gửi yêu cầu liên kết căn hộ khác
+        if (Navigator.of(context).canPop()) {
+          return _buildFormState();
+        }
         return const Center(child: CircularProgressIndicator());
       case LinkStatus.pending:
         return _buildPendingState();
@@ -107,6 +115,14 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
           'Yêu cầu liên kết căn hộ của bạn đã được gửi. Vui lòng chờ Ban quản lý xác nhận.',
           textAlign: TextAlign.center,
         ),
+        if (Navigator.of(context).canPop()) ...[
+          const SizedBox(height: 24),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Quay lại'),
+          ),
+        ],
       ],
     );
   }

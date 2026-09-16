@@ -50,10 +50,14 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            user['full_name'] ?? 'Cư dân',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          Expanded(
+                            child: Text(
+                              user['full_name'] ?? 'Cư dân',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
@@ -76,15 +80,16 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
                         children: [
                           TextButton.icon(
                             icon: const Icon(Icons.close, color: AppTheme.error),
                             label: const Text('Từ chối', style: TextStyle(color: AppTheme.error)),
                             onPressed: () => _handleReject(context, ref, req['id']),
                           ),
-                          const SizedBox(width: 8),
                           ElevatedButton.icon(
                             icon: const Icon(Icons.check),
                             label: const Text('Phê duyệt'),

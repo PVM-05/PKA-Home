@@ -8,14 +8,24 @@ import '../../../data/models/issue_model.dart';
 class ManagementRepository {
   final SupabaseClient _client = SupabaseConfig.client;
 
-  Future<List<ResidentModel>> fetchResidents() async {
-    final response = await _client
+  Future<List<ResidentModel>> fetchResidents({String? role}) async {
+    var query = _client
         .from('users')
-        .select('*, residents_apartments(*, apartments(*))')
-        .eq('role', 'resident')
-        .order('created_at', ascending: false);
+        .select('*, residents_apartments(*, apartments(*))');
+    
+    if (role != null) {
+      query = query.eq('role', role);
+    }
 
+    final response = await query.order('created_at', ascending: false);
     return (response as List).map((e) => ResidentModel.fromJson(e)).toList();
+  }
+
+  Future<void> updateUserRole(String userId, String newRole) async {
+    await _client.from('users').update({
+      'role': newRole,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', userId);
   }
 
   Future<List<ApartmentModel>> fetchApartments() async {
@@ -196,5 +206,29 @@ class ManagementRepository {
       data['assigned_staff_id'] = assignedStaffId;
     }
     await _client.from('issue_reports').update(data).eq('id', id);
+  }
+
+  Future<void> deleteIssue(String issueId, {List<String> imageUrls = const []}) async {
+    // 1. Xóa bản ghi trong bảng issue_reports (issue_images tự động cascade)
+    await _client.from('issue_reports').delete().eq('id', issueId);
+
+    // 2. Xóa các file ảnh đính kèm trong Supabase Storage nếu có
+    if (imageUrls.isNotEmpty) {
+      try {
+        final filePaths = imageUrls.map((url) {
+          final uri = Uri.parse(url);
+          final segments = uri.pathSegments;
+          final bucketIndex = segments.indexOf('issue-images');
+          if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
+            return segments.sublist(bucketIndex + 1).join('/');
+          }
+          return segments.last;
+        }).toList();
+
+        await _client.storage.from('issue-images').remove(filePaths);
+      } catch (_) {
+        // Không block tiến trình nếu xóa ảnh storage thất bại
+      }
+    }
   }
 }

@@ -9,6 +9,8 @@ class AppStateView<T> extends StatelessWidget {
   final IconData emptyIcon;
   final VoidCallback? onRetry;
   final String? retryLabel;
+  final WidgetBuilder? skeletonBuilder;
+  final Widget? actionButton;
 
   const AppStateView({
     super.key,
@@ -18,6 +20,8 @@ class AppStateView<T> extends StatelessWidget {
     this.emptyIcon = Icons.inbox_outlined,
     this.onRetry,
     this.retryLabel,
+    this.skeletonBuilder,
+    this.actionButton,
   });
 
   @override
@@ -35,6 +39,10 @@ class AppStateView<T> extends StatelessWidget {
   }
 
   Widget _buildLoadingState(BuildContext context) {
+    if (skeletonBuilder != null) {
+      return skeletonBuilder!(context);
+    }
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
@@ -94,7 +102,11 @@ class AppStateView<T> extends StatelessWidget {
                     height: 1.4,
                   ),
             ),
-            if (onRetry != null) ...[
+            if (actionButton != null) ...[
+              const SizedBox(height: 20),
+              actionButton!,
+            ],
+            if (onRetry != null && actionButton == null) ...[
               const SizedBox(height: 24),
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
@@ -114,7 +126,6 @@ class AppStateView<T> extends StatelessWidget {
   }
 
   Widget _buildErrorState(BuildContext context, Object error) {
-    // Làm sạch thông báo lỗi cho người dùng
     final cleanError = error.toString().replaceAll('Exception: ', '');
 
     return Center(
@@ -148,9 +159,11 @@ class AppStateView<T> extends StatelessWidget {
             Text(
               cleanError,
               textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 24),

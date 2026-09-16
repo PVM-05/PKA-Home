@@ -38,6 +38,17 @@ class UserRepository {
         .select()
         .single();
 
+    // Đồng bộ vào auth user metadata nếu là tài khoản đang đăng nhập
+    if (fullName != null && _client.auth.currentUser?.id == userId) {
+      try {
+        await _client.auth.updateUser(
+          UserAttributes(data: {'full_name': fullName}),
+        );
+      } catch (_) {
+        // Trigger trên DB đã đảm bảo đồng bộ
+      }
+    }
+
     return UserModel.fromJson(response);
   }
 

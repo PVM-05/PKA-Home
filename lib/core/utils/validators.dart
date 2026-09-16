@@ -135,3 +135,19 @@ String? validateNonNegativeInt(String? value, [String fieldName = 'Số lượng
 
   return null;
 }
+
+/// Validate kỳ hóa đơn theo định dạng chuẩn MM/yyyy (VD: 09/2026).
+String? validateInvoicePeriod(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Vui lòng nhập kỳ hóa đơn';
+  }
+
+  final trimmed = value.trim();
+  final pattern = RegExp(r'^(0[1-9]|1[0-2])/\d{4}$');
+
+  if (!pattern.hasMatch(trimmed)) {
+    return 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)';
+  }
+
+  return null;
+}

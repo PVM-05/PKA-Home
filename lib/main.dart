@@ -36,7 +36,7 @@ class MyApp extends ConsumerWidget {
           if (user == null) {
             return const LoginScreen();
           }
-          if (user.role == 'management') {
+          if (user.isManagement) {
             return const ManagementHomeScreen();
           } else {
             return const ResidentShell();

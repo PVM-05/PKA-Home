@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/models/invoice_model.dart';
 import 'resident_invoice_detail_screen.dart';
@@ -68,7 +70,14 @@ class ResidentInvoiceScreen extends ConsumerWidget {
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => ListView(
+            padding: const EdgeInsets.all(16),
+            children: const [
+              InvoiceCardSkeleton(),
+              InvoiceCardSkeleton(),
+              InvoiceCardSkeleton(),
+            ],
+          ),
           error: (error, stack) => Center(
             child: Text(
               'Lỗi tải dữ liệu: $error',
@@ -89,7 +98,9 @@ class ResidentInvoiceScreen extends ConsumerWidget {
     required Color emptyColor,
   }) {
     return RefreshIndicator(
+      color: AppTheme.primary,
       onRefresh: () async {
+        HapticFeedback.lightImpact();
         ref.invalidate(residentInvoiceProvider);
       },
       child: invoices.isEmpty
@@ -104,12 +115,19 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            emptyIcon,
-                            size: 64,
-                            color: emptyColor.withValues(alpha: 0.6),
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: emptyColor.withValues(alpha: 0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              emptyIcon,
+                              size: 56,
+                              color: emptyColor,
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           Text(
                             emptyMessage,
                             textAlign: TextAlign.center,
@@ -201,13 +219,17 @@ class ResidentInvoiceScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Kỳ ${invoice.period}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  Expanded(
+                    child: Text(
+                      'Kỳ ${invoice.period}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(

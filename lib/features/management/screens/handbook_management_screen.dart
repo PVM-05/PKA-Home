@@ -55,6 +55,7 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'handbook_management_fab',
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         onPressed: () {

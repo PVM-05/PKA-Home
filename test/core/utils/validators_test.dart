@@ -104,5 +104,32 @@ void main() {
         expect(validateNonNegativeInt('1.5'), contains('phải là số nguyên hợp lệ'));
       });
     });
+
+    group('validateInvoicePeriod', () {
+      test('hợp lệ với định dạng MM/yyyy chuẩn', () {
+        expect(validateInvoicePeriod('01/2026'), isNull);
+        expect(validateInvoicePeriod('09/2026'), isNull);
+        expect(validateInvoicePeriod('12/2025'), isNull);
+      });
+
+      test('báo lỗi khi để trống hoặc null', () {
+        expect(validateInvoicePeriod(null), 'Vui lòng nhập kỳ hóa đơn');
+        expect(validateInvoicePeriod(''), 'Vui lòng nhập kỳ hóa đơn');
+        expect(validateInvoicePeriod('   '), 'Vui lòng nhập kỳ hóa đơn');
+      });
+
+      test('báo lỗi khi sai định dạng tháng (1 chữ số, > 12, = 00)', () {
+        expect(validateInvoicePeriod('9/2026'), 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)');
+        expect(validateInvoicePeriod('00/2026'), 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)');
+        expect(validateInvoicePeriod('13/2026'), 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)');
+      });
+
+      test('báo lỗi khi sai định dạng năm hoặc có ký tự lạ', () {
+        expect(validateInvoicePeriod('09/26'), 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)');
+        expect(validateInvoicePeriod('09-2026'), 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)');
+        expect(validateInvoicePeriod('09/2026a'), 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)');
+        expect(validateInvoicePeriod('abc/2026'), 'Định dạng kỳ phải là MM/yyyy (VD: 09/2026)');
+      });
+    });
   });
 }
