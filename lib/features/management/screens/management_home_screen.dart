@@ -22,6 +22,9 @@ import 'handbook_management_screen.dart';
 import 'role_delegation_screen.dart';
 import 'permission_matrix_screen.dart';
 import '../widgets/role_onboarding_dialog.dart';
+import '../widgets/revenue_trend_chart.dart';
+import '../../../core/widgets/maintenance_fund_card.dart';
+import '../../../core/widgets/font_size_sheet.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
@@ -200,6 +203,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PermissionMatrixScreen()),
                 );
+              } else if (value == 'fontSize') {
+                showFontSizeBottomSheet(context, ref);
               } else if (value == 'logout') {
                 ref.read(authProvider.notifier).logout();
               }
@@ -227,10 +232,20 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 ),
               ),
               const PopupMenuItem(
+                value: 'fontSize',
+                child: Row(
+                  children: [
+                    Icon(Icons.format_size_outlined, size: 20, color: AppTheme.primary),
+                    SizedBox(width: 8),
+                    Text('Cỡ chữ hiển thị'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
                 value: 'password',
                 child: Row(
                   children: [
-                    Icon(Icons.vpn_key_outlined, size: 20),
+                    Icon(Icons.lock_outline, size: 20),
                     SizedBox(width: 8),
                     Text('Đổi mật khẩu'),
                   ],
@@ -285,6 +300,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         ref.invalidate(pendingConfirmationInvoicesProvider);
         ref.invalidate(allIssuesProvider);
         ref.invalidate(financialStatsProvider);
+        ref.invalidate(monthlyRevenueTrendProvider);
         ref.invalidate(apartmentsStreamProvider);
         ref.invalidate(totalResidentsProvider);
       },
@@ -436,6 +452,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           const SizedBox(height: 12),
           if (!isTechnician) ...[
             _buildFinancialProgressCard(),
+            const SizedBox(height: 16),
+            const RevenueTrendChart(),
+            const SizedBox(height: 16),
+            const MaintenanceFundCard(isManagement: true),
             const SizedBox(height: 16),
           ],
           GridView.count(

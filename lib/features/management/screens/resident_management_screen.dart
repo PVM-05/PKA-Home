@@ -188,6 +188,42 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                     return;
                   }
 
+                  if (selectedRole != resident.role) {
+                    final oldRoleLabel = roles.firstWhere((r) => r['value'] == resident.role, orElse: () => {'label': resident.role})['label'];
+                    final newRoleLabel = roles.firstWhere((r) => r['value'] == selectedRole, orElse: () => {'label': selectedRole})['label'];
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (confirmContext) => AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        title: const Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded, color: AppTheme.warning),
+                            SizedBox(width: 8),
+                            Text('Xác nhận đổi vai trò', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        content: Text(
+                          'Bạn có chắc chắn muốn thay đổi vai trò của "${resident.fullName}" từ "$oldRoleLabel" sang "$newRoleLabel"? Thao tác này sẽ cập nhật ngay quyền truy cập và chức năng của tài khoản.',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(confirmContext, false),
+                            child: const Text('Hủy', style: TextStyle(color: AppTheme.textSecondary)),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+                            onPressed: () => Navigator.pop(confirmContext, true),
+                            child: const Text('Xác nhận', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm != true) return;
+                  }
+
+                  if (!context.mounted) return;
                   Navigator.pop(context);
                   try {
                     await ref.read(managementRepositoryProvider).updateUserRole(resident.id, selectedRole);

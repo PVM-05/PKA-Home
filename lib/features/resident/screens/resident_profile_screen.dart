@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/accessibility_provider.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -9,6 +10,7 @@ import '../../../core/supabase_config.dart';
 import '../../auth/screens/change_password_screen.dart';
 import 'link_request_screen.dart';
 import 'vehicle_management_screen.dart';
+import '../../../core/widgets/font_size_sheet.dart';
 
 final residentApartmentsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final user = ref.watch(authProvider).value;
@@ -293,6 +295,17 @@ class ResidentProfileScreen extends ConsumerWidget {
                             MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
                           );
                         },
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.format_size_outlined, color: AppTheme.primary),
+                        title: const Text('Cỡ chữ hiển thị'),
+                        subtitle: Text(
+                          FontSizeOption.fromScale(ref.watch(fontSizeScaleProvider)).label,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => showFontSizeBottomSheet(context, ref),
                       ),
                       const Divider(height: 1),
                       ListTile(

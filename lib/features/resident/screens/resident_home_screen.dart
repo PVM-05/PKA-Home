@@ -18,6 +18,7 @@ import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/link_request_provider.dart';
+import '../../../core/widgets/maintenance_fund_card.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   const ResidentHomeScreen({super.key});
@@ -391,6 +392,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                   loading: () => const InvoiceCardSkeleton(),
                   error: (err, st) => Text('Lỗi: $err'),
                 ),
+                const SizedBox(height: 16),
+                const MaintenanceFundCard(),
                 
                 const SizedBox(height: 24),
                 

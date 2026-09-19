@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/supabase_config.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/accessibility_provider.dart';
 import 'data/providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/management/screens/management_home_screen.dart';
@@ -27,10 +28,19 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final fontScale = ref.watch(fontSizeScaleProvider);
 
     return MaterialApp(
       title: 'Quản lý Chung cư',
       theme: AppTheme.lightTheme,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(fontScale),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: authState.when(
         data: (user) {
           if (user == null) {
