@@ -19,6 +19,8 @@ import '../../../data/models/issue_model.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/link_request_provider.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
+import '../../../data/providers/notification_provider.dart';
+import 'notification_center_screen.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   const ResidentHomeScreen({super.key});
@@ -253,26 +255,50 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.apartment, color: Colors.white, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              'PKA Home',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
+                      Row(
+                        children: [
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final unreadCount = ref.watch(unreadNotificationsCountProvider);
+                              return IconButton(
+                                icon: Badge(
+                                  isLabelVisible: unreadCount > 0,
+                                  label: Text('$unreadCount'),
+                                  backgroundColor: AppStatusColors.unpaid,
+                                  child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 24),
+                                ),
+                                tooltip: 'Thông báo',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const NotificationCenterScreen()),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                          ],
-                        ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.apartment, color: Colors.white, size: 16),
+                                SizedBox(width: 4),
+                                Text(
+                                  'PKA Home',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
