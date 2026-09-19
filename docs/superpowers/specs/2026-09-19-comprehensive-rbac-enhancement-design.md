@@ -19,8 +19,22 @@ Hệ thống phân quyền dựa trên vai trò (RBAC) trước đây đã bư�
 
 ## 2. Thiết Kế Tầng CSDL & Phân Quyền RLS (Database Security)
 
-### 2.1. Tách bạch `is_management()` và `is_staff()`
-- **`is_management()`**: Chỉ dành cho Quản trị viên thực sự có thẩm quyền điều hành cao nhất.
+### 2.1. Tách bạch `is_management()`, `is_admin()` và `is_staff()`
+- **`is_admin()`** (Xác nhận từ `20260916_03_rbac_roles_and_permissions.sql`):
+  ```sql
+  CREATE OR REPLACE FUNCTION public.is_admin()
+  RETURNS BOOLEAN AS $$
+  BEGIN
+    RETURN EXISTS (
+      SELECT 1 FROM public.users 
+      WHERE id = auth.uid() AND role IN ('admin', 'management')
+    );
+  END;
+  $$ LANGUAGE plpgsql SECURITY DEFINER;
+  ```
+  *(Đã bao gồm cả `'management'` để tương thích ngược hoàn toàn với tài khoản BQL cũ).*
+
+- **`is_management()`**: Được chuẩn hóa lại để tương đương với `is_admin()`, đại diện cho nhóm Quản trị viên/BQL cấp cao, **không còn chứa `'accountant'` và `'technician'`**:
   ```sql
   CREATE OR REPLACE FUNCTION public.is_management()
   RETURNS BOOLEAN AS $$
@@ -32,7 +46,8 @@ Hệ thống phân quyền dựa trên vai trò (RBAC) trước đây đã bư�
   END;
   $$ LANGUAGE plpgsql SECURITY DEFINER;
   ```
-- **`is_staff()`**: Đại diện cho nhân sự nội bộ thuộc Ban quản lý (dành cho các thao tác xem chung hoặc hỗ trợ).
+
+- **`is_staff()`**: Đại diện cho toàn thể nhân sự nội bộ thuộc Ban quản lý (dành cho các thao tác xem chung hoặc hỗ trợ):
   ```sql
   CREATE OR REPLACE FUNCTION public.is_staff()
   RETURNS BOOLEAN AS $$
@@ -65,9 +80,11 @@ CREATE TABLE IF NOT EXISTS public.role_delegations (
   CONSTRAINT chk_valid_time_range CHECK (ends_at > starts_at),
   -- 3. Không thể tự ủy quyền cho chính mình
   CONSTRAINT chk_no_self_delegation CHECK (delegator_id <> delegate_id),
-  -- 4. Chống chồng lấn khoảng thời gian ủy quyền cho cùng một nhân sự
+  -- 4. Chống chồng lấn khoảng thời gian ủy quyền cho CÙNG 1 VAI TRÒ của 1 nhân sự
+  -- (Vẫn cho phép 1 nhân sự được ủy quyền 2 vai trò khác nhau như accountant + technician cùng lúc)
   CONSTRAINT no_overlapping_delegations EXCLUDE USING gist (
     delegate_id WITH =,
+    delegated_role WITH =,
     tstzrange(starts_at, ends_at) WITH &&
   )
 );
@@ -107,10 +124,16 @@ USING (delegate_id = auth.uid());
 - `is_technician()`: Mở rộng kiểm tra ủy quyền `technician` còn hiệu lực tương tự.
 
 ### 2.4. Chuẩn hóa RLS trên các bảng nghiệp vụ
-- `apartments`, `residents_apartments`, `announcements`, `building_rules`, `building_amenities`, `emergency_contacts`: Chỉ `is_management()` mới có quyền tạo/sửa/xóa (`FOR ALL` hoặc `FOR INSERT/UPDATE/DELETE`). Nhân viên (`is_staff()`) và cư dân chỉ có quyền `SELECT`.
+- `apartments`, `residents_apartments`, `announcements`, `building_rules`, `building_amenities`, `emergency_contacts`: Chỉ `is_management()` (hoặc `is_admin()`) mới có quyền tạo/sửa/xóa (`FOR ALL` hoặc `FOR INSERT/UPDATE/DELETE`). Nhân viên nội bộ (`is_staff()`) và cư dân chỉ có quyền `SELECT`.
 - `invoices`, `invoice_items`: Quản lý bởi `is_accountant()`.
 - `issue_reports`: Cập nhật trạng thái sự cố bởi `is_technician()`.
-- `apartment_link_requests`: Duyệt liên kết căn hộ thông qua RPC `approve_link_request` chỉ cho phép `is_admin()`.
+- `apartment_link_requests`: 
+  - **Đồng bộ triệt để cả Phê duyệt (Approve) và Từ chối (Reject)**:
+    - RPC `approve_link_request` kiểm tra `public.is_admin()` (đã bao gồm `admin` và `management`).
+    - Policy trên bảng `apartment_link_requests` được chuẩn hóa:
+      `CREATE POLICY "Admin toàn quyền trên apartment_link_requests" ON public.apartment_link_requests FOR ALL USING (public.is_admin());`
+    - Nhờ đó, cả hành động Approve (qua RPC) và Reject (qua UPDATE status) đều dùng chung một gate duy nhất `is_admin()`, hoàn toàn khớp với `AppPermissions.linkRequestManagement.allowedRoles = ['admin', 'management']`.
+
 
 ---
 
@@ -218,6 +241,10 @@ File: `lib/core/widgets/role_guard.dart`
 
 - Nhận vào `PermissionItem permission`, `Widget child`, tùy chọn `Widget? fallback`.
 - Lấy `currentUser` và danh sách ủy quyền active của user từ provider `activeDelegationsProvider`.
+- **Cơ chế đánh giá thời gian thực (Real-time Expiration Handling)**:
+  - `activeDelegationsProvider` kết hợp Stream/lắng nghe thay đổi bảng `role_delegations` cùng bộ lọc thời gian client-side:
+    `now.isAfter(del.startsAt) && now.isBefore(del.endsAt)`.
+  - Thiết lập Timer định kỳ (mỗi 60 giây) hoặc tính toán lại tại thời điểm build UI để tự động vô hiệu hóa ủy quyền ngay khi vừa qua mốc `ends_at`, triệt tiêu độ trễ giữa thời gian thực tế và UI mà không phụ thuộc vào mutation từ CSDL.
 - Nếu không có quyền: Trả về giao diện từ chối truy cập chuẩn mực (Biểu tượng khóa đỏ, thông báo quyền hạn hiện tại, quyền yêu cầu và nút "Quay lại").
 - Áp dụng bọc quanh:
   - `InvoiceManagementScreen`, `CreateInvoiceScreen`, `EditInvoiceScreen`
