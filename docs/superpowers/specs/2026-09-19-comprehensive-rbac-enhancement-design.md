@@ -34,15 +34,14 @@ Hệ thống phân quyền dựa trên vai trò (RBAC) trước đây đã bư�
   ```
   *(Đã bao gồm cả `'management'` để tương thích ngược hoàn toàn với tài khoản BQL cũ).*
 
-- **`is_management()`**: Được chuẩn hóa lại để tương đương với `is_admin()`, đại diện cho nhóm Quản trị viên/BQL cấp cao, **không còn chứa `'accountant'` và `'technician'`**:
+- **`is_management()`**: Được giữ lại làm alias của `is_admin()` để tương thích ngược 100% với các RLS policy cũ, **đảm bảo triệt tiêu hoàn toàn rủi ro trôi dạt logic (drift)**:
   ```sql
+  -- is_management() là alias của is_admin() để tương thích ngược hoàn toàn.
+  -- Đảm bảo duy nhất 1 nguồn sự thật cho nhóm Quản trị viên cấp cao.
   CREATE OR REPLACE FUNCTION public.is_management()
   RETURNS BOOLEAN AS $$
   BEGIN
-    RETURN EXISTS (
-      SELECT 1 FROM public.users 
-      WHERE id = auth.uid() AND role IN ('management', 'admin')
-    );
+    RETURN public.is_admin();
   END;
   $$ LANGUAGE plpgsql SECURITY DEFINER;
   ```
@@ -304,6 +303,8 @@ File: `lib/core/widgets/role_guard.dart`
   - Cột: Chức năng / Nghiệp vụ | Quản trị viên | Kế toán viên | Kỹ thuật viên | Cư dân.
   - Biểu tượng: Check xanh tròn (`Icons.check_circle_rounded`), Chéo đỏ (`Icons.cancel_outlined`).
 - Có chú thích rõ ràng nguyên tắc: Least Privilege & Defense-in-Depth (RLS + Presentation Guard).
+- **Ghi chú nghiệp vụ cố định dưới bảng**:
+  > *"Bảng trên thể hiện quyền hạn mặc định theo vai trò. Quyền hạn có thể được mở rộng tạm thời theo thời gian thực thông qua cơ chế Ủy quyền vai trò (xem mục Quản lý Ủy quyền)."*
 - Truy cập từ Menu `ManagementHomeScreen` ("Bảng phân quyền").
 
 ---
