@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
+import 'amenity_booking_screen.dart';
 
 class ResidentHandbookScreen extends ConsumerStatefulWidget {
   final int initialTabIndex;
@@ -383,6 +384,28 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                           ),
                         ),
                       ],
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          icon: const Icon(Icons.calendar_month_outlined, size: 16),
+                          label: const Text('Đặt lịch sử dụng', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AmenityBookingScreen(amenity: amenity),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),

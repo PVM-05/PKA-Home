@@ -323,19 +323,34 @@ class ResidentIssueScreen extends ConsumerWidget {
               style: const TextStyle(fontSize: 14),
             ),
             
-            if (issue.imageUrls.isNotEmpty) ...[
+            if (issue.reportImages.isNotEmpty) ...[
               const SizedBox(height: 12),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Stack(
                   children: [
                     Image.network(
-                      issue.imageUrls.first,
+                      issue.reportImages.first,
                       height: 140,
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
-                    if (issue.imageUrls.length > 1)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Ảnh lúc báo cáo',
+                          style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    if (issue.reportImages.length > 1)
                       Positioned(
                         bottom: 8,
                         right: 8,
@@ -351,7 +366,7 @@ class ResidentIssueScreen extends ConsumerWidget {
                               const Icon(Icons.photo_library_outlined, color: Colors.white, size: 14),
                               const SizedBox(width: 4),
                               Text(
-                                '+${issue.imageUrls.length - 1} ảnh',
+                                '+${issue.reportImages.length - 1} ảnh',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -362,6 +377,59 @@ class ResidentIssueScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
+                  ],
+                ),
+              ),
+            ],
+
+            if (issue.resolutionProofImages.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppStatusColors.paid.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppStatusColors.paid.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.verified, size: 16, color: AppStatusColors.paid),
+                        SizedBox(width: 6),
+                        Text(
+                          'Ảnh minh chứng đã khắc phục (Sau khi sửa)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: AppStatusColors.paid,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: issue.resolutionProofImages.length,
+                        itemBuilder: (ctx, i) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                issue.resolutionProofImages[i],
+                                width: 120,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),

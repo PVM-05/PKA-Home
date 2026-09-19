@@ -9,6 +9,9 @@ import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 
@@ -133,6 +136,275 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       if (!mounted) return;
       _updateStatus(issue, 'in_progress');
     }
+  }
+
+  void _showResolveWithProofDialog(IssueModel issue) async {
+    final picker = ImagePicker();
+    List<File> proofFiles = [];
+    bool isUploading = false;
+    String? errorMessage;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (modalCtx, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(modalCtx).viewInsets.bottom,
+            ),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppStatusColors.paid.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.verified_outlined, color: AppStatusColors.paid, size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Nghiệm Thu Hoàn Thành Sự Cố',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Căn hộ: ${issue.apartment?.code ?? "N/A"} — ${issue.description}',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.camera_alt_outlined, size: 18, color: AppTheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Quy định chất lượng: Bắt buộc chụp/tải lên ít nhất 1 ảnh hiện trạng đã sửa xong trước khi đánh dấu hoàn thành.',
+                            style: TextStyle(fontSize: 12, color: Colors.blue.shade900, height: 1.3),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  if (proofFiles.isNotEmpty) ...[
+                    SizedBox(
+                      height: 90,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: proofFiles.length,
+                        itemBuilder: (context, i) {
+                          return Stack(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                width: 90,
+                                height: 90,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.file(proofFiles[i], fit: BoxFit.cover),
+                                ),
+                              ),
+                              Positioned(
+                                top: 2,
+                                right: 14,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setModalState(() {
+                                      proofFiles.removeAt(i);
+                                      if (proofFiles.isEmpty) {
+                                        errorMessage = 'Vui lòng chọn ít nhất 1 ảnh minh chứng.';
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close, size: 14, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: isUploading
+                              ? null
+                              : () async {
+                                  final picked = await picker.pickImage(
+                                    source: ImageSource.camera,
+                                    maxWidth: 1600,
+                                    maxHeight: 1600,
+                                    imageQuality: 80,
+                                  );
+                                  if (picked != null) {
+                                    setModalState(() {
+                                      proofFiles.add(File(picked.path));
+                                      errorMessage = null;
+                                    });
+                                  }
+                                },
+                          icon: const Icon(Icons.camera_alt, size: 18),
+                          label: const Text('Chụp ảnh'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: isUploading
+                              ? null
+                              : () async {
+                                  final picked = await picker.pickMultiImage(
+                                    maxWidth: 1600,
+                                    maxHeight: 1600,
+                                    imageQuality: 80,
+                                  );
+                                  if (picked.isNotEmpty) {
+                                    setModalState(() {
+                                      proofFiles.addAll(picked.map((x) => File(x.path)));
+                                      errorMessage = null;
+                                    });
+                                  }
+                                },
+                          icon: const Icon(Icons.photo_library, size: 18),
+                          label: const Text('Chọn từ máy'),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  if (errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      errorMessage!,
+                      style: const TextStyle(fontSize: 12, color: AppTheme.error),
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppStatusColors.paid,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: isUploading
+                          ? const SizedBox.shrink()
+                          : const Icon(Icons.verified, size: 20),
+                      label: isUploading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Text(
+                              'Xác Nhận Đã Xử Lý Xong',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                      onPressed: isUploading
+                          ? null
+                          : () async {
+                              if (proofFiles.isEmpty) {
+                                setModalState(() {
+                                  errorMessage = 'Vui lòng chụp hoặc chọn ít nhất 1 ảnh minh chứng hoàn thành!';
+                                });
+                                return;
+                              }
+
+                              setModalState(() => isUploading = true);
+                              try {
+                                final user = ref.read(authProvider).valueOrNull;
+                                final staffId = user?.id ?? issue.assignedStaffId ?? '';
+
+                                await ref.read(managementRepositoryProvider).resolveIssueWithProof(
+                                      issueId: issue.id,
+                                      staffId: staffId,
+                                      proofFiles: proofFiles,
+                                    );
+
+                                if (modalCtx.mounted) {
+                                  Navigator.pop(modalCtx);
+                                }
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Đã cập nhật hoàn thành kèm ảnh nghiệm thu!'),
+                                      backgroundColor: AppStatusColors.paid,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                setModalState(() {
+                                  isUploading = false;
+                                  errorMessage = formatErrorMessage(e);
+                                });
+                              }
+                            },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -343,15 +615,69 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                               const SizedBox(height: 12),
                               Text(issue.description, style: Theme.of(context).textTheme.bodyMedium),
                               
-                              if (issue.imageUrls.isNotEmpty) ...[
+                              if (issue.reportImages.isNotEmpty) ...[
                                 const SizedBox(height: 12),
+                                const Text(
+                                  'Ảnh báo cáo sự cố (Trước khi sửa):',
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                                ),
+                                const SizedBox(height: 4),
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    issue.imageUrls.first,
+                                    issue.reportImages.first,
                                     height: 120,
                                     width: double.infinity,
                                     fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ],
+
+                              if (issue.resolutionProofImages.isNotEmpty) ...[
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: AppStatusColors.paid.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppStatusColors.paid.withValues(alpha: 0.3)),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Row(
+                                        children: [
+                                          Icon(Icons.verified, size: 16, color: AppStatusColors.paid),
+                                          SizedBox(width: 6),
+                                          Text(
+                                            'Ảnh nghiệm thu hoàn thành (Sau khi sửa):',
+                                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppStatusColors.paid),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      SizedBox(
+                                        height: 80,
+                                        child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: issue.resolutionProofImages.length,
+                                          itemBuilder: (ctx, i) {
+                                            return Container(
+                                              margin: const EdgeInsets.only(right: 8),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(6),
+                                                child: Image.network(
+                                                  issue.resolutionProofImages[i],
+                                                  width: 100,
+                                                  height: 80,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -396,10 +722,10 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
-                                    onPressed: () => _updateStatus(issue, 'resolved'),
+                                    onPressed: () => _showResolveWithProofDialog(issue),
                                     style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
                                     icon: const Icon(Icons.check_circle_outline, size: 18),
-                                    label: const Text('Đánh dấu Hoàn thành'),
+                                    label: const Text('Đánh dấu Hoàn thành (Cần ảnh)'),
                                   ),
                                 ),
                             ],

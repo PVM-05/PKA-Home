@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
 import '../../../data/models/apartment_model.dart';
@@ -196,7 +197,7 @@ class ManagementRepository {
   Future<List<IssueModel>> fetchIssues() async {
     final response = await _client
         .from('issue_reports')
-        .select('*, apartments(*), users!issue_reports_reporter_id_fkey(*), assigned_staff:users!issue_reports_assigned_staff_id_fkey(*), issue_images(image_url)')
+        .select('*, apartments(*), users!issue_reports_reporter_id_fkey(*), assigned_staff:users!issue_reports_assigned_staff_id_fkey(*), issue_images(image_url, image_role)')
         .order('created_at', ascending: false);
     return (response as List).map((e) => IssueModel.fromJson(e)).toList();
   }
@@ -207,6 +208,30 @@ class ManagementRepository {
       data['assigned_staff_id'] = assignedStaffId;
     }
     await _client.from('issue_reports').update(data).eq('id', id);
+  }
+
+  /// Kỹ thuật viên hoàn thành sự cố kèm tải ảnh minh chứng nghiệm thu
+  Future<void> resolveIssueWithProof({
+    required String issueId,
+    required String staffId,
+    required List<File> proofFiles,
+  }) async {
+    for (int i = 0; i < proofFiles.length; i++) {
+      final file = proofFiles[i];
+      final fileExt = file.path.split('.').last;
+      final fileName = '$staffId/$issueId/proof_${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
+
+      await _client.storage.from('issue-images').upload(fileName, file);
+      final imageUrl = _client.storage.from('issue-images').getPublicUrl(fileName);
+
+      await _client.from('issue_images').insert({
+        'issue_report_id': issueId,
+        'image_url': imageUrl,
+        'image_role': 'resolution_proof',
+      });
+    }
+
+    await updateIssueStatus(issueId, 'resolved', assignedStaffId: staffId);
   }
 
   Future<void> deleteIssue(String issueId, {List<String> imageUrls = const []}) async {

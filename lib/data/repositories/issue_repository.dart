@@ -99,7 +99,7 @@ class IssueRepository {
   Future<List<Map<String, dynamic>>> fetchIssues() async {
     final response = await _client
         .from('issue_reports')
-        .select('*, apartments(*), users:reporter_id(*), issue_images(image_url)')
+        .select('*, apartments(*), users:reporter_id(*), issue_images(image_url, image_role)')
         .order('created_at', ascending: false);
     return List<Map<String, dynamic>>.from(response);
   }

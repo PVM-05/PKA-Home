@@ -8,6 +8,7 @@ import '../../../data/providers/co_residents_provider.dart';
 import '../../../core/supabase_config.dart';
 import '../../auth/screens/change_password_screen.dart';
 import 'link_request_screen.dart';
+import 'vehicle_management_screen.dart';
 
 final residentApartmentsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final user = ref.watch(authProvider).value;
@@ -223,6 +224,44 @@ class ResidentProfileScreen extends ConsumerWidget {
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('Lỗi tải thông tin căn hộ: $e'),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Phương tiện căn hộ
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Phương tiện & Gửi xe',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.two_wheeler_outlined, color: AppTheme.primary),
+                    ),
+                    title: const Text('Phương tiện đã đăng ký', style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('Quản lý danh sách xe máy, ô tô của căn hộ'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const VehicleManagementScreen()),
+                      );
+                    },
+                  ),
                 ),
 
                 const SizedBox(height: 28),
