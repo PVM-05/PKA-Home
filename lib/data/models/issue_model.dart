@@ -10,6 +10,7 @@ class IssueModel {
   final String status;
   final String priority;
   final DateTime createdAt;
+  final DateTime? updatedAt;
   final ApartmentModel? apartment;
   final ResidentModel? reporter;
   final ResidentModel? assignedStaff;
@@ -24,6 +25,7 @@ class IssueModel {
     required this.status,
     required this.priority,
     required this.createdAt,
+    this.updatedAt,
     this.apartment,
     this.reporter,
     this.assignedStaff,
@@ -47,6 +49,7 @@ class IssueModel {
       status: json['status'] ?? 'pending',
       priority: json['priority'] ?? 'medium',
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       apartment: json['apartments'] != null ? ApartmentModel.fromJson(json['apartments']) : null,
       reporter: json['users'] != null ? ResidentModel.fromJson(json['users']) : null,
       assignedStaff: json['assigned_staff'] != null ? ResidentModel.fromJson(json['assigned_staff']) : null,

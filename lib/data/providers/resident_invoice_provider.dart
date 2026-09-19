@@ -2,16 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/models/invoice_model.dart';
+import 'auth_provider.dart';
 
 final _invoicesStreamProvider = StreamProvider((ref) {
-  final user = SupabaseConfig.client.auth.currentUser;
-  if (user == null) return const Stream.empty();
+  final userId = ref.watch(authProvider).valueOrNull?.id;
+  if (userId == null) return const Stream.empty();
 
   return Stream.fromFuture(
     SupabaseConfig.client
         .from('residents_apartments')
         .select('apartment_id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle(),
   ).asyncExpand((linkData) {
     if (linkData == null || linkData['apartment_id'] == null) {

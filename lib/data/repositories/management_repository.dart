@@ -4,18 +4,29 @@ import '../../../data/models/apartment_model.dart';
 import '../../../data/models/resident_model.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
+import '../../../data/models/role_delegation_model.dart';
 
 class ManagementRepository {
   final SupabaseClient _client = SupabaseConfig.client;
 
-  Future<List<ResidentModel>> fetchResidents() async {
-    final response = await _client
+  Future<List<ResidentModel>> fetchResidents({String? role}) async {
+    var query = _client
         .from('users')
-        .select('*, residents_apartments(*, apartments(*))')
-        .eq('role', 'resident')
-        .order('created_at', ascending: false);
+        .select('*, residents_apartments(*, apartments(*))');
+    
+    if (role != null) {
+      query = query.eq('role', role);
+    }
 
+    final response = await query.order('created_at', ascending: false);
     return (response as List).map((e) => ResidentModel.fromJson(e)).toList();
+  }
+
+  Future<void> updateUserRole(String userId, String newRole) async {
+    await _client.from('users').update({
+      'role': newRole,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', userId);
   }
 
   Future<List<ApartmentModel>> fetchApartments() async {
@@ -197,4 +208,83 @@ class ManagementRepository {
     }
     await _client.from('issue_reports').update(data).eq('id', id);
   }
+
+  Future<void> deleteIssue(String issueId, {List<String> imageUrls = const []}) async {
+    // 1. Xóa bản ghi trong bảng issue_reports (issue_images tự động cascade)
+    await _client.from('issue_reports').delete().eq('id', issueId);
+
+    // 2. Xóa các file ảnh đính kèm trong Supabase Storage nếu có
+    if (imageUrls.isNotEmpty) {
+      try {
+        final filePaths = imageUrls.map((url) {
+          final uri = Uri.parse(url);
+          final segments = uri.pathSegments;
+          final bucketIndex = segments.indexOf('issue-images');
+          if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
+            return segments.sublist(bucketIndex + 1).join('/');
+          }
+          return segments.last;
+        }).toList();
+
+        await _client.storage.from('issue-images').remove(filePaths);
+      } catch (_) {
+        // Không block tiến trình nếu xóa ảnh storage thất bại
+      }
+    }
+  }
+
+  // ============================================================================
+  // ROLE DELEGATIONS (ỦY QUYỀN TẠM THỜI)
+  // ============================================================================
+
+  Future<List<RoleDelegationModel>> fetchDelegations() async {
+    final response = await _client
+        .from('role_delegations')
+        .select('*, delegator:delegator_id(full_name), delegate:delegate_id(full_name)')
+        .order('created_at', ascending: false);
+
+    return (response as List).map((e) => RoleDelegationModel.fromJson(e)).toList();
+  }
+
+  Future<List<RoleDelegationModel>> fetchMyActiveDelegations() async {
+    final currentUserId = _client.auth.currentUser?.id;
+    if (currentUserId == null) return [];
+
+    final nowIso = DateTime.now().toUtc().toIso8601String();
+    final response = await _client
+        .from('role_delegations')
+        .select('*, delegator:delegator_id(full_name), delegate:delegate_id(full_name)')
+        .eq('delegate_id', currentUserId)
+        .lte('starts_at', nowIso)
+        .gte('ends_at', nowIso);
+
+    return (response as List).map((e) => RoleDelegationModel.fromJson(e)).toList();
+  }
+
+  Future<void> createDelegation({
+    required String delegateId,
+    required String delegatedRole,
+    required DateTime startsAt,
+    required DateTime endsAt,
+    String? note,
+  }) async {
+    final currentUserId = _client.auth.currentUser?.id;
+    if (currentUserId == null) throw Exception('Người dùng chưa đăng nhập');
+
+    await _client.from('role_delegations').insert({
+      'delegator_id': currentUserId,
+      'delegate_id': delegateId,
+      'delegated_role': delegatedRole,
+      'starts_at': startsAt.toUtc().toIso8601String(),
+      'ends_at': endsAt.toUtc().toIso8601String(),
+      'note': note,
+    });
+  }
+
+  Future<void> revokeDelegation(String id) async {
+    await _client.from('role_delegations').update({
+      'ends_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', id);
+  }
 }
+

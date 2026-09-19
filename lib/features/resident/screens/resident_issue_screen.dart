@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
@@ -24,7 +25,9 @@ class ResidentIssueScreen extends ConsumerWidget {
         data: (issues) {
           if (issues.isEmpty) {
             return RefreshIndicator(
+              color: AppTheme.primary,
               onRefresh: () async {
+                HapticFeedback.lightImpact();
                 ref.invalidate(residentIssueProvider);
               },
               child: ListView(
@@ -40,10 +43,13 @@ class ResidentIssueScreen extends ConsumerWidget {
           }
 
           return RefreshIndicator(
+            color: AppTheme.primary,
             onRefresh: () async {
+              HapticFeedback.lightImpact();
               ref.invalidate(residentIssueProvider);
             },
             child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               itemCount: issues.length,
               itemBuilder: (context, index) {
@@ -52,10 +58,18 @@ class ResidentIssueScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: const [
+            IssueCardSkeleton(),
+            IssueCardSkeleton(),
+            IssueCardSkeleton(),
+          ],
+        ),
         error: (error, stack) => Center(child: Text('Lỗi tải dữ liệu: $error')),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'resident_issue_fab',
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -71,22 +85,55 @@ class ResidentIssueScreen extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 64,
-            color: AppTheme.textSecondary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Bạn chưa gửi phản ánh nào',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.textSecondary,
-                ),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.chat_bubble_outline,
+                size: 56,
+                color: AppTheme.primary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Bạn chưa gửi phản ánh nào',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Khi căn hộ gặp sự cố (điện, nước, cơ sở vật chất), hãy gửi phản ánh để Ban Quản Lý hỗ trợ xử lý kịp thời.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const CreateIssueScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Gửi phản ánh ngay'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,15 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase_config.dart';
+import 'dashboard_providers.dart' show pendingLinkRequestsCountProvider, apartmentsStreamProvider;
+import 'management_provider.dart' show residentsProvider;
 
 final linkRequestManagementProvider = StateNotifierProvider<LinkRequestManagementNotifier, AsyncValue<List<Map<String, dynamic>>>>((ref) {
-  return LinkRequestManagementNotifier();
+  return LinkRequestManagementNotifier(ref);
 });
 
 class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<String, dynamic>>>> {
+  final Ref ref;
   RealtimeChannel? _channel;
 
-  LinkRequestManagementNotifier() : super(const AsyncValue.loading()) {
+  LinkRequestManagementNotifier(this.ref) : super(const AsyncValue.loading()) {
     fetchRequests();
     _setupRealtime();
   }
@@ -23,6 +26,7 @@ class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<St
           table: 'apartment_link_requests',
           callback: (payload) {
             fetchRequests();
+            ref.invalidate(pendingLinkRequestsCountProvider);
           },
         )
         .subscribe();
@@ -30,7 +34,9 @@ class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<St
 
   @override
   void dispose() {
-    SupabaseConfig.client.removeChannel(_channel!);
+    if (_channel != null) {
+      SupabaseConfig.client.removeChannel(_channel!);
+    }
     super.dispose();
   }
 
@@ -59,6 +65,9 @@ class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<St
     try {
       await SupabaseConfig.client.rpc('approve_link_request', params: {'p_request_id': requestId});
       await fetchRequests();
+      ref.invalidate(pendingLinkRequestsCountProvider);
+      ref.invalidate(residentsProvider);
+      ref.invalidate(apartmentsStreamProvider);
     } catch (e) {
       rethrow;
     }
@@ -71,6 +80,7 @@ class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<St
           .update({'status': 'rejected', 'updated_at': DateTime.now().toIso8601String()})
           .eq('id', requestId);
       await fetchRequests();
+      ref.invalidate(pendingLinkRequestsCountProvider);
     } catch (e) {
       rethrow;
     }

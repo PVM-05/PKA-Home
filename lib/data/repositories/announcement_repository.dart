@@ -28,6 +28,20 @@ class AnnouncementRepository {
     });
   }
 
+  Future<void> updateAnnouncement({
+    required String id,
+    required String title,
+    required String content,
+    required bool isUrgent,
+  }) async {
+    await _client.from('announcements').update({
+      'title': title,
+      'content': content,
+      'is_urgent': isUrgent,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', id);
+  }
+
   Future<void> deleteAnnouncement(String id) async {
     await _client.from('announcements').delete().eq('id', id);
   }

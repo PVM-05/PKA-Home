@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/repositories/announcement_repository.dart';
 
@@ -53,56 +55,70 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade200),
+                    side: BorderSide(
+                      color: announcement.isUrgent
+                          ? AppTheme.error.withValues(alpha: 0.3)
+                          : Colors.grey.shade200,
+                    ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            if (announcement.isUrgent)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                margin: const EdgeInsets.only(right: 8),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.error.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => _showDetailDialog(context, announcement),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              if (announcement.isUrgent)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.error.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
+                                      SizedBox(width: 4),
+                                      Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
                                 ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
-                                    SizedBox(width: 4),
-                                    Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
-                                  ],
+                              Expanded(
+                                child: Text(
+                                  announcement.title,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: announcement.isUrgent ? AppTheme.error : null,
+                                  ),
                                 ),
                               ),
-                            Expanded(
-                              child: Text(
-                                announcement.title,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: announcement.isUrgent ? AppTheme.error : null,
-                                ),
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
+                                tooltip: 'Chỉnh sửa',
+                                onPressed: () => _showEditDialog(context, ref, announcement),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
-                              onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          announcement.content,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: AppTheme.textSecondary),
-                        ),
-                      ],
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                                tooltip: 'Xóa thông báo',
+                                onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            announcement.content,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: AppTheme.textSecondary),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -114,6 +130,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
         error: (error, stack) => Center(child: Text('Lỗi: $error')),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'announcement_management_fab',
         onPressed: () => _showCreateDialog(context, ref),
         child: const Icon(Icons.add),
       ),
@@ -262,4 +279,157 @@ class AnnouncementManagementScreen extends ConsumerWidget {
       },
     );
   }
+
+  void _showDetailDialog(BuildContext context, AnnouncementModel announcement) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            if (announcement.isUrgent)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
+                    SizedBox(width: 4),
+                    Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: Text(
+                announcement.title,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Ngày đăng: ${DateFormat('dd/MM/yyyy HH:mm').format(announcement.createdAt)}',
+                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                announcement.content,
+                style: const TextStyle(fontSize: 14, height: 1.5),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, WidgetRef ref, AnnouncementModel announcement) {
+    final titleController = TextEditingController(text: announcement.title);
+    final contentController = TextEditingController(text: announcement.content);
+    final formKey = GlobalKey<FormState>();
+    bool isUrgent = announcement.isUrgent;
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Text('Chỉnh sửa thông báo'),
+              content: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: titleController,
+                        decoration: const InputDecoration(labelText: 'Tiêu đề'),
+                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập tiêu đề' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: contentController,
+                        decoration: const InputDecoration(labelText: 'Nội dung'),
+                        maxLines: 4,
+                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập nội dung' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      CheckboxListTile(
+                        title: const Text('Khẩn cấp'),
+                        value: isUrgent,
+                        onChanged: (val) => setState(() => isUrgent = val ?? false),
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Hủy'),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) return;
+
+                          setState(() => isSubmitting = true);
+                          try {
+                            final repo = ref.read(announcementRepositoryProvider);
+                            await repo.updateAnnouncement(
+                              id: announcement.id,
+                              title: titleController.text.trim(),
+                              content: contentController.text.trim(),
+                              isUrgent: isUrgent,
+                            );
+                            if (context.mounted) Navigator.pop(context);
+                          } catch (e) {
+                            setState(() => isSubmitting = false);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Lỗi cập nhật thông báo: $e'),
+                                  backgroundColor: AppTheme.error,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Lưu'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 }
+

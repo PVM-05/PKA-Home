@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../widgets/notification_card.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
@@ -191,12 +193,20 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     final announcementsAsync = ref.watch(announcementsStreamProvider);
     final invoiceAsync = ref.watch(residentInvoiceProvider);
     final issueAsync = ref.watch(residentIssueProvider);
-
     final fullName = user?.fullName ?? 'Cư dân';
 
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
+    return RefreshIndicator(
+      color: AppTheme.primary,
+      onRefresh: () async {
+        HapticFeedback.lightImpact();
+        ref.invalidate(residentInvoiceProvider);
+        ref.invalidate(residentIssueProvider);
+        ref.invalidate(announcementsStreamProvider);
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverAppBar(
           expandedHeight: 140,
           floating: false,
           pinned: true,
@@ -218,25 +228,30 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'Xin chào,',
-                            style: TextStyle(color: Colors.white70, fontSize: 16),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            fullName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Xin chào,',
+                              style: TextStyle(color: Colors.white70, fontSize: 16),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              fullName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
@@ -373,7 +388,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                       ),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () => const InvoiceCardSkeleton(),
                   error: (err, st) => Text('Lỗi: $err'),
                 ),
                 
@@ -429,7 +444,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                       ),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () => const ListItemSkeleton(),
                   error: (err, st) => Text('Lỗi: $err'),
                 ),
 
@@ -471,7 +486,12 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                       }).toList(),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () => Column(
+                    children: const [
+                      ListItemSkeleton(),
+                      ListItemSkeleton(),
+                    ],
+                  ),
                   error: (error, stack) => Center(child: Text('Lỗi tải thông báo: $error')),
                 ),
                 const SizedBox(height: 40),
@@ -480,8 +500,9 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
           ),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {
     return InkWell(

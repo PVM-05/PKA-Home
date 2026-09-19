@@ -5,6 +5,8 @@ import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
 import '../../../data/models/building_rule_model.dart';
 import '../../../data/models/building_amenity_model.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 
 class HandbookManagementScreen extends ConsumerStatefulWidget {
   const HandbookManagementScreen({super.key});
@@ -31,9 +33,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quản Lý Cẩm Nang Tòa Nhà'),
+    return RoleGuard(
+      permission: AppPermissions.handbookManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Quản Lý Cẩm Nang Tòa Nhà'),
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppTheme.primary,
@@ -55,6 +59,7 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'handbook_management_fab',
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         onPressed: () {
@@ -70,8 +75,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
         tooltip: 'Thêm mới',
         child: const Icon(Icons.add),
       ),
-    );
+    ));
   }
+
 
   // ===========================================================================
   // Tab 1: Đường Dây Nóng

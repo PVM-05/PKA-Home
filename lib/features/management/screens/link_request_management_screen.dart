@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/providers/link_request_management_provider.dart';
 
 class LinkRequestManagementScreen extends ConsumerWidget {
@@ -12,14 +14,17 @@ class LinkRequestManagementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requestsState = ref.watch(linkRequestManagementProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Duyệt yêu cầu liên kết'),
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () => Navigator.of(context).pop(),
+    return RoleGuard(
+      permission: AppPermissions.linkRequestManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Duyệt yêu cầu liên kết'),
+          leading: IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
-      ),
+
       body: AppStateView<List<Map<String, dynamic>>>(
         asyncValue: requestsState,
         emptyMessage: 'Không có yêu cầu nào đang chờ duyệt',
@@ -50,10 +55,14 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            user['full_name'] ?? 'Cư dân',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          Expanded(
+                            child: Text(
+                              user['full_name'] ?? 'Cư dân',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
@@ -76,15 +85,16 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
                         children: [
                           TextButton.icon(
                             icon: const Icon(Icons.close, color: AppTheme.error),
                             label: const Text('Từ chối', style: TextStyle(color: AppTheme.error)),
                             onPressed: () => _handleReject(context, ref, req['id']),
                           ),
-                          const SizedBox(width: 8),
                           ElevatedButton.icon(
                             icon: const Icon(Icons.check),
                             label: const Text('Phê duyệt'),
@@ -100,8 +110,9 @@ class LinkRequestManagementScreen extends ConsumerWidget {
           );
         },
       ),
-    );
+    ));
   }
+
 
   void _handleApprove(BuildContext context, WidgetRef ref, String id) async {
     try {
