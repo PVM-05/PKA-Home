@@ -9,6 +9,8 @@ import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 
 class IssueManagementScreen extends ConsumerStatefulWidget {
   const IssueManagementScreen({super.key});
@@ -137,11 +139,14 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
   Widget build(BuildContext context) {
     final issuesAsync = ref.watch(allIssuesProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Xử lý Phản ánh'),
-        automaticallyImplyLeading: false,
-      ),
+    return RoleGuard(
+      permission: AppPermissions.issueManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Xử lý Phản ánh'),
+          automaticallyImplyLeading: false,
+        ),
+
       body: Column(
         children: [
           // Thanh tìm kiếm
@@ -409,8 +414,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
           ),
         ],
       ),
-    );
+    ));
   }
+
 
   Widget _buildFilterChip(String status, String label, Color color) {
     final isSelected = _selectedStatus == status;

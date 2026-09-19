@@ -4,6 +4,7 @@ import '../../../data/models/apartment_model.dart';
 import '../../../data/models/resident_model.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
+import '../../../data/models/role_delegation_model.dart';
 
 class ManagementRepository {
   final SupabaseClient _client = SupabaseConfig.client;
@@ -231,4 +232,59 @@ class ManagementRepository {
       }
     }
   }
+
+  // ============================================================================
+  // ROLE DELEGATIONS (ỦY QUYỀN TẠM THỜI)
+  // ============================================================================
+
+  Future<List<RoleDelegationModel>> fetchDelegations() async {
+    final response = await _client
+        .from('role_delegations')
+        .select('*, delegator:delegator_id(full_name), delegate:delegate_id(full_name)')
+        .order('created_at', ascending: false);
+
+    return (response as List).map((e) => RoleDelegationModel.fromJson(e)).toList();
+  }
+
+  Future<List<RoleDelegationModel>> fetchMyActiveDelegations() async {
+    final currentUserId = _client.auth.currentUser?.id;
+    if (currentUserId == null) return [];
+
+    final nowIso = DateTime.now().toUtc().toIso8601String();
+    final response = await _client
+        .from('role_delegations')
+        .select('*, delegator:delegator_id(full_name), delegate:delegate_id(full_name)')
+        .eq('delegate_id', currentUserId)
+        .lte('starts_at', nowIso)
+        .gte('ends_at', nowIso);
+
+    return (response as List).map((e) => RoleDelegationModel.fromJson(e)).toList();
+  }
+
+  Future<void> createDelegation({
+    required String delegateId,
+    required String delegatedRole,
+    required DateTime startsAt,
+    required DateTime endsAt,
+    String? note,
+  }) async {
+    final currentUserId = _client.auth.currentUser?.id;
+    if (currentUserId == null) throw Exception('Người dùng chưa đăng nhập');
+
+    await _client.from('role_delegations').insert({
+      'delegator_id': currentUserId,
+      'delegate_id': delegateId,
+      'delegated_role': delegatedRole,
+      'starts_at': startsAt.toUtc().toIso8601String(),
+      'ends_at': endsAt.toUtc().toIso8601String(),
+      'note': note,
+    });
+  }
+
+  Future<void> revokeDelegation(String id) async {
+    await _client.from('role_delegations').update({
+      'ends_at': DateTime.now().toUtc().toIso8601String(),
+    }).eq('id', id);
+  }
 }
+

@@ -6,6 +6,8 @@ import '../../../core/utils/validators.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/apartment_model.dart';
 import '../../../core/supabase_config.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 
 class ApartmentManagementScreen extends ConsumerStatefulWidget {
   const ApartmentManagementScreen({super.key});
@@ -32,9 +34,11 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
   Widget build(BuildContext context) {
     final apartmentsAsync = ref.watch(apartmentsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quản lý Căn hộ'),
+    return RoleGuard(
+      permission: AppPermissions.apartmentManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Quản lý Căn hộ'),
         actions: [
           IconButton(
             icon: Icon(_isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded),
@@ -349,8 +353,9 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
         icon: const Icon(Icons.add),
         label: const Text('Thêm căn hộ'),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatusChip(String status, String label, Color? activeColor) {
     final isSelected = _statusFilter == status;
@@ -501,6 +506,7 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
       },
     );
   }
+
 
   Widget _buildListView(List<ApartmentModel> apartments) {
     return ListView.builder(

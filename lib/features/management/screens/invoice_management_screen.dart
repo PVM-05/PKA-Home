@@ -8,6 +8,8 @@ import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/invoice_model.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 
 import 'create_invoice_screen.dart';
 import 'edit_invoice_screen.dart';
@@ -36,11 +38,14 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
   Widget build(BuildContext context) {
     final invoicesAsync = ref.watch(invoicesProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quản lý Hóa đơn'),
-        automaticallyImplyLeading: false,
-      ),
+    return RoleGuard(
+      permission: AppPermissions.invoiceManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Quản lý Hóa đơn'),
+          automaticallyImplyLeading: false,
+        ),
+
       body: Column(
         children: [
           // Thanh tìm kiếm
@@ -326,8 +331,9 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Lập hóa đơn', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
-    );
+    ));
   }
+
 
   Widget _buildFilterChip(String filterKey, String label, Color? highlightColor) {
     final isSelected = _statusFilter == filterKey;

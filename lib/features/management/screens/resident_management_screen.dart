@@ -10,6 +10,8 @@ import '../../../data/models/resident_model.dart';
 import '../../../data/models/apartment_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/dashboard_providers.dart' show pendingLinkRequestsCountProvider;
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import 'link_request_management_screen.dart';
 
 class ResidentManagementScreen extends ConsumerStatefulWidget {
@@ -327,10 +329,12 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final linkCount = pendingLinkReqAsync.value ?? 0;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quản lý Cư dân'),
-        automaticallyImplyLeading: false,
+    return RoleGuard(
+      permission: AppPermissions.residentManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Quản lý Cư dân'),
+          automaticallyImplyLeading: false,
         actions: [
           if (isCurrentUserAdmin)
             IconButton(
@@ -628,6 +632,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
           ),
         ],
       ),
-    );
+    ));
   }
+
 }

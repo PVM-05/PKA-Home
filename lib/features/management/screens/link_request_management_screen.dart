@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/providers/link_request_management_provider.dart';
 
 class LinkRequestManagementScreen extends ConsumerWidget {
@@ -12,14 +14,17 @@ class LinkRequestManagementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requestsState = ref.watch(linkRequestManagementProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Duyệt yêu cầu liên kết'),
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () => Navigator.of(context).pop(),
+    return RoleGuard(
+      permission: AppPermissions.linkRequestManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Duyệt yêu cầu liên kết'),
+          leading: IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
-      ),
+
       body: AppStateView<List<Map<String, dynamic>>>(
         asyncValue: requestsState,
         emptyMessage: 'Không có yêu cầu nào đang chờ duyệt',
@@ -105,8 +110,9 @@ class LinkRequestManagementScreen extends ConsumerWidget {
           );
         },
       ),
-    );
+    ));
   }
+
 
   void _handleApprove(BuildContext context, WidgetRef ref, String id) async {
     try {

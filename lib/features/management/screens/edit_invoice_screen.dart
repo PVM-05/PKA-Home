@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart' show invoiceDetailProvider;
@@ -242,10 +244,13 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(invoiceDetailProvider(widget.invoice.id));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Sửa Hóa đơn ${widget.invoice.period}'),
-      ),
+    return RoleGuard(
+      permission: AppPermissions.invoiceManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Sửa Hóa đơn ${widget.invoice.period}'),
+        ),
+
       body: SafeArea(
         child: detailAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -301,8 +306,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
           },
         ),
       ),
-    );
+    ));
   }
+
 
   Widget _buildGeneralInfoCard() {
     return Card(

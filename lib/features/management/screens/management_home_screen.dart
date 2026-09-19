@@ -19,6 +19,9 @@ import '../../auth/screens/change_password_screen.dart';
 import 'audit_trail_screen.dart';
 import 'create_invoice_screen.dart';
 import 'handbook_management_screen.dart';
+import 'role_delegation_screen.dart';
+import 'permission_matrix_screen.dart';
+import '../widgets/role_onboarding_dialog.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
@@ -41,6 +44,17 @@ class _ManagementTab {
 
 class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentUser = ref.read(authProvider).valueOrNull;
+      if (currentUser != null && mounted) {
+        RoleOnboardingDialog.checkAndShow(context, currentUser);
+      }
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -178,11 +192,40 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
                 );
+              } else if (value == 'delegation') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const RoleDelegationScreen()),
+                );
+              } else if (value == 'matrix') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PermissionMatrixScreen()),
+                );
               } else if (value == 'logout') {
                 ref.read(authProvider.notifier).logout();
               }
             },
             itemBuilder: (BuildContext context) => [
+              if (isAdmin)
+                const PopupMenuItem(
+                  value: 'delegation',
+                  child: Row(
+                    children: [
+                      Icon(Icons.vpn_key_outlined, size: 20, color: Colors.purple),
+                      SizedBox(width: 8),
+                      Text('Quản lý ủy quyền'),
+                    ],
+                  ),
+                ),
+              const PopupMenuItem(
+                value: 'matrix',
+                child: Row(
+                  children: [
+                    Icon(Icons.shield_outlined, size: 20, color: AppTheme.primary),
+                    SizedBox(width: 8),
+                    Text('Bảng phân quyền'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'password',
                 child: Row(
@@ -205,6 +248,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               ),
             ],
           ),
+
         ],
       ),
       body: IndexedStack(
@@ -257,7 +301,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                if (isAdmin || isAccountant) ...[
+                if (isAdmin) ...[
                   _buildQuickAction(
                     context,
                     icon: Icons.person_add,
@@ -273,6 +317,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   const SizedBox(width: 12),
                   _buildQuickAction(
                     context,
+                    icon: Icons.vpn_key_outlined,
+                    label: 'Ủy quyền',
+                    color: Colors.purple,
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RoleDelegationScreen())),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                if (isAdmin || isAccountant) ...[
+                  _buildQuickAction(
+                    context,
                     icon: Icons.receipt_long,
                     label: 'Lập hóa đơn',
                     color: AppTheme.secondary,
@@ -280,7 +334,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                   const SizedBox(width: 12),
                 ],
-                if (isTechnician) ...[
+                if (isAdmin || isTechnician) ...[
                   _buildQuickAction(
                     context,
                     icon: Icons.report_problem_outlined,
@@ -291,14 +345,17 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                   const SizedBox(width: 12),
                 ],
-                _buildQuickAction(
-                  context,
-                  icon: Icons.domain,
-                  label: 'Căn hộ',
-                  color: Colors.teal,
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ApartmentManagementScreen())),
-                ),
-                const SizedBox(width: 12),
+                if (isAdmin) ...[
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.domain,
+                    label: 'Căn hộ',
+                    color: Colors.teal,
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ApartmentManagementScreen())),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+
                 _buildQuickAction(
                   context,
                   icon: Icons.menu_book_outlined,

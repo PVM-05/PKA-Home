@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/apartment_model.dart';
 
@@ -236,10 +238,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     final apartmentsAsync = ref.watch(apartmentsProvider);
     final total = _getManagementTotal() + _getElecTotal() + _getWaterTotal() + _getParkingTotal();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lập hóa đơn mới'),
-      ),
+    return RoleGuard(
+      permission: AppPermissions.invoiceManagement,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Lập hóa đơn mới'),
+        ),
+
       body: SafeArea(
         child: apartmentsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -629,6 +634,6 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           },
         ),
       ),
-    );
+    ));
   }
 }
