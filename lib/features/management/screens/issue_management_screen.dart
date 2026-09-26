@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
@@ -14,6 +16,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../core/widgets/photo_viewer_screen.dart';
+import '../../../core/utils/excel_export_helper.dart';
 
 class IssueManagementScreen extends ConsumerStatefulWidget {
   const IssueManagementScreen({super.key});
@@ -26,6 +30,32 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedStatus = 'all'; // all, pending, in_progress, resolved
+  bool _isExporting = false;
+
+  Future<void> _exportExcel(List<IssueModel> issues) async {
+    setState(() => _isExporting = true);
+    final path = await ExcelExportHelper.exportIssues(issues);
+    setState(() => _isExporting = false);
+
+    if (mounted) {
+      if (path != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã xuất báo cáo sự cố thành công!\n$path'),
+            backgroundColor: AppTheme.success,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lỗi khi xuất file Excel báo cáo sự cố.'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -417,6 +447,26 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
         appBar: AppBar(
           title: const Text('Xử lý Phản ánh'),
           automaticallyImplyLeading: false,
+          actions: [
+            issuesAsync.when(
+              data: (issues) {
+                if (issues.isEmpty) return const SizedBox.shrink();
+                return IconButton(
+                  icon: _isExporting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.download),
+                  tooltip: 'Xuất Excel',
+                  onPressed: _isExporting ? null : () => _exportExcel(issues),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (err, st) => const SizedBox.shrink(),
+            ),
+          ],
         ),
 
       body: Column(
@@ -555,14 +605,16 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                       final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
                       final isNew = DateTime.now().difference(issue.createdAt).inMinutes < 15;
                       
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(
-                            color: isHighPriority ? AppStatusColors.priorityHigh.withValues(alpha: 0.5) : Colors.transparent,
-                            width: isHighPriority ? 2 : 0,
+                      return GestureDetector(
+                        onTap: () => context.push(AppRoutes.managementIssueDetail, extra: issue),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: isHighPriority ? AppStatusColors.priorityHigh.withValues(alpha: 0.5) : Colors.transparent,
+                              width: isHighPriority ? 2 : 0,
+                            ),
                           ),
-                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
@@ -624,11 +676,23 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                 const SizedBox(height: 4),
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    issue.reportImages.first,
-                                    height: 120,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => PhotoViewerScreen(
+                                            imageUrls: issue.reportImages,
+                                            initialIndex: 0,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Image.network(
+                                      issue.reportImages.first,
+                                      height: 120,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -666,11 +730,23 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                               margin: const EdgeInsets.only(right: 8),
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(6),
-                                                child: Image.network(
-                                                  issue.resolutionProofImages[i],
-                                                  width: 100,
-                                                  height: 80,
-                                                  fit: BoxFit.cover,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.of(context).push(
+                                                      MaterialPageRoute(
+                                                        builder: (_) => PhotoViewerScreen(
+                                                          imageUrls: issue.resolutionProofImages,
+                                                          initialIndex: i,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Image.network(
+                                                    issue.resolutionProofImages[i],
+                                                    width: 100,
+                                                    height: 80,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
                                               ),
                                             );
@@ -728,10 +804,22 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                     label: const Text('Đánh dấu Hoàn thành (Cần ảnh)'),
                                   ),
                                 ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () => context.push(AppRoutes.managementIssueDetail, extra: issue),
+                                    icon: const Icon(Icons.forum_outlined, size: 16),
+                                    label: const Text('Chi tiết & Trao đổi', style: TextStyle(fontSize: 13)),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
-                      );
+                      ),
+                    );
                     },
                   ),
                 );

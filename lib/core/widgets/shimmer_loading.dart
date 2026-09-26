@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Widget tạo hiệu ứng quét sáng (Shimmer) mượt mà không phụ thuộc thư viện ngoài
+/// Widget tạo hiệu ứng quét sáng (Shimmer) mượt mà thích ứng Dark/Light mode không phụ thuộc thư viện ngoài
 class ShimmerLoading extends StatefulWidget {
   final Widget child;
-  final Color baseColor;
-  final Color highlightColor;
+  final Color? baseColor;
+  final Color? highlightColor;
   final Duration duration;
 
   const ShimmerLoading({
     super.key,
     required this.child,
-    this.baseColor = const Color(0xFFE8ECEF),
-    this.highlightColor = const Color(0xFFF8F9FA),
+    this.baseColor,
+    this.highlightColor,
     this.duration = const Duration(milliseconds: 1500),
   });
 
@@ -42,6 +42,12 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveBaseColor = widget.baseColor ??
+        (isDark ? const Color(0xFF282B2E) : const Color(0xFFE8ECEF));
+    final effectiveHighlightColor = widget.highlightColor ??
+        (isDark ? const Color(0xFF3C4045) : const Color(0xFFF8F9FA));
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -52,9 +58,9 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                widget.baseColor,
-                widget.highlightColor,
-                widget.baseColor,
+                effectiveBaseColor,
+                effectiveHighlightColor,
+                effectiveBaseColor,
               ],
               stops: [
                 (_animation.value - 0.3).clamp(0.0, 1.0),
@@ -77,6 +83,7 @@ class SkeletonBox extends StatelessWidget {
   final double? height;
   final double borderRadius;
   final EdgeInsetsGeometry? margin;
+  final Color? color;
 
   const SkeletonBox({
     super.key,
@@ -84,16 +91,21 @@ class SkeletonBox extends StatelessWidget {
     this.height,
     this.borderRadius = 8.0,
     this.margin,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveColor = color ??
+        (isDark ? const Color(0xFF33373B) : const Color(0xFFE0E0E0));
+
     return Container(
       width: width,
       height: height,
       margin: margin,
       decoration: BoxDecoration(
-        color: const Color(0xFFE0E0E0),
+        color: effectiveColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );
@@ -106,20 +118,24 @@ class StatCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardColor = theme.cardTheme.color ?? theme.colorScheme.surface;
+    final borderColor = theme.dividerColor.withValues(alpha: 0.15);
+
     return ShimmerLoading(
       child: Card(
         elevation: 0,
-        color: Colors.white,
+        color: cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: BorderSide(color: borderColor),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               SkeletonBox(width: 36, height: 36, borderRadius: 10),
               SizedBox(height: 10),
               SkeletonBox(width: 80, height: 12, borderRadius: 4),
@@ -139,34 +155,38 @@ class InvoiceCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardColor = theme.cardTheme.color ?? theme.colorScheme.surface;
+    final borderColor = theme.dividerColor.withValues(alpha: 0.15);
+
     return ShimmerLoading(
       child: Card(
         elevation: 0,
-        color: Colors.white,
+        color: cardColor,
         margin: const EdgeInsets.only(bottom: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: BorderSide(color: borderColor),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   SkeletonBox(width: 120, height: 18, borderRadius: 6),
                   SkeletonBox(width: 90, height: 24, borderRadius: 12),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       SkeletonBox(width: 80, height: 12, borderRadius: 4),
                       SizedBox(height: 4),
                       SkeletonBox(width: 90, height: 14, borderRadius: 4),
@@ -174,7 +194,7 @@ class InvoiceCardSkeleton extends StatelessWidget {
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: const [
+                    children: [
                       SkeletonBox(width: 60, height: 12, borderRadius: 4),
                       SizedBox(height: 4),
                       SkeletonBox(width: 110, height: 18, borderRadius: 6),
@@ -196,34 +216,38 @@ class IssueCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardColor = theme.cardTheme.color ?? theme.colorScheme.surface;
+    final borderColor = theme.dividerColor.withValues(alpha: 0.15);
+
     return ShimmerLoading(
       child: Card(
         elevation: 0,
-        color: Colors.white,
+        color: cardColor,
         margin: const EdgeInsets.only(bottom: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: BorderSide(color: borderColor),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   SkeletonBox(width: 130, height: 18, borderRadius: 6),
                   SkeletonBox(width: 80, height: 22, borderRadius: 12),
                 ],
               ),
-              const SizedBox(height: 12),
-              const SkeletonBox(width: double.infinity, height: 14, borderRadius: 4),
-              const SizedBox(height: 6),
-              const SkeletonBox(width: 200, height: 14, borderRadius: 4),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
+              SkeletonBox(width: double.infinity, height: 14, borderRadius: 4),
+              SizedBox(height: 6),
+              SkeletonBox(width: 200, height: 14, borderRadius: 4),
+              SizedBox(height: 12),
               Row(
-                children: const [
+                children: [
                   SkeletonBox(width: 16, height: 16, borderRadius: 4),
                   SizedBox(width: 6),
                   SkeletonBox(width: 100, height: 12, borderRadius: 4),
@@ -243,32 +267,36 @@ class ListItemSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cardColor = theme.cardTheme.color ?? theme.colorScheme.surface;
+    final borderColor = theme.dividerColor.withValues(alpha: 0.15);
+
     return ShimmerLoading(
       child: Card(
         elevation: 0,
-        color: Colors.white,
+        color: cardColor,
         margin: const EdgeInsets.only(bottom: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: BorderSide(color: borderColor),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
           child: Row(
             children: [
-              const SkeletonBox(width: 48, height: 48, borderRadius: 24),
-              const SizedBox(width: 14),
+              SkeletonBox(width: 48, height: 48, borderRadius: 24),
+              SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     SkeletonBox(width: 140, height: 16, borderRadius: 4),
                     SizedBox(height: 6),
                     SkeletonBox(width: 90, height: 12, borderRadius: 4),
                   ],
                 ),
               ),
-              const SkeletonBox(width: 24, height: 24, borderRadius: 6),
+              SkeletonBox(width: 24, height: 24, borderRadius: 6),
             ],
           ),
         ),

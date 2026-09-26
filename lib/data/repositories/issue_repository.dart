@@ -196,4 +196,36 @@ class IssueRepository {
       }
     }
   }
+
+  /// Lấy danh sách comment của một sự cố, kèm thông tin người gửi.
+  Future<List<Map<String, dynamic>>> fetchComments(String issueReportId) async {
+    final response = await _client
+        .from('issue_comments')
+        .select('*, users:user_id(full_name, role)')
+        .eq('issue_report_id', issueReportId)
+        .order('created_at', ascending: true);
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  /// Stream realtime danh sách comment (không join — dùng kết hợp với fetchComments).
+  Stream<List<Map<String, dynamic>>> streamComments(String issueReportId) {
+    return _client
+        .from('issue_comments')
+        .stream(primaryKey: ['id'])
+        .eq('issue_report_id', issueReportId)
+        .order('created_at', ascending: true);
+  }
+
+  /// Gửi comment mới.
+  Future<void> addComment({
+    required String issueReportId,
+    required String userId,
+    required String content,
+  }) async {
+    await _client.from('issue_comments').insert({
+      'issue_report_id': issueReportId,
+      'user_id': userId,
+      'content': content,
+    });
+  }
 }

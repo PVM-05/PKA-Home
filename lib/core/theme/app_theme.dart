@@ -144,6 +144,125 @@ class AppTheme {
         ),
         margin: const EdgeInsets.only(bottom: 16),
       ),
+
+      // Cấu hình NavigationBar Material 3
+      navigationBarTheme: NavigationBarThemeData(
+        indicatorColor: primary.withValues(alpha: 0.15),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        height: 65,
+        backgroundColor: surface,
+      ),
+    );
+  }
+
+  // 3. Dark Theme
+  static ThemeData get darkTheme {
+    final baseTextTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
+    const darkSurface = Color(0xFF1E1E1E);
+    const darkBackground = Color(0xFF121212);
+    const darkTextPrimary = Colors.white;
+    const darkTextSecondary = Colors.white70;
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: const ColorScheme.dark(
+        primary: primary,
+        secondary: secondary,
+        surface: darkSurface,
+        error: error,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: darkTextPrimary,
+        onError: Colors.white,
+      ),
+      scaffoldBackgroundColor: darkBackground,
+      
+      appBarTheme: AppBarTheme(
+        backgroundColor: darkSurface,
+        foregroundColor: darkTextPrimary,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.inter(
+          color: darkTextPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+
+      textTheme: baseTextTheme.copyWith(
+        headlineLarge: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: darkTextPrimary),
+        headlineMedium: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: darkTextPrimary),
+        titleLarge: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: darkTextPrimary),
+        bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.normal, color: darkTextPrimary),
+        labelSmall: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.normal, color: darkTextSecondary),
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurface,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF333333)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF333333)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: error),
+        ),
+        labelStyle: const TextStyle(color: darkTextSecondary),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: primary,
+          textStyle: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+
+      cardTheme: CardThemeData(
+        color: darkSurface,
+        elevation: 1,
+        shadowColor: Colors.black.withValues(alpha: 0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: const EdgeInsets.only(bottom: 16),
+      ),
+
+      // Cấu hình NavigationBar Material 3
+      navigationBarTheme: NavigationBarThemeData(
+        indicatorColor: primary.withValues(alpha: 0.25),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        height: 65,
+        backgroundColor: darkSurface,
+      ),
     );
   }
 }

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/models/invoice_model.dart';
-import 'resident_invoice_detail_screen.dart';
 
 class ResidentInvoiceScreen extends ConsumerWidget {
   const ResidentInvoiceScreen({super.key});
@@ -205,10 +206,9 @@ class ResidentInvoiceScreen extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ResidentInvoiceDetailScreen(invoice: invoice),
-            ),
+          context.push(
+            AppRoutes.residentInvoiceDetail,
+            extra: invoice,
           );
         },
         child: Padding(

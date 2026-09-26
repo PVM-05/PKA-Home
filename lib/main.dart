@@ -4,10 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/accessibility_provider.dart';
-import 'data/providers/auth_provider.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/management/screens/management_home_screen.dart';
-import 'features/resident/screens/resident_shell.dart';
+import 'core/theme/theme_mode_provider.dart';
+import 'core/router/app_router.dart';
 import 'core/utils/provider_logger.dart';
 
 void main() async {
@@ -27,12 +25,15 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
     final fontScale = ref.watch(fontSizeScaleProvider);
+    final router = ref.watch(appRouterProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Quản lý Chung cư',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ref.watch(themeModeProvider),
+      routerConfig: router,
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
@@ -41,24 +42,6 @@ class MyApp extends ConsumerWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: authState.when(
-        data: (user) {
-          if (user == null) {
-            return const LoginScreen();
-          }
-          if (user.isManagement) {
-            return const ManagementHomeScreen();
-          } else {
-            return const ResidentShell();
-          }
-        },
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-        error: (error, stack) => Scaffold(
-          body: Center(child: Text('Lỗi: $error')),
-        ),
-      ),
     );
   }
 }

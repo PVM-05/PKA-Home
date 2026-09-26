@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
-import 'create_issue_screen.dart';
-import 'edit_issue_screen.dart';
+import '../../../core/widgets/photo_viewer_screen.dart';
 
 class ResidentIssueScreen extends ConsumerWidget {
   const ResidentIssueScreen({super.key});
@@ -71,11 +72,7 @@ class ResidentIssueScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'resident_issue_fab',
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const CreateIssueScreen(),
-            ),
-          );
+          context.push(AppRoutes.residentCreateIssue);
         },
         icon: const Icon(Icons.add),
         label: const Text('Tạo phản ánh'),
@@ -123,11 +120,7 @@ class ResidentIssueScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const CreateIssueScreen(),
-                  ),
-                );
+                context.push(AppRoutes.residentCreateIssue);
               },
               icon: const Icon(Icons.add),
               label: const Text('Gửi phản ánh ngay'),
@@ -236,7 +229,9 @@ class ResidentIssueScreen extends ConsumerWidget {
         priorityText = 'Bình thường';
     }
 
-    return Card(
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.residentIssueDetail, extra: issue),
+      child: Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -280,10 +275,9 @@ class ResidentIssueScreen extends ConsumerWidget {
                         icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
                         onSelected: (value) {
                           if (value == 'edit') {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => EditIssueScreen(issue: issue),
-                              ),
+                            context.push(
+                              AppRoutes.residentEditIssue,
+                              extra: issue,
                             );
                           } else if (value == 'delete') {
                             _confirmDeleteIssue(context, ref, issue);
@@ -329,11 +323,23 @@ class ResidentIssueScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: Stack(
                   children: [
-                    Image.network(
-                      issue.reportImages.first,
-                      height: 140,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => PhotoViewerScreen(
+                              imageUrls: issue.reportImages,
+                              initialIndex: 0,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Image.network(
+                        issue.reportImages.first,
+                        height: 140,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     Positioned(
                       top: 8,
@@ -419,11 +425,23 @@ class ResidentIssueScreen extends ConsumerWidget {
                             margin: const EdgeInsets.only(right: 8),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                issue.resolutionProofImages[i],
-                                width: 120,
-                                height: 100,
-                                fit: BoxFit.cover,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => PhotoViewerScreen(
+                                        imageUrls: issue.resolutionProofImages,
+                                        initialIndex: i,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Image.network(
+                                  issue.resolutionProofImages[i],
+                                  width: 120,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           );
@@ -450,11 +468,30 @@ class ResidentIssueScreen extends ConsumerWidget {
                     color: priorityColor,
                   ),
                 ),
+                const Spacer(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.forum_outlined, size: 14, color: AppTheme.primary.withValues(alpha: 0.7)),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Xem chi tiết & trao đổi',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.primary.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(Icons.chevron_right, size: 16, color: AppTheme.primary.withValues(alpha: 0.7)),
+                  ],
+                ),
               ],
             ),
           ],
         ),
       ),
+    ),
     );
   }
 }

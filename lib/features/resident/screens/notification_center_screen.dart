@@ -18,7 +18,6 @@ class NotificationCenterScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).value;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text(
           'Thông báo & Nhắc nhở',
@@ -137,16 +136,26 @@ class _NotificationCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final iconColor = _getIconColor();
     final isUnread = !notification.isRead;
 
+    final cardBgColor = isUnread
+        ? (isDark ? theme.colorScheme.surface : Colors.white)
+        : (isDark ? theme.colorScheme.surface.withValues(alpha: 0.6) : Colors.grey.shade50);
+
+    final borderColor = isUnread
+        ? AppTheme.primary.withValues(alpha: 0.4)
+        : (isDark ? theme.dividerColor.withValues(alpha: 0.2) : Colors.grey.shade200);
+
     return Card(
       elevation: 0,
-      color: isUnread ? Colors.white : Colors.grey.shade50,
+      color: cardBgColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isUnread ? AppTheme.primary.withValues(alpha: 0.3) : Colors.grey.shade200,
+          color: borderColor,
           width: isUnread ? 1.5 : 1.0,
         ),
       ),
@@ -192,7 +201,9 @@ class _NotificationCard extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: isUnread ? FontWeight.bold : FontWeight.w600,
-                              color: isUnread ? AppTheme.textPrimary : Colors.black87,
+                              color: isUnread
+                                  ? (isDark ? Colors.white : AppTheme.textPrimary)
+                                  : (isDark ? Colors.white70 : Colors.black87),
                             ),
                           ),
                         ),
@@ -212,7 +223,7 @@ class _NotificationCard extends ConsumerWidget {
                       notification.body,
                       style: TextStyle(
                         fontSize: 13,
-                        color: isUnread ? AppTheme.textSecondary : Colors.grey.shade600,
+                        color: isDark ? Colors.white60 : (isUnread ? AppTheme.textSecondary : Colors.grey.shade600),
                         height: 1.4,
                       ),
                     ),
