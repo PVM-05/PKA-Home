@@ -738,6 +738,12 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
     final isEditing = apartment != null;
     final codeController = TextEditingController(text: apartment?.code ?? '');
     final areaController = TextEditingController(text: apartment?.area?.toString() ?? '');
+    final buildingController = TextEditingController(
+      text: apartment?.buildingCode ?? (apartment != null && apartment.code.isNotEmpty ? apartment.code[0].toUpperCase() : 'A'),
+    );
+    final floorController = TextEditingController(
+      text: apartment?.floorNumber.toString() ?? (apartment != null && apartment.code.length >= 3 ? (int.tryParse(apartment.code.substring(1, 3)) ?? 1).toString() : '1'),
+    );
     final formKey = GlobalKey<FormState>();
     bool isSaving = false;
 
@@ -751,31 +757,79 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
               title: Text(isEditing ? 'Cập nhật Căn hộ' : 'Thêm Căn hộ mới'),
               content: Form(
                 key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: codeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Mã căn hộ (VD: A0110)',
-                        prefixIcon: Icon(Icons.tag),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: codeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Mã căn hộ (VD: A0110)',
+                          prefixIcon: Icon(Icons.tag),
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                        validator: validateApartmentCode,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        onChanged: (val) {
+                          final trimmed = val.trim().toUpperCase();
+                          if (trimmed.length >= 3 && !isEditing) {
+                            final b = trimmed[0];
+                            final f = int.tryParse(trimmed.substring(1, 3));
+                            if (f != null) {
+                              setDialogState(() {
+                                buildingController.text = b;
+                                floorController.text = f.toString();
+                              });
+                            }
+                          }
+                        },
                       ),
-                      textCapitalization: TextCapitalization.characters,
-                      validator: validateApartmentCode,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: areaController,
-                      decoration: const InputDecoration(
-                        labelText: 'Diện tích (m²)',
-                        prefixIcon: Icon(Icons.square_foot),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: buildingController,
+                              decoration: const InputDecoration(
+                                labelText: 'Tòa nhà (Block)',
+                                prefixIcon: Icon(Icons.business_outlined),
+                              ),
+                              textCapitalization: TextCapitalization.characters,
+                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: floorController,
+                              decoration: const InputDecoration(
+                                labelText: 'Tầng',
+                                prefixIcon: Icon(Icons.layers_outlined),
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) return 'Bắt buộc';
+                                final n = int.tryParse(v.trim());
+                                if (n == null || n <= 0) return 'Số hợp lệ';
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: validateArea,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: areaController,
+                        decoration: const InputDecoration(
+                          labelText: 'Diện tích (m²)',
+                          prefixIcon: Icon(Icons.square_foot),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: validateArea,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -790,15 +844,28 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
                           if (!(formKey.currentState?.validate() ?? false)) return;
 
                           setDialogState(() => isSaving = true);
-                          final code = codeController.text.trim();
+                          final code = codeController.text.trim().toUpperCase();
                           final area = double.parse(areaController.text.trim());
+                          final building = buildingController.text.trim().toUpperCase();
+                          final floor = int.tryParse(floorController.text.trim()) ?? 1;
 
                           final repo = ref.read(managementRepositoryProvider);
                           try {
                             if (isEditing) {
-                              await repo.updateApartment(apartment.id, code, area);
+                              await repo.updateApartment(
+                                apartment.id,
+                                code,
+                                area,
+                                buildingCode: building,
+                                floorNumber: floor,
+                              );
                             } else {
-                              await repo.createApartment(code, area);
+                              await repo.createApartment(
+                                code,
+                                area,
+                                buildingCode: building,
+                                floorNumber: floor,
+                              );
                             }
                             ref.invalidate(apartmentsProvider);
                             if (context.mounted) Navigator.pop(context);

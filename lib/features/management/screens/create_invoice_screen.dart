@@ -7,6 +7,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../core/widgets/app_error_card.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
 import '../../../data/models/apartment_model.dart';
@@ -249,7 +250,12 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       body: SafeArea(
         child: apartmentsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text('Lỗi tải dữ liệu: $err')),
+          error: (err, _) => Center(
+            child: AppErrorCard(
+              error: err,
+              onRetry: () => ref.invalidate(apartmentsProvider),
+            ),
+          ),
           data: (apartments) {
             final occupiedApartments = apartments.where((a) => !a.isEmpty).toList();
             final buildings = occupiedApartments

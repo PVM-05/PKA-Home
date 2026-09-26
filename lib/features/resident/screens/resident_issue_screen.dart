@@ -10,6 +10,8 @@ import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
+import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_error_card.dart';
 
 class ResidentIssueScreen extends ConsumerWidget {
   const ResidentIssueScreen({super.key});
@@ -67,7 +69,12 @@ class ResidentIssueScreen extends ConsumerWidget {
             IssueCardSkeleton(),
           ],
         ),
-        error: (error, stack) => Center(child: Text('Lỗi tải dữ liệu: $error')),
+        error: (error, stack) => Center(
+          child: AppErrorCard(
+            error: error,
+            onRetry: () => ref.invalidate(residentIssueProvider),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'resident_issue_fab',
@@ -185,7 +192,7 @@ class ResidentIssueScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi khi xóa phản ánh: $e'),
+              content: Text(formatErrorMessage(e)),
               backgroundColor: AppTheme.error,
             ),
           );

@@ -5,6 +5,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/repositories/announcement_repository.dart';
+import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_error_card.dart';
 
 class AnnouncementManagementScreen extends ConsumerWidget {
   const AnnouncementManagementScreen({super.key});
@@ -127,7 +129,12 @@ class AnnouncementManagementScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Lỗi: $error')),
+        error: (error, stack) => Center(
+          child: AppErrorCard(
+            error: error,
+            onRetry: () => ref.invalidate(announcementsStreamProvider),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'announcement_management_fab',
@@ -258,7 +265,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Lỗi đăng thông báo: $e'),
+                                  content: Text(formatErrorMessage(e)),
                                   backgroundColor: AppTheme.error,
                                 ),
                               );
@@ -410,7 +417,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Lỗi cập nhật thông báo: $e'),
+                                  content: Text(formatErrorMessage(e)),
                                   backgroundColor: AppTheme.error,
                                 ),
                               );

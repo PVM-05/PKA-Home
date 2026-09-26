@@ -26,18 +26,17 @@ class ParsedApartment {
   });
 
   factory ParsedApartment.fromJson(Map<String, dynamic> json) {
-    final code = json['code'] as String;
-    final building = json['building_code'] as String;
-    final floor = (json['floor_number'] as int).toString();
-    
-    // Room name can just be the code, or we can format it. 
-    // Usually the user wants to see the code (e.g. A0101) or just the room number.
-    // Let's use the code for clarity, e.g. "Phòng A0101".
+    final code = json['code'] as String? ?? '';
+    final building = (json['building_code'] as String?) ??
+        (code.isNotEmpty ? code[0].toUpperCase() : 'A');
+    final floor = ((json['floor_number'] as int?) ??
+        (code.length >= 3 ? int.tryParse(code.substring(1, 3)) ?? 1 : 1)).toString();
+
     return ParsedApartment(
       code: code,
       building: building,
       floor: floor,
-      room: code, // We will display the full code as the room name for absolute clarity
+      room: code,
     );
   }
 }

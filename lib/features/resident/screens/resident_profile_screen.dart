@@ -77,7 +77,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Lỗi cập nhật: $e')),
+                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
                     );
                   }
                 }
@@ -211,7 +211,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Lỗi tải thông tin căn hộ: $e'),
+                  error: (e, _) => Text(formatErrorMessage(e), style: const TextStyle(color: AppTheme.error)),
                 ),
 
                 const SizedBox(height: 20),

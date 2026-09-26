@@ -39,18 +39,37 @@ class ManagementRepository {
     return (response as List).map((e) => ApartmentModel.fromJson(e)).toList();
   }
 
-  Future<void> createApartment(String code, double area) async {
+  Future<void> createApartment(
+    String code,
+    double area, {
+    String? buildingCode,
+    int? floorNumber,
+  }) async {
+    final building = buildingCode ?? (code.isNotEmpty ? code[0].toUpperCase() : 'A');
+    final floor = floorNumber ?? (code.length >= 3 ? int.tryParse(code.substring(1, 3)) ?? 1 : 1);
     await _client.from('apartments').insert({
       'code': code,
       'area': area,
+      'building_code': building,
+      'floor_number': floor,
       'is_empty': true,
     });
   }
 
-  Future<void> updateApartment(String id, String code, double area) async {
+  Future<void> updateApartment(
+    String id,
+    String code,
+    double area, {
+    String? buildingCode,
+    int? floorNumber,
+  }) async {
+    final building = buildingCode ?? (code.isNotEmpty ? code[0].toUpperCase() : 'A');
+    final floor = floorNumber ?? (code.length >= 3 ? int.tryParse(code.substring(1, 3)) ?? 1 : 1);
     await _client.from('apartments').update({
       'code': code,
       'area': area,
+      'building_code': building,
+      'floor_number': floor,
     }).eq('id', id);
   }
 

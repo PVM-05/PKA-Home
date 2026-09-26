@@ -356,7 +356,10 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (BuildContext bottomSheetContext) {
-        return DraggableScrollableSheet(
+        bool isSubmitting = false;
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return DraggableScrollableSheet(
           initialChildSize: 0.85,
           minChildSize: 0.5,
           maxChildSize: 0.95,
@@ -494,27 +497,40 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                       backgroundColor: AppTheme.success,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    onPressed: () => _handlePaymentConfirmation(context),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check_circle_outline, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text(
-                          'XÁC NHẬN ĐÃ CHUYỂN KHOẢN',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                    onPressed: isSubmitting
+                        ? null
+                        : () async {
+                            setSheetState(() => isSubmitting = true);
+                            await _handlePaymentConfirmation(context);
+                          },
+                    child: isSubmitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_circle_outline, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'XÁC NHẬN ĐÃ CHUYỂN KHOẢN',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
               ),
             );
+          },
+        );
           },
         );
       },

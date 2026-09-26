@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
@@ -659,11 +660,21 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Lỗi tải danh sách xe: $e')),
+            error: (e, _) => Center(
+              child: AppErrorCard(
+                error: e,
+                onRetry: () => ref.invalidate(apartmentVehiclesProvider(apartmentId)),
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi tải thông tin căn hộ: $e')),
+        error: (e, _) => Center(
+          child: AppErrorCard(
+            error: e,
+            onRetry: () => ref.invalidate(residentApartmentIdProvider),
+          ),
+        ),
       ),
     );
   }
