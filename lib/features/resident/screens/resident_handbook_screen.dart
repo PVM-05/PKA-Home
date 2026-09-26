@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
 import 'amenity_booking_screen.dart';
@@ -525,13 +526,13 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                 const Divider(height: 20),
                 _buildFeeRow(
                   title: 'Phí gửi xe máy',
-                  rate: '100.000 đ/tháng/xe',
+                  rate: AppConstants.kMotorbikeFeeFormatted,
                   formula: 'Đăng ký tối đa 2 xe máy/căn hộ',
                 ),
                 const Divider(height: 20),
                 _buildFeeRow(
                   title: 'Phí gửi ô tô',
-                  rate: '1.200.000 đ/tháng/xe',
+                  rate: AppConstants.kCarFeeFormatted,
                   formula: 'Theo vị trí đỗ xe tại tầng hầm',
                 ),
                 const Divider(height: 20),

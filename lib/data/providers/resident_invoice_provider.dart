@@ -3,6 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/models/invoice_model.dart';
 import 'auth_provider.dart';
+import 'invoice_items_provider.dart';
+export 'invoice_items_provider.dart' show invoiceItemsDetailProvider, invoiceDetailProvider;
 
 final _invoicesStreamProvider = StreamProvider((ref) {
   final userId = ref.watch(authProvider).valueOrNull?.id;
@@ -38,23 +40,9 @@ final residentInvoiceProvider = FutureProvider<List<InvoiceModel>>((ref) async {
   return (response as List).map((e) => InvoiceModel.fromJson(e)).toList();
 });
 
-final _invoiceItemsStreamProvider = StreamProvider.family<List<Map<String, dynamic>>, String>((ref, invoiceId) => SupabaseConfig.client.from('invoice_items').stream(primaryKey: ['id']).eq('invoice_id', invoiceId));
 
-final residentInvoiceDetailProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, invoiceId) async {
-  // Lắng nghe thay đổi của invoice items
-  ref.watch(_invoiceItemsStreamProvider(invoiceId));
-  
-  final response = await SupabaseConfig.client
-      .from('invoice_items')
-      .select()
-      .eq('invoice_id', invoiceId)
-      .order('created_at', ascending: true);
-  
-  return List<Map<String, dynamic>>.from(response);
-});
-
-/// Provider chi tiết hóa đơn (invoice_items) dùng chung cho cả Cư dân và Ban Quản lý
-final invoiceDetailProvider = residentInvoiceDetailProvider;
+/// Delegate sang provider trung lập
+final residentInvoiceDetailProvider = invoiceItemsDetailProvider;
 
 class ResidentInvoiceService {
   static Future<void> confirmPayment(WidgetRef ref, String invoiceId, {SupabaseClient? client}) async {

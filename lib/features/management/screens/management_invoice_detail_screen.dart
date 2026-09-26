@@ -5,7 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
-import '../../../data/providers/resident_invoice_provider.dart' show invoiceDetailProvider;
+import '../../../data/providers/invoice_items_provider.dart';
 import 'edit_invoice_screen.dart';
 
 class ManagementInvoiceDetailScreen extends ConsumerWidget {

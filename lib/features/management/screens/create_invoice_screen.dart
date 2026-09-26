@@ -8,6 +8,7 @@ import '../../../core/utils/validators.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
 import '../../../data/models/apartment_model.dart';
@@ -98,12 +99,12 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
   double _getMotorbikeTotal() {
     final qty = double.tryParse(_motorbikeQtyController.text) ?? 0.0;
-    return qty * 100000.0;
+    return qty * AppConstants.kMotorbikeFee;
   }
 
   double _getCarTotal() {
     final qty = double.tryParse(_carQtyController.text) ?? 0.0;
-    return qty * 1200000.0;
+    return qty * AppConstants.kCarFee;
   }
 
   double _getParkingTotal() => _getMotorbikeTotal() + _getCarTotal();
@@ -169,7 +170,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       if (mbQty > 0) {
         items.add({
           'fee_type': 'Phí gửi xe máy',
-          'unit_price': 100000.0,
+          'unit_price': AppConstants.kMotorbikeFee,
           'quantity': mbQty,
         });
       }
@@ -179,7 +180,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       if (carQty > 0) {
         items.add({
           'fee_type': 'Phí gửi ô tô',
-          'unit_price': 1200000.0,
+          'unit_price': AppConstants.kCarFee,
           'quantity': carQty,
         });
       }
@@ -589,7 +590,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                   child: TextFormField(
                                     controller: _motorbikeQtyController,
                                     decoration: const InputDecoration(
-                                      labelText: 'Số xe máy (100.000đ/xe)',
+                                      labelText: 'Số xe máy (${AppConstants.kMotorbikeFeeLabel})',
                                       prefixIcon: Icon(Icons.two_wheeler_outlined),
                                     ),
                                     keyboardType: TextInputType.number,
@@ -602,7 +603,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                   child: TextFormField(
                                     controller: _carQtyController,
                                     decoration: const InputDecoration(
-                                      labelText: 'Số ô tô (1.200.000đ/xe)',
+                                      labelText: 'Số ô tô (${AppConstants.kCarFeeLabel})',
                                       prefixIcon: Icon(Icons.directions_car_outlined),
                                     ),
                                     keyboardType: TextInputType.number,

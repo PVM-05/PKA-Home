@@ -8,32 +8,52 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// 3. Thay thế email và password bên dưới thành thông tin thật trên Supabase.
 /// 4. Chạy: flutter test test/integration/rls_security_test.dart
 
+import 'dart:io';
+
 void main() {
   late SupabaseClient client;
-
-  // Điền thông tin test user vào đây
-  const testResidentEmail = 'resident101@test.com';
-  const testResidentPassword = 'password123';
-  const testResidentApartmentId = 'FILL_UUID_HERE'; // UUID của căn hộ 101
+  late String testResidentEmail;
+  late String testResidentPassword;
+  late String? testResidentApartmentId;
+  bool shouldSkip = true;
 
   setUpAll(() async {
-    // Load biến môi trường
-    await dotenv.load(fileName: ".env");
+    // Load biến môi trường (ưu tiên biến hệ thống trong CI, sau đó tới file .env)
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (_) {}
     
-    // Khởi tạo Supabase (không cần Flutter widget tree)
-    final supabaseUrl = dotenv.env['SUPABASE_URL']!;
-    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY']!;
+    testResidentEmail = Platform.environment['TEST_RESIDENT_EMAIL'] ?? 
+        dotenv.env['TEST_RESIDENT_EMAIL'] ?? 
+        'resident101@test.com';
+    testResidentPassword = Platform.environment['TEST_RESIDENT_PASSWORD'] ?? 
+        dotenv.env['TEST_RESIDENT_PASSWORD'] ?? 
+        'password123';
+    testResidentApartmentId = Platform.environment['TEST_RESIDENT_APARTMENT_ID'] ?? 
+        dotenv.env['TEST_RESIDENT_APARTMENT_ID'];
+
+    shouldSkip = testResidentApartmentId == null || 
+        testResidentApartmentId!.isEmpty || 
+        testResidentApartmentId == 'FILL_UUID_HERE';
+
+    final supabaseUrl = Platform.environment['SUPABASE_URL'] ?? dotenv.env['SUPABASE_URL'];
+    final supabaseAnonKey = Platform.environment['SUPABASE_ANON_KEY'] ?? dotenv.env['SUPABASE_ANON_KEY'];
     
-    client = SupabaseClient(supabaseUrl, supabaseAnonKey);
+    if (supabaseUrl != null && supabaseAnonKey != null) {
+      client = SupabaseClient(supabaseUrl, supabaseAnonKey);
+    } else {
+      shouldSkip = true;
+    }
   });
 
   tearDownAll(() async {
-    await client.auth.signOut();
-    client.dispose();
+    if (!shouldSkip) {
+      await client.auth.signOut();
+      client.dispose();
+    }
   });
 
   group('Kiểm thử RLS Bảo mật (Integration)', () {
-    final shouldSkip = testResidentApartmentId == 'FILL_UUID_HERE';
 
     test(
       'Cư dân chỉ đọc được hóa đơn của căn hộ mình (RLS-01 & RLS-02)',
@@ -72,13 +92,13 @@ void main() {
 
       // 2. Cố gắng update trạng thái hóa đơn bất kỳ
       try {
-        await client.from('invoices').update({'status': 'paid'}).eq('apartment_id', testResidentApartmentId);
+        await client.from('invoices').update({'status': 'paid'}).eq('apartment_id', testResidentApartmentId!);
         // Nếu RLS hoạt động đúng, nó sẽ quăng lỗi PostgrestException vì không có quyền UPDATE
         // Nếu bảng cho phép update thì policy RLS đang sai.
         // Chú ý: Đôi khi Supabase RLS update fail sẽ không throw error mà trả về empty list [], tùy thuộc vào SDK.
         
         // Kiểm tra xem dòng đó có thực sự bị đổi không
-        final check = await client.from('invoices').select('status').eq('apartment_id', testResidentApartmentId).limit(1);
+        final check = await client.from('invoices').select('status').eq('apartment_id', testResidentApartmentId!).limit(1);
         if (check.isNotEmpty) {
            expect(check.first['status'], isNot('paid'), reason: 'Lỗi RLS: Cư dân đã sửa được trạng thái hóa đơn!');
         }

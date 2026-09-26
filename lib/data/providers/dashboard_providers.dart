@@ -1,8 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/repositories/management_repository.dart';
 import '../../../core/supabase_config.dart';
-
-final managementRepositoryProvider = Provider((ref) => ManagementRepository());
 
 final pendingIssuesCountProvider = StreamProvider<int>((ref) {
   return SupabaseConfig.client

@@ -39,11 +39,17 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
 
     if (mounted) {
       if (path != null) {
+        ExcelExportHelper.shareFile(path, subject: 'Báo cáo sự cố PKA-Home');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã xuất báo cáo sự cố thành công!\n$path'),
+            content: const Text('Đã xuất báo cáo sự cố thành công!'),
             backgroundColor: AppTheme.success,
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Chia sẻ lại',
+              textColor: Colors.white,
+              onPressed: () => ExcelExportHelper.shareFile(path, subject: 'Báo cáo sự cố PKA-Home'),
+            ),
           ),
         );
       } else {

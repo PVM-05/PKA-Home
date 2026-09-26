@@ -43,11 +43,17 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
     
     if (mounted) {
       if (path != null) {
+        ExcelExportHelper.shareFile(path, subject: 'Danh sách hóa đơn PKA-Home');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã xuất file thành công!\n$path'),
+            content: const Text('Đã xuất file thành công!'),
             backgroundColor: AppTheme.success,
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Chia sẻ lại',
+              textColor: Colors.white,
+              onPressed: () => ExcelExportHelper.shareFile(path, subject: 'Danh sách hóa đơn PKA-Home'),
+            ),
           ),
         );
       } else {

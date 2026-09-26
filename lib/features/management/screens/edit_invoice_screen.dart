@@ -9,7 +9,7 @@ import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
-import '../../../data/providers/resident_invoice_provider.dart' show invoiceDetailProvider;
+import '../../../data/providers/invoice_items_provider.dart';
 
 class EditInvoiceScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;

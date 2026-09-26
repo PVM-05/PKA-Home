@@ -77,38 +77,16 @@ class ManagementRepository {
     await _client.from('apartments').delete().eq('id', id);
   }
 
-  Future<void> assignResidentToApartment(String userId, String apartmentId) async {
-    // 1. Lấy danh sách căn hộ cũ của cư dân trước khi xóa liên kết
-    final oldLinks = await _client
-        .from('residents_apartments')
-        .select('apartment_id')
-        .eq('user_id', userId);
-
-    // 2. Xóa liên kết cũ của cư dân
-    await _client.from('residents_apartments').delete().eq('user_id', userId);
-    
-    // 3. Tạo liên kết với căn hộ mới
-    await _client.from('residents_apartments').insert({
+  Future<void> assignResidentToApartment(String userId, String apartmentId, {String relationRole = 'owner'}) async {
+    // 1. Thêm hoặc cập nhật liên kết giữa cư dân và căn hộ này (bảo toàn các căn hộ khác của cư dân)
+    await _client.from('residents_apartments').upsert({
       'user_id': userId,
       'apartment_id': apartmentId,
-      'relation_role': 'owner',
-    });
+      'relation_role': relationRole,
+    }, onConflict: 'user_id,apartment_id');
     
-    // 4. Đánh dấu căn hộ mới là có người ở
+    // 2. Đánh dấu căn hộ mới là có người ở
     await _client.from('apartments').update({'is_empty': false}).eq('id', apartmentId);
-
-    // 5. Giải phóng căn hộ cũ nếu không còn ai cư trú
-    for (final link in (oldLinks as List)) {
-      final oldAptId = link['apartment_id'];
-      if (oldAptId == apartmentId) continue;
-      final remaining = await _client
-          .from('residents_apartments')
-          .select('id')
-          .eq('apartment_id', oldAptId);
-      if ((remaining as List).isEmpty) {
-        await _client.from('apartments').update({'is_empty': true}).eq('id', oldAptId);
-      }
-    }
   }
 
   Future<void> unlinkResidentFromApartment(String userId, String apartmentId) async {
@@ -151,23 +129,35 @@ class ManagementRepository {
   }
 
   Future<void> createInvoice(String apartmentId, String period, DateTime dueDate, List<Map<String, dynamic>> items) async {
-    final response = await _client.from('invoices').insert({
-      'apartment_id': apartmentId,
-      'period': period,
-      'due_date': dueDate.toIso8601String().split('T')[0],
-      'status': 'unpaid'
-    }).select('id').single();
-    
-    final invoiceId = response['id'];
-    
-    final List<Map<String, dynamic>> insertItems = items.map((item) => {
-      'invoice_id': invoiceId,
-      'fee_type': item['fee_type'],
-      'unit_price': item['unit_price'],
-      'quantity': item['quantity'],
-    }).toList();
-    
-    await _client.from('invoice_items').insert(insertItems);
+    try {
+      await _client.rpc('create_invoice_with_items', params: {
+        'p_apartment_id': apartmentId,
+        'p_period': period,
+        'p_due_date': dueDate.toIso8601String().split('T')[0],
+        'p_items': items,
+      });
+    } catch (_) {
+      // Fallback nếu RPC chưa được nạp
+      final response = await _client.from('invoices').insert({
+        'apartment_id': apartmentId,
+        'period': period,
+        'due_date': dueDate.toIso8601String().split('T')[0],
+        'status': 'unpaid'
+      }).select('id').single();
+      
+      final invoiceId = response['id'];
+      
+      final List<Map<String, dynamic>> insertItems = items.map((item) => {
+        'invoice_id': invoiceId,
+        'fee_type': item['fee_type'],
+        'unit_price': item['unit_price'],
+        'quantity': item['quantity'],
+      }).toList();
+      
+      if (insertItems.isNotEmpty) {
+        await _client.from('invoice_items').insert(insertItems);
+      }
+    }
   }
 
   Future<void> deleteInvoice(String invoiceId) async {
@@ -182,29 +172,42 @@ class ManagementRepository {
     String? apartmentId,
     String? status,
   }) async {
-    final invoiceData = <String, dynamic>{
-      'period': period,
-      'due_date': dueDate.toIso8601String().split('T')[0],
-    };
-    if (apartmentId != null) {
-      invoiceData['apartment_id'] = apartmentId;
-    }
-    if (status != null) {
-      invoiceData['status'] = status;
-    }
-    await _client.from('invoices').update(invoiceData).eq('id', invoiceId);
+    try {
+      final rpcParams = <String, dynamic>{
+        'p_invoice_id': invoiceId,
+        'p_period': period,
+        'p_due_date': dueDate.toIso8601String().split('T')[0],
+        'p_items': items,
+      };
+      if (apartmentId != null) rpcParams['p_apartment_id'] = apartmentId;
+      if (status != null) rpcParams['p_status'] = status;
+      await _client.rpc('update_invoice_with_items', params: rpcParams);
+    } catch (_) {
+      // Fallback
+      final invoiceData = <String, dynamic>{
+        'period': period,
+        'due_date': dueDate.toIso8601String().split('T')[0],
+      };
+      if (apartmentId != null) {
+        invoiceData['apartment_id'] = apartmentId;
+      }
+      if (status != null) {
+        invoiceData['status'] = status;
+      }
+      await _client.from('invoices').update(invoiceData).eq('id', invoiceId);
 
-    await _client.from('invoice_items').delete().eq('invoice_id', invoiceId);
+      await _client.from('invoice_items').delete().eq('invoice_id', invoiceId);
 
-    final List<Map<String, dynamic>> insertItems = items.map((item) => {
-      'invoice_id': invoiceId,
-      'fee_type': item['fee_type'],
-      'unit_price': item['unit_price'],
-      'quantity': item['quantity'],
-    }).toList();
+      final List<Map<String, dynamic>> insertItems = items.map((item) => {
+        'invoice_id': invoiceId,
+        'fee_type': item['fee_type'],
+        'unit_price': item['unit_price'],
+        'quantity': item['quantity'],
+      }).toList();
 
-    if (insertItems.isNotEmpty) {
-      await _client.from('invoice_items').insert(insertItems);
+      if (insertItems.isNotEmpty) {
+        await _client.from('invoice_items').insert(insertItems);
+      }
     }
   }
 

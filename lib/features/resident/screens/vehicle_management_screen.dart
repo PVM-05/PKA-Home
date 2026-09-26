@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/vehicle_model.dart';
@@ -124,7 +125,7 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    isMotorbikeDisabled ? 'Đã đủ 2 xe' : '100.000đ/tháng',
+                                    isMotorbikeDisabled ? 'Đã đủ 2 xe' : AppConstants.kMotorbikeFeeShort,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: isMotorbikeDisabled ? AppTheme.error : Colors.grey.shade600,
@@ -173,7 +174,7 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    '1.200.000đ/tháng',
+                                    AppConstants.kCarFeeShort,
                                     style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                                   ),
                                 ],
@@ -459,9 +460,9 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                                         ],
                                       ),
                                       const SizedBox(height: 6),
-                                      const Text(
-                                        '100.000 đ/tháng/xe',
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      Text(
+                                        AppConstants.kMotorbikeFeeFormatted,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                                       ),
                                     ],
                                   ),
@@ -504,9 +505,9 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                                         ],
                                       ),
                                       const SizedBox(height: 6),
-                                      const Text(
-                                        '1.200.000 đ/tháng/xe',
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      Text(
+                                        AppConstants.kCarFeeFormatted,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                                       ),
                                     ],
                                   ),

@@ -2,10 +2,18 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../data/models/invoice_model.dart';
 import '../../data/models/issue_model.dart';
 
 class ExcelExportHelper {
+  /// Mở hộp thoại chia sẻ/lưu file qua Share Sheet hệ điều hành
+  static Future<void> shareFile(String filePath, {String? subject, String? text}) async {
+    try {
+      final xFile = XFile(filePath);
+      await Share.shareXFiles([xFile], subject: subject, text: text);
+    } catch (_) {}
+  }
   /// Xuất danh sách Hóa đơn ra file .xlsx
   static Future<String?> exportInvoices(List<InvoiceModel> invoices) async {
     try {
