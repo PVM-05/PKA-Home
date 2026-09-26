@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
+import 'amenity_booking_screen.dart';
 
 class ResidentHandbookScreen extends ConsumerStatefulWidget {
   final int initialTabIndex;
@@ -16,6 +17,9 @@ class ResidentHandbookScreen extends ConsumerStatefulWidget {
 class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -30,6 +34,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -62,7 +67,42 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cẩm Nang Cư Dân'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: const TextStyle(fontSize: 16),
+                decoration: const InputDecoration(
+                  hintText: 'Tìm kiếm hotline, nội quy...',
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.trim().toLowerCase();
+                  });
+                },
+              )
+            : const Text('Cẩm Nang Cư Dân'),
+        actions: [
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            tooltip: _isSearching ? 'Đóng tìm kiếm' : 'Tìm kiếm',
+            onPressed: () {
+              setState(() {
+                if (_isSearching) {
+                  _isSearching = false;
+                  _searchQuery = '';
+                  _searchController.clear();
+                } else {
+                  _isSearching = true;
+                }
+              });
+            },
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -100,17 +140,33 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
       onRefresh: () async => ref.invalidate(emergencyContactsProvider),
       child: contactsAsync.when(
         data: (contacts) {
-          if (contacts.isEmpty) {
-            return const Center(
-              child: Text('Chưa có thông tin đường dây nóng.'),
+          final filteredContacts = _searchQuery.isEmpty
+              ? contacts
+              : contacts.where((c) =>
+                  c.name.toLowerCase().contains(_searchQuery) ||
+                  c.phone.contains(_searchQuery) ||
+                  c.contactType.toLowerCase().contains(_searchQuery)).toList();
+
+          if (filteredContacts.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  _searchQuery.isEmpty
+                      ? 'Chưa có thông tin đường dây nóng.'
+                      : 'Không tìm thấy liên hệ phù hợp với "$_searchQuery"',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppTheme.textSecondary),
+                ),
+              ),
             );
           }
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: contacts.length,
+            itemCount: filteredContacts.length,
             itemBuilder: (context, index) {
-              final contact = contacts[index];
+              final contact = filteredContacts[index];
               return _buildContactCard(contact);
             },
           );
@@ -237,15 +293,32 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
       onRefresh: () async => ref.invalidate(buildingRulesProvider),
       child: rulesAsync.when(
         data: (rules) {
-          if (rules.isEmpty) {
-            return const Center(child: Text('Chưa có nội quy được đăng tải.'));
+          final filteredRules = _searchQuery.isEmpty
+              ? rules
+              : rules.where((r) =>
+                  r.title.toLowerCase().contains(_searchQuery) ||
+                  r.content.toLowerCase().contains(_searchQuery)).toList();
+
+          if (filteredRules.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  _searchQuery.isEmpty
+                      ? 'Chưa có nội quy được đăng tải.'
+                      : 'Không tìm thấy nội quy phù hợp với "$_searchQuery"',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppTheme.textSecondary),
+                ),
+              ),
+            );
           }
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: rules.length,
+            itemCount: filteredRules.length,
             itemBuilder: (context, index) {
-              final rule = rules[index];
+              final rule = filteredRules[index];
               return Card(
                 elevation: 0,
                 color: Colors.white,
@@ -383,6 +456,28 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                           ),
                         ),
                       ],
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          icon: const Icon(Icons.calendar_month_outlined, size: 16),
+                          label: const Text('Đặt lịch sử dụng', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AmenityBookingScreen(amenity: amenity),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),

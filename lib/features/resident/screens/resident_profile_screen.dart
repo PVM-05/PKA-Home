@@ -1,25 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/accessibility_provider.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/co_residents_provider.dart';
-import '../../../core/supabase_config.dart';
-import '../../auth/screens/change_password_screen.dart';
-import 'link_request_screen.dart';
+import '../../../core/widgets/font_size_sheet.dart';
+import '../../../core/theme/theme_mode_provider.dart';
 
-final residentApartmentsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final user = ref.watch(authProvider).value;
-  if (user == null) return [];
-
-  final response = await SupabaseConfig.client
-      .from('residents_apartments')
-      .select('relation_role, apartment_id, apartments(id, code, area)')
-      .eq('user_id', user.id);
-
-  return List<Map<String, dynamic>>.from(response);
-});
+import '../../../data/providers/resident_apartment_provider.dart';
+import '../../../core/widgets/app_avatar.dart';
 
 class ResidentProfileScreen extends ConsumerWidget {
   const ResidentProfileScreen({super.key});
@@ -116,10 +109,10 @@ class ResidentProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 const SizedBox(height: 16),
-                CircleAvatar(
-                  radius: 46,
-                  backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-                  child: const Icon(Icons.person_outline, size: 48, color: AppTheme.primary),
+                AppAvatar(
+                  name: user.fullName,
+                  size: 92,
+                  fontSize: 34,
                 ),
                 const SizedBox(height: 14),
                 Text(
@@ -162,9 +155,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                     ),
                     TextButton.icon(
                       onPressed: () async {
-                        final result = await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const LinkRequestScreen()),
-                        );
+                        final result = await context.push<bool>(AppRoutes.residentLinkRequest);
                         if (result == true) {
                           ref.invalidate(residentApartmentsProvider);
                         }
@@ -200,9 +191,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () async {
-                                  final result = await Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (_) => const LinkRequestScreen()),
-                                  );
+                                  final result = await context.push<bool>(AppRoutes.residentLinkRequest);
                                   if (result == true) {
                                     ref.invalidate(residentApartmentsProvider);
                                   }
@@ -223,6 +212,42 @@ class ResidentProfileScreen extends ConsumerWidget {
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('Lỗi tải thông tin căn hộ: $e'),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Phương tiện căn hộ
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Phương tiện & Gửi xe',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.two_wheeler_outlined, color: AppTheme.primary),
+                    ),
+                    title: const Text('Phương tiện đã đăng ký', style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('Quản lý danh sách xe máy, ô tô của căn hộ'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      context.push(AppRoutes.residentVehicles);
+                    },
+                  ),
                 ),
 
                 const SizedBox(height: 28),
@@ -250,10 +275,37 @@ class ResidentProfileScreen extends ConsumerWidget {
                         title: const Text('Đổi mật khẩu'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
-                          );
+                          context.push(AppRoutes.changePassword);
                         },
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.format_size_outlined, color: AppTheme.primary),
+                        title: const Text('Cỡ chữ hiển thị'),
+                        subtitle: Text(
+                          FontSizeOption.fromScale(ref.watch(fontSizeScaleProvider)).label,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => showFontSizeBottomSheet(context, ref),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: Icon(
+                          ref.watch(themeModeProvider) == ThemeMode.dark
+                              ? Icons.dark_mode
+                              : ref.watch(themeModeProvider) == ThemeMode.light
+                                  ? Icons.light_mode
+                                  : Icons.brightness_auto,
+                          color: AppTheme.primary,
+                        ),
+                        title: const Text('Giao diện'),
+                        subtitle: Text(
+                          _themeModeLabel(ref.watch(themeModeProvider)),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _showThemeModeSheet(context, ref),
                       ),
                       const Divider(height: 1),
                       ListTile(
@@ -302,6 +354,93 @@ class ResidentProfileScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _themeModeLabel(ThemeMode mode) {
+  switch (mode) {
+    case ThemeMode.light:
+      return 'Sáng';
+    case ThemeMode.dark:
+      return 'Tối';
+    case ThemeMode.system:
+      return 'Theo hệ thống';
+  }
+}
+
+void _showThemeModeSheet(BuildContext context, WidgetRef ref) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) {
+      return Consumer(
+        builder: (context, ref, _) {
+          final currentMode = ref.watch(themeModeProvider);
+          final entries = [
+            (ThemeMode.system, 'Theo hệ thống', Icons.brightness_auto,
+                'Tự động theo cài đặt thiết bị'),
+            (ThemeMode.light, 'Sáng', Icons.light_mode,
+                'Luôn dùng giao diện sáng'),
+            (ThemeMode.dark, 'Tối', Icons.dark_mode,
+                'Luôn dùng giao diện tối'),
+          ];
+
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Chọn giao diện',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                ...entries.map(
+                  (entry) =>
+                      // ignore: deprecated_member_use
+                      RadioListTile<ThemeMode>(
+                    value: entry.$1,
+                    // ignore: deprecated_member_use
+                    groupValue: currentMode,
+                    // ignore: deprecated_member_use
+                    onChanged: (mode) {
+                      if (mode != null) {
+                        ref
+                            .read(themeModeProvider.notifier)
+                            .setThemeMode(mode);
+                        Navigator.pop(ctx);
+                      }
+                    },
+                    title: Row(
+                      children: [
+                        Icon(entry.$3, size: 20),
+                        const SizedBox(width: 12),
+                        Text(entry.$2),
+                      ],
+                    ),
+                    subtitle: Text(entry.$4,
+                        style: const TextStyle(fontSize: 12)),
+                    activeColor: AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
 }
 
 class _ApartmentCardWithCoResidents extends ConsumerWidget {

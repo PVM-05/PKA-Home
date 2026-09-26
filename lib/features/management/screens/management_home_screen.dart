@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../widgets/stat_card.dart';
 import '../../../data/models/user_model.dart';
@@ -12,16 +14,13 @@ import '../../../data/providers/management_provider.dart';
 import 'resident_management_screen.dart';
 import 'invoice_management_screen.dart';
 import 'issue_management_screen.dart';
-import 'link_request_management_screen.dart';
 import 'announcement_management_screen.dart';
-import 'apartment_management_screen.dart';
-import '../../auth/screens/change_password_screen.dart';
-import 'audit_trail_screen.dart';
-import 'create_invoice_screen.dart';
-import 'handbook_management_screen.dart';
-import 'role_delegation_screen.dart';
-import 'permission_matrix_screen.dart';
 import '../widgets/role_onboarding_dialog.dart';
+import '../widgets/revenue_trend_chart.dart';
+import '../../../core/widgets/maintenance_fund_card.dart';
+import '../../../core/widgets/font_size_sheet.dart';
+import '../../../core/theme/theme_mode_provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
@@ -33,12 +32,12 @@ class ManagementHomeScreen extends ConsumerStatefulWidget {
 class _ManagementTab {
   final String key;
   final Widget screen;
-  final BottomNavigationBarItem item;
+  final NavigationDestination destination;
 
   const _ManagementTab({
     required this.key,
     required this.screen,
-    required this.item,
+    required this.destination,
   });
 }
 
@@ -95,18 +94,18 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       _ManagementTab(
         key: 'dashboard',
         screen: _buildDashboard(currentUser),
-        item: const BottomNavigationBarItem(
+        destination: const NavigationDestination(
           icon: Icon(Icons.bar_chart_outlined),
-          activeIcon: Icon(Icons.bar_chart),
+          selectedIcon: Icon(Icons.bar_chart, color: AppTheme.primary),
           label: 'Tổng quan',
         ),
       ),
       _ManagementTab(
         key: 'residents',
         screen: const ResidentManagementScreen(),
-        item: BottomNavigationBarItem(
+        destination: NavigationDestination(
           icon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups_outlined)) : const Icon(Icons.groups_outlined),
-          activeIcon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups)) : const Icon(Icons.groups),
+          selectedIcon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups, color: AppTheme.primary)) : const Icon(Icons.groups, color: AppTheme.primary),
           label: 'Cư dân',
         ),
       ),
@@ -114,9 +113,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         _ManagementTab(
           key: 'invoices',
           screen: const InvoiceManagementScreen(),
-          item: BottomNavigationBarItem(
+          destination: NavigationDestination(
             icon: invoiceCount > 0 ? Badge(label: Text('$invoiceCount'), child: const Icon(Icons.receipt_long_outlined)) : const Icon(Icons.receipt_long_outlined),
-            activeIcon: invoiceCount > 0 ? Badge(label: Text('$invoiceCount'), child: const Icon(Icons.receipt_long)) : const Icon(Icons.receipt_long),
+            selectedIcon: invoiceCount > 0 ? Badge(label: Text('$invoiceCount'), child: const Icon(Icons.receipt_long, color: AppTheme.primary)) : const Icon(Icons.receipt_long, color: AppTheme.primary),
             label: 'Hóa đơn',
           ),
         ),
@@ -124,18 +123,18 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         _ManagementTab(
           key: 'issues',
           screen: const IssueManagementScreen(),
-          item: BottomNavigationBarItem(
+          destination: NavigationDestination(
             icon: issueCount > 0 ? Badge(label: Text('$issueCount'), child: const Icon(Icons.report_problem_outlined)) : const Icon(Icons.report_problem_outlined),
-            activeIcon: issueCount > 0 ? Badge(label: Text('$issueCount'), child: const Icon(Icons.report_problem)) : const Icon(Icons.report_problem),
+            selectedIcon: issueCount > 0 ? Badge(label: Text('$issueCount'), child: const Icon(Icons.report_problem, color: AppTheme.primary)) : const Icon(Icons.report_problem, color: AppTheme.primary),
             label: 'Phản ánh',
           ),
         ),
       _ManagementTab(
         key: 'announcements',
         screen: const AnnouncementManagementScreen(),
-        item: const BottomNavigationBarItem(
+        destination: const NavigationDestination(
           icon: Icon(Icons.notifications_outlined),
-          activeIcon: Icon(Icons.notifications),
+          selectedIcon: Icon(Icons.notifications, color: AppTheme.primary),
           label: 'Thông báo',
         ),
       ),
@@ -179,9 +178,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AuditTrailScreen()),
-              );
+              context.push(AppRoutes.managementAuditTrail);
             },
             tooltip: 'Lịch sử hoạt động',
           ),
@@ -189,17 +186,15 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             icon: const Icon(Icons.account_circle_outlined),
             onSelected: (value) {
               if (value == 'password') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
-                );
+                context.push(AppRoutes.changePassword);
               } else if (value == 'delegation') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const RoleDelegationScreen()),
-                );
+                context.push(AppRoutes.managementRoleDelegation);
               } else if (value == 'matrix') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const PermissionMatrixScreen()),
-                );
+                context.push(AppRoutes.managementPermissionMatrix);
+              } else if (value == 'fontSize') {
+                showFontSizeBottomSheet(context, ref);
+              } else if (value == 'theme') {
+                _showManagementThemeModeSheet(context, ref);
               } else if (value == 'logout') {
                 ref.read(authProvider.notifier).logout();
               }
@@ -227,12 +222,32 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 ),
               ),
               const PopupMenuItem(
+                value: 'fontSize',
+                child: Row(
+                  children: [
+                    Icon(Icons.format_size_outlined, size: 20, color: AppTheme.primary),
+                    SizedBox(width: 8),
+                    Text('Cỡ chữ hiển thị'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
                 value: 'password',
                 child: Row(
                   children: [
-                    Icon(Icons.vpn_key_outlined, size: 20),
+                    Icon(Icons.lock_outline, size: 20),
                     SizedBox(width: 8),
                     Text('Đổi mật khẩu'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'theme',
+                child: Row(
+                  children: [
+                    Icon(Icons.brightness_6_outlined, size: 20, color: AppTheme.primary),
+                    SizedBox(width: 8),
+                    Text('Giao diện'),
                   ],
                 ),
               ),
@@ -255,13 +270,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         index: currentIndex,
         children: tabs.map((t) => t.screen).toList(),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primary,
-        unselectedItemColor: AppTheme.textSecondary,
-        items: tabs.map((t) => t.item).toList(),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentIndex,
+        onDestinationSelected: _onItemTapped,
+        indicatorColor: AppTheme.primary.withValues(alpha: 0.15),
+        destinations: tabs.map((t) => t.destination).toList(),
       ),
     );
   }
@@ -285,6 +298,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         ref.invalidate(pendingConfirmationInvoicesProvider);
         ref.invalidate(allIssuesProvider);
         ref.invalidate(financialStatsProvider);
+        ref.invalidate(monthlyRevenueTrendProvider);
         ref.invalidate(apartmentsStreamProvider);
         ref.invalidate(totalResidentsProvider);
       },
@@ -308,7 +322,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     label: 'Duyệt liên kết',
                     color: AppTheme.primary,
                     onTap: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LinkRequestManagementScreen()));
+                      await context.push(AppRoutes.managementLinkRequests);
                       ref.invalidate(pendingLinkRequestsCountProvider);
                       ref.invalidate(residentsProvider);
                     },
@@ -320,7 +334,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     icon: Icons.vpn_key_outlined,
                     label: 'Ủy quyền',
                     color: Colors.purple,
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RoleDelegationScreen())),
+                    onTap: () => context.push(AppRoutes.managementRoleDelegation),
                   ),
                   const SizedBox(width: 12),
                 ],
@@ -330,7 +344,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     icon: Icons.receipt_long,
                     label: 'Lập hóa đơn',
                     color: AppTheme.secondary,
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateInvoiceScreen())),
+                    onTap: () => context.push(AppRoutes.managementCreateInvoice),
                   ),
                   const SizedBox(width: 12),
                 ],
@@ -340,7 +354,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     icon: Icons.report_problem_outlined,
                     label: 'Xử lý sự cố',
                     color: Colors.orange,
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const IssueManagementScreen())),
+                    onTap: () => context.push(AppRoutes.managementIssues),
                     badgeCount: pendingIssuesAsync.value ?? 0,
                   ),
                   const SizedBox(width: 12),
@@ -351,7 +365,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     icon: Icons.domain,
                     label: 'Căn hộ',
                     color: Colors.teal,
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ApartmentManagementScreen())),
+                    onTap: () => context.push(AppRoutes.managementApartments),
                   ),
                   const SizedBox(width: 12),
                 ],
@@ -361,7 +375,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   icon: Icons.menu_book_outlined,
                   label: 'Cẩm nang',
                   color: Colors.indigo,
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HandbookManagementScreen())),
+                   onTap: () => context.push(AppRoutes.managementHandbook),
                 ),
               ],
             ),
@@ -436,6 +450,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           const SizedBox(height: 12),
           if (!isTechnician) ...[
             _buildFinancialProgressCard(),
+            const SizedBox(height: 16),
+            const RevenueTrendChart(),
+            const SizedBox(height: 16),
+            const MaintenanceFundCard(isManagement: true),
             const SizedBox(height: 16),
           ],
           GridView.count(
@@ -611,13 +629,47 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: stats.collectionRate,
-                    minHeight: 8,
-                    backgroundColor: AppStatusColors.unpaid.withValues(alpha: 0.15),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppStatusColors.paid),
+                SizedBox(
+                  height: 120,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: PieChart(
+                          PieChartData(
+                            sectionsSpace: 2,
+                            centerSpaceRadius: 30,
+                            sections: [
+                              PieChartSectionData(
+                                color: AppStatusColors.paid,
+                                value: stats.paidTotal,
+                                title: '',
+                                radius: 25,
+                              ),
+                              PieChartSectionData(
+                                color: AppStatusColors.unpaid,
+                                value: stats.unpaidTotal,
+                                title: '',
+                                radius: 25,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLegendItem(color: AppStatusColors.paid, label: 'Đã thu: ${formatCurrency.format(stats.paidTotal)}'),
+                            const SizedBox(height: 8),
+                            _buildLegendItem(color: AppStatusColors.unpaid, label: 'Còn nợ: ${formatCurrency.format(stats.unpaidTotal)}'),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -729,4 +781,104 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       ),
     );
   }
+
+  Widget _buildLegendItem({required Color color, required String label}) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+void _showManagementThemeModeSheet(BuildContext context, WidgetRef ref) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) {
+      return Consumer(
+        builder: (context, ref, _) {
+          final currentMode = ref.watch(themeModeProvider);
+          final entries = [
+            (ThemeMode.system, 'Theo hệ thống', Icons.brightness_auto,
+                'Tự động theo cài đặt thiết bị'),
+            (ThemeMode.light, 'Sáng', Icons.light_mode,
+                'Luôn dùng giao diện sáng'),
+            (ThemeMode.dark, 'Tối', Icons.dark_mode,
+                'Luôn dùng giao diện tối'),
+          ];
+
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Chọn giao diện',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                ...entries.map(
+                  (entry) =>
+                      // ignore: deprecated_member_use
+                      RadioListTile<ThemeMode>(
+                    value: entry.$1,
+                    // ignore: deprecated_member_use
+                    groupValue: currentMode,
+                    // ignore: deprecated_member_use
+                    onChanged: (mode) {
+                      if (mode != null) {
+                        ref
+                            .read(themeModeProvider.notifier)
+                            .setThemeMode(mode);
+                        Navigator.pop(ctx);
+                      }
+                    },
+                    title: Row(
+                      children: [
+                        Icon(entry.$3, size: 20),
+                        const SizedBox(width: 12),
+                        Text(entry.$2),
+                      ],
+                    ),
+                    subtitle: Text(entry.$4,
+                        style: const TextStyle(fontSize: 12)),
+                    activeColor: AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
 }

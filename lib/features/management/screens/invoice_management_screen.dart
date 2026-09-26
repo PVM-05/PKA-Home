@@ -14,6 +14,7 @@ import '../../../core/widgets/role_guard.dart';
 import 'create_invoice_screen.dart';
 import 'edit_invoice_screen.dart';
 import 'management_invoice_detail_screen.dart';
+import '../../../core/utils/excel_export_helper.dart';
 
 class InvoiceManagementScreen extends ConsumerStatefulWidget {
   const InvoiceManagementScreen({super.key});
@@ -27,11 +28,37 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _statusFilter = 'all'; // 'all', 'pending_confirmation', 'unpaid', 'paid'
+  bool _isExporting = false;
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _exportExcel(List<InvoiceModel> invoices) async {
+    setState(() => _isExporting = true);
+    final path = await ExcelExportHelper.exportInvoices(invoices);
+    setState(() => _isExporting = false);
+    
+    if (mounted) {
+      if (path != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã xuất file thành công!\n$path'),
+            backgroundColor: AppTheme.success,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lỗi khi xuất file Excel.'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -44,6 +71,22 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
         appBar: AppBar(
           title: const Text('Quản lý Hóa đơn'),
           automaticallyImplyLeading: false,
+          actions: [
+            invoicesAsync.when(
+              data: (invoices) {
+                if (invoices.isEmpty) return const SizedBox.shrink();
+                return IconButton(
+                  icon: _isExporting 
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.download),
+                  tooltip: 'Xuất Excel',
+                  onPressed: _isExporting ? null : () => _exportExcel(invoices),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (err, st) => const SizedBox.shrink(),
+            ),
+          ],
         ),
 
       body: Column(

@@ -8,6 +8,7 @@ import '../../../core/utils/validators.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/providers/management_provider.dart';
+import '../../../data/providers/vehicle_provider.dart';
 import '../../../data/models/apartment_model.dart';
 
 class CreateInvoiceScreen extends ConsumerStatefulWidget {
@@ -358,7 +359,19 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                     child: Text('${apt.code} (${apt.area ?? 0} m²)'),
                                   );
                                 }).toList(),
-                                onChanged: (val) => setState(() => _selectedApartment = val),
+                                onChanged: (val) async {
+                                  setState(() => _selectedApartment = val);
+                                  if (val != null) {
+                                    try {
+                                      final counts = await ref.read(vehicleRepositoryProvider).getVehicleCounts(val.id);
+                                      final motorbikes = counts['motorbike'] ?? 0;
+                                      final cars = counts['car'] ?? 0;
+                                      _motorbikeQtyController.text = motorbikes > 0 ? motorbikes.toString() : '';
+                                      _carQtyController.text = cars > 0 ? cars.toString() : '';
+                                      if (mounted) setState(() {});
+                                    } catch (_) {}
+                                  }
+                                },
                                 validator: (val) => val == null ? 'Vui lòng chọn căn hộ' : null,
                               ),
                             ],
@@ -592,6 +605,11 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                   ),
                                 ),
                               ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Hệ thống tự động điền số xe theo dữ liệu đăng ký phương tiện của căn hộ.',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
                             ),
                           ],
                         ),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
 import '../models/emergency_contact_model.dart';
@@ -6,19 +8,37 @@ import '../models/building_amenity_model.dart';
 
 class HandbookRepository {
   final SupabaseClient _client = SupabaseConfig.client;
+  
+  // Cache keys
+  static const String _contactsCacheKey = 'handbook_contacts_cache';
+  static const String _rulesCacheKey = 'handbook_rules_cache';
+  static const String _amenitiesCacheKey = 'handbook_amenities_cache';
 
   // ==========================================
   // 1. Emergency Contacts (Đường dây nóng)
   // ==========================================
   Future<List<EmergencyContactModel>> fetchEmergencyContacts() async {
-    final response = await _client
-        .from('emergency_contacts')
-        .select()
-        .order('display_order', ascending: true);
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final response = await _client
+          .from('emergency_contacts')
+          .select()
+          .order('display_order', ascending: true);
 
-    return (response as List)
-        .map((e) => EmergencyContactModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+      final data = (response as List).cast<Map<String, dynamic>>();
+      // Cache data
+      await prefs.setString(_contactsCacheKey, jsonEncode(data));
+
+      return data.map((e) => EmergencyContactModel.fromJson(e)).toList();
+    } catch (e) {
+      // Load from cache if network fails
+      final cachedStr = prefs.getString(_contactsCacheKey);
+      if (cachedStr != null) {
+        final cachedData = jsonDecode(cachedStr) as List;
+        return cachedData.map((e) => EmergencyContactModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      rethrow;
+    }
   }
 
   Stream<List<Map<String, dynamic>>> watchContacts() {
@@ -62,14 +82,27 @@ class HandbookRepository {
   // 2. Building Rules (Nội quy chung cư)
   // ==========================================
   Future<List<BuildingRuleModel>> fetchBuildingRules() async {
-    final response = await _client
-        .from('building_rules')
-        .select()
-        .order('display_order', ascending: true);
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final response = await _client
+          .from('building_rules')
+          .select()
+          .order('display_order', ascending: true);
 
-    return (response as List)
-        .map((e) => BuildingRuleModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+      final data = (response as List).cast<Map<String, dynamic>>();
+      // Cache data
+      await prefs.setString(_rulesCacheKey, jsonEncode(data));
+
+      return data.map((e) => BuildingRuleModel.fromJson(e)).toList();
+    } catch (e) {
+      // Load from cache if network fails
+      final cachedStr = prefs.getString(_rulesCacheKey);
+      if (cachedStr != null) {
+        final cachedData = jsonDecode(cachedStr) as List;
+        return cachedData.map((e) => BuildingRuleModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      rethrow;
+    }
   }
 
   Stream<List<Map<String, dynamic>>> watchRules() {
@@ -109,14 +142,27 @@ class HandbookRepository {
   // 3. Building Amenities (Tiện ích tòa nhà)
   // ==========================================
   Future<List<BuildingAmenityModel>> fetchBuildingAmenities() async {
-    final response = await _client
-        .from('building_amenities')
-        .select()
-        .order('display_order', ascending: true);
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final response = await _client
+          .from('building_amenities')
+          .select()
+          .order('display_order', ascending: true);
 
-    return (response as List)
-        .map((e) => BuildingAmenityModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+      final data = (response as List).cast<Map<String, dynamic>>();
+      // Cache data
+      await prefs.setString(_amenitiesCacheKey, jsonEncode(data));
+
+      return data.map((e) => BuildingAmenityModel.fromJson(e)).toList();
+    } catch (e) {
+      // Load from cache if network fails
+      final cachedStr = prefs.getString(_amenitiesCacheKey);
+      if (cachedStr != null) {
+        final cachedData = jsonDecode(cachedStr) as List;
+        return cachedData.map((e) => BuildingAmenityModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      rethrow;
+    }
   }
 
   Stream<List<Map<String, dynamic>>> watchAmenities() {

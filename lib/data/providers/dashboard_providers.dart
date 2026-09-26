@@ -108,3 +108,84 @@ final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
         );
       });
 });
+
+class MonthlyRevenueItem {
+  final String period; // e.g. "09/2026"
+  final String shortLabel; // e.g. "T9"
+  final double paidAmount;
+  final double unpaidAmount;
+
+  MonthlyRevenueItem({
+    required this.period,
+    required this.shortLabel,
+    required this.paidAmount,
+    required this.unpaidAmount,
+  });
+
+  double get totalAmount => paidAmount + unpaidAmount;
+  double get collectionRate => totalAmount > 0 ? (paidAmount / totalAmount) : 0.0;
+}
+
+final monthlyRevenueTrendProvider = StreamProvider<List<MonthlyRevenueItem>>((ref) {
+  return SupabaseConfig.client
+      .from('invoices')
+      .stream(primaryKey: ['id'])
+      .map((invoices) {
+        final now = DateTime.now();
+        final List<DateTime> months = [];
+        for (int i = 5; i >= 0; i--) {
+          int year = now.year;
+          int month = now.month - i;
+          while (month <= 0) {
+            month += 12;
+            year -= 1;
+          }
+          months.add(DateTime(year, month, 1));
+        }
+
+        final List<MonthlyRevenueItem> items = [];
+
+        for (final m in months) {
+          final mm = m.month.toString().padLeft(2, '0');
+          final mSingle = m.month.toString();
+          final yyyy = m.year.toString();
+          final periodKey1 = '$mm/$yyyy';
+          final periodKey2 = '$mSingle/$yyyy';
+          final shortLabel = 'T${m.month}';
+
+          double paid = 0.0;
+          double unpaid = 0.0;
+
+          for (final inv in invoices) {
+            final invPeriod = (inv['period'] as String?)?.trim() ?? '';
+            final amt = (inv['total_amount'] as num?)?.toDouble() ?? 0.0;
+            final status = inv['status'];
+
+            bool isMatch = invPeriod == periodKey1 || invPeriod == periodKey2;
+            if (!isMatch && inv['created_at'] != null) {
+              final created = DateTime.tryParse(inv['created_at'] as String);
+              if (created != null && created.year == m.year && created.month == m.month) {
+                isMatch = true;
+              }
+            }
+
+            if (isMatch) {
+              if (status == 'paid') {
+                paid += amt;
+              } else {
+                unpaid += amt;
+              }
+            }
+          }
+
+          items.add(MonthlyRevenueItem(
+            period: periodKey1,
+            shortLabel: shortLabel,
+            paidAmount: paid,
+            unpaidAmount: unpaid,
+          ));
+        }
+
+        return items;
+      });
+});

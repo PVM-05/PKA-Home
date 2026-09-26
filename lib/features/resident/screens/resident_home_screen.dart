@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../widgets/notification_card.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/app_avatar.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../widgets/apartment_switcher_chip.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
@@ -12,12 +17,13 @@ import '../../../data/providers/resident_issue_provider.dart';
 import 'resident_invoice_screen.dart';
 import 'resident_issue_screen.dart';
 import 'resident_profile_screen.dart';
-import 'resident_announcement_detail_screen.dart';
-import 'resident_handbook_screen.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/link_request_provider.dart';
+import '../../../core/widgets/maintenance_fund_card.dart';
+import '../../../data/providers/notification_provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   const ResidentHomeScreen({super.key});
@@ -156,31 +162,29 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
           const ResidentProfileScreen(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primary,
-        unselectedItemColor: AppTheme.textSecondary,
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onItemTapped,
+        indicatorColor: AppTheme.primary.withValues(alpha: 0.15),
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            selectedIcon: Icon(Icons.home, color: AppTheme.primary),
             label: 'Trang chủ',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long),
+            selectedIcon: Icon(Icons.receipt_long, color: AppTheme.primary),
             label: 'Hóa đơn',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble),
+            selectedIcon: Icon(Icons.chat_bubble, color: AppTheme.primary),
             label: 'Phản ánh',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+            selectedIcon: Icon(Icons.person, color: AppTheme.primary),
             label: 'Tài khoản',
           ),
         ],
@@ -225,53 +229,67 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
+                        child: Row(
                           children: [
-                            const Text(
-                              'Xin chào,',
-                              style: TextStyle(color: Colors.white70, fontSize: 16),
+                            AppAvatar(
+                              name: fullName,
+                              size: 46,
+                              fontSize: 18,
+                              onTap: () => _onItemTapped(3),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              fullName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'Xin chào,',
+                                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    fullName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.apartment, color: Colors.white, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              'PKA Home',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
+                      Row(
+                        children: [
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final unreadCount = ref.watch(unreadNotificationsCountProvider);
+                              return IconButton(
+                                icon: Badge(
+                                  isLabelVisible: unreadCount > 0,
+                                  label: Text('$unreadCount'),
+                                  backgroundColor: AppStatusColors.unpaid,
+                                  child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 24),
+                                ),
+                                tooltip: 'Thông báo',
+                                onPressed: () {
+                                  context.push(AppRoutes.residentNotifications);
+                                },
+                              );
+                            },
+                          ),
+                          const ApartmentSwitcherChip(),
+                        ],
                       ),
                     ],
                   ),
@@ -290,30 +308,26 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildQuickAction(Icons.payment, 'Thanh toán', () => _onItemTapped(1)),
-                    _buildQuickAction(Icons.build_circle_outlined, 'Báo sự cố', () => _onItemTapped(2)),
+                    _buildQuickAction(Icons.payment, 'Thanh toán', () => _onItemTapped(1))
+                        .animate().fade(duration: 300.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                    _buildQuickAction(Icons.build_circle_outlined, 'Báo sự cố', () => _onItemTapped(2))
+                        .animate().fade(duration: 300.ms, delay: 100.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
                     _buildQuickAction(
                       Icons.emergency_outlined,
                       'Hotline',
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ResidentHandbookScreen(initialTabIndex: 0),
-                        ),
-                      ),
-                    ),
+                      () => context.push(AppRoutes.residentHandbook, extra: 0),
+                    ).animate().fade(duration: 300.ms, delay: 200.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
                     _buildQuickAction(
                       Icons.menu_book_outlined,
                       'Cẩm nang',
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ResidentHandbookScreen(initialTabIndex: 1),
-                        ),
-                      ),
-                    ),
+                      () => context.push(AppRoutes.residentHandbook, extra: 1),
+                    ).animate().fade(duration: 300.ms, delay: 300.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
                   ],
                 ),
+                const SizedBox(height: 20),
+                
+                // Dịch vụ & Tiện ích Cư dân
+                _buildResidentServicesSection(context),
                 const SizedBox(height: 24),
                 
                 // Invoice Summary Card
@@ -386,11 +400,16 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                           ],
                         ),
                       ),
-                    );
+                    ).animate().fade(duration: 400.ms, delay: 100.ms).slideX(begin: 0.1, curve: Curves.easeOut);
                   },
                   loading: () => const InvoiceCardSkeleton(),
-                  error: (err, st) => Text('Lỗi: $err'),
+                  error: (err, st) => AppErrorCard(
+                    error: err,
+                    onRetry: () => ref.invalidate(residentInvoiceProvider),
+                  ),
                 ),
+                const SizedBox(height: 16),
+                const MaintenanceFundCard(),
                 
                 const SizedBox(height: 24),
                 
@@ -442,10 +461,13 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                         trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
                         onTap: () => _onItemTapped(2),
                       ),
-                    );
+                    ).animate().fade(duration: 400.ms, delay: 200.ms).slideX(begin: 0.1, curve: Curves.easeOut);
                   },
                   loading: () => const ListItemSkeleton(),
-                  error: (err, st) => Text('Lỗi: $err'),
+                  error: (err, st) => AppErrorCard(
+                    error: err,
+                    onRetry: () => ref.invalidate(residentIssueProvider),
+                  ),
                 ),
 
                 const SizedBox(height: 24),
@@ -474,12 +496,9 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                           content: announcement.content,
                           date: '${announcement.createdAt.day}/${announcement.createdAt.month}/${announcement.createdAt.year}',
                           onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ResidentAnnouncementDetailScreen(
-                                  announcement: announcement,
-                                ),
-                              ),
+                            context.push(
+                              AppRoutes.residentAnnouncementDetail,
+                              extra: announcement,
                             );
                           },
                         );
@@ -492,7 +511,10 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                       ListItemSkeleton(),
                     ],
                   ),
-                  error: (error, stack) => Center(child: Text('Lỗi tải thông báo: $error')),
+                  error: (error, stack) => AppErrorCard(
+                    error: error,
+                    onRetry: () => ref.invalidate(announcementsStreamProvider),
+                  ),
                 ),
                 const SizedBox(height: 40),
               ],
@@ -503,6 +525,99 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     ),
   );
 }
+
+  Widget _buildResidentServicesSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface;
+
+    final services = [
+      {
+        'title': 'Đăng ký gửi xe',
+        'subtitle': 'Quản lý phương tiện & thẻ',
+        'icon': Icons.directions_car_filled_outlined,
+        'color': const Color(0xFF1E88E5),
+        'onTap': () => context.push(AppRoutes.residentVehicles),
+      },
+      {
+        'title': 'Tiện ích chung',
+        'subtitle': 'BBQ, Hồ bơi, Thể thao',
+        'icon': Icons.pool_outlined,
+        'color': const Color(0xFF26A69A),
+        'onTap': () => context.push(AppRoutes.residentHandbook, extra: 2),
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Dịch vụ & Tiện ích',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: services.map((s) {
+            final color = s['color'] as Color;
+            return Expanded(
+              child: Card(
+                elevation: 0,
+                color: cardBg,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: isDark
+                        ? Colors.white12
+                        : color.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: s['onTap'] as VoidCallback,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(s['icon'] as IconData, color: color, size: 22),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                s['title'] as String,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                s['subtitle'] as String,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark ? Colors.white60 : AppTheme.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ).animate().fade(duration: 350.ms, delay: 150.ms).slideY(begin: 0.1, curve: Curves.easeOutQuad),
+      ],
+    );
+  }
 
   Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
@@ -532,3 +647,4 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     );
   }
 }
+

@@ -279,35 +279,64 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
   }
 
   Widget _buildBottomAction(BuildContext context) {
-    if (widget.invoice.status != 'unpaid') {
-      return const SizedBox.shrink();
+    if (widget.invoice.status == 'unpaid') {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              offset: const Offset(0, -4),
+              blurRadius: 16,
+            ),
+          ],
+        ),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: AppTheme.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          icon: const Icon(Icons.payment),
+          label: const Text('THANH TOÁN NGAY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          onPressed: () {
+            _showPaymentBottomSheet(context);
+          },
+        ),
+      );
+    } else if (widget.invoice.status == 'paid' || widget.invoice.status == 'pending_confirmation') {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              offset: const Offset(0, -4),
+              blurRadius: 16,
+            ),
+          ],
+        ),
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            side: const BorderSide(color: AppTheme.primary, width: 1.5),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          icon: const Icon(Icons.receipt_outlined, color: AppTheme.primary),
+          label: const Text(
+            'XEM BIÊN NHẬN ĐIỆN TỬ',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primary),
+          ),
+          onPressed: () {
+            _showDigitalReceiptBottomSheet(context);
+          },
+        ),
+      );
     }
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, -4),
-            blurRadius: 16,
-          ),
-        ],
-      ),
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: AppTheme.primary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        icon: const Icon(Icons.payment),
-        label: const Text('THANH TOÁN NGAY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        onPressed: () {
-          _showPaymentBottomSheet(context);
-        },
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   void _showPaymentBottomSheet(BuildContext context) {
@@ -413,9 +442,11 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Theme.of(context).colorScheme.surface
+                          : AppTheme.background,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey.shade200),
                     ),
                     child: Column(
                       children: [
@@ -570,5 +601,145 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         );
       }
     }
+  }
+
+  void _showDigitalReceiptBottomSheet(BuildContext context) {
+    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    final formatDate = DateFormat('dd/MM/yyyy HH:mm');
+    final isPaid = widget.invoice.status == 'paid';
+    final receiptCode = 'REC-${widget.invoice.id.length > 8 ? widget.invoice.id.substring(0, 8).toUpperCase() : widget.invoice.id.toUpperCase()}';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 4,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (isPaid ? AppTheme.success : AppTheme.warning).withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isPaid ? Icons.verified : Icons.hourglass_top,
+                      color: isPaid ? AppTheme.success : AppTheme.warning,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    isPaid ? 'BIÊN NHẬN THANH TOÁN' : 'XÁC NHẬN CHUYỂN KHOẢN',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                isPaid
+                    ? 'Giao dịch đã được Ban Quản Lý phê duyệt hợp lệ'
+                    : 'Đã gửi yêu cầu đối soát, BQL đang kiểm tra giao dịch',
+                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? Theme.of(context).colorScheme.surface : const Color(0xFFF9FAFB),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    _buildCopyableRow(
+                      context,
+                      label: 'Mã biên nhận',
+                      value: receiptCode,
+                      copyValue: receiptCode,
+                    ),
+                    const Divider(height: 16),
+                    _buildCopyableRow(
+                      context,
+                      label: 'Căn hộ',
+                      value: widget.invoice.apartment?.code ?? 'N/A',
+                    ),
+                    const Divider(height: 16),
+                    _buildCopyableRow(
+                      context,
+                      label: 'Kỳ thu',
+                      value: widget.invoice.period,
+                    ),
+                    const Divider(height: 16),
+                    _buildCopyableRow(
+                      context,
+                      label: 'Số tiền thanh toán',
+                      value: formatCurrency.format(widget.invoice.totalAmount),
+                      isHighlight: true,
+                    ),
+                    const Divider(height: 16),
+                    _buildCopyableRow(
+                      context,
+                      label: 'Thời gian',
+                      value: formatDate.format((widget.invoice.updatedAt ?? widget.invoice.createdAt).toLocal()),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: AppTheme.primary,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.copy, color: Colors.white, size: 18),
+                label: const Text(
+                  'Sao chép thông tin biên nhận',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  final summary = 'BIÊN NHẬN THANH TOÁN PKA-HOME\n'
+                      'Mã: $receiptCode\n'
+                      'Căn hộ: ${widget.invoice.apartment?.code ?? "N/A"}\n'
+                      'Kỳ: ${widget.invoice.period}\n'
+                      'Số tiền: ${formatCurrency.format(widget.invoice.totalAmount)}\n'
+                      'Trạng thái: ${isPaid ? "Đã thanh toán" : "Chờ xác nhận"}\n'
+                      'Thời gian: ${formatDate.format((widget.invoice.updatedAt ?? widget.invoice.createdAt).toLocal())}';
+                  Clipboard.setData(ClipboardData(text: summary));
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Đã sao chép toàn bộ thông tin biên nhận'),
+                      backgroundColor: AppTheme.success,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
