@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
 import '../../core/utils/app_logger.dart';
+import '../models/issue_rating_model.dart';
 
 final issueRepositoryProvider = Provider<IssueRepository>((ref) {
   return IssueRepository();
@@ -227,5 +228,62 @@ class IssueRepository {
       'user_id': userId,
       'content': content,
     });
+  }
+
+  /// Lấy đánh giá dịch vụ của một sự cố
+  Future<IssueRatingModel?> fetchRatingForIssue(String issueId) async {
+    final response = await _client
+        .from('issue_ratings')
+        .select('*, users:reporter_id(full_name)')
+        .eq('issue_report_id', issueId)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return IssueRatingModel.fromJson(response);
+  }
+
+  /// Gửi đánh giá dịch vụ mới cho sự cố đã hoàn thành
+  Future<IssueRatingModel> submitRating({
+    required String issueReportId,
+    required String reporterId,
+    required int speedRating,
+    required int attitudeRating,
+    required int qualityRating,
+    String? comment,
+  }) async {
+    final response = await _client.from('issue_ratings').insert({
+      'issue_report_id': issueReportId,
+      'reporter_id': reporterId,
+      'speed_rating': speedRating,
+      'attitude_rating': attitudeRating,
+      'quality_rating': qualityRating,
+      if (comment != null && comment.trim().isNotEmpty) 'comment': comment.trim(),
+    }).select('*, users:reporter_id(full_name)').single();
+
+    return IssueRatingModel.fromJson(response);
+  }
+
+  /// Chỉnh sửa đánh giá dịch vụ
+  Future<IssueRatingModel> updateRating({
+    required String ratingId,
+    required int speedRating,
+    required int attitudeRating,
+    required int qualityRating,
+    String? comment,
+  }) async {
+    final response = await _client.from('issue_ratings').update({
+      'speed_rating': speedRating,
+      'attitude_rating': attitudeRating,
+      'quality_rating': qualityRating,
+      'comment': comment?.trim().isNotEmpty == true ? comment!.trim() : null,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', ratingId).select('*, users:reporter_id(full_name)').single();
+
+    return IssueRatingModel.fromJson(response);
+  }
+
+  /// Lắng nghe thay đổi bảng issue_ratings qua Realtime
+  Stream<List<Map<String, dynamic>>> streamRatings() {
+    return _client.from('issue_ratings').stream(primaryKey: ['id']);
   }
 }

@@ -118,3 +118,19 @@ Table emergency_contacts {
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
+
+Table issue_ratings {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  issue_report_id uuid [unique, not null, note: 'Khóa ngoại 1-1 tới issue_reports']
+  reporter_id uuid [not null]
+  speed_rating integer [not null, note: 'Tốc độ xử lý: 1-5 sao']
+  attitude_rating integer [not null, note: 'Thái độ phục vụ: 1-5 sao']
+  quality_rating integer [not null, note: 'Chất lượng kỹ thuật: 1-5 sao']
+  overall_rating decimal [note: 'GENERATED ALWAYS AS (ROUND((speed_rating + attitude_rating + quality_rating)::numeric / 3.0, 1)) STORED']
+  comment text [note: 'Ý kiến đóng góp của cư dân']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Ref: issue_ratings.issue_report_id - issue_reports.id
+Ref: issue_ratings.reporter_id > users.id

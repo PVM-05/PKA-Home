@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/management_provider.dart';
+import '../../../data/providers/issue_rating_provider.dart';
 
 class TechnicianStatItem {
   final String staffId;
@@ -11,6 +12,8 @@ class TechnicianStatItem {
   final int resolvedCount;
   final int inProgressCount;
   final double avgResolutionHours;
+  final double avgRating;
+  final int ratingCount;
 
   const TechnicianStatItem({
     required this.staffId,
@@ -19,6 +22,8 @@ class TechnicianStatItem {
     required this.resolvedCount,
     required this.inProgressCount,
     required this.avgResolutionHours,
+    this.avgRating = 0.0,
+    this.ratingCount = 0,
   });
 }
 
@@ -29,6 +34,7 @@ class TechnicianPerformanceCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final issuesAsync = ref.watch(allIssuesProvider);
     final residentsAsync = ref.watch(residentsProvider);
+    final ratingsAsync = ref.watch(allIssueRatingsProvider);
 
     return issuesAsync.when(
       loading: () => const SizedBox.shrink(),
@@ -63,6 +69,16 @@ class TechnicianPerformanceCard extends ConsumerWidget {
           }
           final avgHours = resolved.isNotEmpty ? totalHours / resolved.length : 0.0;
 
+          final allRatings = ratingsAsync.valueOrNull ?? [];
+          final techRatings = allRatings.where((r) {
+            return staffIssues.any((issue) => issue.id == r.issueReportId);
+          }).toList();
+
+          final double avgRating = techRatings.isNotEmpty
+              ? techRatings.map((r) => r.overallRating).reduce((a, b) => a + b) / techRatings.length
+              : 0.0;
+          final int ratingCount = techRatings.length;
+
           stats.add(TechnicianStatItem(
             staffId: staffId,
             staffName: staffMap[staffId] ?? 'Kỹ thuật viên',
@@ -70,6 +86,8 @@ class TechnicianPerformanceCard extends ConsumerWidget {
             resolvedCount: resolved.length,
             inProgressCount: inProgress,
             avgResolutionHours: avgHours,
+            avgRating: avgRating,
+            ratingCount: ratingCount,
           ));
         });
 
@@ -151,6 +169,31 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              if (item.ratingCount > 0) ...[
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.star_rate_rounded, size: 12, color: Colors.amber),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        item.avgRating.toStringAsFixed(1),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                           Row(

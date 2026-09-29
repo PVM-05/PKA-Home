@@ -1,5 +1,6 @@
 import 'apartment_model.dart';
 import 'resident_model.dart';
+import 'issue_rating_model.dart';
 
 class IssueImageModel {
   final String imageUrl;
@@ -36,6 +37,7 @@ class IssueModel {
   final ResidentModel? assignedStaff;
   final List<String> imageUrls;
   final List<IssueImageModel> images;
+  final IssueRatingModel? rating;
 
   IssueModel({
     required this.id,
@@ -52,6 +54,7 @@ class IssueModel {
     this.assignedStaff,
     this.imageUrls = const [],
     this.images = const [],
+    this.rating,
   });
 
   /// Danh sách ảnh do cư dân gửi khi báo cáo sự cố (ảnh "Trước")
@@ -96,6 +99,13 @@ class IssueModel {
       assignedStaff: json['assigned_staff'] != null ? ResidentModel.fromJson(json['assigned_staff']) : null,
       imageUrls: parsedUrls,
       images: parsedImages,
+      rating: json['issue_ratings'] != null
+          ? (json['issue_ratings'] is List && (json['issue_ratings'] as List).isNotEmpty
+              ? IssueRatingModel.fromJson((json['issue_ratings'] as List).first as Map<String, dynamic>)
+              : (json['issue_ratings'] is Map<String, dynamic>
+                  ? IssueRatingModel.fromJson(json['issue_ratings'] as Map<String, dynamic>)
+                  : null))
+          : null,
     );
   }
 }

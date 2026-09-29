@@ -40,4 +40,5 @@ class AppRoutes {
   static const String managementAuditTrail = '/management/audit-trail';
   static const String managementRoleDelegation = '/management/role-delegation';
   static const String managementPermissionMatrix = '/management/permission-matrix';
+  static const String managementServiceRatings = '/management/service-ratings';
 }

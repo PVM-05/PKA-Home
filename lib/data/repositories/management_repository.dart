@@ -6,9 +6,12 @@ import '../../../data/models/resident_model.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/role_delegation_model.dart';
+import '../../../data/models/issue_rating_model.dart';
 
 class ManagementRepository {
-  final SupabaseClient _client = SupabaseConfig.client;
+  final SupabaseClient _client;
+
+  ManagementRepository([SupabaseClient? client]) : _client = client ?? SupabaseConfig.client;
 
   Future<List<ResidentModel>> fetchResidents({String? role}) async {
     var query = _client
@@ -332,6 +335,16 @@ class ManagementRepository {
     await _client.from('role_delegations').update({
       'ends_at': DateTime.now().toUtc().toIso8601String(),
     }).eq('id', id);
+  }
+
+  /// Lấy toàn bộ danh sách đánh giá dịch vụ sự cố cho Ban Quản Lý
+  Future<List<IssueRatingModel>> fetchAllRatings() async {
+    final response = await _client
+        .from('issue_ratings')
+        .select('*, users:reporter_id(full_name)')
+        .order('created_at', ascending: false);
+
+    return (response as List).map((e) => IssueRatingModel.fromJson(e)).toList();
   }
 }
 

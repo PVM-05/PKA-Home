@@ -61,9 +61,18 @@ Kiểm thử các cơ chế bảo vệ dữ liệu tài chính và chống xung 
 | **INV-01** | Chống trùng hóa đơn cùng căn hộ - cùng kỳ | Đã có hóa đơn căn hộ A0110 kỳ 10/2026 | 1. BQL vào Lập hóa đơn.<br>2. Chọn tiếp căn hộ A0110 và nhập kỳ `10/2026`.<br>3. Bấm Tạo hóa đơn. | 1. Client bắt lỗi trùng và hiển thị SnackBar đỏ: *"Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn"*, không văng crash.<br>2. Ràng buộc `uq_invoice_apartment_period` trên PostgreSQL bảo vệ không bị nhân đôi nợ. |
 | **INV-02** | Validate định dạng kỳ hóa đơn `MM/YYYY` | Mở màn hình Lập hóa đơn | Nhập các định dạng sai như `2026/10`, `13/2026`, `10-2026`. | Validator báo lỗi: *"Kỳ hóa đơn phải có định dạng MM/YYYY (VD: 10/2026)"*, nút Submit bị chặn cho đến khi nhập đúng. |
 
+## 7. Kiểm thử Khảo sát & Đánh giá Chất lượng Dịch vụ Sự cố (Service Ratings & KPI)
+Kiểm tra tính toàn vẹn của khảo sát đa tiêu chí và tự động tổng hợp KPI kỹ thuật.
+
+| ID | Kịch bản Kiểm thử | Điều kiện tiên quyết | Các bước thực hiện | Kết quả mong đợi |
+| :--- | :--- | :--- | :--- | :--- |
+| **SRV-01** | Cư dân đánh giá sự cố đa tiêu chí | Sự cố của cư dân đã chuyển sang `resolved` | 1. Mở màn hình Chi tiết sự cố.<br>2. Nhấn nút "Đánh giá ngay".<br>3. Chọn số sao cho Tốc độ, Thái độ, Kỹ thuật và nhập nhận xét.<br>4. Nhấn "Gửi đánh giá". | 1. ModalBottomSheet tính toán nhãn cảm nghĩ động.<br>2. Dữ liệu lưu thành công lên bảng `issue_ratings`.<br>3. Chi tiết sự cố chuyển sang hiển thị thẻ tóm tắt đánh giá và nút Chỉnh sửa. |
+| **SRV-02** | Toàn vẹn điểm số cấp CSDL qua Generated Column | Cư dân gửi các điểm số `speed=5`, `attitude=4`, `quality=5` | 1. Kiểm tra bản ghi trên bảng `issue_ratings`. | PostgreSQL tự động tính `overall_rating = 4.7` qua STORED GENERATED ALWAYS, client không thể gian lận điểm số. |
+| **SRV-03** | Giám sát KPI và Thống kê dịch vụ BQL | Đã có các lượt đánh giá sự cố | 1. Đăng nhập tài khoản BQL.<br>2. Quan sát thẻ Hiệu suất KTV trên Trang chủ.<br>3. Mở màn hình Đánh giá dịch vụ (`/management/service-ratings`). | 1. Thẻ KTV hiển thị huy hiệu ⭐ điểm trung bình tương ứng.<br>2. Màn hình tổng hợp hiển thị điểm dịch vụ toàn khu, tỷ lệ hài lòng và hỗ trợ bộ lọc theo số sao. |
+
 ---
 
-## 7. Danh Sách Tài Khoản & Dữ Liệu Mẫu Thử Nghiệm
+## 8. Danh Sách Tài Khoản & Dữ Liệu Mẫu Thử Nghiệm
 
 Hệ thống đã nạp sẵn bộ dữ liệu mẫu chuẩn trực tiếp vào cơ sở dữ liệu Supabase, dùng mật khẩu chung là **`123456`**:
 

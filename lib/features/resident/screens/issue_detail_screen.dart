@@ -7,9 +7,12 @@ import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/issue_comment_model.dart';
+import '../../../data/models/issue_rating_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/issue_comment_provider.dart';
+import '../../../data/providers/issue_rating_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
+import '../widgets/issue_rating_bottom_sheet.dart';
 
 /// Màn hình chi tiết phản ánh sự cố với timeline trạng thái và hệ thống comment.
 class IssueDetailScreen extends ConsumerStatefulWidget {
@@ -76,6 +79,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final commentsAsync = ref.watch(issueCommentsProvider(widget.issue.id));
+    final ratingAsync = ref.watch(issueRatingProvider(widget.issue.id));
     final currentUser = ref.watch(authProvider).valueOrNull;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -110,6 +114,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
 
                 // ─── Timeline trạng thái ───
                 _buildStatusTimeline(),
+                const SizedBox(height: 16),
+
+                // ─── Đánh giá dịch vụ (khi đã giải quyết) ───
+                _buildRatingSection(ratingAsync, currentUser, isDark),
                 const SizedBox(height: 24),
 
                 // ─── Khu vực comment ───
@@ -501,6 +509,257 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
           );
         }),
       ],
+    );
+  }
+
+  Widget _buildRatingSection(
+      AsyncValue<IssueRatingModel?> ratingAsync, dynamic currentUser, bool isDark) {
+    if (widget.issue.status != 'resolved') return const SizedBox.shrink();
+
+    final isReporter = currentUser?.id == widget.issue.reporterId;
+
+    return ratingAsync.when(
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (e, _) => const SizedBox.shrink(),
+      data: (rating) {
+        if (rating == null) {
+          if (!isReporter) return const SizedBox.shrink();
+
+          return Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Colors.amber.withValues(alpha: 0.4),
+              ),
+            ),
+            color: Colors.amber.withValues(alpha: 0.05),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.star_rate_rounded,
+                            color: Colors.amber, size: 22),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Đánh giá chất lượng dịch vụ',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            Text(
+                              'Sự cố đã hoàn thành. Hãy chia sẻ cảm nhận của bạn!',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (_) => IssueRatingBottomSheet(
+                            issueReportId: widget.issue.id,
+                            reporterId: widget.issue.reporterId,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.star_rate_rounded, size: 18),
+                      label: const Text('Đánh giá ngay'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Đã có đánh giá
+        final label =
+            IssueRatingModel.getSatisfactionLabel(rating.overallRating);
+
+        return Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: isDark ? Colors.white12 : Colors.grey.shade200,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.verified_outlined,
+                            color: AppTheme.success, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Đánh giá dịch vụ',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    if (isReporter)
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined,
+                            size: 18, color: AppTheme.primary),
+                        tooltip: 'Chỉnh sửa đánh giá',
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            builder: (_) => IssueRatingBottomSheet(
+                              issueReportId: widget.issue.id,
+                              reporterId: widget.issue.reporterId,
+                              initialRating: rating,
+                            ),
+                          );
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star_rate_rounded,
+                              size: 18, color: Colors.amber),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${rating.overallRating.toStringAsFixed(1)} / 5.0',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    _buildRatingChip('Tốc độ', rating.speedRating, isDark),
+                    _buildRatingChip('Thái độ', rating.attitudeRating, isDark),
+                    _buildRatingChip('Kỹ thuật', rating.qualityRating, isDark),
+                  ],
+                ),
+                if (rating.comment != null &&
+                    rating.comment!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white10 : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '"${rating.comment}"',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 13,
+                        color:
+                            isDark ? Colors.white70 : Colors.grey.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRatingChip(String title, int stars, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white10 : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+            color: isDark ? Colors.white12 : Colors.grey.shade300),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$title: ',
+              style: const TextStyle(
+                  fontSize: 11, color: AppTheme.textSecondary)),
+          Text('$stars',
+              style: const TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.bold)),
+          const Icon(Icons.star_rate_rounded, size: 13, color: Colors.amber),
+        ],
+      ),
     );
   }
 

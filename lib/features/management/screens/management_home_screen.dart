@@ -191,6 +191,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 context.push(AppRoutes.managementRoleDelegation);
               } else if (value == 'matrix') {
                 context.push(AppRoutes.managementPermissionMatrix);
+              } else if (value == 'serviceRatings') {
+                context.push(AppRoutes.managementServiceRatings);
               } else if (value == 'fontSize') {
                 showFontSizeBottomSheet(context, ref);
               } else if (value == 'theme') {
@@ -218,6 +220,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     Icon(Icons.shield_outlined, size: 20, color: AppTheme.primary),
                     SizedBox(width: 8),
                     Text('Bảng phân quyền'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'serviceRatings',
+                child: Row(
+                  children: [
+                    Icon(Icons.star_rate_rounded, size: 20, color: Colors.amber),
+                    SizedBox(width: 8),
+                    Text('Đánh giá dịch vụ'),
                   ],
                 ),
               ),
@@ -377,6 +389,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   color: Colors.indigo,
                    onTap: () => context.push(AppRoutes.managementHandbook),
                 ),
+                if (isAdmin || isTechnician) ...[
+                  const SizedBox(width: 12),
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.star_rate_rounded,
+                    label: 'Đánh giá DV',
+                    color: Colors.amber.shade700,
+                    onTap: () => context.push(AppRoutes.managementServiceRatings),
+                  ),
+                ],
               ],
             ),
           ),
