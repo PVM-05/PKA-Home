@@ -45,13 +45,12 @@ import 'page_transitions.dart';
 
 /// Provider cho GoRouter, lắng nghe auth state để redirect tự động.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-
   return GoRouter(
     initialLocation: AppRoutes.login,
     debugLogDiagnostics: true,
     refreshListenable: GoRouterAuthNotifier(ref),
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
       final user = authState.valueOrNull;
       final isLoggedIn = user != null;
       final isAuthRoute = state.matchedLocation == AppRoutes.login ||

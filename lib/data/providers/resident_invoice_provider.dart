@@ -4,9 +4,18 @@ import '../../../core/supabase_config.dart';
 import '../../../data/models/invoice_model.dart';
 import 'auth_provider.dart';
 import 'invoice_items_provider.dart';
+import 'resident_apartment_provider.dart';
 export 'invoice_items_provider.dart' show invoiceItemsDetailProvider, invoiceDetailProvider;
 
 final _invoicesStreamProvider = StreamProvider((ref) {
+  final selectedAptId = ref.watch(selectedApartmentIdProvider);
+  if (selectedAptId != null && selectedAptId.isNotEmpty) {
+    return SupabaseConfig.client
+        .from('invoices')
+        .stream(primaryKey: ['id'])
+        .eq('apartment_id', selectedAptId);
+  }
+
   final userId = ref.watch(authProvider).valueOrNull?.id;
   if (userId == null) return const Stream.empty();
 
@@ -15,6 +24,7 @@ final _invoicesStreamProvider = StreamProvider((ref) {
         .from('residents_apartments')
         .select('apartment_id')
         .eq('user_id', userId)
+        .limit(1)
         .maybeSingle(),
   ).asyncExpand((linkData) {
     if (linkData == null || linkData['apartment_id'] == null) {

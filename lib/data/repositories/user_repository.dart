@@ -53,11 +53,26 @@ class UserRepository {
   }
 
   Future<List<Map<String, dynamic>>> fetchCoResidents(String apartmentId) async {
-    final response = await _client
-        .from('residents_apartments')
-        .select('relation_role, users(id, full_name, phone)')
-        .eq('apartment_id', apartmentId);
+    try {
+      final response = await _client.rpc('get_co_residents', params: {
+        'p_apartment_id': apartmentId,
+      });
+      final list = (response as List).cast<Map<String, dynamic>>();
+      return list.map((row) => {
+        'relation_role': row['relation_role'],
+        'users': {
+          'id': row['user_id'],
+          'full_name': row['full_name'],
+          'phone': row['phone'],
+        },
+      }).toList();
+    } catch (_) {
+      final response = await _client
+          .from('residents_apartments')
+          .select('relation_role, users(id, full_name, phone)')
+          .eq('apartment_id', apartmentId);
 
-    return List<Map<String, dynamic>>.from(response as List);
+      return List<Map<String, dynamic>>.from(response as List);
+    }
   }
 }

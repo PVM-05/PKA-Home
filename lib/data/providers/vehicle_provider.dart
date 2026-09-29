@@ -3,6 +3,7 @@ import '../../core/supabase_config.dart';
 import '../models/vehicle_model.dart';
 import '../repositories/vehicle_repository.dart';
 import 'auth_provider.dart';
+import 'resident_apartment_provider.dart';
 
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
   return VehicleRepository();
@@ -10,6 +11,11 @@ final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
 
 /// Lấy ID căn hộ của cư dân đang đăng nhập
 final residentApartmentIdProvider = FutureProvider<String?>((ref) async {
+  final selectedId = ref.watch(selectedApartmentIdProvider);
+  if (selectedId != null && selectedId.isNotEmpty) {
+    return selectedId;
+  }
+
   final user = ref.watch(authProvider).valueOrNull;
   if (user == null) return null;
 
@@ -17,6 +23,7 @@ final residentApartmentIdProvider = FutureProvider<String?>((ref) async {
       .from('residents_apartments')
       .select('apartment_id')
       .eq('user_id', user.id)
+      .limit(1)
       .maybeSingle();
 
   if (res != null && res['apartment_id'] != null) {

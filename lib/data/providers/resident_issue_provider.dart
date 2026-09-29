@@ -2,14 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/repositories/issue_repository.dart';
 import 'auth_provider.dart';
+import 'resident_apartment_provider.dart';
 
 final _issueReportsStreamProvider = StreamProvider((ref) {
   final repo = ref.watch(issueRepositoryProvider);
   final userState = ref.watch(authProvider);
+  final activeAptId = ref.watch(selectedApartmentIdProvider);
   
   final userId = userState.valueOrNull?.id;
-  if (userId != null) {
-    return repo.streamIssues(userId: userId);
+  if (userId != null || activeAptId != null) {
+    return repo.streamIssues(userId: userId, apartmentId: activeAptId);
   }
   return const Stream.empty();
 });

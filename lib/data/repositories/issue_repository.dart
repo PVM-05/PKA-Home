@@ -26,21 +26,29 @@ class IssueRepository {
 
   Future<CreateIssueResult> createIssue({
     required String reporterId,
+    String? apartmentId,
     required String description,
     File? imageFile,
     List<File>? imageFiles,
   }) async {
     // 1. Get apartment_id
-    final linkData = await _client
-        .from('residents_apartments')
-        .select('apartment_id')
-        .eq('user_id', reporterId)
-        .single();
-    final apartmentId = linkData['apartment_id'];
+    String targetApartmentId = apartmentId ?? '';
+    if (targetApartmentId.isEmpty) {
+      final linkData = await _client
+          .from('residents_apartments')
+          .select('apartment_id')
+          .eq('user_id', reporterId)
+          .limit(1)
+          .maybeSingle();
+      if (linkData == null || linkData['apartment_id'] == null) {
+        throw Exception('Không tìm thấy thông tin căn hộ liên kết của cư dân.');
+      }
+      targetApartmentId = linkData['apartment_id'] as String;
+    }
 
     // 2. Insert issue_reports
     final issueData = await _client.from('issue_reports').insert({
-      'apartment_id': apartmentId,
+      'apartment_id': targetApartmentId,
       'reporter_id': reporterId,
       'description': description,
     }).select().single();
@@ -86,12 +94,24 @@ class IssueRepository {
     );
   }
 
-  Stream<List<Map<String, dynamic>>> streamIssues({String? userId}) async* {
-    if (userId == null) yield* const Stream<List<Map<String, dynamic>>>.empty();
+  Stream<List<Map<String, dynamic>>> streamIssues({String? userId, String? apartmentId}) async* {
+    if (userId == null && apartmentId == null) yield* const Stream<List<Map<String, dynamic>>>.empty();
     try {
-      final linkData = await _client.from('residents_apartments').select('apartment_id').eq('user_id', userId!).single();
-      final apartmentId = linkData['apartment_id'];
-      yield* _client.from('issue_reports').stream(primaryKey: ['id']).eq('apartment_id', apartmentId).map((list) => list);
+      String targetAptId = apartmentId ?? '';
+      if (targetAptId.isEmpty && userId != null) {
+        final linkData = await _client
+            .from('residents_apartments')
+            .select('apartment_id')
+            .eq('user_id', userId)
+            .limit(1)
+            .maybeSingle();
+        targetAptId = linkData?['apartment_id'] as String? ?? '';
+      }
+      if (targetAptId.isNotEmpty) {
+        yield* _client.from('issue_reports').stream(primaryKey: ['id']).eq('apartment_id', targetAptId).map((list) => list);
+      } else {
+        yield* const Stream<List<Map<String, dynamic>>>.empty();
+      }
     } catch (_) {
       yield* const Stream<List<Map<String, dynamic>>>.empty();
     }

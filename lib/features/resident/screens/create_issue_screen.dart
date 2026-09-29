@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/supabase_config.dart';
+import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
 
@@ -121,9 +122,13 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
       final user = SupabaseConfig.client.auth.currentUser;
       if (user == null) throw Exception('Chưa đăng nhập');
 
+      final currentApartment = ref.read(currentSelectedApartmentProvider);
+      final activeAptId = currentApartment?['apartment_id'] as String? ?? ref.read(selectedApartmentIdProvider);
+
       final issueRepo = ref.read(issueRepositoryProvider);
       final result = await issueRepo.createIssue(
         reporterId: user.id,
+        apartmentId: activeAptId,
         description: description,
         imageFiles: _imageFiles,
       );
