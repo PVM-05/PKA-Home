@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/auth_provider.dart';
+import '../../../data/models/user_model.dart';
 import '../widgets/technician_performance_card.dart';
 
 class AuditLogItem {
@@ -160,10 +161,12 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((ref) 
       final changerName = (row['changer'] as Map?)?['full_name'] ?? 'Quản trị viên';
       final oldRole = row['old_role'];
       final newRole = row['new_role'];
+      final oldRoleName = UserModel.roleToDisplayName(oldRole);
+      final newRoleName = UserModel.roleToDisplayName(newRole);
 
       logs.add(AuditLogItem(
         title: 'Đổi vai trò: $targetName',
-        subtitle: '$oldRole ➔ $newRole (Bởi $changerName)',
+        subtitle: '$oldRoleName ➔ $newRoleName (Bởi $changerName)',
         updatedAt: DateTime.parse(row['changed_at']).toLocal(),
         icon: Icons.admin_panel_settings_outlined,
         color: AppTheme.primary,

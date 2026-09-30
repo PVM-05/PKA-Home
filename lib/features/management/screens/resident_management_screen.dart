@@ -370,7 +370,6 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Quản lý Cư dân'),
-          automaticallyImplyLeading: false,
         actions: [
           if (isCurrentUserAdmin)
             IconButton(

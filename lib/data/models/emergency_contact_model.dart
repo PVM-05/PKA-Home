@@ -33,4 +33,21 @@ class EmergencyContactModel {
     'contact_type': contactType,
     'display_order': displayOrder,
   };
+
+  String get contactTypeDisplayName {
+    switch (contactType.toLowerCase()) {
+      case 'security':
+        return 'An ninh / Bảo vệ';
+      case 'medical':
+        return 'Cấp cứu / Y tế';
+      case 'fire':
+        return 'PCCC / Cứu hộ';
+      case 'management':
+        return 'Ban Quản Lý';
+      case 'technical':
+        return 'Đội Kỹ Thuật';
+      default:
+        return 'Đường dây nóng';
+    }
+  }
 }

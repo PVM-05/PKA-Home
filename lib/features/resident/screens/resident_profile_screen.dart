@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/accessibility_provider.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/validators.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/co_residents_provider.dart';
@@ -49,6 +50,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                   labelText: 'Số điện thoại',
                   prefixIcon: Icon(Icons.phone_outlined),
                 ),
+                validator: validatePhoneOptional,
               ),
             ],
           ),

@@ -42,10 +42,14 @@ final residentInvoiceProvider = FutureProvider<List<InvoiceModel>>((ref) async {
   // Đăng ký lắng nghe Stream Realtime từ Supabase
   ref.watch(_invoicesStreamProvider);
   
-  final response = await SupabaseConfig.client
+  final selectedAptId = ref.watch(selectedApartmentIdProvider);
+  var query = SupabaseConfig.client
       .from('invoices')
-      .select('*, apartments(*)')
-      .order('created_at', ascending: false);
+      .select('*, apartments(*)');
+  if (selectedAptId != null && selectedAptId.isNotEmpty) {
+    query = query.eq('apartment_id', selectedAptId);
+  }
+  final response = await query.order('created_at', ascending: false);
   
   return (response as List).map((e) => InvoiceModel.fromJson(e)).toList();
 });

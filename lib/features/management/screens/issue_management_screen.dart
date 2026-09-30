@@ -63,6 +63,21 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
     }
   }
 
+  List<IssueModel> _filterIssues(List<IssueModel> issues) {
+    return issues.where((issue) {
+      if (_selectedStatus != 'all' && issue.status != _selectedStatus) {
+        return false;
+      }
+      if (_searchQuery.isNotEmpty) {
+        final code = (issue.apartment?.code ?? '').toLowerCase();
+        final desc = issue.description.toLowerCase();
+        final q = _searchQuery.toLowerCase();
+        if (!code.contains(q) && !desc.contains(q)) return false;
+      }
+      return true;
+    }).toList();
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -452,7 +467,6 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Xử lý Phản ánh'),
-          automaticallyImplyLeading: false,
           actions: [
             issuesAsync.when(
               data: (issues) {
@@ -466,7 +480,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                         )
                       : const Icon(Icons.download),
                   tooltip: 'Xuất Excel',
-                  onPressed: _isExporting ? null : () => _exportExcel(issues),
+                  onPressed: _isExporting ? null : () => _exportExcel(_filterIssues(issues)),
                 );
               },
               loading: () => const SizedBox.shrink(),
@@ -535,18 +549,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
               emptyIcon: Icons.report_problem_outlined,
               onRetry: () => ref.invalidate(allIssuesProvider),
               dataBuilder: (issues) {
-                final filtered = issues.where((issue) {
-                  if (_selectedStatus != 'all' && issue.status != _selectedStatus) {
-                    return false;
-                  }
-                  if (_searchQuery.isNotEmpty) {
-                    final code = (issue.apartment?.code ?? '').toLowerCase();
-                    final desc = issue.description.toLowerCase();
-                    final q = _searchQuery.toLowerCase();
-                    if (!code.contains(q) && !desc.contains(q)) return false;
-                  }
-                  return true;
-                }).toList();
+                final filtered = _filterIssues(issues);
 
                 if (filtered.isEmpty) {
                   return RefreshIndicator(

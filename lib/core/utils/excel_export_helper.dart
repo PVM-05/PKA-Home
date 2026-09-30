@@ -30,7 +30,6 @@ class ExcelExportHelper {
         TextCellValue('Hạn Thanh Toán'),
       ]);
 
-      final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '');
       final dateFormat = DateFormat('dd/MM/yyyy');
 
       for (var invoice in invoices) {
@@ -46,7 +45,7 @@ class ExcelExportHelper {
         sheetObject.appendRow([
           TextCellValue(invoice.apartment?.code ?? ''),
           TextCellValue(invoice.period),
-          TextCellValue(currencyFormat.format(invoice.totalAmount)),
+          DoubleCellValue(invoice.totalAmount),
           TextCellValue(statusText),
           TextCellValue(dateFormat.format(invoice.dueDate)),
         ]);

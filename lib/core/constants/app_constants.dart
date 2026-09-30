@@ -11,4 +11,8 @@ class AppConstants {
 
   static const String kMotorbikeFeeLabel = '100.000đ/xe';
   static const String kCarFeeLabel = '1.200.000đ/xe';
+
+  // Hằng số phí quản lý vận hành tòa nhà
+  static const double kDefaultManagementFeePerM2 = 16500.0;
+  static const String kDefaultManagementFeeFormatted = '16.500 đ/m²/tháng';
 }

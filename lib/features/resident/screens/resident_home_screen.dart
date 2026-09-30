@@ -473,12 +473,26 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 const SizedBox(height: 24),
                 
                 // Announcements
-                const Text(
-                  'Thông báo mới nhất',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Thông báo mới nhất',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    announcementsAsync.maybeWhen(
+                      data: (announcements) => announcements.length > 3
+                          ? TextButton(
+                              onPressed: () => context.push(AppRoutes.residentNotifications),
+                              child: const Text('Xem tất cả'),
+                            )
+                          : const SizedBox.shrink(),
+                      orElse: () => const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 announcementsAsync.when(
@@ -486,15 +500,21 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                     if (announcements.isEmpty) {
                       return const Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text('Không có thông báo nào.'),
+                        child: Center(
+                          child: Text(
+                            'Không có thông báo nào.',
+                            style: TextStyle(color: AppTheme.textSecondary),
+                          ),
+                        ),
                       );
                     }
+                    final top3Announcements = announcements.take(3).toList();
                     return Column(
-                      children: announcements.map((announcement) {
+                      children: top3Announcements.map((announcement) {
                         return NotificationCard(
                           title: announcement.title,
                           content: announcement.content,
-                          date: '${announcement.createdAt.day}/${announcement.createdAt.month}/${announcement.createdAt.year}',
+                          date: '${announcement.createdAt.day.toString().padLeft(2, '0')}/${announcement.createdAt.month.toString().padLeft(2, '0')}/${announcement.createdAt.year}',
                           onTap: () {
                             context.push(
                               AppRoutes.residentAnnouncementDetail,

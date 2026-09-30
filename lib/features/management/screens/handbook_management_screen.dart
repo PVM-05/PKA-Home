@@ -7,6 +7,7 @@ import '../../../data/models/building_rule_model.dart';
 import '../../../data/models/building_amenity_model.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../core/utils/error_formatter.dart';
 
 class HandbookManagementScreen extends ConsumerStatefulWidget {
   const HandbookManagementScreen({super.key});
@@ -117,7 +118,7 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                     child: const Icon(Icons.phone_in_talk, color: AppTheme.primary),
                   ),
                   title: Text(contact.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('SĐT: ${contact.phone} • Loại: ${contact.contactType} • Thứ tự: ${contact.displayOrder}'),
+                  subtitle: Text('SĐT: ${contact.phone} • Loại: ${contact.contactTypeDisplayName} • Thứ tự: ${contact.displayOrder}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -216,23 +217,39 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   final order = int.tryParse(orderController.text.trim()) ?? 0;
                   final repo = ref.read(handbookRepositoryProvider);
 
-                  if (isEditing) {
-                    await repo.updateEmergencyContact(
-                      id: contact.id,
-                      name: nameController.text.trim(),
-                      phone: phoneController.text.trim(),
-                      contactType: contactType,
-                      displayOrder: order,
-                    );
-                  } else {
-                    await repo.createEmergencyContact(
-                      name: nameController.text.trim(),
-                      phone: phoneController.text.trim(),
-                      contactType: contactType,
-                      displayOrder: order,
-                    );
+                  try {
+                    if (isEditing) {
+                      await repo.updateEmergencyContact(
+                        id: contact.id,
+                        name: nameController.text.trim(),
+                        phone: phoneController.text.trim(),
+                        contactType: contactType,
+                        displayOrder: order,
+                      );
+                    } else {
+                      await repo.createEmergencyContact(
+                        name: nameController.text.trim(),
+                        phone: phoneController.text.trim(),
+                        contactType: contactType,
+                        displayOrder: order,
+                      );
+                    }
+                    ref.invalidate(emergencyContactsProvider);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(isEditing ? 'Đã cập nhật đường dây nóng!' : 'Đã thêm đường dây nóng thành công!'),
+                          backgroundColor: AppTheme.success,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                      );
+                    }
                   }
-                  ref.invalidate(emergencyContactsProvider);
                 }
               },
               child: const Text('Lưu'),
@@ -369,21 +386,37 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                 final order = int.tryParse(orderController.text.trim()) ?? 0;
                 final repo = ref.read(handbookRepositoryProvider);
 
-                if (isEditing) {
-                  await repo.updateBuildingRule(
-                    id: rule.id,
-                    title: titleController.text.trim(),
-                    content: contentController.text.trim(),
-                    displayOrder: order,
-                  );
-                } else {
-                  await repo.createBuildingRule(
-                    title: titleController.text.trim(),
-                    content: contentController.text.trim(),
-                    displayOrder: order,
-                  );
+                try {
+                  if (isEditing) {
+                    await repo.updateBuildingRule(
+                      id: rule.id,
+                      title: titleController.text.trim(),
+                      content: contentController.text.trim(),
+                      displayOrder: order,
+                    );
+                  } else {
+                    await repo.createBuildingRule(
+                      title: titleController.text.trim(),
+                      content: contentController.text.trim(),
+                      displayOrder: order,
+                    );
+                  }
+                  ref.invalidate(buildingRulesProvider);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isEditing ? 'Đã cập nhật nội quy!' : 'Đã thêm nội quy thành công!'),
+                        backgroundColor: AppTheme.success,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                    );
+                  }
                 }
-                ref.invalidate(buildingRulesProvider);
               }
             },
             child: const Text('Lưu'),
@@ -547,23 +580,39 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                 final order = int.tryParse(orderController.text.trim()) ?? 0;
                 final repo = ref.read(handbookRepositoryProvider);
 
-                if (isEditing) {
-                  await repo.updateBuildingAmenity(
-                    id: amenity.id,
-                    name: nameController.text.trim(),
-                    openHours: hoursController.text.trim(),
-                    description: descController.text.trim(),
-                    displayOrder: order,
-                  );
-                } else {
-                  await repo.createBuildingAmenity(
-                    name: nameController.text.trim(),
-                    openHours: hoursController.text.trim(),
-                    description: descController.text.trim(),
-                    displayOrder: order,
-                  );
+                try {
+                  if (isEditing) {
+                    await repo.updateBuildingAmenity(
+                      id: amenity.id,
+                      name: nameController.text.trim(),
+                      openHours: hoursController.text.trim(),
+                      description: descController.text.trim(),
+                      displayOrder: order,
+                    );
+                  } else {
+                    await repo.createBuildingAmenity(
+                      name: nameController.text.trim(),
+                      openHours: hoursController.text.trim(),
+                      description: descController.text.trim(),
+                      displayOrder: order,
+                    );
+                  }
+                  ref.invalidate(buildingAmenitiesProvider);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isEditing ? 'Đã cập nhật tiện ích!' : 'Đã thêm tiện ích thành công!'),
+                        backgroundColor: AppTheme.success,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                    );
+                  }
                 }
-                ref.invalidate(buildingAmenitiesProvider);
               }
             },
             child: const Text('Lưu'),
@@ -577,6 +626,7 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
     required String title,
     required String message,
     required Future<void> Function() onConfirm,
+    String successMessage = 'Đã xóa thành công!',
   }) {
     showDialog(
       context: context,
@@ -593,7 +643,20 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              await onConfirm();
+              try {
+                await onConfirm();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(successMessage), backgroundColor: AppTheme.success),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                  );
+                }
+              }
             },
             child: const Text('Xóa'),
           ),

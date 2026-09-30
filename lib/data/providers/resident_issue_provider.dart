@@ -21,7 +21,8 @@ final residentIssueProvider = FutureProvider<List<IssueModel>>((ref) async {
   ref.watch(_issueReportsStreamProvider);
 
   final repo = ref.watch(issueRepositoryProvider);
-  final response = await repo.fetchIssues();
+  final activeAptId = ref.watch(selectedApartmentIdProvider);
+  final response = await repo.fetchIssues(apartmentId: activeAptId);
   
   final mapped = response.map((e) => IssueModel.fromJson(e)).toList();
   return mapped;

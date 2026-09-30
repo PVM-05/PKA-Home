@@ -163,8 +163,27 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              final repo = ref.read(announcementRepositoryProvider);
-              await repo.deleteAnnouncement(id);
+              try {
+                final repo = ref.read(announcementRepositoryProvider);
+                await repo.deleteAnnouncement(id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Đã xóa thông báo thành công!'),
+                      backgroundColor: AppTheme.success,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(formatErrorMessage(e)),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                }
+              }
             },
             child: const Text('Xóa'),
           ),
@@ -259,7 +278,15 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
                             );
-                            if (context.mounted) Navigator.pop(context);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Tạo thông báo thành công!'),
+                                  backgroundColor: AppTheme.success,
+                                ),
+                              );
+                            }
                           } catch (e) {
                             setState(() => isSubmitting = false);
                             if (context.mounted) {
@@ -411,7 +438,15 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
                             );
-                            if (context.mounted) Navigator.pop(context);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Cập nhật thông báo thành công!'),
+                                  backgroundColor: AppTheme.success,
+                                ),
+                              );
+                            }
                           } catch (e) {
                             setState(() => isSubmitting = false);
                             if (context.mounted) {

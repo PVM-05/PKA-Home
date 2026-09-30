@@ -35,7 +35,9 @@ class UserModel {
   bool get isResident => role == 'resident';
   bool get isManagement => isAdmin || isAccountant || isTechnician;
 
-  String get roleDisplayName {
+  String get roleDisplayName => roleToDisplayName(role);
+
+  static String roleToDisplayName(String? role) {
     switch (role) {
       case 'admin':
       case 'management':
@@ -47,7 +49,7 @@ class UserModel {
       case 'resident':
         return 'Cư dân';
       default:
-        return role;
+        return role ?? 'Không xác định';
     }
   }
 }

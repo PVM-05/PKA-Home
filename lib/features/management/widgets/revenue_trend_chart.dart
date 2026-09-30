@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/dashboard_providers.dart';
 
 /// Biểu đồ xu hướng thu phí và công nợ 6 kỳ hóa đơn gần nhất dành cho Ban Quản lý.
@@ -14,16 +15,8 @@ class RevenueTrendChart extends ConsumerWidget {
     final trendAsync = ref.watch(monthlyRevenueTrendProvider);
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
-    return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+    return AppCard(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Tiêu đề
@@ -144,10 +137,10 @@ class RevenueTrendChart extends ConsumerWidget {
                                     const SizedBox(height: 8),
                                     Text(
                                       item.shortLabel,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: AppTheme.textPrimary,
+                                        color: Theme.of(context).colorScheme.onSurface,
                                       ),
                                     ),
                                     Text(
@@ -241,7 +234,6 @@ class RevenueTrendChart extends ConsumerWidget {
             ),
           ],
         ),
-      ),
     );
   }
 

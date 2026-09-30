@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 
+import 'app_card.dart';
+
 /// Card thông tin Quỹ bảo trì 2% phần sở hữu chung theo Điều 108 Luật Nhà ở.
 /// Cung cấp thông tin minh bạch về số dư, lãi suất tích lũy, mục đích sử dụng
 /// và danh mục bảo trì định kỳ cho cả Cư dân và Ban Quản lý.
@@ -31,16 +33,12 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.blueGrey.shade100),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final statBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : AppTheme.background;
+
+    return AppCard(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Tiêu đề và biểu tượng
@@ -63,12 +61,12 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Quỹ bảo trì 2% sở hữu chung',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -76,7 +74,7 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
                         'Theo Điều 108 Luật Nhà ở Việt Nam',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.blueGrey.shade700,
+                          color: isDark ? Colors.blueGrey.shade300 : Colors.blueGrey.shade700,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -164,7 +162,7 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: statBgColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -192,7 +190,7 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: statBgColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -203,12 +201,12 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
                           style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'TK Chuyên dùng',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
+                            color: theme.colorScheme.onSurface,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -222,7 +220,7 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: statBgColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -301,7 +299,6 @@ class _MaintenanceFundCardState extends State<MaintenanceFundCard> {
             ],
           ],
         ),
-      ),
     );
   }
 

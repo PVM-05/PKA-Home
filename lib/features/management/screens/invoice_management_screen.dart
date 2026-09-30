@@ -67,6 +67,29 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
     }
   }
 
+  List<InvoiceModel> _filterInvoices(List<InvoiceModel> invoices) {
+    return invoices.where((inv) {
+      if (_statusFilter == 'pending_confirmation' && inv.status != 'pending_confirmation') {
+        return false;
+      }
+      if (_statusFilter == 'unpaid' && inv.status != 'unpaid') {
+        return false;
+      }
+      if (_statusFilter == 'paid' && inv.status != 'paid') {
+        return false;
+      }
+
+      if (_searchQuery.isNotEmpty) {
+        final code = (inv.apartment?.code ?? '').toLowerCase();
+        final period = inv.period.toLowerCase();
+        final q = _searchQuery.toLowerCase();
+        if (!code.contains(q) && !period.contains(q)) return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final invoicesAsync = ref.watch(invoicesProvider);
@@ -76,7 +99,6 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Quản lý Hóa đơn'),
-          automaticallyImplyLeading: false,
           actions: [
             invoicesAsync.when(
               data: (invoices) {
@@ -86,7 +108,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.download),
                   tooltip: 'Xuất Excel',
-                  onPressed: _isExporting ? null : () => _exportExcel(invoices),
+                  onPressed: _isExporting ? null : () => _exportExcel(_filterInvoices(invoices)),
                 );
               },
               loading: () => const SizedBox.shrink(),
@@ -164,26 +186,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
               ),
               onRetry: () => ref.invalidate(invoicesProvider),
               dataBuilder: (invoices) {
-                final filtered = invoices.where((inv) {
-                  if (_statusFilter == 'pending_confirmation' && inv.status != 'pending_confirmation') {
-                    return false;
-                  }
-                  if (_statusFilter == 'unpaid' && inv.status != 'unpaid') {
-                    return false;
-                  }
-                  if (_statusFilter == 'paid' && inv.status != 'paid') {
-                    return false;
-                  }
-
-                  if (_searchQuery.isNotEmpty) {
-                    final code = (inv.apartment?.code ?? '').toLowerCase();
-                    final period = inv.period.toLowerCase();
-                    final q = _searchQuery.toLowerCase();
-                    if (!code.contains(q) && !period.contains(q)) return false;
-                  }
-
-                  return true;
-                }).toList();
+                final filtered = _filterInvoices(invoices);
 
                 if (filtered.isEmpty) {
                   return RefreshIndicator(

@@ -520,7 +520,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
               children: [
                 _buildFeeRow(
                   title: 'Phí dịch vụ quản lý',
-                  rate: '12.000 đ/m²/tháng',
+                  rate: AppConstants.kDefaultManagementFeeFormatted,
                   formula: 'Đơn giá × Diện tích thông thủy căn hộ',
                 ),
                 const Divider(height: 20),

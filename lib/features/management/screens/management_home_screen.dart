@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/app_card.dart';
 import '../widgets/stat_card.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -156,7 +157,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     final currentIndex = _selectedIndex < tabs.length ? _selectedIndex : 0;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: currentIndex == 0
+          ? AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -290,7 +292,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ),
 
         ],
-      ),
+      ) : null,
       body: IndexedStack(
         index: currentIndex,
         children: tabs.map((t) => t.screen).toList(),
@@ -617,16 +619,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     return statsAsync.when(
       data: (stats) {
         final percent = (stats.collectionRate * 100).toInt();
-        return Card(
-          elevation: 0,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.shade200),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+        final textScale = MediaQuery.textScalerOf(context).scale(1.0);
+        final chartHeight = (120.0 * textScale).clamp(120.0, 160.0);
+
+        return AppCard(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -668,7 +665,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  height: 120,
+                  height: chartHeight,
                   child: Row(
                     children: [
                       Expanded(
@@ -761,10 +758,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                             '${stats.paidCount}/${stats.paidCount + stats.unpaidCount}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ],
@@ -774,7 +771,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 ),
               ],
             ),
-          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),

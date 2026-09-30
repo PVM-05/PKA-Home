@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/app_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/issue_model.dart';
@@ -94,21 +95,15 @@ class TechnicianPerformanceCard extends ConsumerWidget {
         // Sắp xếp theo số sự cố giải quyết giảm dần
         stats.sort((a, b) => b.resolvedCount.compareTo(a.resolvedCount));
 
-        return Container(
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final textScale = MediaQuery.textScalerOf(context).scale(1.0);
+        final cardHeight = (118.0 * textScale).clamp(118.0, 165.0);
+        final itemBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50;
+        final itemBorderColor = isDark ? theme.dividerColor.withValues(alpha: 0.15) : Colors.grey.shade200;
+
+        return AppCard(
           margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -131,7 +126,7 @@ class TechnicianPerformanceCard extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               SizedBox(
-                height: 110,
+                height: cardHeight,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: stats.length,
@@ -146,9 +141,9 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                       width: 220,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
+                        color: itemBgColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: itemBorderColor),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
