@@ -14,6 +14,7 @@ import '../../../core/theme/theme_mode_provider.dart';
 
 import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../core/widgets/app_avatar.dart';
+import '../../../core/widgets/app_card.dart';
 
 class ResidentProfileScreen extends ConsumerWidget {
   const ResidentProfileScreen({super.key});
@@ -172,36 +173,28 @@ class ResidentProfileScreen extends ConsumerWidget {
                 apartmentsAsync.when(
                   data: (apartments) {
                     if (apartments.isEmpty) {
-                      return Card(
-                        elevation: 0,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(color: Colors.grey.shade200),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            children: [
-                              const Icon(Icons.apartment_outlined, size: 48, color: AppTheme.textSecondary),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Bạn chưa được liên kết với căn hộ nào.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: AppTheme.textSecondary),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final result = await context.push<bool>(AppRoutes.residentLinkRequest);
-                                  if (result == true) {
-                                    ref.invalidate(residentApartmentsProvider);
-                                  }
-                                },
-                                child: const Text('Xin liên kết ngay'),
-                              ),
-                            ],
-                          ),
+                      return AppCard(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.apartment_outlined, size: 48, color: AppTheme.textSecondary),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Bạn chưa được liên kết với căn hộ nào.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: AppTheme.textSecondary),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () async {
+                                final result = await context.push<bool>(AppRoutes.residentLinkRequest);
+                                if (result == true) {
+                                  ref.invalidate(residentApartmentsProvider);
+                                }
+                              },
+                              child: const Text('Xin liên kết ngay'),
+                            ),
+                          ],
                         ),
                       );
                     }
@@ -227,13 +220,8 @@ class ResidentProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade200),
-                  ),
+                AppCard(
+                  padding: EdgeInsets.zero,
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
@@ -263,13 +251,8 @@ class ResidentProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade200),
-                  ),
+                AppCard(
+                  padding: EdgeInsets.zero,
                   child: Column(
                     children: [
                       ListTile(
@@ -457,149 +440,148 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
     final role = aptData['relation_role'] == 'owner' ? 'Chủ hộ' : 'Người thuê';
     final coResidentsAsync = ref.watch(coResidentsProvider(apartmentId));
 
-    return Card(
-      elevation: 0,
-      color: Colors.white,
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.apartment_outlined, color: AppTheme.primary, size: 24),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Căn hộ ${apartment?['code'] ?? 'N/A'}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Diện tích: ${apartment?['area'] ?? 'N/A'} m²',
-                        style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    role,
-                    style: const TextStyle(
-                      color: AppTheme.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                child: const Icon(Icons.apartment_outlined, color: AppTheme.primary, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Căn hộ ${apartment?['code'] ?? 'N/A'}',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                  ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Diện tích: ${apartment?['area'] ?? 'N/A'} m²',
+                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const Divider(height: 24),
-            Row(
-              children: const [
-                Icon(Icons.people_outline, size: 16, color: AppTheme.textSecondary),
-                SizedBox(width: 6),
-                Text(
-                  'Thành viên cùng căn hộ:',
-                  style: TextStyle(
-                    fontSize: 13,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  role,
+                  style: const TextStyle(
+                    color: AppTheme.primary,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textSecondary,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            coResidentsAsync.when(
-              data: (members) {
-                if (members.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      'Chưa có thành viên khác.',
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+          const Divider(height: 24),
+          Row(
+            children: const [
+              Icon(Icons.people_outline, size: 16, color: AppTheme.textSecondary),
+              SizedBox(width: 6),
+              Text(
+                'Thành viên cùng căn hộ:',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          coResidentsAsync.when(
+            data: (members) {
+              if (members.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    'Chưa có thành viên khác.',
+                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                  ),
+                );
+              }
+
+              return Column(
+                children: members.map((m) {
+                  final userData = m['users'] as Map<String, dynamic>?;
+                  final memberName = userData?['full_name'] ?? 'Cư dân';
+                  final memberPhone = userData?['phone'] ?? '';
+                  final memberRole = m['relation_role'] == 'owner' ? 'Chủ hộ' : 'Người thuê';
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.person_outline, size: 16, color: AppTheme.textSecondary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            memberName,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        if (memberPhone.isNotEmpty) ...[
+                          Text(
+                            memberPhone,
+                            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white12
+                                : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            memberRole,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey.shade300
+                                  : Colors.grey.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
-                }
-
-                return Column(
-                  children: members.map((m) {
-                    final userData = m['users'] as Map<String, dynamic>?;
-                    final memberName = userData?['full_name'] ?? 'Cư dân';
-                    final memberPhone = userData?['phone'] ?? '';
-                    final memberRole = m['relation_role'] == 'owner' ? 'Chủ hộ' : 'Người thuê';
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.person_outline, size: 16, color: Colors.grey),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              memberName,
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          if (memberPhone.isNotEmpty) ...[
-                            Text(
-                              memberPhone,
-                              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              memberRole,
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
-              loading: () => const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-              error: (_, _) => const Text(
-                'Không thể tải danh sách thành viên',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                }).toList(),
+              );
+            },
+            loading: () => const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
-          ],
-        ),
+            error: (_, _) => const Text(
+              'Không thể tải danh sách thành viên',
+              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            ),
+          ),
+        ],
       ),
     );
   }

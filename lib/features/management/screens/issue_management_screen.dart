@@ -7,6 +7,7 @@ import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
@@ -614,24 +615,18 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                       final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
                       final isNew = DateTime.now().difference(issue.createdAt).inMinutes < 15;
                       
-                      return GestureDetector(
+                      return AppCard(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16.0),
+                        borderRadius: 16,
+                        borderColor: isHighPriority ? AppStatusColors.priorityHigh.withValues(alpha: 0.6) : null,
                         onTap: () => context.push(AppRoutes.managementIssueDetail, extra: issue),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              color: isHighPriority ? AppStatusColors.priorityHigh.withValues(alpha: 0.5) : Colors.transparent,
-                              width: isHighPriority ? 2 : 0,
-                            ),
-                          ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
                                   Expanded(
                                     child: Row(
                                       children: [
@@ -826,10 +821,8 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    );
-                    },
+                        );
+                      },
                   ),
                 );
               },

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/vietqr_helper.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 
@@ -64,7 +65,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                     child: ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        _buildSummaryCard(formatCurrency, formatDate),
+                        _buildSummaryCard(context, formatCurrency, formatDate),
                         const SizedBox(height: 32),
                         const Text(
                           'CHI TIẾT CÁC KHOẢN PHÍ',
@@ -92,7 +93,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     );
   }
 
-  Widget _buildSummaryCard(NumberFormat formatCurrency, DateFormat formatDate) {
+  Widget _buildSummaryCard(BuildContext context, NumberFormat formatCurrency, DateFormat formatDate) {
     Color statusColor;
     String statusText;
     IconData statusIcon;
@@ -114,15 +115,29 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         statusIcon = Icons.error_outline;
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark
+        ? (Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface)
+        : Colors.white;
+
     return Card(
-      elevation: 4,
-      shadowColor: statusColor.withValues(alpha: 0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 3,
+      color: cardBg,
+      shadowColor: statusColor.withValues(alpha: 0.18),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isDark ? Colors.white12 : Colors.grey.shade200,
+        ),
+      ),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
-            colors: [statusColor.withValues(alpha: 0.1), Colors.white],
+            colors: [
+              statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
+              cardBg,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -225,55 +240,47 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
       feeColor = Colors.indigo;
     }
 
-    return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: feeColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(feeIcon, color: feeColor, size: 24),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: feeColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    feeType,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            child: Icon(feeIcon, color: feeColor, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  feeType,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${formatCurrency.format(item['unit_price'] ?? 0)} x ${item['quantity'] ?? 1}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${formatCurrency.format(item['unit_price'] ?? 0)} x ${item['quantity'] ?? 1}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Text(
-              formatCurrency.format(item['subtotal'] ?? 0),
-              style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-              ),
+          ),
+          Text(
+            formatCurrency.format(item['subtotal'] ?? 0),
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 16,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
