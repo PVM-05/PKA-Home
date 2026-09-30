@@ -18,16 +18,26 @@ class AmenityBookingRepository {
     required DateTime date,
   }) async {
     final dateStr = _formatDate(date);
-    final response = await _client
-        .from('amenity_bookings')
-        .select('*, apartments(code), users(full_name)')
-        .eq('amenity_id', amenityId)
-        .eq('booking_date', dateStr)
-        .eq('status', 'confirmed');
+    try {
+      final response = await _client.rpc('get_amenity_bookings', params: {
+        'p_amenity_id': amenityId,
+        'p_date': dateStr,
+      });
+      return (response as List)
+          .map((json) => AmenityBookingModel.fromJson(json))
+          .toList();
+    } catch (_) {
+      final response = await _client
+          .from('amenity_bookings')
+          .select('*, apartments(code), users(full_name)')
+          .eq('amenity_id', amenityId)
+          .eq('booking_date', dateStr)
+          .eq('status', 'confirmed');
 
-    return (response as List)
-        .map((json) => AmenityBookingModel.fromJson(json))
-        .toList();
+      return (response as List)
+          .map((json) => AmenityBookingModel.fromJson(json))
+          .toList();
+    }
   }
 
   /// Lấy danh sách lịch đã đặt của người dùng hiện tại

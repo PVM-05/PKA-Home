@@ -36,13 +36,13 @@ class AmenityBookingModel {
       aName = json['building_amenities']['name'] as String?;
     }
 
-    String? aptCode;
-    if (json['apartments'] != null) {
+    String? aptCode = json['apartment_code'] as String?;
+    if (aptCode == null && json['apartments'] != null) {
       aptCode = json['apartments']['code'] as String?;
     }
 
-    String? uName;
-    if (json['users'] != null) {
+    String? uName = json['booker_name'] as String?;
+    if (uName == null && json['users'] != null) {
       uName = json['users']['full_name'] as String?;
     }
 
