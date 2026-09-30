@@ -216,33 +216,92 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: AppTheme.success,
         ),
-        onPressed: () async {
-          try {
-            await ref.read(managementRepositoryProvider).updateInvoiceStatus(invoice.id, 'paid');
-            ref.invalidate(invoicesProvider);
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Xác nhận thu tiền thành công.'),
-                  backgroundColor: AppTheme.success,
-                ),
-              );
-              Navigator.pop(context);
-            }
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(formatErrorMessage(e)),
-                  backgroundColor: AppTheme.error,
-                ),
-              );
-            }
-          }
-        },
+        onPressed: () => _confirmPayment(context, ref, isPending),
         child: Text(isPending ? 'XÁC NHẬN ĐÃ THU (Cư dân báo đã CK)' : 'XÁC NHẬN ĐÃ THU (Tiền mặt)'),
       ),
     );
+  }
+
+  Future<void> _confirmPayment(BuildContext context, WidgetRef ref, bool isPending) async {
+    final method = isPending ? 'Chuyển khoản (Cư dân báo đã chuyển)' : 'Tiền mặt';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle_outline, color: AppTheme.success),
+            SizedBox(width: 8),
+            Text('Xác nhận thu tiền'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Vui lòng xác nhận đã nhận đủ tiền thanh toán:'),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('• Căn hộ: ${invoice.apartment?.code ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text('• Kỳ phí: ${invoice.period}'),
+                  const SizedBox(height: 4),
+                  Text('• Số tiền: ${NumberFormat.currency(locale: "vi_VN", symbol: "đ").format(invoice.totalAmount)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text('• Hình thức: $method'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.success,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Xác nhận đã thu'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(managementRepositoryProvider).updateInvoiceStatus(invoice.id, 'paid');
+      ref.invalidate(invoicesProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Xác nhận thu tiền thành công.'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _confirmDeleteInvoice(BuildContext context, WidgetRef ref) async {

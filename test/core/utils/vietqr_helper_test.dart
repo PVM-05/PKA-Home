@@ -18,7 +18,7 @@ void main() {
       expect(url, contains('addInfo=PKA-101%20Thang%2009-2026'));
     });
 
-    test('generateBqlInvoiceQrUrl uses default BQL account correctly', () {
+    test('generateBqlInvoiceQrUrl uses default BQL account correctly with clean memo', () {
       final url = VietQrHelper.generateBqlInvoiceQrUrl(
         apartmentCode: 'A0110',
         period: '09/2026',
@@ -27,12 +27,16 @@ void main() {
 
       expect(url, startsWith('https://img.vietqr.io/image/MB-0987654321-compact2.png'));
       expect(url, contains('amount=1250000'));
-      expect(url, contains('addInfo=A0110%2009%2F2026'));
+      // Nội dung không chứa ký tự gạch chéo %2F, thay bằng T09-2026
+      expect(url, contains('addInfo=A0110%20T09-2026'));
     });
 
-    test('buildTransferMemo creates concise and standard memo format', () {
-      final memo = VietQrHelper.buildTransferMemo('B502', '10/2026');
-      expect(memo, 'B502 10/2026');
+    test('buildTransferMemo creates concise and standard memo format without slashes', () {
+      final memo = VietQrHelper.buildTransferMemo('A0110', '10/2026');
+      expect(memo, 'A0110 T10-2026');
+
+      final memoAlreadyT = VietQrHelper.buildTransferMemo('B0202', 'T11-2026');
+      expect(memoAlreadyT, 'B0202 T11-2026');
     });
   });
 }

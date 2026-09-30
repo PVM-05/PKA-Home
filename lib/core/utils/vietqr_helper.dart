@@ -6,8 +6,14 @@ class VietQrHelper {
   static const String defaultAccountName = 'BQL CHUNG CU PKA HOME';
 
   /// Sinh nội dung chuyển khoản chuẩn ngắn gọn: [Mã căn hộ] [Kỳ phí]
+  /// Định dạng kỳ phí chuẩn hóa: thay thế dấu '/' bằng '-' và thêm tiền tố 'T'
+  /// (Ví dụ: '09/2026' -> 'T09-2026') để tương thích tối đa với các ứng dụng ngân hàng.
   static String buildTransferMemo(String apartmentCode, String period) {
-    return '$apartmentCode $period';
+    String cleanPeriod = period.trim().replaceAll('/', '-');
+    if (!cleanPeriod.startsWith('T') && !cleanPeriod.startsWith('t')) {
+      cleanPeriod = 'T$cleanPeriod';
+    }
+    return '$apartmentCode $cleanPeriod';
   }
 
   /// Sinh URL ảnh mã QR theo chuẩn VietQR QuickLink (dạng compact2)
