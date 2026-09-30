@@ -16,13 +16,14 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
   final _codeController = TextEditingController();
   String _relationRole = 'owner';
   bool _isSubmitting = false;
+  bool _manualInputMode = false;
 
   String? _selectedBuilding;
   String? _selectedFloor;
   String? _selectedRoom;
 
   void _submit() async {
-    final code = _codeController.text.trim();
+    final code = _codeController.text.trim().toUpperCase();
     final validationError = validateApartmentCode(code);
     if (validationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -168,28 +169,78 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
             ref.watch(availableApartmentsProvider).when(
               data: (apartments) {
                 if (apartments.isEmpty) {
-                  return Card(
-                    elevation: 0,
-                    color: AppTheme.warningBackground,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: AppTheme.radiusMd,
-                      side: const BorderSide(color: AppTheme.warningBorder),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(AppTheme.spacingMd),
-                      child: Row(
-                        children: [
-                          Icon(Icons.info_outline, color: AppTheme.warningText, size: 28),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Chưa tải được danh mục căn hộ tự động. Bạn vui lòng nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
-                              style: TextStyle(color: AppTheme.warningText, fontSize: 13),
-                            ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Card(
+                        elevation: 0,
+                        color: AppTheme.warningBackground,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppTheme.radiusMd,
+                          side: const BorderSide(color: AppTheme.warningBorder),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(AppTheme.spacingMd),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: AppTheme.warningText, size: 28),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Chưa tải được danh mục căn hộ tự động. Bạn vui lòng nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
+                                  style: TextStyle(color: AppTheme.warningText, fontSize: 13),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _codeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Mã căn hộ (VD: A0110)',
+                          prefixIcon: Icon(Icons.tag),
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                        textInputAction: TextInputAction.done,
+                        validator: validateApartmentCode,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                    ],
+                  );
+                }
+
+                if (_manualInputMode) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        controller: _codeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Mã căn hộ (VD: A0110)',
+                          prefixIcon: Icon(Icons.tag),
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                        textInputAction: TextInputAction.done,
+                        validator: validateApartmentCode,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _manualInputMode = false;
+                              _codeController.clear();
+                            });
+                          },
+                          icon: const Icon(Icons.list_alt, size: 16),
+                          label: const Text('Chọn theo Tòa - Tầng - Phòng'),
+                        ),
+                      ),
+                    ],
                   );
                 }
 
@@ -268,20 +319,62 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _manualInputMode = true;
+                          });
+                        },
+                        icon: const Icon(Icons.edit_outlined, size: 16),
+                        label: const Text('Nhập mã trực tiếp'),
+                      ),
+                    ),
                   ],
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, st) => TextFormField(
-                controller: _codeController,
-                decoration: const InputDecoration(
-                  labelText: 'Mã căn hộ (VD: A0110)',
-                  prefixIcon: Icon(Icons.tag),
-                ),
-                textCapitalization: TextCapitalization.characters,
-                textInputAction: TextInputAction.done,
-                validator: validateApartmentCode,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+              error: (err, st) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    elevation: 0,
+                    color: AppTheme.error.withValues(alpha: 0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppTheme.radiusMd,
+                      side: const BorderSide(color: AppTheme.error),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(AppTheme.spacingMd),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: AppTheme.error, size: 28),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Không thể tải danh mục căn hộ. Bạn vui lòng nhập trực tiếp mã căn hộ ở ô bên dưới.',
+                              style: TextStyle(color: AppTheme.error, fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _codeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Mã căn hộ (VD: A0110)',
+                      prefixIcon: Icon(Icons.tag),
+                    ),
+                    textCapitalization: TextCapitalization.characters,
+                    textInputAction: TextInputAction.done,
+                    validator: validateApartmentCode,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
