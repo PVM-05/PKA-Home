@@ -169,7 +169,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tạo phản ánh sự cố'),
+        title: const Text('Gửi Phản Ánh'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -177,7 +177,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Mô tả chi tiết',
+              'Vui lòng mô tả sự cố hoặc yêu cầu hỗ trợ:',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
@@ -185,7 +185,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               controller: _descriptionController,
               maxLines: 5,
               decoration: const InputDecoration(
-                hintText: 'Nhập mô tả sự cố (VD: Rỉ nước, hỏng bóng đèn, mất mạng...)',
+                hintText: 'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy...',
                 alignLabelWithHint: true,
               ),
             ),
@@ -194,7 +194,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Hình ảnh đính kèm (Tối đa 3 ảnh)',
+                  'Đính kèm hình ảnh (Tối đa 3 ảnh):',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Text(
@@ -210,22 +210,22 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                 child: Container(
                   height: 140,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.withValues(alpha: 0.4)),
+                    border: Border.all(color: Theme.of(context).dividerColor),
                     borderRadius: BorderRadius.circular(12),
-                    color: AppTheme.background,
+                    color: Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface,
                   ),
-                  child: Column(
+                  child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add_a_photo_outlined, size: 44, color: AppTheme.textSecondary.withValues(alpha: 0.6)),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Chụp ảnh hoặc chọn từ thư viện',
-                        style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                      Icon(Icons.add_a_photo_outlined, size: 40, color: AppTheme.primary),
+                      SizedBox(height: 8),
+                      Text(
+                        '+ Chọn ảnh từ máy',
+                        style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        '(Hỗ trợ định dạng JPG, PNG - Tối đa 3 ảnh)',
+                      SizedBox(height: 4),
+                      Text(
+                        '(Chụp ảnh hoặc chọn từ thư viện - Tối đa 3 ảnh)',
                         style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                       ),
                     ],
@@ -306,7 +306,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               onPressed: _isLoading ? null : _submit,
               child: _isLoading 
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text('Gửi phản ánh'),
+                : const Text('GỬI YÊU CẦU'),
             ),
           ],
         ),

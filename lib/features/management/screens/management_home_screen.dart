@@ -64,6 +64,33 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     });
   }
 
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Đăng xuất'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authProvider.notifier).logout();
+            },
+            child: const Text('Đăng xuất'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Color _getRoleBadgeColor(String role) {
     switch (role) {
       case 'admin':
@@ -213,7 +240,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               } else if (value == 'theme') {
                 _showManagementThemeModeSheet(context, ref);
               } else if (value == 'logout') {
-                ref.read(authProvider.notifier).logout();
+                _showLogoutDialog(context);
               }
             },
             itemBuilder: (BuildContext context) => [
@@ -290,7 +317,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               ),
             ],
           ),
-
+          IconButton(
+            icon: const Icon(Icons.logout_outlined, color: AppTheme.error),
+            tooltip: 'Đăng xuất',
+            onPressed: () => _showLogoutDialog(context),
+          ),
         ],
       ) : null,
       body: IndexedStack(
@@ -423,30 +454,28 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           const SizedBox(height: 24),
 
           // Widget Việc khẩn cấp
-          Text('Việc khẩn cấp', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppStatusColors.priorityHigh)),
+          Text('Phản ánh cần xử lý gấp', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppStatusColors.priorityHigh, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           allIssuesAsync.when(
             data: (issues) {
               final urgentIssues = issues.where((issue) => issue.priority == 'high' && issue.status == 'pending').toList();
               if (urgentIssues.isEmpty) {
-                return Card(
-                  color: AppStatusColors.paid.withValues(alpha: 0.1),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppStatusColors.paid)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_circle_outline, color: AppStatusColors.paid),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Không có sự cố khẩn cấp nào cần xử lý.',
-                            style: TextStyle(color: AppStatusColors.paid, fontWeight: FontWeight.bold),
+                return AppCard(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline, color: AppStatusColors.paid),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Không có sự cố khẩn cấp nào cần xử lý.',
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               }
@@ -457,12 +486,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 itemCount: urgentIssues.length,
                 itemBuilder: (context, index) {
                   final issue = urgentIssues[index];
-                  return Card(
-                    color: AppStatusColors.priorityHigh.withValues(alpha: 0.05),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: AppStatusColors.priorityHigh),
-                    ),
+                  return AppCard(
+                    padding: EdgeInsets.zero,
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       leading: const Icon(Icons.warning, color: AppStatusColors.priorityHigh),
@@ -486,7 +511,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           const SizedBox(height: 24),
 
           // Tổng quan (Stat Cards)
-          Text('Tổng quan hệ thống', style: Theme.of(context).textTheme.titleLarge),
+          Text('Tổng quan trạng thái', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           if (!isTechnician || canManageInvoices) ...[
             _buildFinancialProgressCard(),
