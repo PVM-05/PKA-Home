@@ -20,6 +20,8 @@ import '../widgets/revenue_trend_chart.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
 import '../../../core/widgets/font_size_sheet.dart';
 import '../../../core/theme/theme_mode_provider.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../data/providers/role_delegation_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
@@ -78,9 +80,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(authProvider).value;
-    final isAdmin = currentUser?.isAdmin ?? true;
-    final isAccountant = currentUser?.isAccountant ?? false;
-    final isTechnician = currentUser?.isTechnician ?? false;
+    final activeDelegations = ref.watch(activeDelegationsProvider).valueOrNull ?? [];
+    final isAdmin = currentUser?.isAdmin ?? false;
+    final canManageInvoices = AppPermissions.invoiceManagement.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
+    final canManageIssues = AppPermissions.issueManagement.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
 
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final pendingInvoicesAsync = ref.watch(pendingConfirmationInvoicesProvider);
@@ -93,7 +102,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     final List<_ManagementTab> tabs = [
       _ManagementTab(
         key: 'dashboard',
-        screen: _buildDashboard(currentUser),
+        screen: _buildDashboard(
+          currentUser,
+          canManageInvoices: canManageInvoices,
+          canManageIssues: canManageIssues,
+        ),
         destination: const NavigationDestination(
           icon: Icon(Icons.bar_chart_outlined),
           selectedIcon: Icon(Icons.bar_chart, color: AppTheme.primary),
@@ -109,7 +122,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           label: 'Cư dân',
         ),
       ),
-      if (isAdmin || isAccountant)
+      if (canManageInvoices)
         _ManagementTab(
           key: 'invoices',
           screen: const InvoiceManagementScreen(),
@@ -119,7 +132,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             label: 'Hóa đơn',
           ),
         ),
-      if (isAdmin || isTechnician)
+      if (canManageIssues)
         _ManagementTab(
           key: 'issues',
           screen: const IssueManagementScreen(),
@@ -291,10 +304,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     );
   }
 
-  Widget _buildDashboard(UserModel? currentUser) {
+  Widget _buildDashboard(
+    UserModel? currentUser, {
+    required bool canManageInvoices,
+    required bool canManageIssues,
+  }) {
     final isTechnician = currentUser?.isTechnician ?? false;
-    final isAccountant = currentUser?.isAccountant ?? false;
-    final isAdmin = currentUser?.isAdmin ?? true;
+    final isAdmin = currentUser?.isAdmin ?? false;
 
     final pendingIssuesAsync = ref.watch(pendingIssuesCountProvider);
     final unpaidInvoicesAsync = ref.watch(unpaidInvoicesTotalProvider);
@@ -350,7 +366,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                   const SizedBox(width: 12),
                 ],
-                if (isAdmin || isAccountant) ...[
+                if (canManageInvoices) ...[
                   _buildQuickAction(
                     context,
                     icon: Icons.receipt_long,
@@ -360,7 +376,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                   const SizedBox(width: 12),
                 ],
-                if (isAdmin || isTechnician) ...[
+                if (canManageIssues) ...[
                   _buildQuickAction(
                     context,
                     icon: Icons.report_problem_outlined,
@@ -389,7 +405,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   color: Colors.indigo,
                    onTap: () => context.push(AppRoutes.managementHandbook),
                 ),
-                if (isAdmin || isTechnician) ...[
+                if (canManageIssues) ...[
                   const SizedBox(width: 12),
                   _buildQuickAction(
                     context,
@@ -470,7 +486,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           // Tổng quan (Stat Cards)
           Text('Tổng quan hệ thống', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
-          if (!isTechnician) ...[
+          if (!isTechnician || canManageInvoices) ...[
             _buildFinancialProgressCard(),
             const SizedBox(height: 16),
             const RevenueTrendChart(),
@@ -498,7 +514,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                       icon: Icons.warning_amber_outlined,
                       color: AppStatusColors.pending,
                     ),
-              if (!isTechnician)
+              if (!isTechnician || canManageInvoices)
                 unpaidInvoicesAsync.isLoading
                     ? const StatCardSkeleton()
                     : StatCard(
