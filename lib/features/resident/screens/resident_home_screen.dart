@@ -24,6 +24,7 @@ import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/link_request_provider.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
 import '../../../data/providers/notification_provider.dart';
+import '../widgets/equipment_interruption_banner.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
@@ -359,6 +360,9 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 ),
                 const SizedBox(height: 20),
                 
+                // Cảnh báo gián đoạn dịch vụ bảo trì thiết bị
+                const EquipmentInterruptionBanner(),
+
                 // Dịch vụ & Tiện ích Cư dân
                 _buildResidentServicesSection(context),
                 const SizedBox(height: 24),
