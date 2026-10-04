@@ -24,6 +24,8 @@ import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/link_request_provider.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
 import '../../../data/providers/notification_provider.dart';
+import '../../../data/models/notification_model.dart';
+import '../../../core/services/push_notification_service.dart';
 import '../widgets/equipment_interruption_banner.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -178,6 +180,22 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
           message: 'Yêu cầu liên kết căn hộ đã được Ban Quản Lý phê duyệt thành công!',
           backgroundColor: AppTheme.success,
         );
+      }
+    });
+
+    // 5. Lắng nghe thông báo mới từ hệ thống để kích hoạt chuông & banner Android
+    ref.listen<AsyncValue<List<NotificationModel>>>(notificationsStreamProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevIds = previous!.value!.map((n) => n.id).toSet();
+        final newNotifications = next.value!.where((n) => !prevIds.contains(n.id) && !n.isRead);
+        for (final notif in newNotifications) {
+          ref.read(pushNotificationServiceProvider).showSystemNotification(
+            id: notif.id.hashCode,
+            title: notif.title,
+            body: notif.body,
+            payload: notif.toJson(),
+          );
+        }
       }
     });
 

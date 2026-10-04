@@ -187,6 +187,45 @@ class PushNotificationService {
     }
   }
 
+  /// Hiển thị thông báo trên thanh trạng thái Android có âm thanh và rung chuông từ dữ liệu thông báo
+  Future<void> showSystemNotification({
+    required int id,
+    required String title,
+    required String body,
+    Map<String, dynamic>? payload,
+  }) async {
+    try {
+      if (kIsWeb) return;
+      if (!Platform.isAndroid && !Platform.isIOS) return;
+
+      await _localNotifications.show(
+        id,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            pkaHomeNotificationChannel.id,
+            pkaHomeNotificationChannel.name,
+            channelDescription: pkaHomeNotificationChannel.description,
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: true,
+            enableVibration: true,
+            icon: '@mipmap/ic_launcher',
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: payload != null ? jsonEncode(payload) : null,
+      );
+    } catch (e) {
+      debugPrint('Lỗi hiển thị thông báo hệ thống: $e');
+    }
+  }
+
   /// Đăng ký Token thiết bị thủ công vào Supabase CSDL
   Future<void> registerTokenManually({
     required String userId,
