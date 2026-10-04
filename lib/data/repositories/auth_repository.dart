@@ -45,4 +45,38 @@ class AuthRepository {
   Future<void> updatePassword(String newPassword) async {
     await _client.auth.updateUser(UserAttributes(password: newPassword));
   }
+
+  /// Gửi mã OTP 6 số đến email của người dùng để phục hồi mật khẩu
+  Future<void> sendPasswordResetOtp(String email) async {
+    try {
+      await _client.auth.resetPasswordForEmail(email.trim());
+    } on AuthException catch (e) {
+      if (e.statusCode == '429' || e.message.toLowerCase().contains('too many requests')) {
+        throw Exception('Bạn đã gửi yêu cầu quá nhiều lần. Vui lòng chờ ít phút.');
+      }
+      // Anti-enumeration: Không rethrow lỗi user not found ra ngoài
+      if (!e.message.toLowerCase().contains('user not found')) {
+        rethrow;
+      }
+    }
+  }
+
+  /// Xác thực mã OTP 6 số do người dùng nhập vào
+  Future<AuthResponse> verifyPasswordResetOtp({
+    required String email,
+    required String token,
+  }) async {
+    try {
+      return await _client.auth.verifyOTP(
+        email: email.trim(),
+        token: token.trim(),
+        type: OtpType.recovery,
+      );
+    } on AuthException catch (e) {
+      if (e.message.toLowerCase().contains('expired') || e.code == 'otp_expired') {
+        throw Exception('Mã xác thực đã hết hạn. Vui lòng gửi lại mã mới.');
+      }
+      throw Exception('Mã xác thực không chính xác hoặc đã hết hạn.');
+    }
+  }
 }
