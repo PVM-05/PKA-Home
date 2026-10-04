@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/amenity_booking_model.dart';
+import '../models/amenity_maintenance_model.dart';
 import '../repositories/amenity_booking_repository.dart';
 import 'auth_provider.dart';
 
@@ -27,11 +28,21 @@ class AmenityDateQuery {
   int get hashCode => Object.hash(amenityId, date.year, date.month, date.day);
 }
 
-/// Lấy danh sách booking của 1 tiện ích trong 1 ngày
+/// Lấy danh sách booking của 1 tiện ích trong 1 ngày (confirmed & waitlist)
 final amenityBookingsForDateProvider =
     FutureProvider.family<List<AmenityBookingModel>, AmenityDateQuery>((ref, query) async {
   final repo = ref.watch(amenityBookingRepositoryProvider);
   return await repo.getBookingsByAmenityAndDate(
+    amenityId: query.amenityId,
+    date: query.date,
+  );
+});
+
+/// Danh sách lịch bảo trì của 1 tiện ích trong 1 ngày
+final amenityMaintenanceForDateProvider =
+    FutureProvider.family<List<AmenityMaintenanceModel>, AmenityDateQuery>((ref, query) async {
+  final repo = ref.watch(amenityBookingRepositoryProvider);
+  return await repo.getMaintenanceWindows(
     amenityId: query.amenityId,
     date: query.date,
   );
