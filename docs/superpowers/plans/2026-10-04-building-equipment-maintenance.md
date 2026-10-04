@@ -29,10 +29,10 @@
 - Trigger `handle_equipment_service_interruption`: Khi task `affects_service = true` chuyển sang `in_progress`, tự động đặt thiết bị thành `under_maintenance` và gửi notification tới cư dân tòa nhà đó.
 - RPC `check_upcoming_equipment_maintenance()`: Quét và nhắc hạn trước 7 ngày.
 
-- [ ] **Step 1: Viết file SQL migration `20261004_02_building_equipment_maintenance.sql`**
-- [ ] **Step 2: Thực thi migration bằng Supabase MCP `execute_sql`**
-- [ ] **Step 3: Kiểm tra cấu trúc các bảng và triggers đã tạo thành công**
-- [ ] **Step 4: Commit migration vào git**
+- [x] **Step 1: Viết file SQL migration `20261004_02_building_equipment_maintenance.sql`**
+- [x] **Step 2: Thực thi migration bằng Supabase MCP `execute_sql`**
+- [x] **Step 3: Kiểm tra cấu trúc các bảng và triggers đã tạo thành công**
+- [x] **Step 4: Commit migration vào git**
 
 ```bash
 git add supabase/migrations/20261004_02_building_equipment_maintenance.sql
@@ -59,12 +59,12 @@ git commit -m "feat(db): tạo migration bảng thiết bị tòa nhà, phiếu 
   - Getters: `isCompleted`, `isInProgress`, `statusDisplayName`, `taskTypeDisplayName`.
   - `fromJson`, `toJson`, `copyWith`.
 
-- [ ] **Step 1: Viết failing unit tests trong `test/data/models/building_equipment_model_test.dart`**
-- [ ] **Step 2: Viết failing unit tests trong `test/data/models/equipment_maintenance_task_model_test.dart`**
-- [ ] **Step 3: Hiện thực `BuildingEquipmentModel` trong `lib/data/models/building_equipment_model.dart`**
-- [ ] **Step 4: Hiện thực `EquipmentMaintenanceTaskModel` trong `lib/data/models/equipment_maintenance_task_model.dart`**
-- [ ] **Step 5: Chạy unit tests xác nhận 100% PASS**
-- [ ] **Step 6: Commit vào git**
+- [x] **Step 1: Viết failing unit tests trong `test/data/models/building_equipment_model_test.dart`**
+- [x] **Step 2: Viết failing unit tests trong `test/data/models/equipment_maintenance_task_model_test.dart`**
+- [x] **Step 3: Hiện thực `BuildingEquipmentModel` trong `lib/data/models/building_equipment_model.dart`**
+- [x] **Step 4: Hiện thực `EquipmentMaintenanceTaskModel` trong `lib/data/models/equipment_maintenance_task_model.dart`**
+- [x] **Step 5: Chạy unit tests xác nhận 100% PASS**
+- [x] **Step 6: Commit vào git**
 
 ```bash
 git add lib/data/models/ test/data/models/
@@ -98,11 +98,11 @@ git commit -m "feat(models): tạo BuildingEquipmentModel và EquipmentMaintenan
   - `equipmentFilterBuildingProvider`, `equipmentFilterCategoryProvider`
   - `activeServiceInterruptionsProvider`
 
-- [ ] **Step 1: Viết failing tests trong `test/data/repositories/equipment_repository_test.dart`**
-- [ ] **Step 2: Hiện thực `EquipmentRepository` trong `lib/data/repositories/equipment_repository.dart`**
-- [ ] **Step 3: Tạo các Riverpod providers trong `lib/data/providers/equipment_provider.dart`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết failing tests trong `test/data/repositories/equipment_repository_test.dart`**
+- [x] **Step 2: Hiện thực `EquipmentRepository` trong `lib/data/repositories/equipment_repository.dart`**
+- [x] **Step 3: Tạo các Riverpod providers trong `lib/data/providers/equipment_provider.dart`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/data/repositories/equipment_repository.dart lib/data/providers/equipment_provider.dart test/data/repositories/equipment_repository_test.dart
@@ -133,12 +133,12 @@ git commit -m "feat(repo): tạo EquipmentRepository và equipment providers"
 - Dialogs:
   - Form thêm/sửa thiết bị và Form giao việc bảo trì.
 
-- [ ] **Step 1: Thêm routes `managementEquipment` và `managementEquipmentDetail` vào `AppRoutes` và `app_router.dart`**
-- [ ] **Step 2: Tạo `EquipmentFormDialog` và `MaintenanceTaskFormDialog`**
-- [ ] **Step 3: Tạo `EquipmentManagementScreen` và `EquipmentDetailScreen`**
-- [ ] **Step 4: Viết widget test trong `test/features/management/equipment_management_screen_test.dart`**
-- [ ] **Step 5: Chạy test xác nhận PASS**
-- [ ] **Step 6: Commit vào git**
+- [x] **Step 1: Thêm routes `managementEquipment` và `managementEquipmentDetail` vào `AppRoutes` và `app_router.dart`**
+- [x] **Step 2: Tạo `EquipmentFormDialog` và `MaintenanceTaskFormDialog`**
+- [x] **Step 3: Tạo `EquipmentManagementScreen` và `EquipmentDetailScreen`**
+- [x] **Step 4: Viết widget test trong `test/features/management/equipment_management_screen_test.dart`**
+- [x] **Step 5: Chạy test xác nhận PASS**
+- [x] **Step 6: Commit vào git**
 
 ```bash
 git add lib/features/management/ lib/core/router/ test/features/management/
@@ -160,11 +160,11 @@ git commit -m "feat(ui): tạo giao diện quản lý thiết bị và bảo tr�
   - Nếu có thiết bị tại tòa nhà đang bảo trì (`affects_service = true`), hiển thị Banner cảnh báo màu vàng nổi bật với thông điệp rõ ràng, thời gian dự kiến xong.
   - Tự động ẩn khi không có thiết bị nào gián đoạn.
 
-- [ ] **Step 1: Tạo widget `EquipmentInterruptionBanner`**
-- [ ] **Step 2: Tích hợp vào `ResidentHomeScreen`**
-- [ ] **Step 3: Viết widget test kiểm tra hiển thị/ẩn banner**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Tạo widget `EquipmentInterruptionBanner`**
+- [x] **Step 2: Tích hợp vào `ResidentHomeScreen`**
+- [x] **Step 3: Viết widget test kiểm tra hiển thị/ẩn banner**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/features/resident/ test/features/resident/
@@ -178,6 +178,6 @@ git commit -m "feat(ui): tích hợp banner cảnh báo bảo trì thiết bị 
 **Files:**
 - Toàn bộ codebase liên quan
 
-- [ ] **Step 1: Chạy `dart analyze` đảm bảo 0 issues**
-- [ ] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
-- [ ] **Step 3: Báo cáo kết quả và tích hợp nhánh hoàn tất**
+- [x] **Step 1: Chạy `dart analyze` đảm bảo 0 issues**
+- [x] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
+- [x] **Step 3: Báo cáo kết quả và tích hợp nhánh hoàn tất**
