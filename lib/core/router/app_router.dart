@@ -11,6 +11,9 @@ import '../../data/models/building_amenity_model.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/change_password_screen.dart';
+import '../../features/auth/screens/forgot_password_screen.dart';
+import '../../features/auth/screens/verify_otp_screen.dart';
+import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/resident/screens/resident_home_screen.dart';
 import '../../features/resident/screens/resident_invoice_screen.dart';
 import '../../features/resident/screens/resident_invoice_detail_screen.dart';
@@ -55,10 +58,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final user = authState.valueOrNull;
       final isLoggedIn = user != null;
       final isAuthRoute = state.matchedLocation == AppRoutes.login ||
-          state.matchedLocation == AppRoutes.register;
+          state.matchedLocation == AppRoutes.register ||
+          state.matchedLocation == AppRoutes.forgotPassword ||
+          state.matchedLocation == AppRoutes.verifyOtp;
 
       // Đang loading auth state → không redirect
       if (authState.isLoading) return null;
+
+      // Đang ở màn hình đặt lại mật khẩu với recovery session → không tự redirect ra trang chủ
+      if (state.matchedLocation == AppRoutes.resetPassword) return null;
 
       // Chưa đăng nhập → về login
       if (!isLoggedIn && !isAuthRoute) return AppRoutes.login;
@@ -92,6 +100,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
           state: state,
           child: const ChangePasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
+          state: state,
+          child: const ForgotPasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.verifyOtp,
+        pageBuilder: (context, state) {
+          final email = (state.extra as String?) ?? '';
+          return AppPageTransitions.slideFromRight(
+            state: state,
+            child: VerifyOtpScreen(email: email),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
+          state: state,
+          child: const ResetPasswordScreen(),
         ),
       ),
 
