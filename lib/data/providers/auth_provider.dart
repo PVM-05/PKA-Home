@@ -1,7 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/services/push_notification_service.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
+
+/// Provider tự động kích hoạt đồng bộ hóa FCM Device Token khi người dùng đăng nhập
+final fcmTokenSyncProvider = Provider<void>((ref) {
+  final authState = ref.watch(authProvider);
+  final user = authState.valueOrNull;
+  if (user != null) {
+    ref.read(pushNotificationServiceProvider).safeInitialize(userId: user.id);
+  }
+});
 
 final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
   return AuthNotifier(ref.read(authRepositoryProvider));
