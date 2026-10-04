@@ -5,7 +5,12 @@ class AmenityBookingModel {
   final String? bookedBy;
   final DateTime bookingDate;
   final String timeSlot;
-  final String status; // 'confirmed' | 'cancelled'
+  final String status; // 'confirmed' | 'waitlist' | 'cancelled' | 'completed' | 'no_show'
+  final int guestsCount;
+  final double feeAmount;
+  final double depositAmount;
+  final String depositStatus; // 'none' | 'pending' | 'received' | 'refunded' | 'forfeited'
+  final String? depositNotes;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final String? amenityName;
@@ -20,6 +25,11 @@ class AmenityBookingModel {
     required this.bookingDate,
     required this.timeSlot,
     this.status = 'confirmed',
+    this.guestsCount = 1,
+    this.feeAmount = 0.0,
+    this.depositAmount = 0.0,
+    this.depositStatus = 'none',
+    this.depositNotes,
     required this.createdAt,
     this.updatedAt,
     this.amenityName,
@@ -28,7 +38,10 @@ class AmenityBookingModel {
   });
 
   bool get isConfirmed => status == 'confirmed';
+  bool get isWaitlist => status == 'waitlist';
   bool get isCancelled => status == 'cancelled';
+  bool get isCompleted => status == 'completed';
+  bool get isNoShow => status == 'no_show';
 
   factory AmenityBookingModel.fromJson(Map<String, dynamic> json) {
     String? aName;
@@ -56,6 +69,11 @@ class AmenityBookingModel {
           : DateTime.now(),
       timeSlot: json['time_slot'] as String? ?? '',
       status: json['status'] as String? ?? 'confirmed',
+      guestsCount: (json['guests_count'] as num?)?.toInt() ?? 1,
+      feeAmount: (json['fee_amount'] as num?)?.toDouble() ?? 0.0,
+      depositAmount: (json['deposit_amount'] as num?)?.toDouble() ?? 0.0,
+      depositStatus: json['deposit_status'] as String? ?? 'none',
+      depositNotes: json['deposit_notes'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -77,6 +95,11 @@ class AmenityBookingModel {
       'booking_date': "${bookingDate.year.toString().padLeft(4, '0')}-${bookingDate.month.toString().padLeft(2, '0')}-${bookingDate.day.toString().padLeft(2, '0')}",
       'time_slot': timeSlot,
       'status': status,
+      'guests_count': guestsCount,
+      'fee_amount': feeAmount,
+      'deposit_amount': depositAmount,
+      'deposit_status': depositStatus,
+      if (depositNotes != null) 'deposit_notes': depositNotes,
     };
   }
 }
