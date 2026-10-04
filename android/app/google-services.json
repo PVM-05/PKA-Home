@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1064157901692",
+    "project_id": "pka-home-ec8f7",
+    "storage_bucket": "pka-home-ec8f7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1064157901692:android:59c8fb4b4703a2e9e2eaf9",
+        "android_client_info": {
+          "package_name": "vn.pka.home"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARvC35ug6SJSBDIznTMfaZ0i4WnrDLwEA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
