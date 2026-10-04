@@ -255,14 +255,19 @@ class IssueRepository {
 
   /// Lấy đánh giá dịch vụ của một sự cố
   Future<IssueRatingModel?> fetchRatingForIssue(String issueId) async {
-    final response = await _client
-        .from('issue_ratings')
-        .select('*, users:reporter_id(full_name)')
-        .eq('issue_report_id', issueId)
-        .maybeSingle();
+    try {
+      final response = await _client
+          .from('issue_ratings')
+          .select('*, users:reporter_id(full_name)')
+          .eq('issue_report_id', issueId)
+          .maybeSingle();
 
-    if (response == null) return null;
-    return IssueRatingModel.fromJson(response);
+      if (response == null) return null;
+      return IssueRatingModel.fromJson(response);
+    } catch (_) {
+      // Trả về null an toàn nếu bảng chưa được tạo hoặc chưa có đánh giá
+      return null;
+    }
   }
 
   /// Gửi đánh giá dịch vụ mới cho sự cố đã hoàn thành
