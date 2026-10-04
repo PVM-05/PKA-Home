@@ -1,11 +1,23 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers/notification_provider.dart';
 import '../../data/repositories/notification_repository.dart';
 import '../router/route_names.dart';
+
+/// Kênh thông báo Android ưu tiên cao nhất: Có chuông, rung và banner nổi
+const AndroidNotificationChannel pkaHomeNotificationChannel = AndroidNotificationChannel(
+  'pka_home_high_importance_channel',
+  'Thông báo PKA-Home',
+  description: 'Kênh nhận thông báo hóa đơn, sự cố và bảo trì tòa nhà có âm thanh và rung chuông.',
+  importance: Importance.max,
+  playSound: true,
+  enableVibration: true,
+);
 
 /// Top-level background message handler cho FCM (bắt buộc phải là top-level function)
 @pragma('vm:entry-point')
@@ -23,6 +35,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Dịch vụ quản lý thông báo đẩy Firebase Cloud Messaging (FCM) & Trung tâm thông báo
 class PushNotificationService {
   final NotificationRepository _notificationRepo;
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   PushNotificationService(this._notificationRepo);
 
@@ -31,8 +44,14 @@ class PushNotificationService {
 
   /// Khởi tạo an toàn (Fail-safe): Tự động bắt lỗi nếu chạy trên môi trường test,
   /// Windows desktop hoặc thiết bị chưa có dịch vụ Google Play.
-  Future<void> safeInitialize({required String userId}) async {
+  Future<void> safeInitialize({
+    required String userId,
+    void Function(String route)? onSelectNotificationRoute,
+  }) async {
     try {
+      // 1. Khởi tạo Android Notification Channel và Local Notifications cho hiển thị Heads-up & Âm thanh
+      await _setupLocalNotifications(onSelectNotificationRoute);
+
       if (!isFirebaseInitialized) {
         debugPrint('Firebase chưa được khởi tạo. Bỏ qua cấu hình FCM Push Notification.');
         return;
@@ -40,7 +59,7 @@ class PushNotificationService {
 
       final fcm = FirebaseMessaging.instance;
 
-      // 1. Xin quyền nhận thông báo (Android 13+ và iOS)
+      // 2. Xin quyền nhận thông báo (Android 13+ POST_NOTIFICATIONS và iOS)
       final settings = await fcm.requestPermission(
         alert: true,
         badge: true,
@@ -52,7 +71,7 @@ class PushNotificationService {
           settings.authorizationStatus == AuthorizationStatus.provisional) {
         debugPrint('Người dùng đã cấp quyền nhận thông báo.');
 
-        // 2. Lấy device token
+        // 3. Lấy Device Token từ Google
         final token = await fcm.getToken();
         if (token != null) {
           debugPrint('FCM Device Token: $token');
@@ -63,7 +82,7 @@ class PushNotificationService {
           );
         }
 
-        // 3. Lắng nghe cập nhật token khi Google làm mới
+        // 4. Lắng nghe cập nhật token khi Google làm mới
         fcm.onTokenRefresh.listen((newToken) async {
           debugPrint('FCM Token đã được làm mới: $newToken');
           await registerTokenManually(
@@ -73,17 +92,98 @@ class PushNotificationService {
           );
         });
 
-        // 4. Cấu hình hiển thị thông báo khi app đang mở (Foreground) trên iOS
+        // 5. Cấu hình hiển thị thông báo khi app đang mở (Foreground) trên iOS
         await fcm.setForegroundNotificationPresentationOptions(
           alert: true,
           badge: true,
           sound: true,
         );
+
+        // 6. Lắng nghe thông báo khi ứng dụng đang mở (Foreground) để hiện thông báo hệ thống có âm thanh
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+          _showForegroundSystemNotification(message);
+        });
       } else {
         debugPrint('Người dùng từ chối quyền nhận thông báo.');
       }
     } catch (e, stackTrace) {
       debugPrint('Không thể khởi tạo FCM: $e\n$stackTrace');
+    }
+  }
+
+  /// Cấu hình Local Notifications và Android Channel
+  Future<void> _setupLocalNotifications(
+    void Function(String route)? onSelectNotificationRoute,
+  ) async {
+    try {
+      if (kIsWeb) return;
+      if (!Platform.isAndroid && !Platform.isIOS) return;
+
+      const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const iosInit = DarwinInitializationSettings(
+        requestAlertPermission: false,
+        requestBadgePermission: false,
+        requestSoundPermission: false,
+      );
+      const initSettings = InitializationSettings(android: androidInit, iOS: iosInit);
+
+      await _localNotifications.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: (details) {
+          if (details.payload != null && details.payload!.isNotEmpty) {
+            try {
+              final Map<String, dynamic> data = jsonDecode(details.payload!);
+              final route = resolveRouteFromNotification(data);
+              onSelectNotificationRoute?.call(route);
+            } catch (_) {}
+          }
+        },
+      );
+
+      // Đăng ký kênh âm thanh cao cấp trên Android
+      final androidImplementation = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      if (androidImplementation != null) {
+        await androidImplementation.createNotificationChannel(pkaHomeNotificationChannel);
+      }
+    } catch (e) {
+      debugPrint('Lỗi thiết lập Local Notification Channel: $e');
+    }
+  }
+
+  /// Hiển thị thông báo trên thanh trạng thái Android có âm thanh và rung chuông khi app đang mở
+  Future<void> _showForegroundSystemNotification(RemoteMessage message) async {
+    try {
+      final notification = message.notification;
+      if (notification == null) return;
+
+      final android = message.notification?.android;
+
+      await _localNotifications.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            pkaHomeNotificationChannel.id,
+            pkaHomeNotificationChannel.name,
+            channelDescription: pkaHomeNotificationChannel.description,
+            importance: Importance.max,
+            priority: Priority.high,
+            playSound: true,
+            enableVibration: true,
+            icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: jsonEncode(message.data),
+      );
+    } catch (e) {
+      debugPrint('Lỗi hiển thị thông báo foreground: $e');
     }
   }
 
