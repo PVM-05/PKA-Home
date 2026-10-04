@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/building_equipment_model.dart';
 import '../models/equipment_maintenance_task_model.dart';
 import '../repositories/equipment_repository.dart';
+export '../repositories/equipment_repository.dart';
 
 /// Bộ lọc tòa nhà
 final equipmentFilterBuildingProvider = StateProvider<String?>((ref) => null);
