@@ -7,6 +7,7 @@ import '../../../data/models/notification_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/notification_provider.dart';
 import 'resident_invoice_screen.dart';
+import 'resident_issue_screen.dart';
 
 /// Màn hình Trung tâm Thông báo & Nhắc nhở dành cho Cư dân.
 class NotificationCenterScreen extends ConsumerWidget {
@@ -118,6 +119,10 @@ class _NotificationCard extends ConsumerWidget {
         return AppStatusColors.unpaid;
       case 'new_invoice':
         return AppTheme.primary;
+      case 'equipment_maintenance':
+        return const Color(0xFFE65100);
+      case 'issue_update':
+        return const Color(0xFF00897B);
       default:
         return AppTheme.secondary;
     }
@@ -129,6 +134,10 @@ class _NotificationCard extends ConsumerWidget {
         return Icons.alarm_outlined;
       case 'new_invoice':
         return Icons.receipt_long_outlined;
+      case 'equipment_maintenance':
+        return Icons.build_circle_outlined;
+      case 'issue_update':
+        return Icons.support_agent_outlined;
       default:
         return Icons.notifications_outlined;
     }
@@ -165,10 +174,15 @@ class _NotificationCard extends ConsumerWidget {
           if (isUnread) {
             await ref.read(notificationRepositoryProvider).markAsRead(notification.id);
           }
-          if (context.mounted &&
-              (notification.type == 'invoice_due_reminder' || notification.type == 'new_invoice')) {
+          if (!context.mounted) return;
+
+          if (notification.type == 'invoice_due_reminder' || notification.type == 'new_invoice') {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ResidentInvoiceScreen()),
+            );
+          } else if (notification.type == 'issue_update') {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ResidentIssueScreen()),
             );
           }
         },
