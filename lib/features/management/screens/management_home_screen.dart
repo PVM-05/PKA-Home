@@ -24,6 +24,9 @@ import '../../../core/theme/theme_mode_provider.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../data/providers/role_delegation_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../core/services/push_notification_service.dart';
+import '../../../data/providers/notification_provider.dart';
+import '../../../data/models/notification_model.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
@@ -91,6 +94,41 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     );
   }
 
+  void _showNotificationToast({
+    required IconData icon,
+    required String message,
+    required Color backgroundColor,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        duration: duration,
+      ),
+    );
+  }
+
   Color _getRoleBadgeColor(String role) {
     switch (role) {
       case 'admin':
@@ -107,6 +145,94 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Lắng nghe phản ánh sự cố mới thời gian thực từ Cư dân
+    ref.listen<AsyncValue<List<Map<String, dynamic>>>>(rawIssuesStreamProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevIds = previous!.value!.map((i) => i['id'] as String).toSet();
+        final newlyAdded = next.value!.where((i) => !prevIds.contains(i['id'])).toList();
+        for (final issue in newlyAdded) {
+          final desc = (issue['description'] as String?) ?? 'Phản ánh sự cố mới từ cư dân';
+          final isUrgent = issue['priority'] == 'urgent';
+          final title = isUrgent ? '🚨 PHẢN ÁNH KHẨN CẤP' : 'Phản ánh sự cố mới';
+
+          debugPrint('🔔 [ManagementHome] Phát hiện phản ánh mới từ Cư dân: "$desc" (priority: ${issue['priority']})');
+          _showNotificationToast(
+            icon: isUrgent ? Icons.warning_amber_rounded : Icons.report_problem,
+            message: isUrgent ? 'SỰ CỐ KHẨN: $desc' : 'Sự cố mới: $desc',
+            backgroundColor: isUrgent ? AppTheme.error : AppTheme.warning,
+            duration: const Duration(seconds: 5),
+          );
+
+          ref.read(pushNotificationServiceProvider).showSystemNotification(
+            id: (issue['id'] as String).hashCode,
+            title: title,
+            body: desc,
+            payload: {'type': 'issue_update', 'id': issue['id']},
+          );
+        }
+      }
+    });
+
+    // 2. Lắng nghe xác nhận chuyển khoản thanh toán hóa đơn mới từ Cư dân
+    ref.listen<AsyncValue<int>>(pendingConfirmationInvoicesProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevCount = previous!.value!;
+        final nextCount = next.value!;
+        if (nextCount > prevCount) {
+          debugPrint('🔔 [ManagementHome] Cư dân vừa gửi xác nhận thanh toán (Tổng chờ đối soát: $nextCount)');
+          _showNotificationToast(
+            icon: Icons.payments,
+            message: 'Cư dân vừa gửi xác nhận chuyển khoản! Đang chờ BQL đối soát.',
+            backgroundColor: AppTheme.success,
+          );
+          ref.read(pushNotificationServiceProvider).showSystemNotification(
+            id: 'payment_confirm_${DateTime.now().millisecondsSinceEpoch}'.hashCode,
+            title: 'Xác nhận thanh toán mới',
+            body: 'Có cư dân vừa hoàn tất chuyển khoản hóa đơn và gửi xác nhận. Vui lòng kiểm tra đối soát.',
+            payload: {'type': 'new_invoice'},
+          );
+        }
+      }
+    });
+
+    // 3. Lắng nghe yêu cầu liên kết căn hộ mới từ Cư dân
+    ref.listen<AsyncValue<int>>(pendingLinkRequestsCountProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevCount = previous!.value!;
+        final nextCount = next.value!;
+        if (nextCount > prevCount) {
+          debugPrint('🔔 [ManagementHome] Có yêu cầu liên kết căn hộ mới (Tổng chờ duyệt: $nextCount)');
+          _showNotificationToast(
+            icon: Icons.person_add_alt_1,
+            message: 'Có yêu cầu liên kết căn hộ mới từ cư dân đang chờ phê duyệt.',
+            backgroundColor: AppTheme.primary,
+          );
+          ref.read(pushNotificationServiceProvider).showSystemNotification(
+            id: 'link_request_${DateTime.now().millisecondsSinceEpoch}'.hashCode,
+            title: 'Yêu cầu liên kết căn hộ mới',
+            body: 'Có cư dân vừa gửi yêu cầu liên kết căn hộ. Vui lòng vào duyệt.',
+            payload: {'type': 'link_request'},
+          );
+        }
+      }
+    });
+
+    // 4. Lắng nghe thông báo hệ thống định danh cho tài khoản quản trị
+    ref.listen<AsyncValue<List<NotificationModel>>>(notificationsStreamProvider, (previous, next) {
+      if (previous?.hasValue == true && next.hasValue) {
+        final prevIds = previous!.value!.map((n) => n.id).toSet();
+        final newNotifs = next.value!.where((n) => !prevIds.contains(n.id) && !n.isRead);
+        for (final notif in newNotifs) {
+          ref.read(pushNotificationServiceProvider).showSystemNotification(
+            id: notif.id.hashCode,
+            title: notif.title,
+            body: notif.body,
+            payload: notif.toJson(),
+          );
+        }
+      }
+    });
+
     final currentUser = ref.watch(authProvider).value;
     final activeDelegations = ref.watch(activeDelegationsProvider).valueOrNull ?? [];
     final isAdmin = currentUser?.isAdmin ?? false;
