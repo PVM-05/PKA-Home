@@ -40,6 +40,7 @@ import '../../features/management/screens/audit_trail_screen.dart';
 import '../../features/management/screens/role_delegation_screen.dart';
 import '../../features/management/screens/permission_matrix_screen.dart';
 import '../../features/management/screens/service_rating_overview_screen.dart';
+import '../../features/management/screens/amenity_management_screen.dart';
 import 'route_names.dart';
 import 'page_transitions.dart';
 
@@ -358,6 +359,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 AppPageTransitions.slideFromRight(
               state: state,
               child: const ServiceRatingOverviewScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'amenities',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const AmenityManagementScreen(),
             ),
           ),
         ],

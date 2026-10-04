@@ -438,6 +438,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   color: Colors.indigo,
                    onTap: () => context.push(AppRoutes.managementHandbook),
                 ),
+                const SizedBox(width: 12),
+                _buildQuickAction(
+                  context,
+                  icon: Icons.pool_outlined,
+                  label: 'Tiện ích',
+                  color: Colors.teal.shade700,
+                  onTap: () => context.push(AppRoutes.managementAmenities),
+                ),
                 if (canManageIssues) ...[
                   const SizedBox(width: 12),
                   _buildQuickAction(
