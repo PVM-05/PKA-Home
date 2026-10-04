@@ -118,7 +118,7 @@ class AmenityBookingRepository {
   }) async {
     await _client.from('amenity_bookings').update({
       'deposit_status': depositStatus,
-      if (notes != null) 'deposit_notes': notes,
+      'deposit_notes': ?notes,
       'updated_at': DateTime.now().toIso8601String(),
     }).eq('id', bookingId);
   }
@@ -168,7 +168,7 @@ class AmenityBookingRepository {
       'start_time': startTime.toIso8601String(),
       'end_time': endTime.toIso8601String(),
       'reason': reason,
-      if (createdBy != null) 'created_by': createdBy,
+      'created_by': ?createdBy,
     });
   }
 
