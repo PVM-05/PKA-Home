@@ -46,7 +46,7 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
         return _buildAlertCard(context, tasks, targetBuilding);
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 
