@@ -8,6 +8,7 @@ import '../../data/models/invoice_model.dart';
 import '../../data/models/issue_model.dart';
 import '../../data/models/announcement_model.dart';
 import '../../data/models/building_amenity_model.dart';
+import '../../data/models/building_equipment_model.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/change_password_screen.dart';
@@ -44,6 +45,8 @@ import '../../features/management/screens/role_delegation_screen.dart';
 import '../../features/management/screens/permission_matrix_screen.dart';
 import '../../features/management/screens/service_rating_overview_screen.dart';
 import '../../features/management/screens/amenity_management_screen.dart';
+import '../../features/management/screens/equipment_management_screen.dart';
+import '../../features/management/screens/equipment_detail_screen.dart';
 import 'route_names.dart';
 import 'page_transitions.dart';
 
@@ -400,6 +403,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               state: state,
               child: const AmenityManagementScreen(),
             ),
+          ),
+          GoRoute(
+            path: 'equipment',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const EquipmentManagementScreen(),
+            ),
+            routes: [
+              GoRoute(
+                path: 'detail',
+                pageBuilder: (context, state) {
+                  final equipment = state.extra as BuildingEquipmentModel;
+                  return AppPageTransitions.slideFromRight(
+                    state: state,
+                    child: EquipmentDetailScreen(equipment: equipment),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

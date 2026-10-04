@@ -45,4 +45,6 @@ class AppRoutes {
   static const String managementPermissionMatrix = '/management/permission-matrix';
   static const String managementServiceRatings = '/management/service-ratings';
   static const String managementAmenities = '/management/amenities';
+  static const String managementEquipment = '/management/equipment';
+  static const String managementEquipmentDetail = '/management/equipment/detail';
 }

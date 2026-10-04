@@ -233,6 +233,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 context.push(AppRoutes.managementRoleDelegation);
               } else if (value == 'matrix') {
                 context.push(AppRoutes.managementPermissionMatrix);
+              } else if (value == 'equipment') {
+                context.push(AppRoutes.managementEquipment);
               } else if (value == 'serviceRatings') {
                 context.push(AppRoutes.managementServiceRatings);
               } else if (value == 'fontSize') {
@@ -262,6 +264,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     Icon(Icons.shield_outlined, size: 20, color: AppTheme.primary),
                     SizedBox(width: 8),
                     Text('Bảng phân quyền'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'equipment',
+                child: Row(
+                  children: [
+                    Icon(Icons.precision_manufacturing_outlined, size: 20, color: Colors.deepOrange),
+                    SizedBox(width: 8),
+                    Text('Bảo trì thiết bị'),
                   ],
                 ),
               ),
@@ -445,6 +457,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   label: 'Tiện ích',
                   color: Colors.teal.shade700,
                   onTap: () => context.push(AppRoutes.managementAmenities),
+                ),
+                const SizedBox(width: 12),
+                _buildQuickAction(
+                  context,
+                  icon: Icons.precision_manufacturing_outlined,
+                  label: 'Bảo trì TB',
+                  color: Colors.deepOrange,
+                  onTap: () => context.push(AppRoutes.managementEquipment),
                 ),
                 if (canManageIssues) ...[
                   const SizedBox(width: 12),
