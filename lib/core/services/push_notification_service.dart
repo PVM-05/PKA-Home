@@ -39,6 +39,17 @@ class PushNotificationService {
 
   PushNotificationService(this._notificationRepo);
 
+  bool _isLocalNotificationsInitialized = false;
+
+  /// Đảm bảo plugin local notifications và notification channel luôn được khởi tạo trước khi gọi show
+  Future<void> ensureLocalNotificationsInitialized([
+    void Function(String route)? onSelectNotificationRoute,
+  ]) async {
+    if (_isLocalNotificationsInitialized) return;
+    await _setupLocalNotifications(onSelectNotificationRoute);
+    _isLocalNotificationsInitialized = true;
+  }
+
   /// Kiểm tra an toàn xem Firebase đã được khởi tạo hay chưa
   bool get isFirebaseInitialized => Firebase.apps.isNotEmpty;
 
@@ -50,7 +61,7 @@ class PushNotificationService {
   }) async {
     try {
       // 1. Khởi tạo Android Notification Channel và Local Notifications cho hiển thị Heads-up & Âm thanh
-      await _setupLocalNotifications(onSelectNotificationRoute);
+      await ensureLocalNotificationsInitialized(onSelectNotificationRoute);
 
       if (!isFirebaseInitialized) {
         debugPrint('Firebase chưa được khởi tạo. Bỏ qua cấu hình FCM Push Notification.');
@@ -140,11 +151,12 @@ class PushNotificationService {
         },
       );
 
-      // Đăng ký kênh âm thanh cao cấp trên Android
+      // Đăng ký kênh âm thanh cao cấp trên Android và xin quyền thông báo
       final androidImplementation = _localNotifications
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
         await androidImplementation.createNotificationChannel(pkaHomeNotificationChannel);
+        await androidImplementation.requestNotificationsPermission();
       }
     } catch (e) {
       debugPrint('Lỗi thiết lập Local Notification Channel: $e');
@@ -157,7 +169,10 @@ class PushNotificationService {
       final notification = message.notification;
       if (notification == null) return;
 
+      await ensureLocalNotificationsInitialized();
+
       final android = message.notification?.android;
+      debugPrint('🔔 [FCM Foreground] Nhận thông báo: "${notification.title}" - "${notification.body}"');
 
       await _localNotifications.show(
         notification.hashCode,
@@ -173,6 +188,12 @@ class PushNotificationService {
             playSound: true,
             enableVibration: true,
             icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+            styleInformation: notification.body != null
+                ? BigTextStyleInformation(
+                    notification.body!,
+                    contentTitle: notification.title,
+                  )
+                : null,
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
@@ -182,8 +203,9 @@ class PushNotificationService {
         ),
         payload: jsonEncode(message.data),
       );
-    } catch (e) {
-      debugPrint('Lỗi hiển thị thông báo foreground: $e');
+      debugPrint('✅ [FCM Foreground] Đã phát thông báo hệ thống Android thành công');
+    } catch (e, stack) {
+      debugPrint('❌ [FCM Foreground] Lỗi hiển thị thông báo foreground: $e\n$stack');
     }
   }
 
@@ -197,6 +219,10 @@ class PushNotificationService {
     try {
       if (kIsWeb) return;
       if (!Platform.isAndroid && !Platform.isIOS) return;
+
+      await ensureLocalNotificationsInitialized();
+
+      debugPrint('🔔 [Hệ thống] Đang phát thông báo Android: "$title" - "$body"');
 
       await _localNotifications.show(
         id,
@@ -212,6 +238,10 @@ class PushNotificationService {
             playSound: true,
             enableVibration: true,
             icon: '@mipmap/ic_launcher',
+            styleInformation: BigTextStyleInformation(
+              body,
+              contentTitle: title,
+            ),
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
@@ -221,8 +251,9 @@ class PushNotificationService {
         ),
         payload: payload != null ? jsonEncode(payload) : null,
       );
-    } catch (e) {
-      debugPrint('Lỗi hiển thị thông báo hệ thống: $e');
+      debugPrint('✅ [Hệ thống] Đã gửi thông báo Android thành công (id: $id)');
+    } catch (e, stack) {
+      debugPrint('❌ [Hệ thống] Lỗi hiển thị thông báo hệ thống: $e\n$stack');
     }
   }
 

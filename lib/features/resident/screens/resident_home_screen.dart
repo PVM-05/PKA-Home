@@ -110,16 +110,42 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
       if (previous?.hasValue == true && next.hasValue) {
         final prevList = previous!.value!;
         final nextList = next.value!;
+        final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+
         for (final nextInv in nextList) {
           final prevInv = prevList.cast<InvoiceModel?>().firstWhere(
                 (p) => p?.id == nextInv.id,
                 orElse: () => null,
               );
-          if (prevInv != null && prevInv.status != nextInv.status && nextInv.status == 'paid') {
+
+          // Trường hợp 1: Có hóa đơn mới vừa được tạo cho căn hộ
+          if (prevInv == null) {
+            debugPrint('🔔 [ResidentHome] Phát hiện hóa đơn mới kỳ: ${nextInv.period}');
+            _showNotificationToast(
+              icon: Icons.receipt_long,
+              message: 'Hóa đơn mới kỳ ${nextInv.period}: ${currencyFormat.format(nextInv.totalAmount)}',
+              backgroundColor: AppTheme.primary,
+            );
+            ref.read(pushNotificationServiceProvider).showSystemNotification(
+              id: nextInv.id.hashCode,
+              title: 'Hóa đơn mới phát hành',
+              body: 'Hóa đơn kỳ ${nextInv.period} (${currencyFormat.format(nextInv.totalAmount)}) đã được phát hành.',
+              payload: {'type': 'new_invoice', 'id': nextInv.id},
+            );
+          }
+          // Trường hợp 2: Hóa đơn được Ban Quản Lý xác nhận thanh toán thành công
+          else if (prevInv.status != nextInv.status && nextInv.status == 'paid') {
+            debugPrint('🔔 [ResidentHome] Hóa đơn kỳ ${nextInv.period} đã được thanh toán');
             _showNotificationToast(
               icon: Icons.check_circle,
               message: 'Hóa đơn kỳ ${nextInv.period} đã được Ban Quản Lý xác nhận thanh toán thành công!',
               backgroundColor: AppTheme.success,
+            );
+            ref.read(pushNotificationServiceProvider).showSystemNotification(
+              id: nextInv.id.hashCode,
+              title: 'Hóa đơn đã thanh toán thành công',
+              body: 'Hóa đơn kỳ ${nextInv.period} đã được Ban Quản Lý xác nhận thanh toán!',
+              payload: {'type': 'new_invoice', 'id': nextInv.id},
             );
           }
         }
@@ -138,16 +164,30 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               );
           if (prevIssue != null && prevIssue.status != nextIssue.status) {
             if (nextIssue.status == 'in_progress') {
+              debugPrint('🔔 [ResidentHome] Cập nhật sự cố đang xử lý: ${nextIssue.description}');
               _showNotificationToast(
                 icon: Icons.engineering,
                 message: 'Phản ánh "${nextIssue.description}" đang được Ban Quản Lý xử lý.',
                 backgroundColor: AppTheme.primary,
               );
+              ref.read(pushNotificationServiceProvider).showSystemNotification(
+                id: nextIssue.id.hashCode,
+                title: 'Sự cố đang được xử lý',
+                body: 'Phản ánh "${nextIssue.description}" đang được Ban Quản Lý xử lý.',
+                payload: {'type': 'issue_update', 'id': nextIssue.id},
+              );
             } else if (nextIssue.status == 'resolved') {
+              debugPrint('🔔 [ResidentHome] Cập nhật sự cố đã giải quyết: ${nextIssue.description}');
               _showNotificationToast(
                 icon: Icons.verified,
                 message: 'Phản ánh "${nextIssue.description}" đã được giải quyết hoàn tất!',
                 backgroundColor: AppTheme.success,
+              );
+              ref.read(pushNotificationServiceProvider).showSystemNotification(
+                id: nextIssue.id.hashCode,
+                title: 'Sự cố đã giải quyết hoàn tất',
+                body: 'Phản ánh "${nextIssue.description}" đã được giải quyết xong. Quý Cư dân vui lòng đánh giá chất lượng dịch vụ.',
+                payload: {'type': 'issue_update', 'id': nextIssue.id},
               );
             }
           }
@@ -155,18 +195,25 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
       }
     });
 
-    // 3. Lắng nghe thông báo mới đăng thời gian thực
+    // 3. Lắng nghe thông báo mới đăng thời gian thực (Bảng tin thông báo chung)
     ref.listen<AsyncValue<List<AnnouncementModel>>>(announcementsStreamProvider, (previous, next) {
       if (previous?.hasValue == true && next.hasValue) {
-        final prevList = previous!.value!;
-        final nextList = next.value!;
-        if (nextList.length > prevList.length) {
-          final newest = nextList.first;
+        final prevIds = previous!.value!.map((a) => a.id).toSet();
+        final newlyAdded = next.value!.where((a) => !prevIds.contains(a.id)).toList();
+        for (final newest in newlyAdded) {
+          debugPrint('📣 [ResidentHome] Phát hiện thông báo bảng tin mới: "${newest.title}"');
           _showNotificationToast(
             icon: newest.isUrgent ? Icons.warning_amber_rounded : Icons.campaign,
             message: newest.isUrgent ? 'THÔNG BÁO KHẨN: ${newest.title}' : 'Thông báo mới: ${newest.title}',
             backgroundColor: newest.isUrgent ? AppTheme.error : AppTheme.primary,
             duration: const Duration(seconds: 5),
+          );
+          // Phát âm thanh chuông Android và thả banner thông báo từ mép trên màn hình
+          ref.read(pushNotificationServiceProvider).showSystemNotification(
+            id: newest.id.hashCode,
+            title: newest.isUrgent ? 'THÔNG BÁO KHẨN: ${newest.title}' : 'Thông báo: ${newest.title}',
+            body: newest.content,
+            payload: {'type': 'announcement', 'id': newest.id},
           );
         }
       }
@@ -179,6 +226,12 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
           icon: Icons.apartment,
           message: 'Yêu cầu liên kết căn hộ đã được Ban Quản Lý phê duyệt thành công!',
           backgroundColor: AppTheme.success,
+        );
+        ref.read(pushNotificationServiceProvider).showSystemNotification(
+          id: 'link_approved'.hashCode,
+          title: 'Liên kết căn hộ thành công',
+          body: 'Yêu cầu liên kết căn hộ đã được Ban Quản Lý phê duyệt!',
+          payload: {'type': 'link_request'},
         );
       }
     });
