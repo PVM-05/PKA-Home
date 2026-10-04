@@ -22,11 +22,11 @@ final invoicesProvider = FutureProvider.autoDispose<List<InvoiceModel>>((ref) as
   return await repo.fetchInvoices();
 });
 
-final _allIssuesStreamProvider = StreamProvider((ref) => ref.watch(managementRepositoryProvider).watchRawIssues());
+final rawIssuesStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) => ref.watch(managementRepositoryProvider).watchRawIssues());
 
 final allIssuesProvider = FutureProvider.autoDispose<List<IssueModel>>((ref) async {
   // Đăng ký lắng nghe Stream Realtime từ Supabase (bất kỳ thay đổi nào cũng làm Future này chạy lại)
-  ref.watch(_allIssuesStreamProvider);
+  ref.watch(rawIssuesStreamProvider);
   final repo = ref.watch(managementRepositoryProvider);
   return await repo.fetchIssues();
 });
