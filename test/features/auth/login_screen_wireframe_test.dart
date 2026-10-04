@@ -31,18 +31,11 @@ void main() {
     // 1. Phải có phụ đề Ứng Dụng Quản Lý Chung Cư theo Wireframe
     expect(find.textContaining('Ứng Dụng Quản Lý Chung Cư'), findsOneWidget);
 
-    // 2. Dòng Quên mật khẩu chuẩn Wireframe: "Quên mật khẩu? Vui lòng liên hệ Ban quản lý"
-    final forgotPasswordBtn = find.text('Quên mật khẩu? Vui lòng liên hệ Ban quản lý');
+    // 2. Dòng Quên mật khẩu tự phục vụ qua Email OTP
+    final forgotPasswordBtn = find.text('Quên mật khẩu?');
     expect(forgotPasswordBtn, findsOneWidget);
 
     // 3. Nút Đăng nhập
     expect(find.widgetWithText(ElevatedButton, 'Đăng nhập'), findsOneWidget);
-
-    // 4. Nhấn Quên mật khẩu mở dialog hướng dẫn
-    await tester.tap(forgotPasswordBtn);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Quên mật khẩu?'), findsOneWidget);
-    expect(find.textContaining('Vui lòng liên hệ Văn phòng Ban Quản lý'), findsOneWidget);
   });
 }

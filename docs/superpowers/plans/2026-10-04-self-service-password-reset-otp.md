@@ -28,22 +28,11 @@
 - `verifyPasswordResetOtp({required String email, required String token}) -> Future<AuthResponse>`
 - `updatePassword(String newPassword) -> Future<UserResponse>`
 
-- [ ] **Step 1: Viết failing test trong `test/data/repositories/auth_repository_test.dart`**
-
-```dart
-test('sendPasswordResetOtp calls resetPasswordForEmail', () async {
-  // test verification of resetPasswordForEmail call
-});
-
-test('verifyPasswordResetOtp calls verifyOTP with OtpType.recovery', () async {
-  // test verification of verifyOTP call
-});
-```
-
-- [ ] **Step 2: Chạy test xác nhận FAIL**
-- [ ] **Step 3: Hiện thực các phương thức trong `lib/data/repositories/auth_repository.dart`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết failing test trong `test/data/repositories/auth_repository_test.dart`**
+- [x] **Step 2: Chạy test xác nhận FAIL**
+- [x] **Step 3: Hiện thực các phương thức trong `lib/data/repositories/auth_repository.dart`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/data/repositories/auth_repository.dart test/data/repositories/auth_repository_test.dart
@@ -63,13 +52,13 @@ git commit -m "feat: bổ sung sendPasswordResetOtp và verifyPasswordResetOtp v
 - `AppRoutes.verifyOtp = '/verify-otp'`
 - `AppRoutes.resetPassword = '/reset-password'`
 
-- [ ] **Step 1: Khai báo 3 hằng số route mới trong `AppRoutes`**
-- [ ] **Step 2: Cập nhật hàm `redirect` trong `app_router.dart`:**
+- [x] **Step 1: Khai báo 3 hằng số route mới trong `AppRoutes`**
+- [x] **Step 2: Cập nhật hàm `redirect` trong `app_router.dart`:**
   - Cho phép truy cập công khai vào `/forgot-password`, `/verify-otp`.
   - Không tự động chuyển hướng người dùng ra khỏi `/reset-password` khi đang có Recovery Session.
-- [ ] **Step 3: Đăng ký 3 GoRoute mới với hiệu ứng chuyển trang `slideFromRight`**
-- [ ] **Step 4: Kiểm tra phân tích `dart analyze`**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 3: Đăng ký 3 GoRoute mới với hiệu ứng chuyển trang `slideFromRight`**
+- [x] **Step 4: Kiểm tra phân tích `dart analyze`**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/core/router/route_names.dart lib/core/router/app_router.dart
@@ -91,11 +80,11 @@ git commit -m "feat: cấu hình route và bypass Auth Guard cho luồng OTP qu�
   - `onChanged`: `ValueChanged<String>`
   - Hỗ trợ tự động nhảy con trỏ khi gõ số, tự động lùi về ô trước khi bấm Backspace, và tự động tách chuỗi khi dán từ Clipboard.
 
-- [ ] **Step 1: Viết failing widget test cho `OtpInputBoxes`**
-- [ ] **Step 2: Chạy test xác nhận FAIL**
-- [ ] **Step 3: Hiện thực widget `OtpInputBoxes`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết failing widget test cho `OtpInputBoxes`**
+- [x] **Step 2: Chạy test xác nhận FAIL**
+- [x] **Step 3: Hiện thực widget `OtpInputBoxes`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/features/auth/widgets/otp_input_boxes.dart test/features/auth/widgets/otp_input_boxes_test.dart
@@ -112,23 +101,23 @@ git commit -m "feat: tạo component OtpInputBoxes 6 ô số tự động chuy�
 - Create: `lib/features/auth/screens/reset_password_screen.dart`
 - Modify: `lib/features/auth/screens/login_screen.dart`
 
-- [ ] **Step 1: Tạo `ForgotPasswordScreen`:**
+- [x] **Step 1: Tạo `ForgotPasswordScreen`:**
   - Ô nhập email chuẩn, validate regex.
   - Thông báo an toàn chống rò rỉ tài khoản (Anti-account enumeration).
   - Nút "Gửi mã xác thực" gọi `sendPasswordResetOtp(email)` và chuyển sang `AppRoutes.verifyOtp`.
-- [ ] **Step 2: Tạo `VerifyOtpScreen`:**
+- [x] **Step 2: Tạo `VerifyOtpScreen`:**
   - Tích hợp `OtpInputBoxes`.
   - Bộ đếm 60 giây gửi lại mã (Timer countdown).
   - Bắt lỗi 429 và mã OTP hết hạn.
   - Xác thực qua `verifyPasswordResetOtp` và chuyển sang `AppRoutes.resetPassword`.
-- [ ] **Step 3: Tạo `ResetPasswordScreen`:**
+- [x] **Step 3: Tạo `ResetPasswordScreen`:**
   - Kiểm tra có session hợp lệ hay không; nếu không có session thì yêu cầu quay lại từ bước 1.
   - Ô nhập mật khẩu mới và xác nhận mật khẩu (tối thiểu 6 ký tự, có nút ẩn/hiện mắt).
   - Gọi `updatePassword(newPassword)`.
   - Đăng xuất phiên tạm và chuyển về `AppRoutes.login` kèm SnackBar xanh thành công.
-- [ ] **Step 4: Cập nhật `LoginScreen`:**
+- [x] **Step 4: Cập nhật `LoginScreen`:**
   - Đổi nút Text "Quên mật khẩu?" dẫn thẳng tới `context.push(AppRoutes.forgotPassword)`.
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/features/auth/screens/
@@ -142,6 +131,6 @@ git commit -m "feat: hoàn thiện giao diện 3 màn hình khôi phục mật k
 **Files:**
 - Toàn bộ codebase liên quan
 
-- [ ] **Step 1: Chạy `dart analyze` đảm bảo không có cảnh báo nào**
-- [ ] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
-- [ ] **Step 3: Báo cáo kết quả và tích hợp nhánh hoàn tất**
+- [x] **Step 1: Chạy `dart analyze` đảm bảo không có cảnh báo nào**
+- [x] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
+- [x] **Step 3: Báo cáo kết quả và tích hợp nhánh hoàn tất**

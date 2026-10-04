@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -59,31 +61,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         });
       }
     }
-  }
-
-  void _showForgotPasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.help_outline, color: AppTheme.primary),
-            SizedBox(width: 8),
-            Text('Quên mật khẩu?'),
-          ],
-        ),
-        content: const Text(
-          'Để bảo mật dữ liệu căn hộ, hệ thống quản lý nội bộ yêu cầu xác minh trực tiếp. Vui lòng liên hệ Văn phòng Ban Quản lý hoặc Hotline tòa nhà để được hỗ trợ cấp lại mật khẩu.',
-          style: TextStyle(height: 1.4),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Đã hiểu'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -209,16 +186,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                         const SizedBox(height: 12),
 
-                        // Quên mật khẩu theo Wireframe
+                        // Quên mật khẩu
                         Center(
                           child: TextButton(
-                            onPressed: _showForgotPasswordDialog,
+                            onPressed: () => context.push(AppRoutes.forgotPassword),
                             child: const Text(
-                              'Quên mật khẩu? Vui lòng liên hệ Ban quản lý',
+                              'Quên mật khẩu?',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: AppTheme.textSecondary,
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
