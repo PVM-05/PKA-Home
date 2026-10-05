@@ -250,6 +250,10 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                                         userId: user.id,
                                       );
 
+                                  ref.invalidate(apartmentVehiclesProvider(apartmentId));
+                                  ref.invalidate(apartmentVehicleCountsProvider(apartmentId));
+                                  ref.invalidate(residentVehiclesProvider);
+
                                   if (modalContext.mounted) {
                                     Navigator.pop(modalContext);
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -315,6 +319,9 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
               Navigator.pop(ctx);
               try {
                 await ref.read(vehicleRepositoryProvider).deleteVehicle(vehicle.id);
+                ref.invalidate(apartmentVehiclesProvider(vehicle.apartmentId));
+                ref.invalidate(apartmentVehicleCountsProvider(vehicle.apartmentId));
+                ref.invalidate(residentVehiclesProvider);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -382,9 +389,16 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
               final motorbikeCount = vehicles.where((v) => v.isMotorbike).length;
               final carCount = vehicles.where((v) => v.isCar).length;
 
-              return ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(apartmentVehiclesProvider(apartmentId));
+                  ref.invalidate(apartmentVehicleCountsProvider(apartmentId));
+                  ref.invalidate(residentVehiclesProvider);
+                },
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  children: [
                   // Thẻ thông tin hạn mức & quy chế
                   Card(
                     elevation: 0,
@@ -658,8 +672,9 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                     }),
                   ],
                 ],
-              );
-            },
+              ),
+            );
+          },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(
               child: AppErrorCard(
