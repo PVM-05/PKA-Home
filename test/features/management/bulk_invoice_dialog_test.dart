@@ -23,10 +23,10 @@ void main() {
     // 2. Kiểm tra các trường nhập liệu
     expect(find.text('Kỳ hóa đơn *'), findsOneWidget);
     expect(find.text('Hạn thanh toán *'), findsOneWidget);
-    expect(find.text('Phí quản lý (đ/m²)'), findsOneWidget);
+    expect(find.text('Phí quản lý (đ/m²) *'), findsOneWidget);
 
     // 3. Kiểm tra nút bấm
     expect(find.text('Hủy'), findsOneWidget);
-    expect(find.text('Tạo hóa đơn'), findsOneWidget);
+    expect(find.text('Kiểm tra dữ liệu'), findsOneWidget);
   });
 }
