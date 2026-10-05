@@ -96,4 +96,16 @@ class VehicleModel {
         return 'Chờ phê duyệt';
     }
   }
+
+  double get monthlyFee {
+    switch (vehicleType) {
+      case 'car':
+        return 1200000.0;
+      case 'electric_bicycle':
+        return 30000.0;
+      case 'motorbike':
+      default:
+        return 100000.0;
+    }
+  }
 }
