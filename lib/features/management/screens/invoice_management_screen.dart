@@ -14,6 +14,7 @@ import '../../../core/widgets/role_guard.dart';
 import 'create_invoice_screen.dart';
 import 'edit_invoice_screen.dart';
 import 'management_invoice_detail_screen.dart';
+import '../widgets/bulk_invoice_dialog.dart';
 import '../../../core/utils/excel_export_helper.dart';
 
 class InvoiceManagementScreen extends ConsumerStatefulWidget {
@@ -100,6 +101,16 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
         appBar: AppBar(
           title: const Text('Quản lý Hóa đơn'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.auto_awesome),
+              tooltip: 'Tạo HĐ hàng loạt',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => const BulkInvoiceDialog(),
+                );
+              },
+            ),
             invoicesAsync.when(
               data: (invoices) {
                 if (invoices.isEmpty) return const SizedBox.shrink();
