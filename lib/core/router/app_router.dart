@@ -48,6 +48,7 @@ import '../../features/management/screens/service_rating_overview_screen.dart';
 import '../../features/management/screens/amenity_management_screen.dart';
 import '../../features/management/screens/equipment_management_screen.dart';
 import '../../features/management/screens/equipment_detail_screen.dart';
+import '../../features/management/screens/management_payment_transactions_screen.dart';
 import 'route_names.dart';
 import 'page_transitions.dart';
 
@@ -431,6 +432,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 },
               ),
             ],
+          ),
+          GoRoute(
+            path: 'payment-transactions',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const ManagementPaymentTransactionsScreen(),
+            ),
           ),
         ],
       ),
