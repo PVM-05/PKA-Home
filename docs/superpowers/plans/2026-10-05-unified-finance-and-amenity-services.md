@@ -28,10 +28,10 @@
 **Interfaces:**
 - Produces: Bảng `public.payment_transactions` mở rộng (thêm `type`, `booking_id`, `title`, nullable `invoice_id`), RPC `simulate_unified_payment(p_type, p_reference_id, p_outcome)`.
 
-- [ ] **Step 1: Viết test kiểm tra schema migration và câu lệnh RPC**
-- [ ] **Step 2: Viết migration file `20261005_03_unified_payment_simulation.sql`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết test kiểm tra schema migration và câu lệnh RPC**
+- [x] **Step 2: Viết migration file `20261005_03_unified_payment_simulation.sql`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add supabase/migrations/20261005_03_unified_payment_simulation.sql test/data/repositories/unified_payment_migration_schema_test.dart
@@ -71,11 +71,11 @@ git commit -m "feat(db): tạo migration bảng payment_transactions mở rộng
   }
   ```
 
-- [ ] **Step 1: Viết unit test cho `PaymentService` và `PaymentTransactionModel`**
-- [ ] **Step 2: Cập nhật `PaymentTransactionModel` hỗ trợ `type`, `booking_id`, `title`**
-- [ ] **Step 3: Cài đặt `PaymentService` và `paymentServiceProvider` gọi RPC `simulate_unified_payment`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết unit test cho `PaymentService` và `PaymentTransactionModel`**
+- [x] **Step 2: Cập nhật `PaymentTransactionModel` hỗ trợ `type`, `booking_id`, `title`**
+- [x] **Step 3: Cài đặt `PaymentService` và `paymentServiceProvider` gọi RPC `simulate_unified_payment`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/data/models/payment_transaction_model.dart lib/data/services/ lib/data/providers/payment_provider.dart test/data/services/
@@ -109,10 +109,10 @@ git commit -m "feat(service): triển khai PaymentService hỗ trợ thanh toán
   2. `Processing`: Hiển thị `⏳ Đang xử lý giao dịch...` (trễ 1.2s - 1.5s với animation chấm nhảy).
   3. `Success`: Icon xanh `✓`, `Thanh toán thành công`, mã `DEMO-...`, ngày giờ, nút `[ HOÀN TẤT ]`.
 
-- [ ] **Step 1: Viết widget test kiểm tra quy trình 3 bước của `UnifiedPaymentSheet`**
-- [ ] **Step 2: Triển khai widget `UnifiedPaymentSheet` với thiết kế giao diện chuẩn Segoe UI / Google Fonts**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test kiểm tra quy trình 3 bước của `UnifiedPaymentSheet`**
+- [x] **Step 2: Triển khai widget `UnifiedPaymentSheet` với thiết kế giao diện chuẩn Segoe UI / Google Fonts**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/core/widgets/unified_payment_sheet.dart test/core/widgets/unified_payment_sheet_test.dart
@@ -131,10 +131,10 @@ git commit -m "feat(ui): tạo widget modal dùng chung UnifiedPaymentSheet 3 tr
 - Nút `[ THANH TOÁN NGAY ]` mở `showUnifiedPaymentSheet` với `type: PaymentType.invoice`.
 - Sau khi thành công: Cập nhật UI ngay sang `Đã thanh toán`, hiển thị nút `[ XEM BIÊN NHẬN ĐIỆN TỬ ]` với mã `DEMO-...`.
 
-- [ ] **Step 1: Viết widget test kiểm tra thanh toán hóa đơn bằng `UnifiedPaymentSheet`**
-- [ ] **Step 2: Cập nhật `ResidentInvoiceDetailScreen` gọi `showUnifiedPaymentSheet`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test kiểm tra thanh toán hóa đơn bằng `UnifiedPaymentSheet`**
+- [x] **Step 2: Cập nhật `ResidentInvoiceDetailScreen` gọi `showUnifiedPaymentSheet`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/resident/screens/resident_invoice_detail_screen.dart test/features/resident/resident_invoice_unified_payment_test.dart
@@ -153,10 +153,10 @@ git commit -m "feat(resident): tích hợp UnifiedPaymentSheet vào màn hình c
 - Khi đặt dịch vụ có phí (Gym, Hồ bơi, Sân cầu lông) $\rightarrow$ Mở `showUnifiedPaymentSheet` với `type: PaymentType.service`.
 - Sau khi thanh toán thành công: Cập nhật booking sang `confirmed`, hiển thị dialog mã đặt chỗ kèm **Mã QR Check-in** (sử dụng Custom QR Canvas hoặc `qr_flutter`).
 
-- [ ] **Step 1: Viết widget test cho luồng đặt dịch vụ và thanh toán qua `UnifiedPaymentSheet`**
-- [ ] **Step 2: Cập nhật `AmenityBookingScreen` mở `showUnifiedPaymentSheet` khi có phí và hiển thị dialog QR**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho luồng đặt dịch vụ và thanh toán qua `UnifiedPaymentSheet`**
+- [x] **Step 2: Cập nhật `AmenityBookingScreen` mở `showUnifiedPaymentSheet` khi có phí và hiển thị dialog QR**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/resident/screens/amenity_booking_screen.dart test/features/resident/amenity_booking_unified_payment_test.dart
@@ -177,11 +177,11 @@ git commit -m "feat(amenity): tích hợp UnifiedPaymentSheet và mã QR Check-i
 - Bộ lọc Chips: `[ Tất cả ]`, `[ 🏠 Hóa đơn ]`, `[ 🏋️ Dịch vụ ]`.
 - Tích hợp liên kết từ `ResidentProfileScreen` mục "Lịch sử thanh toán".
 
-- [ ] **Step 1: Viết widget test cho `PaymentHistoryScreen` và bộ lọc giao dịch**
-- [ ] **Step 2: Xây dựng `PaymentHistoryScreen` và provider tải danh sách giao dịch**
-- [ ] **Step 3: Gắn điều hướng từ `ResidentProfileScreen`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết widget test cho `PaymentHistoryScreen` và bộ lọc giao dịch**
+- [x] **Step 2: Xây dựng `PaymentHistoryScreen` và provider tải danh sách giao dịch**
+- [x] **Step 3: Gắn điều hướng từ `ResidentProfileScreen`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/features/resident/screens/payment_history_screen.dart lib/features/resident/screens/resident_profile_screen.dart test/features/resident/payment_history_screen_test.dart
@@ -195,7 +195,7 @@ git commit -m "feat(resident): xây dựng màn hình Lịch sử thanh toán go
 **Files:**
 - Toàn bộ codebase liên quan
 
-- [ ] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
-- [ ] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
-- [ ] **Step 3: Kiểm tra trạng thái Git working tree sạch sẽ**
-- [ ] **Step 4: Hướng dẫn kịch bản demo hoàn chỉnh cho người dùng**
+- [x] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
+- [x] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
+- [x] **Step 3: Kiểm tra trạng thái Git working tree sạch sẽ**
+- [x] **Step 4: Hướng dẫn kịch bản demo hoàn chỉnh cho người dùng**
