@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/amenity_slot_helper.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/unified_payment_sheet.dart';
 import '../../../data/models/building_amenity_model.dart';
 import '../../../data/models/amenity_booking_model.dart';
 import '../../../data/providers/amenity_booking_provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
+import '../../../data/services/payment_service.dart';
 
 class AmenityBookingScreen extends ConsumerStatefulWidget {
   final BuildingAmenityModel amenity;
@@ -191,6 +194,41 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                     _isSubmitting = false;
                     _selectedSlot = null;
                   });
+
+                  final totalFee = (widget.amenity.feeAmount * guestsCount) +
+                      (widget.amenity.requiresDeposit ? widget.amenity.depositAmount : 0);
+
+                  if (!isWaitlist && totalFee > 0 && mounted) {
+                    final feeItems = <Map<String, dynamic>>[];
+                    if (widget.amenity.feeAmount > 0) {
+                      feeItems.add({
+                        'name': '${widget.amenity.name} ($guestsCount người)',
+                        'amount': widget.amenity.feeAmount * guestsCount,
+                      });
+                    }
+                    if (widget.amenity.requiresDeposit && widget.amenity.depositAmount > 0) {
+                      feeItems.add({
+                        'name': 'Tiền đặt cọc',
+                        'amount': widget.amenity.depositAmount,
+                      });
+                    }
+
+                    final codeSuffix = result.id.length >= 4 ? result.id.substring(0, 4).toUpperCase() : result.id.toUpperCase();
+                    final paymentRes = await showUnifiedPaymentSheet(
+                      context: context,
+                      type: PaymentType.service,
+                      referenceId: result.id,
+                      title: 'Đăng ký ${widget.amenity.name}',
+                      referenceCode: '#BK-${DateFormat('yyyyMMdd').format(_selectedDate)}-$codeSuffix',
+                      amount: totalFee,
+                      feeBreakdown: feeItems,
+                    );
+
+                    if (paymentRes != null && paymentRes.success && mounted) {
+                      _showBookingSuccessDialog(context, result, slot);
+                      return;
+                    }
+                  }
 
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -391,7 +429,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
           color: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: SizedBox(
-            height: 72,
+            height: 84,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -799,21 +837,36 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           ],
                         ),
                       ],
-                      if (canCancel) ...[
-                        const Divider(height: 20),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton.icon(
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppTheme.error,
-                              visualDensity: VisualDensity.compact,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (b.isConfirmed) ...[
+                            OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.primary,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              icon: const Icon(Icons.qr_code_2_rounded, size: 16),
+                              label: const Text('Mã QR'),
+                              onPressed: () {
+                                final bCode = 'BK${b.id.length >= 8 ? b.id.substring(0, 8).toUpperCase() : b.id.toUpperCase()}';
+                                _showQrCodeDialog(context, b, bCode, b.timeSlot);
+                              },
                             ),
-                            icon: const Icon(Icons.cancel_outlined, size: 16),
-                            label: const Text('Hủy lịch này'),
-                            onPressed: () => _confirmCancelBooking(b),
-                          ),
-                        ),
-                      ],
+                            const SizedBox(width: 8),
+                          ],
+                          if (canCancel)
+                            TextButton.icon(
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.error,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              icon: const Icon(Icons.cancel_outlined, size: 16),
+                              label: const Text('Hủy lịch này'),
+                              onPressed: () => _confirmCancelBooking(b),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -823,6 +876,144 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: AppErrorCard(error: e)),
+      ),
+    );
+  }
+
+  void _showBookingSuccessDialog(BuildContext context, AmenityBookingModel booking, String slot) {
+    final bookingCode = 'BK${booking.id.length >= 8 ? booking.id.substring(0, 8).toUpperCase() : booking.id.toUpperCase()}';
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Column(
+          children: [
+            Icon(Icons.check_circle_rounded, color: AppTheme.success, size: 56),
+            SizedBox(height: 12),
+            Text('Đặt Dịch Vụ Thành Công!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.amenity.name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${_fullDateFormat.format(_selectedDate)} • $slot',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Mã đặt chỗ:', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                  Text(
+                    bookingCode,
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppTheme.primary),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: const Icon(Icons.qr_code_2_rounded),
+              label: const Text('Xem Mã QR Check-in', style: TextStyle(fontWeight: FontWeight.bold)),
+              onPressed: () {
+                Navigator.pop(dialogCtx);
+                _showQrCodeDialog(context, booking, bookingCode, slot);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showQrCodeDialog(BuildContext context, AmenityBookingModel booking, String bookingCode, String slot) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Center(
+          child: Column(
+            children: [
+              const Text('Mã QR Check-in Dịch Vụ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(widget.amenity.name, style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+            ],
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: QrImageView(
+                data: 'PKA-BOOKING:$bookingCode:${widget.amenity.name}:$slot',
+                version: QrVersions.auto,
+                size: 200.0,
+                backgroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              bookingCode,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Xuất trình mã này cho lễ tân / BQL khi vào sử dụng dịch vụ',
+              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Hoàn tất'),
+          ),
+        ],
       ),
     );
   }
