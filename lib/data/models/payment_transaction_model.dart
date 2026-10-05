@@ -2,7 +2,10 @@ import 'package:intl/intl.dart';
 
 class PaymentTransactionModel {
   final String id;
-  final String invoiceId;
+  final String? invoiceId;
+  final String? bookingId;
+  final String type; // 'INVOICE' | 'SERVICE'
+  final String? title;
   final String? userId;
   final String apartmentId;
   final double amount;
@@ -14,7 +17,10 @@ class PaymentTransactionModel {
 
   PaymentTransactionModel({
     required this.id,
-    required this.invoiceId,
+    this.invoiceId,
+    this.bookingId,
+    this.type = 'INVOICE',
+    this.title,
     this.userId,
     required this.apartmentId,
     required this.amount,
@@ -28,6 +34,9 @@ class PaymentTransactionModel {
   bool get isSuccess => status == 'SUCCESS';
   bool get isFailed => status == 'FAILED';
   bool get isCancelled => status == 'CANCELLED';
+
+  bool get isInvoice => type == 'INVOICE';
+  bool get isService => type == 'SERVICE';
 
   String get statusDisplayName {
     switch (status) {
@@ -50,16 +59,19 @@ class PaymentTransactionModel {
   factory PaymentTransactionModel.fromJson(Map<String, dynamic> json) {
     return PaymentTransactionModel(
       id: json['id'] as String,
-      invoiceId: json['invoice_id'] as String,
+      invoiceId: json['invoice_id'] as String?,
+      bookingId: json['booking_id'] as String?,
+      type: json['type'] as String? ?? 'INVOICE',
+      title: json['title'] as String?,
       userId: json['user_id'] as String?,
       apartmentId: json['apartment_id'] as String? ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      paymentMethod: json['payment_method'] as String? ?? 'DEMO',
+      paymentMethod: json['payment_method'] as String? ?? 'Demo Payment',
       status: json['status'] as String? ?? 'SUCCESS',
       transactionCode: json['transaction_code'] as String? ?? '',
       failureReason: json['failure_reason'] as String?,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.parse(json['created_at'] as String).toLocal()
           : DateTime.now(),
     );
   }
@@ -68,6 +80,9 @@ class PaymentTransactionModel {
     return {
       'id': id,
       'invoice_id': invoiceId,
+      'booking_id': bookingId,
+      'type': type,
+      'title': title,
       'user_id': userId,
       'apartment_id': apartmentId,
       'amount': amount,
