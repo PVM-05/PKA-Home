@@ -28,6 +28,7 @@ import '../../../core/services/push_notification_service.dart';
 import '../../../data/providers/notification_provider.dart';
 import '../../../data/models/notification_model.dart';
 import '../../../data/providers/payment_provider.dart';
+import '../../../data/providers/meter_reading_provider.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
@@ -364,6 +365,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 context.push(AppRoutes.managementEquipment);
               } else if (value == 'serviceRatings') {
                 context.push(AppRoutes.managementServiceRatings);
+              } else if (value == 'meterReadings') {
+                context.push(AppRoutes.managementMeterReading);
               } else if (value == 'fontSize') {
                 showFontSizeBottomSheet(context, ref);
               } else if (value == 'theme') {
@@ -384,6 +387,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     ],
                   ),
                 ),
+              const PopupMenuItem(
+                value: 'meterReadings',
+                child: Row(
+                  children: [
+                    Icon(Icons.speed_outlined, size: 20, color: Color(0xFFE65100)),
+                    SizedBox(width: 8),
+                    Text('Duyệt số điện nước'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'matrix',
                 child: Row(
@@ -488,6 +501,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     final unpaidInvoicesAsync = ref.watch(unpaidInvoicesTotalProvider);
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final allIssuesAsync = ref.watch(allIssuesProvider);
+    final pendingMeterReadingsAsync = ref.watch(pendingMeterReadingsCountProvider);
 
     return RefreshIndicator(
       color: AppTheme.primary,
@@ -501,6 +515,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         ref.invalidate(monthlyRevenueTrendProvider);
         ref.invalidate(apartmentsStreamProvider);
         ref.invalidate(totalResidentsProvider);
+        ref.invalidate(pendingMeterReadingsCountProvider);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -539,6 +554,18 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   const SizedBox(width: 12),
                 ],
                 if (canManageInvoices) ...[
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.speed_outlined,
+                    label: 'Duyệt điện nước',
+                    color: const Color(0xFFE65100),
+                    onTap: () async {
+                      await context.push(AppRoutes.managementMeterReading);
+                      ref.invalidate(pendingMeterReadingsCountProvider);
+                    },
+                    badgeCount: pendingMeterReadingsAsync.value ?? 0,
+                  ),
+                  const SizedBox(width: 12),
                   _buildQuickAction(
                     context,
                     icon: Icons.receipt_long,
