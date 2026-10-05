@@ -346,5 +346,44 @@ class ManagementRepository {
 
     return (response as List).map((e) => IssueRatingModel.fromJson(e)).toList();
   }
+
+  /// Khóa hoặc mở khóa tài khoản người dùng
+  Future<void> toggleUserLock(String userId, bool isLocked) async {
+    await _client.from('users').update({
+      'is_locked': isLocked,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', userId);
+  }
+
+  /// Tạo hóa đơn hàng loạt theo tháng cho toàn bộ căn hộ đang có người ở
+  Future<Map<String, dynamic>> generateMonthlyBulkInvoices({
+    required String period,
+    required DateTime dueDate,
+    double mgmtRate = 10000,
+    double electricRate = 3000,
+    double waterRate = 15000,
+  }) async {
+    final response = await _client.rpc('generate_monthly_bulk_invoices', params: {
+      'p_period': period,
+      'p_due_date': dueDate.toIso8601String(),
+      'p_mgmt_rate': mgmtRate,
+      'p_electric_rate': electricRate,
+      'p_water_rate': waterRate,
+    });
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  /// Cập nhật chỉ số điện nước tháng cho căn hộ
+  Future<void> updateApartmentReadings({
+    required String apartmentId,
+    required double electricReading,
+    required double waterReading,
+  }) async {
+    await _client.from('apartments').update({
+      'electric_reading': electricReading,
+      'water_reading': waterReading,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', apartmentId);
+  }
 }
 

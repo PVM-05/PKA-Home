@@ -5,6 +5,8 @@ class ApartmentModel {
   final int floorNumber;
   final double? area;
   final bool isEmpty;
+  final double electricReading;
+  final double waterReading;
 
   ApartmentModel({
     required this.id,
@@ -13,6 +15,8 @@ class ApartmentModel {
     required this.floorNumber,
     this.area,
     this.isEmpty = true,
+    this.electricReading = 0,
+    this.waterReading = 0,
   });
 
   factory ApartmentModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,8 @@ class ApartmentModel {
       floorNumber: floorNumber,
       area: json['area'] != null ? (json['area'] as num).toDouble() : null,
       isEmpty: json['is_empty'] as bool? ?? true,
+      electricReading: json['electric_reading'] != null ? (json['electric_reading'] as num).toDouble() : 0,
+      waterReading: json['water_reading'] != null ? (json['water_reading'] as num).toDouble() : 0,
     );
   }
 
@@ -40,6 +46,30 @@ class ApartmentModel {
       'floor_number': floorNumber,
       'area': area,
       'is_empty': isEmpty,
+      'electric_reading': electricReading,
+      'water_reading': waterReading,
     };
+  }
+
+  ApartmentModel copyWith({
+    String? id,
+    String? code,
+    String? buildingCode,
+    int? floorNumber,
+    double? area,
+    bool? isEmpty,
+    double? electricReading,
+    double? waterReading,
+  }) {
+    return ApartmentModel(
+      id: id ?? this.id,
+      code: code ?? this.code,
+      buildingCode: buildingCode ?? this.buildingCode,
+      floorNumber: floorNumber ?? this.floorNumber,
+      area: area ?? this.area,
+      isEmpty: isEmpty ?? this.isEmpty,
+      electricReading: electricReading ?? this.electricReading,
+      waterReading: waterReading ?? this.waterReading,
+    );
   }
 }

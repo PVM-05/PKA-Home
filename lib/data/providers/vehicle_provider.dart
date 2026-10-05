@@ -57,3 +57,16 @@ final apartmentVehicleCountsProvider = FutureProvider.family<Map<String, int>, S
   final repo = ref.watch(vehicleRepositoryProvider);
   return await repo.getVehicleCounts(apartmentId);
 });
+
+/// Danh sách toàn bộ xe dành cho Ban Quản Lý (lọc theo status)
+final allVehiclesProvider = FutureProvider.family<List<VehicleModel>, String?>((ref, status) async {
+  final repo = ref.watch(vehicleRepositoryProvider);
+  return await repo.getAllVehicles(status: status);
+});
+
+/// Số lượng xe đang chờ BQL phê duyệt
+final pendingVehiclesCountProvider = FutureProvider<int>((ref) async {
+  final repo = ref.watch(vehicleRepositoryProvider);
+  final pending = await repo.getAllVehicles(status: 'pending');
+  return pending.length;
+});
