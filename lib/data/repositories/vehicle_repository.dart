@@ -94,4 +94,32 @@ class VehicleRepository {
   Future<void> deleteVehicle(String vehicleId) async {
     await _client.from('vehicles').delete().eq('id', vehicleId);
   }
+
+  /// Lấy toàn bộ danh sách phương tiện (Dành cho Ban Quản Lý)
+  Future<List<VehicleModel>> getAllVehicles({String? status}) async {
+    var query = _client.from('vehicles').select();
+    if (status != null) {
+      query = query.eq('status', status);
+    }
+    final response = await query.order('created_at', ascending: false);
+    return (response as List).map((json) => VehicleModel.fromJson(json)).toList();
+  }
+
+  /// Cập nhật trạng thái phê duyệt phương tiện
+  Future<void> updateVehicleStatus(String vehicleId, String status) async {
+    await _client.from('vehicles').update({
+      'status': status,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', vehicleId);
+  }
+
+  /// Phê duyệt cấp thẻ gửi xe cho phương tiện
+  Future<void> approveVehicle(String vehicleId) async {
+    await updateVehicleStatus(vehicleId, 'approved');
+  }
+
+  /// Từ chối đăng ký phương tiện
+  Future<void> rejectVehicle(String vehicleId) async {
+    await updateVehicleStatus(vehicleId, 'rejected');
+  }
 }

@@ -3,12 +3,14 @@ class UserModel {
   final String fullName;
   final String role; // 'resident' or 'management'
   final String? phone;
+  final bool isLocked;
 
   UserModel({
     required this.id,
     required this.fullName,
     required this.role,
     this.phone,
+    this.isLocked = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class UserModel {
       fullName: json['full_name'] as String,
       role: json['role'] as String,
       phone: json['phone'] as String?,
+      isLocked: json['is_locked'] as bool? ?? false,
     );
   }
 
@@ -26,7 +29,24 @@ class UserModel {
       'full_name': fullName,
       'role': role,
       'phone': phone,
+      'is_locked': isLocked,
     };
+  }
+
+  UserModel copyWith({
+    String? id,
+    String? fullName,
+    String? role,
+    String? phone,
+    bool? isLocked,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
+      role: role ?? this.role,
+      phone: phone ?? this.phone,
+      isLocked: isLocked ?? this.isLocked,
+    );
   }
 
   bool get isAdmin => role == 'admin' || role == 'management';
