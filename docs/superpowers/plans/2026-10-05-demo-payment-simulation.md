@@ -104,10 +104,10 @@ git commit -m "feat(service): bổ sung phương thức simulatePayment gọi RP
     - `[Hủy]`: Đóng dialog.
 - Cập nhật Biên nhận điện tử hiển thị mã giao dịch `transaction_code` và phương thức `Demo Payment`.
 
-- [ ] **Step 1: Viết widget test kiểm tra hiển thị Bottom Sheet và Dialog mô phỏng**
-- [ ] **Step 2: Cập nhật `ResidentInvoiceDetailScreen` tích hợp Cổng thanh toán Demo**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test kiểm tra hiển thị Bottom Sheet và Dialog mô phỏng**
+- [x] **Step 2: Cập nhật `ResidentInvoiceDetailScreen` tích hợp Cổng thanh toán Demo**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/resident/screens/resident_invoice_detail_screen.dart test/features/resident/
@@ -121,6 +121,6 @@ git commit -m "feat(ui): tích hợp cổng thanh toán mô phỏng demo payment
 **Files:**
 - Toàn bộ codebase liên quan
 
-- [ ] **Step 1: Chạy `dart analyze` đảm bảo 0 cảnh báo/lỗi**
-- [ ] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
-- [ ] **Step 3: Báo cáo kết quả và sẵn sàng chạy demo trực tiếp**
+- [x] **Step 1: Chạy `dart analyze` đảm bảo 0 cảnh báo/lỗi**
+- [x] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
+- [x] **Step 3: Báo cáo kết quả và sẵn sàng chạy demo trực tiếp**
