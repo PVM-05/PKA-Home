@@ -688,22 +688,66 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface;
 
-    final services = [
-      {
-        'title': 'Đăng ký gửi xe',
-        'subtitle': 'Quản lý phương tiện & thẻ',
-        'icon': Icons.directions_car_filled_outlined,
-        'color': const Color(0xFF1E88E5),
-        'onTap': () => context.push(AppRoutes.residentVehicles),
-      },
-      {
-        'title': 'Tiện ích chung',
-        'subtitle': 'BBQ, Hồ bơi, Thể thao',
-        'icon': Icons.pool_outlined,
-        'color': const Color(0xFF26A69A),
-        'onTap': () => context.push(AppRoutes.residentHandbook, extra: 2),
-      },
-    ];
+    Widget buildServiceCard({
+      required String title,
+      required String subtitle,
+      required IconData icon,
+      required Color color,
+      required VoidCallback onTap,
+    }) {
+      return Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        color: cardBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? Colors.white12 : color.withValues(alpha: 0.2),
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 22),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark ? Colors.white60 : AppTheme.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,67 +758,38 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         ),
         const SizedBox(height: 10),
         Row(
-          children: services.map((s) {
-            final color = s['color'] as Color;
-            return Expanded(
-              child: Card(
-                elevation: 0,
-                color: cardBg,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(
-                    color: isDark
-                        ? Colors.white12
-                        : color.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: s['onTap'] as VoidCallback,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(s['icon'] as IconData, color: color, size: 22),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                s['title'] as String,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                s['subtitle'] as String,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isDark ? Colors.white60 : AppTheme.textSecondary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+          children: [
+            Expanded(
+              child: buildServiceCard(
+                title: 'Số điện nước',
+                subtitle: 'Quét OCR & Gửi chỉ số',
+                icon: Icons.speed_outlined,
+                color: const Color(0xFFE65100),
+                onTap: () => context.push(AppRoutes.residentMeterReading),
               ),
-            );
-          }).toList(),
-        ).animate().fade(duration: 350.ms, delay: 150.ms).slideY(begin: 0.1, curve: Curves.easeOutQuad),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: buildServiceCard(
+                title: 'Đăng ký gửi xe',
+                subtitle: 'Quản lý phương tiện',
+                icon: Icons.directions_car_filled_outlined,
+                color: const Color(0xFF1E88E5),
+                onTap: () => context.push(AppRoutes.residentVehicles),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        buildServiceCard(
+          title: 'Tiện ích chung',
+          subtitle: 'BBQ, Hồ bơi, Phòng gym & Quy định sinh hoạt',
+          icon: Icons.pool_outlined,
+          color: const Color(0xFF26A69A),
+          onTap: () => context.push(AppRoutes.residentHandbook, extra: 2),
+        ),
       ],
-    );
+    ).animate().fade(duration: 350.ms, delay: 150.ms).slideY(begin: 0.1, curve: Curves.easeOutQuad);
   }
 
   Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {

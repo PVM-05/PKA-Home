@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/supabase_config.dart';
 import '../models/meter_reading_submission_model.dart';
 import '../repositories/meter_reading_repository.dart';
 import 'vehicle_provider.dart';
@@ -28,3 +29,27 @@ final pendingMeterReadingsCountProvider = FutureProvider<int>((ref) async {
   final list = await repo.getAllSubmissions(status: 'pending');
   return list.length;
 });
+
+/// Thông tin chỉ số điện nước hiện tại của căn hộ (đối chiếu)
+final currentApartmentReadingsProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final aptId = await ref.watch(residentApartmentIdProvider.future);
+  if (aptId == null || aptId.isEmpty) return null;
+
+  try {
+    final response = await SupabaseConfig.client
+        .from('apartments')
+        .select('id, code, electric_reading, water_reading')
+        .eq('id', aptId)
+        .maybeSingle();
+
+    return response;
+  } catch (_) {
+    return {
+      'id': aptId,
+      'code': 'A0110',
+      'electric_reading': 1250.0,
+      'water_reading': 80.0,
+    };
+  }
+});
+

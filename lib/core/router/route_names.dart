@@ -27,6 +27,7 @@ class AppRoutes {
   static const String residentAmenityBooking = '/resident/amenity-booking';
   static const String residentAnnouncementDetail = '/resident/announcement';
   static const String residentPaymentHistory = '/resident/payment-history';
+  static const String residentMeterReading = '/resident/meter-reading';
 
   // Management
   static const String managementHome = '/management';
@@ -50,4 +51,5 @@ class AppRoutes {
   static const String managementEquipmentDetail = '/management/equipment/detail';
   static const String managementPaymentTransactions = '/management/payment-transactions';
   static const String managementVehicleApproval = '/management/vehicle-approval';
+  static const String managementMeterReading = '/management/meter-readings';
 }

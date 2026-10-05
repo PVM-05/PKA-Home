@@ -30,6 +30,7 @@ import '../../features/resident/screens/vehicle_management_screen.dart';
 import '../../features/resident/screens/amenity_booking_screen.dart';
 import '../../features/resident/screens/resident_announcement_detail_screen.dart';
 import '../../features/resident/screens/payment_history_screen.dart';
+import '../../features/resident/screens/resident_meter_reading_screen.dart';
 import '../../features/management/screens/management_home_screen.dart';
 import '../../features/management/screens/resident_management_screen.dart';
 import '../../features/management/screens/invoice_management_screen.dart';
@@ -262,6 +263,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
               state: state,
               child: const PaymentHistoryScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'meter-reading',
+            pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
+              state: state,
+              child: const ResidentMeterReadingScreen(),
             ),
           ),
         ],
