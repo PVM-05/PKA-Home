@@ -25,9 +25,13 @@ final allMeterReadingsProvider = FutureProvider.family<List<MeterReadingSubmissi
 
 /// Số lượng chỉ số đang chờ BQL duyệt
 final pendingMeterReadingsCountProvider = FutureProvider<int>((ref) async {
-  final repo = ref.watch(meterReadingRepositoryProvider);
-  final list = await repo.getAllSubmissions(status: 'pending');
-  return list.length;
+  try {
+    final repo = ref.watch(meterReadingRepositoryProvider);
+    final list = await repo.getAllSubmissions(status: 'pending');
+    return list.length;
+  } catch (_) {
+    return 0;
+  }
 });
 
 /// Thông tin chỉ số điện nước hiện tại của căn hộ (đối chiếu)
