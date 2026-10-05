@@ -27,6 +27,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../core/services/push_notification_service.dart';
 import '../../../data/providers/notification_provider.dart';
 import '../../../data/models/notification_model.dart';
+import '../../../data/providers/payment_provider.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
@@ -602,6 +603,22 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     onTap: () => context.push(AppRoutes.managementServiceRatings),
                   ),
                 ],
+                const SizedBox(width: 12),
+                _buildQuickAction(
+                  context,
+                  icon: Icons.two_wheeler_outlined,
+                  label: 'Duyệt xe',
+                  color: Colors.blueGrey,
+                  onTap: () => context.push(AppRoutes.managementVehicleApproval),
+                ),
+                const SizedBox(width: 12),
+                _buildQuickAction(
+                  context,
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Giao dịch',
+                  color: Colors.deepPurple,
+                  onTap: () => context.push(AppRoutes.managementPaymentTransactions),
+                ),
               ],
             ),
           ),
@@ -662,6 +679,26 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => const Text('Lỗi tải dữ liệu', style: TextStyle(color: AppTheme.error)),
           ),
+          const SizedBox(height: 24),
+
+          // Khối Thanh toán gần đây
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Thanh toán gần đây',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.push(AppRoutes.managementPaymentTransactions);
+                },
+                child: const Text('Xem tất cả'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildRecentTransactionsCard(),
           const SizedBox(height: 24),
 
           // Tổng quan (Stat Cards)
@@ -790,6 +827,62 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     ),
   );
 }
+
+  Widget _buildRecentTransactionsCard() {
+    final transactionsAsync = ref.watch(paymentTransactionsProvider);
+    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+
+    return transactionsAsync.when(
+      data: (transactions) {
+        if (transactions.isEmpty) {
+          return const AppCard(
+            padding: EdgeInsets.all(16),
+            child: Center(
+              child: Text('Chưa có giao dịch thanh toán nào.', style: TextStyle(color: AppTheme.textSecondary)),
+            ),
+          );
+        }
+
+        final recent = transactions.take(4).toList();
+        return AppCard(
+          padding: EdgeInsets.zero,
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: recent.length,
+            separatorBuilder: (_, _) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final tx = recent[index];
+              return ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppStatusColors.paid.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.check_circle_outline, color: AppStatusColors.paid, size: 20),
+                ),
+                title: Text(tx.title ?? 'Giao dịch thanh toán', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                subtitle: Text(
+                  '${tx.transactionCode} • ${DateFormat('dd/MM HH:mm').format(tx.createdAt)}',
+                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+                trailing: Text(
+                  formatCurrency.format(tx.amount),
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary, fontSize: 14),
+                ),
+              );
+            },
+          ),
+        );
+      },
+      loading: () => const AppCard(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+    );
+  }
 
   Widget _buildFinancialProgressCard() {
     final statsAsync = ref.watch(financialStatsProvider);
