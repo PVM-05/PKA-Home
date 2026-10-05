@@ -33,10 +33,10 @@
   - RPC `generate_monthly_bulk_invoices(p_period, p_due_date, p_mgmt_rate, p_electric_rate, p_water_rate)`.
   - RPC `check_in_amenity_booking(p_booking_id)`.
 
-- [ ] **Step 1: Viết test kiểm tra schema migration và các câu lệnh RPC**
-- [ ] **Step 2: Tạo migration SQL `20261005_04_admin_management_ecosystem.sql`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết test kiểm tra schema migration và các câu lệnh RPC**
+- [x] **Step 2: Tạo migration SQL `20261005_04_admin_management_ecosystem.sql`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add supabase/migrations/20261005_04_admin_management_ecosystem.sql test/data/repositories/admin_ecosystem_migration_test.dart
@@ -65,11 +65,11 @@ git commit -m "feat(db): migration he sinh thai admin pka home va cac rpc hoa do
   - `VehicleRepository` (getPendingVehicles, approveVehicle, rejectVehicle, registerVehicle).
   - `InvoiceRepository.generateMonthlyBulkInvoices(...)`.
 
-- [ ] **Step 1: Viết unit tests cho `VehicleModel` và `VehicleRepository`**
-- [ ] **Step 2: Triển khai `VehicleModel` và mở rộng `UserModel`, `ApartmentModel`**
-- [ ] **Step 3: Triển khai `VehicleRepository`, `vehicleProvider` và gọi RPC tạo hóa đơn hàng loạt**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết unit tests cho `VehicleModel` và `VehicleRepository`**
+- [x] **Step 2: Triển khai `VehicleModel` và mở rộng `UserModel`, `ApartmentModel`**
+- [x] **Step 3: Triển khai `VehicleRepository`, `vehicleProvider` và gọi RPC tạo hóa đơn hàng loạt**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/data/models/ lib/data/repositories/ lib/data/providers/ test/data/
@@ -91,10 +91,10 @@ git commit -m "feat(data): them VehicleModel, cap nhat UserModel isLocked va ham
   - Danh sách 5 giao dịch thanh toán mô phỏng gần nhất (`DEMO-...`, Căn hộ, Số tiền, Trạng thái Thành công).
   - Nút tắt nhanh: Tạo HĐ hàng loạt, Phát thông báo, Duyệt xe, Duyệt cư dân.
 
-- [ ] **Step 1: Viết widget test cho các thẻ KPI, progress bar và danh sách giao dịch**
-- [ ] **Step 2: Cập nhật `_buildDashboard` trong `management_home_screen.dart`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho các thẻ KPI, progress bar và danh sách giao dịch**
+- [x] **Step 2: Cập nhật `_buildDashboard` trong `management_home_screen.dart`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/screens/management_home_screen.dart test/features/management/management_dashboard_enhanced_test.dart
@@ -117,10 +117,10 @@ git commit -m "feat(management): nang cap dashboard voi kpi cards, tien do thu p
   - Nhập/chọn định mức: Phí quản lý ($10.000 đ/m^2$), Phí gửi xe tự động theo xe duyệt, Điện, Nước.
   - Nút **[ TỰ ĐỘNG TẠO 280 HÓA ĐƠN ]** gọi RPC và hiển thị kết quả thành công.
 
-- [ ] **Step 1: Viết widget test cho `BulkInvoiceDialog`**
-- [ ] **Step 2: Triển khai `BulkInvoiceDialog` và tích hợp vào `InvoiceManagementScreen`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho `BulkInvoiceDialog`**
+- [x] **Step 2: Triển khai `BulkInvoiceDialog` và tích hợp vào `InvoiceManagementScreen`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/widgets/bulk_invoice_dialog.dart lib/features/management/screens/invoice_management_screen.dart test/features/management/bulk_invoice_dialog_test.dart
@@ -142,10 +142,10 @@ git commit -m "feat(invoice): them tinh nang tao hoa don hang loat theo thang ch
   - Nút/Menu "Khóa tài khoản" / "Mở khóa tài khoản".
   - Nhấn vào cư dân mở `Resident360DetailSheet`: Thông tin cá nhân, Tab Phương tiện (xe máy, ô tô), Tab Hóa đơn (công nợ), Tab Dịch vụ (gói gym, bơi).
 
-- [ ] **Step 1: Viết widget test cho Resident 360 sheet và toggle khóa tài khoản**
-- [ ] **Step 2: Triển khai `Resident360DetailSheet` và tích hợp vào `ResidentManagementScreen`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho Resident 360 sheet và toggle khóa tài khoản**
+- [x] **Step 2: Triển khai `Resident360DetailSheet` và tích hợp vào `ResidentManagementScreen`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/widgets/resident_360_detail_sheet.dart lib/features/management/screens/resident_management_screen.dart test/features/management/resident_360_management_test.dart
@@ -168,10 +168,10 @@ git commit -m "feat(resident): hoan thien quan ly cu dan 360 do va tinh nang kho
 - Bộ lọc: `Tất cả`, `Hóa đơn`, `Dịch vụ`, `Thành công`, `Đang chờ`.
 - Dialog xem chi tiết giao dịch: Hiển thị hóa đơn liên kết hoặc mã đặt tiện ích.
 
-- [ ] **Step 1: Viết widget test cho `ManagementPaymentTransactionsScreen`**
-- [ ] **Step 2: Xây dựng màn hình và đăng ký route `AppRoutes.managementPaymentTransactions`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho `ManagementPaymentTransactionsScreen`**
+- [x] **Step 2: Xây dựng màn hình và đăng ký route `AppRoutes.managementPaymentTransactions`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/screens/management_payment_transactions_screen.dart lib/core/router/ test/features/management/management_payment_transactions_screen_test.dart
@@ -193,10 +193,10 @@ git commit -m "feat(payment): them man hinh doi soat giao dich toan he thong cho
   - Nút **[ Xác Nhận Check-in ]** chuyển booking sang `completed`.
   - Ô tìm kiếm nhanh theo mã đặt chỗ `BK-XXXX` khi cư dân trình mã QR.
 
-- [ ] **Step 1: Viết widget test cho tab đặt chỗ và luồng xác nhận Check-in**
-- [ ] **Step 2: Nâng cấp `AmenityManagementScreen` hỗ trợ 2 tab: Dịch vụ & Danh sách đặt chỗ / Check-in**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho tab đặt chỗ và luồng xác nhận Check-in**
+- [x] **Step 2: Nâng cấp `AmenityManagementScreen` hỗ trợ 2 tab: Dịch vụ & Danh sách đặt chỗ / Check-in**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/screens/amenity_management_screen.dart test/features/management/amenity_management_checkin_test.dart
@@ -220,10 +220,10 @@ git commit -m "feat(amenity): tich hop quan ly dat cho va chuc nang xac nhan che
   - Bấm **[ Từ Chối ]**: Đổi trạng thái `rejected`.
 - Tab xe đã duyệt / xe bị từ chối.
 
-- [ ] **Step 1: Viết widget test cho `VehicleApprovalScreen`**
-- [ ] **Step 2: Triển khai `VehicleApprovalScreen` và đăng ký route `AppRoutes.managementVehicleApproval`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho `VehicleApprovalScreen`**
+- [x] **Step 2: Triển khai `VehicleApprovalScreen` và đăng ký route `AppRoutes.managementVehicleApproval`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/screens/vehicle_approval_screen.dart lib/core/router/ test/features/management/vehicle_approval_screen_test.dart
@@ -245,10 +245,10 @@ git commit -m "feat(vehicle): xay dung man hinh quan ly va phe duyet dang ky xe 
   - `○ Căn hộ cụ thể (Nhập mã: VD A0110)`
 - Nhãn cảnh báo: Thông thường vs Khẩn cấp.
 
-- [ ] **Step 1: Viết widget test kiểm tra chọn đối tượng gửi thông báo**
-- [ ] **Step 2: Cập nhật dialog tạo thông báo trong `announcement_management_screen.dart`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test kiểm tra chọn đối tượng gửi thông báo**
+- [x] **Step 2: Cập nhật dialog tạo thông báo trong `announcement_management_screen.dart`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/screens/announcement_management_screen.dart test/features/management/announcement_targeting_test.dart
@@ -262,7 +262,7 @@ git commit -m "feat(announcement): bo sung phan tang doi tuong gui thong bao the
 **Files:**
 - Toàn bộ codebase liên quan
 
-- [ ] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
-- [ ] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
-- [ ] **Step 3: Kiểm tra trạng thái Git working tree sạch sẽ**
-- [ ] **Step 4: Cập nhật checklist hoàn tất trong tài liệu kế hoạch**
+- [x] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
+- [x] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
+- [x] **Step 3: Kiểm tra trạng thái Git working tree sạch sẽ**
+- [x] **Step 4: Cập nhật checklist hoàn tất trong tài liệu kế hoạch**
