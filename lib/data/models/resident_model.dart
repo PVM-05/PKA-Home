@@ -6,6 +6,7 @@ class ResidentModel {
   final String? phone;
   final String role;
   final ApartmentModel? apartment;
+  final bool isLocked;
 
   ResidentModel({
     required this.id,
@@ -13,6 +14,7 @@ class ResidentModel {
     this.phone,
     required this.role,
     this.apartment,
+    this.isLocked = false,
   });
 
   factory ResidentModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,25 @@ class ResidentModel {
       phone: json['phone'] as String?,
       role: json['role'] as String,
       apartment: apt,
+      isLocked: json['is_locked'] as bool? ?? false,
+    );
+  }
+
+  ResidentModel copyWith({
+    String? id,
+    String? fullName,
+    String? phone,
+    String? role,
+    ApartmentModel? apartment,
+    bool? isLocked,
+  }) {
+    return ResidentModel(
+      id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
+      phone: phone ?? this.phone,
+      role: role ?? this.role,
+      apartment: apartment ?? this.apartment,
+      isLocked: isLocked ?? this.isLocked,
     );
   }
 

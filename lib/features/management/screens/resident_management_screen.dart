@@ -13,6 +13,7 @@ import '../../../data/providers/dashboard_providers.dart' show pendingLinkReques
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import 'link_request_management_screen.dart';
+import '../widgets/resident_360_detail_sheet.dart';
 
 class ResidentManagementScreen extends ConsumerStatefulWidget {
   const ResidentManagementScreen({super.key});
@@ -522,10 +523,19 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
 
                       return Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            children: [
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (_) => Resident360DetailSheet(resident: resident),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              children: [
                               // Avatar
                               CircleAvatar(
                                 radius: 24,
@@ -580,13 +590,29 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(color: _getRoleColor(resident.role).withValues(alpha: 0.4)),
                                       ),
-                                      child: Text(
-                                        resident.roleDisplayName,
-                                        style: TextStyle(
-                                          color: _getRoleColor(resident.role),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            resident.roleDisplayName,
+                                            style: TextStyle(
+                                              color: _getRoleColor(resident.role),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          if (resident.isLocked) ...[
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              '• Đã khóa',
+                                              style: TextStyle(
+                                                color: AppTheme.error,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -658,6 +684,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                             ],
                           ),
                         ),
+                       ),
                       );
                     },
                   ),
