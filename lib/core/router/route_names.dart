@@ -48,4 +48,6 @@ class AppRoutes {
   static const String managementAmenities = '/management/amenities';
   static const String managementEquipment = '/management/equipment';
   static const String managementEquipmentDetail = '/management/equipment/detail';
+  static const String managementPaymentTransactions = '/management/payment-transactions';
+  static const String managementVehicleApproval = '/management/vehicle-approval';
 }
