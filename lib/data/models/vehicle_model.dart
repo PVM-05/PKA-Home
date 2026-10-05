@@ -25,7 +25,7 @@ class VehicleModel {
       apartmentId: json['apartment_id'] as String? ?? '',
       userId: json['user_id'] as String?,
       vehicleType: json['vehicle_type'] as String? ?? 'motorbike',
-      licensePlate: json['license_plate'] as String? ?? '',
+      licensePlate: json['license_plate'] as String? ?? json['plate_number'] as String? ?? '',
       brandModel: json['brand_model'] as String?,
       status: json['status'] as String? ?? 'pending',
       createdAt: json['created_at'] != null
@@ -41,6 +41,7 @@ class VehicleModel {
       'user_id': userId,
       'vehicle_type': vehicleType,
       'license_plate': licensePlate,
+      'plate_number': licensePlate,
       'brand_model': brandModel,
       'status': status,
       'created_at': createdAt.toIso8601String(),
@@ -72,6 +73,12 @@ class VehicleModel {
   bool get isPending => status == 'pending';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';
+
+  String get plateNumber => licensePlate;
+  bool get isMotorbike => vehicleType == 'motorbike';
+  bool get isCar => vehicleType == 'car';
+  bool get isElectricBicycle => vehicleType == 'electric_bicycle';
+  String get vehicleTypeName => vehicleTypeDisplayName;
 
   String get vehicleTypeDisplayName {
     switch (vehicleType) {
