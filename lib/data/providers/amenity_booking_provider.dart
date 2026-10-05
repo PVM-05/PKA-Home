@@ -55,3 +55,10 @@ final myAmenityBookingsProvider = FutureProvider<List<AmenityBookingModel>>((ref
   final repo = ref.watch(amenityBookingRepositoryProvider);
   return await repo.getMyBookings(user.id);
 });
+
+/// Danh sách tất cả các lượt đặt chỗ (cho Ban quản lý theo dõi)
+final allAmenityBookingsProvider = FutureProvider<List<AmenityBookingModel>>((ref) async {
+  final repo = ref.watch(amenityBookingRepositoryProvider);
+  return await repo.getAllBookings();
+});
+
