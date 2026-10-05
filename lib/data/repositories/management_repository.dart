@@ -7,6 +7,7 @@ import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/role_delegation_model.dart';
 import '../../../data/models/issue_rating_model.dart';
+import '../../../data/models/bulk_invoice_validation_model.dart';
 
 class ManagementRepository {
   final SupabaseClient _client;
@@ -384,6 +385,63 @@ class ManagementRepository {
       'water_reading': waterReading,
       'updated_at': DateTime.now().toIso8601String(),
     }).eq('id', apartmentId);
+  }
+
+  /// Chạy tiền kiểm tra dữ liệu hóa đơn hàng loạt (Dry-Run, không ghi database)
+  Future<BulkInvoiceValidationModel> validateMonthlyBulkInvoices({
+    required String period,
+    double mgmtRate = 10000,
+    double electricRate = 3500,
+    double waterRate = 18000,
+  }) async {
+    try {
+      final response = await _client.rpc('validate_monthly_bulk_invoices', params: {
+        'p_period': period,
+        'p_mgmt_rate': mgmtRate,
+        'p_electric_rate': electricRate,
+        'p_water_rate': waterRate,
+      });
+      return BulkInvoiceValidationModel.fromJson(Map<String, dynamic>.from(response as Map));
+    } catch (e) {
+      return BulkInvoiceValidationModel(
+        period: period,
+        totalScanned: 0,
+        validCount: 0,
+        missingCount: 0,
+        invalidCount: 0,
+        alreadyInvoicedCount: 0,
+        totalEstimatedAmount: 0.0,
+        validItems: [],
+        issues: [
+          BulkInvoiceIssueItem(
+            apartmentId: '',
+            apartmentCode: '',
+            type: 'missing_data',
+            message: 'Không thể kết nối RPC tiền kiểm tra: $e',
+          ),
+        ],
+      );
+    }
+  }
+
+  /// Tạo hóa đơn hàng loạt cho danh sách căn hộ hợp lệ
+  Future<Map<String, dynamic>> generateValidBulkInvoices({
+    required String period,
+    required DateTime dueDate,
+    double mgmtRate = 10000,
+    double electricRate = 3500,
+    double waterRate = 18000,
+    List<String>? targetApartmentIds,
+  }) async {
+    final response = await _client.rpc('generate_valid_bulk_invoices', params: {
+      'p_period': period,
+      'p_due_date': dueDate.toIso8601String(),
+      'p_mgmt_rate': mgmtRate,
+      'p_electric_rate': electricRate,
+      'p_water_rate': waterRate,
+      'p_target_apartment_ids': ?targetApartmentIds,
+    });
+    return Map<String, dynamic>.from(response as Map);
   }
 }
 
