@@ -563,7 +563,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                       await context.push(AppRoutes.managementMeterReading);
                       ref.invalidate(pendingMeterReadingsCountProvider);
                     },
-                    badgeCount: pendingMeterReadingsAsync.value ?? 0,
+                    badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
                   ),
                   const SizedBox(width: 12),
                   _buildQuickAction(
