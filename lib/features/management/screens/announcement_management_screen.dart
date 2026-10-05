@@ -90,6 +90,25 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.group_outlined, size: 13, color: AppTheme.primary),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      announcement.targetDisplayName,
+                                      style: const TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               Expanded(
                                 child: Text(
                                   announcement.title,
@@ -195,7 +214,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
   void _showCreateDialog(BuildContext context, WidgetRef ref) {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
+    final apartmentController = TextEditingController();
     final formKey = GlobalKey<FormState>();
+    String targetType = 'all';
     bool isUrgent = false;
     bool isSubmitting = false;
 
@@ -225,6 +246,61 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             : null,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                       ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        initialValue: targetType,
+                        decoration: const InputDecoration(
+                          labelText: 'Đối tượng nhận thông báo',
+                          prefixIcon: Icon(Icons.group_outlined),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'all',
+                            child: Text('Tất cả cư dân (Toàn tòa)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'block_a',
+                            child: Text('Chỉ cư dân Tòa A'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'block_b',
+                            child: Text('Chỉ cư dân Tòa B'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'apartment',
+                            child: Text('Căn hộ cụ thể'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() => targetType = val);
+                          }
+                        },
+                      ),
+                      if (targetType == 'apartment') ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: apartmentController,
+                          decoration: const InputDecoration(
+                            labelText: 'Mã căn hộ nhận tin *',
+                            hintText: 'VD: A0110',
+                            prefixIcon: Icon(Icons.door_front_door_outlined),
+                          ),
+                          validator: (v) {
+                            if (targetType == 'apartment') {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Vui lòng nhập mã căn hộ';
+                              }
+                              final regex = RegExp(r'^[a-zA-Z]\d{4}$');
+                              if (!regex.hasMatch(v.trim())) {
+                                return 'Mã căn hộ phải có định dạng Block + Tầng (2 số) + Phòng (2 số), VD: A0110';
+                              }
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: contentController,
@@ -277,6 +353,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               title: titleController.text.trim(),
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
+                              targetType: targetType,
+                              targetApartment: targetType == 'apartment' ? apartmentController.text.trim().toUpperCase() : null,
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
@@ -351,6 +429,17 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              Row(
+                children: [
+                  const Icon(Icons.group_outlined, size: 16, color: AppTheme.primary),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Đối tượng nhận: ${announcement.targetDisplayName}',
+                    style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
               Text(
                 'Ngày đăng: ${DateFormat('dd/MM/yyyy HH:mm').format(announcement.createdAt)}',
                 style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
@@ -376,7 +465,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
   void _showEditDialog(BuildContext context, WidgetRef ref, AnnouncementModel announcement) {
     final titleController = TextEditingController(text: announcement.title);
     final contentController = TextEditingController(text: announcement.content);
+    final apartmentController = TextEditingController(text: announcement.targetApartment ?? '');
     final formKey = GlobalKey<FormState>();
+    String targetType = announcement.targetType;
     bool isUrgent = announcement.isUrgent;
     bool isSubmitting = false;
 
@@ -399,6 +490,60 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                         decoration: const InputDecoration(labelText: 'Tiêu đề'),
                         validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập tiêu đề' : null,
                       ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        initialValue: targetType,
+                        decoration: const InputDecoration(
+                          labelText: 'Đối tượng nhận thông báo',
+                          prefixIcon: Icon(Icons.group_outlined),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'all',
+                            child: Text('Tất cả cư dân (Toàn tòa)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'block_a',
+                            child: Text('Chỉ cư dân Tòa A'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'block_b',
+                            child: Text('Chỉ cư dân Tòa B'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'apartment',
+                            child: Text('Căn hộ cụ thể'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() => targetType = val);
+                          }
+                        },
+                      ),
+                      if (targetType == 'apartment') ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: apartmentController,
+                          decoration: const InputDecoration(
+                            labelText: 'Mã căn hộ nhận tin *',
+                            hintText: 'VD: A0110',
+                            prefixIcon: Icon(Icons.door_front_door_outlined),
+                          ),
+                          validator: (v) {
+                            if (targetType == 'apartment') {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Vui lòng nhập mã căn hộ';
+                              }
+                              final regex = RegExp(r'^[a-zA-Z]\d{4}$');
+                              if (!regex.hasMatch(v.trim())) {
+                                return 'Mã căn hộ phải có định dạng Block + Tầng (2 số) + Phòng (2 số), VD: A0110';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: contentController,
@@ -437,6 +582,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               title: titleController.text.trim(),
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
+                              targetType: targetType,
+                              targetApartment: targetType == 'apartment' ? apartmentController.text.trim().toUpperCase() : null,
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
