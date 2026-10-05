@@ -31,10 +31,10 @@
   - RPC `approve_meter_reading(p_submission_id, p_generate_invoice, p_due_date, p_mgmt_rate, p_electric_rate, p_water_rate)`.
   - RPC `reject_meter_reading(p_submission_id, p_reason)`.
 
-- [ ] **Step 1: Viết test kiểm tra migration SQL và logic RPC**
-- [ ] **Step 2: Viết migration file `20261005_05_meter_reading_submissions.sql`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết test kiểm tra migration SQL và logic RPC**
+- [x] **Step 2: Viết migration file `20261005_05_meter_reading_submissions.sql`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add supabase/migrations/20261005_05_meter_reading_submissions.sql test/data/repositories/meter_reading_migration_test.dart
@@ -57,11 +57,11 @@ git commit -m "feat(db): migration bang meter_reading_submissions va cac rpc duy
   - Getters: `isPending`, `isApproved`, `isRejected`, `statusDisplayName`.
   - `MeterOcrSimulator.scanMeterImage({required File or path, required String meterType, double currentReading = 0})`: Mô phỏng quét 1200ms và trả về số liệu mới logic.
 
-- [ ] **Step 1: Viết unit tests cho `MeterReadingSubmissionModel` và `MeterOcrSimulator`**
-- [ ] **Step 2: Triển khai `MeterReadingSubmissionModel`**
-- [ ] **Step 3: Triển khai `MeterOcrSimulator`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết unit tests cho `MeterReadingSubmissionModel` và `MeterOcrSimulator`**
+- [x] **Step 2: Triển khai `MeterReadingSubmissionModel`**
+- [x] **Step 3: Triển khai `MeterOcrSimulator`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/data/models/meter_reading_submission_model.dart lib/core/utils/meter_ocr_simulator.dart test/data/models/ test/core/utils/
@@ -86,10 +86,10 @@ git commit -m "feat(meter): them MeterReadingSubmissionModel va tien ich MeterOc
   - `MeterReadingRepository.rejectReading(...)`
   - Providers: `meterReadingRepositoryProvider`, `apartmentMeterReadingsProvider`, `allMeterReadingsProvider`, `pendingMeterReadingsCountProvider`.
 
-- [ ] **Step 1: Viết unit test cho `MeterReadingRepository`**
-- [ ] **Step 2: Triển khai `MeterReadingRepository` và `meter_reading_provider.dart`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết unit test cho `MeterReadingRepository`**
+- [x] **Step 2: Triển khai `MeterReadingRepository` và `meter_reading_provider.dart`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/data/repositories/meter_reading_repository.dart lib/data/providers/meter_reading_provider.dart test/data/repositories/meter_reading_repository_test.dart
@@ -114,11 +114,11 @@ git commit -m "feat(meter): trien khai repository va providers cho khai bao chi 
 - Bấm [ Gửi chỉ số ] lưu vào cơ sở dữ liệu.
 - Tab / Danh sách lịch sử các lần gửi và trạng thái xét duyệt.
 
-- [ ] **Step 1: Viết widget test cho `ResidentMeterReadingScreen`**
-- [ ] **Step 2: Triển khai màn hình và đăng ký route `AppRoutes.residentMeterReading`**
-- [ ] **Step 3: Thêm nút liên kết trên `ResidentHomeScreen`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết widget test cho `ResidentMeterReadingScreen`**
+- [x] **Step 2: Triển khai màn hình và đăng ký route `AppRoutes.residentMeterReading`**
+- [x] **Step 3: Thêm nút liên kết trên `ResidentHomeScreen`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/features/resident/screens/resident_meter_reading_screen.dart lib/core/router/ lib/features/resident/screens/resident_home_screen.dart test/features/resident/resident_meter_reading_screen_test.dart
@@ -144,11 +144,11 @@ git commit -m "feat(resident): them man hinh gui chi so dien nuoc kem smart ocr 
   - Bấm [ Từ chối ] $\rightarrow$ Dialog nhập lý do $\rightarrow$ Gọi `rejectReading`.
   - Bấm [ Phê duyệt ] $\rightarrow$ Dialog xác nhận kèm Checkbox "Tự động tạo hóa đơn tháng cho căn hộ này" $\rightarrow$ Gọi `approveReading`.
 
-- [ ] **Step 1: Viết widget test cho `ManagementMeterReadingScreen`**
-- [ ] **Step 2: Triển khai màn hình và đăng ký route `AppRoutes.managementMeterReading`**
-- [ ] **Step 3: Thêm nút truy cập từ `ManagementHomeScreen`**
-- [ ] **Step 4: Chạy test xác nhận PASS**
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 1: Viết widget test cho `ManagementMeterReadingScreen`**
+- [x] **Step 2: Triển khai màn hình và đăng ký route `AppRoutes.managementMeterReading`**
+- [x] **Step 3: Thêm nút truy cập từ `ManagementHomeScreen`**
+- [x] **Step 4: Chạy test xác nhận PASS**
+- [x] **Step 5: Commit vào git**
 
 ```bash
 git add lib/features/management/screens/management_meter_reading_screen.dart lib/core/router/ lib/features/management/screens/management_home_screen.dart test/features/management/management_meter_reading_screen_test.dart
@@ -162,10 +162,10 @@ git commit -m "feat(management): them man hinh duyet chi so cong to va tao hoa d
 **Files:**
 - Toàn bộ codebase liên quan
 
-- [ ] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
-- [ ] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
-- [ ] **Step 3: Cập nhật checklist hoàn tất trong tài liệu kế hoạch**
-- [ ] **Step 4: Commit và tổng kết kịch bản demo cho người dùng**
+- [x] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
+- [x] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
+- [x] **Step 3: Cập nhật checklist hoàn tất trong tài liệu kế hoạch**
+- [x] **Step 4: Commit và tổng kết kịch bản demo cho người dùng**
 
 ```bash
 git add docs/superpowers/plans/2026-10-05-smart-meter-reading.md
