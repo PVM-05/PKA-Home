@@ -64,4 +64,25 @@ class ResidentInvoiceService {
     await supabase.rpc('confirm_payment', params: {'p_invoice_id': invoiceId});
     ref.invalidate(residentInvoiceProvider);
   }
+
+  static Future<Map<String, dynamic>> simulatePayment({
+    required WidgetRef ref,
+    required String invoiceId,
+    required String outcome,
+    SupabaseClient? client,
+  }) async {
+    final supabase = client ?? SupabaseConfig.client;
+    final res = await supabase.rpc(
+      'simulate_invoice_payment',
+      params: {
+        'p_invoice_id': invoiceId,
+        'p_outcome': outcome,
+      },
+    );
+    ref.invalidate(residentInvoiceProvider);
+    if (res is Map<String, dynamic>) {
+      return res;
+    }
+    return Map<String, dynamic>.from(res as Map);
+  }
 }
