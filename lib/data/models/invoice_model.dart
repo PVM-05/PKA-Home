@@ -10,6 +10,9 @@ class InvoiceModel {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final ApartmentModel? apartment;
+  final String? paymentMethod;
+  final String? transactionCode;
+  final DateTime? paidAt;
 
   InvoiceModel({
     required this.id,
@@ -21,6 +24,9 @@ class InvoiceModel {
     required this.createdAt,
     this.updatedAt,
     this.apartment,
+    this.paymentMethod,
+    this.transactionCode,
+    this.paidAt,
   });
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +40,9 @@ class InvoiceModel {
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       apartment: json['apartments'] != null ? ApartmentModel.fromJson(json['apartments']) : null,
+      paymentMethod: json['payment_method'] as String?,
+      transactionCode: json['transaction_code'] as String?,
+      paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at']) : null,
     );
   }
 }
