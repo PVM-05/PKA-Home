@@ -240,6 +240,37 @@ class ResidentProfileScreen extends ConsumerWidget {
                   ),
                 ),
 
+                const SizedBox(height: 20),
+
+                // Tài chính & Thanh toán
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Tài chính & Thanh toán',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                AppCard(
+                  padding: EdgeInsets.zero,
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.receipt_long_outlined, color: AppTheme.primary),
+                    ),
+                    title: const Text('Lịch sử thanh toán', style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('Xem tất cả giao dịch hóa đơn và dịch vụ tiện ích'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      context.push(AppRoutes.residentPaymentHistory);
+                    },
+                  ),
+                ),
+
                 const SizedBox(height: 28),
 
                 // Settings Section
