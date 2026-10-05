@@ -252,6 +252,95 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
     );
   }
 
+  void _showQuickCheckInDialog() {
+    final codeController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.qr_code_scanner, color: AppTheme.primary),
+            SizedBox(width: 8),
+            Text('Check-in Tiện Ích (QR/Mã)'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Nhập mã đặt chỗ từ mã QR của cư dân để xác nhận điểm danh sử dụng dịch vụ:',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: codeController,
+              decoration: const InputDecoration(
+                labelText: 'Mã đặt chỗ (Booking ID)',
+                hintText: 'Nhập UUID hoặc mã đặt chỗ',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.confirmation_number_outlined),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Đóng'),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppStatusColors.paid,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.check, size: 16),
+            label: const Text('Xác nhận Check-in'),
+            onPressed: () async {
+              final code = codeController.text.trim();
+              if (code.isEmpty) return;
+              Navigator.pop(ctx);
+
+              try {
+                final result = await ref
+                    .read(amenityBookingRepositoryProvider)
+                    .checkInBooking(code);
+                if (_selectedAmenity != null) {
+                  ref.invalidate(amenityBookingsForDateProvider(
+                    AmenityDateQuery(
+                      amenityId: _selectedAmenity!.id,
+                      date: _selectedDate,
+                    ),
+                  ));
+                }
+                ref.invalidate(allAmenityBookingsProvider);
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(result['message']?.toString() ?? 'Xác nhận Check-in thành công!'),
+                      backgroundColor: AppStatusColors.paid,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(formatErrorMessage(e)),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final amenitiesAsync = ref.watch(buildingAmenitiesProvider);
@@ -259,13 +348,20 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quản Trị Tiện Ích'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner_outlined),
+            tooltip: 'Quét / Nhập mã Check-in',
+            onPressed: _showQuickCheckInDialog,
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppTheme.primary,
           indicatorColor: AppTheme.primary,
           unselectedLabelColor: AppTheme.textSecondary,
           tabs: const [
-            Tab(icon: Icon(Icons.list_alt_outlined), text: 'Lịch Đặt & Điểm Danh'),
+            Tab(icon: Icon(Icons.qr_code_scanner_outlined), text: 'Lịch Đặt Chỗ & Check-in'),
             Tab(icon: Icon(Icons.build_outlined), text: 'Lịch Bảo Trì'),
           ],
         ),
@@ -374,7 +470,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               final b = bookings[index];
 
               Color statusColor = AppStatusColors.paid;
-              String statusLabel = 'Đã xác nhận';
+              String statusLabel = 'Chờ Check-in';
               if (b.isWaitlist) {
                 statusColor = Colors.purple;
                 statusLabel = 'Danh sách chờ';
@@ -383,7 +479,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 statusLabel = 'Đã hủy';
               } else if (b.isCompleted) {
                 statusColor = AppTheme.primary;
-                statusLabel = 'Đã sử dụng';
+                statusLabel = 'Đã Check-in';
               } else if (b.isNoShow) {
                 statusColor = AppTheme.error;
                 statusLabel = 'Vắng mặt';
@@ -420,6 +516,23 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                       const SizedBox(height: 4),
                       Text('Số người: ${b.guestsCount} người', style: const TextStyle(fontWeight: FontWeight.w500)),
                     ],
+                    if (b.feeAmount > 0) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.payments_outlined, size: 16, color: AppStatusColors.paid),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Phí dịch vụ: ${_currencyFormat.format(b.feeAmount)} (Đã thanh toán)',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppStatusColors.paid,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     if (b.depositAmount > 0) ...[
                       const SizedBox(height: 6),
                       Row(
@@ -442,6 +555,21 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                         ],
                       ),
                     ],
+                    if (b.isCompleted) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.check_circle_outline, size: 16, color: AppTheme.primary),
+                          const SizedBox(width: 4),
+                          Text(
+                            b.checkedInAt != null
+                                ? 'Đã check-in lúc ${_timeFormat.format(b.checkedInAt!)}'
+                                : 'Đã check-in sử dụng',
+                            style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ],
                     const Divider(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -459,6 +587,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                                   .read(amenityBookingRepositoryProvider)
                                   .markBookingAttendance(b.id, 'no_show');
                               ref.invalidate(amenityBookingsForDateProvider(query));
+                              ref.invalidate(allAmenityBookingsProvider);
                             },
                           ),
                           const SizedBox(width: 8),
@@ -467,13 +596,22 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                               backgroundColor: AppStatusColors.paid,
                               foregroundColor: Colors.white,
                             ),
-                            icon: const Icon(Icons.check, size: 16),
-                            label: const Text('Điểm danh / Nhận chỗ'),
+                            icon: const Icon(Icons.qr_code_scanner, size: 16),
+                            label: const Text('Xác nhận Check-in'),
                             onPressed: () async {
                               await ref
                                   .read(amenityBookingRepositoryProvider)
-                                  .markBookingAttendance(b.id, 'completed');
+                                  .checkInBooking(b.id);
                               ref.invalidate(amenityBookingsForDateProvider(query));
+                              ref.invalidate(allAmenityBookingsProvider);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Xác nhận check-in thành công cho căn hộ ${b.apartmentCode ?? ""}!'),
+                                    backgroundColor: AppStatusColors.paid,
+                                  ),
+                                );
+                              }
                             },
                           ),
                         ],

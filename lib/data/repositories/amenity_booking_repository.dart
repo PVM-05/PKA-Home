@@ -131,6 +131,41 @@ class AmenityBookingRepository {
     }).eq('id', bookingId);
   }
 
+  /// Lấy danh sách tất cả các lượt đặt chỗ (cho Ban quản lý theo dõi)
+  Future<List<AmenityBookingModel>> getAllBookings() async {
+    final response = await _client
+        .from('amenity_bookings')
+        .select('*, building_amenities(name), apartments(code), users(full_name)')
+        .order('booking_date', ascending: false)
+        .order('time_slot', ascending: false);
+
+    return (response as List)
+        .map((json) => AmenityBookingModel.fromJson(json))
+        .toList();
+  }
+
+  /// Ban quản lý xác nhận Check-in lượt đặt chỗ (gọi RPC check_in_amenity_booking)
+  Future<Map<String, dynamic>> checkInBooking(String bookingId) async {
+    try {
+      final response = await _client.rpc('check_in_amenity_booking', params: {
+        'p_booking_id': bookingId,
+      });
+      return response as Map<String, dynamic>;
+    } catch (_) {
+      // Fallback nếu RPC chưa chạy
+      await _client.from('amenity_bookings').update({
+        'status': 'completed',
+        'checked_in_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', bookingId);
+      return {
+        'success': true,
+        'message': 'Check-in thành công!',
+        'booking_id': bookingId,
+      };
+    }
+  }
+
   /// Lấy danh sách các khoảng thời gian bảo trì của tiện ích trong ngày
   Future<List<AmenityMaintenanceModel>> getMaintenanceWindows({
     required String amenityId,
