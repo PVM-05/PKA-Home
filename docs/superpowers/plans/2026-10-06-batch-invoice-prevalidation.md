@@ -45,10 +45,10 @@
     - Gửi thông báo hệ thống đến cư dân liên kết.
     - Trả về JSON: `success`, `invoices_created`, `total_amount`, `skipped_count`.
 
-- [ ] **Step 1: Viết unit test kiểm tra logic phân loại và tạo hóa đơn của RPCs trong `batch_invoice_migration_test.dart`**
-- [ ] **Step 2: Viết migration file `supabase/migrations/20261006_01_batch_invoice_prevalidation.sql`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết unit test kiểm tra logic phân loại và tạo hóa đơn của RPCs trong `batch_invoice_migration_test.dart`**
+- [x] **Step 2: Viết migration file `supabase/migrations/20261006_01_batch_invoice_prevalidation.sql`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add supabase/migrations/20261006_01_batch_invoice_prevalidation.sql test/data/repositories/batch_invoice_migration_test.dart
@@ -79,10 +79,10 @@ git commit -m "feat(db): them rpc validate_monthly_bulk_invoices va generate_val
   - `BulkInvoiceIssueItem`: `apartmentId`, `apartmentCode`, `type` (`missing_data`, `invalid_reading`, `already_invoiced`), `message`.
   - Helpers: `canGenerateAny`, `hasIssues`, `typeDisplayName`.
 
-- [ ] **Step 1: Viết unit test cho `BulkInvoiceValidationModel`**
-- [ ] **Step 2: Triển khai `lib/data/models/bulk_invoice_validation_model.dart`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết unit test cho `BulkInvoiceValidationModel`**
+- [x] **Step 2: Triển khai `lib/data/models/bulk_invoice_validation_model.dart`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/data/models/bulk_invoice_validation_model.dart test/data/models/bulk_invoice_validation_model_test.dart
@@ -102,10 +102,10 @@ git commit -m "feat(invoice): them BulkInvoiceValidationModel cho tien kiem tra 
   - `ManagementRepository.validateMonthlyBulkInvoices({required String period, double mgmtRate, double electricRate, double waterRate})`: Trả về `Future<BulkInvoiceValidationModel>`.
   - `ManagementRepository.generateValidBulkInvoices({required String period, required DateTime dueDate, double mgmtRate, double electricRate, double waterRate, List<String>? targetApartmentIds})`: Trả về `Future<Map<String, dynamic>>`.
 
-- [ ] **Step 1: Viết unit test cho các phương thức repository mới**
-- [ ] **Step 2: Triển khai các phương thức trong `lib/data/repositories/management_repository.dart`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết unit test cho các phương thức repository mới**
+- [x] **Step 2: Triển khai các phương thức trong `lib/data/repositories/management_repository.dart`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/data/repositories/management_repository.dart test/data/repositories/bulk_invoice_repository_test.dart
@@ -141,10 +141,10 @@ git commit -m "feat(repo): them validateMonthlyBulkInvoices va generateValidBulk
   - Báo SnackBar chi tiết số hóa đơn được phát hành và doanh thu dự thu.
   - Invalidate `invoicesProvider` và đóng dialog.
 
-- [ ] **Step 1: Viết widget test cho `BulkInvoiceDialog` quy trình 2 bước**
-- [ ] **Step 2: Triển khai nâng cấp `lib/features/management/widgets/bulk_invoice_dialog.dart`**
-- [ ] **Step 3: Chạy test xác nhận PASS**
-- [ ] **Step 4: Commit vào git**
+- [x] **Step 1: Viết widget test cho `BulkInvoiceDialog` quy trình 2 bước**
+- [x] **Step 2: Triển khai nâng cấp `lib/features/management/widgets/bulk_invoice_dialog.dart`**
+- [x] **Step 3: Chạy test xác nhận PASS**
+- [x] **Step 4: Commit vào git**
 
 ```bash
 git add lib/features/management/widgets/bulk_invoice_dialog.dart test/features/management/bulk_invoice_dialog_preflight_test.dart
@@ -158,10 +158,10 @@ git commit -m "feat(ui): nang cap BulkInvoiceDialog thanh quy trinh Pre-flight D
 **Files:**
 - Toàn bộ codebase liên quan
 
-- [ ] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
-- [ ] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
-- [ ] **Step 3: Cập nhật checklist hoàn tất trong tài liệu kế hoạch**
-- [ ] **Step 4: Commit và tổng kết cho người dùng**
+- [x] **Step 1: Chạy `dart analyze` toàn dự án đảm bảo 0 lỗi/cảnh báo**
+- [x] **Step 2: Chạy toàn bộ test suite `flutter test` đảm bảo 100% test cases pass**
+- [x] **Step 3: Cập nhật checklist hoàn tất trong tài liệu kế hoạch**
+- [x] **Step 4: Commit và tổng kết cho người dùng**
 
 ```bash
 git add docs/superpowers/plans/2026-10-06-batch-invoice-prevalidation.md
