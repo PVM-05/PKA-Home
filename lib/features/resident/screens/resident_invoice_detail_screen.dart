@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/unified_payment_sheet.dart';
 import '../../../data/models/invoice_model.dart';
+import '../../../data/services/payment_service.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 
 class ResidentInvoiceDetailScreen extends ConsumerStatefulWidget {
@@ -82,7 +84,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                   ),
                 ),
               ),
-              _buildBottomAction(context),
+              _buildBottomAction(context, items),
             ],
           );
         },
@@ -284,7 +286,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     );
   }
 
-  Widget _buildBottomAction(BuildContext context) {
+  Widget _buildBottomAction(BuildContext context, List<Map<String, dynamic>> items) {
     if (widget.invoice.status == 'unpaid') {
       return Container(
         padding: const EdgeInsets.all(24),
@@ -307,7 +309,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
           icon: const Icon(Icons.payment),
           label: const Text('THANH TOÁN NGAY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           onPressed: () {
-            _showPaymentBottomSheet(context);
+            _handlePayment(context, items);
           },
         ),
       );
@@ -345,383 +347,32 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     return const SizedBox.shrink();
   }
 
-  void _showPaymentBottomSheet(BuildContext context) {
-    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Future<void> _handlePayment(BuildContext context, List<Map<String, dynamic>> items) async {
+    final feeBreakdown = items.map((item) => {
+      'name': item['fee_type'] as String? ?? 'Khoản phí',
+      'amount': (item['subtotal'] as num?)?.toDouble() ?? 0.0,
+    }).toList();
 
-    showModalBottomSheet(
+    final aptCode = widget.invoice.apartment?.code ?? '';
+    final periodClean = widget.invoice.period.replaceAll('/', '');
+
+    final result = await showUnifiedPaymentSheet(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (BuildContext bottomSheetContext) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.75,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (ctx, scrollController) {
-            return SingleChildScrollView(
-              controller: scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      height: 4,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.account_balance_wallet_rounded, color: AppTheme.primary, size: 24),
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'CỔNG THANH TOÁN ĐIỆN TỬ',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Mô phỏng thanh toán trực tuyến bảo mật cho đồ án',
-                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  // Thông tin hóa đơn tóm tắt
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? Theme.of(context).colorScheme.surface : const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Căn hộ: ${widget.invoice.apartment?.code ?? "N/A"}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'Kỳ ${widget.invoice.period}',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Hạn nộp: ${DateFormat('dd/MM/yyyy').format(widget.invoice.dueDate)}',
-                          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                        ),
-                        const Divider(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Số tiền thanh toán:',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                            ),
-                            Text(
-                              formatCurrency.format(widget.invoice.totalAmount),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w900,
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Thẻ phương thức thanh toán
-                  const Text(
-                    'Phương thức thanh toán:',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.primary, width: 1.5),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(Icons.credit_card_rounded, color: Colors.white, size: 22),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Demo Payment (Sandbox)',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Mô phỏng gạch nợ tự động • Không mất phí',
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.check_circle, color: AppTheme.primary, size: 22),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: AppTheme.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    icon: const Icon(Icons.lock_outline, color: Colors.white, size: 18),
-                    label: const Text(
-                      'TIẾN HÀNH THANH TOÁN',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    onPressed: () {
-                      _showConfirmationScenarioDialog(context, bottomSheetContext);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showConfirmationScenarioDialog(BuildContext parentContext, BuildContext bottomSheetContext) {
-    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
-
-    showDialog(
-      context: parentContext,
-      builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.tune_rounded, color: AppTheme.primary),
-            SizedBox(width: 8),
-            Text('Xác Nhận Thanh Toán', style: TextStyle(fontSize: 18)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  const Text('Tổng số tiền giao dịch', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatCurrency.format(widget.invoice.totalAmount),
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.primary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Chọn kịch bản kiểm thử để thực hiện:',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 14),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.success,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              icon: const Icon(Icons.check_circle_outline, size: 18),
-              label: const Text('Thanh toán thành công (Mô phỏng)', style: TextStyle(fontWeight: FontWeight.bold)),
-              onPressed: () {
-                Navigator.pop(dialogCtx);
-                Navigator.pop(bottomSheetContext);
-                _executePayment(parentContext, 'SUCCESS');
-              },
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.error,
-                side: const BorderSide(color: AppTheme.error),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              icon: const Icon(Icons.highlight_off, size: 18),
-              label: const Text('Thanh toán thất bại (Mô phỏng)', style: TextStyle(fontWeight: FontWeight.bold)),
-              onPressed: () {
-                Navigator.pop(dialogCtx);
-                Navigator.pop(bottomSheetContext);
-                _executePayment(parentContext, 'FAILED');
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Hủy bỏ'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _executePayment(BuildContext context, String outcome) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (c) => const Center(
-        child: Card(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Đang xử lý giao dịch qua Cổng...', style: TextStyle(fontWeight: FontWeight.w500)),
-              ],
-            ),
-          ),
-        ),
-      ),
+      type: PaymentType.invoice,
+      referenceId: widget.invoice.id,
+      title: 'Thanh toán hóa đơn',
+      referenceCode: '#INV-$periodClean-$aptCode',
+      amount: widget.invoice.totalAmount,
+      feeBreakdown: feeBreakdown,
     );
 
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    try {
-      final res = await ResidentInvoiceService.simulatePayment(
-        ref: ref,
-        invoiceId: widget.invoice.id,
-        outcome: outcome,
+    if (result != null && result.success && mounted) {
+      ScaffoldMessenger.of(this.context).showSnackBar(
+        SnackBar(
+          content: Text('Thanh toán thành công! Mã GD: ${result.transactionCode}'),
+          backgroundColor: AppTheme.success,
+        ),
       );
-
-      if (!context.mounted) return;
-      Navigator.pop(context); // Đóng loading dialog
-
-      if (outcome == 'SUCCESS') {
-        final txCode = res['transaction_code'] as String? ?? 'PAY-DEMO';
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Column(
-              children: [
-                Icon(Icons.verified_rounded, color: AppTheme.success, size: 56),
-                SizedBox(height: 12),
-                Text('Thanh Toán Thành Công!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Hóa đơn đã được gạch nợ tự động trên hệ thống.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                ),
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Mã giao dịch:', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                      Text(txCode, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  _showDigitalReceiptBottomSheet(context);
-                },
-                child: const Text('Xem biên nhận'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success, foregroundColor: Colors.white),
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Xong'),
-              ),
-            ],
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Thanh toán thất bại: Giao dịch bị từ chối bởi cổng thanh toán (Thử nghiệm). Hóa đơn vẫn chưa thanh toán.'),
-            backgroundColor: AppTheme.error,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.pop(context); // Đóng loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
-      }
     }
   }
 
