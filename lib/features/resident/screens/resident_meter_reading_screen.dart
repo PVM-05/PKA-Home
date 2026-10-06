@@ -212,6 +212,46 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Cảnh báo nếu đã quá hạn nộp chỉ số (hạn chót ngày 25 hàng tháng)
+                    if (DateTime.now().day > 25) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade50,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.amber.shade400),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800, size: 22),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Lưu ý: Đã quá hạn chốt số tháng này (Hạn chót: ngày 25)',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: Colors.amber.shade900,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    'Vui lòng gửi chỉ số sớm nhất có thể để tránh bị tạm tính chỉ số theo mức trung bình của căn hộ.',
+                                    style: TextStyle(fontSize: 12, color: Colors.black87),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     // Banner đối chiếu chỉ số cũ
                     AppCard(
                       child: Column(
