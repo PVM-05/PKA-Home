@@ -95,6 +95,12 @@ class AmenityBookingRepository {
 
       return AmenityBookingModel.fromJson(bookingData);
     } on PostgrestException catch (e) {
+      if (e.code == '23505') {
+        throw Exception('Khung giờ vừa được người khác đặt. Vui lòng chọn khung giờ khác.');
+      }
+      if (e.code == '23503') {
+        throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+      }
       throw Exception(e.message);
     } catch (e) {
       if (e is Exception) rethrow;

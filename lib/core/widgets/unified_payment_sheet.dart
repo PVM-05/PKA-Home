@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../../data/services/payment_service.dart';
 import '../../data/providers/payment_provider.dart';
+import '../utils/network_error_handler.dart';
 
 enum _PaymentStep { confirmation, processing, success, failed }
 
@@ -63,8 +64,13 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
   final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
+  bool _isSubmitting = false;
+
   Future<void> _startPayment() async {
+    if (_isSubmitting) return;
+
     setState(() {
+      _isSubmitting = true;
       _step = _PaymentStep.processing;
     });
 
@@ -72,9 +78,8 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       // Giả lập độ trễ mạng/gateway 1.2s - 1.5s tạo trải nghiệm thực tế
       await Future.delayed(const Duration(milliseconds: 1400));
 
-      final service = ref.read(paymentServiceProvider);
-      final res = await service.pay(
-        ref: ref,
+      final controller = ref.read(paymentControllerProvider);
+      final res = await controller.pay(
         type: widget.type,
         referenceId: widget.referenceId,
         outcome: 'SUCCESS',
@@ -83,14 +88,23 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       if (mounted) {
         setState(() {
           _result = res;
+          _errorMessage = res.errorMessage != null
+              ? NetworkErrorHandler.getMessage(res.errorMessage!)
+              : null;
           _step = res.success ? _PaymentStep.success : _PaymentStep.failed;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage = NetworkErrorHandler.getMessage(e);
           _step = _PaymentStep.failed;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
         });
       }
     }
@@ -286,11 +300,30 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             elevation: 2,
           ),
-          onPressed: _startPayment,
-          child: const Text(
-            'THANH TOÁN',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-          ),
+          onPressed: _isSubmitting ? null : _startPayment,
+          child: _isSubmitting
+              ? const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'ĐANG XỬ LÝ...',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                )
+              : const Text(
+                  'THANH TOÁN',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                ),
         ),
         const SizedBox(height: 8),
       ],
@@ -451,15 +484,32 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
           ),
         ),
         const SizedBox(height: 24),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.error,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-          onPressed: () => Navigator.pop(context),
-          child: const Text('ĐÓNG', style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('ĐÓNG', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: _isSubmitting ? null : _startPayment,
+                child: const Text('THỬ LẠI', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
         ),
       ],
     );

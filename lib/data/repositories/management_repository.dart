@@ -78,7 +78,14 @@ class ManagementRepository {
   }
 
   Future<void> deleteApartment(String id) async {
-    await _client.from('apartments').delete().eq('id', id);
+    try {
+      await _client.from('apartments').delete().eq('id', id);
+    } on PostgrestException catch (e) {
+      if (e.code == '23503') {
+        throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+      }
+      throw Exception(e.message);
+    }
   }
 
   Future<void> assignResidentToApartment(String userId, String apartmentId, {String relationRole = 'owner'}) async {
@@ -165,7 +172,14 @@ class ManagementRepository {
   }
 
   Future<void> deleteInvoice(String invoiceId) async {
-    await _client.from('invoices').delete().eq('id', invoiceId);
+    try {
+      await _client.from('invoices').delete().eq('id', invoiceId);
+    } on PostgrestException catch (e) {
+      if (e.code == '23503') {
+        throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+      }
+      throw Exception(e.message);
+    }
   }
 
   Future<void> updateInvoice({
@@ -261,8 +275,15 @@ class ManagementRepository {
   }
 
   Future<void> deleteIssue(String issueId, {List<String> imageUrls = const []}) async {
-    // 1. Xóa bản ghi trong bảng issue_reports (issue_images tự động cascade)
-    await _client.from('issue_reports').delete().eq('id', issueId);
+    try {
+      // 1. Xóa bản ghi trong bảng issue_reports (issue_images tự động cascade)
+      await _client.from('issue_reports').delete().eq('id', issueId);
+    } on PostgrestException catch (e) {
+      if (e.code == '23503') {
+        throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+      }
+      throw Exception(e.message);
+    }
 
     // 2. Xóa các file ảnh đính kèm trong Supabase Storage nếu có
     if (imageUrls.isNotEmpty) {
