@@ -29,12 +29,13 @@ class VehicleRepository {
         .map((list) => list.map((json) => VehicleModel.fromJson(json)).toList());
   }
 
-  /// Lấy tổng số lượng xe máy và ô tô của căn hộ (phục vụ tự động tính phí hóa đơn)
+  /// Lấy tổng số lượng xe máy và ô tô ĐÃ PHÊ DUYỆT của căn hộ (phục vụ tự động tính phí hóa đơn)
   Future<Map<String, int>> getVehicleCounts(String apartmentId) async {
     final response = await _client
         .from('vehicles')
         .select('vehicle_type')
-        .eq('apartment_id', apartmentId);
+        .eq('apartment_id', apartmentId)
+        .eq('status', 'approved');
 
     int motorbikes = 0;
     int cars = 0;
@@ -54,24 +55,32 @@ class VehicleRepository {
     };
   }
 
+  /// Lấy số lượng xe máy ĐANG HOẠT ĐỘNG (pending hoặc approved) để kiểm tra hạn mức 2 xe máy
+  Future<int> getActiveMotorbikeCount(String apartmentId) async {
+    final response = await _client
+        .from('vehicles')
+        .select('id')
+        .eq('apartment_id', apartmentId)
+        .eq('vehicle_type', 'motorbike')
+        .neq('status', 'rejected');
+
+    return (response as List).length;
+  }
+
   /// Đăng ký phương tiện mới cho căn hộ
   Future<VehicleModel> registerVehicle({
     required String apartmentId,
     required String plateNumber,
     required String vehicleType,
     required String userId,
+    String? brandModel,
   }) async {
     final cleanPlate = plateNumber.trim().toUpperCase();
 
-    // 1. Kiểm tra giới hạn 2 xe máy ở tầng repository trước (Client/Repo check)
+    // 1. Kiểm tra giới hạn 2 xe máy ở tầng repository (chỉ đếm xe active: pending hoặc approved)
     if (vehicleType == 'motorbike') {
-      final existingMotorbikes = await _client
-          .from('vehicles')
-          .select('id')
-          .eq('apartment_id', apartmentId)
-          .eq('vehicle_type', 'motorbike');
-
-      if ((existingMotorbikes as List).length >= 2) {
+      final activeCount = await getActiveMotorbikeCount(apartmentId);
+      if (activeCount >= 2) {
         throw Exception('Mỗi căn hộ chỉ được đăng ký tối đa 2 xe máy theo quy định của tòa nhà.');
       }
     }
@@ -81,8 +90,12 @@ class VehicleRepository {
         .insert({
           'apartment_id': apartmentId,
           'plate_number': cleanPlate,
+          'license_plate': cleanPlate,
           'vehicle_type': vehicleType,
+          'brand_model': brandModel?.trim(),
           'registered_by': userId,
+          'user_id': userId,
+          'status': 'pending',
         })
         .select()
         .single();
@@ -106,11 +119,15 @@ class VehicleRepository {
   }
 
   /// Cập nhật trạng thái phê duyệt phương tiện
-  Future<void> updateVehicleStatus(String vehicleId, String status) async {
-    await _client.from('vehicles').update({
+  Future<void> updateVehicleStatus(String vehicleId, String status, {String? reason}) async {
+    final updates = <String, dynamic>{
       'status': status,
       'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', vehicleId);
+    };
+    if (reason != null && reason.trim().isNotEmpty) {
+      updates['rejection_reason'] = reason.trim();
+    }
+    await _client.from('vehicles').update(updates).eq('id', vehicleId);
   }
 
   /// Phê duyệt cấp thẻ gửi xe cho phương tiện
@@ -118,8 +135,8 @@ class VehicleRepository {
     await updateVehicleStatus(vehicleId, 'approved');
   }
 
-  /// Từ chối đăng ký phương tiện
-  Future<void> rejectVehicle(String vehicleId) async {
-    await updateVehicleStatus(vehicleId, 'rejected');
+  /// Từ chối đăng ký phương tiện kèm lý do
+  Future<void> rejectVehicle(String vehicleId, {String? reason}) async {
+    await updateVehicleStatus(vehicleId, 'rejected', reason: reason);
   }
 }
