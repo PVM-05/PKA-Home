@@ -3,51 +3,70 @@ import 'package:pka_home/data/models/vehicle_model.dart';
 
 void main() {
   group('VehicleModel Tests', () {
-    test('VehicleModel serialization fromJson và toJson chính xác', () {
+    test('Khởi tạo VehicleModel đầy đủ và kiểm tra helper getters', () {
+      final vehicle = VehicleModel(
+        id: 'v-1',
+        apartmentId: 'apt-1',
+        vehicleType: 'motorbike',
+        licensePlate: '29A-12345',
+        brandModel: 'Honda AirBlade',
+        status: 'pending',
+        createdAt: DateTime(2026, 10, 6),
+      );
+
+      expect(vehicle.isPending, isTrue);
+      expect(vehicle.isApproved, isFalse);
+      expect(vehicle.isRejected, isFalse);
+      expect(vehicle.isActive, isTrue);
+      expect(vehicle.hasRejectionReason, isFalse);
+      expect(vehicle.vehicleTypeDisplayName, 'Xe máy');
+      expect(vehicle.monthlyFee, 100000.0);
+    });
+
+    test('fromJson parse dung rejection_reason va brand_model', () {
       final json = {
-        'id': 'v-1',
+        'id': 'v-2',
         'apartment_id': 'apt-1',
-        'user_id': 'user-1',
-        'vehicle_type': 'motorbike',
-        'license_plate': '29A1-12345',
-        'brand_model': 'Honda Vision',
-        'status': 'pending',
-        'created_at': '2026-10-05T20:00:00.000Z',
+        'vehicle_type': 'car',
+        'license_plate': '30H-999.88',
+        'brand_model': 'Mazda CX-5',
+        'status': 'rejected',
+        'rejection_reason': 'Biển số xe không rõ ràng trong ảnh chụp',
+        'created_at': '2026-10-06T10:00:00.000Z',
       };
 
       final vehicle = VehicleModel.fromJson(json);
 
-      expect(vehicle.id, 'v-1');
-      expect(vehicle.apartmentId, 'apt-1');
-      expect(vehicle.vehicleType, 'motorbike');
-      expect(vehicle.licensePlate, '29A1-12345');
-      expect(vehicle.brandModel, 'Honda Vision');
-      expect(vehicle.status, 'pending');
-      expect(vehicle.isPending, isTrue);
-      expect(vehicle.isApproved, isFalse);
-      expect(vehicle.vehicleTypeDisplayName, 'Xe máy');
-      expect(vehicle.statusDisplayName, 'Chờ phê duyệt');
+      expect(vehicle.isRejected, isTrue);
+      expect(vehicle.isActive, isFalse);
+      expect(vehicle.hasRejectionReason, isTrue);
+      expect(vehicle.rejectionReason, 'Biển số xe không rõ ràng trong ảnh chụp');
+      expect(vehicle.brandModel, 'Mazda CX-5');
+      expect(vehicle.vehicleTypeDisplayName, 'Ô tô');
+      expect(vehicle.monthlyFee, 1200000.0);
 
-      final outputJson = vehicle.toJson();
-      expect(outputJson['license_plate'], '29A1-12345');
-      expect(outputJson['vehicle_type'], 'motorbike');
+      final outJson = vehicle.toJson();
+      expect(outJson['rejection_reason'], 'Biển số xe không rõ ràng trong ảnh chụp');
+      expect(outJson['brand_model'], 'Mazda CX-5');
     });
 
-    test('VehicleModel copyWith hoạt động đúng', () {
+    test('copyWith cap nhat dung rejection_reason', () {
       final vehicle = VehicleModel(
-        id: 'v-2',
+        id: 'v-3',
         apartmentId: 'apt-1',
-        vehicleType: 'car',
-        licensePlate: '30E-99999',
+        vehicleType: 'motorbike',
+        licensePlate: '59-X1 56789',
         status: 'pending',
-        createdAt: DateTime.now(),
+        createdAt: DateTime(2026, 10, 6),
       );
 
-      final approvedVehicle = vehicle.copyWith(status: 'approved');
-      expect(approvedVehicle.status, 'approved');
-      expect(approvedVehicle.isApproved, isTrue);
-      expect(approvedVehicle.statusDisplayName, 'Đã phê duyệt');
-      expect(approvedVehicle.licensePlate, '30E-99999');
+      final updated = vehicle.copyWith(
+        status: 'rejected',
+        rejectionReason: 'Vượt quá hạn mức 2 xe máy của căn hộ',
+      );
+
+      expect(updated.isRejected, isTrue);
+      expect(updated.rejectionReason, 'Vượt quá hạn mức 2 xe máy của căn hộ');
     });
   });
 }
