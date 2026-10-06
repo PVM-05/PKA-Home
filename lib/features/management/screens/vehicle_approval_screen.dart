@@ -134,37 +134,96 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
   }
 
   Future<void> _rejectVehicle(VehicleModel vehicle) async {
-    final confirmed = await showDialog<bool>(
+    final reasonController = TextEditingController();
+    final quickReasons = [
+      'Biển số không hợp lệ',
+      'Vượt quá hạn mức xe máy',
+      'Thiếu thông tin xác thực',
+    ];
+
+    final result = await showDialog<String?>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.cancel_outlined, color: AppTheme.error),
-            SizedBox(width: 8),
-            Text('Từ Chối Đăng Ký'),
-          ],
-        ),
-        content: Text('Bạn có chắc chắn muốn từ chối đăng ký phương tiện biển số "${vehicle.licensePlate}" không?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-              foregroundColor: Colors.white,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          return AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.cancel_outlined, color: AppTheme.error),
+                SizedBox(width: 8),
+                Text('Từ Chối Đăng Ký'),
+              ],
             ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Từ chối'),
-          ),
-        ],
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Bạn có chắc chắn muốn từ chối đăng ký phương tiện biển số "${vehicle.licensePlate}" không?',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Lý do từ chối (tùy chọn):',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: quickReasons.map((reason) {
+                      final isSelected = reasonController.text == reason;
+                      return ChoiceChip(
+                        label: Text(reason, style: const TextStyle(fontSize: 12)),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setDialogState(() {
+                            reasonController.text = selected ? reason : '';
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: reasonController,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: 'Nhập lý do từ chối cụ thể để cư dân nắm thông tin...',
+                      hintStyle: const TextStyle(fontSize: 13),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.all(10),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, null),
+                child: const Text('Hủy'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.error,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  final reasonText = reasonController.text.trim();
+                  Navigator.pop(ctx, reasonText.isEmpty ? '' : reasonText);
+                },
+                child: const Text('Từ chối'),
+              ),
+            ],
+          );
+        },
       ),
     );
 
-    if (confirmed == true && mounted) {
+    if (result != null && mounted) {
       try {
-        await ref.read(vehicleRepositoryProvider).rejectVehicle(vehicle.id);
+        final reasonParam = result.isEmpty ? null : result;
+        await ref.read(vehicleRepositoryProvider).rejectVehicle(vehicle.id, reason: reasonParam);
         _refreshData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -382,6 +441,33 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                                 ),
                               ],
                             ),
+                            if (v.isRejected) ...[
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.error.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: AppTheme.error.withValues(alpha: 0.2)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.error_outline, size: 16, color: AppTheme.error),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Lý do từ chối: ${v.hasRejectionReason ? v.rejectionReason! : 'Không đủ điều kiện cấp thẻ xe.'}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.error,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             if (v.isPending) ...[
                               const Divider(height: 20),
                               Row(
