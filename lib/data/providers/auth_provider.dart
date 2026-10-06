@@ -13,14 +13,19 @@ final fcmTokenSyncProvider = Provider<void>((ref) {
   }
 });
 
+/// Provider thông báo phiên làm việc hết hạn
+final sessionExpiredNoticeProvider = StateProvider<bool>((ref) => false);
+
 final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
-  return AuthNotifier(ref.read(authRepositoryProvider));
+  return AuthNotifier(ref.read(authRepositoryProvider), ref);
 });
 
 class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   final AuthRepository _repository;
+  final Ref? _ref;
+  bool _isManualLogout = false;
 
-  AuthNotifier(this._repository) : super(const AsyncValue.loading()) {
+  AuthNotifier(this._repository, [this._ref]) : super(const AsyncValue.loading()) {
     _checkAuthState();
   }
 
@@ -37,9 +42,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
       final Session? session = data.session;
       
       if (event == AuthChangeEvent.signedIn && session != null) {
+         _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
          _fetchUserInfo(session.user.id);
-      } else if (event == AuthChangeEvent.signedOut) {
+      } else if (event == AuthChangeEvent.signedOut || (event == AuthChangeEvent.tokenRefreshed && session == null)) {
+         final wasLoggedIn = state.valueOrNull != null;
          state = const AsyncValue.data(null);
+         if (wasLoggedIn && !_isManualLogout) {
+           _ref?.read(sessionExpiredNoticeProvider.notifier).state = true;
+         }
       }
     });
   }
@@ -64,7 +74,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   }
 
   Future<void> logout() async {
-    await _repository.logout();
+    _isManualLogout = true;
+    try {
+      _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
+      await _repository.logout();
+    } finally {
+      _isManualLogout = false;
+    }
   }
 
   void updateUser(UserModel updated) {
