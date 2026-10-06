@@ -70,3 +70,10 @@ final pendingVehiclesCountProvider = FutureProvider<int>((ref) async {
   final pending = await repo.getAllVehicles(status: 'pending');
   return pending.length;
 });
+
+/// Số lượng xe máy đang hoạt động (pending hoặc approved) của căn hộ để kiểm tra hạn mức 2 xe máy
+final apartmentActiveMotorbikeCountProvider = FutureProvider.family<int, String>((ref, apartmentId) async {
+  final repo = ref.watch(vehicleRepositoryProvider);
+  return await repo.getActiveMotorbikeCount(apartmentId);
+});
+
