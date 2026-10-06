@@ -1,7 +1,7 @@
 # Đặc Tả Thiết Kế: Đồng Bộ Vòng Đời Phương Tiện & Phê Duyệt Thẻ Xe Toàn Diện
 
 - **Ngày tạo**: 2026-10-06
-- **Trạng thái**: Bản thảo thiết kế đã phê duyệt (Design Approved)
+- **Trạng thái**: Hoàn thiện theo góp ý phản biện (Finalized & Approved)
 - **Tác giả**: Antigravity & Nhóm phát triển PKA-Home
 
 ---
@@ -15,15 +15,54 @@ Trong hệ thống PKA-Home:
 - Tuy nhiên, luồng phía Cư dân (`VehicleManagementScreen`) chưa được đồng bộ:
   1. Chưa cho phép nhập Hãng/Mẫu xe (`brand_model`, ví dụ: "Honda AirBlade", "Mazda CX-5").
   2. Chưa hiển thị huy hiệu trạng thái phê duyệt (`Chờ phê duyệt`, `Đã phê duyệt`, `Đã từ chối`).
-  3. Khi BQL từ chối, hệ thống chưa lưu lý do từ chối (`rejection_reason`), dẫn đến cư dân không biết lý do bị từ chối để bổ sung/sửa đổi.
+  3. Khi BQL từ chối, hệ thống chưa lưu lý do từ chối (`rejection_reason`), dẫn đến cư dân không biết lý do bị từ chối để khắc phục.
   4. Trigger DB `check_vehicle_limits()` hiện tại đếm toàn bộ xe máy không phân biệt trạng thái, khiến cư dân có xe máy bị từ chối vẫn bị tính vào hạn mức 2 xe máy.
   5. Phương thức `getVehicleCounts(apartmentId)` chưa lọc trạng thái `approved`, có nguy cơ tính phí gửi xe vào hóa đơn hàng tháng cho cả xe chưa được phê duyệt.
 
-### 1.2. Mục Tiêu
-- Đồng bộ hoàn chỉnh vòng đời phương tiện từ lúc cư dân đăng ký -> BQL tiếp nhận, phê duyệt hoặc từ chối có lý do -> cư dân theo dõi trạng thái và dọn dẹp/nộp lại.
-- Tự động hóa tính phí chính xác: Chỉ tính phí gửi xe đối với xe đã được phê duyệt (`approved`).
-- Đảm bảo hạn mức 2 xe máy/căn hộ chỉ áp dụng cho xe đang hoạt động (`pending` hoặc `approved`), giải phóng hạn mức cho xe đã bị từ chối (`rejected`).
-- Tuân thủ 100% chuẩn UI/UX tiếng Việt, Material Icons, theme nhất quán và kiểm thử tự động.
+### 1.2. Luồng Vòng Đời Phương Tiện Chuẩn (State Lifecycle)
+```text
+                 CƯ DÂN
+                    │
+                    ▼
+          Đăng ký phương tiện
+                    │
+                    ▼
+                 PENDING (Tính hạn mức, KHÔNG tính phí)
+                    │
+              ┌─────┴─────┐
+              │           │
+              ▼           ▼
+          APPROVED      REJECTED (KHÔNG tính hạn mức, KHÔNG tính phí)
+              │           │
+              │           ├── Hiển thị lý do từ chối
+              │           │
+              │           └── Cư dân bấm XÓA
+              │                 │
+              │                 ▼
+              │            Đăng ký xe mới (Lịch sử sạch)
+              │                 │
+              │                 ▼
+              │              PENDING
+              │
+              ▼
+       Tính phí gửi xe
+              │
+              ▼
+       Hóa đơn hàng tháng
+```
+
+**Nguyên tắc nghiệp vụ cốt lõi**:
+1. **Không cho phép sửa trực tiếp xe `rejected` thành `pending`**: Giúp lịch sử sạch sẽ, không bị mất dấu lần từ chối trước đó. Cư dân chỉ có thể bấm **Xóa** xe bị từ chối và đăng ký bản ghi xe mới.
+2. **Không áp đặt UNIQUE cứng trên `license_plate`**: Cho phép sau khi xóa xe rejected, cư dân có thể đăng ký lại cùng biển số xe mà không bị lỗi ràng buộc.
+3. **Tách biệt tuyệt đối 2 khái niệm Đếm (Counts)**:
+   - **Active Count** (`pending + approved`): Dùng để kiểm soát hạn mức đăng ký (tối đa 2 xe máy/căn hộ).
+   - **Billing Count** (`approved` only): Dùng để kết xuất phí gửi xe vào hóa đơn dịch vụ hàng tháng.
+
+| Trạng thái | Tính hạn mức 2 xe | Tính phí gửi xe hàng tháng | Cho phép đăng ký lại |
+| :--- | :---: | :---: | :---: |
+| `pending` | Có (Đang giữ chỗ) | Không | Không |
+| `approved` | Có (Đang sử dụng) | Có (Đã cấp thẻ xe) | Không |
+| `rejected` | Không (Đã giải phóng) | Không | Có (sau khi xóa xe cũ) |
 
 ---
 
@@ -37,8 +76,10 @@ ALTER TABLE public.vehicles
 ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
 ```
 
-### 2.2. Cập Nhật Trigger Kiểm Tra Hạn Mức 2 Xe Máy (`check_vehicle_limits`)
-Trigger đảm bảo mỗi căn hộ chỉ được đăng ký tối đa 2 xe máy có trạng thái `pending` hoặc `approved`. Xe đã bị `rejected` sẽ không bị tính vào hạn mức.
+### 2.2. Nâng Cấp Trigger Kiểm Tra Hạn Mức 2 Xe Máy (`check_vehicle_limits`)
+Trigger xử lý đầy đủ cả tình huống `INSERT` và `UPDATE` (ví dụ chuyển trạng thái từ `rejected` sang `pending`/`approved` hoặc đổi loại xe):
+- Chỉ kiểm tra khi bản ghi mới là xe máy (`vehicle_type = 'motorbike'`) và trạng thái khác `rejected` (`status != 'rejected'`).
+- Tự loại trừ chính bản ghi đang cập nhật qua `id != COALESCE(NEW.id, '00000000-0000-0000-0000-000000000000'::uuid)`.
 
 ```sql
 CREATE OR REPLACE FUNCTION public.check_vehicle_limits()
@@ -62,6 +103,11 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_check_vehicle_limits ON public.vehicles;
+CREATE TRIGGER trg_check_vehicle_limits
+BEFORE INSERT OR UPDATE ON public.vehicles
+FOR EACH ROW EXECUTE FUNCTION public.check_vehicle_limits();
 ```
 
 ---
@@ -74,32 +120,56 @@ $$ LANGUAGE plpgsql;
   final String? rejectionReason;
   ```
 - Cập nhật constructor, `fromJson` (đọc `rejection_reason`), `toJson` (ghi `rejection_reason`), `copyWith`.
-- Bổ sung các helper getters:
+- Bổ sung bộ helper getters chuẩn hóa toàn hệ thống:
   ```dart
-  bool get hasRejectionReason => rejectionReason != null && rejectionReason!.trim().isNotEmpty;
+  bool get isPending => status == 'pending';
+  bool get isApproved => status == 'approved';
+  bool get isRejected => status == 'rejected';
+  bool get isActive => isPending || isApproved;
+  bool get hasRejectionReason =>
+      rejectionReason != null && rejectionReason!.trim().isNotEmpty;
   ```
 
 ### 3.2. Cập Nhật `VehicleRepository` (`lib/data/repositories/vehicle_repository.dart`)
 1. **`registerVehicle`**:
    - Nhận thêm tham số tùy chọn: `String? brandModel`.
-   - Lưu vào Supabase với `brand_model: brandModel?.trim()`, `license_plate: cleanPlate`, `plate_number: cleanPlate`, `status: 'pending'`, `user_id: userId`.
-   - Trước khi insert, kiểm tra số lượng xe máy đang hoạt động (`status IN ('pending', 'approved')`).
+   - Lưu vào Supabase:
+     ```dart
+     {
+       'apartment_id': apartmentId,
+       'plate_number': cleanPlate,
+       'license_plate': cleanPlate,
+       'vehicle_type': vehicleType,
+       'brand_model': brandModel?.trim(),
+       'registered_by': userId,
+       'user_id': userId,
+       'status': 'pending',
+     }
+     ```
+   - Kiểm tra trước ở tầng Dart: Số lượng xe máy `isActive` (`status IN ('pending', 'approved')`) < 2.
 2. **`rejectVehicle`**:
-   - Nhận thêm tham số tùy chọn: `String? reason`.
-   - Cập nhật cả `status: 'rejected'` và `rejection_reason: reason?.trim()`.
-3. **`getVehicleCounts`**:
-   - Chỉ đếm các xe có `status == 'approved'` để kết xuất phí gửi xe vào hóa đơn hàng tháng.
-4. **`getActiveMotorbikeCount`**:
-   - Đếm số lượng xe máy có `status IN ('pending', 'approved')` của căn hộ để kiểm soát việc vô hiệu hóa tùy chọn "Xe máy" trên form đăng ký.
+   - Nhận thêm tham số: `String? reason`.
+   - Cập nhật:
+     ```dart
+     {
+       'status': 'rejected',
+       'rejection_reason': reason?.trim(),
+       'updated_at': DateTime.now().toIso8601String(),
+     }
+     ```
+3. **`getVehicleCounts(String apartmentId)` (Tính phí)**:
+   - Thêm điều kiện lọc `.eq('status', 'approved')` để đảm bảo hóa đơn tự động chỉ tính tiền xe đã được phê duyệt.
+4. **`getActiveMotorbikeCount(String apartmentId)` (Hạn mức)**:
+   - Đếm xe máy có `status IN ('pending', 'approved')` để cung cấp cho provider `apartmentActiveMotorbikeCountProvider`.
 
 ---
 
 ## 4. Thiết Kế Giao Diện Người Dùng (UI/UX)
 
 ### 4.1. Màn Hình Cư Dân (`VehicleManagementScreen`)
-- **Bộ lọc loại xe khi đăng ký**:
+- **Phân loại xe khi đăng ký**:
   - Hỗ trợ 2 loại xe: **Xe máy** (100.000 đ/tháng, tối đa 2 xe) và **Ô tô** (1.200.000 đ/tháng).
-  - Loại bỏ hoàn toàn tùy chọn xe điện khỏi giao diện đăng ký để đúng quy chế vận hành.
+  - Loại bỏ hoàn toàn tùy chọn xe điện.
 - **Form đăng ký xe**:
   - Thêm trường nhập liệu `TextFormField` cho Hãng/Mẫu xe:
     - Nhãn: *"Hãng và mẫu xe (tùy chọn)"*
@@ -113,28 +183,28 @@ $$ LANGUAGE plpgsql;
     - 🔴 `Đã từ chối`: Màu đỏ (`AppTheme.error`), nền đỏ nhạt.
   - Khi xe ở trạng thái `rejected`:
     - Hiển thị banner cảnh báo đỏ nhẹ kèm lý do từ chối: *"Lý do từ chối: [Nội dung lý do]"*.
-    - Nút xóa phương tiện để cư dân gỡ bỏ bản ghi bị từ chối và đăng ký lại nếu muốn.
+    - Nút xóa phương tiện (`IconButton(Icons.delete_outline)`) để cư dân xóa bỏ bản ghi bị từ chối và đăng ký lại xe mới.
 
 ### 4.2. Màn Hình Ban Quản Lý (`VehicleApprovalScreen`)
 - **Hộp thoại Từ chối phê duyệt**:
-  - Hiển thị thông tin xe sắp từ chối.
+  - Hiển thị thông tin xe sắp từ chối (Biển số, Căn hộ).
   - Bổ sung trường nhập văn bản *"Lý do từ chối (tùy chọn)"*.
-  - Bổ sung danh sách các nút gợi ý nhanh lý do từ chối:
+  - Bổ sung các chip gợi ý nhanh:
     - *"Biển số không hợp lệ"*
     - *"Vượt quá hạn mức xe máy"*
     - *"Thiếu thông tin xác thực"*
 - **Tab "Đã từ chối"**:
-  - Hiển thị thông tin lý do từ chối ngay dưới thẻ xe.
+  - Hiển thị chi tiết lý do từ chối trong thẻ xe.
 
 ---
 
 ## 5. Chiến Lược Kiểm Thử (Testing Strategy)
 
 1. **Unit Test Data Layer**:
-   - `test/data/models/vehicle_model_test.dart`: Parse `rejection_reason` và `brand_model` từ JSON và serialise ngược lại.
-   - `test/data/repositories/vehicle_repository_test.dart`: Kiểm tra `registerVehicle` gửi đủ các trường, `rejectVehicle` gửi lý do từ chối, `getVehicleCounts` chỉ đếm xe `approved`.
+   - `test/data/models/vehicle_model_test.dart`: Parse `rejection_reason`, `brand_model`, kiểm tra các getter `isPending`, `isApproved`, `isRejected`, `isActive`, `hasRejectionReason`.
+   - `test/data/repositories/vehicle_repository_test.dart`: Kiểm tra `registerVehicle` gửi đủ các trường, `rejectVehicle` gửi lý do từ chối, `getVehicleCounts` chỉ đếm xe `approved`, `getActiveMotorbikeCount` đếm đúng xe `isActive`.
 2. **Widget & Flow Test**:
-   - `test/features/resident/vehicle_management_screen_test.dart`: Kiểm thử hiển thị danh sách xe với các badge trạng thái (Chờ phê duyệt, Đã phê duyệt, Đã từ chối) và lý do từ chối.
+   - `test/features/resident/vehicle_management_screen_test.dart`: Kiểm thử hiển thị danh sách xe với các badge trạng thái, lý do từ chối của xe rejected, form nhập hãng xe.
    - `test/features/management/vehicle_approval_screen_test.dart`: Cập nhật kiểm thử từ chối xe có lý do.
 3. **Kiểm Tra Tính Toàn Vẹn**:
    - Chạy `dart analyze` đảm bảo 0 cảnh báo/lỗi.
