@@ -18,7 +18,6 @@ import 'package:pka_home/features/resident/screens/amenity_booking_screen.dart';
 class FakePaymentServiceForAmenity extends PaymentService {
   @override
   Future<PaymentResult> pay({
-    required WidgetRef ref,
     required PaymentType type,
     required String referenceId,
     String outcome = 'SUCCESS',
