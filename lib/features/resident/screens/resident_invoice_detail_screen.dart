@@ -347,32 +347,41 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     return const SizedBox.shrink();
   }
 
+  bool _isOpeningPayment = false;
+
   Future<void> _handlePayment(BuildContext context, List<Map<String, dynamic>> items) async {
-    final feeBreakdown = items.map((item) => {
-      'name': item['fee_type'] as String? ?? 'Khoản phí',
-      'amount': (item['subtotal'] as num?)?.toDouble() ?? 0.0,
-    }).toList();
+    if (_isOpeningPayment) return;
+    _isOpeningPayment = true;
 
-    final aptCode = widget.invoice.apartment?.code ?? '';
-    final periodClean = widget.invoice.period.replaceAll('/', '');
+    try {
+      final feeBreakdown = items.map((item) => {
+        'name': item['fee_type'] as String? ?? 'Khoản phí',
+        'amount': (item['subtotal'] as num?)?.toDouble() ?? 0.0,
+      }).toList();
 
-    final result = await showUnifiedPaymentSheet(
-      context: context,
-      type: PaymentType.invoice,
-      referenceId: widget.invoice.id,
-      title: 'Thanh toán hóa đơn',
-      referenceCode: '#INV-$periodClean-$aptCode',
-      amount: widget.invoice.totalAmount,
-      feeBreakdown: feeBreakdown,
-    );
+      final aptCode = widget.invoice.apartment?.code ?? '';
+      final periodClean = widget.invoice.period.replaceAll('/', '');
 
-    if (result != null && result.success && mounted) {
-      ScaffoldMessenger.of(this.context).showSnackBar(
-        SnackBar(
-          content: Text('Thanh toán thành công! Mã GD: ${result.transactionCode}'),
-          backgroundColor: AppTheme.success,
-        ),
+      final result = await showUnifiedPaymentSheet(
+        context: context,
+        type: PaymentType.invoice,
+        referenceId: widget.invoice.id,
+        title: 'Thanh toán hóa đơn',
+        referenceCode: '#INV-$periodClean-$aptCode',
+        amount: widget.invoice.totalAmount,
+        feeBreakdown: feeBreakdown,
       );
+
+      if (result != null && result.success && mounted) {
+        ScaffoldMessenger.of(this.context).showSnackBar(
+          SnackBar(
+            content: Text('Thanh toán thành công! Mã GD: ${result.transactionCode}'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } finally {
+      _isOpeningPayment = false;
     }
   }
 
