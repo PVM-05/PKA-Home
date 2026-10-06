@@ -8,6 +8,7 @@ import '../../../core/utils/meter_ocr_simulator.dart';
 import '../../../data/providers/meter_reading_provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
+import '../../../core/utils/network_error_handler.dart';
 
 class ResidentMeterReadingScreen extends ConsumerStatefulWidget {
   const ResidentMeterReadingScreen({super.key});
@@ -97,6 +98,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
   }
 
   Future<void> _submit(double oldElec, double oldWater) async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final elecVal = double.tryParse(_electricController.text.trim()) ?? 0.0;
@@ -174,7 +176,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi gửi chỉ số: $e'),
+            content: Text(NetworkErrorHandler.getMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );

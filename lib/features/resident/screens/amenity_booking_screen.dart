@@ -13,6 +13,7 @@ import '../../../data/providers/amenity_booking_provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
 import '../../../data/services/payment_service.dart';
+import '../../../core/utils/network_error_handler.dart';
 
 class AmenityBookingScreen extends ConsumerStatefulWidget {
   final BuildingAmenityModel amenity;
@@ -170,90 +171,102 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                 backgroundColor: isWaitlist ? Colors.purple : AppTheme.primary,
                 foregroundColor: Colors.white,
               ),
-              onPressed: () async {
-                Navigator.pop(ctx);
-                setState(() => _isSubmitting = true);
+              onPressed: _isSubmitting
+                  ? null
+                  : () async {
+                      if (_isSubmitting) return;
+                      setState(() => _isSubmitting = true);
+                      Navigator.pop(ctx);
 
-                try {
-                  final result = await ref.read(amenityBookingRepositoryProvider).createBooking(
-                        amenityId: widget.amenity.id,
-                        apartmentId: apartmentId,
-                        userId: userId,
-                        date: _selectedDate,
-                        timeSlot: slot,
-                        guestsCount: guestsCount,
-                        allowWaitlist: isWaitlist,
-                      );
+                      try {
+                        final result = await ref.read(amenityBookingRepositoryProvider).createBooking(
+                              amenityId: widget.amenity.id,
+                              apartmentId: apartmentId,
+                              userId: userId,
+                              date: _selectedDate,
+                              timeSlot: slot,
+                              guestsCount: guestsCount,
+                              allowWaitlist: isWaitlist,
+                            );
 
-                  ref.invalidate(amenityBookingsForDateProvider(
-                    AmenityDateQuery(amenityId: widget.amenity.id, date: _selectedDate),
-                  ));
-                  ref.invalidate(myAmenityBookingsProvider);
+                        ref.invalidate(amenityBookingsForDateProvider(
+                          AmenityDateQuery(amenityId: widget.amenity.id, date: _selectedDate),
+                        ));
+                        ref.invalidate(myAmenityBookingsProvider);
 
-                  setState(() {
-                    _isSubmitting = false;
-                    _selectedSlot = null;
-                  });
+                        setState(() {
+                          _isSubmitting = false;
+                          _selectedSlot = null;
+                        });
 
-                  final totalFee = (widget.amenity.feeAmount * guestsCount) +
-                      (widget.amenity.requiresDeposit ? widget.amenity.depositAmount : 0);
+                        final totalFee = (widget.amenity.feeAmount * guestsCount) +
+                            (widget.amenity.requiresDeposit ? widget.amenity.depositAmount : 0);
 
-                  if (!isWaitlist && totalFee > 0 && mounted) {
-                    final feeItems = <Map<String, dynamic>>[];
-                    if (widget.amenity.feeAmount > 0) {
-                      feeItems.add({
-                        'name': '${widget.amenity.name} ($guestsCount người)',
-                        'amount': widget.amenity.feeAmount * guestsCount,
-                      });
-                    }
-                    if (widget.amenity.requiresDeposit && widget.amenity.depositAmount > 0) {
-                      feeItems.add({
-                        'name': 'Tiền đặt cọc',
-                        'amount': widget.amenity.depositAmount,
-                      });
-                    }
+                        if (!isWaitlist && totalFee > 0 && mounted) {
+                          final feeItems = <Map<String, dynamic>>[];
+                          if (widget.amenity.feeAmount > 0) {
+                            feeItems.add({
+                              'name': '${widget.amenity.name} ($guestsCount người)',
+                              'amount': widget.amenity.feeAmount * guestsCount,
+                            });
+                          }
+                          if (widget.amenity.requiresDeposit && widget.amenity.depositAmount > 0) {
+                            feeItems.add({
+                              'name': 'Tiền đặt cọc',
+                              'amount': widget.amenity.depositAmount,
+                            });
+                          }
 
-                    final codeSuffix = result.id.length >= 4 ? result.id.substring(0, 4).toUpperCase() : result.id.toUpperCase();
-                    final paymentRes = await showUnifiedPaymentSheet(
-                      context: context,
-                      type: PaymentType.service,
-                      referenceId: result.id,
-                      title: 'Đăng ký ${widget.amenity.name}',
-                      referenceCode: '#BK-${DateFormat('yyyyMMdd').format(_selectedDate)}-$codeSuffix',
-                      amount: totalFee,
-                      feeBreakdown: feeItems,
-                    );
+                          final codeSuffix = result.id.length >= 4 ? result.id.substring(0, 4).toUpperCase() : result.id.toUpperCase();
+                          final paymentRes = await showUnifiedPaymentSheet(
+                            context: context,
+                            type: PaymentType.service,
+                            referenceId: result.id,
+                            title: 'Đăng ký ${widget.amenity.name}',
+                            referenceCode: '#BK-${DateFormat('yyyyMMdd').format(_selectedDate)}-$codeSuffix',
+                            amount: totalFee,
+                            feeBreakdown: feeItems,
+                          );
 
-                    if (paymentRes != null && paymentRes.success && mounted) {
-                      _showBookingSuccessDialog(context, result, slot);
-                      return;
-                    }
-                  }
+                          if (paymentRes != null && paymentRes.success && mounted) {
+                            _showBookingSuccessDialog(context, result, slot);
+                            return;
+                          }
+                        }
 
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result.isWaitlist
-                              ? 'Đã thêm vào danh sách chờ thành công!'
-                              : 'Đặt lịch tiện ích thành công!',
-                        ),
-                        backgroundColor: result.isWaitlist ? Colors.purple : AppStatusColors.paid,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  setState(() => _isSubmitting = false);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(formatErrorMessage(e)),
-                        backgroundColor: AppTheme.error,
-                      ),
-                    );
-                  }
-                }
-              },
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result.isWaitlist
+                                    ? 'Đã thêm vào danh sách chờ thành công!'
+                                    : 'Đặt lịch tiện ích thành công!',
+                              ),
+                              backgroundColor: result.isWaitlist ? Colors.purple : AppStatusColors.paid,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        // Tự động làm mới slot khi lỗi (đặc biệt khi có người vừa đặt trước 23505)
+                        ref.invalidate(amenityBookingsForDateProvider(
+                          AmenityDateQuery(amenityId: widget.amenity.id, date: _selectedDate),
+                        ));
+                        ref.invalidate(myAmenityBookingsProvider);
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(NetworkErrorHandler.getMessage(e)),
+                              backgroundColor: AppTheme.error,
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isSubmitting = false);
+                        }
+                      }
+                    },
               child: Text(isWaitlist ? 'Xác nhận vào hàng chờ' : 'Xác nhận đặt'),
             ),
           ],
