@@ -6,6 +6,7 @@ class VehicleModel {
   final String licensePlate;
   final String? brandModel;
   final String status; // 'pending', 'approved', 'rejected'
+  final String? rejectionReason;
   final DateTime createdAt;
 
   VehicleModel({
@@ -16,6 +17,7 @@ class VehicleModel {
     required this.licensePlate,
     this.brandModel,
     this.status = 'pending',
+    this.rejectionReason,
     required this.createdAt,
   });
 
@@ -28,6 +30,7 @@ class VehicleModel {
       licensePlate: json['license_plate'] as String? ?? json['plate_number'] as String? ?? '',
       brandModel: json['brand_model'] as String?,
       status: json['status'] as String? ?? 'pending',
+      rejectionReason: json['rejection_reason'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -44,6 +47,7 @@ class VehicleModel {
       'plate_number': licensePlate,
       'brand_model': brandModel,
       'status': status,
+      'rejection_reason': rejectionReason,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -56,6 +60,7 @@ class VehicleModel {
     String? licensePlate,
     String? brandModel,
     String? status,
+    String? rejectionReason,
     DateTime? createdAt,
   }) {
     return VehicleModel(
@@ -66,6 +71,7 @@ class VehicleModel {
       licensePlate: licensePlate ?? this.licensePlate,
       brandModel: brandModel ?? this.brandModel,
       status: status ?? this.status,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -73,6 +79,9 @@ class VehicleModel {
   bool get isPending => status == 'pending';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';
+  bool get isActive => isPending || isApproved;
+  bool get hasRejectionReason =>
+      rejectionReason != null && rejectionReason!.trim().isNotEmpty;
 
   String get plateNumber => licensePlate;
   bool get isMotorbike => vehicleType == 'motorbike';
