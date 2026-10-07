@@ -6,6 +6,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
 import 'amenity_booking_screen.dart';
+import '../../../core/utils/error_formatter.dart';
 
 class ResidentHandbookScreen extends ConsumerStatefulWidget {
   final int initialTabIndex;
@@ -173,7 +174,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi tải dữ liệu: $e')),
+        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
       ),
     );
   }
@@ -371,7 +372,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi tải nội quy: $e')),
+        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
       ),
     );
   }
@@ -487,7 +488,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi tải tiện ích: $e')),
+        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
       ),
     );
   }
@@ -563,7 +564,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         _buildFaqItem(
           question: 'Tôi thanh toán hóa đơn bằng cách nào?',
           answer:
-              'Tại màn hình Hóa đơn, nhấn "Xem chi tiết" -> "Thanh toán". Ứng dụng sẽ tự động sinh mã VietQR QuickLink chuẩn với đúng số tiền và nội dung chuyển khoản. Bạn chỉ cần mở ứng dụng ngân hàng và quét mã để hoàn tất.',
+              'Tại màn hình Hóa đơn, nhấn "Xem chi tiết" -> "Thanh toán". Ứng dụng cung cấp Cổng thanh toán tiện lợi (Demo Payment) hỗ trợ thanh toán trực tuyến tức thì hoặc Cư dân có thể thanh toán trực tiếp tại văn phòng Ban Quản Lý.',
         ),
         _buildFaqItem(
           question: 'Khi gặp sự cố trong căn hộ thì xử lý thế nào?',

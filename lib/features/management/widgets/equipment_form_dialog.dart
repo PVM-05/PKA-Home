@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/building_equipment_model.dart';
 import '../../../data/providers/equipment_provider.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Hộp thoại Thêm mới hoặc Cập nhật Hồ sơ thiết bị kỹ thuật
 class EquipmentFormDialog extends ConsumerStatefulWidget {
@@ -124,7 +125,7 @@ class _EquipmentFormDialogState extends ConsumerState<EquipmentFormDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi: ${e.toString().replaceFirst("Exception: ", "")}'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );

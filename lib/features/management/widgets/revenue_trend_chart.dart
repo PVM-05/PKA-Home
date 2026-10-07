@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/dashboard_providers.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Biểu đồ xu hướng thu phí và công nợ 6 kỳ hóa đơn gần nhất dành cho Ban Quản lý.
 class RevenueTrendChart extends ConsumerWidget {
@@ -229,7 +230,7 @@ class RevenueTrendChart extends ConsumerWidget {
               ),
               error: (err, _) => Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text('Lỗi tải dữ liệu biểu đồ: $err', style: const TextStyle(color: AppTheme.error, fontSize: 12)),
+                child: Text(formatErrorMessage(err), style: const TextStyle(color: AppTheme.error, fontSize: 12)),
               ),
             ),
           ],

@@ -6,6 +6,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/providers/vehicle_provider.dart';
+import '../../../core/utils/error_formatter.dart';
 
 class VehicleApprovalScreen extends ConsumerStatefulWidget {
   const VehicleApprovalScreen({super.key});
@@ -124,7 +125,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi khi phê duyệt: $e'),
+              content: Text(formatErrorMessage(e)),
               backgroundColor: AppTheme.error,
             ),
           );
@@ -237,7 +238,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi: $e'),
+              content: Text(formatErrorMessage(e)),
               backgroundColor: AppTheme.error,
             ),
           );

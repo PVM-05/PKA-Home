@@ -147,7 +147,7 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi tải dữ liệu: $e')),
+        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
       ),
     );
   }
@@ -332,7 +332,7 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi tải nội quy: $e')),
+        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
       ),
     );
   }
@@ -521,7 +521,7 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi tải tiện ích: $e')),
+        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
       ),
     );
   }

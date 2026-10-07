@@ -8,7 +8,7 @@
 ## 🏢 1. Tổng Quan Dự Án
 
 **PKA-Home** giải quyết triệt để các bài toán thường gặp trong quản trị và sinh hoạt tại chung cư hiện đại:
-- **Minh bạch tài chính**: Hóa đơn phân rã từng loại phí (điện, nước, quản lý, gửi xe), thanh toán VietQR động, phòng chống gian lận dữ liệu cấp cơ sở dữ liệu.
+- **Minh bạch tài chính**: Hóa đơn phân rã từng loại phí (điện, nước, quản lý, gửi xe), Cổng thanh toán Demo mô phỏng tức thì, phòng chống gian lận dữ liệu cấp cơ sở dữ liệu.
 - **Tương tác nhanh chóng**: Tiếp nhận phản ánh sự cố kèm hình ảnh, tự động phân loại mức độ khẩn cấp (Rule-based), phân công kỹ thuật viên và theo dõi tiến độ theo thời gian thực.
 - **Tiện ích số hoá**: Đăng ký thẻ xe điện tử, đặt chỗ tiện ích nội khu (hồ bơi, BBQ, phòng sinh hoạt), tra cứu sổ tay cẩm nang tòa nhà và danh bạ khẩn cấp.
 - **Bảo mật cấp độ cao (Security by Design)**: Tách quyền truy cập nghiêm ngặt với PostgreSQL Row Level Security (RLS) và xử lý giao dịch an toàn qua Remote Procedure Calls (RPC).
@@ -76,8 +76,8 @@ pka_home/
    - Huy hiệu (Badge) thông báo thời gian thực về trạng thái xử lý phản ánh và hóa đơn.
 3. **Hóa đơn & Thanh toán**:
    - Xem chi tiết từng hạng mục chi phí (điện, nước, phí quản lý, rác thải, gửi xe).
-   - Tích hợp mã **VietQR động** chuyển khoản chuẩn xác số tiền và nội dung.
-   - Thao tác "Xác nhận đã chuyển khoản" với cơ chế phòng ngừa bấm đúp (Debounce) an toàn.
+   - Tích hợp **Cổng thanh toán Demo** (Demo Payment) hỗ trợ thanh toán 1 chạm tức thì, đối soát giao dịch tự động.
+   - Cơ chế phòng ngừa bấm đúp (Debounce & Row Locking) an toàn tuyệt đối.
    - Tra cứu toàn bộ lịch sử thanh toán các kỳ trước.
 4. **Phản ánh & Báo cáo Sự cố**:
    - Gửi yêu cầu bảo trì kèm hình ảnh trực tiếp từ camera/thư viện.
