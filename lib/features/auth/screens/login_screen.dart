@@ -105,6 +105,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 36),
 
+                  if (ref.watch(accountLockedNoticeProvider)) ...[
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.red.shade400),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.lock_outline, color: Colors.red.shade800, size: 20),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Text(
+                              'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Ban Quản Lý để được hỗ trợ.',
+                              style: TextStyle(fontSize: 13, color: Colors.black87),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
                   if (ref.watch(sessionExpiredNoticeProvider)) ...[
                     Container(
                       margin: const EdgeInsets.only(bottom: 20),

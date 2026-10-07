@@ -54,7 +54,11 @@ void main() {
       final file = javaOrDartFile('lib/features/management/screens/management_invoice_detail_screen.dart');
       final content = file.readAsStringSync();
 
-      expect(content.contains('recordPaymentTransaction'), isTrue, reason: 'Must call recordPaymentTransaction when staff confirms cash/transfer');
+      expect(
+        content.contains('recordManualPayment') || content.contains('recordPaymentTransaction'),
+        isTrue,
+        reason: 'Must call recordManualPayment or recordPaymentTransaction when staff confirms cash/transfer',
+      );
     });
   });
 }

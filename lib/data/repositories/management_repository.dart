@@ -437,11 +437,25 @@ class ManagementRepository {
   }) async {
     final response = await _client.rpc('generate_valid_bulk_invoices', params: {
       'p_period': period,
-      'p_due_date': dueDate.toIso8601String(),
+      'p_due_date': dueDate.toIso8601String().split('T')[0],
       'p_mgmt_rate': mgmtRate,
       'p_electric_rate': electricRate,
       'p_water_rate': waterRate,
       'p_target_apartment_ids': ?targetApartmentIds,
+    });
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  /// Xác nhận thu tiền nguyên tử (Atomic Payment Confirmation)
+  Future<Map<String, dynamic>> recordManualPayment({
+    required String invoiceId,
+    String paymentMethod = 'CASH',
+    String? notes,
+  }) async {
+    final response = await _client.rpc('record_manual_payment', params: {
+      'p_invoice_id': invoiceId,
+      'p_payment_method': paymentMethod,
+      'p_notes': notes,
     });
     return Map<String, dynamic>.from(response as Map);
   }
