@@ -142,9 +142,10 @@ void main() {
     final textFields = find.byType(TextFormField);
     expect(textFields, findsNWidgets(3));
 
-    // Field 0 la Dien moi, Field 1 la Nuoc moi
+    // Field 0 la Dien moi, Field 1 la Nuoc moi, Field 2 la Ky khai bao
     await tester.enterText(textFields.at(0), '160.0');
     await tester.enterText(textFields.at(1), '45.0');
+    await tester.enterText(textFields.at(2), '11/2026');
     await tester.pumpAndSettle();
 
     // Cuon tim nut Gui chi so
