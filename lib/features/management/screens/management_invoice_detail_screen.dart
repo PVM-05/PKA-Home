@@ -286,6 +286,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       final txnMethod = isPending ? 'BANK_TRANSFER' : 'CASH';
       final txnTitle = 'Thanh toán hóa đơn kỳ ${invoice.period} (${isPending ? "Chuyển khoản" : "Tiền mặt"})';
       
+      // Sử dụng recordManualPayment thay thế cho recordPaymentTransaction để đảm bảo tính nguyên tử (atomic transaction)
       await repo.recordManualPayment(
         invoiceId: invoice.id,
         paymentMethod: txnMethod,
