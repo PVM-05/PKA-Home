@@ -25,7 +25,7 @@ class NetworkErrorHandler {
         case '08001':
           return 'Không thể kết nối đến hệ thống. Vui lòng thử lại.';
         case '23505':
-          return 'Dữ liệu đã tồn tại trong hệ thống hoặc khung giờ vừa được người khác đặt. Vui lòng kiểm tra lại.';
+          return 'Khung giờ vừa được người khác đặt hoặc Dữ liệu đã tồn tại trong hệ thống. Vui lòng kiểm tra lại.';
         case '23503':
           return 'Dữ liệu đang được liên kết. Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.';
         case '42501':
