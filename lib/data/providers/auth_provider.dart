@@ -18,9 +18,7 @@ final fcmTokenSyncProvider = Provider<void>((ref) {
 final sessionExpiredNoticeProvider = StateProvider<bool>((ref) => false);
 
 final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
-  final notifier = AuthNotifier(ref.read(authRepositoryProvider), ref);
-  ref.onDispose(() => notifier.dispose());
-  return notifier;
+  return AuthNotifier(ref.read(authRepositoryProvider), ref);
 });
 
 class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {

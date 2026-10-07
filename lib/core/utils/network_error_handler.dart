@@ -8,7 +8,7 @@ class NetworkErrorHandler {
   const NetworkErrorHandler._();
 
   /// Chuyển đổi ngoại lệ thành thông điệp tiếng Việt thân thiện
-  static String getMessage(Object? error, {String fallback = 'Đã xảy ra lỗi, vui lòng thử lại sau.'}) {
+  static String getMessage(Object? error, {String fallback = 'Đã xảy ra lỗi. Vui lòng thử lại.'}) {
     if (error == null) return fallback;
 
     if (error is SocketException) {
@@ -23,11 +23,11 @@ class NetworkErrorHandler {
       switch (error.code) {
         case '08006':
         case '08001':
-          return 'Không thể kết nối đến hệ thống máy chủ. Vui lòng thử lại.';
+          return 'Không thể kết nối đến hệ thống. Vui lòng thử lại.';
         case '23505':
-          return 'Dữ liệu đã tồn tại trong hệ thống hoặc khung giờ vừa được đăng ký. Vui lòng kiểm tra lại.';
+          return 'Khung giờ vừa được người khác đặt hoặc dữ liệu đã tồn tại trong hệ thống. Vui lòng kiểm tra lại.';
         case '23503':
-          return 'Không thể thực hiện vì dữ liệu đang được liên kết với bản ghi khác.';
+          return 'Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.';
         case '42501':
           return 'Bạn không có quyền thực hiện thao tác này.';
         case 'PGRST116':
@@ -39,7 +39,7 @@ class NetworkErrorHandler {
         return 'Bạn không có quyền thực hiện thao tác này.';
       }
       if (msg.contains('foreign key constraint')) {
-        return 'Không thể thực hiện vì dữ liệu đang được liên kết với bản ghi khác.';
+        return 'Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.';
       }
 
       // Nếu là thông báo tiếng Việt có chủ đích từ RAISE EXCEPTION trong trigger/RPC
