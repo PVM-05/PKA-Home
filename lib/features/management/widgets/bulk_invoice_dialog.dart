@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/network_error_handler.dart';
 import '../../../data/models/bulk_invoice_validation_model.dart';
 import '../../../data/providers/management_provider.dart';
 
@@ -93,7 +94,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi kiểm tra dữ liệu: $e'),
+            content: Text(NetworkErrorHandler.getMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -142,7 +143,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi tạo hóa đơn hàng loạt: $e'),
+            content: Text(NetworkErrorHandler.getMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );

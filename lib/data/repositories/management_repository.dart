@@ -415,34 +415,13 @@ class ManagementRepository {
     double electricRate = 3500,
     double waterRate = 18000,
   }) async {
-    try {
-      final response = await _client.rpc('validate_monthly_bulk_invoices', params: {
-        'p_period': period,
-        'p_mgmt_rate': mgmtRate,
-        'p_electric_rate': electricRate,
-        'p_water_rate': waterRate,
-      });
-      return BulkInvoiceValidationModel.fromJson(Map<String, dynamic>.from(response as Map));
-    } catch (e) {
-      return BulkInvoiceValidationModel(
-        period: period,
-        totalScanned: 0,
-        validCount: 0,
-        missingCount: 0,
-        invalidCount: 0,
-        alreadyInvoicedCount: 0,
-        totalEstimatedAmount: 0.0,
-        validItems: [],
-        issues: [
-          BulkInvoiceIssueItem(
-            apartmentId: '',
-            apartmentCode: '',
-            type: 'missing_data',
-            message: 'Không thể kết nối RPC tiền kiểm tra: $e',
-          ),
-        ],
-      );
-    }
+    final response = await _client.rpc('validate_monthly_bulk_invoices', params: {
+      'p_period': period,
+      'p_mgmt_rate': mgmtRate,
+      'p_electric_rate': electricRate,
+      'p_water_rate': waterRate,
+    });
+    return BulkInvoiceValidationModel.fromJson(Map<String, dynamic>.from(response as Map));
   }
 
   /// Tạo hóa đơn hàng loạt cho danh sách căn hộ hợp lệ

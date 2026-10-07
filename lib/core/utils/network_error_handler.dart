@@ -8,7 +8,9 @@ class NetworkErrorHandler {
   const NetworkErrorHandler._();
 
   /// Chuyển đổi ngoại lệ thành thông điệp tiếng Việt thân thiện
-  static String getMessage(Object error) {
+  static String getMessage(Object? error, {String fallback = 'Đã xảy ra lỗi, vui lòng thử lại sau.'}) {
+    if (error == null) return fallback;
+
     if (error is SocketException) {
       return 'Không có kết nối mạng. Vui lòng kiểm tra Internet và thử lại.';
     }
@@ -21,24 +23,55 @@ class NetworkErrorHandler {
       switch (error.code) {
         case '08006':
         case '08001':
-          return 'Không thể kết nối đến hệ thống. Vui lòng thử lại.';
+          return 'Không thể kết nối đến hệ thống máy chủ. Vui lòng thử lại.';
         case '23505':
-          return 'Khung giờ vừa được người khác đặt hoặc dữ liệu đã tồn tại. Vui lòng chọn khung giờ khác.';
+          return 'Dữ liệu đã tồn tại trong hệ thống hoặc khung giờ vừa được đăng ký. Vui lòng kiểm tra lại.';
         case '23503':
-          return 'Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.';
+          return 'Không thể thực hiện vì dữ liệu đang được liên kết với bản ghi khác.';
+        case '42501':
+          return 'Bạn không có quyền thực hiện thao tác này.';
+        case 'PGRST116':
+          return 'Không tìm thấy dữ liệu yêu cầu.';
       }
+
+      final msg = error.message.toLowerCase();
+      if (msg.contains('violates row-level security policy') || msg.contains('permission denied')) {
+        return 'Bạn không có quyền thực hiện thao tác này.';
+      }
+      if (msg.contains('foreign key constraint')) {
+        return 'Không thể thực hiện vì dữ liệu đang được liên kết với bản ghi khác.';
+      }
+
       // Nếu là thông báo tiếng Việt có chủ đích từ RAISE EXCEPTION trong trigger/RPC
       if (error.message.isNotEmpty &&
-          !error.message.toLowerCase().contains('syntax error') &&
-          !error.message.toLowerCase().contains('relation') &&
-          !error.message.toLowerCase().contains('column') &&
-          !error.message.toLowerCase().contains('null value')) {
+          !msg.contains('syntax error') &&
+          !msg.contains('relation') &&
+          !msg.contains('column') &&
+          !msg.contains('null value')) {
         return error.message;
       }
+
+      return fallback;
     }
 
     if (error is AuthException) {
-      return error.message;
+      final msg = error.message.toLowerCase();
+      if (msg.contains('invalid login credentials') || msg.contains('invalid_credentials')) {
+        return 'Email hoặc mật khẩu không chính xác.';
+      }
+      if (msg.contains('user already registered') || msg.contains('user_already_exists')) {
+        return 'Email này đã được đăng ký tài khoản.';
+      }
+      if (msg.contains('email not confirmed')) {
+        return 'Tài khoản chưa được xác thực Email. Vui lòng kiểm tra hộp thư đến.';
+      }
+      if (msg.contains('password should be at least')) {
+        return 'Mật khẩu phải có độ dài tối thiểu 6 ký tự.';
+      }
+      if (error.message.isNotEmpty && !msg.contains('syntax') && !msg.contains('exception')) {
+        return error.message;
+      }
+      return 'Lỗi xác thực: Vui lòng kiểm tra lại thông tin đăng nhập.';
     }
 
     final errStr = error.toString().toLowerCase();
@@ -55,6 +88,6 @@ class NetworkErrorHandler {
       return 'Kết nối máy chủ quá lâu. Vui lòng thử lại sau.';
     }
 
-    return 'Đã xảy ra lỗi. Vui lòng thử lại.';
+    return fallback;
   }
 }
