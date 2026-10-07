@@ -9,6 +9,7 @@ import '../../../data/providers/meter_reading_provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
 import '../../../core/utils/network_error_handler.dart';
+import '../../../core/utils/validators.dart';
 
 class ResidentMeterReadingScreen extends ConsumerStatefulWidget {
   const ResidentMeterReadingScreen({super.key});
@@ -69,16 +70,17 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
         setState(() {
           if (type == MeterType.electric) {
             _electricOcrResult = result;
-            _electricImagePath = 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400';
+            _electricImagePath = null;
             _electricController.text = result.detectedReading.toString();
             _isScanningElectric = false;
           } else {
             _waterOcrResult = result;
-            _waterImagePath = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400';
+            _waterImagePath = null;
             _waterController.text = result.detectedReading.toString();
             _isScanningWater = false;
           }
         });
+
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -118,6 +120,19 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Chỉ số nước mới ($waterVal) không được nhỏ hơn chỉ số cũ ($oldWater m³).'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
+
+    final period = _periodController.text.trim();
+    final existingReadings = ref.read(residentMeterReadingsProvider).valueOrNull ?? [];
+    final alreadySubmitted = existingReadings.any((r) => r.period == period && !r.isRejected);
+    if (alreadySubmitted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Kỳ $period đã được gửi khai báo trước đó. Vui lòng chờ Ban Quản Lý xử lý.'),
           backgroundColor: AppTheme.error,
         ),
       );
@@ -195,9 +210,41 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
       ),
       body: aptReadingsAsync.when(
         data: (aptData) {
-          final aptCode = aptData?['code'] as String? ?? 'A0110';
-          final oldElec = (aptData?['electric_reading'] as num?)?.toDouble() ?? 1250.0;
-          final oldWater = (aptData?['water_reading'] as num?)?.toDouble() ?? 80.0;
+          if (aptData == null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.home_work_outlined, size: 64, color: AppTheme.textSecondary),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Bạn chưa liên kết với căn hộ nào',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Vui lòng gửi yêu cầu liên kết căn hộ để có thể khai báo chỉ số điện nước.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppTheme.textSecondary),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).pushNamed('/link-request'),
+                      icon: const Icon(Icons.link),
+                      label: const Text('Gửi yêu cầu liên kết'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final aptCode = aptData['code'] as String? ?? '';
+          final oldElec = (aptData['electric_reading'] as num?)?.toDouble() ?? 0.0;
+          final oldWater = (aptData['water_reading'] as num?)?.toDouble() ?? 0.0;
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -502,11 +549,11 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                     TextFormField(
                       controller: _periodController,
                       decoration: const InputDecoration(
-                        labelText: 'Kỳ khai báo (Tháng/Năm) *',
+                        labelText: 'Kỳ khai báo (MM/yyyy) *',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.calendar_month_outlined),
                       ),
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Vui lòng nhập kỳ khai báo' : null,
+                      validator: validateInvoicePeriod,
                     ),
                     const SizedBox(height: 20),
 
