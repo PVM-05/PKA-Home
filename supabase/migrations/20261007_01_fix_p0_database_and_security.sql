@@ -413,4 +413,255 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_catalog;
 
+-- 8. SỬA RPC DUYỆT CHỈ SỐ ĐỒNG HỒ (approve_meter_reading & reject_meter_reading)
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.approve_meter_reading(
+    p_submission_id UUID,
+    p_generate_invoice BOOLEAN DEFAULT false,
+    p_due_date DATE DEFAULT (CURRENT_DATE + INTERVAL '15 days'),
+    p_mgmt_rate NUMERIC DEFAULT 10000,
+    p_electric_rate NUMERIC DEFAULT 3000,
+    p_water_rate NUMERIC DEFAULT 15000
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+DECLARE
+    v_sub RECORD;
+    v_area NUMERIC;
+    v_old_elec NUMERIC;
+    v_old_water NUMERIC;
+    v_elec_diff NUMERIC;
+    v_water_diff NUMERIC;
+    v_mgmt_fee NUMERIC;
+    v_motorbike_count INT;
+    v_car_count INT;
+    v_parking_fee NUMERIC;
+    v_total_amount NUMERIC;
+    v_invoice_id UUID;
+BEGIN
+    -- Kiểm tra phân quyền
+    IF NOT (public.is_staff_or_management() OR public.is_admin_or_accountant()) THEN
+        RAISE EXCEPTION 'Bạn không có quyền duyệt chỉ số đồng hồ';
+    END IF;
+
+    SELECT * INTO v_sub FROM public.meter_reading_submissions WHERE id = p_submission_id FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Bản ghi chỉ số không tồn tại: %', p_submission_id;
+    END IF;
+
+    IF v_sub.status <> 'pending' THEN
+        RAISE EXCEPTION 'Bản ghi chỉ số đã được xử lý trước đó (Trạng thái: %)', v_sub.status;
+    END IF;
+
+    SELECT area, COALESCE(electric_reading, 0), COALESCE(water_reading, 0)
+    INTO v_area, v_old_elec, v_old_water
+    FROM public.apartments WHERE id = v_sub.apartment_id;
+
+    v_area := COALESCE(v_area, 50.0);
+
+    -- Cập nhật chỉ số mới vào căn hộ
+    UPDATE public.apartments
+    SET electric_reading = v_sub.electric_reading,
+        water_reading = v_sub.water_reading,
+        updated_at = now()
+    WHERE id = v_sub.apartment_id;
+
+    -- Cập nhật trạng thái submission
+    UPDATE public.meter_reading_submissions
+    SET status = 'approved',
+        reviewed_by = auth.uid(),
+        reviewed_at = now(),
+        updated_at = now()
+    WHERE id = p_submission_id;
+
+    -- Tạo hóa đơn nếu được yêu cầu
+    IF p_generate_invoice THEN
+        v_elec_diff := GREATEST(0, v_sub.electric_reading - v_old_elec);
+        v_water_diff := GREATEST(0, v_sub.water_reading - v_old_water);
+        v_mgmt_fee := v_area * p_mgmt_rate;
+
+        -- Đếm xe đã duyệt
+        SELECT COUNT(*) FILTER (WHERE vehicle_type = 'motorbike' AND status = 'approved'),
+               COUNT(*) FILTER (WHERE vehicle_type = 'car' AND status = 'approved')
+        INTO v_motorbike_count, v_car_count
+        FROM public.vehicles WHERE apartment_id = v_sub.apartment_id;
+
+        v_parking_fee := (v_motorbike_count * 100000) + (v_car_count * 1200000);
+        v_total_amount := v_mgmt_fee + (v_elec_diff * p_electric_rate) + (v_water_diff * p_water_rate) + v_parking_fee;
+
+        -- SỬA CHUẨN: status = 'unpaid' thay vì 'pending'
+        INSERT INTO public.invoices (apartment_id, period, due_date, total_amount, status, created_at, updated_at)
+        VALUES (v_sub.apartment_id, v_sub.period, p_due_date, v_total_amount, 'unpaid', now(), now())
+        RETURNING id INTO v_invoice_id;
+
+        -- SỬA CHUẨN: BỎ CỘT subtotal KHỎI INSERT INTO invoice_items
+        INSERT INTO public.invoice_items (invoice_id, fee_type, unit_price, quantity)
+        VALUES
+            (v_invoice_id, 'Phí quản lý', p_mgmt_rate, v_area),
+            (v_invoice_id, 'Tiền điện', p_electric_rate, v_elec_diff),
+            (v_invoice_id, 'Tiền nước', p_water_rate, v_water_diff);
+
+        IF v_parking_fee > 0 THEN
+            INSERT INTO public.invoice_items (invoice_id, fee_type, unit_price, quantity)
+            VALUES (v_invoice_id, 'Phí gửi xe', v_parking_fee, 1);
+        END IF;
+
+        RETURN jsonb_build_object(
+            'success', true,
+            'submission_id', p_submission_id,
+            'invoice_id', v_invoice_id,
+            'status', 'approved'
+        );
+    END IF;
+
+    RETURN jsonb_build_object('success', true, 'submission_id', p_submission_id, 'status', 'approved');
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.reject_meter_reading(
+    p_submission_id UUID,
+    p_rejection_reason TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+BEGIN
+    IF NOT (public.is_staff_or_management() OR public.is_admin_or_accountant()) THEN
+        RAISE EXCEPTION 'Bạn không có quyền từ chối chỉ số đồng hồ';
+    END IF;
+
+    UPDATE public.meter_reading_submissions
+    SET status = 'rejected',
+        rejection_reason = p_rejection_reason,
+        reviewed_by = auth.uid(),
+        reviewed_at = now(),
+        updated_at = now()
+    WHERE id = p_submission_id AND status = 'pending';
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Bản ghi không tồn tại hoặc đã được xử lý';
+    END IF;
+
+    RETURN jsonb_build_object('success', true, 'submission_id', p_submission_id, 'status', 'rejected');
+END;
+$$;
+
+-- 9. SỬA RPC TẠO HÓA ĐƠN HÀNG LOẠT (generate_valid_bulk_invoices & validate_monthly_bulk_invoices)
+-- ------------------------------------------------------------------------------
+-- Xóa hàm cũ không còn sử dụng
+DROP FUNCTION IF EXISTS public.generate_monthly_bulk_invoices(TEXT, DATE, NUMERIC, NUMERIC, NUMERIC);
+
+CREATE OR REPLACE FUNCTION public.generate_valid_bulk_invoices(
+  p_period text,
+  p_due_date date,
+  p_mgmt_rate numeric default 10000,
+  p_electric_rate numeric default 3000,
+  p_water_rate numeric default 15000
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+DECLARE
+  v_validation jsonb;
+  v_results jsonb := '[]'::jsonb;
+  v_inv_record record;
+  v_new_invoice_id uuid;
+  v_total_amount numeric;
+  v_created_count integer := 0;
+  v_parking_fee numeric;
+  v_elec_qty numeric;
+  v_water_qty numeric;
+BEGIN
+  IF NOT public.is_admin_or_accountant() THEN
+    RAISE EXCEPTION 'Chỉ Kế toán hoặc Quản trị viên mới có quyền tạo hóa đơn hàng loạt';
+  END IF;
+
+  v_validation := public.validate_monthly_bulk_invoices(
+    p_period, p_due_date, p_mgmt_rate, p_electric_rate, p_water_rate
+  );
+
+  FOR v_inv_record IN 
+    SELECT * FROM jsonb_to_recordset(v_validation->'valid_invoices') AS x(
+      apartment_id uuid,
+      apartment_code text,
+      area numeric,
+      electric_reading numeric,
+      water_reading numeric,
+      electric_usage numeric,
+      water_usage numeric,
+      motorbike_count integer,
+      car_count integer,
+      total_amount numeric
+    )
+  LOOP
+    IF NOT EXISTS (
+      SELECT 1 FROM public.invoices 
+      WHERE apartment_id = v_inv_record.apartment_id AND period = p_period
+    ) THEN
+      v_elec_qty := GREATEST(0, COALESCE(v_inv_record.electric_usage, 0));
+      v_water_qty := GREATEST(0, COALESCE(v_inv_record.water_usage, 0));
+      v_parking_fee := (COALESCE(v_inv_record.motorbike_count, 0) * 100000) + 
+                       (COALESCE(v_inv_record.car_count, 0) * 1200000);
+      
+      v_total_amount := (COALESCE(v_inv_record.area, 50) * p_mgmt_rate) +
+                        (v_elec_qty * p_electric_rate) +
+                        (v_water_qty * p_water_rate) +
+                        v_parking_fee;
+
+      INSERT INTO public.invoices (
+        apartment_id,
+        period,
+        due_date,
+        total_amount,
+        status,
+        created_at,
+        updated_at
+      ) VALUES (
+        v_inv_record.apartment_id,
+        p_period,
+        p_due_date,
+        v_total_amount,
+        'unpaid',
+        now(),
+        now()
+      ) RETURNING id INTO v_new_invoice_id;
+
+      -- SỬA CHUẨN: BỎ CỘT subtotal KHỎI INSERT INTO invoice_items
+      INSERT INTO public.invoice_items (invoice_id, fee_type, unit_price, quantity)
+      VALUES 
+        (v_new_invoice_id, 'Phí quản lý', p_mgmt_rate, COALESCE(v_inv_record.area, 50)),
+        (v_new_invoice_id, 'Tiền điện', p_electric_rate, v_elec_qty),
+        (v_new_invoice_id, 'Tiền nước', p_water_rate, v_water_qty);
+
+      -- Chỉ chèn phí gửi xe nếu căn hộ thực sự có xe đã duyệt
+      IF v_parking_fee > 0 THEN
+        INSERT INTO public.invoice_items (invoice_id, fee_type, unit_price, quantity)
+        VALUES (v_new_invoice_id, 'Phí gửi xe', v_parking_fee, 1);
+      END IF;
+
+      v_created_count := v_created_count + 1;
+      v_results := v_results || jsonb_build_object(
+        'apartment_code', v_inv_record.apartment_code,
+        'invoice_id', v_new_invoice_id,
+        'total_amount', v_total_amount
+      );
+    END IF;
+  END LOOP;
+
+  RETURN jsonb_build_object(
+    'period', p_period,
+    'created_count', v_created_count,
+    'invoices', v_results
+  );
+END;
+$$;
+
+
 
