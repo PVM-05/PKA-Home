@@ -44,6 +44,14 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     super.dispose();
   }
 
+  InvoiceModel get _invoice {
+    final invoicesState = ref.watch(residentInvoiceProvider);
+    return invoicesState.valueOrNull?.firstWhere(
+      (inv) => inv.id == widget.invoice.id,
+      orElse: () => widget.invoice,
+    ) ?? widget.invoice;
+  }
+
   @override
   Widget build(BuildContext context) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
@@ -52,7 +60,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chi tiết hóa đơn ${widget.invoice.period}'),
+        title: Text('Chi tiết hóa đơn ${_invoice.period}'),
       ),
       body: detailState.when(
         data: (items) {
@@ -99,7 +107,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     String statusText;
     IconData statusIcon;
 
-    switch (widget.invoice.status) {
+    switch (_invoice.status) {
       case 'paid':
         statusColor = AppTheme.success;
         statusText = 'Đã thanh toán';
@@ -178,7 +186,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
             ),
             const SizedBox(height: 8),
             Text(
-              formatCurrency.format(widget.invoice.totalAmount),
+              formatCurrency.format(_invoice.totalAmount),
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.w900,
@@ -188,9 +196,9 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 16),
-            _buildInfoRow(Icons.calendar_today, 'Hạn thanh toán', formatDate.format(widget.invoice.dueDate)),
+            _buildInfoRow(Icons.calendar_today, 'Hạn thanh toán', formatDate.format(_invoice.dueDate)),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.apartment, 'Căn hộ', widget.invoice.apartment?.code ?? 'N/A'),
+            _buildInfoRow(Icons.apartment, 'Căn hộ', _invoice.apartment?.code ?? 'N/A'),
           ],
         ),
       ),
@@ -287,7 +295,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
   }
 
   Widget _buildBottomAction(BuildContext context, List<Map<String, dynamic>> items) {
-    if (widget.invoice.status == 'unpaid') {
+    if (_invoice.status == 'unpaid') {
       return Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -313,7 +321,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
           },
         ),
       );
-    } else if (widget.invoice.status == 'paid' || widget.invoice.status == 'pending_confirmation') {
+    } else if (_invoice.status == 'paid' || _invoice.status == 'pending_confirmation') {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -359,20 +367,22 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         'amount': (item['subtotal'] as num?)?.toDouble() ?? 0.0,
       }).toList();
 
-      final aptCode = widget.invoice.apartment?.code ?? '';
-      final periodClean = widget.invoice.period.replaceAll('/', '');
+      final aptCode = _invoice.apartment?.code ?? '';
+      final periodClean = _invoice.period.replaceAll('/', '');
 
       final result = await showUnifiedPaymentSheet(
         context: context,
         type: PaymentType.invoice,
-        referenceId: widget.invoice.id,
+        referenceId: _invoice.id,
         title: 'Thanh toán hóa đơn',
         referenceCode: '#INV-$periodClean-$aptCode',
-        amount: widget.invoice.totalAmount,
+        amount: _invoice.totalAmount,
         feeBreakdown: feeBreakdown,
       );
 
       if (result != null && result.success && mounted) {
+        ref.invalidate(residentInvoiceProvider);
+        ref.invalidate(residentInvoiceDetailProvider(_invoice.id));
         ScaffoldMessenger.of(this.context).showSnackBar(
           SnackBar(
             content: Text('Thanh toán thành công! Mã GD: ${result.transactionCode}'),
@@ -436,8 +446,8 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
   void _showDigitalReceiptBottomSheet(BuildContext context) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy HH:mm');
-    final isPaid = widget.invoice.status == 'paid';
-    final receiptCode = 'REC-${widget.invoice.id.length > 8 ? widget.invoice.id.substring(0, 8).toUpperCase() : widget.invoice.id.toUpperCase()}';
+    final isPaid = _invoice.status == 'paid';
+    final receiptCode = 'REC-${_invoice.id.length > 8 ? _invoice.id.substring(0, 8).toUpperCase() : _invoice.id.toUpperCase()}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
@@ -511,41 +521,41 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                     _buildCopyableRow(
                       context,
                       label: 'Căn hộ',
-                      value: widget.invoice.apartment?.code ?? 'N/A',
+                      value: _invoice.apartment?.code ?? 'N/A',
                     ),
                     const Divider(height: 16),
                     _buildCopyableRow(
                       context,
                       label: 'Kỳ thu',
-                      value: widget.invoice.period,
+                      value: _invoice.period,
                     ),
                     const Divider(height: 16),
                     _buildCopyableRow(
                       context,
                       label: 'Số tiền thanh toán',
-                      value: formatCurrency.format(widget.invoice.totalAmount),
+                      value: formatCurrency.format(_invoice.totalAmount),
                       isHighlight: true,
                     ),
                     const Divider(height: 16),
                     _buildCopyableRow(
                       context,
                       label: 'Phương thức',
-                      value: widget.invoice.paymentMethod == 'DEMO' ? 'Demo Payment (Cổng điện tử)' : (widget.invoice.paymentMethod ?? 'Chuyển khoản trực tuyến'),
+                      value: _invoice.paymentMethod == 'DEMO' ? 'Demo Payment (Cổng điện tử)' : (_invoice.paymentMethod ?? 'Chuyển khoản trực tuyến'),
                     ),
-                    if (widget.invoice.transactionCode != null) ...[
+                    if (_invoice.transactionCode != null) ...[
                       const Divider(height: 16),
                       _buildCopyableRow(
                         context,
                         label: 'Mã giao dịch',
-                        value: widget.invoice.transactionCode!,
-                        copyValue: widget.invoice.transactionCode!,
+                        value: _invoice.transactionCode!,
+                        copyValue: _invoice.transactionCode!,
                       ),
                     ],
                     const Divider(height: 16),
                     _buildCopyableRow(
                       context,
                       label: 'Thời gian',
-                      value: formatDate.format((widget.invoice.updatedAt ?? widget.invoice.createdAt).toLocal()),
+                      value: formatDate.format((_invoice.updatedAt ?? _invoice.createdAt).toLocal()),
                     ),
                   ],
                 ),
@@ -566,11 +576,11 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                 onPressed: () {
                   final summary = 'BIÊN NHẬN THANH TOÁN PKA-HOME\n'
                       'Mã: $receiptCode\n'
-                      'Căn hộ: ${widget.invoice.apartment?.code ?? "N/A"}\n'
-                      'Kỳ: ${widget.invoice.period}\n'
-                      'Số tiền: ${formatCurrency.format(widget.invoice.totalAmount)}\n'
+                      'Căn hộ: ${_invoice.apartment?.code ?? "N/A"}\n'
+                      'Kỳ: ${_invoice.period}\n'
+                      'Số tiền: ${formatCurrency.format(_invoice.totalAmount)}\n'
                       'Trạng thái: ${isPaid ? "Đã thanh toán" : "Chờ xác nhận"}\n'
-                      'Thời gian: ${formatDate.format((widget.invoice.updatedAt ?? widget.invoice.createdAt).toLocal())}';
+                      'Thời gian: ${formatDate.format((_invoice.updatedAt ?? _invoice.createdAt).toLocal())}';
                   Clipboard.setData(ClipboardData(text: summary));
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
