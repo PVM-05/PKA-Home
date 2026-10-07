@@ -1,21 +1,24 @@
-// Copy nội dung này dán vào https://dbdiagram.io/ để xem biểu đồ
+// Copy nội dung này dán vào https://dbdiagram.io/ để xem biểu đồ quan hệ thực thể (ERD) hoàn chỉnh
 
 Table users {
   id uuid [primary key, note: 'Khóa ngoại tới auth.users(id) ON DELETE CASCADE']
   full_name varchar [not null]
   phone varchar
-  role user_role [not null, default: 'resident', note: 'resident hoặc management']
+  role user_role [not null, default: 'resident', note: 'resident, admin, accountant, technician, management']
+  is_locked boolean [default: false, note: 'Khóa tài khoản']
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
 
 Table apartments {
   id uuid [primary key, default: `gen_random_uuid()`]
-  code varchar [unique, not null, note: 'Định dạng chuẩn: A0110 thay vì A101 (Block + Tầng 2 chữ số + Phòng 2 chữ số)']
+  code varchar [unique, not null, note: 'Định dạng chuẩn: A0110 (Block + Tầng 2 chữ số + Phòng 2 chữ số)']
   building_code varchar [note: 'Mã tòa: A, B, C']
   floor_number integer [note: 'Số tầng: 1-10']
   area decimal
   is_empty boolean [default: true]
+  electric_reading decimal [default: 0]
+  water_reading decimal [default: 0]
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
@@ -45,7 +48,7 @@ Table invoices {
   period varchar [not null, note: 'Ví dụ: 08/2026']
   due_date date
   total_amount decimal [default: 0]
-  status invoice_status [default: 'unpaid', note: 'unpaid, pending_confirmation, paid']
+  status invoice_status [default: 'unpaid', note: 'unpaid, pending_confirmation, paid, overdue, cancelled']
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
@@ -57,6 +60,111 @@ Table invoice_items {
   unit_price decimal [default: 0]
   quantity decimal [default: 1]
   subtotal decimal [note: 'GENERATED ALWAYS AS (unit_price * quantity) STORED']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table vehicles {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  apartment_id uuid [ref: > apartments.id, not null]
+  resident_id uuid [ref: > users.id, not null]
+  license_plate varchar [unique, not null]
+  vehicle_type varchar [not null, note: 'motorcycle, car, bicycle']
+  vehicle_brand varchar
+  status varchar [default: 'pending', note: 'pending, approved, rejected']
+  notes text
+  rejection_reason text
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table meter_reading_submissions {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  apartment_id uuid [ref: > apartments.id, not null]
+  submitted_by uuid [ref: > users.id, not null]
+  period varchar [not null, note: 'Định dạng MM/yyyy']
+  electric_reading decimal [not null]
+  water_reading decimal [not null]
+  electric_image_url varchar
+  water_image_url varchar
+  status varchar [default: 'pending', note: 'pending, approved, rejected']
+  reject_reason text
+  approved_by uuid [ref: > users.id, null]
+  approved_at timestamp
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table payment_transactions {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  invoice_id uuid [ref: > invoices.id, null]
+  booking_id uuid [ref: > amenity_bookings.id, null]
+  type varchar [default: 'INVOICE', note: 'INVOICE hoặc SERVICE']
+  title text
+  user_id uuid [ref: > users.id, null]
+  apartment_id uuid [ref: > apartments.id, not null]
+  amount decimal [not null]
+  payment_method varchar [default: 'DEMO']
+  status varchar [not null, note: 'SUCCESS, FAILED, CANCELLED']
+  transaction_code varchar [unique, not null]
+  failure_reason text
+  created_at timestamp [default: `now()`]
+}
+
+Table amenities {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  name varchar [not null]
+  description text
+  hourly_rate decimal [default: 0]
+  open_time time
+  close_time time
+  max_capacity integer [default: 1]
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table amenity_bookings {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  amenity_id uuid [ref: > amenities.id, not null]
+  apartment_id uuid [ref: > apartments.id, not null]
+  booked_by uuid [ref: > users.id, not null]
+  booking_date date [not null]
+  time_slot varchar [not null, note: 'Ví dụ: 08:00-09:00']
+  total_amount decimal [default: 0]
+  payment_status varchar [default: 'unpaid', note: 'unpaid, paid, refunded']
+  status varchar [default: 'confirmed', note: 'confirmed, waitlist, cancelled']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table building_equipments {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  equipment_code varchar [unique, not null]
+  name varchar [not null]
+  category varchar [not null, note: 'elevator, generator, water_pump, fire_alarm, lighting']
+  location varchar [not null]
+  building_code varchar [not null]
+  installation_date date
+  warranty_until date
+  status varchar [default: 'normal', note: 'normal, maintenance_required, under_repair, out_of_service']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table equipment_maintenance_tasks {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  equipment_id uuid [ref: > building_equipments.id, not null]
+  title varchar [not null]
+  description text
+  task_type varchar [default: 'routine', note: 'routine, urgent_repair, replacement, inspection']
+  scheduled_start timestamp [not null]
+  scheduled_end timestamp [not null]
+  actual_end timestamp
+  status varchar [default: 'scheduled', note: 'scheduled, in_progress, completed, cancelled']
+  assigned_to uuid [ref: > users.id, null]
+  service_interruption_note text
+  notes text
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
@@ -81,6 +189,22 @@ Table issue_images {
   updated_at timestamp [default: `now()`]
 }
 
+Table issue_ratings {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  issue_report_id uuid [unique, not null, note: 'Khóa ngoại 1-1 tới issue_reports']
+  reporter_id uuid [not null]
+  speed_rating integer [not null, note: 'Tốc độ xử lý: 1-5 sao']
+  attitude_rating integer [not null, note: 'Thái độ phục vụ: 1-5 sao']
+  quality_rating integer [not null, note: 'Chất lượng kỹ thuật: 1-5 sao']
+  overall_rating decimal [note: 'GENERATED ALWAYS AS (ROUND((speed_rating + attitude_rating + quality_rating)::numeric / 3.0, 1)) STORED']
+  comment text [note: 'Ý kiến đóng góp của cư dân']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Ref: issue_ratings.issue_report_id - issue_reports.id
+Ref: issue_ratings.reporter_id > users.id
+
 Table announcements {
   id uuid [primary key, default: `gen_random_uuid()`]
   title varchar [not null]
@@ -88,6 +212,40 @@ Table announcements {
   is_urgent boolean [default: false]
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
+}
+
+Table notifications {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid [ref: > users.id, null]
+  title varchar [not null]
+  body text [not null]
+  type varchar [default: 'general']
+  is_read boolean [default: false]
+  data jsonb
+  created_at timestamp [default: `now()`]
+}
+
+Table role_delegations {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  delegator_id uuid [ref: > users.id, not null]
+  delegate_id uuid [ref: > users.id, not null]
+  delegated_role varchar [not null, note: 'admin, accountant, technician']
+  starts_at timestamp [not null]
+  ends_at timestamp [not null]
+  notes text
+  is_active boolean [default: true]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table password_reset_otps {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  phone varchar [not null]
+  otp_hash varchar [not null]
+  expires_at timestamp [not null]
+  is_used boolean [default: false]
+  attempts_left integer [default: 5]
+  created_at timestamp [default: `now()`]
 }
 
 Table building_amenities {
@@ -118,19 +276,3 @@ Table emergency_contacts {
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }
-
-Table issue_ratings {
-  id uuid [primary key, default: `gen_random_uuid()`]
-  issue_report_id uuid [unique, not null, note: 'Khóa ngoại 1-1 tới issue_reports']
-  reporter_id uuid [not null]
-  speed_rating integer [not null, note: 'Tốc độ xử lý: 1-5 sao']
-  attitude_rating integer [not null, note: 'Thái độ phục vụ: 1-5 sao']
-  quality_rating integer [not null, note: 'Chất lượng kỹ thuật: 1-5 sao']
-  overall_rating decimal [note: 'GENERATED ALWAYS AS (ROUND((speed_rating + attitude_rating + quality_rating)::numeric / 3.0, 1)) STORED']
-  comment text [note: 'Ý kiến đóng góp của cư dân']
-  created_at timestamp [default: `now()`]
-  updated_at timestamp [default: `now()`]
-}
-
-Ref: issue_ratings.issue_report_id - issue_reports.id
-Ref: issue_ratings.reporter_id > users.id

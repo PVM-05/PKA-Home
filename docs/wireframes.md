@@ -6,7 +6,7 @@ Tài liệu này mô tả chi tiết sơ đồ khối giao diện (Wireframe) c�
 
 ## I. Nguyên Tắc Thiết Kế Cốt Lõi (UI/UX Guidelines)
 
-1. **Ngôn ngữ chuẩn mực**: 100% Tiếng Việt chuẩn mực, tôn trọng thuật ngữ quốc tế phổ thông (Hotline, Email, VietQR, App, Wifi). Tuyệt đối không dùng tiếng Anh giải nghĩa trong ngoặc đơn.
+1. **Ngôn ngữ chuẩn mực**: 100% Tiếng Việt chuẩn mực, tôn trọng thuật ngữ quốc tế phổ thông (Hotline, Email, QR, App, Wifi). Tuyệt đối không dùng tiếng Anh giải nghĩa trong ngoặc đơn.
 2. **Hệ thống Icon**: Đồng nhất bộ biểu tượng Material Design Icons (`Icons.*`), tuyệt đối không sử dụng Emoji.
 3. **Màu sắc & Thẻ giao diện (AppCard)**: Sử dụng các biến màu chủ đạo (`AppTheme.primary`, `AppTheme.secondary`, `AppStatusColors`), toàn bộ khối nội dung sử dụng `AppCard` tự thích ứng Chế độ sáng (Light Mode) và Chế độ tối (Dark Mode).
 4. **Bố cục co giãn (Responsive & Accessibility)**:
@@ -93,12 +93,12 @@ Tài liệu này mô tả chi tiết sơ đồ khối giao diện (Wireframe) c�
 - **Hành động & Phản hồi**:
   - Nhấn `[Apt]`: Mở thanh chọn căn hộ (Apartment Switcher) cho cư dân sở hữu nhiều căn hộ.
   - Nhấn `[X]`: Mở hộp thoại xác nhận Đăng xuất nhanh.
-  - Nhấn `THANH TOÁN NGAY`: Chuyển sang Tab Hóa đơn để xem bảng kê chi tiết và mở VietQR.
+  - Nhấn `THANH TOÁN NGAY`: Chuyển sang Tab Hóa đơn để xem bảng kê chi tiết và mở Demo Payment Sheet.
 
 ---
 
-### 3. Màn hình Chi tiết Hóa đơn & Thanh toán VietQR
-- **Mục đích**: Minh bạch các khoản phí và hỗ trợ thanh toán trực tuyến tự động không tiếp xúc.
+### 3. Màn hình Chi tiết Hóa đơn & Thanh toán Trực tuyến (Demo Payment Sheet)
+- **Mục đích**: Minh bạch các khoản phí và hỗ trợ thanh toán trực tuyến mô phỏng tự động, đối soát tức thì.
 ```text
 +-------------------------------------------------+
 | [ < Trở lại ]     Chi Tiết Hóa Đơn              |
@@ -116,28 +116,27 @@ Tài liệu này mô tả chi tiết sơ đồ khối giao diện (Wireframe) c�
 | TỔNG TIỀN PHẢI NỘP:                1.587.500 đ  |
 |                                                 |
 | [=============================================] |
-| [            THANH TOÁN QUA VIETQR            ] |
+| [         THANH TOÁN TRỰC TUYẾN (DEMO)        ] |
 | [=============================================] |
 |                                                 |
 | + - - - - - - - - - - - - - - - - - - - - - - + |
-| |         MODAL THANH TOÁN VIETQR             | |
+| |        MODAL UNIFIED PAYMENT SHEET          | |
 | |                                             | |
-| |            [ ẢNH MÃ QR VIETQR ]             | |
-| |         Quét mã bằng App Ngân Hàng          | |
-| |                                             | |
-| | Ngân hàng: Quân Đội (MBBank)                | |
-| | STK BQL:   0987654321          [Sao chép]   | |
 | | Số tiền:   1.587.500 đ                      | |
-| | Cú pháp:   A0110 T09-2026      [Sao chép]   | |
+| | Nội dung:  Hóa đơn kỳ 09/2026 - A0110       | |
 | |                                             | |
-| | [ Nút: TÔI ĐÃ CHUYỂN KHOẢN XONG ]           | |
+| | [(*) Mô phỏng Thành công]                   | |
+| | [( ) Mô phỏng Thất bại]                     | |
+| | [( ) Mô phỏng Hủy giao dịch]                | |
+| |                                             | |
+| | [ Nút: XÁC NHẬN THANH TOÁN (DEMO) ]         | |
 | + - - - - - - - - - - - - - - - - - - - - - - + |
 +-------------------------------------------------+
 ```
 - **Hành động & Phản hồi**:
-  - Tích hợp liên kết động chuẩn VietQR QuickLink `https://img.vietqr.io/image/...`.
-  - Cú pháp chuẩn hóa loại bỏ dấu `/` chống lỗi bộ lọc ngân hàng: `A0110 T09-2026`.
-  - Bấm "Tôi đã chuyển khoản xong" cập nhật ngay trạng thái sang `pending_confirmation` (Chờ đối soát).
+  - Tích hợp RPC nguyên tử `simulate_unified_payment` đảm bảo tính toàn vẹn (ACID), khóa hàng `FOR UPDATE`.
+  - Tự động sinh mã giao dịch duy nhất `TXN-INVOICE-...` và ghi nhận bản ghi đối soát vào bảng `payment_transactions`.
+  - Cập nhật trạng thái tức thì sang `paid`, phát sinh thông báo thành công và làm mới dashboard realtime.
 
 ---
 
