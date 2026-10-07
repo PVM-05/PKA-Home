@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/resident_model.dart';
 import '../../../data/providers/management_provider.dart';
+
 
 class Resident360DetailSheet extends ConsumerStatefulWidget {
   final ResidentModel resident;
@@ -72,9 +74,9 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
     final apt = resident.apartment;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -175,13 +177,13 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
               controller: _tabController,
               children: [
                 // Tab 1: Phương tiện
-                _buildVehiclesTab(apt?.code),
+                _buildVehiclesTab(apt?.id, apt?.code),
 
                 // Tab 2: Hóa đơn
-                _buildInvoicesTab(apt?.code),
+                _buildInvoicesTab(apt?.id, apt?.code),
 
                 // Tab 3: Dịch vụ
-                _buildServicesTab(apt?.code),
+                _buildServicesTab(widget.resident.id, apt?.code),
               ],
             ),
           ),
@@ -191,105 +193,205 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
     );
   }
 
-  Widget _buildVehiclesTab(String? aptCode) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        AppCard(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              const Icon(Icons.two_wheeler, color: AppTheme.primary, size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Honda Vision (Xe máy)', style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text('Biển số: 29A1-12345 • Căn hộ $aptCode', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                  ],
-                ),
+  Widget _buildVehiclesTab(String? apartmentId, String? aptCode) {
+    final vehiclesAsync = ref.watch(residentVehiclesProvider(apartmentId));
+    return vehiclesAsync.when(
+      data: (vehicles) {
+        if (vehicles.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.two_wheeler_outlined, size: 40, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
+                const SizedBox(height: 8),
+                const Text('Chưa có phương tiện nào đăng ký', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              ],
+            ),
+          );
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: vehicles.length,
+          itemBuilder: (context, index) {
+            final v = vehicles[index];
+            final typeStr = v['vehicle_type'] == 'car' ? 'Ô tô' : (v['vehicle_type'] == 'electric_bicycle' ? 'Xe đạp điện' : 'Xe máy');
+            final plate = v['license_plate'] ?? v['plate_number'] ?? 'Chưa rõ';
+            final brand = v['brand_model'] ?? typeStr;
+            final status = v['status'] as String? ?? 'pending';
+            final isApproved = status == 'approved';
+            final isRejected = status == 'rejected';
+
+            return AppCard(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Icon(v['vehicle_type'] == 'car' ? Icons.directions_car : Icons.two_wheeler, color: AppTheme.primary, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('$brand ($typeStr)', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text('Biển số: $plate • Căn hộ ${aptCode ?? "N/A"}', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isApproved ? AppTheme.success.withValues(alpha: 0.1) : (isRejected ? AppTheme.error.withValues(alpha: 0.1) : AppTheme.warning.withValues(alpha: 0.1)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      isApproved ? 'Đã duyệt' : (isRejected ? 'Bị từ chối' : 'Chờ duyệt'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isApproved ? AppTheme.success : (isRejected ? AppTheme.error : AppTheme.warning),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppTheme.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text('Đã duyệt', style: TextStyle(fontSize: 11, color: AppTheme.success, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        ),
-      ],
+            );
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Lỗi tải danh sách xe', style: TextStyle(color: AppTheme.error))),
     );
   }
 
-  Widget _buildInvoicesTab(String? aptCode) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        AppCard(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              const Icon(Icons.receipt_long, color: AppTheme.primary, size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Hóa đơn tháng 10/2026', style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text('Tổng tiền: 1.480.000 đ • Căn hộ $aptCode', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                  ],
-                ),
+  Widget _buildInvoicesTab(String? apartmentId, String? aptCode) {
+    final invoicesAsync = ref.watch(residentInvoicesProvider(apartmentId));
+    final currencyFmt = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    return invoicesAsync.when(
+      data: (invoices) {
+        if (invoices.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.receipt_long_outlined, size: 40, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
+                const SizedBox(height: 8),
+                const Text('Chưa có hóa đơn nào', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              ],
+            ),
+          );
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: invoices.length,
+          itemBuilder: (context, index) {
+            final inv = invoices[index];
+            final isPaid = inv.status == 'paid';
+            return AppCard(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.receipt_long, color: AppTheme.primary, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Hóa đơn kỳ ${inv.period}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text('Tổng tiền: ${currencyFmt.format(inv.totalAmount)} • Căn hộ ${aptCode ?? "N/A"}', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isPaid ? AppTheme.success.withValues(alpha: 0.1) : AppTheme.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
+                      style: TextStyle(fontSize: 11, color: isPaid ? AppTheme.success : AppTheme.error, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppTheme.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text('Đã thanh toán', style: TextStyle(fontSize: 11, color: AppTheme.success, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        ),
-      ],
+            );
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Lỗi tải hóa đơn', style: TextStyle(color: AppTheme.error))),
     );
   }
 
-  Widget _buildServicesTab(String? aptCode) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        AppCard(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              const Icon(Icons.fitness_center, color: AppTheme.primary, size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Gói Gym Tháng', style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text('Hạn dùng: 31/10/2026 • Căn hộ $aptCode', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                  ],
-                ),
+  Widget _buildServicesTab(String userId, String? aptCode) {
+    final bookingsAsync = ref.watch(residentBookingsProvider(userId));
+    return bookingsAsync.when(
+      data: (bookings) {
+        if (bookings.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.sports_tennis_outlined, size: 40, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
+                const SizedBox(height: 8),
+                const Text('Chưa có lịch đặt tiện ích / dịch vụ nào', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              ],
+            ),
+          );
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: bookings.length,
+          itemBuilder: (context, index) {
+            final b = bookings[index];
+            final amenityName = (b['amenities'] as Map?)?['name'] ?? 'Tiện ích';
+            final date = b['booking_date'] ?? '';
+            final slot = b['time_slot'] ?? '';
+            final status = b['status'] as String? ?? 'confirmed';
+            final isConfirmed = status == 'confirmed';
+            final isWaitlist = status == 'waitlist';
+
+            return AppCard(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.fitness_center, color: AppTheme.primary, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('$amenityName', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text('Lịch: $slot ngày $date • Căn hộ ${aptCode ?? "N/A"}', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isConfirmed ? AppTheme.primary.withValues(alpha: 0.1) : (isWaitlist ? AppTheme.warning.withValues(alpha: 0.1) : AppTheme.error.withValues(alpha: 0.1)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      isConfirmed ? 'Đã đặt' : (isWaitlist ? 'Chờ slot' : 'Đã hủy'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isConfirmed ? AppTheme.primary : (isWaitlist ? AppTheme.warning : AppTheme.error),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text('Đang dùng', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        ),
-      ],
+            );
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Lỗi tải lịch tiện ích', style: TextStyle(color: AppTheme.error))),
     );
   }
 }
+
