@@ -283,17 +283,14 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
 
     try {
       final repo = ref.read(managementRepositoryProvider);
-      await repo.updateInvoiceStatus(invoice.id, 'paid');
-
       final txnMethod = isPending ? 'BANK_TRANSFER' : 'CASH';
       final txnTitle = 'Thanh toán hóa đơn kỳ ${invoice.period} (${isPending ? "Chuyển khoản" : "Tiền mặt"})';
-      await repo.recordPaymentTransaction(
+      
+      // Sử dụng recordManualPayment thay thế cho recordPaymentTransaction để đảm bảo tính nguyên tử (atomic transaction)
+      await repo.recordManualPayment(
         invoiceId: invoice.id,
-        apartmentId: invoice.apartmentId,
-        amount: invoice.totalAmount,
         paymentMethod: txnMethod,
-        status: 'SUCCESS',
-        title: txnTitle,
+        notes: txnTitle,
       );
 
       ref.invalidate(invoicesProvider);

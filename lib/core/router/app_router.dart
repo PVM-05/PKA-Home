@@ -67,14 +67,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = user != null;
       final isAuthRoute = state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.register ||
-          state.matchedLocation == AppRoutes.forgotPassword ||
-          state.matchedLocation == AppRoutes.verifyOtp;
+          state.matchedLocation == AppRoutes.forgotPassword;
+      final isRecoveryRoute = state.matchedLocation == AppRoutes.verifyOtp ||
+          state.matchedLocation == AppRoutes.resetPassword;
 
       // Đang loading auth state → không redirect
       if (authState.isLoading) return null;
 
-      // Đang ở màn hình đặt lại mật khẩu với recovery session → không tự redirect ra trang chủ
-      if (state.matchedLocation == AppRoutes.resetPassword) return null;
+      // Đang trong luồng khôi phục mật khẩu (xác thực OTP hoặc đặt lại mật khẩu) → không tự redirect ra trang chủ
+      if (isRecoveryRoute) return null;
 
       // Chưa đăng nhập → về login
       if (!isLoggedIn && !isAuthRoute) return AppRoutes.login;

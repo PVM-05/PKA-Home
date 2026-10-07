@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../errors/app_exception.dart';
 
 /// Bộ phân loại và chuẩn hóa thông điệp lỗi mạng & cơ sở dữ liệu
 /// Đảm bảo không để lộ ngoại lệ kỹ thuật thô cho người dùng
@@ -10,6 +11,10 @@ class NetworkErrorHandler {
   /// Chuyển đổi ngoại lệ thành thông điệp tiếng Việt thân thiện
   static String getMessage(Object? error, {String fallback = 'Đã xảy ra lỗi. Vui lòng thử lại.'}) {
     if (error == null) return fallback;
+
+    if (error is AppException) {
+      return error.message;
+    }
 
     if (error is SocketException) {
       return 'Không có kết nối mạng. Vui lòng kiểm tra Internet và thử lại.';
@@ -32,6 +37,8 @@ class NetworkErrorHandler {
           return 'Bạn không có quyền thực hiện thao tác này.';
         case 'PGRST116':
           return 'Không tìm thấy dữ liệu yêu cầu.';
+        case 'P0001':
+          return error.message;
       }
 
       final msg = error.message.toLowerCase();
@@ -43,8 +50,9 @@ class NetworkErrorHandler {
       }
 
       // Nếu là thông báo tiếng Việt có chủ đích từ RAISE EXCEPTION trong trigger/RPC
-      if (error.message.isNotEmpty &&
-          !msg.contains('syntax error') &&
+      final isVietnamese = RegExp(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', caseSensitive: false).hasMatch(error.message);
+      if (isVietnamese &&
+          !msg.contains('syntax') &&
           !msg.contains('relation') &&
           !msg.contains('column') &&
           !msg.contains('null value')) {

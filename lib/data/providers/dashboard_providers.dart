@@ -100,10 +100,31 @@ final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
       return p == curPeriod || p == curSinglePeriod;
     }).toList();
 
-    // Nếu kỳ hiện tại chưa lập hóa đơn, lấy kỳ gần nhất có dữ liệu
+    // Nếu kỳ hiện tại chưa lập hóa đơn, lấy kỳ gần nhất có dữ liệu theo ngày tháng
     if (currentInvoices.isEmpty && invoices.isNotEmpty) {
-      final latestPeriod = invoices.first['period'];
-      currentInvoices = invoices.where((inv) => inv['period'] == latestPeriod).toList();
+      String? latestPeriod;
+      DateTime? latestDate;
+      for (final inv in invoices) {
+        final p = (inv['period'] as String?)?.trim();
+        if (p == null || !p.contains('/')) continue;
+        final parts = p.split('/');
+        if (parts.length == 2) {
+          final m = int.tryParse(parts[0]);
+          final y = int.tryParse(parts[1]);
+          if (m != null && y != null) {
+            final dt = DateTime(y, m);
+            if (latestDate == null || dt.isAfter(latestDate)) {
+              latestDate = dt;
+              latestPeriod = p;
+            }
+          }
+        }
+      }
+      if (latestPeriod != null) {
+        currentInvoices = invoices.where((inv) => (inv['period'] as String?)?.trim() == latestPeriod).toList();
+      } else {
+        currentInvoices = invoices;
+      }
     }
 
     double paid = 0.0;
@@ -182,7 +203,8 @@ final monthlyRevenueTrendProvider = StreamProvider<List<MonthlyRevenueItem>>((re
         final status = inv['status'];
 
         bool isMatch = invPeriod == periodKey1 || invPeriod == periodKey2;
-        if (!isMatch && inv['created_at'] != null) {
+        // Chỉ fallback sang created_at nếu invPeriod rỗng (không xác định được chu kỳ)
+        if (!isMatch && invPeriod.isEmpty && inv['created_at'] != null) {
           final created = DateTime.tryParse(inv['created_at'] as String);
           if (created != null && created.year == m.year && created.month == m.month) {
             isMatch = true;
