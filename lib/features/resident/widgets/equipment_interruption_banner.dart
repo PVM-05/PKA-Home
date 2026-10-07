@@ -56,13 +56,20 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
     String buildingName,
   ) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? Colors.amber.shade900.withValues(alpha: 0.25) : const Color(0xFFFFF8E1);
+    final borderColor = isDark ? Colors.amber.shade700 : const Color(0xFFFFB74D);
+    final titleColor = isDark ? Colors.red.shade300 : const Color(0xFFB71C1C);
+    final subTitleColor = isDark ? Colors.grey.shade300 : const Color(0xFF5D4037);
+    final itemTextColor = isDark ? Colors.white : const Color(0xFF263238);
+    final timeColor = isDark ? Colors.grey.shade400 : const Color(0xFF546E7A);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1), // Amber 50
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFFB74D), width: 1.2), // Amber 300
+        border: Border.all(color: borderColor, width: 1.2),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFFFB300).withValues(alpha: 0.12),
@@ -81,7 +88,7 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFE082),
+                  color: isDark ? Colors.amber.shade800 : const Color(0xFFFFE082),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -95,19 +102,19 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Bảo trì thiết bị - Tạm gián đoạn dịch vụ',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFB71C1C),
+                        color: titleColor,
                       ),
                     ),
                     Text(
                       'Khu vực: $buildingName',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF5D4037),
+                        color: subTitleColor,
                       ),
                     ),
                   ],
@@ -132,7 +139,7 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 10),
-          const Divider(height: 1, color: Color(0xFFFFCC80)),
+          Divider(height: 1, color: borderColor.withValues(alpha: 0.6)),
           const SizedBox(height: 10),
 
           // Danh sách các thiết bị đang bảo trì
@@ -158,10 +165,10 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                       children: [
                         Text(
                           '$eqTitle: ${task.title}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF263238),
+                            color: itemTextColor,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -175,9 +182,9 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                             const SizedBox(width: 4),
                             Text(
                               'Thời gian: ${dateFormat.format(task.scheduledStart)} - ${dateFormat.format(task.scheduledEnd)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: Color(0xFF546E7A),
+                                color: timeColor,
                               ),
                             ),
                           ],

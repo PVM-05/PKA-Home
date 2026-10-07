@@ -209,11 +209,11 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
 
     return Card(
       elevation: 0,
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).dividerColor),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -322,11 +322,11 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
               final rule = filteredRules[index];
               return Card(
                 elevation: 0,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: Theme(
                   data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -397,11 +397,11 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
               final amenity = amenities[index];
               return Card(
                 elevation: 0,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -509,10 +509,10 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         const SizedBox(height: 8),
         Card(
           elevation: 0,
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.shade200),
+            side: BorderSide(color: Theme.of(context).dividerColor),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -618,11 +618,11 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
   Widget _buildFaqItem({required String question, required String answer}) {
     return Card(
       elevation: 0,
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: Theme.of(context).dividerColor),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),

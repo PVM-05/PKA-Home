@@ -49,10 +49,11 @@ class ManagementRepository {
     String? buildingCode,
     int? floorNumber,
   }) async {
-    final building = buildingCode ?? (code.isNotEmpty ? code[0].toUpperCase() : 'A');
-    final floor = floorNumber ?? (code.length >= 3 ? int.tryParse(code.substring(1, 3)) ?? 1 : 1);
+    final normalizedCode = code.trim().toUpperCase();
+    final building = buildingCode ?? (normalizedCode.isNotEmpty ? normalizedCode[0] : 'A');
+    final floor = floorNumber ?? (normalizedCode.length >= 3 ? int.tryParse(normalizedCode.substring(1, 3)) ?? 1 : 1);
     await _client.from('apartments').insert({
-      'code': code,
+      'code': normalizedCode,
       'area': area,
       'building_code': building,
       'floor_number': floor,
@@ -67,10 +68,11 @@ class ManagementRepository {
     String? buildingCode,
     int? floorNumber,
   }) async {
-    final building = buildingCode ?? (code.isNotEmpty ? code[0].toUpperCase() : 'A');
-    final floor = floorNumber ?? (code.length >= 3 ? int.tryParse(code.substring(1, 3)) ?? 1 : 1);
+    final normalizedCode = code.trim().toUpperCase();
+    final building = buildingCode ?? (normalizedCode.isNotEmpty ? normalizedCode[0] : 'A');
+    final floor = floorNumber ?? (normalizedCode.length >= 3 ? int.tryParse(normalizedCode.substring(1, 3)) ?? 1 : 1);
     await _client.from('apartments').update({
-      'code': code,
+      'code': normalizedCode,
       'area': area,
       'building_code': building,
       'floor_number': floor,
