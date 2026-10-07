@@ -504,17 +504,20 @@ class ManagementRepository {
     required double amount,
     required String paymentMethod,
     String status = 'SUCCESS',
+    String? title,
   }) async {
-    final txnCode = 'TXN-CASH-${DateTime.now().millisecondsSinceEpoch}';
+    final prefix = paymentMethod.toUpperCase().contains('CASH') ? 'CASH' : 'BANK';
+    final txnCode = 'TXN-$prefix-${DateTime.now().millisecondsSinceEpoch}';
     await _client.from('payment_transactions').insert({
       'transaction_code': txnCode,
       'user_id': _client.auth.currentUser?.id,
       'apartment_id': apartmentId,
       'amount': amount,
       'payment_method': paymentMethod,
-      'payment_category': 'INVOICE',
-      'reference_id': invoiceId,
+      'type': 'INVOICE',
+      'invoice_id': invoiceId,
       'status': status,
+      'title': ?title,
     });
   }
 }
