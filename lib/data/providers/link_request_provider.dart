@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/errors/app_exception.dart';
+import '../../../core/utils/network_error_handler.dart';
 import 'auth_provider.dart';
 
 enum LinkStatus { loading, linked, pending, rejected, none }
@@ -193,7 +195,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
 
   Future<void> submitRequest(String code, String relationRole) async {
     if (_userId == null) {
-      throw Exception('Vui lòng đăng nhập để thực hiện thao tác này.');
+      throw const AppException('Vui lòng đăng nhập để thực hiện thao tác này.');
     }
 
     try {
@@ -210,7 +212,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
 
       if (existingPending != null) {
         await checkStatus();
-        throw Exception('Bạn đang có một yêu cầu liên kết đang chờ Ban quản lý phê duyệt. Vui lòng chờ xử lý trước khi gửi yêu cầu mới.');
+        throw const AppException('Bạn đang có một yêu cầu liên kết đang chờ Ban quản lý phê duyệt. Vui lòng chờ xử lý trước khi gửi yêu cầu mới.');
       }
       
       // Lấy ID căn hộ từ mã (code) (Chuyển sang viết hoa để không bị lỗi A0110 vs a0110)
@@ -218,7 +220,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
           .rpc('find_apartment_by_code', params: {'p_code': code.toUpperCase()});
           
       if (res == null || (res as List).isEmpty) {
-        throw Exception('Không tìm thấy căn hộ với mã này.');
+        throw const AppException('Không tìm thấy căn hộ với mã này.');
       }
       
       final apartmentId = res[0]['id'];
@@ -241,9 +243,9 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
     } on PostgrestException catch (pe) {
       await checkStatus();
       if (pe.code == '23505') {
-        throw Exception('Bạn đang có một yêu cầu liên kết đang chờ duyệt hoặc đã gửi yêu cầu cho căn hộ này.');
+        throw const AppException('Bạn đang có một yêu cầu liên kết đang chờ duyệt hoặc đã gửi yêu cầu cho căn hộ này.');
       }
-      throw Exception('Lỗi CSDL: ${pe.message}');
+      throw AppException(NetworkErrorHandler.getMessage(pe));
     } catch (e) {
       await checkStatus(); // Lấy lại state cũ nếu lỗi
       rethrow;

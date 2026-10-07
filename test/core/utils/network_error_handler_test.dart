@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pka_home/core/errors/app_exception.dart';
 import 'package:pka_home/core/utils/network_error_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -57,6 +58,30 @@ void main() {
       expect(msg, contains('Không có kết nối mạng'));
     });
 
+    test('Xử lý AppException trả về nguyên vẹn thông điệp tiếng Việt', () {
+      const error = AppException('Mỗi căn hộ chỉ được đăng ký tối đa 2 xe máy.');
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, equals('Mỗi căn hộ chỉ được đăng ký tối đa 2 xe máy.'));
+    });
+
+    test('Xử lý PostgrestException P0001 trả về thông báo lỗi nghiệp vụ', () {
+      final error = PostgrestException(
+        message: 'Khung giờ đặt đã trôi qua so với thời gian hiện tại',
+        code: 'P0001',
+      );
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, equals('Khung giờ đặt đã trôi qua so với thời gian hiện tại'));
+    });
+
+    test('Lọc lỗi SQL tiếng Anh thô (như UUID syntax) về thông báo tiếng Việt an toàn', () {
+      final error = PostgrestException(
+        message: 'invalid input syntax for type uuid: "abc"',
+        code: '22P02',
+      );
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, equals('Đã xảy ra lỗi. Vui lòng thử lại.'));
+    });
+
     test('Xử lý AuthException trả về message gốc của auth', () {
       final error = AuthException('Email hoặc mật khẩu không chính xác.');
       final msg = NetworkErrorHandler.getMessage(error);
@@ -70,3 +95,4 @@ void main() {
     });
   });
 }
+
