@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/building_equipment_model.dart';
 import '../../../data/providers/equipment_provider.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Hộp thoại Lập phiếu bảo dưỡng / bảo trì thiết bị tòa nhà
 class MaintenanceTaskFormDialog extends ConsumerStatefulWidget {
@@ -159,7 +160,7 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi: ${e.toString().replaceFirst("Exception: ", "")}'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );

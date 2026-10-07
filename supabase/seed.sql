@@ -2487,7 +2487,7 @@ SELECT 'Lịch sục rửa và vệ sinh khử trùng bể nước sinh hoạt n
 WHERE NOT EXISTS (SELECT 1 FROM public.announcements WHERE title = 'Lịch sục rửa và vệ sinh khử trùng bể nước sinh hoạt ngầm');
 
 INSERT INTO public.announcements (title, content, is_urgent, created_at, updated_at)
-SELECT 'Thông báo phát hành hóa đơn thu phí dịch vụ tháng 10/2026', 'Hóa đơn quản lý, điện, nước và phí gửi xe tháng 10/2026 đã được phát hành trên ứng dụng PKA-Home. Hạn thanh toán đến hết ngày 25/10/2026. Cư dân có thể thanh toán nhanh bằng mã VietQR tiện lợi.', false, NOW() - interval '2 days', NOW()
+SELECT 'Thông báo phát hành hóa đơn thu phí dịch vụ tháng 10/2026', 'Hóa đơn quản lý, điện, nước và phí gửi xe tháng 10/2026 đã được phát hành trên ứng dụng PKA-Home. Hạn thanh toán đến hết ngày 25/10/2026. Cư dân có thể thanh toán trực tuyến nhanh chóng qua Cổng thanh toán tiện lợi.', false, NOW() - interval '2 days', NOW()
 WHERE NOT EXISTS (SELECT 1 FROM public.announcements WHERE title = 'Thông báo phát hành hóa đơn thu phí dịch vụ tháng 10/2026');
 
 INSERT INTO public.announcements (title, content, is_urgent, created_at, updated_at)

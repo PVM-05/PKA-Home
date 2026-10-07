@@ -125,7 +125,7 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
             children: [
               // Khu vực bộ lọc phân cấp (Header Control Panel)
               Container(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

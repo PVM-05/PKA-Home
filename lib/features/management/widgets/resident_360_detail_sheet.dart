@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/resident_model.dart';
 import '../../../data/providers/management_provider.dart';
+import '../../../core/utils/error_formatter.dart';
 
 
 class Resident360DetailSheet extends ConsumerStatefulWidget {
@@ -60,7 +61,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
         setState(() => _isToggling = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi cập nhật: $e'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );

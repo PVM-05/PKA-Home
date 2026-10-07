@@ -13,6 +13,7 @@ import '../../../data/providers/issue_comment_provider.dart';
 import '../../../data/providers/issue_rating_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
 import '../widgets/issue_rating_bottom_sheet.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Màn hình chi tiết phản ánh sự cố với timeline trạng thái và hệ thống comment.
 class IssueDetailScreen extends ConsumerStatefulWidget {
@@ -66,7 +67,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi gửi bình luận: $e'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -198,7 +199,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   ),
                   error: (e, _) => Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text('Lỗi tải bình luận: $e',
+                    child: Text(formatErrorMessage(e),
                         style: const TextStyle(color: AppTheme.error)),
                   ),
                 ),

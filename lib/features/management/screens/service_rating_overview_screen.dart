@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/providers/issue_rating_provider.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Màn hình Khảo sát & Đánh giá dịch vụ sự cố dành cho Ban Quản Lý
 class ServiceRatingOverviewScreen extends ConsumerStatefulWidget {
@@ -40,7 +41,7 @@ class _ServiceRatingOverviewScreenState
               children: [
                 const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
                 const SizedBox(height: 12),
-                Text('Lỗi tải đánh giá: $err', textAlign: TextAlign.center),
+                Text(formatErrorMessage(err), textAlign: TextAlign.center),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () => ref.invalidate(allIssueRatingsProvider),

@@ -9,6 +9,7 @@ import '../../../data/models/equipment_maintenance_task_model.dart';
 import '../../../data/providers/equipment_provider.dart';
 import '../widgets/equipment_form_dialog.dart';
 import '../widgets/maintenance_task_form_dialog.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Màn hình Chi tiết Thiết bị, lịch sử bảo dưỡng và hạch toán chi phí
 class EquipmentDetailScreen extends ConsumerStatefulWidget {
@@ -92,7 +93,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi: ${e.toString().replaceFirst("Exception: ", "")}'),
+              content: Text(formatErrorMessage(e)),
               backgroundColor: AppTheme.error,
             ),
           );
@@ -247,7 +248,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                   child: CircularProgressIndicator(),
                 ),
               ),
-              error: (e, _) => Center(child: Text('Lỗi tải lịch sử: $e')),
+              error: (e, _) => Center(child: Text(formatErrorMessage(e))),
               data: (tasks) {
                 if (tasks.isEmpty) {
                   return const Padding(

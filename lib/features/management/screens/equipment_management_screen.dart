@@ -10,6 +10,7 @@ import '../../../data/models/equipment_maintenance_task_model.dart';
 import '../../../data/providers/equipment_provider.dart';
 import '../widgets/equipment_form_dialog.dart';
 import '../widgets/maintenance_task_form_dialog.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Màn hình Quản lý danh mục thiết bị và bảo trì định kỳ toàn tòa nhà
 class EquipmentManagementScreen extends ConsumerStatefulWidget {
@@ -99,7 +100,7 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi: ${e.toString().replaceFirst("Exception: ", "")}'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -178,13 +179,13 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
                 // Tab 1: Danh mục thiết bị
                 equipmentsAsync.when(
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text('Lỗi tải dữ liệu: $e')),
+                  error: (e, _) => Center(child: Text(formatErrorMessage(e))),
                   data: (equipments) => _buildEquipmentsTab(equipments),
                 ),
                 // Tab 2: Lịch & Phiếu bảo trì
                 tasksAsync.when(
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text('Lỗi tải dữ liệu: $e')),
+                  error: (e, _) => Center(child: Text(formatErrorMessage(e))),
                   data: (tasks) => equipmentsAsync.maybeWhen(
                     data: (equipments) => _buildTasksTab(tasks, equipments),
                     orElse: () => _buildTasksTab(tasks, []),

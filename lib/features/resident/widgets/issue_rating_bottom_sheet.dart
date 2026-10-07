@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/repositories/issue_repository.dart';
 import '../../../data/providers/issue_rating_provider.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Modal BottomSheet đánh giá chất lượng dịch vụ sự cố đa tiêu chí
 class IssueRatingBottomSheet extends ConsumerStatefulWidget {
@@ -96,7 +97,7 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi gửi đánh giá: $e'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );

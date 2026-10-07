@@ -7,6 +7,7 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/meter_reading_submission_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/meter_reading_provider.dart';
+import '../../../core/utils/error_formatter.dart';
 
 class ManagementMeterReadingScreen extends ConsumerStatefulWidget {
   const ManagementMeterReadingScreen({super.key});
@@ -151,7 +152,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi khi phê duyệt: $e'),
+              content: Text(formatErrorMessage(e)),
               backgroundColor: AppTheme.error,
             ),
           );
@@ -256,7 +257,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi khi từ chối: $e'),
+              content: Text(formatErrorMessage(e)),
               backgroundColor: AppTheme.error,
             ),
           );

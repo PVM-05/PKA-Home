@@ -40,9 +40,9 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
               bottom: MediaQuery.of(modalContext).viewInsets.bottom,
             ),
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              decoration: BoxDecoration(
+                color: Theme.of(modalContext).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
               child: Form(
@@ -97,11 +97,11 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                               decoration: BoxDecoration(
                                 color: selectedType == 'motorbike'
                                     ? AppTheme.primary.withValues(alpha: 0.1)
-                                    : (isMotorbikeDisabled ? Colors.grey.shade100 : Colors.white),
+                                    : (isMotorbikeDisabled ? Theme.of(modalContext).disabledColor.withValues(alpha: 0.1) : Theme.of(modalContext).cardColor),
                                 border: Border.all(
                                   color: selectedType == 'motorbike'
                                       ? AppTheme.primary
-                                      : Colors.grey.shade300,
+                                      : Theme.of(modalContext).dividerColor,
                                   width: selectedType == 'motorbike' ? 2 : 1,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -152,9 +152,9 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                               decoration: BoxDecoration(
                                 color: selectedType == 'car'
                                     ? AppTheme.primary.withValues(alpha: 0.1)
-                                    : Colors.white,
+                                    : Theme.of(modalContext).cardColor,
                                 border: Border.all(
-                                  color: selectedType == 'car' ? AppTheme.primary : Colors.grey.shade300,
+                                  color: selectedType == 'car' ? AppTheme.primary : Theme.of(modalContext).dividerColor,
                                   width: selectedType == 'car' ? 2 : 1,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -426,10 +426,10 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                   // Thẻ thông tin hạn mức & quy chế
                   Card(
                     elevation: 0,
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: Colors.grey.shade200),
+                      side: BorderSide(color: Theme.of(context).dividerColor),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -585,10 +585,10 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                   if (vehicles.isEmpty) ...[
                     Card(
                       elevation: 0,
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(color: Colors.grey.shade200),
+                        side: BorderSide(color: Theme.of(context).dividerColor),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
@@ -614,14 +614,14 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                     ...vehicles.map((vehicle) {
                       return Card(
                         elevation: 0,
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         margin: const EdgeInsets.only(bottom: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                           side: BorderSide(
                             color: vehicle.isRejected
                                 ? AppTheme.error.withValues(alpha: 0.3)
-                                : Colors.grey.shade200,
+                                : Theme.of(context).dividerColor,
                           ),
                         ),
                         child: Padding(

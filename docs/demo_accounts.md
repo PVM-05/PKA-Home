@@ -17,7 +17,7 @@ Tài liệu này tổng hợp toàn bộ thông tin đăng nhập và các kịc
 | Vai trò | Email | Mật khẩu | Họ và tên | Số điện thoại | Chức năng nổi bật |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Quản trị viên (Admin)** | `pkahome.admin@gmail.com` | `PkaHome@2026` | Nguyễn Văn An | `0901234567` | Toàn quyền quản trị hệ thống, Dashboard tổng quan, Quản lý tòa nhà & căn hộ, Duyệt thẻ xe, Đăng thông báo khẩn |
-| **Kế toán (Accountant)** | `pkahome.ketoan@gmail.com` | `PkaHome@2026` | Trần Thị Mai | `0902345678` | Quản lý hóa đơn dịch vụ hàng loạt, Đối soát thanh toán VietQR, Duyệt chỉ số điện nước cư dân gửi |
+| **Kế toán (Accountant)** | `pkahome.ketoan@gmail.com` | `PkaHome@2026` | Trần Thị Mai | `0902345678` | Quản lý hóa đơn dịch vụ hàng loạt, Đối soát thanh toán, Duyệt chỉ số điện nước cư dân gửi |
 | **Kỹ thuật viên (Technician)** | `pkahome.kythuat@gmail.com` | `PkaHome@2026` | Lê Hoàng Long | `0903456789` | Tiếp nhận & xử lý phản ánh sự cố, Tải ảnh nghiệm thu sau xử lý, Theo dõi lịch bảo trì 5 thiết bị tòa nhà |
 
 ---
@@ -62,7 +62,7 @@ Hệ thống đã nạp sẵn 25 căn hộ có cư dân sinh sống trên cả 3
 4. **Hóa đơn dịch vụ & Tiền tệ**:
    - 75 hóa đơn (3 chu kỳ: 08/2026, 09/2026, 10/2026).
    - Chi tiết cấu thành từng khoản: Phí quản lý (tính theo diện tích căn hộ x 16.500đ/m²), Điện, Nước, Phí gửi xe (100.000đ/xe máy, 1.200.000đ/ô tô).
-   - 20 giao dịch thanh toán thành công qua mô phỏng quét mã **VietQR**.
+   - 20 giao dịch thanh toán thành công qua mô phỏng Cổng thanh toán **Demo Payment**.
 5. **Khai báo chỉ số điện nước**:
    - 10 lượt cư dân chụp ảnh công tơ gửi lên (7 lượt đã duyệt, 3 lượt chờ kế toán thẩm định).
 6. **Thiết bị tòa nhà & Kế hoạch bảo trì định kỳ**:
@@ -82,12 +82,12 @@ Hệ thống đã nạp sẵn 25 căn hộ có cư dân sinh sống trên cả 3
 
 ## 5. Hướng Dẫn Các Luồng Trình Diễn (Demo Flows)
 
-### Kịch bản 1: Cư Dân Thanh Toán Hóa Đơn Bằng VietQR
+### Kịch bản 1: Cư Dân Thanh Toán Hóa Đơn Bằng Cổng Thanh Toán Demo
 1. Đăng nhập tài khoản cư dân `cudan.a0101@gmail.com` / `PkaHome@2026`.
 2. Vào tab **Hóa đơn & Thanh toán**.
 3. Chọn hóa đơn tháng **10/2026** (trạng thái Chưa thanh toán).
 4. Xem chi tiết bảng phân bổ chi phí (quản lý, điện, nước, gửi xe).
-5. Bấm **Thanh toán ngay** -> Hệ thống hiển thị Modal VietQR mô phỏng chuẩn giao diện ngân hàng.
+5. Bấm **Thanh toán ngay** -> Hệ thống hiển thị Cổng thanh toán Demo Payment hỗ trợ thanh toán 1 chạm.
 6. Xác nhận thanh toán thành công -> Trạng thái hóa đơn chuyển sang Đã thanh toán và lưu lịch sử giao dịch.
 
 ### Kịch bản 2: Vòng Đời Thẻ Xe (Đăng Ký - Từ Chối - Đăng Ký Lại - Phê Duyệt)
