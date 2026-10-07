@@ -17,6 +17,9 @@ final fcmTokenSyncProvider = Provider<void>((ref) {
 /// Provider thông báo phiên làm việc hết hạn
 final sessionExpiredNoticeProvider = StateProvider<bool>((ref) => false);
 
+/// Provider thông báo tài khoản bị khóa
+final accountLockedNoticeProvider = StateProvider<bool>((ref) => false);
+
 final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
   return AuthNotifier(ref.read(authRepositoryProvider), ref);
 });
@@ -45,6 +48,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
 
       if (event == AuthChangeEvent.signedIn && session != null) {
         _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
+        _ref?.read(accountLockedNoticeProvider.notifier).state = false;
         _fetchUserInfo(session.user.id);
       } else if (event == AuthChangeEvent.signedOut || (event == AuthChangeEvent.tokenRefreshed && session == null)) {
         final wasLoggedIn = state.valueOrNull != null;
@@ -52,22 +56,29 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
         if (wasLoggedIn && !_isManualLogout) {
           _ref?.read(sessionExpiredNoticeProvider.notifier).state = true;
         }
+        _isManualLogout = false;
       }
     });
   }
 
   Future<void> _fetchUserInfo(String userId) async {
     try {
-      state = const AsyncValue.loading();
+      // Chỉ đặt loading nếu đổi user ID hoặc chưa có dữ liệu để tránh chớp UI khi app resume
+      if (state.valueOrNull?.id != userId) {
+        state = const AsyncValue.loading();
+      }
       final data = await _repository.fetchUserInfo(userId);
       final userModel = UserModel.fromJson(data);
 
       if (userModel.isLocked) {
-        await logout();
-        state = AsyncValue.error(
-          Exception('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Ban Quản Lý để được hỗ trợ.'),
-          StackTrace.current,
-        );
+        _ref?.read(accountLockedNoticeProvider.notifier).state = true;
+        _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
+        _isManualLogout = true;
+        try {
+          await _repository.logout();
+        } finally {
+          state = const AsyncValue.data(null);
+        }
         return;
       }
 
@@ -78,20 +89,25 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   }
 
   Future<void> login(String email, String password) async {
+    _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
+    _ref?.read(accountLockedNoticeProvider.notifier).state = false;
     await _repository.login(email, password);
   }
 
   Future<void> register(String email, String password, String fullName) async {
+    _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
+    _ref?.read(accountLockedNoticeProvider.notifier).state = false;
     await _repository.register(email, password, fullName);
   }
 
   Future<void> logout() async {
     _isManualLogout = true;
+    _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
     try {
-      _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
       await _repository.logout();
-    } finally {
+    } catch (_) {
       _isManualLogout = false;
+      rethrow;
     }
   }
 
