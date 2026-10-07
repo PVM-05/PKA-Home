@@ -663,5 +663,260 @@ BEGIN
 END;
 $$;
 
+-- 10. BẢO MẬT THANH TOÁN (simulate_unified_payment: FOR UPDATE & SERVICE check)
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.simulate_unified_payment(
+  p_category text,
+  p_reference_id uuid,
+  p_payment_method text default 'bank_transfer',
+  p_outcome text default 'SUCCESS',
+  p_failure_reason text default null
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+DECLARE
+  v_transaction_code text;
+  v_user_id uuid := auth.uid();
+  v_amount numeric := 0;
+  v_apt_id uuid;
+  v_tx_id uuid;
+  v_invoice record;
+  v_booking record;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Yêu cầu xác thực tài khoản để thực hiện thanh toán';
+  END IF;
+
+  v_transaction_code := 'TXN-' || to_char(now(), 'YYYYMMDDHH24MISS') || '-' || upper(substring(gen_random_uuid()::text, 1, 6));
+
+  IF upper(p_category) = 'INVOICE' THEN
+    -- KHÓA DÒNG BẢO VỆ CHỐNG DOUBLE PAYMENT
+    SELECT * INTO v_invoice 
+    FROM public.invoices 
+    WHERE id = p_reference_id 
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Không tìm thấy hóa đơn cần thanh toán: %', p_reference_id;
+    END IF;
+
+    IF v_invoice.status = 'paid' THEN
+      RAISE EXCEPTION 'Hóa đơn này đã được thanh toán trước đó';
+    END IF;
+
+    v_amount := v_invoice.total_amount;
+    v_apt_id := v_invoice.apartment_id;
+
+    IF upper(p_outcome) = 'SUCCESS' THEN
+      UPDATE public.invoices
+      SET status = 'paid', updated_at = now()
+      WHERE id = p_reference_id;
+    END IF;
+
+  ELSIF upper(p_category) = 'SERVICE' THEN
+    -- KHÓA DÒNG ĐẶT TIỆN ÍCH
+    SELECT * INTO v_booking 
+    FROM public.amenity_bookings 
+    WHERE id = p_reference_id 
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Không tìm thấy đơn đặt dịch vụ tiện ích: %', p_reference_id;
+    END IF;
+
+    -- XÁC THỰC QUYỀN SỞ HỮU DỊCH VỤ
+    IF v_booking.booked_by <> v_user_id AND NOT public.is_staff_or_management() THEN
+      RAISE EXCEPTION 'Bạn không có quyền thanh toán cho đơn dịch vụ này';
+    END IF;
+
+    IF v_booking.status = 'confirmed' THEN
+      RAISE EXCEPTION 'Lịch dịch vụ này đã được xác nhận thanh toán trước đó';
+    END IF;
+
+    v_amount := COALESCE(v_booking.total_amount, 0);
+    SELECT apartment_id INTO v_apt_id FROM public.residents_apartments WHERE user_id = v_user_id LIMIT 1;
+
+    IF upper(p_outcome) = 'SUCCESS' THEN
+      UPDATE public.amenity_bookings
+      SET status = 'confirmed', updated_at = now()
+      WHERE id = p_reference_id;
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'Danh mục thanh toán không hợp lệ: %', p_category;
+  END IF;
+
+  INSERT INTO public.payment_transactions (
+    transaction_code,
+    user_id,
+    apartment_id,
+    amount,
+    payment_method,
+    payment_category,
+    reference_id,
+    status,
+    failure_reason,
+    created_at,
+    updated_at
+  ) VALUES (
+    v_transaction_code,
+    v_user_id,
+    v_apt_id,
+    v_amount,
+    p_payment_method,
+    upper(p_category),
+    p_reference_id,
+    upper(p_outcome),
+    p_failure_reason,
+    now(),
+    now()
+  ) RETURNING id INTO v_tx_id;
+
+  RETURN jsonb_build_object(
+    'success', (upper(p_outcome) = 'SUCCESS'),
+    'transaction_id', v_tx_id,
+    'transaction_code', v_transaction_code,
+    'status', upper(p_outcome),
+    'amount', v_amount
+  );
+END;
+$$;
+
+-- 11. CHECK-IN TIỆN ÍCH & MÚI GIỜ VIỆT NAM TRONG book_amenity_slot
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.check_in_amenity_booking(p_booking_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+BEGIN
+  IF NOT public.is_staff_or_management() THEN
+    RAISE EXCEPTION 'Chỉ Ban Quản Lý hoặc Nhân viên kỹ thuật mới có quyền Check-in';
+  END IF;
+
+  UPDATE public.amenity_bookings
+  SET check_in_time = now(),
+      updated_at = now()
+  WHERE id = p_booking_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Không tìm thấy lịch đặt tiện ích: %', p_booking_id;
+  END IF;
+
+  RETURN jsonb_build_object('success', true, 'booking_id', p_booking_id);
+END;
+$$;
+
+-- Sửa múi giờ trong book_amenity_slot
+CREATE OR REPLACE FUNCTION public.book_amenity_slot(
+    p_amenity_id UUID,
+    p_booking_date DATE,
+    p_time_slot VARCHAR,
+    p_guests_count INT DEFAULT 1,
+    p_notes TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+DECLARE
+    v_amenity RECORD;
+    v_total_guests INT;
+    v_booking_id UUID;
+    v_status VARCHAR;
+    v_start_time_text TEXT;
+    v_slot_start TIMESTAMPTZ;
+BEGIN
+    SELECT * INTO v_amenity FROM public.amenities WHERE id = p_amenity_id;
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'message', 'Tiện ích không tồn tại');
+    END IF;
+
+    -- SỬA CHUẨN MÚI GIỜ VIỆT NAM (Asia/Ho_Chi_Minh)
+    v_start_time_text := split_part(p_time_slot, '-', 1);
+    v_slot_start := (p_booking_date::TEXT || ' ' || v_start_time_text || ':00')::TIMESTAMP AT TIME ZONE 'Asia/Ho_Chi_Minh';
+    IF v_slot_start < now() THEN
+        RETURN jsonb_build_object('success', false, 'message', 'Không thể đặt khung giờ đã trôi qua');
+    END IF;
+
+    IF v_amenity.booking_type = 'per_slot' THEN
+        IF EXISTS (
+            SELECT 1 FROM public.amenity_bookings
+            WHERE amenity_id = p_amenity_id
+              AND booking_date = p_booking_date
+              AND time_slot = p_time_slot
+              AND status = 'confirmed'
+        ) THEN
+            v_status := 'waitlist';
+        ELSE
+            v_status := 'confirmed';
+        END IF;
+    ELSE
+        SELECT COALESCE(SUM(guests_count), 0) INTO v_total_guests
+        FROM public.amenity_bookings
+        WHERE amenity_id = p_amenity_id
+          AND booking_date = p_booking_date
+          AND time_slot = p_time_slot
+          AND status = 'confirmed';
+
+        IF (v_total_guests + p_guests_count) <= v_amenity.max_capacity THEN
+            v_status := 'confirmed';
+        ELSE
+            v_status := 'waitlist';
+        END IF;
+    END IF;
+
+    INSERT INTO public.amenity_bookings (
+        amenity_id,
+        booked_by,
+        booking_date,
+        time_slot,
+        guests_count,
+        status,
+        notes,
+        created_at,
+        updated_at
+    ) VALUES (
+        p_amenity_id,
+        auth.uid(),
+        p_booking_date,
+        p_time_slot,
+        p_guests_count,
+        v_status,
+        p_notes,
+        now(),
+        now()
+    ) RETURNING id INTO v_booking_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'booking_id', v_booking_id,
+        'status', v_status,
+        'is_waitlist', (v_status = 'waitlist')
+    );
+END;
+$$;
+
+-- 12. PHÂN QUYỀN THỰC THI (HARDENING EXECUTE PERMISSIONS)
+-- ------------------------------------------------------------------------------
+REVOKE ALL ON FUNCTION public.approve_meter_reading FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.reject_meter_reading FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.validate_monthly_bulk_invoices FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.generate_valid_bulk_invoices FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.check_in_amenity_booking FROM anon, PUBLIC;
+
+GRANT EXECUTE ON FUNCTION public.approve_meter_reading TO authenticated;
+GRANT EXECUTE ON FUNCTION public.reject_meter_reading TO authenticated;
+GRANT EXECUTE ON FUNCTION public.validate_monthly_bulk_invoices TO authenticated;
+GRANT EXECUTE ON FUNCTION public.generate_valid_bulk_invoices TO authenticated;
+GRANT EXECUTE ON FUNCTION public.check_in_amenity_booking TO authenticated;
+GRANT EXECUTE ON FUNCTION public.simulate_unified_payment TO authenticated;
+GRANT EXECUTE ON FUNCTION public.book_amenity_slot TO authenticated;
+
+
 
 
