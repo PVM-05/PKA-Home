@@ -259,7 +259,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('Lỗi tải danh sách xe', style: TextStyle(color: AppTheme.error))),
+      error: (e, _) => const Center(child: Text('Lỗi tải danh sách xe', style: TextStyle(color: AppTheme.error))),
     );
   }
 
@@ -320,7 +320,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('Lỗi tải hóa đơn', style: TextStyle(color: AppTheme.error))),
+      error: (e, _) => const Center(child: Text('Lỗi tải hóa đơn', style: TextStyle(color: AppTheme.error))),
     );
   }
 
@@ -390,7 +390,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('Lỗi tải lịch tiện ích', style: TextStyle(color: AppTheme.error))),
+      error: (e, _) => const Center(child: Text('Lỗi tải lịch tiện ích', style: TextStyle(color: AppTheme.error))),
     );
   }
 }
