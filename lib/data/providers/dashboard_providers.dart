@@ -89,19 +89,6 @@ class FinancialStats {
 
 final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
   return ref.watch(rawInvoicesStream).map((invoices) {
-    double paid = 0.0;
-    double unpaid = 0.0;
-
-    for (var inv in invoices) {
-      final amt = (inv['total_amount'] as num?)?.toDouble() ?? 0.0;
-      final status = inv['status'];
-      if (status == 'paid') {
-        paid += amt;
-      } else {
-        unpaid += amt;
-      }
-    }
-
     // Đếm số căn hộ duy nhất đã đóng / chưa đóng trong kỳ hiện tại
     final now = DateTime.now();
     final curMm = now.month.toString().padLeft(2, '0');
@@ -119,14 +106,19 @@ final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
       currentInvoices = invoices.where((inv) => inv['period'] == latestPeriod).toList();
     }
 
+    double paid = 0.0;
+    double unpaid = 0.0;
     final paidApartments = <String>{};
     final unpaidApartments = <String>{};
 
     for (var inv in currentInvoices) {
+      final amt = (inv['total_amount'] as num?)?.toDouble() ?? 0.0;
       final aptId = inv['apartment_id'] as String? ?? inv['id'] as String;
       if (inv['status'] == 'paid') {
+        paid += amt;
         paidApartments.add(aptId);
       } else {
+        unpaid += amt;
         unpaidApartments.add(aptId);
       }
     }

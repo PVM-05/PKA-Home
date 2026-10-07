@@ -101,11 +101,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
               final contact = contacts[index];
               return Card(
                 elevation: 0,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -281,11 +281,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
               final rule = rules[index];
               return Card(
                 elevation: 0,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -447,11 +447,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
               final amenity = amenities[index];
               return Card(
                 elevation: 0,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),

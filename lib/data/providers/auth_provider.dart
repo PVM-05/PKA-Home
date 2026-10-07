@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/push_notification_service.dart';
@@ -17,13 +18,16 @@ final fcmTokenSyncProvider = Provider<void>((ref) {
 final sessionExpiredNoticeProvider = StateProvider<bool>((ref) => false);
 
 final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
-  return AuthNotifier(ref.read(authRepositoryProvider), ref);
+  final notifier = AuthNotifier(ref.read(authRepositoryProvider), ref);
+  ref.onDispose(() => notifier.dispose());
+  return notifier;
 });
 
 class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   final AuthRepository _repository;
   final Ref? _ref;
   bool _isManualLogout = false;
+  StreamSubscription? _authSubscription;
 
   AuthNotifier(this._repository, [this._ref]) : super(const AsyncValue.loading()) {
     _checkAuthState();
@@ -37,19 +41,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
       state = const AsyncValue.data(null);
     }
 
-    _repository.authStateChanges.listen((data) {
+    _authSubscription = _repository.authStateChanges.listen((data) {
       final AuthChangeEvent event = data.event;
       final Session? session = data.session;
-      
+
       if (event == AuthChangeEvent.signedIn && session != null) {
-         _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
-         _fetchUserInfo(session.user.id);
+        _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
+        _fetchUserInfo(session.user.id);
       } else if (event == AuthChangeEvent.signedOut || (event == AuthChangeEvent.tokenRefreshed && session == null)) {
-         final wasLoggedIn = state.valueOrNull != null;
-         state = const AsyncValue.data(null);
-         if (wasLoggedIn && !_isManualLogout) {
-           _ref?.read(sessionExpiredNoticeProvider.notifier).state = true;
-         }
+        final wasLoggedIn = state.valueOrNull != null;
+        state = const AsyncValue.data(null);
+        if (wasLoggedIn && !_isManualLogout) {
+          _ref?.read(sessionExpiredNoticeProvider.notifier).state = true;
+        }
       }
     });
   }
@@ -59,6 +63,16 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
       state = const AsyncValue.loading();
       final data = await _repository.fetchUserInfo(userId);
       final userModel = UserModel.fromJson(data);
+
+      if (userModel.isLocked) {
+        await logout();
+        state = AsyncValue.error(
+          Exception('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Ban Quản Lý để được hỗ trợ.'),
+          StackTrace.current,
+        );
+        return;
+      }
+
       state = AsyncValue.data(userModel);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -92,5 +106,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     if (user != null) {
       await _fetchUserInfo(user.id);
     }
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 }
