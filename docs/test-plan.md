@@ -82,7 +82,7 @@ Hệ thống đã nạp sẵn bộ dữ liệu mẫu chuẩn trực tiếp vào 
 | `ketoan@pka.vn` | Trần Thị Thu Thảo | **Kế toán** | - | 4 tabs (ẩn Phản ánh). Duyệt xác nhận thanh toán; tạo hóa đơn; theo dõi doanh thu và nợ phí. |
 | `kythuat@pka.vn` | Lê Hoàng Long | **Kỹ thuật viên** | - | 4 tabs (ẩn Hóa đơn). Tiếp nhận sự cố kỹ thuật, cập nhật tiến độ xử lý và hoàn thành sự cố. |
 | `test1@gmail.com` | Phạm Văn Minh | **Cư dân (Chủ hộ)** | **A0202** | Có hóa đơn T08/2026 (đã đóng), T09/2026 (Đang chờ BQL xác nhận thanh toán); 1 sự cố rò rỉ nước khẩn cấp. |
-| `cudan1@pka.vn` | Hoàng Đức Anh | **Cư dân (Chủ hộ)** | **A0101** | Có hóa đơn T09/2026 (2.465.000 đ) Chưa thanh toán — **Dùng để demo Quét mã VietQR**; 1 sự cố Aptomat đang xử lý. |
+| `cudan1@pka.vn` | Hoàng Đức Anh | **Cư dân (Chủ hộ)** | **A0101** | Có hóa đơn T09/2026 (2.465.000 đ) Chưa thanh toán — **Dùng để demo Cổng thanh toán trực tuyến mô phỏng (Demo Payment Sheet)**; 1 sự cố Aptomat đang xử lý. |
 | `cudan2@pka.vn` | Nguyễn Thị Mai Hương | **Cư dân (Chủ hộ)** | **B0101** | Lịch sử 2 tháng hóa đơn đã thanh toán; 1 sự cố sửa khóa thẻ từ đã hoàn thành. |
 | `cudan3@pka.vn` | Đỗ Quốc Bảo | **Cư dân (Khách thuê)** | **C0101** | Có hóa đơn T09/2026 (860.000 đ) Chưa thanh toán. |
 | `pending_cudan@pka.vn`| Bùi Minh Tuấn | **Cư dân (Chờ duyệt)**| **A0103** | Đang có yêu cầu liên kết ở trạng thái **Pending** — Dùng để kiểm thử giao diện chờ duyệt của cư dân và chức năng Duyệt của BQL. |
