@@ -6,6 +6,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/invoice_items_provider.dart';
+import '../../../data/providers/payment_provider.dart';
 import 'edit_invoice_screen.dart';
 
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
@@ -281,8 +282,22 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      await ref.read(managementRepositoryProvider).updateInvoiceStatus(invoice.id, 'paid');
+      final repo = ref.read(managementRepositoryProvider);
+      await repo.updateInvoiceStatus(invoice.id, 'paid');
+
+      final txnMethod = isPending ? 'BANK_TRANSFER' : 'CASH';
+      final txnTitle = 'Thanh toán hóa đơn kỳ ${invoice.period} (${isPending ? "Chuyển khoản" : "Tiền mặt"})';
+      await repo.recordPaymentTransaction(
+        invoiceId: invoice.id,
+        apartmentId: invoice.apartmentId,
+        amount: invoice.totalAmount,
+        paymentMethod: txnMethod,
+        status: 'SUCCESS',
+        title: txnTitle,
+      );
+
       ref.invalidate(invoicesProvider);
+      ref.invalidate(paymentTransactionsProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

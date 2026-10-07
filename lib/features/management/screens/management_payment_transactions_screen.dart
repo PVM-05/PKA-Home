@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/payment_transaction_model.dart';
 import '../../../data/providers/payment_provider.dart';
 
@@ -45,7 +46,7 @@ class _ManagementPaymentTransactionsScreenState extends ConsumerState<Management
             const Divider(),
             _buildDetailRow('Thời gian', DateFormat('dd/MM/yyyy HH:mm:ss').format(tx.createdAt)),
             const Divider(),
-            _buildDetailRow('Trạng thái', tx.isSuccess ? 'Thành công (Đã đối soát)' : tx.status),
+            _buildDetailRow('Trạng thái', tx.statusDisplayName),
           ],
         ),
         actions: [
@@ -56,6 +57,13 @@ class _ManagementPaymentTransactionsScreenState extends ConsumerState<Management
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(PaymentTransactionModel tx) {
+    if (tx.isSuccess) return AppTheme.success;
+    if (tx.isFailed) return AppTheme.error;
+    if (tx.isCancelled) return AppTheme.textSecondary;
+    return AppTheme.warning;
   }
 
   Widget _buildDetailRow(String label, String value, {bool isAmount = false}) {
@@ -199,12 +207,12 @@ class _ManagementPaymentTransactionsScreenState extends ConsumerState<Management
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.success.withValues(alpha: 0.1),
+                                          color: _getStatusColor(tx).withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(4),
                                         ),
-                                        child: const Text(
-                                          'Thành công',
-                                          style: TextStyle(fontSize: 10, color: AppTheme.success, fontWeight: FontWeight.bold),
+                                        child: Text(
+                                          tx.statusDisplayName,
+                                          style: TextStyle(fontSize: 10, color: _getStatusColor(tx), fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ],
@@ -220,7 +228,7 @@ class _ManagementPaymentTransactionsScreenState extends ConsumerState<Management
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Lỗi: $e', style: const TextStyle(color: AppTheme.error))),
+        error: (e, _) => Center(child: AppErrorCard(error: e)),
       ),
     );
   }
