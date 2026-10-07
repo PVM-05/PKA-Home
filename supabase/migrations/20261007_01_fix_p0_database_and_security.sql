@@ -75,3 +75,65 @@ CREATE TRIGGER trg_protect_user_sensitive_fields
   BEFORE UPDATE ON public.users
   FOR EACH ROW
   EXECUTE FUNCTION public.protect_user_sensitive_fields();
+
+-- 3. SỬA HÀM PHÂN QUYỀN RBAC (ĐÚNG CỘT TRONG role_delegations)
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.is_staff_or_management()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid()
+      AND (
+        role IN ('management', 'admin', 'technician')
+        OR EXISTS (
+          SELECT 1 FROM public.role_delegations rd
+          WHERE rd.delegate_id = auth.uid()
+            AND rd.delegated_role IN ('management', 'admin', 'technician')
+            AND now() BETWEEN rd.starts_at AND rd.ends_at
+        )
+      )
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_admin_or_accountant()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid()
+      AND (
+        role IN ('admin', 'accountant', 'management')
+        OR EXISTS (
+          SELECT 1 FROM public.role_delegations rd
+          WHERE rd.delegate_id = auth.uid()
+            AND rd.delegated_role = 'accountant'
+            AND now() BETWEEN rd.starts_at AND rd.ends_at
+        )
+      )
+  );
+$$;
+
+-- 4. SIẾT CHẶT RLS: CƯ DÂN CHỈ ĐƯỢC PHÉP HỦY LỊCH TIỆN ÍCH (CANCELLED)
+-- ------------------------------------------------------------------------------
+DROP POLICY IF EXISTS "Cư dân hủy booking của mình" ON public.amenity_bookings;
+DROP POLICY IF EXISTS "amenity_bookings_resident_cancel_only" ON public.amenity_bookings;
+DROP POLICY IF EXISTS "Cư dân cập nhật booking của mình" ON public.amenity_bookings;
+
+CREATE POLICY "amenity_bookings_resident_cancel_only"
+ON public.amenity_bookings
+FOR UPDATE
+TO authenticated
+USING (booked_by = auth.uid())
+WITH CHECK (
+  booked_by = auth.uid() AND status = 'cancelled'
+);
+
