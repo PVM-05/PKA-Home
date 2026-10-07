@@ -464,5 +464,59 @@ class ManagementRepository {
     });
     return Map<String, dynamic>.from(response as Map);
   }
+
+  /// Lấy danh sách phương tiện theo apartment_id
+  Future<List<Map<String, dynamic>>> fetchResidentVehicles(String? apartmentId) async {
+    if (apartmentId == null) return [];
+    try {
+      final res = await _client.from('vehicles').select().eq('apartment_id', apartmentId).order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(res as List);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Lấy danh sách hóa đơn theo apartment_id
+  Future<List<InvoiceModel>> fetchResidentInvoices(String? apartmentId) async {
+    if (apartmentId == null) return [];
+    try {
+      final res = await _client.from('invoices').select('*, apartments(*)').eq('apartment_id', apartmentId).order('created_at', ascending: false);
+      return (res as List).map((e) => InvoiceModel.fromJson(e)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Lấy danh sách lịch đặt tiện ích theo user_id
+  Future<List<Map<String, dynamic>>> fetchResidentBookings(String userId) async {
+    try {
+      final res = await _client.from('amenity_bookings').select('*, amenities(name)').eq('booked_by', userId).order('booking_date', ascending: false);
+      return List<Map<String, dynamic>>.from(res as List);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Ghi nhận giao dịch thanh toán (tiền mặt / chuyển khoản thủ công)
+  Future<void> recordPaymentTransaction({
+    required String invoiceId,
+    String? apartmentId,
+    required double amount,
+    required String paymentMethod,
+    String status = 'SUCCESS',
+  }) async {
+    final txnCode = 'TXN-CASH-${DateTime.now().millisecondsSinceEpoch}';
+    await _client.from('payment_transactions').insert({
+      'transaction_code': txnCode,
+      'user_id': _client.auth.currentUser?.id,
+      'apartment_id': apartmentId,
+      'amount': amount,
+      'payment_method': paymentMethod,
+      'payment_category': 'INVOICE',
+      'reference_id': invoiceId,
+      'status': status,
+    });
+  }
 }
+
 

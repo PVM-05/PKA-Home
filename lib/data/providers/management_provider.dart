@@ -37,3 +37,16 @@ final assignResidentProvider = FutureProvider.autoDispose.family<void, Map<Strin
   final apartmentId = params['apartment_id']!;
   await repo.assignResidentToApartment(userId, apartmentId);
 });
+
+final residentVehiclesProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String?>((ref, apartmentId) async {
+  return ref.watch(managementRepositoryProvider).fetchResidentVehicles(apartmentId);
+});
+
+final residentInvoicesProvider = FutureProvider.autoDispose.family<List<InvoiceModel>, String?>((ref, apartmentId) async {
+  return ref.watch(managementRepositoryProvider).fetchResidentInvoices(apartmentId);
+});
+
+final residentBookingsProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String>((ref, userId) async {
+  return ref.watch(managementRepositoryProvider).fetchResidentBookings(userId);
+});
+
