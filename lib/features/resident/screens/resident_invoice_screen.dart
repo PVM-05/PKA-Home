@@ -8,6 +8,7 @@ import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/models/invoice_model.dart';
+import '../../../core/utils/error_formatter.dart';
 
 class ResidentInvoiceScreen extends ConsumerWidget {
   const ResidentInvoiceScreen({super.key});
@@ -81,7 +82,7 @@ class ResidentInvoiceScreen extends ConsumerWidget {
           ),
           error: (error, stack) => Center(
             child: Text(
-              'Lỗi tải dữ liệu: $error',
+              formatErrorMessage(error),
               style: const TextStyle(color: AppTheme.error),
             ),
           ),

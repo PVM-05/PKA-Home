@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_theme.dart';
+import '../utils/network_error_handler.dart';
 
 class AppStateView<T> extends StatelessWidget {
   final AsyncValue<T> asyncValue;
@@ -126,7 +127,7 @@ class AppStateView<T> extends StatelessWidget {
   }
 
   Widget _buildErrorState(BuildContext context, Object error) {
-    final cleanError = error.toString().replaceAll('Exception: ', '');
+    final cleanError = NetworkErrorHandler.getMessage(error);
 
     return Center(
       child: Padding(
