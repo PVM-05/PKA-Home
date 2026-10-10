@@ -45,7 +45,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
   }
 
   InvoiceModel get _invoice {
-    final invoicesState = ref.watch(residentInvoiceProvider);
+    final invoicesState = ref.read(residentInvoiceProvider);
     return invoicesState.valueOrNull?.firstWhere(
       (inv) => inv.id == widget.invoice.id,
       orElse: () => widget.invoice,
@@ -54,6 +54,8 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
 
   @override
   Widget build(BuildContext context) {
+    // Lắng nghe provider trong build để tự động re-render khi trạng thái hóa đơn thay đổi
+    ref.watch(residentInvoiceProvider);
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
     final detailState = ref.watch(residentInvoiceDetailProvider(widget.invoice.id));

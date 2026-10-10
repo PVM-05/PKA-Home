@@ -45,10 +45,21 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
   }
 
   void _handleChanged(int index, String value) {
-    // 1. Xử lý trường hợp dán mã (Paste từ clipboard)
-    if (value.length > 1) {
-      final digits = value.replaceAll(RegExp(r'\D'), '');
-      if (digits.isNotEmpty) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+
+    // 1. Xử lý trường hợp dán mã (Paste từ clipboard) hoặc gõ đè
+    if (digits.length > 1) {
+      if (digits.length == 2) {
+        // Gõ thêm/đè 1 ký tự vào ô đã có sẵn số: giữ ký tự mới nhất và chuyển ô tiếp theo
+        final newChar = digits.substring(digits.length - 1);
+        _controllers[index].text = newChar;
+        if (index < widget.length - 1) {
+          _focusNodes[index + 1].requestFocus();
+        } else {
+          _focusNodes[index].unfocus();
+        }
+      } else {
+        // Dán chuỗi OTP nhiều ký tự từ clipboard
         for (int i = 0; i < widget.length; i++) {
           if (i < digits.length) {
             _controllers[i].text = digits[i];

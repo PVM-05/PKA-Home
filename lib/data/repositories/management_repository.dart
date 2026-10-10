@@ -485,7 +485,7 @@ class ManagementRepository {
   /// Lấy danh sách lịch đặt tiện ích theo user_id
   Future<List<Map<String, dynamic>>> fetchResidentBookings(String userId) async {
     try {
-      final res = await _client.from('amenity_bookings').select('*, amenities(name)').eq('booked_by', userId).order('booking_date', ascending: false);
+      final res = await _client.from('amenity_bookings').select('*, building_amenities(name)').eq('booked_by', userId).order('booking_date', ascending: false);
       return List<Map<String, dynamic>>.from(res as List);
     } catch (_) {
       return [];

@@ -124,7 +124,9 @@ class VehicleRepository {
       'status': status,
       'updated_at': DateTime.now().toIso8601String(),
     };
-    if (reason != null && reason.trim().isNotEmpty) {
+    if (status == 'approved') {
+      updates['rejection_reason'] = null;
+    } else if (reason != null && reason.trim().isNotEmpty) {
       updates['rejection_reason'] = reason.trim();
     }
     await _client.from('vehicles').update(updates).eq('id', vehicleId);
