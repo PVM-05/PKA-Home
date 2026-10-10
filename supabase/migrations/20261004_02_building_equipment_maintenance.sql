@@ -75,10 +75,9 @@ AS $$
         role IN ('management', 'admin', 'technician')
         OR EXISTS (
           SELECT 1 FROM public.role_delegations rd
-          WHERE rd.delegate_user_id = auth.uid()
-            AND rd.target_role IN ('management', 'admin', 'technician')
-            AND rd.status = 'active'
-            AND now() BETWEEN rd.start_time AND rd.end_time
+          WHERE rd.delegate_id = auth.uid()
+            AND rd.delegated_role IN ('management', 'admin', 'technician')
+            AND now() BETWEEN rd.starts_at AND rd.ends_at
         )
       )
   );

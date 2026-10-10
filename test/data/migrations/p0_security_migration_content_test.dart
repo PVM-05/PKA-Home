@@ -17,4 +17,26 @@ void main() {
     expect(content.contains("simulate_invoice_payment"), isTrue, reason: 'Phải drop hàm cũ simulate_invoice_payment');
     expect(content.contains("Cư dân xóa yêu cầu bị từ chối"), isTrue, reason: 'Phải có policy DELETE link requests rejected');
   });
+
+  test('Migration 20261004_02 dùng đúng các cột của bảng role_delegations', () {
+    final file = File('supabase/migrations/20261004_02_building_equipment_maintenance.sql');
+    expect(file.existsSync(), isTrue);
+
+    final content = file.readAsStringSync();
+    expect(content.contains('delegate_user_id'), isFalse, reason: 'Không được chứa delegate_user_id');
+    expect(content.contains('rd.delegate_id = auth.uid()'), isTrue);
+    expect(content.contains('now() BETWEEN rd.starts_at AND rd.ends_at'), isTrue);
+  });
+
+  test('Migration 20261010_01 chứa đầy đủ các bản vá bổ sung', () {
+    final file = File('supabase/migrations/20261010_01_comprehensive_database_and_security_patches.sql');
+    expect(file.existsSync(), isTrue);
+
+    final content = file.readAsStringSync();
+    expect(content.contains('v_txn_code :='), isTrue, reason: 'Phải tự sinh transaction_code');
+    expect(content.contains("trg_check_amenity_booking_resident_update"), isTrue);
+    expect(content.contains("GREATEST(0, v_cur_elec - v_old_elec)"), isTrue);
+    expect(content.contains(r"\ysập\y|\ysap\y|\ynổ\y|\yno\y"), isTrue);
+    expect(content.contains("DROP FUNCTION IF EXISTS public.simulate_invoice_payment(UUID, VARCHAR)"), isTrue);
+  });
 }
