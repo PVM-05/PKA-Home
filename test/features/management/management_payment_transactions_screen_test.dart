@@ -2,10 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pka_home/data/models/payment_transaction_model.dart';
+import 'package:pka_home/data/models/user_model.dart';
+import 'package:pka_home/data/providers/auth_provider.dart';
 import 'package:pka_home/data/providers/payment_provider.dart';
 import 'package:pka_home/features/management/screens/management_payment_transactions_screen.dart';
 
+class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
+  final adminUser = UserModel(
+    id: 'admin-1',
+    fullName: 'Ban Quản Trị',
+    phone: '0988888888',
+    role: 'admin',
+  );
+
   testWidgets('ManagementPaymentTransactionsScreen hiển thị danh sách đối soát giao dịch và bộ lọc', (tester) async {
     final mockTransactions = [
       PaymentTransactionModel(
@@ -35,6 +51,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          authProvider.overrideWith((ref) => FakeAuthNotifier(adminUser)),
           paymentTransactionsProvider.overrideWith((ref) => mockTransactions),
         ],
         child: const MaterialApp(
