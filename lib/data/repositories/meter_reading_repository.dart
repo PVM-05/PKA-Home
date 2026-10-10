@@ -76,28 +76,13 @@ class MeterReadingRepository {
         ? "${dueDate.year.toString().padLeft(4, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.day.toString().padLeft(2, '0')}"
         : null;
 
-    try {
-      final response = await _client.rpc('approve_meter_reading', params: {
-        'p_submission_id': submissionId,
-        'p_generate_invoice': generateInvoice,
-        'p_due_date': ?dueStr,
-      });
+    final response = await _client.rpc('approve_meter_reading', params: {
+      'p_submission_id': submissionId,
+      'p_generate_invoice': generateInvoice,
+      'p_due_date': ?dueStr,
+    });
 
-      return response as Map<String, dynamic>;
-    } catch (_) {
-      // Fallback nếu RPC chưa thực thi
-      await _client.from('meter_reading_submissions').update({
-        'status': 'approved',
-        'reviewed_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', submissionId);
-
-      return {
-        'success': true,
-        'message': 'Đã phê duyệt chỉ số thành công!',
-        'submission_id': submissionId,
-      };
-    }
+    return response as Map<String, dynamic>;
   }
 
   /// Ban quản lý từ chối chỉ số với lý do
@@ -105,26 +90,11 @@ class MeterReadingRepository {
     required String submissionId,
     required String reason,
   }) async {
-    try {
-      final response = await _client.rpc('reject_meter_reading', params: {
-        'p_submission_id': submissionId,
-        'p_reason': reason,
-      });
+    final response = await _client.rpc('reject_meter_reading', params: {
+      'p_submission_id': submissionId,
+      'p_reason': reason,
+    });
 
-      return response as Map<String, dynamic>;
-    } catch (_) {
-      await _client.from('meter_reading_submissions').update({
-        'status': 'rejected',
-        'reject_reason': reason,
-        'reviewed_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', submissionId);
-
-      return {
-        'success': true,
-        'message': 'Đã từ chối chỉ số.',
-        'submission_id': submissionId,
-      };
-    }
+    return response as Map<String, dynamic>;
   }
 }

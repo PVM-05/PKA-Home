@@ -152,24 +152,10 @@ class AmenityBookingRepository {
 
   /// Ban quản lý xác nhận Check-in lượt đặt chỗ (gọi RPC check_in_amenity_booking)
   Future<Map<String, dynamic>> checkInBooking(String bookingId) async {
-    try {
-      final response = await _client.rpc('check_in_amenity_booking', params: {
-        'p_booking_id': bookingId,
-      });
-      return response as Map<String, dynamic>;
-    } catch (_) {
-      // Fallback nếu RPC chưa chạy
-      await _client.from('amenity_bookings').update({
-        'status': 'completed',
-        'checked_in_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', bookingId);
-      return {
-        'success': true,
-        'message': 'Check-in thành công!',
-        'booking_id': bookingId,
-      };
-    }
+    final response = await _client.rpc('check_in_amenity_booking', params: {
+      'p_booking_id': bookingId,
+    });
+    return response as Map<String, dynamic>;
   }
 
   /// Lấy danh sách các khoảng thời gian bảo trì của tiện ích trong ngày

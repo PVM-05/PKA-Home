@@ -142,35 +142,12 @@ class ManagementRepository {
   }
 
   Future<void> createInvoice(String apartmentId, String period, DateTime dueDate, List<Map<String, dynamic>> items) async {
-    try {
-      await _client.rpc('create_invoice_with_items', params: {
-        'p_apartment_id': apartmentId,
-        'p_period': period,
-        'p_due_date': dueDate.toIso8601String().split('T')[0],
-        'p_items': items,
-      });
-    } catch (_) {
-      // Fallback nếu RPC chưa được nạp
-      final response = await _client.from('invoices').insert({
-        'apartment_id': apartmentId,
-        'period': period,
-        'due_date': dueDate.toIso8601String().split('T')[0],
-        'status': 'unpaid'
-      }).select('id').single();
-      
-      final invoiceId = response['id'];
-      
-      final List<Map<String, dynamic>> insertItems = items.map((item) => {
-        'invoice_id': invoiceId,
-        'fee_type': item['fee_type'],
-        'unit_price': item['unit_price'],
-        'quantity': item['quantity'],
-      }).toList();
-      
-      if (insertItems.isNotEmpty) {
-        await _client.from('invoice_items').insert(insertItems);
-      }
-    }
+    await _client.rpc('create_invoice_with_items', params: {
+      'p_apartment_id': apartmentId,
+      'p_period': period,
+      'p_due_date': dueDate.toIso8601String().split('T')[0],
+      'p_items': items,
+    });
   }
 
   Future<void> deleteInvoice(String invoiceId) async {
