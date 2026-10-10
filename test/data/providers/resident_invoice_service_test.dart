@@ -36,9 +36,11 @@ void main() {
         'amount': 500000.0,
       });
 
-      when(() => mockSupabase.rpc('simulate_invoice_payment', params: {
-        'p_invoice_id': 'inv-101',
+      when(() => mockSupabase.rpc('simulate_unified_payment', params: {
+        'p_category': 'INVOICE',
+        'p_reference_id': 'inv-101',
         'p_outcome': 'SUCCESS',
+        'p_payment_method': 'DEMO',
       })).thenAnswer((_) => fakeBuilder);
 
       final result = await ResidentInvoiceService.simulatePayment(

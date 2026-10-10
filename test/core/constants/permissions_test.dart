@@ -68,8 +68,8 @@ void main() {
       );
     });
 
-    test('AppPermissions.all contains all 7 permissions with valid metadata', () {
-      expect(AppPermissions.all.length, equals(7));
+    test('AppPermissions.all contains all 12 permissions with valid metadata', () {
+      expect(AppPermissions.all.length, equals(12));
       for (final item in AppPermissions.all) {
         expect(item.key.isNotEmpty, isTrue);
         expect(item.name.isNotEmpty, isTrue);

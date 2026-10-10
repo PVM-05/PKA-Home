@@ -4,13 +4,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pka_home/data/models/building_equipment_model.dart';
 import 'package:pka_home/data/models/equipment_maintenance_task_model.dart';
+import 'package:pka_home/data/models/user_model.dart';
+import 'package:pka_home/data/providers/auth_provider.dart';
 import 'package:pka_home/data/repositories/equipment_repository.dart';
 import 'package:pka_home/features/management/screens/equipment_management_screen.dart';
+
+class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class MockEquipmentRepository extends Mock implements EquipmentRepository {}
 
 void main() {
   late MockEquipmentRepository mockRepo;
+
+  final adminUser = UserModel(
+    id: 'admin-1',
+    fullName: 'Ban Quản Trị',
+    phone: '0988888888',
+    role: 'admin',
+  );
 
   final sampleEquipments = [
     BuildingEquipmentModel(
@@ -72,6 +88,7 @@ void main() {
   Widget buildTestWidget() {
     return ProviderScope(
       overrides: [
+        authProvider.overrideWith((ref) => FakeAuthNotifier(adminUser)),
         equipmentRepositoryProvider.overrideWithValue(mockRepo),
       ],
       child: const MaterialApp(
