@@ -11,6 +11,8 @@ import '../../../data/providers/equipment_provider.dart';
 import '../widgets/equipment_form_dialog.dart';
 import '../widgets/maintenance_task_form_dialog.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/role_guard.dart';
+import '../../../core/constants/permissions.dart';
 
 /// Màn hình Quản lý danh mục thiết bị và bảo trì định kỳ toàn tòa nhà
 class EquipmentManagementScreen extends ConsumerStatefulWidget {
@@ -115,7 +117,9 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
     final selectedBuilding = ref.watch(equipmentFilterBuildingProvider) ?? 'Tất cả';
     final selectedCategory = ref.watch(equipmentFilterCategoryProvider) ?? 'Tất cả';
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.equipmentManagement,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Bảo trì thiết bị tòa nhà'),
         bottom: TabBar(
@@ -207,6 +211,7 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
         icon: const Icon(Icons.add),
         label: Text(_tabController.index == 0 ? 'Thêm thiết bị' : 'Lập phiếu bảo trì'),
       ),
+    ),
     );
   }
 

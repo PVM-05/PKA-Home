@@ -8,6 +8,8 @@ import '../../../data/models/meter_reading_submission_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/meter_reading_provider.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/role_guard.dart';
+import '../../../core/constants/permissions.dart';
 
 class ManagementMeterReadingScreen extends ConsumerStatefulWidget {
   const ManagementMeterReadingScreen({super.key});
@@ -307,7 +309,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
   Widget build(BuildContext context) {
     final pendingCountAsync = ref.watch(pendingMeterReadingsCountProvider);
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.meterReadingManagement,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Duyệt Chỉ Số Điện Nước'),
         actions: [
@@ -401,6 +405,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: AppErrorCard(error: e, onRetry: _refreshAll)),
       ),
+    ),
     );
   }
 

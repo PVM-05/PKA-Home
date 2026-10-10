@@ -7,6 +7,8 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/providers/vehicle_provider.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/role_guard.dart';
+import '../../../core/constants/permissions.dart';
 
 class VehicleApprovalScreen extends ConsumerStatefulWidget {
   const VehicleApprovalScreen({super.key});
@@ -273,7 +275,9 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
     final currentStatus = _getStatusForTabIndex(_tabController.index);
     final vehiclesAsync = ref.watch(allVehiclesProvider(currentStatus));
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.vehicleApproval,
+      child: Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
@@ -534,6 +538,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
           ),
         ],
       ),
+    ),
     );
   }
 }

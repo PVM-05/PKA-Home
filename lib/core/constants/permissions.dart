@@ -81,6 +81,46 @@ class AppPermissions {
     allowedRoles: ['admin', 'management'],
   );
 
+  static const vehicleApproval = PermissionItem(
+    key: 'vehicle_approval',
+    name: 'Duyệt đăng ký phương tiện',
+    category: 'Cư dân & Căn hộ',
+    description: 'Kiểm tra và phê duyệt hoặc từ chối cấp thẻ xe cho cư dân.',
+    allowedRoles: ['admin', 'management'],
+  );
+
+  static const meterReadingManagement = PermissionItem(
+    key: 'meter_reading_management',
+    name: 'Kiểm tra & Duyệt chỉ số đồng hồ',
+    category: 'Tài chính & Hóa đơn',
+    description: 'Kiểm tra chỉ số điện nước cư dân khai báo và lập hóa đơn.',
+    allowedRoles: ['admin', 'management', 'accountant', 'technician'],
+  );
+
+  static const equipmentManagement = PermissionItem(
+    key: 'equipment_management',
+    name: 'Quản lý thiết bị & Bảo trì',
+    category: 'Sự cố & Kỹ thuật',
+    description: 'Theo dõi tình trạng kỹ thuật thiết bị tòa nhà và lịch bảo dưỡng.',
+    allowedRoles: ['admin', 'management', 'technician'],
+  );
+
+  static const paymentTransactions = PermissionItem(
+    key: 'payment_transactions',
+    name: 'Lịch sử giao dịch thanh toán',
+    category: 'Tài chính & Hóa đơn',
+    description: 'Tra cứu và đối soát toàn bộ dòng tiền, giao dịch nạp/thu tiền.',
+    allowedRoles: ['admin', 'management', 'accountant'],
+  );
+
+  static const amenityManagement = PermissionItem(
+    key: 'amenity_management',
+    name: 'Quản lý tiện ích & Đặt chỗ',
+    category: 'Tiện ích & Dịch vụ',
+    description: 'Cấu hình khung giờ tiện ích, kiểm tra danh sách đặt chỗ và check-in.',
+    allowedRoles: ['admin', 'management'],
+  );
+
   static const List<PermissionItem> all = [
     invoiceManagement,
     issueManagement,
@@ -89,5 +129,10 @@ class AppPermissions {
     apartmentManagement,
     handbookManagement,
     roleDelegation,
+    vehicleApproval,
+    meterReadingManagement,
+    equipmentManagement,
+    paymentTransactions,
+    amenityManagement,
   ];
 }
