@@ -82,7 +82,9 @@ class NetworkErrorHandler {
       return 'Lỗi xác thực: Vui lòng kiểm tra lại thông tin đăng nhập.';
     }
 
+    final rawMsg = error.toString().replaceFirst(RegExp(r'^Exception:\s*'), '').trim();
     final errStr = error.toString().toLowerCase();
+
     if (errStr.contains('socketexception') ||
         errStr.contains('failed host lookup') ||
         errStr.contains('clientexception') ||
@@ -94,6 +96,17 @@ class NetworkErrorHandler {
         errStr.contains('timed out') ||
         errStr.contains('connection timeout')) {
       return 'Kết nối máy chủ quá lâu. Vui lòng thử lại sau.';
+    }
+
+    // Nếu là Exception mang thông báo tiếng Việt có chủ đích
+    final isVietnamese = RegExp(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', caseSensitive: false).hasMatch(rawMsg);
+    if (isVietnamese &&
+        !errStr.contains('syntax') &&
+        !errStr.contains('relation') &&
+        !errStr.contains('column') &&
+        !errStr.contains('null value') &&
+        !errStr.contains('stacktrace')) {
+      return rawMsg;
     }
 
     return fallback;
