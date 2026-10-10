@@ -195,7 +195,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
   }
 
   Widget _buildVehiclesTab(String? apartmentId, String? aptCode) {
-    final vehiclesAsync = ref.watch(residentVehiclesProvider(apartmentId));
+    final vehiclesAsync = ref.watch(apartmentVehiclesProvider(apartmentId));
     return vehiclesAsync.when(
       data: (vehicles) {
         if (vehicles.isEmpty) {

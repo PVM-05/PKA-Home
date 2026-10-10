@@ -64,6 +64,12 @@ void main() {
       expect(msg, equals('Mỗi căn hộ chỉ được đăng ký tối đa 2 xe máy.'));
     });
 
+    test('Xử lý Exception thông thường chứa tiếng Việt có chủ đích', () {
+      final error = Exception('Căn hộ đã đạt giới hạn tối đa 2 xe máy');
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, equals('Căn hộ đã đạt giới hạn tối đa 2 xe máy'));
+    });
+
     test('Xử lý PostgrestException P0001 trả về thông báo lỗi nghiệp vụ', () {
       final error = PostgrestException(
         message: 'Khung giờ đặt đã trôi qua so với thời gian hiện tại',
