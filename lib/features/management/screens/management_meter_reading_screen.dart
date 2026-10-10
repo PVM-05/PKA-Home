@@ -366,6 +366,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
           _buildSubmissionList('rejected'),
         ],
       ),
+    ),
     );
   }
 
@@ -405,7 +406,6 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: AppErrorCard(error: e, onRetry: _refreshAll)),
       ),
-    ),
     );
   }
 
