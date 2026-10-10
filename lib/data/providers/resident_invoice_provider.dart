@@ -73,10 +73,12 @@ class ResidentInvoiceService {
   }) async {
     final supabase = client ?? SupabaseConfig.client;
     final res = await supabase.rpc(
-      'simulate_invoice_payment',
+      'simulate_unified_payment',
       params: {
-        'p_invoice_id': invoiceId,
+        'p_category': 'INVOICE',
+        'p_reference_id': invoiceId,
         'p_outcome': outcome,
+        'p_payment_method': 'DEMO',
       },
     );
     ref.invalidate(residentInvoiceProvider);
