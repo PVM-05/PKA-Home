@@ -86,6 +86,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.residentHome;
       }
 
+      // Cư dân không được phép truy cập vào khu vực quản trị (/management/*)
+      if (isLoggedIn && !user.isManagement && state.matchedLocation.startsWith('/management')) {
+        return AppRoutes.residentHome;
+      }
+
       return null;
     },
     routes: [

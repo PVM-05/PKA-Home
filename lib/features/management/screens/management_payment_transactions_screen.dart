@@ -6,6 +6,8 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/payment_transaction_model.dart';
 import '../../../data/providers/payment_provider.dart';
+import '../../../core/widgets/role_guard.dart';
+import '../../../core/constants/permissions.dart';
 
 class ManagementPaymentTransactionsScreen extends ConsumerStatefulWidget {
   const ManagementPaymentTransactionsScreen({super.key});
@@ -93,7 +95,9 @@ class _ManagementPaymentTransactionsScreenState extends ConsumerState<Management
   Widget build(BuildContext context) {
     final transactionsAsync = ref.watch(paymentTransactionsProvider);
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.paymentTransactions,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Đối soát Giao dịch'),
       ),
@@ -230,6 +234,7 @@ class _ManagementPaymentTransactionsScreenState extends ConsumerState<Management
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: AppErrorCard(error: e)),
       ),
+    ),
     );
   }
 }
