@@ -4,6 +4,8 @@ enum PaymentType { invoice, service }
 
 class PaymentResult {
   final bool success;
+  final bool isPending;
+  final String status;
   final String transactionCode;
   final String transactionId;
   final double amount;
@@ -13,6 +15,8 @@ class PaymentResult {
 
   PaymentResult({
     required this.success,
+    this.isPending = false,
+    this.status = 'SUCCESS',
     required this.transactionCode,
     required this.transactionId,
     required this.amount,
@@ -22,8 +26,12 @@ class PaymentResult {
   });
 
   factory PaymentResult.fromJson(Map<String, dynamic> json) {
+    final statusVal = json['status'] as String? ?? (json['success'] == true ? 'SUCCESS' : 'FAILED');
+    final isPendingVal = statusVal == 'PENDING' || (json['is_pending'] as bool? ?? false);
     return PaymentResult(
       success: json['success'] as bool? ?? false,
+      isPending: isPendingVal,
+      status: statusVal,
       transactionCode: json['transaction_code'] as String? ?? '',
       transactionId: json['transaction_id'] as String? ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
@@ -42,6 +50,7 @@ class PaymentService {
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
+    String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
   }) async {
     final typeString = type == PaymentType.invoice ? 'INVOICE' : 'SERVICE';
@@ -51,6 +60,7 @@ class PaymentService {
       params: {
         'p_type': typeString,
         'p_reference_id': referenceId,
+        'p_payment_method': paymentMethod,
         'p_outcome': outcome,
       },
     );

@@ -10,9 +10,11 @@ class PaymentTransactionModel {
   final String apartmentId;
   final double amount;
   final String paymentMethod;
-  final String status; // 'SUCCESS', 'FAILED', 'CANCELLED'
+  final String status; // 'SUCCESS', 'PENDING', 'FAILED', 'CANCELLED'
   final String transactionCode;
   final String? failureReason;
+  final String? confirmedBy;
+  final DateTime? confirmedAt;
   final DateTime createdAt;
 
   PaymentTransactionModel({
@@ -28,10 +30,13 @@ class PaymentTransactionModel {
     required this.status,
     required this.transactionCode,
     this.failureReason,
+    this.confirmedBy,
+    this.confirmedAt,
     required this.createdAt,
   });
 
   bool get isSuccess => status == 'SUCCESS';
+  bool get isPending => status == 'PENDING';
   bool get isFailed => status == 'FAILED';
   bool get isCancelled => status == 'CANCELLED';
 
@@ -42,6 +47,8 @@ class PaymentTransactionModel {
     switch (status) {
       case 'SUCCESS':
         return 'Thành công';
+      case 'PENDING':
+        return 'Chờ xác nhận';
       case 'FAILED':
         return 'Thất bại';
       case 'CANCELLED':
@@ -66,10 +73,14 @@ class PaymentTransactionModel {
       userId: json['user_id'] as String?,
       apartmentId: json['apartment_id'] as String? ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      paymentMethod: json['payment_method'] as String? ?? 'Demo Payment',
-      status: json['status'] as String? ?? 'SUCCESS',
+      paymentMethod: json['payment_method'] as String? ?? 'Chuyển khoản',
+      status: json['status'] as String? ?? 'PENDING',
       transactionCode: json['transaction_code'] as String? ?? '',
       failureReason: json['failure_reason'] as String?,
+      confirmedBy: json['confirmed_by'] as String?,
+      confirmedAt: json['confirmed_at'] != null
+          ? DateTime.parse(json['confirmed_at'] as String).toLocal()
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String).toLocal()
           : DateTime.now(),
@@ -90,6 +101,8 @@ class PaymentTransactionModel {
       'status': status,
       'transaction_code': transactionCode,
       'failure_reason': failureReason,
+      'confirmed_by': confirmedBy,
+      'confirmed_at': confirmedAt?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
     };
   }

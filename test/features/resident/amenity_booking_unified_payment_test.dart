@@ -20,6 +20,7 @@ class FakePaymentServiceForAmenity extends PaymentService {
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
+    String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
   }) async {
     return PaymentResult(
@@ -170,13 +171,13 @@ void main() {
 
     // Kiểm tra UnifiedPaymentSheet mở ra
     expect(find.byType(UnifiedPaymentSheet), findsOneWidget);
-    expect(find.text('Demo Payment'), findsOneWidget);
-    expect(find.text('THANH TOÁN'), findsOneWidget);
+    expect(find.text('Chuyển khoản (VietQR Mô Phỏng)'), findsOneWidget);
+    expect(find.text('GỬI THÔNG BÁO THANH TOÁN'), findsOneWidget);
 
-    // Bấm THANH TOÁN
-    await tester.tap(find.text('THANH TOÁN'));
+    // Bấm GỬI THÔNG BÁO THANH TOÁN
+    await tester.tap(find.text('GỬI THÔNG BÁO THANH TOÁN'));
     await tester.pump();
-    expect(find.text('Đang xử lý giao dịch...'), findsOneWidget);
+    expect(find.text('Đang gửi thông báo thanh toán...'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 1600));
     await tester.pumpAndSettle();

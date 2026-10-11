@@ -1,71 +1,63 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/payment_transaction_model.dart';
 import 'package:pka_home/data/services/payment_service.dart';
 
 void main() {
-  group('PaymentTransactionModel Multi-Type Tests', () {
-    test('Khởi tạo giao dịch loại INVOICE', () {
-      final model = PaymentTransactionModel(
-        id: 'tx-1',
-        invoiceId: 'inv-1',
-        bookingId: null,
-        type: 'INVOICE',
-        title: 'Hóa đơn tháng 10/2026',
-        apartmentId: 'apt-1',
-        amount: 1480000.0,
-        paymentMethod: 'Demo Payment',
-        status: 'SUCCESS',
-        transactionCode: 'DEMO-20261005-0001',
-        createdAt: DateTime(2026, 10, 5, 22, 15),
-      );
-
-      expect(model.isInvoice, isTrue);
-      expect(model.isService, isFalse);
-      expect(model.isSuccess, isTrue);
-      expect(model.title, 'Hóa đơn tháng 10/2026');
-      expect(model.transactionCode, 'DEMO-20261005-0001');
-    });
-
-    test('Khởi tạo giao dịch loại SERVICE từ JSON', () {
+  group('PaymentResult Tests', () {
+    test('deserialize kết quả PENDING (chờ BQL xác nhận)', () {
       final json = {
-        'id': 'tx-2',
-        'invoice_id': null,
-        'booking_id': 'bk-123',
-        'type': 'SERVICE',
-        'title': 'Sân cầu lông (18:00 - 19:00)',
-        'apartment_id': 'apt-1',
-        'amount': 100000.0,
-        'payment_method': 'Demo Payment',
-        'status': 'SUCCESS',
-        'transaction_code': 'DEMO-20261005-0002',
-        'created_at': '2026-10-05T22:30:00.000Z',
+        'success': true,
+        'is_pending': true,
+        'status': 'PENDING',
+        'message': 'Đã gửi thông báo thanh toán. Vui lòng chờ Ban Quản Lý đối soát và xác nhận.',
+        'transaction_id': 'tx-pending-1',
+        'transaction_code': 'PENDING-INV-20261011-001',
+        'amount': 1250000.0,
+        'title': 'Yêu cầu thanh toán hóa đơn kỳ 10/2026',
+        'paid_at': '2026-10-11T20:45:00Z',
       };
 
-      final model = PaymentTransactionModel.fromJson(json);
-
-      expect(model.isService, isTrue);
-      expect(model.isInvoice, isFalse);
-      expect(model.bookingId, 'bk-123');
-      expect(model.invoiceId, isNull);
-      expect(model.title, 'Sân cầu lông (18:00 - 19:00)');
-    });
-  });
-
-  group('PaymentResult Tests', () {
-    test('PaymentResult lưu đầy đủ thông tin sau giao dịch', () {
-      final now = DateTime.now();
-      final result = PaymentResult(
-        success: true,
-        transactionCode: 'DEMO-20261005-0001',
-        transactionId: 'tx-01',
-        amount: 1480000.0,
-        title: 'Hóa đơn tháng 10/2026',
-        paidAt: now,
-      );
+      final result = PaymentResult.fromJson(json);
 
       expect(result.success, isTrue);
-      expect(result.transactionCode, 'DEMO-20261005-0001');
-      expect(result.amount, 1480000.0);
+      expect(result.isPending, isTrue);
+      expect(result.status, 'PENDING');
+      expect(result.transactionCode, 'PENDING-INV-20261011-001');
+      expect(result.amount, 1250000.0);
+      expect(result.errorMessage, contains('Đã gửi thông báo'));
+    });
+
+    test('deserialize kết quả SUCCESS (đã thu tiền)', () {
+      final json = {
+        'success': true,
+        'status': 'SUCCESS',
+        'transaction_id': 'tx-success-1',
+        'transaction_code': 'PENDING-INV-20261011-001',
+        'amount': 1250000.0,
+        'title': 'Thanh toán hóa đơn kỳ 10/2026',
+        'paid_at': '2026-10-11T21:00:00Z',
+      };
+
+      final result = PaymentResult.fromJson(json);
+
+      expect(result.success, isTrue);
+      expect(result.isPending, isFalse);
+      expect(result.status, 'SUCCESS');
+      expect(result.transactionCode, 'PENDING-INV-20261011-001');
+    });
+
+    test('deserialize kết quả FAILED', () {
+      final json = {
+        'success': false,
+        'status': 'FAILED',
+        'message': 'Hóa đơn này đã được thanh toán trước đó',
+      };
+
+      final result = PaymentResult.fromJson(json);
+
+      expect(result.success, isFalse);
+      expect(result.isPending, isFalse);
+      expect(result.status, 'FAILED');
+      expect(result.errorMessage, 'Hóa đơn này đã được thanh toán trước đó');
     });
   });
 }

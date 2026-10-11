@@ -17,6 +17,7 @@ class MockPaymentService extends PaymentService {
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
+    String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
   }) async {
     return result;
@@ -100,13 +101,13 @@ void main() {
 
     // Mở UnifiedPaymentSheet
     expect(find.text('Thanh toán hóa đơn'), findsOneWidget);
-    expect(find.text('Demo Payment'), findsOneWidget);
+    expect(find.text('Chuyển khoản (VietQR Mô Phỏng)'), findsOneWidget);
     expect(find.descendant(of: find.byType(UnifiedPaymentSheet), matching: find.text('Phí quản lý')), findsOneWidget);
 
-    // Bấm THANH TOÁN trong sheet
-    await tester.tap(find.text('THANH TOÁN'));
+    // Bấm GỬI THÔNG BÁO THANH TOÁN trong sheet
+    await tester.tap(find.text('GỬI THÔNG BÁO THANH TOÁN'));
     await tester.pump();
-    expect(find.text('Đang xử lý giao dịch...'), findsOneWidget);
+    expect(find.text('Đang gửi thông báo thanh toán...'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 1600));
     await tester.pumpAndSettle();
