@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// HƯỚNG DẪN CHẠY TEST NÀY:
 /// 1. Đảm bảo file `.env` ở thư mục gốc chứa SUPABASE_URL và SUPABASE_ANON_KEY.
@@ -12,49 +11,60 @@ import 'dart:io';
 
 void main() {
   late SupabaseClient client;
-  late String testResidentEmail;
-  late String testResidentPassword;
-  late String? testResidentApartmentId;
-  bool shouldSkip = true;
+
+  final envMap = <String, String>{};
+  try {
+    final envFile = File('.env');
+    if (envFile.existsSync()) {
+      for (final line in envFile.readAsLinesSync()) {
+        final trimmed = line.trim();
+        if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+        final separatorIndex = trimmed.indexOf('=');
+        if (separatorIndex > 0) {
+          final key = trimmed.substring(0, separatorIndex).trim();
+          final value = trimmed.substring(separatorIndex + 1).trim();
+          envMap[key] = value;
+        }
+      }
+    }
+  } catch (_) {}
+
+  final testResidentEmail = Platform.environment['TEST_RESIDENT_EMAIL'] ?? 
+      envMap['TEST_RESIDENT_EMAIL'] ?? 
+      'resident101@test.com';
+  final testResidentPassword = Platform.environment['TEST_RESIDENT_PASSWORD'] ?? 
+      envMap['TEST_RESIDENT_PASSWORD'] ?? 
+      'password123';
+  final testResidentApartmentId = Platform.environment['TEST_RESIDENT_APARTMENT_ID'] ?? 
+      envMap['TEST_RESIDENT_APARTMENT_ID'];
+
+  final supabaseUrl = Platform.environment['SUPABASE_URL'] ?? envMap['SUPABASE_URL'];
+  final supabaseAnonKey = Platform.environment['SUPABASE_ANON_KEY'] ?? envMap['SUPABASE_ANON_KEY'];
+
+  final bool isConfigured = supabaseUrl != null &&
+      supabaseUrl.isNotEmpty &&
+      supabaseAnonKey != null &&
+      supabaseAnonKey.isNotEmpty &&
+      testResidentApartmentId != null &&
+      testResidentApartmentId.isNotEmpty &&
+      testResidentApartmentId != 'FILL_UUID_HERE';
+
+  final skipReason = isConfigured ? null : 'Chưa cấu hình tài khoản test thực tế trong .env';
 
   setUpAll(() async {
-    // Load biến môi trường (ưu tiên biến hệ thống trong CI, sau đó tới file .env)
-    try {
-      await dotenv.load(fileName: ".env");
-    } catch (_) {}
-    
-    testResidentEmail = Platform.environment['TEST_RESIDENT_EMAIL'] ?? 
-        dotenv.env['TEST_RESIDENT_EMAIL'] ?? 
-        'resident101@test.com';
-    testResidentPassword = Platform.environment['TEST_RESIDENT_PASSWORD'] ?? 
-        dotenv.env['TEST_RESIDENT_PASSWORD'] ?? 
-        'password123';
-    testResidentApartmentId = Platform.environment['TEST_RESIDENT_APARTMENT_ID'] ?? 
-        dotenv.env['TEST_RESIDENT_APARTMENT_ID'];
-
-    shouldSkip = testResidentApartmentId == null || 
-        testResidentApartmentId!.isEmpty || 
-        testResidentApartmentId == 'FILL_UUID_HERE';
-
-    final supabaseUrl = Platform.environment['SUPABASE_URL'] ?? dotenv.env['SUPABASE_URL'];
-    final supabaseAnonKey = Platform.environment['SUPABASE_ANON_KEY'] ?? dotenv.env['SUPABASE_ANON_KEY'];
-    
-    if (supabaseUrl != null && supabaseAnonKey != null) {
-      client = SupabaseClient(supabaseUrl, supabaseAnonKey);
-    } else {
-      shouldSkip = true;
+    if (isConfigured) {
+      client = SupabaseClient(supabaseUrl!, supabaseAnonKey!);
     }
   });
 
   tearDownAll(() async {
-    if (!shouldSkip) {
+    if (isConfigured) {
       await client.auth.signOut();
       client.dispose();
     }
   });
 
   group('Kiểm thử RLS Bảo mật (Integration)', () {
-
     test(
       'Cư dân chỉ đọc được hóa đơn của căn hộ mình (RLS-01 & RLS-02)',
       () async {
@@ -78,7 +88,6 @@ void main() {
           );
         }
       },
-      skip: shouldSkip ? 'Chưa cấu hình tài khoản test thực tế trong .env' : null,
     );
 
     test(
@@ -107,7 +116,6 @@ void main() {
         expect(e, isA<PostgrestException>());
       }
     },
-    skip: shouldSkip ? 'Chưa cấu hình tài khoản test thực tế trong .env' : null,
   );
 
     test(
@@ -145,7 +153,6 @@ void main() {
           expect(e, isA<PostgrestException>());
         }
       },
-      skip: shouldSkip ? 'Chưa cấu hình tài khoản test thực tế trong .env' : null,
     );
-  });
+  }, skip: skipReason);
 }
