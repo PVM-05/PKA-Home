@@ -158,10 +158,18 @@ BEGIN
     SELECT area, COALESCE(electric_reading, 0), COALESCE(water_reading, 0)
     INTO v_area, v_old_elec, v_old_water
     FROM public.apartments
-    WHERE id = v_sub.apartment_id;
+    WHERE id = v_sub.apartment_id FOR UPDATE;
 
-    v_elec_diff := GREATEST(0, v_sub.electric_reading - v_old_elec);
-    v_water_diff := GREATEST(0, v_sub.water_reading - v_old_water);
+    IF v_sub.electric_reading < v_old_elec THEN
+        RAISE EXCEPTION 'Chỉ số điện mới (%) không được nhỏ hơn chỉ số cũ (%) của căn hộ', v_sub.electric_reading, v_old_elec;
+    END IF;
+
+    IF v_sub.water_reading < v_old_water THEN
+        RAISE EXCEPTION 'Chỉ số nước mới (%) không được nhỏ hơn chỉ số cũ (%) của căn hộ', v_sub.water_reading, v_old_water;
+    END IF;
+
+    v_elec_diff := v_sub.electric_reading - v_old_elec;
+    v_water_diff := v_sub.water_reading - v_old_water;
     v_mgmt_fee := ROUND(COALESCE(v_area, 70) * 16500);
 
     -- Đếm số xe approved của căn hộ (nếu 0 xe thì phí = 0đ)
