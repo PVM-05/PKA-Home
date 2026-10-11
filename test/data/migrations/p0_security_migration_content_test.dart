@@ -42,4 +42,14 @@ void main() {
     expect(content.contains("building_amenities"), isTrue, reason: 'Phải trỏ đúng bảng building_amenities');
     expect(content.contains("auth.uid() IS NULL"), isTrue, reason: 'Phải cho phép seed script chạy khi auth.uid() null');
   });
+
+  test('Migration 20261010_01 siết chặt quyền và trạng thái trong simulate_unified_payment', () {
+    final file = File('supabase/migrations/20261010_01_comprehensive_database_and_security_patches.sql');
+    final content = file.readAsStringSync();
+    expect(content.contains("v_user_id IS NULL THEN"), isTrue, reason: 'Phải bắt buộc đăng nhập');
+    expect(content.contains("residents_apartments"), isTrue, reason: 'Phải kiểm tra quyền cư dân căn hộ');
+    expect(content.contains("v_inv_status = 'paid'"), isTrue, reason: 'Phải chặn thanh toán trùng hóa đơn');
+    expect(content.contains("v_booking_status = 'confirmed'"), isTrue, reason: 'Phải chặn thanh toán trùng tiện ích');
+    expect(content.contains("NOT IN ('SUCCESS', 'FAILED')"), isTrue, reason: 'Phải kiểm tra outcome hợp lệ');
+  });
 }
