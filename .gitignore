@@ -1,9 +1,112 @@
-# Miscellaneous
+# ==========================================
+# 1. BẢO MẬT & THÔNG TIN NHẠY CẢM (Security & Secrets)
+# ==========================================
+# Environment files & Variables
+.env
+.env.*
+!.env.example
+*.env
+*.env.local
+
+# Private Keys, Certificates & Keystores (Android / iOS / Backend)
+*.keystore
+*.jks
+*.key
+*.pem
+*.p12
+*.pfx
+*.pkcs12
+*.cer
+*.crt
+*.der
+key.properties
+local.properties
+
+# Service Accounts, Tokens & API Credentials
+credentials.json
+auth.json
+client_secret*.json
+*service-account*.json
+service_account.json
+token.json
+*.token
+tokens/
+secrets/
+*.secret
+
+# Apple / iOS Certificates & Provisioning Profiles
+*.mobileprovision
+*.provisionprofile
+*.p8
+*.cert
+
+# Supabase Local Cache & Tokens
+.supabase/
+supabase/.temp/
+supabase/.branches/
+supabase/.env*
+!supabase/.env.example
+
+# ==========================================
+# 2. FLUTTER & DART BUILD ARTIFACTS
+# ==========================================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+app.*.symbols
+app.*.map.json
+
+# ==========================================
+# 3. ANDROID & IOS BUILD OUTPUTS
+# ==========================================
+# Android
+/android/app/debug
+/android/app/profile
+/android/app/release
+.gradle/
+android/.gradle/
+*.apk
+*.aab
+
+# iOS / macOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+.symlinks/
+*.xcworkspace
+Pods/
+
+# ==========================================
+# 4. IDE & EDITOR FILES
+# ==========================================
+# JetBrains / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+.vscode/
+
+# Miscellaneous Editors & OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 *.class
 *.log
 *.pyc
 *.swp
-.DS_Store
 .atom/
 .build/
 .buildlog/
@@ -12,44 +115,8 @@
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-/android/app/google-services.json
-# Env files
-.env
-.env.*
-!.env.example
-
-# Local agents plugins and MCP config
+# ==========================================
+# 5. AGENTS & LOCAL OVERRIDES
+# ==========================================
 .agents/plugins/
 .agents/mcp_config.json
-supabase/.temp/
