@@ -19,7 +19,17 @@ import 'data/providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  // Nạp cấu hình môi trường an toàn: ưu tiên .env, tự động fallback sang .env.example
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Không thể nạp .env, thử nạp dự phòng từ .env.example: $e");
+    try {
+      await dotenv.load(fileName: ".env.example");
+    } catch (_) {
+      debugPrint("Chưa có file cấu hình môi trường (.env hoặc .env.example)");
+    }
+  }
   await SupabaseConfig.initialize();
 
   // Khởi tạo Firebase (FCM) an toàn
