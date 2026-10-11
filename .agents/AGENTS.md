@@ -15,9 +15,9 @@ Agent **BẮT BUỘC** nhận diện ngữ cảnh và áp dụng ngay lập tứ
 - **`writing-plans` / `executing-plans`**: Bắt buộc viết tài liệu kế hoạch (plan) chi tiết và bám sát thực thi từng bước.
 - **`using-superpowers` / `writing-skills`**: Bắt buộc đọc và sử dụng các năng lực hệ thống, quản lý quy trình đúng chuẩn.
 
-**B. Quy trình Code & Quản lý Nhánh (Git/Code Workflow)**
+**B. Quy trình Code & Git (Git/Code Workflow)**
 - **`requesting-code-review` / `receiving-code-review`**: Tự động đánh giá, rà soát code trước khi hoàn thành task.
-- **`using-git-worktrees` / `finishing-a-development-branch`**: Tự động quản lý branch an toàn khi phát triển và merge tính năng.
+- **Commit trực tiếp vào `main`**: Theo yêu cầu dự án, toàn bộ công việc được thực hiện và commit trực tiếp trên nhánh `main`, không tạo thêm branch/worktree phụ.
 
 **C. Quy trình Debug & Kiểm thử (Testing)**
 - **`test-driven-development`**: Bắt buộc viết kịch bản test trước, code sau.

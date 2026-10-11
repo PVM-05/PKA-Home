@@ -38,9 +38,9 @@ lib/
 - **Mã phòng/căn hộ**: Sử dụng định dạng chuẩn `A0110` / `a0110` (Block + Tầng 2 chữ số + Phòng 2 chữ số) trong placeholder, validate và mock data thay vì dạng `A101`.
 
 ## 3. Git workflow
-- **Branch**: `feature/<ten-tinh-nang>`, `fix/<ten-loi>`, `docs/<ten-tai-lieu>`
-- **Commit message**: dạng `<loại>: <mô tả ngắn>` (loại gồm feat, fix, docs, refactor, style, test). VD: `feat: thêm màn hình xem chi tiết hóa đơn`
-- **Không commit trực tiếp vào main**: Dùng Pull Request kể cả khi làm một mình để lưu lịch sử review phục vụ báo cáo đồ án.
+- **Branch**: Chỉ sử dụng duy nhất nhánh `main`. Không tạo các nhánh tính năng phụ (`feature/*`, `fix/*`, `docs/*`...).
+- **Commit**: Toàn bộ thay đổi commit trực tiếp vào `main`.
+- **Commit message**: Dạng `<loại>: <mô tả ngắn>` (loại gồm feat, fix, docs, refactor, style, test). VD: `feat: thêm màn hình xem chi tiết hóa đơn`
 
 ## 4. Quy tắc quản lý trạng thái (Riverpod)
 - Mỗi tính năng có 1 file `*_provider.dart` riêng, không gộp nhiều provider không liên quan.
