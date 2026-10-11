@@ -6,8 +6,17 @@ import 'package:pka_home/data/models/amenity_booking_model.dart';
 import 'package:pka_home/data/models/amenity_maintenance_model.dart';
 import 'package:pka_home/data/providers/handbook_provider.dart';
 import 'package:pka_home/data/providers/amenity_booking_provider.dart';
+import 'package:pka_home/data/models/user_model.dart';
+import 'package:pka_home/data/providers/auth_provider.dart';
 import 'package:pka_home/data/repositories/amenity_booking_repository.dart';
 import 'package:pka_home/features/management/screens/amenity_management_screen.dart';
+
+class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class MockAmenityBookingRepo implements AmenityBookingRepository {
   bool checkInCalled = false;
@@ -108,6 +117,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          authProvider.overrideWith((ref) => FakeAuthNotifier(UserModel(
+                id: 'admin-1',
+                fullName: 'Quản trị viên',
+                phone: '0901234567',
+                role: 'admin',
+              ))),
           amenityBookingRepositoryProvider.overrideWithValue(mockRepo),
           buildingAmenitiesProvider.overrideWith((ref) => [testAmenity]),
           amenityBookingsForDateProvider.overrideWith((ref, query) => mockRepo.getBookingsByAmenityAndDate(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
@@ -41,6 +42,9 @@ class PushNotificationService {
 
   bool _isLocalNotificationsInitialized = false;
 
+  StreamSubscription<String>? _tokenRefreshSub;
+  StreamSubscription<RemoteMessage>? _onMessageSub;
+
   /// Đảm bảo plugin local notifications và notification channel luôn được khởi tạo trước khi gọi show
   Future<void> ensureLocalNotificationsInitialized([
     void Function(String route)? onSelectNotificationRoute,
@@ -53,6 +57,14 @@ class PushNotificationService {
   /// Kiểm tra an toàn xem Firebase đã được khởi tạo hay chưa
   bool get isFirebaseInitialized => Firebase.apps.isNotEmpty;
 
+  /// Hủy các listener để tránh cộng dồn khi logout/login
+  void dispose() {
+    _tokenRefreshSub?.cancel();
+    _tokenRefreshSub = null;
+    _onMessageSub?.cancel();
+    _onMessageSub = null;
+  }
+
   /// Khởi tạo an toàn (Fail-safe): Tự động bắt lỗi nếu chạy trên môi trường test,
   /// Windows desktop hoặc thiết bị chưa có dịch vụ Google Play.
   Future<void> safeInitialize({
@@ -60,6 +72,12 @@ class PushNotificationService {
     void Function(String route)? onSelectNotificationRoute,
   }) async {
     try {
+      // Hủy các subscription cũ trước khi tạo mới để tránh cộng dồn listener
+      await _tokenRefreshSub?.cancel();
+      _tokenRefreshSub = null;
+      await _onMessageSub?.cancel();
+      _onMessageSub = null;
+
       // 1. Khởi tạo Android Notification Channel và Local Notifications cho hiển thị Heads-up & Âm thanh
       await ensureLocalNotificationsInitialized(onSelectNotificationRoute);
 
@@ -93,8 +111,8 @@ class PushNotificationService {
           );
         }
 
-        // 4. Lắng nghe cập nhật token khi Google làm mới
-        fcm.onTokenRefresh.listen((newToken) async {
+        // 4. Lắng nghe cập nhật token khi Google làm mới (tránh cộng dồn)
+        _tokenRefreshSub = fcm.onTokenRefresh.listen((newToken) async {
           debugPrint('FCM Token đã được làm mới: $newToken');
           await registerTokenManually(
             userId: userId,
@@ -111,7 +129,7 @@ class PushNotificationService {
         );
 
         // 6. Lắng nghe thông báo khi ứng dụng đang mở (Foreground) để hiện thông báo hệ thống có âm thanh
-        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        _onMessageSub = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           _showForegroundSystemNotification(message);
         });
       } else {

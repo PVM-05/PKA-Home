@@ -5,6 +5,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/building_amenity_model.dart';
 import '../../../data/models/amenity_booking_model.dart';
 import '../../../data/providers/handbook_provider.dart';
@@ -345,8 +347,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
   Widget build(BuildContext context) {
     final amenitiesAsync = ref.watch(buildingAmenitiesProvider);
 
-    return Scaffold(
-      appBar: AppBar(
+    return RoleGuard(
+      permission: AppPermissions.amenityManagement,
+      child: Scaffold(
+        appBar: AppBar(
         title: const Text('Quản Trị Tiện Ích'),
         actions: [
           IconButton(
@@ -436,8 +440,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: AppErrorCard(error: e)),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // ===========================================================================
   // Tab 1: Danh sách Đặt Lịch & Điểm Danh

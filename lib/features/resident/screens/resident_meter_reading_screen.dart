@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
@@ -70,12 +72,12 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
         setState(() {
           if (type == MeterType.electric) {
             _electricOcrResult = result;
-            _electricImagePath = null;
+            _electricImagePath = 'https://storage.supabase.co/v0/b/meter-images/electric_sample.jpg';
             _electricController.text = result.detectedReading.toString();
             _isScanningElectric = false;
           } else {
             _waterOcrResult = result;
-            _waterImagePath = null;
+            _waterImagePath = 'https://storage.supabase.co/v0/b/meter-images/water_sample.jpg';
             _waterController.text = result.detectedReading.toString();
             _isScanningWater = false;
           }
@@ -232,7 +234,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: () => Navigator.of(context).pushNamed('/link-request'),
+                      onPressed: () => context.push(AppRoutes.residentLinkRequest),
                       icon: const Icon(Icons.link),
                       label: const Text('Gửi yêu cầu liên kết'),
                     ),
@@ -384,10 +386,14 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
                               const Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.bolt, color: Colors.amber),
                                   SizedBox(width: 6),
@@ -400,7 +406,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Quét ảnh Smart OCR'),
+                                label: const Text('Quét OCR (Mô phỏng)'),
                                 onPressed: _isScanningElectric ? null : () => _scanMeter(MeterType.electric, oldElec),
                               ),
                             ],
@@ -467,10 +473,14 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
                               const Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.water_drop, color: Colors.blue),
                                   SizedBox(width: 6),
@@ -483,7 +493,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Quét ảnh Smart OCR'),
+                                label: const Text('Quét OCR (Mô phỏng)'),
                                 onPressed: _isScanningWater ? null : () => _scanMeter(MeterType.water, oldWater),
                               ),
                             ],

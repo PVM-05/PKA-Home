@@ -38,5 +38,8 @@ void main() {
     expect(content.contains("GREATEST(0, v_cur_elec - v_old_elec)"), isTrue);
     expect(content.contains(r"\ysập\y|\ysap\y|\ynổ\y|\yno\y"), isTrue);
     expect(content.contains("DROP FUNCTION IF EXISTS public.simulate_invoice_payment(UUID, VARCHAR)"), isTrue);
+    expect(content.contains("checked_in_at"), isTrue, reason: 'Phải cập nhật cột checked_in_at');
+    expect(content.contains("building_amenities"), isTrue, reason: 'Phải trỏ đúng bảng building_amenities');
+    expect(content.contains("auth.uid() IS NULL"), isTrue, reason: 'Phải cho phép seed script chạy khi auth.uid() null');
   });
 }

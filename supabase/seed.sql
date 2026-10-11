@@ -855,6 +855,122 @@ BEGIN
         full_name = EXCLUDED.full_name,
         phone = EXCLUDED.phone,
         role = EXCLUDED.role;
+
+    -- 5 tài khoản cư dân bổ sung tránh lỗi FK trong residents_apartments
+    -- User 1: a84c3099-f173-433c-8a8e-5990eeb8aad9
+    IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = 'a84c3099-f173-433c-8a8e-5990eeb8aad9') THEN
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role, aud
+        ) VALUES (
+            'a84c3099-f173-433c-8a8e-5990eeb8aad9', '00000000-0000-0000-0000-000000000000'::uuid, 'cudan.a0101b@gmail.com',
+            crypt('PkaHome@2026', gen_salt('bf')), NOW(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            jsonb_build_object('full_name', 'Nguyễn Văn An', 'role', 'resident'),
+            NOW(), NOW(), 'authenticated', 'authenticated'
+        );
+        INSERT INTO auth.identities (
+            id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+        ) VALUES (
+            'a84c3099-f173-433c-8a8e-5990eeb8aad9', 'a84c3099-f173-433c-8a8e-5990eeb8aad9', jsonb_build_object('sub', 'a84c3099-f173-433c-8a8e-5990eeb8aad9', 'email', 'cudan.a0101b@gmail.com'),
+            'email', 'a84c3099-f173-433c-8a8e-5990eeb8aad9', NOW(), NOW(), NOW()
+        ) ON CONFLICT DO NOTHING;
+    END IF;
+    INSERT INTO public.users (id, full_name, phone, role, is_locked)
+    VALUES ('a84c3099-f173-433c-8a8e-5990eeb8aad9', 'Nguyễn Văn An', '0911001011', 'resident'::public.user_role, false)
+    ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, phone = EXCLUDED.phone, role = EXCLUDED.role;
+
+    -- User 2: 4f89c188-841e-4936-854b-a70393c265be
+    IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = '4f89c188-841e-4936-854b-a70393c265be') THEN
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role, aud
+        ) VALUES (
+            '4f89c188-841e-4936-854b-a70393c265be', '00000000-0000-0000-0000-000000000000'::uuid, 'cudan.a0102b@gmail.com',
+            crypt('PkaHome@2026', gen_salt('bf')), NOW(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            jsonb_build_object('full_name', 'Trần Thị Bích', 'role', 'resident'),
+            NOW(), NOW(), 'authenticated', 'authenticated'
+        );
+        INSERT INTO auth.identities (
+            id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+        ) VALUES (
+            '4f89c188-841e-4936-854b-a70393c265be', '4f89c188-841e-4936-854b-a70393c265be', jsonb_build_object('sub', '4f89c188-841e-4936-854b-a70393c265be', 'email', 'cudan.a0102b@gmail.com'),
+            'email', '4f89c188-841e-4936-854b-a70393c265be', NOW(), NOW(), NOW()
+        ) ON CONFLICT DO NOTHING;
+    END IF;
+    INSERT INTO public.users (id, full_name, phone, role, is_locked)
+    VALUES ('4f89c188-841e-4936-854b-a70393c265be', 'Trần Thị Bích', '0911001012', 'resident'::public.user_role, false)
+    ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, phone = EXCLUDED.phone, role = EXCLUDED.role;
+
+    -- User 3: f5547802-196d-475b-877d-c0ea2c3d3910
+    IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = 'f5547802-196d-475b-877d-c0ea2c3d3910') THEN
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role, aud
+        ) VALUES (
+            'f5547802-196d-475b-877d-c0ea2c3d3910', '00000000-0000-0000-0000-000000000000'::uuid, 'cudan.a0103b@gmail.com',
+            crypt('PkaHome@2026', gen_salt('bf')), NOW(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            jsonb_build_object('full_name', 'Lê Hoàng Cường', 'role', 'resident'),
+            NOW(), NOW(), 'authenticated', 'authenticated'
+        );
+        INSERT INTO auth.identities (
+            id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+        ) VALUES (
+            'f5547802-196d-475b-877d-c0ea2c3d3910', 'f5547802-196d-475b-877d-c0ea2c3d3910', jsonb_build_object('sub', 'f5547802-196d-475b-877d-c0ea2c3d3910', 'email', 'cudan.a0103b@gmail.com'),
+            'email', 'f5547802-196d-475b-877d-c0ea2c3d3910', NOW(), NOW(), NOW()
+        ) ON CONFLICT DO NOTHING;
+    END IF;
+    INSERT INTO public.users (id, full_name, phone, role, is_locked)
+    VALUES ('f5547802-196d-475b-877d-c0ea2c3d3910', 'Lê Hoàng Cường', '0911001013', 'resident'::public.user_role, false)
+    ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, phone = EXCLUDED.phone, role = EXCLUDED.role;
+
+    -- User 4: 78fbb083-ee75-4144-9bc8-79f79a49584a
+    IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = '78fbb083-ee75-4144-9bc8-79f79a49584a') THEN
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role, aud
+        ) VALUES (
+            '78fbb083-ee75-4144-9bc8-79f79a49584a', '00000000-0000-0000-0000-000000000000'::uuid, 'cudan.a0204b@gmail.com',
+            crypt('PkaHome@2026', gen_salt('bf')), NOW(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            jsonb_build_object('full_name', 'Phạm Thị Dung', 'role', 'resident'),
+            NOW(), NOW(), 'authenticated', 'authenticated'
+        );
+        INSERT INTO auth.identities (
+            id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+        ) VALUES (
+            '78fbb083-ee75-4144-9bc8-79f79a49584a', '78fbb083-ee75-4144-9bc8-79f79a49584a', jsonb_build_object('sub', '78fbb083-ee75-4144-9bc8-79f79a49584a', 'email', 'cudan.a0204b@gmail.com'),
+            'email', '78fbb083-ee75-4144-9bc8-79f79a49584a', NOW(), NOW(), NOW()
+        ) ON CONFLICT DO NOTHING;
+    END IF;
+    INSERT INTO public.users (id, full_name, phone, role, is_locked)
+    VALUES ('78fbb083-ee75-4144-9bc8-79f79a49584a', 'Phạm Thị Dung', '0911001014', 'resident'::public.user_role, false)
+    ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, phone = EXCLUDED.phone, role = EXCLUDED.role;
+
+    -- User 5: 17a9f297-6fb8-45b0-a9e7-a598fd770684
+    IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = '17a9f297-6fb8-45b0-a9e7-a598fd770684') THEN
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password, email_confirmed_at,
+            raw_app_meta_data, raw_user_meta_data, created_at, updated_at, role, aud
+        ) VALUES (
+            '17a9f297-6fb8-45b0-a9e7-a598fd770684', '00000000-0000-0000-0000-000000000000'::uuid, 'cudan.a0305b@gmail.com',
+            crypt('PkaHome@2026', gen_salt('bf')), NOW(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            jsonb_build_object('full_name', 'Võ Quốc Em', 'role', 'resident'),
+            NOW(), NOW(), 'authenticated', 'authenticated'
+        );
+        INSERT INTO auth.identities (
+            id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+        ) VALUES (
+            '17a9f297-6fb8-45b0-a9e7-a598fd770684', '17a9f297-6fb8-45b0-a9e7-a598fd770684', jsonb_build_object('sub', '17a9f297-6fb8-45b0-a9e7-a598fd770684', 'email', 'cudan.a0305b@gmail.com'),
+            'email', '17a9f297-6fb8-45b0-a9e7-a598fd770684', NOW(), NOW(), NOW()
+        ) ON CONFLICT DO NOTHING;
+    END IF;
+    INSERT INTO public.users (id, full_name, phone, role, is_locked)
+    VALUES ('17a9f297-6fb8-45b0-a9e7-a598fd770684', 'Võ Quốc Em', '0911001015', 'resident'::public.user_role, false)
+    ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, phone = EXCLUDED.phone, role = EXCLUDED.role;
 END $$;
 
 -- 3. LIÊN KẾT CƯ DÂN VÀO 25 CĂN HỘ ĐANG CƯ TRÚ

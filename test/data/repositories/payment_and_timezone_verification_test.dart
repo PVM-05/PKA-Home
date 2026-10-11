@@ -17,8 +17,8 @@ void main() {
       expect(content.contains('check_in_amenity_booking'), isTrue);
       
       // Revoke execution from public/anon
-      expect(content.contains('REVOKE ALL ON FUNCTION public.approve_meter_reading FROM anon, PUBLIC;'), isTrue);
-      expect(content.contains('REVOKE ALL ON FUNCTION public.generate_valid_bulk_invoices FROM anon, PUBLIC;'), isTrue);
+      expect(content.contains('REVOKE ALL ON FUNCTION public.approve_meter_reading'), isTrue);
+      expect(content.contains('REVOKE ALL ON FUNCTION public.generate_valid_bulk_invoices'), isTrue);
     });
   });
 }

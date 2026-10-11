@@ -189,7 +189,7 @@ Dự án sở hữu bộ kiểm thử tự động với độ bao phủ cao (TD
 
 ## 📜 8. Quy Chuẩn Đóng Góp (Git & Coding Workflow)
 
-- **Ngôn ngữ giao diện**: 100% tiếng Việt chuẩn mực theo [`design-rules.md`](file:///.agents/rules/design-rules.md).
+- **Ngôn ngữ giao diện**: 100% tiếng Việt chuẩn mực theo [design-rules.md](.agents/rules/design-rules.md).
 - **Quy tắc phân nhánh**:
   - `feature/<ten-tinh-nang>`: Phát triển tính năng mới.
   - `fix/<ten-loi>`: Sửa chữa lỗi phát sinh.

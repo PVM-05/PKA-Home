@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/models/user_model.dart';
@@ -227,8 +229,10 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
     final isAdmin = currentUser?.isAdmin ?? false;
     timeago.setLocaleMessages('vi', timeago.ViMessages());
 
-    return Scaffold(
-      appBar: AppBar(
+    return RoleGuard(
+      permission: AppPermissions.auditTrail,
+      child: Scaffold(
+        appBar: AppBar(
         title: const Text('Lịch sử Hoạt động'),
         leading: IconButton(
           icon: const Icon(Icons.chevron_left),
@@ -376,8 +380,9 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildFilterChip(String category, String label) {
     final isSelected = _selectedCategory == category;
