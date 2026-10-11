@@ -59,5 +59,19 @@ void main() {
       expect(result.status, 'FAILED');
       expect(result.errorMessage, 'Hóa đơn này đã được thanh toán trước đó');
     });
+
+    test('không tự suy đoán SUCCESS khi thiếu status dù có success: true', () {
+      final json = {
+        'success': true,
+        'transaction_code': 'LEGACY-001',
+      };
+
+      final result = PaymentResult.fromJson(json);
+
+      expect(result.status, 'UNKNOWN');
+      expect(result.success, isFalse);
+      expect(result.isPending, isFalse);
+      expect(result.errorMessage, contains('thiếu trạng thái'));
+    });
   });
 }

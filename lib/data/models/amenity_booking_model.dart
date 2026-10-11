@@ -40,6 +40,7 @@ class AmenityBookingModel {
   });
 
   bool get isConfirmed => status == 'confirmed';
+  bool get isPendingPayment => status == 'pending_payment';
   bool get isWaitlist => status == 'waitlist';
   bool get isCancelled => status == 'cancelled';
   bool get isCompleted => status == 'completed';

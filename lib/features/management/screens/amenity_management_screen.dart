@@ -476,7 +476,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
 
               Color statusColor = AppStatusColors.paid;
               String statusLabel = 'Chờ Check-in';
-              if (b.isWaitlist) {
+              if (b.isPendingPayment) {
+                statusColor = AppTheme.warning;
+                statusLabel = 'Chờ thanh toán';
+              } else if (b.isWaitlist) {
                 statusColor = Colors.purple;
                 statusLabel = 'Danh sách chờ';
               } else if (b.isCancelled) {
@@ -525,14 +528,14 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          const Icon(Icons.payments_outlined, size: 16, color: AppStatusColors.paid),
+                          Icon(Icons.payments_outlined, size: 16, color: b.isPendingPayment ? AppTheme.warning : AppStatusColors.paid),
                           const SizedBox(width: 4),
                           Text(
-                            'Phí dịch vụ: ${_currencyFormat.format(b.feeAmount)} (Đã thanh toán)',
-                            style: const TextStyle(
+                            'Phí dịch vụ: ${_currencyFormat.format(b.feeAmount)} ${b.isPendingPayment ? "(Chờ thu)" : "(Đã thanh toán)"}',
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: AppStatusColors.paid,
+                              color: b.isPendingPayment ? AppTheme.warning : AppStatusColors.paid,
                             ),
                           ),
                         ],
@@ -579,6 +582,18 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        if (b.isPendingPayment || (!b.isConfirmed && !b.isCancelled && !b.isWaitlist && (b.feeAmount > 0 || b.depositAmount > 0))) ...[
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.success,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: const Icon(Icons.check_circle_outline, size: 16),
+                            label: const Text('Xác nhận thu phí'),
+                            onPressed: () => _showConfirmAmenityPaymentDialog(b, query),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                         if (b.isConfirmed) ...[
                           OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
@@ -589,8 +604,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                             label: const Text('Vắng mặt (No-show)'),
                             onPressed: () async {
                               await ref
-                                  .read(amenityBookingRepositoryProvider)
-                                  .markBookingAttendance(b.id, 'no_show');
+                                   .read(amenityBookingRepositoryProvider)
+                                   .markBookingAttendance(b.id, 'no_show');
                               ref.invalidate(amenityBookingsForDateProvider(query));
                               ref.invalidate(allAmenityBookingsProvider);
                             },
@@ -620,7 +635,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                             },
                           ),
                         ],
-                        if (!b.isConfirmed && b.depositAmount > 0)
+                        if (!b.isConfirmed && !b.isPendingPayment && b.depositAmount > 0)
                           TextButton.icon(
                             icon: const Icon(Icons.edit_note, size: 16),
                             label: const Text('Xem cọc'),
@@ -723,5 +738,123 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
         ),
       ),
     );
+  }
+
+  Future<void> _showConfirmAmenityPaymentDialog(AmenityBookingModel b, AmenityDateQuery query) async {
+    String selectedMethod = 'CASH';
+    final totalFee = b.feeAmount + b.depositAmount;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: AppTheme.success),
+              SizedBox(width: 8),
+              Text('Thu phí dịch vụ tiện ích'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Xác nhận đã nhận đủ tiền phí/tiền cọc từ cư dân:'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('• Căn hộ: ${b.apartmentCode ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('• Tiện ích: ${b.amenityName ?? "Dịch vụ"} (${b.timeSlot})'),
+                    const SizedBox(height: 4),
+                    Text('• Tổng thu: ${_currencyFormat.format(totalFee)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              const SizedBox(height: 6),
+              // ignore: deprecated_member_use
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: const Text('Tiền mặt (CASH)'),
+                value: 'CASH',
+                // ignore: deprecated_member_use
+                groupValue: selectedMethod,
+                // ignore: deprecated_member_use
+                onChanged: (val) {
+                  if (val != null) setDialogState(() => selectedMethod = val);
+                },
+              ),
+              // ignore: deprecated_member_use
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: const Text('Chuyển khoản (BANK_TRANSFER)'),
+                value: 'BANK_TRANSFER',
+                // ignore: deprecated_member_use
+                groupValue: selectedMethod,
+                // ignore: deprecated_member_use
+                onChanged: (val) {
+                  if (val != null) setDialogState(() => selectedMethod = val);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.success,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Xác nhận đã thu'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final methodTitle = selectedMethod == 'CASH' ? 'Tiền mặt' : 'Chuyển khoản';
+      await ref.read(amenityBookingRepositoryProvider).recordManualAmenityPayment(
+        bookingId: b.id,
+        paymentMethod: selectedMethod,
+        notes: 'Thu phí dịch vụ tiện ích ${b.amenityName ?? ""} ($methodTitle)',
+      );
+      ref.invalidate(amenityBookingsForDateProvider(query));
+      ref.invalidate(allAmenityBookingsProvider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Xác nhận thu phí ($methodTitle) thành công cho căn hộ ${b.apartmentCode ?? ""}!'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
   }
 }

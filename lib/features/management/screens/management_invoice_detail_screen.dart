@@ -200,6 +200,18 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final reqMethod = (invoice.paymentMethod ?? '').toLowerCase();
+    final isCashRequest = reqMethod == 'cash' || reqMethod == 'tiền mặt';
+
+    final String buttonLabel;
+    if (isPending) {
+      buttonLabel = isCashRequest
+          ? 'XÁC NHẬN ĐÃ THU (Cư dân báo nộp Tiền mặt)'
+          : 'XÁC NHẬN ĐÃ THU (Cư dân báo Chuyển khoản)';
+    } else {
+      buttonLabel = 'XÁC NHẬN ĐÃ THU (Thu trực tiếp tại quầy)';
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -218,64 +230,103 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           backgroundColor: AppTheme.success,
         ),
         onPressed: () => _confirmPayment(context, ref, isPending),
-        child: Text(isPending ? 'XÁC NHẬN ĐÃ THU (Cư dân báo đã CK)' : 'XÁC NHẬN ĐÃ THU (Tiền mặt)'),
+        child: Text(buttonLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
       ),
     );
   }
 
   Future<void> _confirmPayment(BuildContext context, WidgetRef ref, bool isPending) async {
-    final method = isPending ? 'Chuyển khoản (Cư dân báo đã chuyển)' : 'Tiền mặt';
+    final reqMethod = (invoice.paymentMethod ?? '').toLowerCase();
+    final isCashRequest = reqMethod == 'cash' || reqMethod == 'tiền mặt';
+    String selectedMethod = isCashRequest ? 'CASH' : 'BANK_TRANSFER';
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle_outline, color: AppTheme.success),
-            SizedBox(width: 8),
-            Text('Xác nhận thu tiền'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Vui lòng xác nhận đã nhận đủ tiền thanh toán:'),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: AppTheme.success),
+              SizedBox(width: 8),
+              Text('Xác nhận thu tiền'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Vui lòng kiểm tra và xác nhận phương thức đã nhận đủ:'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('• Căn hộ: ${invoice.apartment?.code ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('• Kỳ phí: ${invoice.period}'),
+                    const SizedBox(height: 4),
+                    Text('• Số tiền: ${NumberFormat.currency(locale: "vi_VN", symbol: "đ").format(invoice.totalAmount)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                    if (isPending) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '• Cư dân đã báo: ${isCashRequest ? "Nộp tiền mặt tại BQL" : "Chuyển khoản (VietQR)"}',
+                        style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('• Căn hộ: ${invoice.apartment?.code ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('• Kỳ phí: ${invoice.period}'),
-                  const SizedBox(height: 4),
-                  Text('• Số tiền: ${NumberFormat.currency(locale: "vi_VN", symbol: "đ").format(invoice.totalAmount)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('• Hình thức: $method'),
-                ],
+              const SizedBox(height: 14),
+              const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              const SizedBox(height: 6),
+              // ignore: deprecated_member_use
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: const Text('Tiền mặt (CASH)'),
+                value: 'CASH',
+                // ignore: deprecated_member_use
+                groupValue: selectedMethod,
+                // ignore: deprecated_member_use
+                onChanged: (val) {
+                  if (val != null) setDialogState(() => selectedMethod = val);
+                },
               ),
+              // ignore: deprecated_member_use
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: const Text('Chuyển khoản (BANK_TRANSFER)'),
+                value: 'BANK_TRANSFER',
+                // ignore: deprecated_member_use
+                groupValue: selectedMethod,
+                // ignore: deprecated_member_use
+                onChanged: (val) {
+                  if (val != null) setDialogState(() => selectedMethod = val);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.success,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Xác nhận đã thu'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.success,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xác nhận đã thu'),
-          ),
-        ],
       ),
     );
 
@@ -283,13 +334,13 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
 
     try {
       final repo = ref.read(managementRepositoryProvider);
-      final txnMethod = isPending ? 'BANK_TRANSFER' : 'CASH';
-      final txnTitle = 'Thanh toán hóa đơn kỳ ${invoice.period} (${isPending ? "Chuyển khoản" : "Tiền mặt"})';
+      final methodTitle = selectedMethod == 'CASH' ? 'Tiền mặt' : 'Chuyển khoản';
+      final txnTitle = 'Thanh toán hóa đơn kỳ ${invoice.period} ($methodTitle)';
       
       // Sử dụng recordManualPayment thay thế cho recordPaymentTransaction để đảm bảo tính nguyên tử (atomic transaction)
       await repo.recordManualPayment(
         invoiceId: invoice.id,
-        paymentMethod: txnMethod,
+        paymentMethod: selectedMethod,
         notes: txnTitle,
       );
 
@@ -297,8 +348,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       ref.invalidate(paymentTransactionsProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Xác nhận thu tiền thành công.'),
+          SnackBar(
+            content: Text('Xác nhận thu tiền ($methodTitle) thành công.'),
             backgroundColor: AppTheme.success,
           ),
         );

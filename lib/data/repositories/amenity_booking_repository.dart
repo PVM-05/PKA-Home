@@ -115,6 +115,20 @@ class AmenityBookingRepository {
     }).eq('id', bookingId);
   }
 
+  /// Ban quản lý xác nhận thu phí dịch vụ / tiền cọc tiện ích nguyên tử
+  Future<Map<String, dynamic>> recordManualAmenityPayment({
+    required String bookingId,
+    String paymentMethod = 'CASH',
+    String? notes,
+  }) async {
+    final response = await _client.rpc('record_manual_amenity_payment', params: {
+      'p_booking_id': bookingId,
+      'p_payment_method': paymentMethod,
+      'p_notes': notes,
+    });
+    return Map<String, dynamic>.from(response as Map);
+  }
+
   /// Ban quản lý điểm danh cư dân đến nhận tiện ích (completed hoặc no_show)
   Future<void> markBookingAttendance(String bookingId, String status) async {
     await _client.from('amenity_bookings').update({
