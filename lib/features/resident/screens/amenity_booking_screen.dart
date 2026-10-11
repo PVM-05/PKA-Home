@@ -232,6 +232,18 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                             _showBookingSuccessDialog(context, result, slot);
                             return;
                           }
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Lịch đặt đã được ghi nhận ở trạng thái Chờ thanh toán. Vui lòng liên hệ Ban Quản Lý để hoàn tất thanh toán trước giờ sử dụng.',
+                                ),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                            return;
+                          }
                         }
 
                         if (mounted) {

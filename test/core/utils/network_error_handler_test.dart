@@ -52,6 +52,15 @@ void main() {
       expect(msg, equals('Căn hộ đã đạt tối đa 2 xe máy'));
     });
 
+    test('Xử lý PostgrestException 0A000 feature_not_supported trả về thông điệp RPC', () {
+      final error = PostgrestException(
+        message: 'Thanh toán trực tuyến chưa được cấu hình. Hệ thống không ghi nhận giao dịch demo; vui lòng liên hệ Ban Quản Lý để xác nhận thanh toán.',
+        code: '0A000',
+      );
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, contains('Thanh toán trực tuyến chưa được cấu hình'));
+    });
+
     test('Xử lý Exception thông thường dạng chuỗi mạng', () {
       final error = Exception('ClientException with SocketException');
       final msg = NetworkErrorHandler.getMessage(error);
