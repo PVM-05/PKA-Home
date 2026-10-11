@@ -23,21 +23,13 @@ class AnnouncementRepository {
     String targetType = 'all',
     String? targetApartment,
   }) async {
-    try {
-      await _client.from('announcements').insert({
-        'title': title,
-        'content': content,
-        'is_urgent': isUrgent,
-        'target_type': targetType,
-        'target_apartment': ?targetApartment,
-      });
-    } catch (_) {
-      await _client.from('announcements').insert({
-        'title': title,
-        'content': content,
-        'is_urgent': isUrgent,
-      });
-    }
+    await _client.from('announcements').insert({
+      'title': title,
+      'content': content,
+      'is_urgent': isUrgent,
+      'target_type': targetType,
+      'target_apartment': ?targetApartment,
+    });
   }
 
   Future<void> updateAnnouncement({
@@ -48,23 +40,14 @@ class AnnouncementRepository {
     String targetType = 'all',
     String? targetApartment,
   }) async {
-    try {
-      await _client.from('announcements').update({
-        'title': title,
-        'content': content,
-        'is_urgent': isUrgent,
-        'target_type': targetType,
-        'target_apartment': ?targetApartment,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', id);
-    } catch (_) {
-      await _client.from('announcements').update({
-        'title': title,
-        'content': content,
-        'is_urgent': isUrgent,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', id);
-    }
+    await _client.from('announcements').update({
+      'title': title,
+      'content': content,
+      'is_urgent': isUrgent,
+      'target_type': targetType,
+      'target_apartment': ?targetApartment,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('id', id);
   }
 
   Future<void> deleteAnnouncement(String id) async {
