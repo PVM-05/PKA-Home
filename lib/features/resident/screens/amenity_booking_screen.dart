@@ -229,7 +229,18 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           );
 
                           if (paymentRes != null && paymentRes.success && mounted) {
-                            _showBookingSuccessDialog(context, result, slot);
+                            if (paymentRes.isPending || paymentRes.status == 'PENDING') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Đã gửi thông báo thanh toán dịch vụ (${paymentRes.transactionCode}). Vui lòng chờ Ban Quản Lý xác nhận.',
+                                  ),
+                                  backgroundColor: Colors.orange.shade800,
+                                ),
+                              );
+                            } else {
+                              _showBookingSuccessDialog(context, result, slot);
+                            }
                             return;
                           }
 

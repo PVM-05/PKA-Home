@@ -59,5 +59,50 @@ void main() {
       expect(model.statusDisplayName, 'Thất bại');
       expect(model.failureReason, contains('từ chối'));
     });
+
+    test('deserialize JSON giao dịch PENDING (chờ xác nhận)', () {
+      final json = {
+        'id': 'tx-003',
+        'invoice_id': 'inv-101',
+        'user_id': 'user-1',
+        'apartment_id': 'apt-01',
+        'amount': 500000.0,
+        'payment_method': 'bank_transfer',
+        'status': 'PENDING',
+        'transaction_code': 'PENDING-INV-20261011-AB12',
+        'failure_reason': null,
+        'confirmed_by': 'staff-01',
+        'confirmed_at': '2026-10-11T20:30:00Z',
+        'created_at': '2026-10-11T20:00:00Z',
+      };
+
+      final model = PaymentTransactionModel.fromJson(json);
+
+      expect(model.isPending, isTrue);
+      expect(model.isSuccess, isFalse);
+      expect(model.isFailed, isFalse);
+      expect(model.statusDisplayName, 'Chờ xác nhận');
+      expect(model.transactionCode, 'PENDING-INV-20261011-AB12');
+      expect(model.confirmedBy, 'staff-01');
+      expect(model.confirmedAt, isNotNull);
+    });
+
+    test('fallback an toàn khi thiếu status không mặc định là SUCCESS', () {
+      final json = {
+        'id': 'tx-004',
+        'apartment_id': 'apt-01',
+        'amount': 150000.0,
+        'payment_method': 'CASH',
+        'transaction_code': 'TX-FALLBACK',
+      };
+
+      final model = PaymentTransactionModel.fromJson(json);
+
+      expect(model.status, 'PENDING');
+      expect(model.isPending, isTrue);
+      expect(model.isSuccess, isFalse);
+      expect(model.statusDisplayName, 'Chờ xác nhận');
+    });
   });
 }
+

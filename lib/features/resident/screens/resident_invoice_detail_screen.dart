@@ -323,7 +323,36 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
           },
         ),
       );
-    } else if (_invoice.status == 'paid' || _invoice.status == 'pending_confirmation') {
+    } else if (_invoice.status == 'pending_confirmation') {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              offset: const Offset(0, -4),
+              blurRadius: 16,
+            ),
+          ],
+        ),
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            side: const BorderSide(color: Colors.orange, width: 1.5),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          icon: const Icon(Icons.hourglass_top, color: Colors.orange),
+          label: const Text(
+            'ĐANG CHỜ BQL XÁC NHẬN (CHI TIẾT)',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
+          ),
+          onPressed: () {
+            _showDigitalReceiptBottomSheet(context);
+          },
+        ),
+      );
+    } else if (_invoice.status == 'paid') {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -385,12 +414,21 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
       if (result != null && result.success && mounted) {
         ref.invalidate(residentInvoiceProvider);
         ref.invalidate(residentInvoiceDetailProvider(_invoice.id));
-        ScaffoldMessenger.of(this.context).showSnackBar(
-          SnackBar(
-            content: Text('Thanh toán thành công! Mã GD: ${result.transactionCode}'),
-            backgroundColor: AppTheme.success,
-          ),
-        );
+        if (result.isPending || result.status == 'PENDING') {
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            SnackBar(
+              content: Text('Đã gửi thông báo thanh toán! Đang chờ Ban Quản Lý xác nhận. Mã: ${result.transactionCode}'),
+              backgroundColor: Colors.orange.shade800,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            SnackBar(
+              content: Text('Thanh toán thành công! Mã GD: ${result.transactionCode}'),
+              backgroundColor: AppTheme.success,
+            ),
+          );
+        }
       }
     } finally {
       _isOpeningPayment = false;

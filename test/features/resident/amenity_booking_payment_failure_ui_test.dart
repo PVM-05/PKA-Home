@@ -20,6 +20,7 @@ class FailingPaymentService extends PaymentService {
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
+    String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
   }) async {
     return PaymentResult(
@@ -162,8 +163,8 @@ void main() {
 
     expect(find.byType(UnifiedPaymentSheet), findsOneWidget);
 
-    // Bấm THANH TOÁN
-    await tester.tap(find.text('THANH TOÁN'));
+    // Bấm GỬI THÔNG BÁO THANH TOÁN
+    await tester.tap(find.text('GỬI THÔNG BÁO THANH TOÁN'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1600));
     await tester.pumpAndSettle();

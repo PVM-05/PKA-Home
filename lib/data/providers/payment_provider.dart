@@ -21,11 +21,13 @@ class PaymentController {
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
+    String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
   }) async {
     final result = await _service.pay(
       type: type,
       referenceId: referenceId,
+      paymentMethod: paymentMethod,
       outcome: outcome,
     );
 

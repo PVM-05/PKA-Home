@@ -13,6 +13,7 @@ class FakePaymentService extends PaymentService {
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
+    String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
   }) async {
     return fakeResult;
@@ -20,27 +21,29 @@ class FakePaymentService extends PaymentService {
 }
 
 void main() {
-  testWidgets('UnifiedPaymentSheet hiển thị xác nhận và hoàn tất thanh toán thành công', (tester) async {
-    tester.view.physicalSize = const Size(800, 1200);
+  testWidgets('UnifiedPaymentSheet hiển thị xác nhận và bước pendingConfirmation (Chờ BQL xác nhận)', (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     });
 
-    final fakeResult = PaymentResult(
+    final pendingResult = PaymentResult(
       success: true,
-      transactionCode: 'DEMO-20261005-0001',
-      transactionId: 'tx-001',
+      isPending: true,
+      status: 'PENDING',
+      transactionCode: 'PENDING-INV-20261011-0001',
+      transactionId: 'tx-pending-001',
       amount: 1480000.0,
-      title: 'Hóa đơn tháng 10/2026',
-      paidAt: DateTime(2026, 10, 5, 22, 30),
+      title: 'Yêu cầu thanh toán hóa đơn kỳ 10/2026',
+      paidAt: DateTime(2026, 10, 11, 20, 30),
     );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          paymentServiceProvider.overrideWithValue(FakePaymentService(fakeResult)),
+          paymentServiceProvider.overrideWithValue(FakePaymentService(pendingResult)),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -79,30 +82,93 @@ void main() {
     // 1. Kiểm tra trạng thái Xác nhận
     expect(find.text('Thanh toán hóa đơn'), findsOneWidget);
     expect(find.text('#INV-202610-A0110'), findsOneWidget);
-    expect(find.text('Demo Payment'), findsOneWidget);
-    expect(find.text('Giao dịch mô phỏng (Sandbox)'), findsOneWidget);
-    expect(find.text('Phí quản lý'), findsOneWidget);
-    expect(find.text('THANH TOÁN'), findsOneWidget);
+    expect(find.textContaining('Quy trình mô phỏng phục vụ đánh giá đồ án'), findsOneWidget);
+    expect(find.text('Chuyển khoản (VietQR Mô Phỏng)'), findsOneWidget);
+    expect(find.text('Tiền mặt tại văn phòng Ban Quản Lý'), findsOneWidget);
+    expect(find.text('GỬI THÔNG BÁO THANH TOÁN'), findsOneWidget);
 
-    // 2. Bấm nút THANH TOÁN
-    await tester.tap(find.text('THANH TOÁN'));
+    // 2. Bấm nút GỬI THÔNG BÁO THANH TOÁN
+    await tester.tap(find.text('GỬI THÔNG BÁO THANH TOÁN'));
     await tester.pump(); // frame đầu tiên chuyển sang Processing
-    expect(find.text('Đang xử lý giao dịch...'), findsOneWidget);
+    expect(find.text('Đang gửi thông báo thanh toán...'), findsOneWidget);
 
     // Chờ trễ giả lập và gọi API xong
     await tester.pump(const Duration(milliseconds: 1600));
     await tester.pumpAndSettle();
 
-    // 3. Kiểm tra trạng thái Thành công
-    expect(find.text('Thanh toán thành công'), findsOneWidget);
-    expect(find.text('DEMO-20261005-0001'), findsOneWidget);
-    expect(find.text('HOÀN TẤT'), findsOneWidget);
+    // 3. Kiểm tra bước pendingConfirmation (Không được hiển thị "Thanh toán thành công" giả)
+    expect(find.text('Đã gửi thông báo thanh toán'), findsOneWidget);
+    expect(find.text('Chờ Ban Quản Lý xác nhận'), findsOneWidget);
+    expect(find.text('PENDING-INV-20261011-0001'), findsOneWidget);
+    expect(find.text('ĐÃ HIỂU'), findsOneWidget);
+    expect(find.text('Thanh toán thành công'), findsNothing);
 
-    // Bấm hoàn tất
-    await tester.tap(find.text('HOÀN TẤT'));
+    // Bấm ĐÃ HIỂU để đóng sheet
+    await tester.tap(find.text('ĐÃ HIỂU'));
     await tester.pumpAndSettle();
 
     // Bottom sheet đã đóng
-    expect(find.text('Thanh toán thành công'), findsNothing);
+    expect(find.text('Đã gửi thông báo thanh toán'), findsNothing);
+  });
+
+  testWidgets('UnifiedPaymentSheet hiển thị bước success khi kết quả thanh toán là SUCCESS trực tiếp', (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final successResult = PaymentResult(
+      success: true,
+      isPending: false,
+      status: 'SUCCESS',
+      transactionCode: 'SUCCESS-20261011-0002',
+      transactionId: 'tx-success-002',
+      amount: 500000.0,
+      title: 'Hóa đơn tiền điện tháng 10/2026',
+      paidAt: DateTime(2026, 10, 11, 21, 0),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          paymentServiceProvider.overrideWithValue(FakePaymentService(successResult)),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    showUnifiedPaymentSheet(
+                      context: ctx,
+                      type: PaymentType.invoice,
+                      referenceId: 'inv-456',
+                      title: 'Hóa đơn tiền điện tháng 10/2026',
+                      referenceCode: '#INV-202610-A0201',
+                      amount: 500000.0,
+                    );
+                  },
+                  child: const Text('MỞ CỔNG'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('MỞ CỔNG'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('GỬI THÔNG BÁO THANH TOÁN'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Thanh toán thành công'), findsOneWidget);
+    expect(find.text('SUCCESS-20261011-0002'), findsOneWidget);
+    expect(find.text('HOÀN TẤT'), findsOneWidget);
   });
 }

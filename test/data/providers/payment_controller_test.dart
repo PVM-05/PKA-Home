@@ -13,6 +13,7 @@ class MockPaymentService extends PaymentService {
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
+    String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
   }) async {
     payCallCount++;
