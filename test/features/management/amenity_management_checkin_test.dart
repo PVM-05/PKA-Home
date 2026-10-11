@@ -95,6 +95,15 @@ class MockAmenityBookingRepo implements AmenityBookingRepository {
 
   @override
   Future<void> deleteMaintenanceWindow(String windowId) async {}
+
+  @override
+  Future<Map<String, dynamic>> recordManualAmenityPayment({
+    required String bookingId,
+    String paymentMethod = 'CASH',
+    String? notes,
+  }) async {
+    return {'success': true, 'message': 'Xác nhận thành công'};
+  }
 }
 
 void main() {

@@ -26,10 +26,25 @@ class PaymentResult {
   });
 
   factory PaymentResult.fromJson(Map<String, dynamic> json) {
-    final statusVal = json['status'] as String? ?? (json['success'] == true ? 'SUCCESS' : 'FAILED');
-    final isPendingVal = statusVal == 'PENDING' || (json['is_pending'] as bool? ?? false);
+    final rawStatus = json['status'] as String?;
+    final isExplicitPending = (json['is_pending'] as bool?) == true;
+
+    // Tuyệt đối không suy đoán SUCCESS từ boolean success nếu thiếu status tường minh
+    final String statusVal;
+    if (rawStatus != null && rawStatus.isNotEmpty) {
+      statusVal = rawStatus.toUpperCase();
+    } else if (isExplicitPending) {
+      statusVal = 'PENDING';
+    } else {
+      statusVal = 'UNKNOWN';
+    }
+
+    final isPendingVal = statusVal == 'PENDING';
+    final isSuccessVal = (json['success'] as bool? ?? false) && statusVal == 'SUCCESS';
+    final hasValidState = isSuccessVal || isPendingVal;
+
     return PaymentResult(
-      success: json['success'] as bool? ?? false,
+      success: hasValidState,
       isPending: isPendingVal,
       status: statusVal,
       transactionCode: json['transaction_code'] as String? ?? '',
@@ -37,7 +52,9 @@ class PaymentResult {
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       title: json['title'] as String? ?? 'Giao dịch',
       paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at'] as String).toLocal() : DateTime.now(),
-      errorMessage: json['message'] as String? ?? json['error'] as String?,
+      errorMessage: hasValidState
+          ? (json['message'] as String? ?? json['error'] as String?)
+          : (json['message'] as String? ?? json['error'] as String? ?? 'Dữ liệu phản hồi thiếu trạng thái giao dịch hợp lệ.'),
     );
   }
 }
