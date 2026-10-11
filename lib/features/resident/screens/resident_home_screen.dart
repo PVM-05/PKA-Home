@@ -294,7 +294,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
 
   Widget _buildDashboard() {
     final user = ref.watch(authProvider).value;
-    final announcementsAsync = ref.watch(announcementsStreamProvider);
+    final announcementsAsync = ref.watch(residentAnnouncementsProvider);
     final invoiceAsync = ref.watch(residentInvoiceProvider);
     final issueAsync = ref.watch(residentIssueProvider);
     final fullName = user?.fullName ?? 'Cư dân';

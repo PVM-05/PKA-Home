@@ -72,22 +72,21 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
         setState(() {
           if (type == MeterType.electric) {
             _electricOcrResult = result;
-            _electricImagePath = 'https://storage.supabase.co/v0/b/meter-images/electric_sample.jpg';
+            _electricImagePath = null; // Không lưu URL ảnh mẫu giả lập làm bằng chứng
             _electricController.text = result.detectedReading.toString();
             _isScanningElectric = false;
           } else {
             _waterOcrResult = result;
-            _waterImagePath = 'https://storage.supabase.co/v0/b/meter-images/water_sample.jpg';
+            _waterImagePath = null; // Không lưu URL ảnh mẫu giả lập làm bằng chứng
             _waterController.text = result.detectedReading.toString();
             _isScanningWater = false;
           }
         });
 
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã nhận diện thành công: ${result.detectedReading} ${result.unit} (Độ tin cậy ${(result.confidence * 100).toStringAsFixed(1)}%)'),
-            backgroundColor: AppStatusColors.paid,
+            content: Text('Mô phỏng nhận diện: ${result.detectedReading} ${result.unit} (Vui lòng kiểm tra lại theo công tơ thực tế)'),
+            backgroundColor: AppTheme.primary,
           ),
         );
       }
@@ -406,7 +405,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Quét OCR (Mô phỏng)'),
+                                label: const Text('Mô phỏng nhận diện'),
                                 onPressed: _isScanningElectric ? null : () => _scanMeter(MeterType.electric, oldElec),
                               ),
                             ],
@@ -417,7 +416,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             const SizedBox(height: 6),
                             const Center(
                               child: Text(
-                                'AI đang quét và trích xuất chỉ số công tơ điện...',
+                                'Đang chạy thuật toán mô phỏng nhận diện công tơ điện...',
                                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                               ),
                             ),
@@ -427,17 +426,19 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppStatusColors.paid.withValues(alpha: 0.1),
+                                color: AppTheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Row(
+                              child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.check_circle_outline, size: 14, color: AppStatusColors.paid),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Đã nhận diện qua ảnh • Độ tin cậy ${(_electricOcrResult!.confidence * 100).toStringAsFixed(1)}%',
-                                    style: const TextStyle(fontSize: 12, color: AppStatusColors.paid, fontWeight: FontWeight.w600),
+                                  Icon(Icons.info_outline, size: 14, color: AppTheme.primary),
+                                  SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế',
+                                      style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -493,7 +494,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Quét OCR (Mô phỏng)'),
+                                label: const Text('Mô phỏng nhận diện'),
                                 onPressed: _isScanningWater ? null : () => _scanMeter(MeterType.water, oldWater),
                               ),
                             ],
@@ -504,7 +505,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             const SizedBox(height: 6),
                             const Center(
                               child: Text(
-                                'AI đang quét và trích xuất chỉ số công tơ nước...',
+                                'Đang chạy thuật toán mô phỏng nhận diện công tơ nước...',
                                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                               ),
                             ),
@@ -514,17 +515,19 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppStatusColors.paid.withValues(alpha: 0.1),
+                                color: AppTheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Row(
+                              child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.check_circle_outline, size: 14, color: AppStatusColors.paid),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Đã nhận diện qua ảnh • Độ tin cậy ${(_waterOcrResult!.confidence * 100).toStringAsFixed(1)}%',
-                                    style: const TextStyle(fontSize: 12, color: AppStatusColors.paid, fontWeight: FontWeight.w600),
+                                  Icon(Icons.info_outline, size: 14, color: AppTheme.primary),
+                                  SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế',
+                                      style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                 ],
                               ),
