@@ -34,8 +34,8 @@ final pendingConfirmationInvoicesProvider = StreamProvider<int>((ref) {
 });
 
 final unpaidInvoicesTotalProvider = Provider<AsyncValue<double>>((ref) {
-  // Thống nhất với financialStatsProvider: tính tất cả hóa đơn chưa thanh toán (unpaid + pending_confirmation)
-  return ref.watch(financialStatsProvider).whenData((stats) => stats.unpaidTotal);
+  // Thống nhất với financialStatsProvider: tính tất cả hóa đơn còn phải thu (unpaid + pending_confirmation)
+  return ref.watch(financialStatsProvider).whenData((stats) => stats.unpaidTotal + stats.pendingConfirmationTotal);
 });
 
 final apartmentsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
@@ -73,18 +73,35 @@ final emptyApartmentsProvider = Provider<AsyncValue<int>>((ref) {
 class FinancialStats {
   final double paidTotal;
   final double unpaidTotal;
+  final double pendingConfirmationTotal;
+  final double cancelledTotal;
   final int paidCount;
   final int unpaidCount;
+  final int pendingConfirmationCount;
+  final int cancelledCount;
 
   FinancialStats({
     required this.paidTotal,
     required this.unpaidTotal,
+    this.pendingConfirmationTotal = 0.0,
+    this.cancelledTotal = 0.0,
     required this.paidCount,
     required this.unpaidCount,
+    this.pendingConfirmationCount = 0,
+    this.cancelledCount = 0,
   });
 
-  double get totalRevenue => paidTotal + unpaidTotal;
-  double get collectionRate => totalRevenue > 0 ? (paidTotal / totalRevenue) : 0.0;
+  /// Tổng tiền phát hành hợp lệ cần thu (loại trừ đã hủy)
+  double get totalBilled => paidTotal + unpaidTotal + pendingConfirmationTotal;
+
+  /// Doanh thu thực tế đã thu
+  double get actualRevenue => paidTotal;
+
+  /// Giữ tương thích ngược với getter cũ
+  double get totalRevenue => totalBilled;
+
+  /// Tỷ lệ thu tiền thực tế
+  double get collectionRate => totalBilled > 0 ? (paidTotal / totalBilled) : 0.0;
 }
 
 final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
@@ -129,16 +146,29 @@ final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
 
     double paid = 0.0;
     double unpaid = 0.0;
+    double pendingConfirmation = 0.0;
+    double cancelled = 0.0;
+
     final paidApartments = <String>{};
     final unpaidApartments = <String>{};
+    final pendingConfirmationApartments = <String>{};
+    final cancelledApartments = <String>{};
 
     for (var inv in currentInvoices) {
       final amt = (inv['total_amount'] as num?)?.toDouble() ?? 0.0;
       final aptId = inv['apartment_id'] as String? ?? inv['id'] as String;
-      if (inv['status'] == 'paid') {
+      final status = (inv['status'] as String?)?.toLowerCase();
+
+      if (status == 'paid') {
         paid += amt;
         paidApartments.add(aptId);
-      } else {
+      } else if (status == 'pending_confirmation') {
+        pendingConfirmation += amt;
+        pendingConfirmationApartments.add(aptId);
+      } else if (status == 'cancelled' || status == 'void') {
+        cancelled += amt;
+        cancelledApartments.add(aptId);
+      } else if (status == 'unpaid' || status == 'overdue') {
         unpaid += amt;
         unpaidApartments.add(aptId);
       }
@@ -147,8 +177,12 @@ final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
     return FinancialStats(
       paidTotal: paid,
       unpaidTotal: unpaid,
+      pendingConfirmationTotal: pendingConfirmation,
+      cancelledTotal: cancelled,
       paidCount: paidApartments.length,
       unpaidCount: unpaidApartments.length,
+      pendingConfirmationCount: pendingConfirmationApartments.length,
+      cancelledCount: cancelledApartments.length,
     );
   });
 });
@@ -212,9 +246,10 @@ final monthlyRevenueTrendProvider = StreamProvider<List<MonthlyRevenueItem>>((re
         }
 
         if (isMatch) {
-          if (status == 'paid') {
+          final s = status?.toString().toLowerCase();
+          if (s == 'paid') {
             paid += amt;
-          } else {
+          } else if (s == 'unpaid' || s == 'overdue' || s == 'pending_confirmation') {
             unpaid += amt;
           }
         }
