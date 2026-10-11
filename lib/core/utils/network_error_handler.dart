@@ -38,6 +38,7 @@ class NetworkErrorHandler {
         case 'PGRST116':
           return 'Không tìm thấy dữ liệu yêu cầu.';
         case 'P0001':
+        case '0A000':
           return error.message;
       }
 

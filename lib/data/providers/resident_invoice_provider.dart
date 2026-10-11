@@ -75,7 +75,7 @@ class ResidentInvoiceService {
     final res = await supabase.rpc(
       'simulate_unified_payment',
       params: {
-        'p_category': 'INVOICE',
+        'p_type': 'INVOICE',
         'p_reference_id': invoiceId,
         'p_outcome': outcome,
         'p_payment_method': 'DEMO',
