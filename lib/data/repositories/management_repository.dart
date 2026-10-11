@@ -179,32 +179,11 @@ class ManagementRepository {
       if (apartmentId != null) rpcParams['p_apartment_id'] = apartmentId;
       if (status != null) rpcParams['p_status'] = status;
       await _client.rpc('update_invoice_with_items', params: rpcParams);
-    } catch (_) {
-      // Fallback
-      final invoiceData = <String, dynamic>{
-        'period': period,
-        'due_date': dueDate.toIso8601String().split('T')[0],
-      };
-      if (apartmentId != null) {
-        invoiceData['apartment_id'] = apartmentId;
-      }
-      if (status != null) {
-        invoiceData['status'] = status;
-      }
-      await _client.from('invoices').update(invoiceData).eq('id', invoiceId);
-
-      await _client.from('invoice_items').delete().eq('invoice_id', invoiceId);
-
-      final List<Map<String, dynamic>> insertItems = items.map((item) => {
-        'invoice_id': invoiceId,
-        'fee_type': item['fee_type'],
-        'unit_price': item['unit_price'],
-        'quantity': item['quantity'],
-      }).toList();
-
-      if (insertItems.isNotEmpty) {
-        await _client.from('invoice_items').insert(insertItems);
-      }
+    } on PostgrestException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Không thể cập nhật hóa đơn: $e');
     }
   }
 

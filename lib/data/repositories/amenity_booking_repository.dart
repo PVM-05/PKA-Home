@@ -19,30 +19,16 @@ class AmenityBookingRepository {
     required DateTime date,
   }) async {
     final dateStr = _formatDate(date);
-    try {
-      final response = await _client
-          .from('amenity_bookings')
-          .select('*, apartments(code), users(full_name)')
-          .eq('amenity_id', amenityId)
-          .eq('booking_date', dateStr)
-          .inFilter('status', ['confirmed', 'waitlist']);
+    final response = await _client
+        .from('amenity_bookings')
+        .select('*, apartments(code), users(full_name)')
+        .eq('amenity_id', amenityId)
+        .eq('booking_date', dateStr)
+        .inFilter('status', ['confirmed', 'waitlist']);
 
-      return (response as List)
-          .map((json) => AmenityBookingModel.fromJson(json))
-          .toList();
-    } catch (_) {
-      try {
-        final response = await _client.rpc('get_amenity_bookings', params: {
-          'p_amenity_id': amenityId,
-          'p_date': dateStr,
-        });
-        return (response as List)
-            .map((json) => AmenityBookingModel.fromJson(json))
-            .toList();
-      } catch (_) {
-        return [];
-      }
-    }
+    return (response as List)
+        .map((json) => AmenityBookingModel.fromJson(json))
+        .toList();
   }
 
   /// Lấy danh sách lịch đã đặt của người dùng hiện tại
@@ -166,20 +152,16 @@ class AmenityBookingRepository {
     final dayStart = DateTime(date.year, date.month, date.day).toIso8601String();
     final dayEnd = DateTime(date.year, date.month, date.day, 23, 59, 59).toIso8601String();
 
-    try {
-      final response = await _client
-          .from('amenity_maintenance_windows')
-          .select('*, building_amenities(name)')
-          .eq('amenity_id', amenityId)
-          .lte('start_time', dayEnd)
-          .gte('end_time', dayStart);
+    final response = await _client
+        .from('amenity_maintenance_windows')
+        .select('*, building_amenities(name)')
+        .eq('amenity_id', amenityId)
+        .lte('start_time', dayEnd)
+        .gte('end_time', dayStart);
 
-      return (response as List)
-          .map((json) => AmenityMaintenanceModel.fromJson(json))
-          .toList();
-    } catch (_) {
-      return [];
-    }
+    return (response as List)
+        .map((json) => AmenityMaintenanceModel.fromJson(json))
+        .toList();
   }
 
   /// Ban quản lý tạo lịch tạm ngừng tiện ích để bảo trì/vệ sinh
