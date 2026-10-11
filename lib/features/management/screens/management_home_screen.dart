@@ -154,8 +154,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         final newlyAdded = next.value!.where((i) => !prevIds.contains(i['id'])).toList();
         for (final issue in newlyAdded) {
           final desc = (issue['description'] as String?) ?? 'Phản ánh sự cố mới từ cư dân';
-          final isUrgent = issue['priority'] == 'urgent';
-          final title = isUrgent ? '🚨 PHẢN ÁNH KHẨN CẤP' : 'Phản ánh sự cố mới';
+          final isUrgent = issue['priority'] == 'high' || issue['priority'] == 'urgent';
 
           debugPrint('🔔 [ManagementHome] Phát hiện phản ánh mới từ Cư dân: "$desc" (priority: ${issue['priority']})');
           _showNotificationToast(
@@ -163,13 +162,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             message: isUrgent ? 'SỰ CỐ KHẨN: $desc' : 'Sự cố mới: $desc',
             backgroundColor: isUrgent ? AppTheme.error : AppTheme.warning,
             duration: const Duration(seconds: 5),
-          );
-
-          ref.read(pushNotificationServiceProvider).showSystemNotification(
-            id: (issue['id'] as String).hashCode,
-            title: title,
-            body: desc,
-            payload: {'type': 'issue_update', 'id': issue['id']},
           );
         }
       }
@@ -246,6 +238,34 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       currentUser?.role,
       activeDelegations: activeDelegations,
     );
+    final canManageMeterReadings = AppPermissions.meterReadingManagement.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
+    final canManageHandbook = AppPermissions.handbookManagement.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
+    final canManageAmenities = AppPermissions.amenityManagement.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
+    final canManageEquipment = AppPermissions.equipmentManagement.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
+    final canApproveVehicles = AppPermissions.vehicleApproval.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
+    final canViewPaymentTransactions = AppPermissions.paymentTransactions.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
+    final canViewAuditTrail = AppPermissions.auditTrail.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
 
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final pendingInvoicesAsync = ref.watch(pendingConfirmationInvoicesProvider);
@@ -262,6 +282,12 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           currentUser,
           canManageInvoices: canManageInvoices,
           canManageIssues: canManageIssues,
+          canManageMeterReadings: canManageMeterReadings,
+          canManageHandbook: canManageHandbook,
+          canManageAmenities: canManageAmenities,
+          canManageEquipment: canManageEquipment,
+          canApproveVehicles: canApproveVehicles,
+          canViewPaymentTransactions: canViewPaymentTransactions,
         ),
         destination: const NavigationDestination(
           icon: Icon(Icons.bar_chart_outlined),
@@ -345,13 +371,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () {
-              context.push(AppRoutes.managementAuditTrail);
-            },
-            tooltip: 'Lịch sử hoạt động',
-          ),
+          if (canViewAuditTrail)
+            IconButton(
+              icon: const Icon(Icons.history),
+              onPressed: () {
+                context.push(AppRoutes.managementAuditTrail);
+              },
+              tooltip: 'Lịch sử hoạt động',
+            ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle_outlined),
             onSelected: (value) {
@@ -387,46 +414,50 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     ],
                   ),
                 ),
-              const PopupMenuItem(
-                value: 'meterReadings',
-                child: Row(
-                  children: [
-                    Icon(Icons.speed_outlined, size: 20, color: Color(0xFFE65100)),
-                    SizedBox(width: 8),
-                    Text('Duyệt số điện nước'),
-                  ],
+              if (canManageMeterReadings)
+                const PopupMenuItem(
+                  value: 'meterReadings',
+                  child: Row(
+                    children: [
+                      Icon(Icons.speed_outlined, size: 20, color: Color(0xFFE65100)),
+                      SizedBox(width: 8),
+                      Text('Duyệt số điện nước'),
+                    ],
+                  ),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'matrix',
-                child: Row(
-                  children: [
-                    Icon(Icons.shield_outlined, size: 20, color: AppTheme.primary),
-                    SizedBox(width: 8),
-                    Text('Bảng phân quyền'),
-                  ],
+              if (isAdmin)
+                const PopupMenuItem(
+                  value: 'matrix',
+                  child: Row(
+                    children: [
+                      Icon(Icons.shield_outlined, size: 20, color: AppTheme.primary),
+                      SizedBox(width: 8),
+                      Text('Bảng phân quyền'),
+                    ],
+                  ),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'equipment',
-                child: Row(
-                  children: [
-                    Icon(Icons.precision_manufacturing_outlined, size: 20, color: Colors.deepOrange),
-                    SizedBox(width: 8),
-                    Text('Bảo trì thiết bị'),
-                  ],
+              if (canManageEquipment)
+                const PopupMenuItem(
+                  value: 'equipment',
+                  child: Row(
+                    children: [
+                      Icon(Icons.precision_manufacturing_outlined, size: 20, color: Colors.deepOrange),
+                      SizedBox(width: 8),
+                      Text('Bảo trì thiết bị'),
+                    ],
+                  ),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'serviceRatings',
-                child: Row(
-                  children: [
-                    Icon(Icons.star_rate_rounded, size: 20, color: Colors.amber),
-                    SizedBox(width: 8),
-                    Text('Đánh giá dịch vụ'),
-                  ],
+              if (canManageIssues)
+                const PopupMenuItem(
+                  value: 'serviceRatings',
+                  child: Row(
+                    children: [
+                      Icon(Icons.star_rate_rounded, size: 20, color: Colors.amber),
+                      SizedBox(width: 8),
+                      Text('Đánh giá dịch vụ'),
+                    ],
+                  ),
                 ),
-              ),
               const PopupMenuItem(
                 value: 'fontSize',
                 child: Row(
@@ -493,6 +524,12 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     UserModel? currentUser, {
     required bool canManageInvoices,
     required bool canManageIssues,
+    required bool canManageMeterReadings,
+    required bool canManageHandbook,
+    required bool canManageAmenities,
+    required bool canManageEquipment,
+    required bool canApproveVehicles,
+    required bool canViewPaymentTransactions,
   }) {
     final isTechnician = currentUser?.isTechnician ?? false;
     final isAdmin = currentUser?.isAdmin ?? false;
@@ -553,7 +590,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                   const SizedBox(width: 12),
                 ],
-                if (canManageInvoices) ...[
+                if (canManageMeterReadings) ...[
                   _buildQuickAction(
                     context,
                     icon: Icons.speed_outlined,
@@ -566,6 +603,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
                   ),
                   const SizedBox(width: 12),
+                ],
+                if (canManageInvoices) ...[
                   _buildQuickAction(
                     context,
                     icon: Icons.receipt_long,
@@ -596,32 +635,37 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                   const SizedBox(width: 12),
                 ],
-
-                _buildQuickAction(
-                  context,
-                  icon: Icons.menu_book_outlined,
-                  label: 'Cẩm nang',
-                  color: Colors.indigo,
-                   onTap: () => context.push(AppRoutes.managementHandbook),
-                ),
-                const SizedBox(width: 12),
-                _buildQuickAction(
-                  context,
-                  icon: Icons.pool_outlined,
-                  label: 'Tiện ích',
-                  color: Colors.teal.shade700,
-                  onTap: () => context.push(AppRoutes.managementAmenities),
-                ),
-                const SizedBox(width: 12),
-                _buildQuickAction(
-                  context,
-                  icon: Icons.precision_manufacturing_outlined,
-                  label: 'Bảo trì TB',
-                  color: Colors.deepOrange,
-                  onTap: () => context.push(AppRoutes.managementEquipment),
-                ),
-                if (canManageIssues) ...[
+                if (canManageHandbook) ...[
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.menu_book_outlined,
+                    label: 'Cẩm nang',
+                    color: Colors.indigo,
+                    onTap: () => context.push(AppRoutes.managementHandbook),
+                  ),
                   const SizedBox(width: 12),
+                ],
+                if (canManageAmenities) ...[
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.pool_outlined,
+                    label: 'Tiện ích',
+                    color: Colors.teal.shade700,
+                    onTap: () => context.push(AppRoutes.managementAmenities),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                if (canManageEquipment) ...[
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.precision_manufacturing_outlined,
+                    label: 'Bảo trì TB',
+                    color: Colors.deepOrange,
+                    onTap: () => context.push(AppRoutes.managementEquipment),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                if (canManageIssues) ...[
                   _buildQuickAction(
                     context,
                     icon: Icons.star_rate_rounded,
@@ -629,23 +673,27 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     color: Colors.amber.shade700,
                     onTap: () => context.push(AppRoutes.managementServiceRatings),
                   ),
+                  const SizedBox(width: 12),
                 ],
-                const SizedBox(width: 12),
-                _buildQuickAction(
-                  context,
-                  icon: Icons.two_wheeler_outlined,
-                  label: 'Duyệt xe',
-                  color: Colors.blueGrey,
-                  onTap: () => context.push(AppRoutes.managementVehicleApproval),
-                ),
-                const SizedBox(width: 12),
-                _buildQuickAction(
-                  context,
-                  icon: Icons.receipt_long_outlined,
-                  label: 'Giao dịch',
-                  color: Colors.deepPurple,
-                  onTap: () => context.push(AppRoutes.managementPaymentTransactions),
-                ),
+                if (canApproveVehicles) ...[
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.two_wheeler_outlined,
+                    label: 'Duyệt xe',
+                    color: Colors.blueGrey,
+                    onTap: () => context.push(AppRoutes.managementVehicleApproval),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                if (canViewPaymentTransactions) ...[
+                  _buildQuickAction(
+                    context,
+                    icon: Icons.receipt_long_outlined,
+                    label: 'Giao dịch',
+                    color: Colors.deepPurple,
+                    onTap: () => context.push(AppRoutes.managementPaymentTransactions),
+                  ),
+                ],
               ],
             ),
           ),

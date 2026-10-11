@@ -277,7 +277,7 @@ DECLARE
     v_current_confirmed_count INT;
 BEGIN
     IF OLD.status <> 'cancelled' AND NEW.status = 'cancelled' THEN
-        SELECT * INTO v_amenity FROM public.amenities WHERE id = NEW.amenity_id;
+        SELECT * INTO v_amenity FROM public.building_amenities WHERE id = NEW.amenity_id;
         IF NOT FOUND THEN RETURN NEW; END IF;
 
         IF v_amenity.booking_type = 'per_slot' THEN
@@ -521,6 +521,9 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.reject_meter_reading(UUID, TEXT);
+DROP FUNCTION IF EXISTS public.reject_meter_reading(UUID);
+
 CREATE OR REPLACE FUNCTION public.reject_meter_reading(
     p_submission_id UUID,
     p_rejection_reason TEXT
@@ -537,7 +540,7 @@ BEGIN
 
     UPDATE public.meter_reading_submissions
     SET status = 'rejected',
-        rejection_reason = p_rejection_reason,
+        reject_reason = p_rejection_reason,
         reviewed_by = auth.uid(),
         reviewed_at = now(),
         updated_at = now()
@@ -553,8 +556,11 @@ $$;
 
 -- 9. SỬA RPC TẠO HÓA ĐƠN HÀNG LOẠT (generate_valid_bulk_invoices & validate_monthly_bulk_invoices)
 -- ------------------------------------------------------------------------------
--- Xóa hàm cũ không còn sử dụng
+-- Xóa hàm cũ không còn sử dụng (bao gồm chữ ký TIMESTAMPTZ và DATE)
+DROP FUNCTION IF EXISTS public.generate_monthly_bulk_invoices(TEXT, TIMESTAMPTZ, NUMERIC, NUMERIC, NUMERIC);
 DROP FUNCTION IF EXISTS public.generate_monthly_bulk_invoices(TEXT, DATE, NUMERIC, NUMERIC, NUMERIC);
+DROP FUNCTION IF EXISTS public.generate_valid_bulk_invoices(TEXT, TIMESTAMPTZ, NUMERIC, NUMERIC, NUMERIC, UUID[]);
+DROP FUNCTION IF EXISTS public.generate_valid_bulk_invoices(TEXT, DATE, NUMERIC, NUMERIC, NUMERIC);
 
 CREATE OR REPLACE FUNCTION public.generate_valid_bulk_invoices(
   p_period text,
@@ -754,12 +760,13 @@ BEGIN
     apartment_id,
     amount,
     payment_method,
-    payment_category,
-    reference_id,
+    type,
+    invoice_id,
+    booking_id,
+    title,
     status,
     failure_reason,
-    created_at,
-    updated_at
+    created_at
   ) VALUES (
     v_transaction_code,
     v_user_id,
@@ -767,10 +774,11 @@ BEGIN
     v_amount,
     p_payment_method,
     upper(p_category),
-    p_reference_id,
+    CASE WHEN upper(p_category) = 'INVOICE' THEN p_reference_id ELSE NULL END,
+    CASE WHEN upper(p_category) = 'SERVICE' THEN p_reference_id ELSE NULL END,
+    CASE WHEN upper(p_category) = 'INVOICE' THEN 'Thanh toán hóa đơn' ELSE 'Thanh toán dịch vụ' END,
     upper(p_outcome),
     p_failure_reason,
-    now(),
     now()
   ) RETURNING id INTO v_tx_id;
 
@@ -786,6 +794,8 @@ $$;
 
 -- 11. CHECK-IN TIỆN ÍCH & MÚI GIỜ VIỆT NAM TRONG book_amenity_slot
 -- ------------------------------------------------------------------------------
+ALTER TABLE public.amenity_bookings ADD COLUMN IF NOT EXISTS checked_in_at TIMESTAMPTZ;
+
 CREATE OR REPLACE FUNCTION public.check_in_amenity_booking(p_booking_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -798,7 +808,8 @@ BEGIN
   END IF;
 
   UPDATE public.amenity_bookings
-  SET check_in_time = now(),
+  SET checked_in_at = now(),
+      status = 'completed',
       updated_at = now()
   WHERE id = p_booking_id;
 
@@ -811,6 +822,9 @@ END;
 $$;
 
 -- Sửa múi giờ trong book_amenity_slot
+DROP FUNCTION IF EXISTS public.book_amenity_slot(UUID, UUID, DATE, VARCHAR, INT, BOOLEAN);
+DROP FUNCTION IF EXISTS public.book_amenity_slot(UUID, DATE, VARCHAR, INT, TEXT);
+
 CREATE OR REPLACE FUNCTION public.book_amenity_slot(
     p_amenity_id UUID,
     p_booking_date DATE,
@@ -831,7 +845,7 @@ DECLARE
     v_start_time_text TEXT;
     v_slot_start TIMESTAMPTZ;
 BEGIN
-    SELECT * INTO v_amenity FROM public.amenities WHERE id = p_amenity_id;
+    SELECT * INTO v_amenity FROM public.building_amenities WHERE id = p_amenity_id;
     IF NOT FOUND THEN
         RETURN jsonb_build_object('success', false, 'message', 'Tiện ích không tồn tại');
     END IF;
@@ -903,19 +917,19 @@ $$;
 
 -- 12. PHÂN QUYỀN THỰC THI (HARDENING EXECUTE PERMISSIONS)
 -- ------------------------------------------------------------------------------
-REVOKE ALL ON FUNCTION public.approve_meter_reading FROM anon, PUBLIC;
-REVOKE ALL ON FUNCTION public.reject_meter_reading FROM anon, PUBLIC;
-REVOKE ALL ON FUNCTION public.validate_monthly_bulk_invoices FROM anon, PUBLIC;
-REVOKE ALL ON FUNCTION public.generate_valid_bulk_invoices FROM anon, PUBLIC;
-REVOKE ALL ON FUNCTION public.check_in_amenity_booking FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.approve_meter_reading(UUID) FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.reject_meter_reading(UUID, TEXT) FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.validate_monthly_bulk_invoices(TEXT, NUMERIC, NUMERIC, NUMERIC) FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.generate_valid_bulk_invoices(TEXT, DATE, NUMERIC, NUMERIC, NUMERIC) FROM anon, PUBLIC;
+REVOKE ALL ON FUNCTION public.check_in_amenity_booking(UUID) FROM anon, PUBLIC;
 
-GRANT EXECUTE ON FUNCTION public.approve_meter_reading TO authenticated;
-GRANT EXECUTE ON FUNCTION public.reject_meter_reading TO authenticated;
-GRANT EXECUTE ON FUNCTION public.validate_monthly_bulk_invoices TO authenticated;
-GRANT EXECUTE ON FUNCTION public.generate_valid_bulk_invoices TO authenticated;
-GRANT EXECUTE ON FUNCTION public.check_in_amenity_booking TO authenticated;
-GRANT EXECUTE ON FUNCTION public.simulate_unified_payment TO authenticated;
-GRANT EXECUTE ON FUNCTION public.book_amenity_slot TO authenticated;
+GRANT EXECUTE ON FUNCTION public.approve_meter_reading(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.reject_meter_reading(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.validate_monthly_bulk_invoices(TEXT, NUMERIC, NUMERIC, NUMERIC) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.generate_valid_bulk_invoices(TEXT, DATE, NUMERIC, NUMERIC, NUMERIC) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.check_in_amenity_booking(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.simulate_unified_payment(TEXT, UUID, TEXT, TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.book_amenity_slot(UUID, DATE, VARCHAR, INT, TEXT) TO authenticated;
 
 
 

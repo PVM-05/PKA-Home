@@ -155,7 +155,7 @@ BEGIN
         WHERE id = NEW.equipment_id;
 
         -- Gửi thông báo gián đoạn dịch vụ tới cư dân tòa nhà đó
-        INSERT INTO public.notifications (user_id, title, content, type, is_read, created_at)
+        INSERT INTO public.notifications (user_id, title, body, type, is_read, created_at)
         SELECT DISTINCT
             ra.user_id,
             '[Bảo trì] ' || v_eq.name || ' tạm ngưng phục vụ',
@@ -165,7 +165,10 @@ BEGIN
             now()
         FROM public.residents_apartments ra
         JOIN public.apartments a ON a.id = ra.apartment_id
-        WHERE v_eq.building = 'Toàn khu' OR a.building = v_eq.building;
+        WHERE v_eq.building = 'Toàn khu' 
+           OR a.building_code = v_eq.building 
+           OR ('Tòa ' || a.building_code) = v_eq.building 
+           OR v_eq.building LIKE '%' || a.building_code || '%';
     END IF;
 
     RETURN NEW;

@@ -94,7 +94,7 @@ class AppPermissions {
     name: 'Kiểm tra & Duyệt chỉ số đồng hồ',
     category: 'Tài chính & Hóa đơn',
     description: 'Kiểm tra chỉ số điện nước cư dân khai báo và lập hóa đơn.',
-    allowedRoles: ['admin', 'management', 'accountant', 'technician'],
+    allowedRoles: ['admin', 'management', 'accountant'],
   );
 
   static const equipmentManagement = PermissionItem(
@@ -121,6 +121,14 @@ class AppPermissions {
     allowedRoles: ['admin', 'management'],
   );
 
+  static const auditTrail = PermissionItem(
+    key: 'audit_trail',
+    name: 'Nhật ký kiểm toán & Hoạt động',
+    category: 'Hệ thống & Phân quyền',
+    description: 'Theo dõi nhật ký thay đổi trạng thái hóa đơn, sự cố và phân quyền.',
+    allowedRoles: ['admin', 'management'],
+  );
+
   static const List<PermissionItem> all = [
     invoiceManagement,
     issueManagement,
@@ -134,5 +142,6 @@ class AppPermissions {
     equipmentManagement,
     paymentTransactions,
     amenityManagement,
+    auditTrail,
   ];
 }
