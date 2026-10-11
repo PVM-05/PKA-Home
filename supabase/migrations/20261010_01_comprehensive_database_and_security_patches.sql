@@ -518,21 +518,39 @@ SET search_path = public, pg_catalog
 AS $$
 DECLARE
   v_user_id UUID := auth.uid();
+  v_user_role VARCHAR;
   v_apt_id UUID;
   v_amount NUMERIC(12, 2);
   v_tx_id UUID;
   v_tx_code VARCHAR;
   v_title TEXT;
   v_clean_type VARCHAR := upper(p_type);
+  v_clean_outcome VARCHAR := upper(p_outcome);
+  v_inv_status VARCHAR;
+  v_booking_user UUID;
+  v_booking_status VARCHAR;
 BEGIN
+  -- 1. Bắt buộc đăng nhập
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Yêu cầu đăng nhập để thực hiện thanh toán';
+  END IF;
+
+  -- 2. Kiểm tra loại thanh toán & kết quả hợp lệ
   IF v_clean_type NOT IN ('INVOICE', 'SERVICE') THEN
     RAISE EXCEPTION 'Loại thanh toán không hợp lệ (chỉ hỗ trợ INVOICE hoặc SERVICE): %', p_type;
   END IF;
 
+  IF v_clean_outcome NOT IN ('SUCCESS', 'FAILED') THEN
+    RAISE EXCEPTION 'Kết quả thanh toán không hợp lệ (chỉ hỗ trợ SUCCESS hoặc FAILED): %', p_outcome;
+  END IF;
+
+  SELECT role INTO v_user_role FROM public.users WHERE id = v_user_id;
+
   v_tx_code := 'SIM-' || to_char(clock_timestamp(), 'YYYYMMDDHH24MISSMS') || '-' || upper(substr(gen_random_uuid()::text, 1, 6));
 
+  -- 3. Xử lý nhánh INVOICE
   IF v_clean_type = 'INVOICE' THEN
-    SELECT apartment_id, total_amount INTO v_apt_id, v_amount
+    SELECT apartment_id, total_amount, status INTO v_apt_id, v_amount, v_inv_status
     FROM public.invoices
     WHERE id = p_reference_id FOR UPDATE;
 
@@ -540,9 +558,27 @@ BEGIN
       RAISE EXCEPTION 'Hóa đơn không tồn tại: %', p_reference_id;
     END IF;
 
+    -- Kiểm tra trạng thái hóa đơn
+    IF v_inv_status = 'paid' THEN
+      RAISE EXCEPTION 'Hóa đơn này đã được thanh toán trước đó';
+    END IF;
+    IF v_inv_status = 'cancelled' THEN
+      RAISE EXCEPTION 'Hóa đơn này đã bị hủy, không thể thanh toán';
+    END IF;
+
+    -- Kiểm soát phân quyền: Chỉ cư dân của căn hộ hoặc Admin/Manager mới được thanh toán
+    IF COALESCE(v_user_role, 'resident') NOT IN ('admin', 'manager') THEN
+      IF NOT EXISTS (
+        SELECT 1 FROM public.residents_apartments 
+        WHERE apartment_id = v_apt_id AND user_id = v_user_id
+      ) THEN
+        RAISE EXCEPTION 'Bạn không có quyền thanh toán hóa đơn của căn hộ này';
+      END IF;
+    END IF;
+
     v_title := 'Thanh toán hóa đơn tiền phòng/dịch vụ';
 
-    IF upper(p_outcome) = 'SUCCESS' THEN
+    IF v_clean_outcome = 'SUCCESS' THEN
       UPDATE public.invoices
       SET status = 'paid',
           payment_method = p_payment_method,
@@ -573,13 +609,15 @@ BEGIN
       p_payment_method,
       'INVOICE',
       v_title,
-      upper(p_outcome),
-      p_failure_reason,
+      v_clean_outcome,
+      CASE WHEN v_clean_outcome = 'FAILED' THEN COALESCE(p_failure_reason, 'Giao dịch mô phỏng thất bại') ELSE NULL END,
       now()
     ) RETURNING id INTO v_tx_id;
 
-  ELSE -- SERVICE
-    SELECT b.apartment_id, b.fee_amount, a.name INTO v_apt_id, v_amount, v_title
+  -- 4. Xử lý nhánh SERVICE
+  ELSE
+    SELECT b.apartment_id, b.user_id, b.status, b.fee_amount, a.name 
+    INTO v_apt_id, v_booking_user, v_booking_status, v_amount, v_title
     FROM public.amenity_bookings b
     JOIN public.building_amenities a ON a.id = b.amenity_id
     WHERE b.id = p_reference_id FOR UPDATE;
@@ -588,9 +626,27 @@ BEGIN
       RAISE EXCEPTION 'Lượt đặt tiện ích không tồn tại: %', p_reference_id;
     END IF;
 
+    -- Kiểm tra trạng thái lượt đặt
+    IF v_booking_status = 'confirmed' THEN
+      RAISE EXCEPTION 'Lượt đặt tiện ích này đã được xác nhận/thanh toán trước đó';
+    END IF;
+    IF v_booking_status IN ('cancelled', 'rejected') THEN
+      RAISE EXCEPTION 'Lượt đặt tiện ích này đã bị hủy hoặc từ chối, không thể thanh toán';
+    END IF;
+
+    -- Kiểm soát quyền sở hữu: Người đặt, cư dân cùng căn hộ hoặc BQL
+    IF COALESCE(v_user_role, 'resident') NOT IN ('admin', 'manager') THEN
+      IF v_booking_user != v_user_id AND NOT EXISTS (
+        SELECT 1 FROM public.residents_apartments
+        WHERE apartment_id = v_apt_id AND user_id = v_user_id
+      ) THEN
+        RAISE EXCEPTION 'Bạn không có quyền thanh toán cho lượt đặt tiện ích này';
+      END IF;
+    END IF;
+
     v_title := 'Thanh toán dịch vụ ' || COALESCE(v_title, 'tiện ích');
 
-    IF upper(p_outcome) = 'SUCCESS' THEN
+    IF v_clean_outcome = 'SUCCESS' THEN
       UPDATE public.amenity_bookings
       SET status = 'confirmed',
           updated_at = now()
@@ -618,17 +674,17 @@ BEGIN
       p_payment_method,
       'SERVICE',
       v_title,
-      upper(p_outcome),
-      p_failure_reason,
+      v_clean_outcome,
+      CASE WHEN v_clean_outcome = 'FAILED' THEN COALESCE(p_failure_reason, 'Giao dịch mô phỏng thất bại') ELSE NULL END,
       now()
     ) RETURNING id INTO v_tx_id;
   END IF;
 
   RETURN jsonb_build_object(
-    'success', upper(p_outcome) = 'SUCCESS',
+    'success', v_clean_outcome = 'SUCCESS',
     'transaction_id', v_tx_id,
     'transaction_code', v_tx_code,
-    'status', upper(p_outcome)
+    'status', v_clean_outcome
   );
 END;
 $$;
