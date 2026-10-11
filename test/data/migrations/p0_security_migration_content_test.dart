@@ -52,4 +52,12 @@ void main() {
     expect(content.contains("v_booking_status = 'confirmed'"), isTrue, reason: 'Phải chặn thanh toán trùng tiện ích');
     expect(content.contains("NOT IN ('SUCCESS', 'FAILED')"), isTrue, reason: 'Phải kiểm tra outcome hợp lệ');
   });
+
+  test('Migration 20261010_01 approve_meter_reading khóa FOR UPDATE và từ chối chỉ số mới nhỏ hơn chỉ số cũ', () {
+    final file = File('supabase/migrations/20261010_01_comprehensive_database_and_security_patches.sql');
+    final content = file.readAsStringSync();
+    expect(content.contains("FROM public.apartments\n    WHERE id = v_sub.apartment_id FOR UPDATE;"), isTrue);
+    expect(content.contains("v_sub.electric_reading < v_old_elec"), isTrue);
+    expect(content.contains("v_sub.water_reading < v_old_water"), isTrue);
+  });
 }
