@@ -36,16 +36,13 @@ void main() {
       envMap['TEST_RESIDENT_PASSWORD'] ?? 
       'password123';
   final testResidentApartmentId = Platform.environment['TEST_RESIDENT_APARTMENT_ID'] ?? 
-      envMap['TEST_RESIDENT_APARTMENT_ID'];
+      envMap['TEST_RESIDENT_APARTMENT_ID'] ?? '';
 
-  final supabaseUrl = Platform.environment['SUPABASE_URL'] ?? envMap['SUPABASE_URL'];
-  final supabaseAnonKey = Platform.environment['SUPABASE_ANON_KEY'] ?? envMap['SUPABASE_ANON_KEY'];
+  final supabaseUrl = Platform.environment['SUPABASE_URL'] ?? envMap['SUPABASE_URL'] ?? '';
+  final supabaseAnonKey = Platform.environment['SUPABASE_ANON_KEY'] ?? envMap['SUPABASE_ANON_KEY'] ?? '';
 
-  final bool isConfigured = supabaseUrl != null &&
-      supabaseUrl.isNotEmpty &&
-      supabaseAnonKey != null &&
+  final bool isConfigured = supabaseUrl.isNotEmpty &&
       supabaseAnonKey.isNotEmpty &&
-      testResidentApartmentId != null &&
       testResidentApartmentId.isNotEmpty &&
       testResidentApartmentId != 'FILL_UUID_HERE';
 
@@ -53,7 +50,7 @@ void main() {
 
   setUpAll(() async {
     if (isConfigured) {
-      client = SupabaseClient(supabaseUrl!, supabaseAnonKey!);
+      client = SupabaseClient(supabaseUrl, supabaseAnonKey);
     }
   });
 
@@ -101,13 +98,13 @@ void main() {
 
       // 2. Cố gắng update trạng thái hóa đơn bất kỳ
       try {
-        await client.from('invoices').update({'status': 'paid'}).eq('apartment_id', testResidentApartmentId!);
+        await client.from('invoices').update({'status': 'paid'}).eq('apartment_id', testResidentApartmentId);
         // Nếu RLS hoạt động đúng, nó sẽ quăng lỗi PostgrestException vì không có quyền UPDATE
         // Nếu bảng cho phép update thì policy RLS đang sai.
         // Chú ý: Đôi khi Supabase RLS update fail sẽ không throw error mà trả về empty list [], tùy thuộc vào SDK.
         
         // Kiểm tra xem dòng đó có thực sự bị đổi không
-        final check = await client.from('invoices').select('status').eq('apartment_id', testResidentApartmentId!).limit(1);
+        final check = await client.from('invoices').select('status').eq('apartment_id', testResidentApartmentId).limit(1);
         if (check.isNotEmpty) {
            expect(check.first['status'], isNot('paid'), reason: 'Lỗi RLS: Cư dân đã sửa được trạng thái hóa đơn!');
         }
