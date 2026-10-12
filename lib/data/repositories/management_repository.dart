@@ -220,7 +220,17 @@ class ManagementRepository {
       final fileName = '$staffId/$issueId/proof_${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
 
       await _client.storage.from('issue-images').upload(fileName, file);
-      final imageUrl = _client.storage.from('issue-images').getPublicUrl(fileName);
+
+      String imageUrl;
+      try {
+        // Ưu tiên tạo Signed URL có thời hạn 1 năm cho private bucket
+        imageUrl = await _client.storage
+            .from('issue-images')
+            .createSignedUrl(fileName, 60 * 60 * 24 * 365);
+      } catch (_) {
+        // Fallback sang public URL nếu cấu hình bucket là public
+        imageUrl = _client.storage.from('issue-images').getPublicUrl(fileName);
+      }
 
       await _client.from('issue_images').insert({
         'issue_report_id': issueId,
@@ -230,6 +240,27 @@ class ManagementRepository {
     }
 
     await updateIssueStatus(issueId, 'resolved', assignedStaffId: staffId);
+  }
+
+  /// Trích xuất object path và sinh Signed URL mới cho ảnh sự cố
+  Future<String> getSignedImageUrl(String urlOrPath, {int expiresIn = 60 * 60 * 24 * 30}) async {
+    try {
+      if (urlOrPath.isEmpty) return '';
+      String objectPath = urlOrPath;
+      if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+        final uri = Uri.parse(urlOrPath);
+        final segments = uri.pathSegments;
+        final bucketIndex = segments.indexOf('issue-images');
+        if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
+          objectPath = segments.sublist(bucketIndex + 1).join('/');
+        } else {
+          return urlOrPath;
+        }
+      }
+      return await _client.storage.from('issue-images').createSignedUrl(objectPath, expiresIn);
+    } catch (_) {
+      return urlOrPath;
+    }
   }
 
   Future<void> deleteIssue(String issueId, {List<String> imageUrls = const []}) async {

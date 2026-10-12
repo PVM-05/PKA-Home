@@ -72,14 +72,14 @@ class MeterReadingRepository {
     bool generateInvoice = false,
     DateTime? dueDate,
   }) async {
-    final dueStr = dueDate != null
+    final dueStr = (generateInvoice && dueDate != null)
         ? "${dueDate.year.toString().padLeft(4, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.day.toString().padLeft(2, '0')}"
         : null;
 
     final response = await _client.rpc('approve_meter_reading', params: {
       'p_submission_id': submissionId,
       'p_generate_invoice': generateInvoice,
-      'p_due_date': ?dueStr,
+      'p_due_date': dueStr,
     });
 
     return response as Map<String, dynamic>;
