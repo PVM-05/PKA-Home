@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
+import '../../../core/widgets/app_storage_image.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/issue_comment_model.dart';
@@ -366,21 +367,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     ),
                   ));
                 },
-                child: ClipRRect(
+                child: AppStorageImage(
+                  imageUrl: imageUrls[index],
+                  width: 80,
+                  height: 80,
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    imageUrls[index],
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.broken_image_outlined,
-                          color: Colors.grey),
-                    ),
-                  ),
                 ),
               );
             },

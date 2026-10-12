@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'app_storage_image.dart';
 
 class PhotoViewerScreen extends StatelessWidget {
   final List<String> imageUrls;
@@ -22,23 +23,36 @@ class PhotoViewerScreen extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       extendBodyBehindAppBar: true,
-      body: PhotoViewGallery.builder(
-        itemCount: imageUrls.length,
-        builder: (context, index) {
-          return PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(imageUrls[index]),
-            initialScale: PhotoViewComputedScale.contained,
-            minScale: PhotoViewComputedScale.contained * 0.8,
-            maxScale: PhotoViewComputedScale.covered * 3,
-            heroAttributes: PhotoViewHeroAttributes(tag: imageUrls[index]),
+      body: FutureBuilder<List<String>>(
+        future: AppStorageImage.resolveSignedUrlList(imageUrls),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            );
+          }
+
+          final resolvedUrls = snapshot.data ?? imageUrls;
+
+          return PhotoViewGallery.builder(
+            itemCount: resolvedUrls.length,
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider: NetworkImage(resolvedUrls[index]),
+                initialScale: PhotoViewComputedScale.contained,
+                minScale: PhotoViewComputedScale.contained * 0.8,
+                maxScale: PhotoViewComputedScale.covered * 3,
+                heroAttributes: PhotoViewHeroAttributes(tag: resolvedUrls[index]),
+              );
+            },
+            pageController: PageController(initialPage: initialIndex),
+            scrollPhysics: const BouncingScrollPhysics(),
+            backgroundDecoration: const BoxDecoration(color: Colors.black),
+            loadingBuilder: (context, event) => const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
           );
         },
-        pageController: PageController(initialPage: initialIndex),
-        scrollPhysics: const BouncingScrollPhysics(),
-        backgroundDecoration: const BoxDecoration(color: Colors.black),
-        loadingBuilder: (context, event) => const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
       ),
     );
   }

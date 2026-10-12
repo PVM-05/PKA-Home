@@ -73,23 +73,12 @@ class IssueRepository {
         await _client.storage
             .from('issue-images')
             .upload(fileName, file);
-            
-        String imageUrl;
-        try {
-          // Ưu tiên tạo signed URL có thời hạn hợp lệ cho bucket private bảo mật
-          imageUrl = await _client.storage
-              .from('issue-images')
-              .createSignedUrl(fileName, 60 * 60 * 24 * 365);
-        } catch (_) {
-          // Fallback sang public URL nếu bucket được cấu hình public
-          imageUrl = _client.storage
-              .from('issue-images')
-              .getPublicUrl(fileName);
-        }
 
+        // Lưu trực tiếp object path (fileName) vào cơ sở dữ liệu để bảo mật cho bucket private
         await _client.from('issue_images').insert({
           'issue_report_id': issueId,
-          'image_url': imageUrl,
+          'image_url': fileName,
+          'image_role': 'report',
         });
       } catch (e, stack) {
         AppLogger.e('Lỗi tải ảnh sự cố lên Storage: $e', e, stack);

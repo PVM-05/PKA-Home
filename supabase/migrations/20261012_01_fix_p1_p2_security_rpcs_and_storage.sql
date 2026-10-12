@@ -1,10 +1,31 @@
 -- ==============================================================================
 -- Migration: 20261012_01_fix_p1_p2_security_rpcs_and_storage.sql
 -- Mục tiêu:
--- 1. [Lỗi 2 & 5]: book_amenity_slot kiểm tra quyền sở hữu căn hộ & khóa đồng bộ chống vượt sức chứa
--- 2. [Lỗi 3]: record_manual_amenity_payment chống ghi nhận giao dịch trùng (Idempotent) & partial unique index
+-- 1. [Lỗi 2 & 5]: book_amenity_slot kiểm tra quyền sở hữu căn hộ, khóa đồng bộ pg_advisory_xact_lock
+--    và chuẩn hóa tên cột schema (booked_by thay vì user_id, đảm bảo cột notes, guests_count, fee...)
+-- 2. [Lỗi 3]: record_manual_amenity_payment chống ghi nhận giao dịch trùng (Idempotent)
+--    kèm partial unique index và bổ sung cột confirmed_by, confirmed_at cho payment_transactions
 -- 3. [Lỗi 1]: approve_meter_reading đồng bộ 3 tham số (p_submission_id, p_generate_invoice, p_due_date)
 -- ==============================================================================
+
+-- ------------------------------------------------------------------------------
+-- 0. ĐỒNG BỘ DDL: ĐẢM BẢO CÁC CỘT VÀ RÀNG BUỘC CỦA amenity_bookings VÀ payment_transactions
+-- ------------------------------------------------------------------------------
+ALTER TABLE public.amenity_bookings
+ADD COLUMN IF NOT EXISTS notes TEXT,
+ADD COLUMN IF NOT EXISTS guests_count INT NOT NULL DEFAULT 1,
+ADD COLUMN IF NOT EXISTS fee_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS deposit_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS deposit_status VARCHAR(20) NOT NULL DEFAULT 'none',
+ADD COLUMN IF NOT EXISTS deposit_notes TEXT;
+
+-- Bỏ index độc quyền cũ chỉ cho phép 1 booking/slot để hỗ trợ tiện ích có max_capacity > 1
+DROP INDEX IF EXISTS public.uq_active_amenity_slot;
+
+-- Đảm bảo bảng payment_transactions có đầy đủ cột xác nhận
+ALTER TABLE public.payment_transactions 
+ADD COLUMN IF NOT EXISTS confirmed_by UUID REFERENCES public.users(id),
+ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMPTZ;
 
 -- ------------------------------------------------------------------------------
 -- 1. [Lỗi 2 & 5]: CẬP NHẬT RPC book_amenity_slot (BẢO MẬT CĂN HỘ & CHỐNG VƯỢT SỨC CHỨA)
@@ -138,10 +159,10 @@ BEGIN
         END IF;
     END IF;
 
-    -- Chèn bản ghi đặt chỗ
+    -- Chèn bản ghi đặt chỗ (DÙNG ĐÚNG booked_by theo schema CSDL)
     INSERT INTO public.amenity_bookings (
         amenity_id,
-        user_id,
+        booked_by,
         apartment_id,
         booking_date,
         time_slot,
