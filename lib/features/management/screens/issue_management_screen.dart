@@ -18,6 +18,7 @@ import '../../../data/providers/auth_provider.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
+import '../../../core/widgets/app_storage_image.dart';
 import '../../../core/utils/excel_export_helper.dart';
 
 class IssueManagementScreen extends ConsumerStatefulWidget {
@@ -691,8 +692,8 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                         ),
                                       );
                                     },
-                                    child: Image.network(
-                                      issue.reportImages.first,
+                                    child: AppStorageImage(
+                                      imageUrl: issue.reportImages.first,
                                       height: 120,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
@@ -745,8 +746,8 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                                       ),
                                                     );
                                                   },
-                                                  child: Image.network(
-                                                    issue.resolutionProofImages[i],
+                                                  child: AppStorageImage(
+                                                    imageUrl: issue.resolutionProofImages[i],
                                                     width: 100,
                                                     height: 80,
                                                     fit: BoxFit.cover,

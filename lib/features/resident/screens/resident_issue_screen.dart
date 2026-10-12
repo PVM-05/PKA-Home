@@ -10,6 +10,7 @@ import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
+import '../../../core/widgets/app_storage_image.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_error_card.dart';
 
@@ -341,8 +342,8 @@ class ResidentIssueScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      child: Image.network(
-                        issue.reportImages.first,
+                      child: AppStorageImage(
+                        imageUrl: issue.reportImages.first,
                         height: 140,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -443,8 +444,8 @@ class ResidentIssueScreen extends ConsumerWidget {
                                     ),
                                   );
                                 },
-                                child: Image.network(
-                                  issue.resolutionProofImages[i],
+                                child: AppStorageImage(
+                                  imageUrl: issue.resolutionProofImages[i],
                                   width: 120,
                                   height: 100,
                                   fit: BoxFit.cover,

@@ -221,20 +221,10 @@ class ManagementRepository {
 
       await _client.storage.from('issue-images').upload(fileName, file);
 
-      String imageUrl;
-      try {
-        // Ưu tiên tạo Signed URL có thời hạn 1 năm cho private bucket
-        imageUrl = await _client.storage
-            .from('issue-images')
-            .createSignedUrl(fileName, 60 * 60 * 24 * 365);
-      } catch (_) {
-        // Fallback sang public URL nếu cấu hình bucket là public
-        imageUrl = _client.storage.from('issue-images').getPublicUrl(fileName);
-      }
-
+      // Lưu trực tiếp object path vào cơ sở dữ liệu
       await _client.from('issue_images').insert({
         'issue_report_id': issueId,
-        'image_url': imageUrl,
+        'image_url': fileName,
         'image_role': 'resolution_proof',
       });
     }
