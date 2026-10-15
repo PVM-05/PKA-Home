@@ -266,6 +266,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       currentUser?.role,
       activeDelegations: activeDelegations,
     );
+    final canManageResidents = AppPermissions.residentManagement.allows(
+      currentUser?.role,
+      activeDelegations: activeDelegations,
+    );
 
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final pendingInvoicesAsync = ref.watch(pendingConfirmationInvoicesProvider);
@@ -295,15 +299,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           label: 'Tổng quan',
         ),
       ),
-      _ManagementTab(
-        key: 'residents',
-        screen: const ResidentManagementScreen(),
-        destination: NavigationDestination(
-          icon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups_outlined)) : const Icon(Icons.groups_outlined),
-          selectedIcon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups, color: AppTheme.primary)) : const Icon(Icons.groups, color: AppTheme.primary),
-          label: 'Cư dân',
+      if (canManageResidents)
+        _ManagementTab(
+          key: 'residents',
+          screen: const ResidentManagementScreen(),
+          destination: NavigationDestination(
+            icon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups_outlined)) : const Icon(Icons.groups_outlined),
+            selectedIcon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups, color: AppTheme.primary)) : const Icon(Icons.groups, color: AppTheme.primary),
+            label: 'Cư dân',
+          ),
         ),
-      ),
       if (canManageInvoices)
         _ManagementTab(
           key: 'invoices',
