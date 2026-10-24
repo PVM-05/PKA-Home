@@ -62,7 +62,19 @@ class MockVehicleBillingRepository implements VehicleRepository {
 
   @override
   Future<void> deleteVehicle(String vehicleId) async {}
+
+  @override
+  Future<void> updatePendingVehicle({
+    required String vehicleId,
+    required String licensePlate,
+    required String vehicleType,
+    String? brandModel,
+  }) async {}
+
+  @override
+  Future<void> cancelPendingVehicle(String vehicleId) async {}
 }
+
 
 void main() {
   group('CreateInvoiceScreen Vehicle Billing Auto-Fill Tests', () {

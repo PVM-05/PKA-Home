@@ -10,9 +10,16 @@ enum LinkStatus { loading, linked, pending, rejected, none }
 
 class ResidentLinkStatus {
   final LinkStatus status;
+  final String? requestId;
+  final String? apartmentCode;
   
-  ResidentLinkStatus({required this.status});
+  ResidentLinkStatus({
+    required this.status,
+    this.requestId,
+    this.apartmentCode,
+  });
 }
+
 
 class ParsedApartment {
   final String code;
@@ -156,14 +163,19 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
       // (ưu tiên pending để không bị che khuất nếu có nhiều yêu cầu)
       final pendingReq = await _supabase
           .from('apartment_link_requests')
-          .select()
+          .select('*, apartments(code)')
           .eq('user_id', _userId)
           .eq('status', 'pending')
           .limit(1)
           .maybeSingle();
 
       if (pendingReq != null) {
-        state = ResidentLinkStatus(status: LinkStatus.pending);
+        final aptCode = (pendingReq['apartments'] as Map?)?['code'] as String?;
+        state = ResidentLinkStatus(
+          status: LinkStatus.pending,
+          requestId: pendingReq['id'] as String?,
+          apartmentCode: aptCode,
+        );
         return;
       }
 
@@ -193,7 +205,53 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
     }
   }
 
+  Future<void> cancelPendingRequest([String? reqId]) async {
+    if (_userId == null) {
+      throw const AppException('Vui lòng đăng nhập để thực hiện thao tác này.');
+    }
+
+    try {
+      state = ResidentLinkStatus(status: LinkStatus.loading);
+      String? targetId = reqId ?? state.requestId;
+      if (targetId == null) {
+        final pending = await _supabase
+            .from('apartment_link_requests')
+            .select('id')
+            .eq('user_id', _userId)
+            .eq('status', 'pending')
+            .limit(1)
+            .maybeSingle();
+        if (pending != null) {
+          targetId = pending['id'] as String?;
+        }
+      }
+
+      if (targetId == null) {
+        state = ResidentLinkStatus(status: LinkStatus.none);
+        return;
+      }
+
+      final res = await _supabase.rpc('cancel_apartment_link_request', params: {
+        'p_request_id': targetId,
+      });
+
+      final resMap = res as Map<String, dynamic>;
+      if (resMap['success'] != true) {
+        throw AppException(resMap['message'] ?? 'Không thể hủy yêu cầu liên kết.');
+      }
+
+      await checkStatus();
+    } on PostgrestException catch (pe) {
+      await checkStatus();
+      throw AppException(NetworkErrorHandler.getMessage(pe));
+    } catch (e) {
+      await checkStatus();
+      rethrow;
+    }
+  }
+
   Future<void> submitRequest(String code, String relationRole) async {
+
     if (_userId == null) {
       throw const AppException('Vui lòng đăng nhập để thực hiện thao tác này.');
     }
