@@ -23,7 +23,7 @@ class AmenityManagementScreen extends ConsumerStatefulWidget {
 class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  BuildingAmenityModel? _selectedAmenity;
+  String? _selectedAmenityId;
   DateTime _selectedDate = DateTime.now();
 
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
@@ -308,10 +308,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 final result = await ref
                     .read(amenityBookingRepositoryProvider)
                     .checkInBooking(code);
-                if (_selectedAmenity != null) {
+                if (_selectedAmenityId != null) {
                   ref.invalidate(amenityBookingsForDateProvider(
                     AmenityDateQuery(
-                      amenityId: _selectedAmenity!.id,
+                      amenityId: _selectedAmenityId!,
                       date: _selectedDate,
                     ),
                   ));
@@ -376,7 +376,14 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
             return const Center(child: Text('Tòa nhà chưa có tiện ích nào được tạo.'));
           }
 
-          _selectedAmenity ??= amenities.first;
+          // Đảm bảo _selectedAmenityId luôn hợp lệ và tồn tại trong danh sách amenities
+          if (_selectedAmenityId == null || !amenities.any((a) => a.id == _selectedAmenityId)) {
+            _selectedAmenityId = amenities.first.id;
+          }
+          final selectedAmenity = amenities.firstWhere(
+            (a) => a.id == _selectedAmenityId,
+            orElse: () => amenities.first,
+          );
 
           return Column(
             children: [
@@ -388,21 +395,22 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   children: [
                     Expanded(
                       flex: 3,
-                      child: DropdownButtonFormField<BuildingAmenityModel>(
-                        initialValue: _selectedAmenity,
+                      child: DropdownButtonFormField<String>(
+                        key: ValueKey(_selectedAmenityId),
+                        initialValue: _selectedAmenityId,
                         decoration: const InputDecoration(
                           labelText: 'Chọn tiện ích',
                           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           border: OutlineInputBorder(),
                         ),
                         items: amenities.map((a) {
-                          return DropdownMenuItem(
-                            value: a,
+                          return DropdownMenuItem<String>(
+                            value: a.id,
                             child: Text(a.name, overflow: TextOverflow.ellipsis),
                           );
                         }).toList(),
                         onChanged: (val) {
-                          if (val != null) setState(() => _selectedAmenity = val);
+                          if (val != null) setState(() => _selectedAmenityId = val);
                         },
                       ),
                     ),
@@ -429,8 +437,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildBookingsTab(_selectedAmenity!),
-                    _buildMaintenanceTab(_selectedAmenity!),
+                    _buildBookingsTab(selectedAmenity),
+                    _buildMaintenanceTab(selectedAmenity),
                   ],
                 ),
               ),

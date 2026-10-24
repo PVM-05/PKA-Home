@@ -194,4 +194,54 @@ void main() {
     expect(find.text('Check-in Tiện Ích (QR/Mã)'), findsOneWidget);
     expect(find.text('Mã đặt chỗ (Booking ID)'), findsOneWidget);
   });
+
+  testWidgets('Dropdown chọn tiện ích hiển thị ổn định khi danh sách thay đổi và chọn tiện ích khác', (tester) async {
+    final mockRepo = MockAmenityBookingRepo();
+    final testAmenity1 = BuildingAmenityModel(
+      id: 'amenity-1',
+      name: 'Sân Pickleball',
+      displayOrder: 1,
+      bookingType: 'exclusive',
+      maxCapacity: 4,
+    );
+    final testAmenity2 = BuildingAmenityModel(
+      id: 'amenity-2',
+      name: 'Hồ bơi vô cực',
+      displayOrder: 2,
+      bookingType: 'shared',
+      maxCapacity: 20,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith((ref) => FakeAuthNotifier(UserModel(
+                id: 'admin-1',
+                fullName: 'Quản trị viên',
+                phone: '0901234567',
+                role: 'admin',
+              ))),
+          amenityBookingRepositoryProvider.overrideWithValue(mockRepo),
+          buildingAmenitiesProvider.overrideWith((ref) => [testAmenity1, testAmenity2]),
+          amenityBookingsForDateProvider.overrideWith((ref, query) => []),
+          amenityMaintenanceForDateProvider.overrideWith((ref, query) => []),
+        ],
+        child: const MaterialApp(
+          home: AmenityManagementScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sân Pickleball'), findsOneWidget);
+
+    await tester.tap(find.text('Sân Pickleball'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Hồ bơi vô cực').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hồ bơi vô cực'), findsOneWidget);
+  });
 }
