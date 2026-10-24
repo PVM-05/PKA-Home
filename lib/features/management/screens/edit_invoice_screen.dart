@@ -10,6 +10,7 @@ import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/invoice_items_provider.dart';
+import '../../../core/utils/invoice_fee_helper.dart';
 
 class EditInvoiceScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
@@ -90,7 +91,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   void _initializeItems(List<Map<String, dynamic>> rawItems) {
     if (_isItemsInitialized) return;
     for (final raw in rawItems) {
-      final feeType = raw['fee_type'] as String? ?? 'Phí dịch vụ';
+      final feeType = InvoiceFeeHelper.getFeeName(raw['fee_type'] as String?);
       final unitPrice = (raw['unit_price'] as num?)?.toDouble() ?? 0.0;
       final quantity = (raw['quantity'] as num?)?.toDouble() ?? 1.0;
       _items.add(_EditableFeeItem(
