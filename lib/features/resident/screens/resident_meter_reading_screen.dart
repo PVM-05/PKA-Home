@@ -12,6 +12,7 @@ import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
 import '../../../core/utils/network_error_handler.dart';
 import '../../../core/utils/validators.dart';
+import '../../../data/models/meter_reading_submission_model.dart';
 
 class ResidentMeterReadingScreen extends ConsumerStatefulWidget {
   const ResidentMeterReadingScreen({super.key});
@@ -618,6 +619,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             Color statusColor = AppTheme.warning;
                             if (item.isApproved) statusColor = AppStatusColors.paid;
                             if (item.isRejected) statusColor = AppTheme.error;
+                            if (item.isCancelled) statusColor = Colors.grey;
 
                             return AppCard(
                               margin: const EdgeInsets.only(bottom: 12),
@@ -682,6 +684,35 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                       ),
                                     ),
                                   ],
+                                  if (item.isPending) ...[
+                                    const SizedBox(height: 10),
+                                    const Divider(height: 1),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        OutlinedButton.icon(
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: AppTheme.primary,
+                                            visualDensity: VisualDensity.compact,
+                                          ),
+                                          icon: const Icon(Icons.edit_outlined, size: 16),
+                                          label: const Text('Sửa chỉ số'),
+                                          onPressed: () => _showEditSubmissionDialog(context, item),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        TextButton.icon(
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: AppTheme.error,
+                                            visualDensity: VisualDensity.compact,
+                                          ),
+                                          icon: const Icon(Icons.cancel_outlined, size: 16),
+                                          label: const Text('Hủy phiếu'),
+                                          onPressed: () => _confirmCancelSubmission(context, item),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             );
@@ -699,6 +730,216 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: AppErrorCard(error: e)),
+      ),
+    );
+  }
+
+  void _showEditSubmissionDialog(BuildContext context, MeterReadingSubmissionModel item) {
+    final elecController = TextEditingController(text: item.electricReading.toString());
+    final waterController = TextEditingController(text: item.waterReading.toString());
+    final formKey = GlobalKey<FormState>();
+    bool clearElectricImg = false;
+    bool clearWaterImg = false;
+    bool isSaving = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              const Icon(Icons.edit_note, color: AppTheme.primary),
+              const SizedBox(width: 8),
+              Expanded(child: Text('Sửa Chỉ Số Kỳ ${item.period}')),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Bạn có thể điều chỉnh lại chỉ số điện nước khi phiếu đang chờ Ban Quản Lý phê duyệt.',
+                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: elecController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Chỉ số điện (kWh) *',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.bolt, color: Colors.orange),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) return 'Vui lòng nhập chỉ số điện';
+                      final num = double.tryParse(val.trim());
+                      if (num == null || num < 0) return 'Chỉ số điện phải là số không âm';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: waterController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Chỉ số nước (m³) *',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.water_drop, color: Colors.blue),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) return 'Vui lòng nhập chỉ số nước';
+                      final num = double.tryParse(val.trim());
+                      if (num == null || num < 0) return 'Chỉ số nước phải là số không âm';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  if (item.electricImageUrl != null)
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('Xóa ảnh công tơ điện đã gửi', style: TextStyle(fontSize: 13)),
+                      value: clearElectricImg,
+                      onChanged: (val) => setDialogState(() => clearElectricImg = val ?? false),
+                    ),
+                  if (item.waterImageUrl != null)
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: const Text('Xóa ảnh công tơ nước đã gửi', style: TextStyle(fontSize: 13)),
+                      value: clearWaterImg,
+                      onChanged: (val) => setDialogState(() => clearWaterImg = val ?? false),
+                    ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Hệ thống sẽ giữ nguyên ảnh công tơ trước đó nếu bạn không chủ động xóa.',
+                            style: TextStyle(fontSize: 11, color: Colors.blue.shade900),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isSaving ? null : () => Navigator.pop(dialogCtx),
+              child: const Text('Đóng'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: isSaving
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      final newElec = double.parse(elecController.text.trim());
+                      final newWater = double.parse(waterController.text.trim());
+                      setDialogState(() => isSaving = true);
+                      try {
+                        await ref.read(meterReadingRepositoryProvider).updatePendingSubmission(
+                              submissionId: item.id,
+                              electricReading: newElec,
+                              waterReading: newWater,
+                              clearElectricImage: clearElectricImg,
+                              clearWaterImage: clearWaterImg,
+                            );
+                        ref.invalidate(residentMeterReadingsProvider);
+                        if (context.mounted) {
+                          Navigator.pop(dialogCtx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Cập nhật chỉ số điện nước thành công!'),
+                              backgroundColor: AppStatusColors.paid,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        setDialogState(() => isSaving = false);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(NetworkErrorHandler.getMessage(e)),
+                              backgroundColor: AppTheme.error,
+                            ),
+                          );
+                        }
+                      }
+                    },
+              child: isSaving
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Lưu thay đổi'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmCancelSubmission(BuildContext context, MeterReadingSubmissionModel item) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Hủy Phiếu Khai Báo'),
+        content: Text(
+          'Bạn có chắc chắn muốn hủy phiếu khai báo chỉ số kỳ ${item.period} không? Hành động này không thể hoàn tác.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Không'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              try {
+                await ref.read(meterReadingRepositoryProvider).cancelPendingSubmission(item.id);
+                ref.invalidate(residentMeterReadingsProvider);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Đã hủy phiếu khai báo chỉ số.'),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(NetworkErrorHandler.getMessage(e)),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Xác nhận hủy'),
+          ),
+        ],
       ),
     );
   }
