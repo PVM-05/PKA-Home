@@ -72,5 +72,24 @@ void main() {
       expect(duplicatesIdx, greaterThan(alterTypeIdx), reason: 'Phải dọn trùng sau khi cột chấp nhận cancelled');
       expect(createIndexIdx, greaterThan(duplicatesIdx), reason: 'Phải tạo index sau khi đã dọn trùng');
     });
+
+    test('Các RPC sửa/hủy xe và điện nước không được chứa quyền thao tác chéo qua residents_apartments', () {
+      if (!migrationFile.existsSync()) return;
+      final content = migrationFile.readAsStringSync();
+
+      // Khối RPC update_pending_vehicle
+      final vehicleUpdateStart = content.indexOf('FUNCTION public.update_pending_vehicle');
+      final vehicleUpdateEnd = content.indexOf('FUNCTION public.reschedule_amenity_booking');
+      final vehicleUpdateBlock = content.substring(vehicleUpdateStart, vehicleUpdateEnd);
+      expect(vehicleUpdateBlock.contains('residents_apartments'), isFalse,
+          reason: 'update_pending_vehicle không được cho phép cư dân cùng căn hộ sửa xe.');
+
+      // Khối RPC meter reading
+      final meterStart = content.indexOf('FUNCTION public.update_pending_meter_reading');
+      final meterEnd = content.indexOf('FUNCTION public.cancel_apartment_link_request');
+      final meterBlock = content.substring(meterStart, meterEnd);
+      expect(meterBlock.contains('residents_apartments'), isFalse,
+          reason: 'RPCs phiếu điện nước không được cho phép cư dân cùng căn hộ sửa/hủy chéo.');
+    });
   });
 }
