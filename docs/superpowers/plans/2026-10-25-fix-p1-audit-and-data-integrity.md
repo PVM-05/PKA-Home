@@ -1,6 +1,6 @@
 # Kế Hoạch Thực Thi: Khắc Phục Lỗi Toàn Vẹn Dữ Liệu, Phân Quyền & Kiểm Thử Nghiệp Vụ (P1 Audit Fixes)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Khắc phục triệt để các lỗi P1 về bảo mật phân quyền sửa/hủy, thứ tự migration dọn trùng, trigger hạn mức 2 xe máy, xác thực giờ đổi lịch tiện ích theo Strict FIFO, và nâng cấp bộ kiểm thử 3 lớp đạt chuẩn nghiệm thu.
 
@@ -26,7 +26,7 @@
 - Consumes: Bảng `public.apartment_link_requests`, RPC `public.approve_link_request`.
 - Produces: Cột `status VARCHAR(20)` có check constraint 4 trạng thái, dọn sạch trùng trước khi tạo partial unique index `uq_link_requests_active`.
 
-- [ ] **Step 1: Viết test kiểm tra thứ tự DDL và CTE dọn trùng**
+- [x] **Step 1: Viết test kiểm tra thứ tự DDL và CTE dọn trùng**
 
 Cập nhật `test/data/repositories/pending_correction_migration_test.dart`:
 ```dart
@@ -49,12 +49,12 @@ test('Migration phải dọn trùng dữ liệu và không chứa EXCEPTION WHEN
 });
 ```
 
-- [ ] **Step 2: Chạy test để xác nhận test thất bại**
+- [x] **Step 2: Chạy test để xác nhận test thất bại**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: FAIL (vì migration hiện tại vẫn chứa `EXCEPTION WHEN OTHERS THEN NULL` và chưa có `WITH duplicates AS`).
 
-- [ ] **Step 3: Cập nhật migration file với thứ tự DDL chuẩn và cập nhật các đối tượng phụ thuộc**
+- [x] **Step 3: Cập nhật migration file với thứ tự DDL chuẩn và cập nhật các đối tượng phụ thuộc**
 
 Tại `supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql`, thay thế khối 1.3 và 1.4:
 ```sql
@@ -148,12 +148,12 @@ ON public.apartment_link_requests(user_id, apartment_id)
 WHERE status IN ('pending', 'approved');
 ```
 
-- [ ] **Step 4: Chạy test để xác nhận test vượt qua**
+- [x] **Step 4: Chạy test để xác nhận test vượt qua**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql test/data/repositories/pending_correction_migration_test.dart
@@ -172,7 +172,7 @@ git commit -m "fix: chuẩn hóa thứ tự DDL migration và dọn trùng link 
 - Consumes: Bảng `public.vehicles`, `public.meter_reading_submissions`.
 - Produces: RPC `update_pending_vehicle`, `cancel_pending_vehicle`, `update_pending_meter_reading`, `cancel_pending_meter_reading` loại bỏ hoàn toàn kiểm tra `residents_apartments`.
 
-- [ ] **Step 1: Viết test kiểm tra quyền nghiêm ngặt trong migration test**
+- [x] **Step 1: Viết test kiểm tra quyền nghiêm ngặt trong migration test**
 
 Cập nhật `test/data/repositories/pending_correction_migration_test.dart`:
 ```dart
@@ -194,12 +194,12 @@ test('Các RPC sửa/hủy xe và điện nước không được chứa quyền
 });
 ```
 
-- [ ] **Step 2: Chạy test để xác nhận test thất bại**
+- [x] **Step 2: Chạy test để xác nhận test thất bại**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: FAIL.
 
-- [ ] **Step 3: Cập nhật điều kiện quyền trong RPCs của migration**
+- [x] **Step 3: Cập nhật điều kiện quyền trong RPCs của migration**
 
 Trong `supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql`:
 1. `update_pending_vehicle`:
@@ -231,12 +231,12 @@ Trong `supabase/migrations/20261024_04_pending_requests_correction_and_reschedul
       );
 ```
 
-- [ ] **Step 4: Chạy test để xác nhận test vượt qua**
+- [x] **Step 4: Chạy test để xác nhận test vượt qua**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql test/data/repositories/pending_correction_migration_test.dart
@@ -257,7 +257,7 @@ git commit -m "fix: thống nhất quyền sở hữu nghiêm ngặt cho phươn
 - Consumes: Bảng `public.vehicles`, `VehicleRepository.getActiveMotorbikeCount`.
 - Produces: Trigger `trg_check_vehicle_limits` cấp CSDL với `SECURITY DEFINER` và `SET search_path = public, pg_catalog`; bộ đếm Dart lọc chính xác `inFilter('status', ['pending', 'approved'])`.
 
-- [ ] **Step 1: Viết test cho trigger và bộ đếm xe máy**
+- [x] **Step 1: Viết test cho trigger và bộ đếm xe máy**
 
 Thêm vào `test/data/repositories/pending_correction_migration_test.dart`:
 ```dart
@@ -272,12 +272,12 @@ test('Migration phải định nghĩa trigger check_vehicle_limits có SECURITY 
 });
 ```
 
-- [ ] **Step 2: Chạy test để xác nhận test thất bại**
+- [x] **Step 2: Chạy test để xác nhận test thất bại**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: FAIL.
 
-- [ ] **Step 3: Bổ sung trigger check_vehicle_limits vào migration và sửa VehicleRepository**
+- [x] **Step 3: Bổ sung trigger check_vehicle_limits vào migration và sửa VehicleRepository**
 
 1. Thêm định nghĩa trigger vào `supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql`:
 ```sql
@@ -343,12 +343,12 @@ FOR EACH ROW EXECUTE FUNCTION public.check_vehicle_limits();
   }
 ```
 
-- [ ] **Step 4: Chạy test để xác nhận test vượt qua**
+- [x] **Step 4: Chạy test để xác nhận test vượt qua**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql lib/data/repositories/vehicle_repository.dart test/data/repositories/pending_correction_migration_test.dart
@@ -367,7 +367,7 @@ git commit -m "fix: củng cố trigger hạn mức xe máy CSDL và sửa bộ 
 - Consumes: Bảng `public.amenity_bookings`, `public.building_amenities`, `public.payment_transactions`.
 - Produces: RPC `public.reschedule_amenity_booking` xác thực regex định dạng giờ, `open_hours`, tính sức chứa slot cũ và đôn Waitlist theo Strict FIFO kèm đồng bộ thanh toán.
 
-- [ ] **Step 1: Viết test cho logic đổi lịch và Strict FIFO trong migration test**
+- [x] **Step 1: Viết test cho logic đổi lịch và Strict FIFO trong migration test**
 
 Cập nhật `test/data/repositories/pending_correction_migration_test.dart`:
 ```dart
@@ -386,12 +386,12 @@ test('reschedule_amenity_booking phải kiểm tra định dạng giờ regex, l
 });
 ```
 
-- [ ] **Step 2: Chạy test để xác nhận test thất bại**
+- [x] **Step 2: Chạy test để xác nhận test thất bại**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: FAIL.
 
-- [ ] **Step 3: Cập nhật toàn bộ RPC `reschedule_amenity_booking` trong migration**
+- [x] **Step 3: Cập nhật toàn bộ RPC `reschedule_amenity_booking` trong migration**
 
 Thay thế RPC `reschedule_amenity_booking` trong `supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql`:
 ```sql
@@ -670,12 +670,12 @@ END;
 $$;
 ```
 
-- [ ] **Step 4: Chạy test để xác nhận test vượt qua**
+- [x] **Step 4: Chạy test để xác nhận test vượt qua**
 
 Run: `flutter test test/data/repositories/pending_correction_migration_test.dart`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql test/data/repositories/pending_correction_migration_test.dart
@@ -696,7 +696,7 @@ git commit -m "fix: xác thực khung giờ nghiêm ngặt và đôn Waitlist th
 - Consumes: `VehicleRepository`, `AmenityBookingRepository`, `MeterReadingRepository`.
 - Produces: Bộ unit test Mocktail xác minh từng tham số RPC, dữ liệu trả về và ngoại lệ; UI hiển thị SnackBar theo `action` và `status`.
 
-- [ ] **Step 1: Viết bộ unit test repository toàn diện với Mocktail**
+- [x] **Step 1: Viết bộ unit test repository toàn diện với Mocktail**
 
 Viết lại toàn bộ `test/data/repositories/pending_requests_correction_repository_test.dart`:
 ```dart
@@ -864,7 +864,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Cập nhật thông báo đổi lịch trong AmenityBookingScreen**
+- [x] **Step 2: Cập nhật thông báo đổi lịch trong AmenityBookingScreen**
 
 Tại `lib/features/resident/screens/amenity_booking_screen.dart`:
 ```dart
@@ -905,17 +905,17 @@ Và trong khối catch ngoại lệ của `rescheduleBooking`:
     }
 ```
 
-- [ ] **Step 3: Chạy test repository**
+- [x] **Step 3: Chạy test repository**
 
 Run: `flutter test test/data/repositories/pending_requests_correction_repository_test.dart`
 Expected: PASS.
 
-- [ ] **Step 4: Chạy test UI amenity reschedule**
+- [x] **Step 4: Chạy test UI amenity reschedule**
 
 Run: `flutter test test/features/resident/amenity_reschedule_test.dart`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/features/resident/screens/amenity_booking_screen.dart test/data/repositories/pending_requests_correction_repository_test.dart
@@ -929,17 +929,17 @@ git commit -m "test: nâng cấp unit test repository với Mocktail và chuẩn
 **Files:**
 - Toàn bộ codebase.
 
-- [ ] **Step 1: Chạy Dart Code Analysis**
+- [x] **Step 1: Chạy Dart Code Analysis**
 
 Run: `dart analyze`
 Expected: No errors / warnings.
 
-- [ ] **Step 2: Chạy toàn bộ bộ kiểm thử Flutter**
+- [x] **Step 2: Chạy toàn bộ bộ kiểm thử Flutter**
 
 Run: `flutter test`
 Expected: 100% tests pass.
 
-- [ ] **Step 3: Commit xác nhận nghiệm thu**
+- [x] **Step 3: Commit xác nhận nghiệm thu**
 
 ```bash
 git commit --allow-empty -m "chore: hoàn tất kiểm thử toàn diện và xác minh chất lượng hệ thống"
