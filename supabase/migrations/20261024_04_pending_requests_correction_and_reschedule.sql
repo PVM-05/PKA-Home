@@ -19,27 +19,91 @@ ALTER TABLE public.meter_reading_submissions DROP CONSTRAINT IF EXISTS meter_rea
 ALTER TABLE public.meter_reading_submissions ADD CONSTRAINT meter_reading_submissions_status_check 
   CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled'));
 
--- 1.3 Chuyển đổi cột status của public.apartment_link_requests sang VARCHAR(20)
--- để tránh lỗi transaction DDL của PostgreSQL enum khi thêm giá trị mới
-DO $$
+-- 1.3 Chuyển đổi cột status của public.apartment_link_requests sang VARCHAR(20) an toàn
+-- Xóa default cũ ràng buộc enum link_request_status
+ALTER TABLE public.apartment_link_requests 
+  ALTER COLUMN status DROP DEFAULT;
+
+-- Chuyển kiểu dữ liệu sang VARCHAR(20)
+ALTER TABLE public.apartment_link_requests 
+  ALTER COLUMN status TYPE VARCHAR(20) USING status::text;
+
+-- Gán default mới
+ALTER TABLE public.apartment_link_requests 
+  ALTER COLUMN status SET DEFAULT 'pending';
+
+-- Áp dụng check constraint mới
+ALTER TABLE public.apartment_link_requests DROP CONSTRAINT IF EXISTS apartment_link_requests_status_check;
+ALTER TABLE public.apartment_link_requests ADD CONSTRAINT apartment_link_requests_status_check 
+  CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled'));
+
+-- Xóa constraint UNIQUE cũ không điều kiện (nếu có)
+ALTER TABLE public.apartment_link_requests DROP CONSTRAINT IF EXISTS apartment_link_requests_user_id_apartment_id_key;
+
+-- Cập nhật RLS Policy "Resident tạo yêu cầu" tránh ép kiểu enum cũ
+DROP POLICY IF EXISTS "Resident tạo yêu cầu" ON public.apartment_link_requests;
+CREATE POLICY "Resident tạo yêu cầu" 
+ON public.apartment_link_requests FOR INSERT 
+WITH CHECK (user_id = auth.uid() AND status = 'pending');
+
+-- Cập nhật RPC approve_link_request để biến v_status dùng VARCHAR(20) thay vì enum cũ
+CREATE OR REPLACE FUNCTION public.approve_link_request(p_request_id UUID)
+RETURNS void AS $$
+DECLARE
+  v_user_id UUID;
+  v_apartment_id UUID;
+  v_status VARCHAR(20);
+  v_requested_role public.relation_type;
 BEGIN
-    -- Chuyển kiểu dữ liệu an toàn
-    ALTER TABLE public.apartment_link_requests 
-      ALTER COLUMN status TYPE VARCHAR(20) USING status::text;
-    
-    -- Áp dụng check constraint
-    ALTER TABLE public.apartment_link_requests DROP CONSTRAINT IF EXISTS apartment_link_requests_status_check;
-    ALTER TABLE public.apartment_link_requests ADD CONSTRAINT apartment_link_requests_status_check 
-      CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled'));
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Chỉ Quản trị viên mới có quyền duyệt yêu cầu liên kết căn hộ.';
+  END IF;
 
-    -- Xóa constraint UNIQUE(user_id, apartment_id) cũ nếu tồn tại
-    ALTER TABLE public.apartment_link_requests DROP CONSTRAINT IF EXISTS apartment_link_requests_user_id_apartment_id_key;
-EXCEPTION
-    WHEN OTHERS THEN NULL;
-END $$;
+  SELECT user_id, apartment_id, status, requested_relation_role 
+  INTO v_user_id, v_apartment_id, v_status, v_requested_role 
+  FROM public.apartment_link_requests 
+  WHERE id = p_request_id;
 
--- 1.4 Làm sạch dữ liệu trùng lịch sử và thiết lập Partial Unique Index
--- Chỉ chặn trùng lặp đối với các yêu cầu đang pending hoặc đã approved
+  IF v_status IS NULL THEN
+    RAISE EXCEPTION 'Không tìm thấy yêu cầu liên kết.';
+  END IF;
+
+  IF v_status != 'pending' THEN
+    RAISE EXCEPTION 'Yêu cầu này đã được xử lý.';
+  END IF;
+
+  UPDATE public.apartment_link_requests
+  SET status = 'approved',
+      updated_at = now()
+  WHERE id = p_request_id;
+
+  INSERT INTO public.residents_apartments (user_id, apartment_id, relation_role)
+  VALUES (v_user_id, v_apartment_id, v_requested_role)
+  ON CONFLICT (user_id, apartment_id) DO NOTHING;
+
+  UPDATE public.apartments
+  SET is_empty = false
+  WHERE id = v_apartment_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_catalog;
+
+-- 1.4 Dọn dẹp bản ghi trùng lặp lịch sử trước khi tạo Partial Unique Index
+-- Ưu tiên giữ lại bản ghi 'approved', nếu cùng trạng thái thì lấy bản ghi mới nhất (created_at DESC).
+-- Các bản ghi trùng còn lại được chuyển sang 'cancelled'.
+WITH duplicates AS (
+    SELECT id,
+           ROW_NUMBER() OVER (
+               PARTITION BY user_id, apartment_id 
+               ORDER BY (CASE WHEN status = 'approved' THEN 1 ELSE 2 END), created_at DESC
+           ) as rn
+    FROM public.apartment_link_requests
+    WHERE status IN ('pending', 'approved')
+)
+UPDATE public.apartment_link_requests
+SET status = 'cancelled', updated_at = NOW()
+WHERE id IN (SELECT id FROM duplicates WHERE rn > 1);
+
+-- Thiết lập Partial Unique Index
 CREATE UNIQUE INDEX IF NOT EXISTS uq_link_requests_active 
 ON public.apartment_link_requests(user_id, apartment_id) 
 WHERE status IN ('pending', 'approved');
