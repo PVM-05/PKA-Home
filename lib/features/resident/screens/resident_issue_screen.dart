@@ -147,7 +147,7 @@ class ResidentIssueScreen extends ConsumerWidget {
           children: [
             Icon(Icons.warning_amber_rounded, color: AppTheme.error),
             SizedBox(width: 8),
-            Text('Xác nhận xóa'),
+            Expanded(child: Text('Xác nhận xóa')),
           ],
         ),
         content: const Text(

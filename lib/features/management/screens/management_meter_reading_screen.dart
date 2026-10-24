@@ -66,47 +66,49 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   ),
                 ],
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Kỳ: ${item.period} • Người gửi: ${item.submitterName ?? 'Cư dân'}'),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(10),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Kỳ: ${item.period} • Người gửi: ${item.submitterName ?? 'Cư dân'}'),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('• Điện mới: ${item.electricReading} kWh', style: const TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          Text('• Nước mới: ${item.waterReading} m³', style: const TextStyle(fontWeight: FontWeight.w600)),
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('• Điện mới: ${item.electricReading} kWh', style: const TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 4),
-                        Text('• Nước mới: ${item.waterReading} m³', style: const TextStyle(fontWeight: FontWeight.w600)),
-                      ],
+                    const SizedBox(height: 16),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        'Tự động tạo hóa đơn tháng cho căn hộ này',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: const Text(
+                        'Tính phí điện, nước theo chỉ số mới và phí quản lý',
+                        style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                      ),
+                      value: generateInvoice,
+                      activeColor: AppTheme.primary,
+                      onChanged: (val) {
+                        setDialogState(() {
+                          generateInvoice = val ?? true;
+                        });
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text(
-                      'Tự động tạo hóa đơn tháng cho căn hộ này',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: const Text(
-                      'Tính phí điện, nước theo chỉ số mới và phí quản lý',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                    ),
-                    value: generateInvoice,
-                    activeColor: AppTheme.primary,
-                    onChanged: (val) {
-                      setDialogState(() {
-                        generateInvoice = val ?? true;
-                      });
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -187,33 +189,35 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               ),
             ],
           ),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Vui lòng nhập lý do từ chối để cư dân nắm được thông tin và khai báo lại:',
-                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: reasonController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Lý do từ chối *',
-                    hintText: 'VD: Ảnh mờ không rõ số, số điện thấp hơn thực tế...',
-                    border: OutlineInputBorder(),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Vui lòng nhập lý do từ chối để cư dân nắm được thông tin và khai báo lại:',
+                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
                   ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Vui lòng nhập lý do từ chối';
-                    }
-                    return null;
-                  },
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: reasonController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Lý do từ chối *',
+                      hintText: 'VD: Ảnh mờ không rõ số, số điện thấp hơn thực tế...',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Vui lòng nhập lý do từ chối';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -287,14 +291,18 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   ),
                 ],
               ),
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Text('Không thể tải hình ảnh công tơ'),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Text('Không thể tải hình ảnh công tơ'),
+                      ),
+                    ),
                   ),
                 ),
               ),

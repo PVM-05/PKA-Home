@@ -911,7 +911,7 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
           children: [
             Icon(Icons.warning_amber_rounded, color: AppTheme.error),
             SizedBox(width: 8),
-            Text('Xác nhận xóa'),
+            Expanded(child: Text('Xác nhận xóa')),
           ],
         ),
         content: Text('Bạn có chắc chắn muốn xóa căn hộ ${apt.code}? Thao tác này không thể hoàn tác.'),

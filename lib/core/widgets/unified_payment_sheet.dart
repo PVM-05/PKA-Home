@@ -826,12 +826,16 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: isHighlight ? AppTheme.primary : null,
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: isHighlight ? AppTheme.primary : null,
+            ),
           ),
         ),
       ],

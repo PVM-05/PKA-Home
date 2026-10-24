@@ -65,7 +65,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
               children: [
                 Icon(Icons.person_add_alt_1, color: AppTheme.primary),
                 SizedBox(width: 8),
-                Text('Tạo tài khoản mới', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                Expanded(child: Text('Tạo tài khoản mới', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
               ],
             ),
             content: SingleChildScrollView(
@@ -401,7 +401,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                           children: [
                             Icon(Icons.warning_amber_rounded, color: AppTheme.warning),
                             SizedBox(width: 8),
-                            Text('Xác nhận đổi vai trò', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Expanded(child: Text('Xác nhận đổi vai trò', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
                           ],
                         ),
                         content: Text(

@@ -369,14 +369,15 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
               const SizedBox(height: 14),
 
               // Chuyển đổi danh sách chi tiết
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   ChoiceChip(
                     label: Text('Căn hợp lệ (${result.validCount})'),
                     selected: _selectedListTab == 0,
                     onSelected: (_) => setState(() => _selectedListTab = 0),
                   ),
-                  const SizedBox(width: 8),
                   ChoiceChip(
                     label: Text('Cần xử lý (${result.issues.length})'),
                     selected: _selectedListTab == 1,

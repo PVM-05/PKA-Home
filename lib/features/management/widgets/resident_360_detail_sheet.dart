@@ -97,7 +97,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
               color: willDeactivate ? AppTheme.error : AppTheme.success,
             ),
             const SizedBox(width: 8),
-            Text(willDeactivate ? 'Vô hiệu hóa tài khoản' : 'Kích hoạt lại tài khoản'),
+            Expanded(child: Text(willDeactivate ? 'Vô hiệu hóa tài khoản' : 'Kích hoạt lại tài khoản')),
           ],
         ),
         content: Text(
@@ -178,7 +178,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
           children: [
             Icon(Icons.lock_reset, color: AppTheme.primary),
             SizedBox(width: 8),
-            Text('Gửi email đặt lại mật khẩu'),
+            Expanded(child: Text('Gửi email đặt lại mật khẩu')),
           ],
         ),
         content: Text('Hệ thống sẽ gửi email chứa liên kết thiết lập mật khẩu mới đến địa chỉ: $email. Tiếp tục?'),

@@ -449,7 +449,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Phí quản lý', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                Text(_currencyFormat.format(_getManagementTotal()), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    _currencyFormat.format(_getManagementTotal()),
+                                    textAlign: TextAlign.end,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 12),
@@ -492,7 +499,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Tiền điện', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                Text(_currencyFormat.format(_getElecTotal()), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    _currencyFormat.format(_getElecTotal()),
+                                    textAlign: TextAlign.end,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 12),
@@ -536,7 +550,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Tiền nước', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                Text(_currencyFormat.format(_getWaterTotal()), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    _currencyFormat.format(_getWaterTotal()),
+                                    textAlign: TextAlign.end,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 12),
@@ -580,7 +601,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Phí gửi xe', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                Text(_currencyFormat.format(_getParkingTotal()), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    _currencyFormat.format(_getParkingTotal()),
+                                    textAlign: TextAlign.end,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                  ),
+                                ),
                               ],
                             ),
                             const SizedBox(height: 12),
@@ -636,7 +664,16 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('TỔNG CỘNG', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
-                          Text(_currencyFormat.format(total), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _currencyFormat.format(total),
+                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),

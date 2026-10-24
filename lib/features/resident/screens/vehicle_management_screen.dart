@@ -45,12 +45,13 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     Center(
                       child: Container(
                         width: 40,
@@ -309,6 +310,7 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                 ),
               ),
             ),
+            ),
           );
         },
       ),
@@ -342,12 +344,13 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     Center(
                       child: Container(
                         width: 40,
@@ -578,6 +581,7 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                   ],
                 ),
               ),
+            ),
             ),
           );
         },
