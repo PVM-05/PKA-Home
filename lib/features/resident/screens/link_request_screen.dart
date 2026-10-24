@@ -75,7 +75,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
             padding: const EdgeInsets.all(24.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
-              child: _buildContent(linkState.status),
+              child: _buildContent(linkState),
             ),
           ),
         ),
@@ -83,8 +83,8 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
     );
   }
 
-  Widget _buildContent(LinkStatus status) {
-    switch (status) {
+  Widget _buildContent(ResidentLinkStatus linkState) {
+    switch (linkState.status) {
       case LinkStatus.loading:
         return const Center(child: CircularProgressIndicator());
       case LinkStatus.linked:
@@ -94,7 +94,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         }
         return const Center(child: CircularProgressIndicator());
       case LinkStatus.pending:
-        return _buildPendingState();
+        return _buildPendingState(linkState);
       case LinkStatus.rejected:
         return _buildRejectedState();
       case LinkStatus.none:
@@ -102,7 +102,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
     }
   }
 
-  Widget _buildPendingState() {
+  Widget _buildPendingState(ResidentLinkStatus linkState) {
     return Column(
       children: [
         const Icon(Icons.schedule, size: 80, color: Colors.orange),
@@ -112,19 +112,82 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppTheme.primary),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Yêu cầu liên kết căn hộ của bạn đã được gửi. Vui lòng chờ Ban quản lý xác nhận.',
+        Text(
+          linkState.apartmentCode != null
+              ? 'Yêu cầu liên kết căn hộ ${linkState.apartmentCode} của bạn đã được gửi. Vui lòng chờ Ban quản lý xác nhận.'
+              : 'Yêu cầu liên kết căn hộ của bạn đã được gửi. Vui lòng chờ Ban quản lý xác nhận.',
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: 24),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppTheme.error,
+            side: const BorderSide(color: AppTheme.error),
+          ),
+          onPressed: _isSubmitting ? null : () => _confirmCancelLinkRequest(linkState.requestId),
+          icon: const Icon(Icons.cancel_outlined),
+          label: const Text('Hủy yêu cầu này'),
+        ),
         if (Navigator.of(context).canPop()) ...[
-          const SizedBox(height: 24),
-          OutlinedButton.icon(
+          const SizedBox(height: 16),
+          TextButton.icon(
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.arrow_back),
             label: const Text('Quay lại'),
           ),
         ],
       ],
+    );
+  }
+
+  void _confirmCancelLinkRequest(String? requestId) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Hủy Yêu Cầu Liên Kết'),
+        content: const Text(
+          'Bạn có chắc chắn muốn hủy yêu cầu liên kết căn hộ này? Bạn có thể gửi lại yêu cầu khác sau khi hủy.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Không'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              setState(() => _isSubmitting = true);
+              try {
+                await ref.read(residentLinkProvider.notifier).cancelPendingRequest(requestId);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Đã hủy yêu cầu liên kết căn hộ.'),
+                      backgroundColor: AppTheme.success,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString().replaceAll('Exception: ', '')),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                }
+              } finally {
+                if (mounted) setState(() => _isSubmitting = false);
+              }
+            },
+            child: const Text('Xác nhận hủy'),
+          ),
+        ],
+      ),
     );
   }
 
