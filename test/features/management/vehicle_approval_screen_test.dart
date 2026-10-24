@@ -101,7 +101,19 @@ class MockVehicleRepository implements VehicleRepository {
 
   @override
   Stream<List<VehicleModel>> streamVehiclesByApartment(String apartmentId) => const Stream.empty();
+
+  @override
+  Future<void> updatePendingVehicle({
+    required String vehicleId,
+    required String licensePlate,
+    required String vehicleType,
+    String? brandModel,
+  }) async {}
+
+  @override
+  Future<void> cancelPendingVehicle(String vehicleId) async {}
 }
+
 
 void main() {
   final adminUser = UserModel(

@@ -141,4 +141,35 @@ class VehicleRepository {
   Future<void> rejectVehicle(String vehicleId, {String? reason}) async {
     await updateVehicleStatus(vehicleId, 'rejected', reason: reason);
   }
+
+  /// Cư dân chỉnh sửa thông tin phương tiện đang chờ duyệt (pending)
+  Future<void> updatePendingVehicle({
+    required String vehicleId,
+    required String licensePlate,
+    required String vehicleType,
+    String? brandModel,
+  }) async {
+    final response = await _client.rpc('update_pending_vehicle', params: {
+      'p_vehicle_id': vehicleId,
+      'p_license_plate': licensePlate,
+      'p_vehicle_type': vehicleType,
+      'p_brand_model': brandModel,
+    });
+    final resMap = response as Map<String, dynamic>;
+    if (resMap['success'] != true) {
+      throw Exception(resMap['message'] ?? 'Không thể cập nhật phương tiện.');
+    }
+  }
+
+  /// Cư dân hủy đăng ký phương tiện đang chờ duyệt (pending)
+  Future<void> cancelPendingVehicle(String vehicleId) async {
+    final response = await _client.rpc('cancel_pending_vehicle', params: {
+      'p_vehicle_id': vehicleId,
+    });
+    final resMap = response as Map<String, dynamic>;
+    if (resMap['success'] != true) {
+      throw Exception(resMap['message'] ?? 'Không thể hủy phương tiện.');
+    }
+  }
 }
+

@@ -76,7 +76,37 @@ class MockMeterReadingRepository implements MeterReadingRepository {
     }
     return {'success': true, 'message': 'Đã từ chối chỉ số.'};
   }
+
+  @override
+  Future<void> updatePendingSubmission({
+    required String submissionId,
+    required double electricReading,
+    required double waterReading,
+    String? electricImageUrl,
+    String? waterImageUrl,
+    bool clearElectricImage = false,
+    bool clearWaterImage = false,
+  }) async {
+    final index = _items.indexWhere((i) => i.id == submissionId);
+    if (index != -1) {
+      _items[index] = _items[index].copyWith(
+        electricReading: electricReading,
+        waterReading: waterReading,
+        electricImageUrl: clearElectricImage ? null : (electricImageUrl ?? _items[index].electricImageUrl),
+        waterImageUrl: clearWaterImage ? null : (waterImageUrl ?? _items[index].waterImageUrl),
+      );
+    }
+  }
+
+  @override
+  Future<void> cancelPendingSubmission(String submissionId) async {
+    final index = _items.indexWhere((i) => i.id == submissionId);
+    if (index != -1) {
+      _items[index] = _items[index].copyWith(status: 'cancelled');
+    }
+  }
 }
+
 
 void main() {
   group('MeterReadingRepository Tests', () {

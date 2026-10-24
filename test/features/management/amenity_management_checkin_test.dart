@@ -105,7 +105,20 @@ class MockAmenityBookingRepo implements AmenityBookingRepository {
   }) async {
     return {'success': true, 'message': 'Xác nhận thành công'};
   }
+
+
+  @override
+  Future<Map<String, dynamic>> rescheduleBooking({
+    required String bookingId,
+    required DateTime newDate,
+    required String newTimeSlot,
+    int? newGuestsCount,
+    String? newNotes,
+  }) async {
+    return {'success': true, 'message': 'Đổi lịch thành công'};
+  }
 }
+
 
 void main() {
   testWidgets('AmenityManagementScreen hiển thị Tab Lịch Đặt Chỗ & Check-in và thực hiện check-in thành công', (tester) async {
