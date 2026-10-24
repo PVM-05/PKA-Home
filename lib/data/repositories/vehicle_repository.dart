@@ -62,7 +62,7 @@ class VehicleRepository {
         .select('id')
         .eq('apartment_id', apartmentId)
         .eq('vehicle_type', 'motorbike')
-        .neq('status', 'rejected');
+        .inFilter('status', ['pending', 'approved']);
 
     return (response as List).length;
   }
