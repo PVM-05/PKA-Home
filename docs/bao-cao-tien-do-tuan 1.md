@@ -27,34 +27,44 @@ Luồng Cư dân đã được nâng cấp lên mức **Smart Dashboard** (Giao 
    - Bảng Tóm tắt Hóa đơn tự động tính tổng nợ (đỏ nếu chưa đóng, xanh nếu đã đóng).
    - Thanh Quick Actions để Báo sự cố/Thanh toán siêu tốc.
    - Widget nhắc việc: Hiển thị ngay trạng thái của Phản ánh sự cố gần nhất.
-3. **Quản lý Hóa đơn:**
+3. **Quản lý Hóa đơn & Thanh toán:**
    - Chi tiết hóa đơn (Invoice Detail) có hiệu ứng trượt (animations) sang trọng.
    - Tự động bắt từ khóa để gắn Icon trực quan (Điện ⚡️, Nước 💧, Gửi xe 🚗).
-   - Tích hợp BottomSheet mô phỏng cổng thanh toán (ATM, MoMo, ZaloPay).
+   - Tích hợp Cổng thanh toán mô phỏng đồng nhất (**Unified Payment Sheet**): Hỗ trợ thanh toán trực tuyến mô phỏng VietQR, Chuyển khoản ngân hàng xác nhận 2 bước (`PENDING`), và Đăng ký thanh toán tiền mặt tại quầy BQL.
 4. **Phản ánh Sự cố (Realtime):**
    - Hỗ trợ nhập văn bản và đính kèm hình ảnh (ImagePicker).
    - Tích hợp **Supabase Realtime**: Nếu Ban quản lý đổi trạng thái từ "Chờ tiếp nhận" sang "Đang xử lý", giao diện Cư dân lập tức đổi màu chữ tự động mà không cần vuốt màn hình tải lại.
+5. **Tiện ích Tòa nhà & Đăng ký Phương tiện:**
+   - Đặt lịch tiện ích chung cư (Gym, BBQ, Bể bơi...) với quản lý khung giờ, cọc phí, sức chứa thực tế và danh sách chờ (`waitlist`).
+   - Đăng ký và quản lý thẻ xe máy, ô tô theo hạn mức từng căn hộ.
 
-### Giai đoạn 5: Tính năng Ban Quản Lý (80%)
-- **Khung giao diện:** Đã xây dựng hoàn tất màn hình Dashboard, Lập Hóa đơn, Quản lý Căn hộ, Quản lý Cư dân, và Xử lý phản ánh.
-- Chờ ghép nối API chuyên sâu và làm mịn UI.
+### Giai đoạn 5: Tính năng Ban Quản Lý (100%)
+- **Smart Dashboard:** Bảng điều khiển quản trị thông minh, hiển thị biểu đồ tỷ lệ thanh toán, tổng quan doanh thu, nợ đọng, căn hộ và sự cố cần xử lý.
+- **Hồ sơ Cư dân 360 độ (Resident 360):** Xem toàn diện lịch sử căn hộ, thành viên, phương tiện, hóa đơn và lịch sử đặt tiện ích của từng cư dân.
+- **Lập Hóa đơn & Quản lý Chỉ số:** Phát hành hóa đơn hàng loạt an toàn qua RPC CSDL (`generate_valid_bulk_invoices`), nhập và duyệt chỉ số công tơ điện nước.
+- **Quản lý Căn hộ & Duyệt Liên kết:** Phê duyệt yêu cầu liên kết căn hộ của cư dân, quản lý danh sách căn hộ theo Block và Tầng.
+- **Xử lý Sự cố & Bảo trì:** Tiếp nhận, phân công kỹ thuật viên và cập nhật tiến độ xử lý phản ánh kèm hình ảnh.
+- **Duyệt Thẻ xe & Tiện ích:** Phê duyệt / từ chối thẻ xe kèm lý do, theo dõi lịch bảo trì và đặt chỗ tiện ích.
 
-### Giai đoạn 6: Kiểm thử (Đang triển khai)
-- **TDD (Test-Driven Development):** Code Provider (`resident_issue_provider_test.dart`) được viết Test Case trước khi triển khai logic thực tế. Áp dụng kỹ thuật Mock bằng thư viện `mocktail`.
-- Vượt qua 100% Unit Test cho luồng Realtime Phản ánh sự cố.
+### Giai đoạn 6: Kiểm thử & Đảm bảo Chất lượng (100%)
+- **TDD & Test Suite Toàn diện:** Xây dựng hơn 143 bài kiểm thử tự động bao gồm Unit Tests, Widget Tests, Provider Tests và Integration Tests.
+- **Kiểm thử Bảo mật RLS:** Bộ test bảo mật (`rls_security_test.dart`) chứng minh tính độc lập dữ liệu giữa các căn hộ và cơ chế phòng vệ 3 lớp chống leo thang đặc quyền.
+- **Phân tích Tĩnh (Static Analysis):** Đạt chuẩn `flutter analyze` 0 cảnh báo, 0 lỗi.
 
 ## 3. Khó khăn gặp phải & Giải pháp
-- **Vấn đề rò rỉ bộ nhớ (Memory Leak) với Stream:** Khi làm tính năng Realtime, dữ liệu Supabase Stream bị gọi dư thừa mỗi khi đổi tab.
-  - **Giải pháp:** Sử dụng `ref.keepAlive()` kết hợp với việc huỷ Stream (dispose) đúng vòng đời Riverpod. Tối ưu bằng `.eq('user_id', userId)` để chỉ lắng nghe dòng dữ liệu liên quan.
+- **Vấn đề rò rỉ bộ nhớ (Memory Leak) với Stream & Controllers:** Khi làm tính năng Realtime và giao diện nhập liệu OTP, Stream và FocusNode dễ bị giữ lại trong bộ nhớ.
+  - **Giải pháp:** Sử dụng `ref.keepAlive()` kết hợp huỷ Stream đúng vòng đời Riverpod; quản lý FocusNode tập trung bằng State lifecycle (`initState`/`dispose`).
 - **Đồng bộ Design System:** Ban đầu dính nhiều thư viện Icon thừa (`fluentui_system_icons`).
-  - **Giải pháp:** Refactor toàn hệ thống, gỡ hoàn toàn thư viện ngoài, chỉ dùng Material Design theo quy tắc `design-rules.md`.
+  - **Giải pháp:** Refactor toàn hệ thống, gỡ hoàn toàn thư viện ngoài, chỉ dùng Material Design theo quy tắc `design-rules.md`, 100% tiếng Việt chuẩn mực.
 - **Ràng buộc tính toàn vẹn tài chính cấp Server (Generated Column):** Trước đây `subtotal` của từng mục hóa đơn được tính toán từ Client và gửi lên DB, tiềm ẩn rủi ro sai lệch dữ liệu tài chính nếu có client khác can thiệp hoặc FE gặp lỗi tính toán.
   - **Giải pháp:** Chuyển đổi cột `subtotal` trong bảng `invoice_items` thành **PostgreSQL Generated Column** (`GENERATED ALWAYS AS (unit_price * quantity) STORED`), loại bỏ hoàn toàn tính toán từ client, đảm bảo tính nhất quán tuyệt đối và tuân thủ nguyên tắc an toàn dữ liệu tài chính.
 - **Bảo toàn phản ánh sự cố khi upload ảnh gián đoạn:** Khi mạng yếu, việc tải ảnh lên Supabase Storage có thể thất bại sau khi bản ghi `issue_reports` đã được tạo, gây ra tình trạng ném ngoại lệ toàn phần và người dùng bấm gửi lại gây trùng lặp bản ghi.
   - **Giải pháp:** Phân tách khối upload ảnh bằng cơ chế bọc lỗi độc lập (`CreateIssueResult(imageUploadFailed: true)`). Nếu upload ảnh lỗi, hệ thống vẫn bảo toàn nội dung mô tả phản ánh trong DB và thông báo rõ ràng cho cư dân: *"Đã gửi phản ánh nhưng ảnh tải lên thất bại, vui lòng thử đính kèm lại sau"*.
+- **Xung đột RPC và dữ liệu Seeding:** Trải qua nhiều đợt phát triển, các hàm RPC thanh toán và đặt tiện ích có nhiều phiên bản nạp chồng và seed dữ liệu xe máy vượt quá hạn mức.
+  - **Giải pháp:** Tạo Migration hợp nhất tập trung (`20261024_01_system_audit_consolidation.sql`) xóa bỏ mọi phiên bản cũ không an toàn, chuẩn hóa toàn bộ tài khoản sang định dạng `@gmail.com` với mật khẩu bảo mật `PkaHome@2026`, đồng thời chuẩn hóa bộ dữ liệu mẫu xe không vi phạm trigger.
 
 ## 4. Hướng phát triển tiếp theo (Next Steps)
-1. **Tinh chỉnh UI Ban quản lý:** Áp dụng mô hình Smart Dashboard cho luồng Management (Vẽ biểu đồ hình tròn cho Nợ đọng).
-2. **Push Notifications:** Bắn thông báo đẩy về máy điện thoại qua Firebase (FCM) khi có hóa đơn mới.
-3. **Tối ưu hóa Truy vấn & Phân trang (Pagination / Infinite Scroll):** Hiện tại ở phạm vi đồ án và dữ liệu thử nghiệm, các phương thức truy vấn danh sách (`fetchInvoices`, `fetchResidents`, `fetchApartments`, `fetchIssues`) đang lấy toàn bộ dữ liệu. Khi mở rộng sang tòa nhà thực tế với hàng nghìn căn hộ và lịch sử giao dịch nhiều năm, hệ thống sẽ triển khai cơ chế phân trang tải cuộn (Infinite Scroll / Cursor-based Pagination) bằng `.range(from, to)` của Supabase SDK kết hợp `ScrollController` của Flutter để tối ưu hiệu năng bộ nhớ và băng thông mạng.
-4. **Hoàn thiện Hồ sơ Đồ án:** Cập nhật lại sơ đồ ERD, Test Plan và làm Slide bảo vệ (Phase 7-8).
+1. **Push Notifications:** Triển khai gửi thông báo đẩy thực tế qua Firebase Cloud Messaging (Edge Function Supabase).
+2. **Tối ưu hóa Phân trang (Pagination):** Mở rộng truy vấn dạng cuộn trang vô tận (`.range(from, to)`) khi hệ thống đạt quy mô hàng ngàn căn hộ.
+3. **Hoàn thiện Hồ sơ Đồ án:** Hoàn tất Slide báo cáo, video demo và đóng gói tài liệu nghiệm thu bảo vệ đồ án.
+

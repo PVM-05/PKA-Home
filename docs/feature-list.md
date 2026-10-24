@@ -44,42 +44,49 @@
 | **Chỉnh sửa hồ sơ cá nhân** | Cập nhật họ tên, SĐT (không lưu CCCD dạng số). |
 | **Thành viên cùng căn hộ** | Xem danh sách người đang liên kết với cùng căn hộ (owner/tenant/family). |
 | **Cẩm nang tòa nhà** | Danh bạ khẩn cấp (nút gọi trực tiếp), nội quy, biểu phí minh bạch, giờ hoạt động tiện ích — quản lý CRUD động, không hard-code. |
+| **Đăng ký & Quản lý Phương tiện** | Đăng ký thẻ xe máy, ô tô theo hạn mức từng căn hộ (tối đa 2 xe máy, 1 ô tô), kiểm tra biển số trùng lặp, xem lý do bị từ chối và nộp lại hồ sơ. |
+| **Tiện ích Tòa nhà & Đặt chỗ** | Xem danh mục tiện ích (Gym, BBQ, Bể bơi, Sân Tennis...), đặt chỗ theo khung giờ với kiểm soát sức chứa thực tế (`guests_count`), tiền cọc, và danh sách chờ (`waitlist`). |
+| **Cổng thanh toán mô phỏng (Unified Payment)** | Thanh toán trực tuyến mô phỏng VietQR, Chuyển khoản ngân hàng 2 bước (`PENDING`), hoặc Đăng ký thanh toán tiền mặt tại quầy BQL. |
+| **Khai báo chỉ số điện nước** | Cư dân chụp ảnh công tơ điện nước gửi định kỳ hàng tháng cho BQL thẩm định. |
+| **Đánh giá xử lý sự cố** | Chấm điểm 1-5 sao kèm nhận xét sau khi kỹ thuật viên hoàn thành sửa chữa. |
 
 ### 2.2. Ban quản lý
 
 | Tính năng | Mô tả chi tiết |
 | :--- | :--- |
-| **Smart Dashboard** | Quick Actions có badge đếm số việc cần xử lý (liên kết chờ, hóa đơn chờ xác nhận, phản ánh mới). |
+| **Smart Dashboard** | Quick Actions có badge đếm số việc cần xử lý (liên kết chờ, hóa đơn chờ xác nhận, phản ánh mới, thẻ xe chờ duyệt). Biểu đồ tài chính trực quan. |
 | **Widget "Việc khẩn cấp"** | Lọc phản ánh priority = high chưa xử lý, hiển thị nổi bật ở đầu trang. |
 | **Badge "MỚI"** | Đánh dấu item phát sinh trong khoảng thời gian gần (hỗ trợ Realtime). |
 | **Audit trail / Lịch sử hoạt động** | Timeline tổng hợp mọi hành động quan trọng với thời gian tương đối (ví dụ: "5 phút trước"). |
-| **Thống kê tổng quan** | Tỷ lệ lấp đầy căn hộ, doanh thu theo kỳ, tổng nợ đọng. |
+| **Thống kê tổng quan** | Tỷ lệ lấp đầy căn hộ, doanh thu theo kỳ, tổng nợ đọng, biểu đồ tròn phân bổ trạng thái hóa đơn. |
 | **CRUD Cẩm nang tòa nhà** | Quản lý động: nội quy, danh bạ khẩn cấp, tiện ích — không cần sửa mã nguồn khi có thay đổi. |
-| **Danh bạ cư dân đầy đủ** | Tra cứu nhanh theo tên hoặc mã căn hộ (`a0110`), không chỉ giới hạn ở danh sách chờ duyệt. |
+| **Danh bạ cư dân & Hồ sơ 360 độ** | Tra cứu nhanh cư dân theo tên hoặc mã căn hộ (`a0110`), xem toàn cảnh lịch sử căn hộ, thành viên, thẻ xe, hóa đơn và lịch sử đặt tiện ích. |
+| **Duyệt Thẻ xe cư dân** | Xem danh sách xe chờ duyệt, phê duyệt hoặc từ chối kèm lý do phản hồi cho cư dân. |
+| **Lập hóa đơn hàng loạt an toàn** | RPC CSDL `generate_valid_bulk_invoices` tự động tính phí quản lý, phí gửi xe máy/ô tô theo căn hộ và xuất hóa đơn định kỳ. |
+| **Duyệt chỉ số điện nước** | Kế toán thẩm định ảnh chụp công tơ và số chỉ số do cư dân gửi, duyệt để đưa vào kỳ tính phí. |
+| **Quản lý Bảo trì thiết bị** | Theo dõi lịch bảo trì định kỳ của các thiết bị trọng yếu tòa nhà (Thang máy, PCCC, Máy bơm, Máy phát điện). |
 
 ### 2.3. Hạ tầng / Kỹ thuật dùng chung (Cả 2 phía)
 
-- **Hệ thống màu trạng thái nhất quán (`AppStatusColors`)**: Phân định rõ đỏ / cam / xanh cho từng trạng thái hóa đơn, priority phản ánh, trạng thái yêu cầu liên kết.
+- **Hệ thống màu trạng thái nhất quán (`AppStatusColors`)**: Phân định rõ đỏ / cam / xanh cho từng trạng thái hóa đơn, priority phản ánh, trạng thái yêu cầu liên kết, duyệt xe.
 - **Widget xử lý trạng thái chung (`AppStateView`)**: Chuẩn hóa hiển thị loading, empty, error trên toàn ứng dụng.
 - **Bảo mật Row Level Security (RLS)**: Bật RLS toàn diện trên mọi bảng — đảm bảo cư dân căn hộ A tuyệt đối không xem được dữ liệu của căn hộ B.
-- **Bảo mật thao tác qua RPC (Remote Procedure Call)**: Sử dụng Database RPC thay vì lệnh `UPDATE` trực tiếp từ client ở các thao tác nhạy cảm (xác nhận thanh toán, duyệt liên kết căn hộ).
+- **Bảo mật thao tác qua RPC (Remote Procedure Call)**: Sử dụng Database RPC thay vì lệnh `UPDATE` trực tiếp từ client ở các thao tác nhạy cảm (thanh toán, duyệt liên kết căn hộ, đặt tiện ích, phát hành hóa đơn).
 - **Phân loại ưu tiên phản ánh bằng Rule-based**: Tự động nhận diện mức độ khẩn cấp theo từ khóa (cháy, nổ, rò rỉ nước, kẹt thang máy...) mà không cần phụ thuộc LLM ngoài.
+- **Cơ chế chống mất kết nối (Resilient Fallback)**: Tự động chuyển đổi giữa WebSocket Realtime và HTTP Polling khi kết nối mạng chập chờn.
 
 ---
 
-## PHẦN 3: TÍNH NĂNG MỞ RỘNG — Ý TƯỞNG CHO TƯƠNG LAI (Chưa cần làm ngay)
+## PHẦN 3: TÍNH NĂNG MỞ RỘNG — Ý TƯỞNG CHO TƯƠNG LAI
 
 > [!NOTE]
-> Danh sách được sắp xếp theo độ dễ triển khai giảm dần — khuyến nghị chỉ thực hiện sau khi Phần 1 (MVP) và Phần 2 đã vận hành ổn định.
+> Các ý tưởng nâng cấp hệ thống khi triển khai vận hành ở quy mô lớn hơn:
 
 | # | Tính năng | Phía | Độ khó | Ghi chú |
 | :-: | :--- | :--- | :---: | :--- |
-| 1 | **Đánh giá sao sau khi xử lý sự cố** | Resident | Thấp | Thêm bảng nhỏ `issue_ratings` để đánh giá chất lượng dịch vụ. |
-| 2 | **QR mời khách (Visitor Pass có thời hạn)** | Resident | Thấp - Trung | Thuần phần mềm, tạo mã QR động có hạn dùng, không cần phần cứng. |
-| 3 | **Đặt tiện ích nội khu (Hồ bơi, Gym, BBQ)** | Resident + Admin | Trung | Kiểm tra trùng lịch đặt chỗ, tái sử dụng mô hình quản lý hiện có. |
-| 4 | **Đăng nhập sinh trắc học (FaceID / Vân tay)** | Resident | Trung | Sử dụng package `local_auth`, không cần thiết bị ngoài. |
-| 5 | **QR thanh toán tĩnh (Hiển thị số tài khoản)** | Resident | Trung | Cung cấp mã VietQR kèm số tài khoản, chưa cần webhook tự động xác nhận. |
-| 6 | **Webhook xác nhận thanh toán tự động** | Backend | Cao | Tích hợp cổng thanh toán (VNPay / MoMo Sandbox). |
-| 7 | **Push Notification qua FCM** | Cả 2 | Trung - Cao | Triển khai sau khi luồng Realtime trong ứng dụng đã hoạt động trơn tru. |
-| 8 | **Đăng ký chuyển nhà / Thi công (Gate-pass)** | Resident + Admin | Trung | Tái sử dụng luồng gửi duyệt yêu cầu tương tự liên kết căn hộ. |
-| 9 | **Heatmap khu vực hay hỏng hóc** | Admin | Trung | Thống kê `GROUP BY apartment_id` / số tầng từ bảng `issue_reports`. |
+| 1 | **QR mời khách (Visitor Pass có thời hạn)** | Resident | Thấp - Trung | Thuần phần mềm, tạo mã QR động có hạn dùng, bảo vệ quét QR tại sảnh. |
+| 2 | **Đăng nhập sinh trắc học (FaceID / Vân tay)** | Resident | Trung | Sử dụng package `local_auth` để mở khóa ứng dụng nhanh. |
+| 3 | **Tích hợp Open Banking Webhook tự động** | Backend | Cao | Kết nối Casso / VietQR API để tự động xác nhận chuyển khoản ngân hàng thời gian thực. |
+| 4 | **Đăng ký chuyển nhà / Thi công (Gate-pass)** | Resident + Admin | Trung | Đăng ký mượn thang hàng và thời gian thi công sửa chữa nội thất. |
+| 5 | **Heatmap khu vực hay hỏng hóc** | Admin | Trung | Thống kê trực quan vị trí phát sinh nhiều phản ánh sự cố theo từng Block/Tầng. |
+

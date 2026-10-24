@@ -38,8 +38,28 @@
 - **INSERT/UPDATE/DELETE**: Chỉ Ban quản lý được quyền đăng hoặc chỉnh sửa thông báo.
 
 ## 7. Storage Bucket `issue-images`
-- **INSERT (Upload)**: Mọi người dùng đã đăng nhập đều có thể tải ảnh lên. Tên file buộc phải nằm trong thư mục có định dạng trùng với mã định danh của họ (VD: `/<uid>/...`).
-- **SELECT (Download)**: Công khai cho bất kỳ ai có đường dẫn (vì ảnh báo lỗi thường không quá nhạy cảm, hoặc có thể giới hạn chỉ người báo lỗi và BQL được xem).
+- **INSERT (Upload)**: Mọi người dùng đã xác thực (`authenticated`) đều có thể tải ảnh lên đính kèm báo cáo sự cố (định dạng `/<uid>/...` hoặc `/<issue_report_id>/...`).
+- **SELECT (Download)**: Giới hạn người dùng đã đăng nhập (`authenticated`), bao gồm cư dân trong tòa nhà và Ban quản lý/kỹ thuật viên xử lý sự cố.
+
+## 8. Bảng `vehicles`
+- **SELECT**: Cư dân chỉ xem các phương tiện thuộc căn hộ của mình (dựa vào `residents_apartments`). Ban quản lý xem được toàn bộ danh sách xe.
+- **INSERT**: Cư dân được phép đăng ký thêm xe vào căn hộ mình đang ở (tuân thủ giới hạn tối đa 2 xe máy, 1 ô tô qua trigger).
+- **UPDATE**: Cư dân chỉ được chỉnh sửa hoặc nộp lại thông tin khi trạng thái là `pending` hoặc `rejected`. Ban quản lý có quyền duyệt (`approved`) hoặc từ chối (`rejected`) kèm lý do (`rejection_reason`).
+- **DELETE**: Cư dân được xóa xe ở trạng thái chờ duyệt hoặc từ chối. Ban quản lý có quyền xóa toàn bộ.
+
+## 9. Bảng `payment_transactions`
+- **SELECT**: Cư dân xem lịch sử giao dịch thanh toán thuộc căn hộ của mình. Ban quản lý và kế toán xem toàn bộ.
+- **INSERT/UPDATE**: Khởi tạo và cập nhật qua các hàm an toàn `simulate_unified_payment` (RPC) hoặc `record_manual_payment` (BQL). Trực tiếp qua REST API bị hạn chế nghiêm ngặt bởi RLS.
+
+## 10. Bảng `building_amenities` & `amenity_bookings`
+- **`building_amenities`**: Mọi người dùng `authenticated` đều có quyền xem danh sách tiện ích, biểu phí và khung giờ hoạt động (`SELECT`). Chỉ Ban quản lý có quyền thêm/sửa/xóa (`INSERT/UPDATE/DELETE`).
+- **`amenity_bookings`**:
+  - **SELECT**: Cư dân chỉ xem lịch sử đặt chỗ của chính mình hoặc của căn hộ mình. Ban quản lý xem toàn bộ lịch sử sử dụng tiện ích của tòa nhà.
+  - **INSERT**: Cư dân đăng ký đặt chỗ qua RPC an toàn `book_amenity_slot` (kiểm tra trùng lịch, giới hạn sức chứa và khung bảo trì).
+  - **UPDATE**: Cư dân chỉ được hủy lịch đặt (`status = 'cancelled'`) của chính mình trước giờ bắt đầu. Ban quản lý có quyền cập nhật trạng thái nhận/hoàn tiền cọc (`deposit_status`) hoặc check-in.
+
+## 11. Bảng `user_fcm_tokens`
+- **SELECT/INSERT/UPDATE**: Ràng buộc `user_id = auth.uid()`. Mỗi người dùng chỉ được quản lý token thiết bị của chính mình để nhận thông báo đẩy qua Firebase Cloud Messaging (FCM).
 
 ---
 

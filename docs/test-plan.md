@@ -74,17 +74,19 @@ Kiểm tra tính toàn vẹn của khảo sát đa tiêu chí và tự động t
 
 ## 8. Danh Sách Tài Khoản & Dữ Liệu Mẫu Thử Nghiệm
 
-Hệ thống đã nạp sẵn bộ dữ liệu mẫu chuẩn trực tiếp vào cơ sở dữ liệu Supabase, dùng mật khẩu chung là **`123456`**:
+Hệ thống đã nạp sẵn bộ dữ liệu mẫu chuẩn trực tiếp vào cơ sở dữ liệu Supabase, dùng mật khẩu chung là **`PkaHome@2026`**:
 
 | Email | Họ và Tên | Vai trò | Căn hộ | Dữ liệu mẫu sẵn có & Kịch bản áp dụng |
 | :--- | :--- | :--- | :--- | :--- |
-| `admin@gmail.com` | Nguyễn Văn Quản Trị | **Quản trị viên** | - | Toàn quyền 5 tabs. Quản lý cư dân, phân quyền vai trò, duyệt liên kết căn hộ, xem toàn bộ số liệu thống kê. |
-| `ketoan@pka.vn` | Trần Thị Thu Thảo | **Kế toán** | - | 4 tabs (ẩn Phản ánh). Duyệt xác nhận thanh toán; tạo hóa đơn; theo dõi doanh thu và nợ phí. |
-| `kythuat@pka.vn` | Lê Hoàng Long | **Kỹ thuật viên** | - | 4 tabs (ẩn Hóa đơn). Tiếp nhận sự cố kỹ thuật, cập nhật tiến độ xử lý và hoàn thành sự cố. |
+| `pkahome.admin@gmail.com` | Nguyễn Văn An | **Quản trị viên** | - | Toàn quyền 5 tabs. Quản lý cư dân, phân quyền vai trò, duyệt thẻ xe, duyệt liên kết căn hộ, xem toàn bộ số liệu thống kê. |
+| `pkahome.ketoan@gmail.com` | Trần Thị Mai | **Kế toán** | - | 4 tabs (ẩn Phản ánh). Duyệt xác nhận thanh toán; tạo hóa đơn; theo dõi doanh thu và nợ phí, duyệt chỉ số điện nước. |
+| `pkahome.kythuat@gmail.com` | Lê Hoàng Long | **Kỹ thuật viên** | - | 4 tabs (ẩn Hóa đơn). Tiếp nhận sự cố kỹ thuật, cập nhật tiến độ xử lý và hoàn thành sự cố, theo dõi bảo trì thiết bị. |
+| `cudan.a0101@gmail.com` | Phạm Minh Đức | **Cư dân (Chủ hộ)** | **A0101** | Có hóa đơn T09/2026 & T10/2026 chưa thanh toán — **Dùng để demo Cổng thanh toán mô phỏng (Unified Payment Sheet)**; lịch sử đặt tiện ích, thẻ xe đã duyệt. |
+| `nguoithan.a0101@gmail.com` | Nguyễn Thị Lan | **Cư dân (Thành viên)** | **A0101** | Cùng căn hộ A0101 — Demo nhiều thành viên cùng quản lý căn hộ. |
+| `cudan.b0101@gmail.com` | Hoàng Ngọc Tuấn | **Cư dân (Chủ hộ)** | **B0101** | Có thẻ xe máy đang chờ BQL duyệt (`59X1-999.88`); lịch sử hóa đơn 3 tháng. |
+| `cudan.c0101@gmail.com` | Đinh Trọng Nghĩa | **Cư dân (Chủ hộ)** | **C0101** | Có sự cố điện đang được kỹ thuật viên tiếp nhận xử lý; hóa đơn chưa thanh toán. |
 | `test1@gmail.com` | Phạm Văn Minh | **Cư dân (Chủ hộ)** | **A0202** | Có hóa đơn T08/2026 (đã đóng), T09/2026 (Đang chờ BQL xác nhận thanh toán); 1 sự cố rò rỉ nước khẩn cấp. |
-| `cudan1@pka.vn` | Hoàng Đức Anh | **Cư dân (Chủ hộ)** | **A0101** | Có hóa đơn T09/2026 (2.465.000 đ) Chưa thanh toán — **Dùng để demo Cổng thanh toán trực tuyến mô phỏng (Demo Payment Sheet)**; 1 sự cố Aptomat đang xử lý. |
-| `cudan2@pka.vn` | Nguyễn Thị Mai Hương | **Cư dân (Chủ hộ)** | **B0101** | Lịch sử 2 tháng hóa đơn đã thanh toán; 1 sự cố sửa khóa thẻ từ đã hoàn thành. |
-| `cudan3@pka.vn` | Đỗ Quốc Bảo | **Cư dân (Khách thuê)** | **C0101** | Có hóa đơn T09/2026 (860.000 đ) Chưa thanh toán. |
-| `pending_cudan@pka.vn`| Bùi Minh Tuấn | **Cư dân (Chờ duyệt)**| **A0103** | Đang có yêu cầu liên kết ở trạng thái **Pending** — Dùng để kiểm thử giao diện chờ duyệt của cư dân và chức năng Duyệt của BQL. |
+| `cudan.a0501@gmail.com` | Trần Bảo Nam | **Cư dân (Chủ hộ)** | **A0501** | Có 1 thẻ xe máy bị từ chối (`29M1-999.99`) — Demo luồng xem lý do từ chối, xóa và nộp lại hồ sơ. |
+
 
 
