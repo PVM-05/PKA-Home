@@ -65,6 +65,7 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>PKA-Home cần quyền truy cập máy ảnh để chụp ảnh hóa đơn, công tơ điện nước và hiện trường sự cố.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

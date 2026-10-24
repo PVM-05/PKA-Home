@@ -65,29 +65,29 @@ void main() {
     });
 
     testWidgets('calls sendPasswordResetOtp and shows neutral message on valid email', (tester) async {
-      when(() => mockAuthRepository.sendPasswordResetOtp('resident@pka.vn'))
+      when(() => mockAuthRepository.sendPasswordResetOtp('resident@gmail.com'))
           .thenAnswer((_) async {});
 
       await tester.pumpWidget(buildTestWidget(const ForgotPasswordScreen()));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), 'resident@pka.vn');
+      await tester.enterText(find.byType(TextField), 'resident@gmail.com');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Gửi mã xác thực'));
       await tester.pump(); // Start async call
       await tester.pump(const Duration(milliseconds: 100)); // Finish async call
 
-      verify(() => mockAuthRepository.sendPasswordResetOtp('resident@pka.vn')).called(1);
+      verify(() => mockAuthRepository.sendPasswordResetOtp('resident@gmail.com')).called(1);
       expect(find.textContaining('Nếu địa chỉ thư điện tử này tồn tại'), findsOneWidget);
     });
 
     testWidgets('shows error banner when rate limit 429 occurs', (tester) async {
-      when(() => mockAuthRepository.sendPasswordResetOtp('rate@pka.vn'))
+      when(() => mockAuthRepository.sendPasswordResetOtp('rate@gmail.com'))
           .thenThrow(Exception('Bạn đã gửi yêu cầu quá nhiều lần. Vui lòng chờ ít phút.'));
 
       await tester.pumpWidget(buildTestWidget(const ForgotPasswordScreen()));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), 'rate@pka.vn');
+      await tester.enterText(find.byType(TextField), 'rate@gmail.com');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Gửi mã xác thực'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
@@ -98,20 +98,20 @@ void main() {
 
   group('VerifyOtpScreen Tests', () {
     testWidgets('renders email target and countdown elements', (tester) async {
-      await tester.pumpWidget(buildTestWidget(const VerifyOtpScreen(email: 'resident@pka.vn')));
+      await tester.pumpWidget(buildTestWidget(const VerifyOtpScreen(email: 'resident@gmail.com')));
       await tester.pump();
 
       expect(find.text('Xác nhận mã OTP'), findsOneWidget);
-      expect(find.text('resident@pka.vn'), findsOneWidget);
+      expect(find.text('resident@gmail.com'), findsOneWidget);
       expect(find.textContaining('Gửi lại mã sau'), findsOneWidget);
       expect(find.byType(TextField), findsNWidgets(6));
     });
 
     testWidgets('resend button becomes active after 60s and can be pressed', (tester) async {
-      when(() => mockAuthRepository.sendPasswordResetOtp('resident@pka.vn'))
+      when(() => mockAuthRepository.sendPasswordResetOtp('resident@gmail.com'))
           .thenAnswer((_) async {});
 
-      await tester.pumpWidget(buildTestWidget(const VerifyOtpScreen(email: 'resident@pka.vn')));
+      await tester.pumpWidget(buildTestWidget(const VerifyOtpScreen(email: 'resident@gmail.com')));
       await tester.pump();
 
       // Fast forward timer 61 seconds
@@ -122,16 +122,16 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      verify(() => mockAuthRepository.sendPasswordResetOtp('resident@pka.vn')).called(1);
+      verify(() => mockAuthRepository.sendPasswordResetOtp('resident@gmail.com')).called(1);
     });
 
     testWidgets('calls verifyPasswordResetOtp when 6 digits are typed', (tester) async {
       when(() => mockAuthRepository.verifyPasswordResetOtp(
-            email: 'resident@pka.vn',
+            email: 'resident@gmail.com',
             token: '123456',
           )).thenAnswer((_) async => MockAuthResponse());
 
-      await tester.pumpWidget(buildTestWidget(const VerifyOtpScreen(email: 'resident@pka.vn')));
+      await tester.pumpWidget(buildTestWidget(const VerifyOtpScreen(email: 'resident@gmail.com')));
       await tester.pump();
 
       // Enter digits across the 6 boxes
@@ -142,7 +142,7 @@ void main() {
       }
 
       verify(() => mockAuthRepository.verifyPasswordResetOtp(
-            email: 'resident@pka.vn',
+            email: 'resident@gmail.com',
             token: '123456',
           )).called(1);
     });

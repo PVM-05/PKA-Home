@@ -346,12 +346,35 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
           itemCount: bookings.length,
           itemBuilder: (context, index) {
             final b = bookings[index];
-            final amenityName = (b['amenities'] as Map?)?['name'] ?? 'Tiện ích';
+            final amenityName = (b['building_amenities'] as Map?)?['name'] ??
+                (b['amenities'] as Map?)?['name'] ??
+                'Tiện ích';
             final date = b['booking_date'] ?? '';
             final slot = b['time_slot'] ?? '';
             final status = b['status'] as String? ?? 'confirmed';
             final isConfirmed = status == 'confirmed';
             final isWaitlist = status == 'waitlist';
+            final isPending = status == 'pending_payment';
+            final isCompleted = status == 'completed';
+
+            Color statusColor;
+            String statusLabel;
+            if (isConfirmed) {
+              statusColor = AppTheme.primary;
+              statusLabel = 'Đã đặt';
+            } else if (isPending) {
+              statusColor = AppStatusColors.pendingConfirmation;
+              statusLabel = 'Chờ nộp phí';
+            } else if (isWaitlist) {
+              statusColor = AppTheme.warning;
+              statusLabel = 'Chờ slot';
+            } else if (isCompleted) {
+              statusColor = AppTheme.success;
+              statusLabel = 'Đã sử dụng';
+            } else {
+              statusColor = AppTheme.error;
+              statusLabel = 'Đã hủy';
+            }
 
             return AppCard(
               padding: const EdgeInsets.all(12),
@@ -372,14 +395,14 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: isConfirmed ? AppTheme.primary.withValues(alpha: 0.1) : (isWaitlist ? AppTheme.warning.withValues(alpha: 0.1) : AppTheme.error.withValues(alpha: 0.1)),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      isConfirmed ? 'Đã đặt' : (isWaitlist ? 'Chờ slot' : 'Đã hủy'),
+                      statusLabel,
                       style: TextStyle(
                         fontSize: 11,
-                        color: isConfirmed ? AppTheme.primary : (isWaitlist ? AppTheme.warning : AppTheme.error),
+                        color: statusColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
