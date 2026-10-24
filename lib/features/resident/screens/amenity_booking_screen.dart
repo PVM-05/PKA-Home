@@ -1227,14 +1227,19 @@ class _RescheduleBookingBottomSheetState extends ConsumerState<_RescheduleBookin
 
       if (mounted) {
         Navigator.pop(context);
-        final isWaitlist = res['is_waitlist'] == true || res['status'] == 'waitlist';
+        final action = res['action'] as String?;
+        final status = res['status'] as String?;
+
+        String successMsg;
+        if (action == 'rescheduled_pending_payment' || status == 'pending_payment') {
+          successMsg = 'Đổi lịch thành công! Vui lòng hoàn tất thanh toán cho lịch đặt mới.';
+        } else {
+          successMsg = 'Đổi lịch đặt chỗ thành công!';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              isWaitlist
-                  ? 'Đã chuyển sang danh sách chờ của khung giờ mới thành công.'
-                  : 'Đổi lịch đặt chỗ thành công!',
-            ),
+            content: Text(successMsg),
             backgroundColor: AppTheme.success,
           ),
         );
