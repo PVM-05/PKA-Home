@@ -53,5 +53,24 @@ void main() {
       expect(content.contains('uq_link_requests_active'), isTrue);
       expect(content.contains('WHERE status IN (\'pending\', \'approved\')'), isTrue);
     });
+
+    test('Migration phải dọn trùng dữ liệu và không chứa EXCEPTION WHEN OTHERS THEN NULL', () {
+      if (!migrationFile.existsSync()) return;
+      final content = migrationFile.readAsStringSync();
+      expect(content.contains('EXCEPTION WHEN OTHERS THEN NULL'), isFalse,
+          reason: 'Khối nuốt lỗi DDL đã phải được loại bỏ hoàn toàn.');
+      expect(content.contains('WITH duplicates AS'), isTrue,
+          reason: 'Bắt buộc phải có CTE duplicates để dọn bản ghi trùng.');
+
+      final dropDefaultIdx = content.indexOf('ALTER COLUMN status DROP DEFAULT');
+      final alterTypeIdx = content.indexOf('ALTER COLUMN status TYPE VARCHAR(20)');
+      final duplicatesIdx = content.indexOf('WITH duplicates AS');
+      final createIndexIdx = content.indexOf('CREATE UNIQUE INDEX IF NOT EXISTS uq_link_requests_active');
+
+      expect(dropDefaultIdx, isNonNegative, reason: 'Phải DROP DEFAULT trước');
+      expect(alterTypeIdx, greaterThan(dropDefaultIdx), reason: 'Phải ALTER TYPE sau khi DROP DEFAULT');
+      expect(duplicatesIdx, greaterThan(alterTypeIdx), reason: 'Phải dọn trùng sau khi cột chấp nhận cancelled');
+      expect(createIndexIdx, greaterThan(duplicatesIdx), reason: 'Phải tạo index sau khi đã dọn trùng');
+    });
   });
 }
