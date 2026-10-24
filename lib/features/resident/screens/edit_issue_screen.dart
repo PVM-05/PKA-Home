@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/supabase_config.dart';
+import '../../../core/widgets/app_storage_image.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
@@ -231,20 +232,12 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                 ..._existingImages.map((imageUrl) {
                   return Stack(
                     children: [
-                      ClipRRect(
+                      AppStorageImage(
+                        imageUrl: imageUrl,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          imageUrl,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            width: 100,
-                            height: 100,
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.broken_image, color: Colors.grey),
-                          ),
-                        ),
                       ),
                       Positioned(
                         top: 4,

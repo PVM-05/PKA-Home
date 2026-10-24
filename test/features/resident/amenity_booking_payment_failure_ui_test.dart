@@ -47,6 +47,7 @@ class FakeAmenityBookingRepo implements AmenityBookingRepository {
     required DateTime date,
     required String timeSlot,
     int guestsCount = 1,
+    String? notes,
     bool allowWaitlist = false,
   }) async {
     return AmenityBookingModel(

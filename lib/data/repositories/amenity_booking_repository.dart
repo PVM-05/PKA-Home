@@ -54,6 +54,7 @@ class AmenityBookingRepository {
     required String timeSlot,
     int guestsCount = 1,
     bool allowWaitlist = false,
+    String? notes,
   }) async {
     final dateStr = _formatDate(date);
 
@@ -65,6 +66,7 @@ class AmenityBookingRepository {
         'p_time_slot': timeSlot,
         'p_guests_count': guestsCount,
         'p_allow_waitlist': allowWaitlist,
+        'p_notes': ?notes,
       });
 
       final resMap = response as Map<String, dynamic>;

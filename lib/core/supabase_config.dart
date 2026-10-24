@@ -26,13 +26,27 @@ class SupabaseConfig {
     }
 
     try {
-      await Supabase.initialize(
-        url: supabaseUrl,
-        publishableKey: supabaseAnonKey,
-      );
+      if (isConfigured) {
+        await Supabase.initialize(
+          url: supabaseUrl,
+          publishableKey: supabaseAnonKey,
+        );
+      }
     } catch (e) {
       debugPrint('Không thể khởi tạo SupabaseClient: $e');
     }
+  }
+
+  static bool get isConfigured {
+    const envUrl = String.fromEnvironment('SUPABASE_URL');
+    const envAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+    final url = envUrl.isNotEmpty ? envUrl : (dotenv.env['SUPABASE_URL'] ?? '');
+    final key = envAnonKey.isNotEmpty ? envAnonKey : (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+
+    return url.isNotEmpty &&
+        key.isNotEmpty &&
+        !url.contains('your-project-ref') &&
+        !url.contains('placeholder');
   }
 
   static SupabaseClient get client => Supabase.instance.client;

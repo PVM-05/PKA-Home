@@ -150,6 +150,36 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Xác thực nguồn gọi an toàn: Service Role, Webhook Secret hoặc kiểm tra chéo bản ghi CSDL
+    const authHeader = req.headers.get("Authorization");
+    const webhookSecret = req.headers.get("x-webhook-secret");
+    const expectedSecret = Deno.env.get("FCM_WEBHOOK_SECRET");
+    const isServiceRole = authHeader === `Bearer ${supabaseServiceKey}`;
+    const isSecretMatch = Boolean(expectedSecret && webhookSecret === expectedSecret);
+
+    if (!isServiceRole && !isSecretMatch) {
+      if (!notification.id) {
+        return new Response(JSON.stringify({ error: "Unauthorized: Missing notification verification" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Kiểm tra chéo: Bản ghi thông báo phải thực sự tồn tại trong CSDL và gắn đúng recipient user_id
+      const { data: dbNotif, error: verifyError } = await supabase
+        .from("notifications")
+        .select("id, user_id")
+        .eq("id", notification.id)
+        .eq("user_id", notification.user_id)
+        .maybeSingle();
+
+      if (verifyError || !dbNotif) {
+        return new Response(JSON.stringify({ error: "Forbidden: Notification record does not exist or recipient mismatch" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // 1. Lấy danh sách FCM token còn hiệu lực của user
     const { data: tokens, error: tokenError } = await supabase
       .from("user_fcm_tokens")
@@ -223,13 +253,17 @@ serve(async (req) => {
     );
 
     const successCount = sendResults.filter(Boolean).length;
+    const isSuccess = successCount > 0;
 
     return new Response(JSON.stringify({ 
-      success: true, 
+      success: isSuccess, 
       sentCount: successCount,
-      totalTokens: tokens.length
+      totalTokens: tokens.length,
+      message: isSuccess 
+        ? `Successfully sent to ${successCount}/${tokens.length} devices` 
+        : "Failed to deliver to any registered devices"
     }), {
-      status: 200,
+      status: isSuccess ? 200 : 502,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
