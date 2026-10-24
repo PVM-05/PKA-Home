@@ -191,14 +191,10 @@ BEGIN
         RAISE EXCEPTION 'Chỉ có thể chỉnh sửa phương tiện đang ở trạng thái chờ duyệt (pending).';
     END IF;
 
-    -- Kiểm tra quyền: người tạo xe, người cùng căn hộ, hoặc BQL
+    -- Kiểm tra quyền: chỉ người tạo xe hoặc BQL (không cho phép cư dân cùng căn hộ thao tác chéo)
     IF v_vehicle.user_id != v_user_id 
        AND v_vehicle.registered_by != v_user_id 
-       AND NOT public.is_staff() 
-       AND NOT EXISTS (
-           SELECT 1 FROM public.residents_apartments 
-           WHERE apartment_id = v_vehicle.apartment_id AND user_id = v_user_id
-       ) THEN
+       AND NOT public.is_staff() THEN
         RAISE EXCEPTION 'Bạn không có quyền chỉnh sửa thông tin phương tiện này.';
     END IF;
 
@@ -517,11 +513,8 @@ BEGIN
         RAISE EXCEPTION 'Chỉ có thể chỉnh sửa phiếu chỉ số đang ở trạng thái chờ duyệt (pending).';
     END IF;
 
-    -- Kiểm tra quyền sở hữu
-    IF v_sub.submitted_by != v_user_id AND NOT public.is_staff() AND NOT EXISTS (
-        SELECT 1 FROM public.residents_apartments 
-        WHERE apartment_id = v_sub.apartment_id AND user_id = v_user_id
-    ) THEN
+    -- Kiểm tra quyền sở hữu nghiêm ngặt: chỉ người gửi hoặc BQL
+    IF v_sub.submitted_by != v_user_id AND NOT public.is_staff() THEN
         RAISE EXCEPTION 'Bạn không có quyền chỉnh sửa phiếu chỉ số này.';
     END IF;
 
@@ -582,10 +575,6 @@ BEGIN
       AND (
           submitted_by = v_user_id 
           OR public.is_staff()
-          OR EXISTS (
-              SELECT 1 FROM public.residents_apartments 
-              WHERE apartment_id = public.meter_reading_submissions.apartment_id AND user_id = v_user_id
-          )
       );
 
     GET DIAGNOSTICS v_updated_count = ROW_COUNT;
