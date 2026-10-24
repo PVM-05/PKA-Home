@@ -1244,6 +1244,16 @@ DROP TRIGGER IF EXISTS trg_notify_on_issue_lifecycle ON public.issue_reports;
 -- Dọn dẹp trigger bảo trì thiết bị cũ trên equipment_maintenance_tasks
 DROP TRIGGER IF EXISTS trg_notify_equipment_task_status ON public.equipment_maintenance_tasks;
 
--- Siết quyền hàm xem lịch tiện ích: Thu hồi từ PUBLIC và chỉ cấp cho authenticated
-REVOKE ALL ON FUNCTION public.get_amenity_bookings(UUID, DATE) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.get_amenity_bookings(UUID, DATE) TO authenticated;
+-- Siết quyền hàm xem lịch tiện ích (kiểm tra an toàn nếu hàm có tồn tại trong CSDL)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_proc p 
+        JOIN pg_namespace n ON p.pronamespace = n.oid 
+        WHERE n.nspname = 'public' AND p.proname = 'get_amenity_bookings'
+    ) THEN
+        EXECUTE 'REVOKE ALL ON FUNCTION public.get_amenity_bookings(UUID, DATE) FROM PUBLIC, anon;';
+        EXECUTE 'GRANT EXECUTE ON FUNCTION public.get_amenity_bookings(UUID, DATE) TO authenticated;';
+    END IF;
+END $$;
+
