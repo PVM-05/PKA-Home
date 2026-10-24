@@ -287,69 +287,71 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
             children: [
               Icon(Icons.check_circle_outline, color: AppTheme.success),
               SizedBox(width: 8),
-              Text('Xác nhận thu tiền'),
+              Expanded(child: Text('Xác nhận thu tiền')),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Vui lòng kiểm tra và xác nhận phương thức đã nhận đủ:'),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('• Căn hộ: ${invoice.apartment?.code ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text('• Kỳ phí: ${invoice.period}'),
-                    const SizedBox(height: 4),
-                    Text('• Số tiền: ${NumberFormat.currency(locale: "vi_VN", symbol: "đ").format(invoice.totalAmount)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
-                    if (isPending) ...[
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Vui lòng kiểm tra và xác nhận phương thức đã nhận đủ:'),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('• Căn hộ: ${invoice.apartment?.code ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(
-                        '• Cư dân đã báo: ${isCashRequest ? "Nộp tiền mặt tại BQL" : "Chuyển khoản (VietQR)"}',
-                        style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.w600),
-                      ),
+                      Text('• Kỳ phí: ${invoice.period}'),
+                      const SizedBox(height: 4),
+                      Text('• Số tiền: ${NumberFormat.currency(locale: "vi_VN", symbol: "đ").format(invoice.totalAmount)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                      if (isPending) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '• Cư dân đã báo: ${isCashRequest ? "Nộp tiền mặt tại BQL" : "Chuyển khoản (VietQR)"}',
+                          style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              const SizedBox(height: 6),
-              // ignore: deprecated_member_use
-              RadioListTile<String>(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                title: const Text('Tiền mặt (CASH)'),
-                value: 'CASH',
+                const SizedBox(height: 14),
+                const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(height: 6),
                 // ignore: deprecated_member_use
-                groupValue: selectedMethod,
+                RadioListTile<String>(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text('Tiền mặt (CASH)'),
+                  value: 'CASH',
+                  // ignore: deprecated_member_use
+                  groupValue: selectedMethod,
+                  // ignore: deprecated_member_use
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => selectedMethod = val);
+                  },
+                ),
                 // ignore: deprecated_member_use
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => selectedMethod = val);
-                },
-              ),
-              // ignore: deprecated_member_use
-              RadioListTile<String>(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                title: const Text('Chuyển khoản (BANK_TRANSFER)'),
-                value: 'BANK_TRANSFER',
-                // ignore: deprecated_member_use
-                groupValue: selectedMethod,
-                // ignore: deprecated_member_use
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => selectedMethod = val);
-                },
-              ),
-            ],
+                RadioListTile<String>(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text('Chuyển khoản (BANK_TRANSFER)'),
+                  value: 'BANK_TRANSFER',
+                  // ignore: deprecated_member_use
+                  groupValue: selectedMethod,
+                  // ignore: deprecated_member_use
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => selectedMethod = val);
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(

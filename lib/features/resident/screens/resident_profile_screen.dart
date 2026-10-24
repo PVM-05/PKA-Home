@@ -441,7 +441,7 @@ void _showThemeModeSheet(BuildContext context, WidgetRef ref) {
                       children: [
                         Icon(entry.$3, size: 20),
                         const SizedBox(width: 12),
-                        Text(entry.$2),
+                        Expanded(child: Text(entry.$2)),
                       ],
                     ),
                     subtitle: Text(entry.$4,

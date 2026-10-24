@@ -64,10 +64,11 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Thêm Lịch Bảo Trì'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text('Ngày: ${_dateFormat.format(_selectedDate)}', style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Row(
@@ -118,6 +119,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               ),
             ],
           ),
+        ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -177,41 +179,43 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Quản Lý Tiền Đặt Cọc'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Căn hộ: ${booking.apartmentCode ?? "***"}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text('Người đặt: ${booking.bookerName ?? "***"}'),
-              const SizedBox(height: 6),
-              Text('Số tiền cọc: ${_currencyFormat.format(booking.depositAmount)}',
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.warning)),
-              const SizedBox(height: 12),
-              const Text('Trạng thái cọc:', style: TextStyle(fontWeight: FontWeight.w500)),
-              DropdownButton<String>(
-                value: currentStatus,
-                isExpanded: true,
-                items: const [
-                  DropdownMenuItem(value: 'none', child: Text('Không yêu cầu cọc')),
-                  DropdownMenuItem(value: 'pending', child: Text('Chưa nộp tiền cọc (Chờ thu)')),
-                  DropdownMenuItem(value: 'received', child: Text('Đã nhận đủ tiền cọc')),
-                  DropdownMenuItem(value: 'refunded', child: Text('Đã hoàn trả cọc cho cư dân')),
-                  DropdownMenuItem(value: 'forfeited', child: Text('Tịch thu cọc (Vi phạm/Hư hỏng)')),
-                ],
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => currentStatus = val);
-                },
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Ghi chú thu/hoàn cọc',
-                  hintText: 'VD: Đã hoàn tiền mặt lúc 21h',
-                  border: OutlineInputBorder(),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Căn hộ: ${booking.apartmentCode ?? "***"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Người đặt: ${booking.bookerName ?? "***"}'),
+                const SizedBox(height: 6),
+                Text('Số tiền cọc: ${_currencyFormat.format(booking.depositAmount)}',
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.warning)),
+                const SizedBox(height: 12),
+                const Text('Trạng thái cọc:', style: TextStyle(fontWeight: FontWeight.w500)),
+                DropdownButton<String>(
+                  value: currentStatus,
+                  isExpanded: true,
+                  items: const [
+                    DropdownMenuItem(value: 'none', child: Text('Không yêu cầu cọc')),
+                    DropdownMenuItem(value: 'pending', child: Text('Chưa nộp tiền cọc (Chờ thu)')),
+                    DropdownMenuItem(value: 'received', child: Text('Đã nhận đủ tiền cọc')),
+                    DropdownMenuItem(value: 'refunded', child: Text('Đã hoàn trả cọc cho cư dân')),
+                    DropdownMenuItem(value: 'forfeited', child: Text('Tịch thu cọc (Vi phạm/Hư hỏng)')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => currentStatus = val);
+                  },
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                TextField(
+                  controller: notesController,
+                  decoration: const InputDecoration(
+                    labelText: 'Ghi chú thu/hoàn cọc',
+                    hintText: 'VD: Đã hoàn tiền mặt lúc 21h',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -264,28 +268,30 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
           children: [
             Icon(Icons.qr_code_scanner, color: AppTheme.primary),
             SizedBox(width: 8),
-            Text('Check-in Tiện Ích (QR/Mã)'),
+            Expanded(child: Text('Check-in Tiện Ích (QR/Mã)')),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Nhập mã đặt chỗ từ mã QR của cư dân để xác nhận điểm danh sử dụng dịch vụ:',
-              style: TextStyle(fontSize: 13),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: codeController,
-              decoration: const InputDecoration(
-                labelText: 'Mã đặt chỗ (Booking ID)',
-                hintText: 'Nhập UUID hoặc mã đặt chỗ',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.confirmation_number_outlined),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Nhập mã đặt chỗ từ mã QR của cư dân để xác nhận điểm danh sử dụng dịch vụ:',
+                style: TextStyle(fontSize: 13),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: codeController,
+                decoration: const InputDecoration(
+                  labelText: 'Mã đặt chỗ (Booking ID)',
+                  hintText: 'Nhập UUID hoặc mã đặt chỗ',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.confirmation_number_outlined),
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -760,62 +766,64 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
             children: [
               Icon(Icons.check_circle_outline, color: AppTheme.success),
               SizedBox(width: 8),
-              Text('Thu phí dịch vụ tiện ích'),
+              Expanded(child: Text('Thu phí dịch vụ tiện ích')),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Xác nhận đã nhận đủ tiền phí/tiền cọc từ cư dân:'),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(8),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Xác nhận đã nhận đủ tiền phí/tiền cọc từ cư dân:'),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('• Căn hộ: ${b.apartmentCode ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('• Tiện ích: ${b.amenityName ?? "Dịch vụ"} (${b.timeSlot})'),
+                      const SizedBox(height: 4),
+                      Text('• Tổng thu: ${_currencyFormat.format(totalFee)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('• Căn hộ: ${b.apartmentCode ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text('• Tiện ích: ${b.amenityName ?? "Dịch vụ"} (${b.timeSlot})'),
-                    const SizedBox(height: 4),
-                    Text('• Tổng thu: ${_currencyFormat.format(totalFee)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
-                  ],
+                const SizedBox(height: 14),
+                const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(height: 6),
+                // ignore: deprecated_member_use
+                RadioListTile<String>(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text('Tiền mặt (CASH)'),
+                  value: 'CASH',
+                  // ignore: deprecated_member_use
+                  groupValue: selectedMethod,
+                  // ignore: deprecated_member_use
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => selectedMethod = val);
+                  },
                 ),
-              ),
-              const SizedBox(height: 14),
-              const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              const SizedBox(height: 6),
-              // ignore: deprecated_member_use
-              RadioListTile<String>(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                title: const Text('Tiền mặt (CASH)'),
-                value: 'CASH',
                 // ignore: deprecated_member_use
-                groupValue: selectedMethod,
-                // ignore: deprecated_member_use
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => selectedMethod = val);
-                },
-              ),
-              // ignore: deprecated_member_use
-              RadioListTile<String>(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                title: const Text('Chuyển khoản (BANK_TRANSFER)'),
-                value: 'BANK_TRANSFER',
-                // ignore: deprecated_member_use
-                groupValue: selectedMethod,
-                // ignore: deprecated_member_use
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => selectedMethod = val);
-                },
-              ),
-            ],
+                RadioListTile<String>(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text('Chuyển khoản (BANK_TRANSFER)'),
+                  value: 'BANK_TRANSFER',
+                  // ignore: deprecated_member_use
+                  groupValue: selectedMethod,
+                  // ignore: deprecated_member_use
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => selectedMethod = val);
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(

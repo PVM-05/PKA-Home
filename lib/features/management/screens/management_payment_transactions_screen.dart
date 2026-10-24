@@ -29,27 +29,29 @@ class _ManagementPaymentTransactionsScreenState extends ConsumerState<Management
           children: [
             Icon(Icons.verified, color: AppTheme.success),
             SizedBox(width: 8),
-            Text('Chi tiết Giao dịch', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Expanded(child: Text('Chi tiết Giao dịch', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDetailRow('Mã GD', tx.transactionCode),
-            const Divider(),
-            _buildDetailRow('Nội dung', tx.title ?? 'Thanh toán dịch vụ'),
-            const Divider(),
-            _buildDetailRow('Loại GD', tx.isInvoice ? 'Hóa đơn định kỳ' : 'Dịch vụ tiện ích'),
-            const Divider(),
-            _buildDetailRow('Số tiền', _currencyFormat.format(tx.amount), isAmount: true),
-            const Divider(),
-            _buildDetailRow('Phương thức', tx.paymentMethod),
-            const Divider(),
-            _buildDetailRow('Thời gian', DateFormat('dd/MM/yyyy HH:mm:ss').format(tx.createdAt)),
-            const Divider(),
-            _buildDetailRow('Trạng thái', tx.statusDisplayName),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow('Mã GD', tx.transactionCode),
+              const Divider(),
+              _buildDetailRow('Nội dung', tx.title ?? 'Thanh toán dịch vụ'),
+              const Divider(),
+              _buildDetailRow('Loại GD', tx.isInvoice ? 'Hóa đơn định kỳ' : 'Dịch vụ tiện ích'),
+              const Divider(),
+              _buildDetailRow('Số tiền', _currencyFormat.format(tx.amount), isAmount: true),
+              const Divider(),
+              _buildDetailRow('Phương thức', tx.paymentMethod),
+              const Divider(),
+              _buildDetailRow('Thời gian', DateFormat('dd/MM/yyyy HH:mm:ss').format(tx.createdAt)),
+              const Divider(),
+              _buildDetailRow('Trạng thái', tx.statusDisplayName),
+            ],
+          ),
         ),
         actions: [
           ElevatedButton(

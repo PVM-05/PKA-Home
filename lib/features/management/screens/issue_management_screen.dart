@@ -136,35 +136,37 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
             builder: (context, setDialogState) {
               return AlertDialog(
                 title: const Text('Tiếp nhận & Phân công'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Sự cố: ${issue.description}', maxLines: 2, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 16),
-                    const Text('Chọn nhân viên xử lý:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    if (staffList.isEmpty)
-                      const Text('Chưa có nhân viên nào trong hệ thống', style: TextStyle(color: AppTheme.textSecondary))
-                    else
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedStaffId,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person_outline),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Sự cố: ${issue.description}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 16),
+                      const Text('Chọn nhân viên xử lý:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      if (staffList.isEmpty)
+                        const Text('Chưa có nhân viên nào trong hệ thống', style: TextStyle(color: AppTheme.textSecondary))
+                      else
+                        DropdownButtonFormField<String>(
+                          initialValue: selectedStaffId,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.person_outline),
+                          ),
+                          items: staffList.map((s) {
+                            return DropdownMenuItem<String>(
+                              value: s['id'],
+                              child: Text(s['name']!),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setDialogState(() {
+                              selectedStaffId = val;
+                            });
+                          },
                         ),
-                        items: staffList.map((s) {
-                          return DropdownMenuItem<String>(
-                            value: s['id'],
-                            child: Text(s['name']!),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          setDialogState(() {
-                            selectedStaffId = val;
-                          });
-                        },
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
                 actions: [
                   TextButton(

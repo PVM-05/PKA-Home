@@ -64,35 +64,37 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
           children: [
             Icon(Icons.check_circle_outline, color: AppStatusColors.paid),
             SizedBox(width: 8),
-            Text('Phê Duyệt Đăng Ký Xe'),
+            Expanded(child: Text('Phê Duyệt Đăng Ký Xe')),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Bạn có chắc chắn muốn phê duyệt cấp thẻ gửi xe cho phương tiện biển số:'),
-            const SizedBox(height: 8),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black26),
-                ),
-                child: Text(
-                  vehicle.licensePlate,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Bạn có chắc chắn muốn phê duyệt cấp thẻ gửi xe cho phương tiện biển số:'),
+              const SizedBox(height: 8),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.black26),
+                  ),
+                  child: Text(
+                    vehicle.licensePlate,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Biểu phí ${vehicle.vehicleTypeDisplayName}: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng sẽ tự động được cộng vào hóa đơn căn hộ.',
-              style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                'Biểu phí ${vehicle.vehicleTypeDisplayName}: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng sẽ tự động được cộng vào hóa đơn căn hộ.',
+                style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -153,7 +155,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
               children: [
                 Icon(Icons.cancel_outlined, color: AppTheme.error),
                 SizedBox(width: 8),
-                Text('Từ Chối Đăng Ký'),
+                Expanded(child: Text('Từ Chối Đăng Ký')),
               ],
             ),
             content: SingleChildScrollView(

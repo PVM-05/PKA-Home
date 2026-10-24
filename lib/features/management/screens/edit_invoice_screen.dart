@@ -529,9 +529,14 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             'TỔNG CỘNG MỚI:',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primary),
           ),
-          Text(
-            _currencyFormat.format(_totalAmount),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.primary),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                _currencyFormat.format(_totalAmount),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.primary),
+              ),
+            ),
           ),
         ],
       ),
