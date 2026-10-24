@@ -30,7 +30,7 @@ class MeterReadingRepository {
           'water_image_url': ?waterImageUrl,
           'status': 'pending',
         })
-        .select('*, apartments(code), users(full_name)')
+        .select('*, apartments(code), users:submitted_by(full_name)')
         .single();
 
     return MeterReadingSubmissionModel.fromJson(response);
@@ -40,7 +40,7 @@ class MeterReadingRepository {
   Future<List<MeterReadingSubmissionModel>> getMySubmissions(String apartmentId) async {
     final response = await _client
         .from('meter_reading_submissions')
-        .select('*, apartments(code), users(full_name)')
+        .select('*, apartments(code), users:submitted_by(full_name)')
         .eq('apartment_id', apartmentId)
         .order('created_at', ascending: false);
 
@@ -53,7 +53,7 @@ class MeterReadingRepository {
   Future<List<MeterReadingSubmissionModel>> getAllSubmissions({String? status}) async {
     var query = _client
         .from('meter_reading_submissions')
-        .select('*, apartments(code), users(full_name)');
+        .select('*, apartments(code), users:submitted_by(full_name)');
 
     if (status != null && status.isNotEmpty) {
       query = query.eq('status', status);
@@ -97,4 +97,41 @@ class MeterReadingRepository {
 
     return response as Map<String, dynamic>;
   }
+
+  /// Cư dân chỉnh sửa phiếu gửi chỉ số đang chờ duyệt
+  Future<void> updatePendingSubmission({
+    required String submissionId,
+    required double electricReading,
+    required double waterReading,
+    String? electricImageUrl,
+    String? waterImageUrl,
+    bool clearElectricImage = false,
+    bool clearWaterImage = false,
+  }) async {
+    final response = await _client.rpc('update_pending_meter_reading', params: {
+      'p_submission_id': submissionId,
+      'p_electric_reading': electricReading,
+      'p_water_reading': waterReading,
+      'p_electric_image_url': ?electricImageUrl,
+      'p_water_image_url': ?waterImageUrl,
+      'p_clear_electric_image': clearElectricImage,
+      'p_clear_water_image': clearWaterImage,
+    });
+    final resMap = response as Map<String, dynamic>;
+    if (resMap['success'] != true) {
+      throw Exception(resMap['message'] ?? 'Không thể cập nhật chỉ số.');
+    }
+  }
+
+  /// Cư dân hủy phiếu gửi chỉ số đang chờ duyệt
+  Future<void> cancelPendingSubmission(String submissionId) async {
+    final response = await _client.rpc('cancel_pending_meter_reading', params: {
+      'p_submission_id': submissionId,
+    });
+    final resMap = response as Map<String, dynamic>;
+    if (resMap['success'] != true) {
+      throw Exception(resMap['message'] ?? 'Không thể hủy phiếu chỉ số.');
+    }
+  }
 }
+
