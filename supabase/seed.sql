@@ -1209,8 +1209,7 @@ BEGIN
     UPDATE public.apartments SET is_empty = false WHERE code = 'C0501';
 END $$;
 
--- 4. SEED PHƯƠNG TIỆN (THẺ XE ĐÃ DUYỆT, CHỜ DUYỆT, TỪ CHỐI)
-ALTER TABLE public.vehicles DISABLE TRIGGER trg_check_vehicle_limits;
+-- 4. SEED PHƯƠNG TIỆN (THẺ XE ĐÃ DUYỆT, CHỜ DUYỆT, TỪ CHỐI - 40 XE ĐỘC BẢN)
 DO $$
 BEGIN
 
@@ -1218,25 +1217,12 @@ BEGIN
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29B1-678.90', '29B1-678.90', 'Honda Vision', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29B1-678.90', '29B1-678.90', 'Honda Vision', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
     SELECT id, 'motorbike', '29A1-123.45', '29A1-123.45', 'Honda SH 150i', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1244,39 +1230,10 @@ BEGIN
     )
     SELECT id, 'motorbike', '29B1-678.90', '29B1-678.90', 'Honda Vision', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29A1-123.45', '29A1-123.45', 'Honda SH 150i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29B1-678.90', '29B1-678.90', 'Honda Vision', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29A1-123.45', '29A1-123.45', 'Honda SH 150i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29A1-123.45', '29A1-123.45', 'Honda SH 150i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0101'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1284,7 +1241,10 @@ BEGIN
     )
     SELECT id, 'motorbike', '29C1-111.22', '29C1-111.22', 'Yamaha Grande', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1292,55 +1252,10 @@ BEGIN
     )
     SELECT id, 'car', '30H-888.88', '30H-888.88', 'Mazda CX-5', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29C1-111.22', '29C1-111.22', 'Yamaha Grande', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-888.88', '30H-888.88', 'Mazda CX-5', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29C1-111.22', '29C1-111.22', 'Yamaha Grande', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-888.88', '30H-888.88', 'Mazda CX-5', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-888.88', '30H-888.88', 'Mazda CX-5', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29C1-111.22', '29C1-111.22', 'Yamaha Grande', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0102'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1348,39 +1263,10 @@ BEGIN
     )
     SELECT id, 'motorbike', '29D1-333.44', '29D1-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0103'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29D1-333.44', '29D1-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0103'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29D1-333.44', '29D1-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0103'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29D1-333.44', '29D1-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0103'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30G-666.66', '30G-666.66', 'Toyota Camry', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1388,7 +1274,10 @@ BEGIN
     )
     SELECT id, 'motorbike', '29E1-555.66', '29E1-555.66', 'Vespa Sprint', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1396,47 +1285,10 @@ BEGIN
     )
     SELECT id, 'car', '30G-666.66', '30G-666.66', 'Toyota Camry', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30G-666.66', '30G-666.66', 'Toyota Camry', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29E1-555.66', '29E1-555.66', 'Vespa Sprint', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29E1-555.66', '29E1-555.66', 'Vespa Sprint', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30G-666.66', '30G-666.66', 'Toyota Camry', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29E1-555.66', '29E1-555.66', 'Vespa Sprint', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0201'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1444,95 +1296,21 @@ BEGIN
     )
     SELECT id, 'motorbike', '29F1-777.88', '29F1-777.88', 'Honda Lead', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29F1-999.00', '29F1-999.00', 'Yamaha NVX', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29F1-999.00', '29F1-999.00', 'Yamaha NVX', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29F1-999.00', '29F1-999.00', 'Yamaha NVX', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29F1-777.88', '29F1-777.88', 'Honda Lead', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29F1-777.88', '29F1-777.88', 'Honda Lead', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29F1-999.00', '29F1-999.00', 'Yamaha NVX', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29F1-777.88', '29F1-777.88', 'Honda Lead', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30E-123.99', '30E-123.99', 'Hyundai Tucson', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29G1-999.00', '29G1-999.00', 'Yamaha Exciter', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0203'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30E-123.99', '30E-123.99', 'Hyundai Tucson', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0203'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30E-123.99', '30E-123.99', 'Hyundai Tucson', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0203'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30E-123.99', '30E-123.99', 'Hyundai Tucson', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0203'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1540,415 +1318,131 @@ BEGIN
     )
     SELECT id, 'motorbike', '29H1-222.33', '29H1-222.33', 'Honda Wave Alpha', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29H1-222.33', '29H1-222.33', 'Honda Wave Alpha', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'car', '30H-991.23', '30H-991.23', 'Hyundai SantaFe', 'pending', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29H1-222.33', '29H1-222.33', 'Honda Wave Alpha', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29H1-222.33', '29H1-222.33', 'Honda Wave Alpha', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-991.23', '30H-991.23', 'Kia Carnival', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-991.23', '30H-991.23', 'Kia Carnival', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-991.23', '30H-991.23', 'Kia Carnival', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-991.23', '30H-991.23', 'Kia Carnival', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29K1-444.55', '29K1-444.55', 'Honda Winner X', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29K1-444.55', '29K1-444.55', 'Piaggio Liberty', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0302'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29K1-444.55', '29K1-444.55', 'Honda Winner X', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29K1-444.55', '29K1-444.55', 'Honda Winner X', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29K1-444.55', '29K1-444.55', 'Honda Winner X', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-888.99', '29M1-888.99', 'Honda SH Mode', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'car', '30E-123.45', '30E-123.45', 'Kia Seltos', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30A-999.11', '30A-999.11', 'Mercedes-Benz C200', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-888.99', '29M1-888.99', 'Honda SH Mode', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30A-999.11', '30A-999.11', 'Mercedes-Benz C200', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30A-999.11', '30A-999.11', 'Mercedes-Benz C200', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30A-999.11', '30A-999.11', 'Mercedes-Benz C200', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-888.99', '29M1-888.99', 'Honda SH Mode', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-888.99', '29M1-888.99', 'Honda SH Mode', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30F-555.22', '30F-555.22', 'VinFast VF8', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'car', '30F-567.89', '30F-567.89', 'VinFast VF8', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30F-555.22', '30F-555.22', 'VinFast VF8', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29M1-999.99', '29M1-999.99', 'Honda Winner X', 'rejected', 'Vượt quá hạn mức số lượng xe máy quy định', NOW(), NOW()
     FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30F-555.22', '30F-555.22', 'VinFast VF8', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30F-555.22', '30F-555.22', 'VinFast VF8', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-999.99', '29M1-999.99', 'Yamaha R15', 'rejected', 'Biển số xe không hợp lệ trên cơ sở dữ liệu đăng kiểm.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-999.99', '29M1-999.99', 'Yamaha R15', 'rejected', 'Biển số xe không hợp lệ trên cơ sở dữ liệu đăng kiểm.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-999.99', '29M1-999.99', 'Yamaha R15', 'rejected', 'Biển số xe không hợp lệ trên cơ sở dữ liệu đăng kiểm.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29M1-999.99', '29M1-999.99', 'Yamaha R15', 'rejected', 'Biển số xe không hợp lệ trên cơ sở dữ liệu đăng kiểm.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'A0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X1-112.23', '59X1-112.23', 'Honda Vision', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29N1-112.23', '29N1-112.23', 'Honda Future 125', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '59X1-112.23', '59X1-112.23', 'Honda Vision', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '59X1-999.88', '59X1-999.88', 'Yamaha NVX', 'pending', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '59X1-112.23', '59X1-112.23', 'Honda Vision', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X1-112.23', '59X1-112.23', 'Honda Vision', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X1-999.88', '59X1-999.88', 'Yamaha FreeGo', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X1-999.88', '59X1-999.88', 'Yamaha FreeGo', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X1-999.88', '59X1-999.88', 'Yamaha FreeGo', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X1-999.88', '59X1-999.88', 'Yamaha FreeGo', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X2-334.45', '59X2-334.45', 'Yamaha Janus', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29O1-334.12', '29O1-334.12', 'Honda Vision', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '51K-889.90', '51K-889.90', 'Kia Seltos', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'car', '30A-998.87', '30A-998.87', 'Mercedes-Benz C200', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '59X2-334.45', '59X2-334.45', 'Yamaha Janus', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X2-334.45', '59X2-334.45', 'Yamaha Janus', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '59X2-334.45', '59X2-334.45', 'Yamaha Janus', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '51K-889.90', '51K-889.90', 'Kia Seltos', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '51K-889.90', '51K-889.90', 'Kia Seltos', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '51K-889.90', '51K-889.90', 'Kia Seltos', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29P1-123.88', '29P1-123.88', 'Honda AirBlade 160', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29P1-334.45', '29P1-334.45', 'Honda Vision', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29P1-123.88', '29P1-123.88', 'Honda AirBlade 160', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29P2-445.56', '29P2-445.56', 'Yamaha Sirius', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29P1-123.88', '29P1-123.88', 'Honda AirBlade 160', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29P1-123.88', '29P1-123.88', 'Honda AirBlade 160', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29P1-777.66', '29P1-777.66', 'Honda Beat', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29P1-777.66', '29P1-777.66', 'Honda Beat', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29P1-777.66', '29P1-777.66', 'Honda Beat', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29P1-777.66', '29P1-777.66', 'Honda Beat', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0201'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -1956,191 +1450,54 @@ BEGIN
     )
     SELECT id, 'car', '30H-234.56', '30H-234.56', 'Honda CR-V', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0202'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30H-234.56', '30H-234.56', 'Honda CR-V', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-234.56', '30H-234.56', 'Honda CR-V', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-234.56', '30H-234.56', 'Honda CR-V', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29T1-345.67', '29T1-345.67', 'Yamaha Exciter', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29Q1-556.67', '29Q1-556.67', 'Vespa GTS 300', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0301'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29T1-345.67', '29T1-345.67', 'Yamaha Exciter', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29T1-345.67', '29T1-345.67', 'Yamaha Exciter', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29T1-345.67', '29T1-345.67', 'Yamaha Exciter', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29U1-456.78', '29U1-456.78', 'Honda Lead 125', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29R1-778.89', '29R1-778.89', 'Yamaha Janus', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30E-789.01', '30E-789.01', 'Ford Everest', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29U1-456.78', '29U1-456.78', 'Honda Lead 125', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30E-789.01', '30E-789.01', 'Ford Everest', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29U1-456.78', '29U1-456.78', 'Honda Lead 125', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30E-789.01', '30E-789.01', 'Ford Everest', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29U1-456.78', '29U1-456.78', 'Honda Lead 125', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30E-789.01', '30E-789.01', 'Ford Everest', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0302'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-445.67', '30H-445.67', 'Hyundai Santa Fe', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'car', '30K-456.78', '30K-456.78', 'Ford Everest', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30H-445.67', '30H-445.67', 'Hyundai Santa Fe', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29T1-888.77', '29T1-888.77', 'Suzuki Raider', 'rejected', 'Vượt quá hạn mức số lượng xe máy quy định', NOW(), NOW()
     FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-445.67', '30H-445.67', 'Hyundai Santa Fe', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30H-445.67', '30H-445.67', 'Hyundai Santa Fe', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29T1-888.77', '29T1-888.77', 'Honda CBR150R', 'rejected', 'Vượt quá hạn mức xe máy tối đa của căn hộ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29T1-888.77', '29T1-888.77', 'Honda CBR150R', 'rejected', 'Vượt quá hạn mức xe máy tối đa của căn hộ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29T1-888.77', '29T1-888.77', 'Honda CBR150R', 'rejected', 'Vượt quá hạn mức xe máy tối đa của căn hộ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29T1-888.77', '29T1-888.77', 'Honda CBR150R', 'rejected', 'Vượt quá hạn mức xe máy tối đa của căn hộ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0401'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -2148,31 +1505,21 @@ BEGIN
     )
     SELECT id, 'car', '30G-998.87', '30G-998.87', 'BMW 320i', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0501'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30G-998.87', '30G-998.87', 'BMW 320i', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29U1-123.89', '29U1-123.89', 'Honda SH Mode', 'pending', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'B0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30G-998.87', '30G-998.87', 'BMW 320i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30G-998.87', '30G-998.87', 'BMW 320i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'B0501'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -2180,63 +1527,32 @@ BEGIN
     )
     SELECT id, 'motorbike', '29V1-567.89', '29V1-567.89', 'Honda Future 125', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0101'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29V1-567.89', '29V1-567.89', 'Honda Future 125', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29V1-567.89', '29V1-567.89', 'Honda Future 125', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29V1-567.89', '29V1-567.89', 'Honda Future 125', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0101'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29X1-678.90', '29X1-678.90', 'Honda Vision Smartkey', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29W1-890.12', '29W1-890.12', 'Honda Lead', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0102'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29X1-678.90', '29X1-678.90', 'Honda Vision Smartkey', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'car', '30H-678.90', '30H-678.90', 'Hyundai Tucson', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29X1-678.90', '29X1-678.90', 'Honda Vision Smartkey', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0102'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29X1-678.90', '29X1-678.90', 'Honda Vision Smartkey', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0102'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -2244,7 +1560,10 @@ BEGIN
     )
     SELECT id, 'car', '30K-112.34', '30K-112.34', 'Toyota Corolla Cross', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -2252,87 +1571,32 @@ BEGIN
     )
     SELECT id, 'motorbike', '29Y1-789.01', '29Y1-789.01', 'Vespa GTS 150', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'car', '30K-112.34', '30K-112.34', 'Toyota Corolla Cross', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29Y1-789.01', '29Y1-789.01', 'Vespa GTS 150', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29Y1-789.01', '29Y1-789.01', 'Vespa GTS 150', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30K-112.34', '30K-112.34', 'Toyota Corolla Cross', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29Y1-789.01', '29Y1-789.01', 'Vespa GTS 150', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30K-112.34', '30K-112.34', 'Toyota Corolla Cross', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0201'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29Z1-890.12', '29Z1-890.12', 'Yamaha Sirius', 'approved', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29Z1-234.56', '29Z1-234.56', 'Yamaha Sirius', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0202'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29Z1-890.12', '29Z1-890.12', 'Yamaha Sirius', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29Z1-890.12', '29Z1-890.12', 'Yamaha Sirius', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0202'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29Z1-890.12', '29Z1-890.12', 'Yamaha Sirius', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0202'
-    ON CONFLICT DO NOTHING;
+    SELECT id, 'motorbike', '29AA-111.22', '29AA-111.22', 'Honda SH 350i', 'approved', NULL, NOW(), NOW()
+    FROM public.apartments WHERE code = 'C0301'
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -2340,127 +1604,43 @@ BEGIN
     )
     SELECT id, 'motorbike', '29AA-333.44', '29AA-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29AA-111.22', '29AA-111.22', 'Honda SH 125i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
+    SELECT id, 'car', '30K-789.01', '30K-789.01', 'VinFast VF9', 'approved', NULL, NOW(), NOW()
+    FROM public.apartments WHERE code = 'C0302'
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29AA-111.22', '29AA-111.22', 'Honda SH 125i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AA-111.22', '29AA-111.22', 'Honda SH 125i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AA-333.44', '29AA-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AA-333.44', '29AA-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AA-333.44', '29AA-333.44', 'Honda AirBlade', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AA-111.22', '29AA-111.22', 'Honda SH 125i', 'approved', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0301'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AB-555.66', '29AB-555.66', 'Honda Blade', 'pending', NULL, NOW(), NOW()
+    SELECT id, 'motorbike', '29AB-555.66', '29AB-555.66', 'Yamaha FreeGo', 'pending', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
         status, rejection_reason, created_at, updated_at
     )
-    SELECT id, 'motorbike', '29AB-555.66', '29AB-555.66', 'Honda Blade', 'pending', NULL, NOW(), NOW()
+    SELECT id, 'car', '30K-999.88', '30K-999.88', 'Lexus RX350', 'rejected', 'Thiếu ảnh chụp giấy đăng ký xe chính chủ', NOW(), NOW()
     FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AB-555.66', '29AB-555.66', 'Honda Blade', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AB-555.66', '29AB-555.66', 'Honda Blade', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30K-999.88', '30K-999.88', 'Toyota Vios', 'rejected', 'Thiếu ảnh chụp giấy đăng ký xe chính chủ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30K-999.88', '30K-999.88', 'Toyota Vios', 'rejected', 'Thiếu ảnh chụp giấy đăng ký xe chính chủ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30K-999.88', '30K-999.88', 'Toyota Vios', 'rejected', 'Thiếu ảnh chụp giấy đăng ký xe chính chủ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'car', '30K-999.88', '30K-999.88', 'Toyota Vios', 'rejected', 'Thiếu ảnh chụp giấy đăng ký xe chính chủ.', NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0401'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 
     INSERT INTO public.vehicles (
         apartment_id, vehicle_type, license_plate, plate_number, brand_model,
@@ -2468,34 +1648,11 @@ BEGIN
     )
     SELECT id, 'motorbike', '29AC-777.88', '29AC-777.88', 'Vespa Primavera', 'pending', NULL, NOW(), NOW()
     FROM public.apartments WHERE code = 'C0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AC-777.88', '29AC-777.88', 'Vespa Primavera', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AC-777.88', '29AC-777.88', 'Vespa Primavera', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0501'
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.vehicles (
-        apartment_id, vehicle_type, license_plate, plate_number, brand_model,
-        status, rejection_reason, created_at, updated_at
-    )
-    SELECT id, 'motorbike', '29AC-777.88', '29AC-777.88', 'Vespa Primavera', 'pending', NULL, NOW(), NOW()
-    FROM public.apartments WHERE code = 'C0501'
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (license_plate) DO UPDATE SET
+        status = EXCLUDED.status,
+        rejection_reason = EXCLUDED.rejection_reason,
+        brand_model = EXCLUDED.brand_model;
 END $$;
-ALTER TABLE public.vehicles ENABLE TRIGGER trg_check_vehicle_limits;
-
 -- 5. SEED TRANG THIẾT BỊ VẬN HÀNH & KẾ HOẠCH BẢO TRÌ
 
 INSERT INTO public.building_equipments (
