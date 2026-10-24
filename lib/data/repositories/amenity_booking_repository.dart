@@ -24,7 +24,7 @@ class AmenityBookingRepository {
         .select('*, apartments(code), users(full_name)')
         .eq('amenity_id', amenityId)
         .eq('booking_date', dateStr)
-        .inFilter('status', ['confirmed', 'waitlist']);
+        .inFilter('status', ['confirmed', 'waitlist', 'pending_payment']);
 
     return (response as List)
         .map((json) => AmenityBookingModel.fromJson(json))

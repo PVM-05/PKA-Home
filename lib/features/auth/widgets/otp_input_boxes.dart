@@ -21,12 +21,14 @@ class OtpInputBoxes extends StatefulWidget {
 class _OtpInputBoxesState extends State<OtpInputBoxes> {
   late List<TextEditingController> _controllers;
   late List<FocusNode> _focusNodes;
+  late List<FocusNode> _keyboardFocusNodes;
 
   @override
   void initState() {
     super.initState();
     _controllers = List.generate(widget.length, (_) => TextEditingController());
     _focusNodes = List.generate(widget.length, (_) => FocusNode());
+    _keyboardFocusNodes = List.generate(widget.length, (_) => FocusNode());
   }
 
   @override
@@ -36,6 +38,9 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
     }
     for (final f in _focusNodes) {
       f.dispose();
+    }
+    for (final kf in _keyboardFocusNodes) {
+      kf.dispose();
     }
     super.dispose();
   }
@@ -114,7 +119,7 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
           width: 46,
           height: 54,
           child: KeyboardListener(
-            focusNode: FocusNode(),
+            focusNode: _keyboardFocusNodes[index],
             onKeyEvent: (event) => _handleKeyEvent(index, event),
             child: TextField(
               controller: _controllers[index],

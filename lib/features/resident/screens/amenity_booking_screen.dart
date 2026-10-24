@@ -72,6 +72,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
     required bool isWaitlist,
     required int guestsCount,
   }) {
+    int dialogGuestsCount = guestsCount;
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -96,15 +97,15 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       children: [
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline, size: 20),
-                          onPressed: guestsCount > 1
-                              ? () => setDialogState(() => guestsCount--)
+                          onPressed: dialogGuestsCount > 1
+                              ? () => setDialogState(() => dialogGuestsCount--)
                               : null,
                         ),
-                        Text('$guestsCount', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text('$dialogGuestsCount', style: const TextStyle(fontWeight: FontWeight.bold)),
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline, size: 20),
-                          onPressed: guestsCount < widget.amenity.maxCapacity
-                              ? () => setDialogState(() => guestsCount++)
+                          onPressed: dialogGuestsCount < widget.amenity.maxCapacity
+                              ? () => setDialogState(() => dialogGuestsCount++)
                               : null,
                         ),
                       ],
@@ -115,7 +116,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
               ],
               if (widget.amenity.feeAmount > 0) ...[
                 Text(
-                  'Phí sử dụng: ${_currencyFormat.format(widget.amenity.feeAmount * guestsCount)}',
+                  'Phí sử dụng: ${_currencyFormat.format(widget.amenity.feeAmount * dialogGuestsCount)}',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
@@ -185,7 +186,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                               userId: userId,
                               date: _selectedDate,
                               timeSlot: slot,
-                              guestsCount: guestsCount,
+                              guestsCount: dialogGuestsCount,
                               allowWaitlist: isWaitlist,
                             );
 
@@ -199,15 +200,15 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           _selectedSlot = null;
                         });
 
-                        final totalFee = (widget.amenity.feeAmount * guestsCount) +
+                        final totalFee = (widget.amenity.feeAmount * dialogGuestsCount) +
                             (widget.amenity.requiresDeposit ? widget.amenity.depositAmount : 0);
 
                         if (!isWaitlist && totalFee > 0 && mounted) {
                           final feeItems = <Map<String, dynamic>>[];
                           if (widget.amenity.feeAmount > 0) {
                             feeItems.add({
-                              'name': '${widget.amenity.name} ($guestsCount người)',
-                              'amount': widget.amenity.feeAmount * guestsCount,
+                              'name': '${widget.amenity.name} ($dialogGuestsCount người)',
+                              'amount': widget.amenity.feeAmount * dialogGuestsCount,
                             });
                           }
                           if (widget.amenity.requiresDeposit && widget.amenity.depositAmount > 0) {
@@ -771,7 +772,10 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
 
               Color statusColor = AppStatusColors.paid;
               String statusLabel = 'Đã xác nhận';
-              if (b.isWaitlist) {
+              if (b.isPendingPayment) {
+                statusColor = AppStatusColors.pendingConfirmation;
+                statusLabel = 'Chờ thanh toán';
+              } else if (b.isWaitlist) {
                 statusColor = Colors.purple;
                 statusLabel = 'Danh sách chờ';
               } else if (b.isCancelled) {
@@ -785,7 +789,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                 statusLabel = 'Vắng mặt';
               }
 
-              final canCancel = (b.isConfirmed || b.isWaitlist);
+              final canCancel = (b.isConfirmed || b.isWaitlist || b.isPendingPayment);
 
               return Card(
                 elevation: 0,
@@ -876,6 +880,58 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                          if (b.isPendingPayment) ...[
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              icon: const Icon(Icons.payment, size: 16),
+                              label: const Text('Thanh toán ngay'),
+                              onPressed: () async {
+                                final totalFee = b.feeAmount + b.depositAmount;
+                                final feeItems = <Map<String, dynamic>>[];
+                                if (b.feeAmount > 0) {
+                                  feeItems.add({
+                                    'name': '${b.amenityName ?? widget.amenity.name} (${b.guestsCount} người)',
+                                    'amount': b.feeAmount,
+                                  });
+                                }
+                                if (b.depositAmount > 0) {
+                                  feeItems.add({
+                                    'name': 'Tiền đặt cọc',
+                                    'amount': b.depositAmount,
+                                  });
+                                }
+
+                                final codeSuffix = b.id.length >= 4 ? b.id.substring(0, 4).toUpperCase() : b.id.toUpperCase();
+                                final paymentRes = await showUnifiedPaymentSheet(
+                                  context: context,
+                                  type: PaymentType.service,
+                                  referenceId: b.id,
+                                  title: 'Thanh toán ${b.amenityName ?? widget.amenity.name}',
+                                  referenceCode: '#BK-${DateFormat('yyyyMMdd').format(b.bookingDate)}-$codeSuffix',
+                                  amount: totalFee,
+                                  feeBreakdown: feeItems,
+                                );
+
+                                if (paymentRes != null && paymentRes.success && context.mounted) {
+                                  ref.invalidate(myAmenityBookingsProvider);
+                                  ref.invalidate(amenityBookingsForDateProvider(
+                                    AmenityDateQuery(amenityId: widget.amenity.id, date: _selectedDate),
+                                  ));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Yêu cầu thanh toán đã được tiếp nhận thành công'),
+                                      backgroundColor: AppTheme.success,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                          ],
                           if (b.isConfirmed) ...[
                             OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
