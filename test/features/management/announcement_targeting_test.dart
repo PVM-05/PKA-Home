@@ -132,4 +132,35 @@ void main() {
     expect(mockRepo.lastTargetApartment, 'A0110');
     expect(find.text('Tạo thông báo thành công!'), findsOneWidget);
   });
+
+  testWidgets('Thẻ thông báo hiển thị tiêu đề rộng rãi không bị ép chiều ngang', (tester) async {
+    final mockRepo = MockAnnouncementRepository();
+    final urgentAnnouncement = AnnouncementModel(
+      id: 'ann-urgent',
+      title: '[KHẨN CẤP] Tạm ngừng vận hành thang máy TM-A01 để bảo trì định kỳ',
+      content: 'Thang máy TM-A01 Block A sẽ tạm dừng hoạt động từ 13h30 đến 17h00 ngày mai để thay cáp và kiểm định an toàn.',
+      isUrgent: true,
+      targetType: 'all',
+      createdAt: DateTime(2026, 10, 24, 14, 0),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          announcementRepositoryProvider.overrideWithValue(mockRepo),
+          announcementsStreamProvider.overrideWith((ref) => Stream.value([urgentAnnouncement])),
+        ],
+        child: const MaterialApp(
+          home: AnnouncementManagementScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final titleFinder = find.text('[KHẨN CẤP] Tạm ngừng vận hành thang máy TM-A01 để bảo trì định kỳ');
+    expect(titleFinder, findsOneWidget);
+
+    final titleSize = tester.getSize(titleFinder);
+    expect(titleSize.width, greaterThan(250.0), reason: 'Tiêu đề thông báo phải có chiều rộng đủ lớn, không bị ép hẹp thành cột dọc');
+  });
 }
