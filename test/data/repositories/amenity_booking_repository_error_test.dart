@@ -46,5 +46,21 @@ void main() {
         throwsA(isA<PostgrestException>()),
       );
     });
+
+    test('getMaintenanceWindows trả về danh sách rỗng khi bảng chưa tồn tại trong schema cache (PGRST205)', () async {
+      when(() => mockClient.from('amenity_maintenance_windows')).thenThrow(
+        const PostgrestException(
+          message: "Could not find the table 'public.amenity_maintenance_windows' in the schema cache",
+          code: 'PGRST205',
+        ),
+      );
+
+      final result = await repo.getMaintenanceWindows(
+        amenityId: 'amenity-uuid',
+        date: DateTime(2026, 10, 11),
+      );
+
+      expect(result, isEmpty);
+    });
   });
 }

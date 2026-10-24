@@ -168,16 +168,24 @@ class AmenityBookingRepository {
     final dayStart = DateTime(date.year, date.month, date.day).toIso8601String();
     final dayEnd = DateTime(date.year, date.month, date.day, 23, 59, 59).toIso8601String();
 
-    final response = await _client
-        .from('amenity_maintenance_windows')
-        .select('*, building_amenities(name)')
-        .eq('amenity_id', amenityId)
-        .lte('start_time', dayEnd)
-        .gte('end_time', dayStart);
+    try {
+      final response = await _client
+          .from('amenity_maintenance_windows')
+          .select('*, building_amenities(name)')
+          .eq('amenity_id', amenityId)
+          .lte('start_time', dayEnd)
+          .gte('end_time', dayStart);
 
-    return (response as List)
-        .map((json) => AmenityMaintenanceModel.fromJson(json))
-        .toList();
+      return (response as List)
+          .map((json) => AmenityMaintenanceModel.fromJson(json))
+          .toList();
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST205' || e.code == '42P01') {
+        // Bảng chưa được tạo trên CSDL, tạm thời xem như không có lịch bảo trì
+        return [];
+      }
+      rethrow;
+    }
   }
 
   /// Ban quản lý tạo lịch tạm ngừng tiện ích để bảo trì/vệ sinh
@@ -201,4 +209,28 @@ class AmenityBookingRepository {
   Future<void> deleteMaintenanceWindow(String windowId) async {
     await _client.from('amenity_maintenance_windows').delete().eq('id', windowId);
   }
+
+  /// Cư dân đổi lịch đặt tiện ích (chống Deadlock, bảo toàn tiền cọc/phí & đôn Waitlist)
+  Future<Map<String, dynamic>> rescheduleBooking({
+    required String bookingId,
+    required DateTime newDate,
+    required String newTimeSlot,
+    int? newGuestsCount,
+    String? newNotes,
+  }) async {
+    final dateStr = _formatDate(newDate);
+    final response = await _client.rpc('reschedule_amenity_booking', params: {
+      'p_booking_id': bookingId,
+      'p_new_date': dateStr,
+      'p_new_time_slot': newTimeSlot,
+      'p_new_guests_count': ?newGuestsCount,
+      'p_new_notes': ?newNotes,
+    });
+    final resMap = response as Map<String, dynamic>;
+    if (resMap['success'] != true) {
+      throw Exception(resMap['message'] ?? 'Không thể đổi lịch đặt tiện ích.');
+    }
+    return resMap;
+  }
 }
+
