@@ -78,89 +78,91 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: Text(isWaitlist ? 'Gia Nhập Danh Sách Chờ' : 'Xác Nhận Đặt Lịch'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Tiện ích: ${widget.amenity.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Text('Ngày sử dụng: ${_fullDateFormat.format(_selectedDate)}'),
-              const SizedBox(height: 6),
-              Text('Khung giờ: $slot', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              if (widget.amenity.isShared) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Số người tham gia:'),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline, size: 20),
-                          onPressed: dialogGuestsCount > 1
-                              ? () => setDialogState(() => dialogGuestsCount--)
-                              : null,
-                        ),
-                        Text('$dialogGuestsCount', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline, size: 20),
-                          onPressed: dialogGuestsCount < widget.amenity.maxCapacity
-                              ? () => setDialogState(() => dialogGuestsCount++)
-                              : null,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Tiện ích: ${widget.amenity.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
-              ],
-              if (widget.amenity.feeAmount > 0) ...[
-                Text(
-                  'Phí sử dụng: ${_currencyFormat.format(widget.amenity.feeAmount * dialogGuestsCount)}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-              ],
-              if (widget.amenity.requiresDeposit && widget.amenity.depositAmount > 0) ...[
-                Text(
-                  'Tiền đặt cọc: ${_currencyFormat.format(widget.amenity.depositAmount)}',
-                  style: const TextStyle(color: AppTheme.warning, fontWeight: FontWeight.bold),
-                ),
+                Text('Ngày sử dụng: ${_fullDateFormat.format(_selectedDate)}'),
                 const SizedBox(height: 6),
-              ],
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isWaitlist ? Colors.purple.shade50 : Colors.amber.shade50,
-                  border: Border.all(
-                    color: isWaitlist ? Colors.purple.shade200 : Colors.amber.shade300,
+                Text('Khung giờ: $slot', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                if (widget.amenity.isShared) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Số người tham gia:'),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline, size: 20),
+                            onPressed: dialogGuestsCount > 1
+                                ? () => setDialogState(() => dialogGuestsCount--)
+                                : null,
+                          ),
+                          Text('$dialogGuestsCount', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          IconButton(
+                            icon: const Icon(Icons.add_circle_outline, size: 20),
+                            onPressed: dialogGuestsCount < widget.amenity.maxCapacity
+                                ? () => setDialogState(() => dialogGuestsCount++)
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      isWaitlist ? Icons.hourglass_top_outlined : Icons.info_outline,
-                      size: 18,
-                      color: isWaitlist ? Colors.purple : Colors.amber.shade800,
+                  const SizedBox(height: 6),
+                ],
+                if (widget.amenity.feeAmount > 0) ...[
+                  Text(
+                    'Phí sử dụng: ${_currencyFormat.format(widget.amenity.feeAmount * dialogGuestsCount)}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                if (widget.amenity.requiresDeposit && widget.amenity.depositAmount > 0) ...[
+                  Text(
+                    'Tiền đặt cọc: ${_currencyFormat.format(widget.amenity.depositAmount)}',
+                    style: const TextStyle(color: AppTheme.warning, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                ],
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isWaitlist ? Colors.purple.shade50 : Colors.amber.shade50,
+                    border: Border.all(
+                      color: isWaitlist ? Colors.purple.shade200 : Colors.amber.shade300,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        isWaitlist
-                            ? 'Khung giờ này đã hết chỗ. Khi có người hủy lịch, hệ thống sẽ tự động xác nhận cho bạn và gửi thông báo.'
-                            : 'Vui lòng có mặt đúng giờ. Nếu có đặt cọc, vui lòng hoàn tất tại quầy lễ tân/BQL.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isWaitlist ? Colors.purple.shade900 : Colors.black87,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isWaitlist ? Icons.hourglass_top_outlined : Icons.info_outline,
+                        size: 18,
+                        color: isWaitlist ? Colors.purple : Colors.amber.shade800,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isWaitlist
+                              ? 'Khung giờ này đã hết chỗ. Khi có người hủy lịch, hệ thống sẽ tự động xác nhận cho bạn và gửi thông báo.'
+                              : 'Vui lòng có mặt đúng giờ. Nếu có đặt cọc, vui lòng hoàn tất tại quầy lễ tân/BQL.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isWaitlist ? Colors.purple.shade900 : Colors.black87,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -790,6 +792,9 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
               }
 
               final canCancel = (b.isConfirmed || b.isWaitlist || b.isPendingPayment);
+              final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+              final bookingDateOnly = DateTime(b.bookingDate.year, b.bookingDate.month, b.bookingDate.day);
+              final canReschedule = (b.isConfirmed || b.isWaitlist || b.isPendingPayment) && !bookingDateOnly.isBefore(today);
 
               return Card(
                 elevation: 0,
@@ -947,6 +952,18 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                             ),
                             const SizedBox(width: 8),
                           ],
+                          if (canReschedule) ...[
+                            OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.primary,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              icon: const Icon(Icons.edit_calendar, size: 16),
+                              label: const Text('Đổi lịch'),
+                              onPressed: () => _showRescheduleSheet(context, b),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
                           if (canCancel)
                             TextButton.icon(
                               style: TextButton.styleFrom(
@@ -986,55 +1003,57 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
             Text('Đặt Dịch Vụ Thành Công!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              widget.amenity.name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${_fullDateFormat.format(_selectedDate)} • $slot',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                widget.amenity.name,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                textAlign: TextAlign.center,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Mã đặt chỗ:', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
-                  Text(
-                    bookingCode,
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppTheme.primary),
-                  ),
-                ],
+              const SizedBox(height: 4),
+              Text(
+                '${_fullDateFormat.format(_selectedDate)} • $slot',
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Mã đặt chỗ:', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                    Text(
+                      bookingCode,
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppTheme.primary),
+                    ),
+                  ],
+                ),
               ),
-              icon: const Icon(Icons.qr_code_2_rounded),
-              label: const Text('Xem Mã QR Check-in', style: TextStyle(fontWeight: FontWeight.bold)),
-              onPressed: () {
-                Navigator.pop(dialogCtx);
-                _showQrCodeDialog(context, booking, bookingCode, slot);
-              },
-            ),
-          ],
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.qr_code_2_rounded),
+                label: const Text('Xem Mã QR Check-in', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  Navigator.pop(dialogCtx);
+                  _showQrCodeDialog(context, booking, bookingCode, slot);
+                },
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -1060,40 +1079,42 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
             ],
           ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 10,
-                  ),
-                ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: QrImageView(
+                  data: 'PKA-BOOKING:$bookingCode:${widget.amenity.name}:$slot',
+                  version: QrVersions.auto,
+                  size: 200.0,
+                  backgroundColor: Colors.white,
+                ),
               ),
-              child: QrImageView(
-                data: 'PKA-BOOKING:$bookingCode:${widget.amenity.name}:$slot',
-                version: QrVersions.auto,
-                size: 200.0,
-                backgroundColor: Colors.white,
+              const SizedBox(height: 14),
+              Text(
+                bookingCode,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1),
               ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              bookingCode,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Xuất trình mã này cho lễ tân / BQL khi vào sử dụng dịch vụ',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                'Xuất trình mã này cho lễ tân / BQL khi vào sử dụng dịch vụ',
+                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
         actions: [
           ElevatedButton(
@@ -1104,6 +1125,431 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
             ),
             onPressed: () => Navigator.pop(dialogCtx),
             child: const Text('Hoàn tất'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRescheduleSheet(BuildContext context, AmenityBookingModel booking) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _RescheduleBookingBottomSheet(
+        booking: booking,
+        amenity: widget.amenity,
+      ),
+    );
+  }
+}
+
+class _RescheduleBookingBottomSheet extends ConsumerStatefulWidget {
+  final AmenityBookingModel booking;
+  final BuildingAmenityModel amenity;
+
+  const _RescheduleBookingBottomSheet({
+    required this.booking,
+    required this.amenity,
+  });
+
+  @override
+  ConsumerState<_RescheduleBookingBottomSheet> createState() => _RescheduleBookingBottomSheetState();
+}
+
+class _RescheduleBookingBottomSheetState extends ConsumerState<_RescheduleBookingBottomSheet> {
+  late DateTime _selectedDate;
+  String? _selectedSlot;
+  late int _guestsCount;
+  bool _isSubmitting = false;
+
+  final DateFormat _dayOfWeekFormat = DateFormat('EEE', 'vi');
+  final DateFormat _dateDisplayFormat = DateFormat('dd/MM');
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final bDate = DateTime(widget.booking.bookingDate.year, widget.booking.bookingDate.month, widget.booking.bookingDate.day);
+    _selectedDate = bDate.isBefore(today) ? today : bDate;
+    _selectedSlot = widget.booking.timeSlot;
+    _guestsCount = widget.booking.guestsCount;
+  }
+
+  List<DateTime> _getNext7Days() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return List.generate(7, (i) => today.add(Duration(days: i)));
+  }
+
+  List<String> _getSlots() {
+    return AmenitySlotHelper.generateSlots(
+      widget.amenity.openHours,
+      widget.amenity.slotDurationMinutes,
+    );
+  }
+
+  Future<void> _handleConfirmReschedule() async {
+    if (_selectedSlot == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng chọn một khung giờ mới.')),
+      );
+      return;
+    }
+
+    final sameDate = _selectedDate.year == widget.booking.bookingDate.year &&
+        _selectedDate.month == widget.booking.bookingDate.month &&
+        _selectedDate.day == widget.booking.bookingDate.day;
+    if (sameDate && _selectedSlot == widget.booking.timeSlot) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng chọn ngày hoặc khung giờ khác với lịch hiện tại.')),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final res = await ref.read(amenityBookingRepositoryProvider).rescheduleBooking(
+        bookingId: widget.booking.id,
+        newDate: _selectedDate,
+        newTimeSlot: _selectedSlot!,
+        newGuestsCount: _guestsCount,
+      );
+
+      ref.invalidate(myAmenityBookingsProvider);
+      ref.invalidate(amenityBookingsForDateProvider(
+        AmenityDateQuery(amenityId: widget.amenity.id, date: widget.booking.bookingDate),
+      ));
+      ref.invalidate(amenityBookingsForDateProvider(
+        AmenityDateQuery(amenityId: widget.amenity.id, date: _selectedDate),
+      ));
+
+      if (mounted) {
+        Navigator.pop(context);
+        final isWaitlist = res['is_waitlist'] == true || res['status'] == 'waitlist';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isWaitlist
+                  ? 'Đã chuyển sang danh sách chờ của khung giờ mới thành công.'
+                  : 'Đổi lịch đặt chỗ thành công!',
+            ),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final slots = _getSlots();
+    final bookingsAsync = ref.watch(amenityBookingsForDateProvider(
+      AmenityDateQuery(amenityId: widget.amenity.id, date: _selectedDate),
+    ));
+    final maintenanceAsync = ref.watch(amenityMaintenanceForDateProvider(
+      AmenityDateQuery(amenityId: widget.amenity.id, date: _selectedDate),
+    ));
+
+    final isConfirmedBooking = widget.booking.isConfirmed;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Đổi Lịch Đặt Chỗ',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tiện ích: ${widget.amenity.name}',
+                        style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+
+          // Thông báo chính sách
+          if (isConfirmedBooking)
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Lượt đặt đã xác nhận/thanh toán sẽ giữ nguyên số người (${widget.booking.guestsCount} người) và bảo lưu toàn bộ chi phí/tiền cọc.',
+                      style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          // Bộ chọn ngày
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: SizedBox(
+              height: 74,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: 7,
+                itemBuilder: (context, index) {
+                  final date = _getNext7Days()[index];
+                  final isSelected = date.year == _selectedDate.year &&
+                      date.month == _selectedDate.month &&
+                      date.day == _selectedDate.day;
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDate = date;
+                        _selectedSlot = null;
+                      });
+                    },
+                    child: Container(
+                      width: 60,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppTheme.primary : Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected ? AppTheme.primary : Colors.grey.shade200,
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            index == 0 ? 'Hôm nay' : _dayOfWeekFormat.format(date),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _dateDisplayFormat.format(date),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected ? Colors.white : Colors.grey.shade900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const Divider(height: 1),
+
+          // Tùy chọn số lượng khách (nếu shared và không phải confirmed)
+          if (!isConfirmedBooking && widget.amenity.isShared) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Số người tham gia:', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline, size: 22),
+                        onPressed: _guestsCount > 1
+                            ? () => setState(() => _guestsCount--)
+                            : null,
+                      ),
+                      Text('$_guestsCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline, size: 22),
+                        onPressed: _guestsCount < widget.amenity.maxCapacity
+                            ? () => setState(() => _guestsCount++)
+                            : null,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+          ],
+
+          // Danh sách khung giờ
+          Expanded(
+            child: bookingsAsync.when(
+              data: (existingBookings) {
+                final maintenanceList = maintenanceAsync.valueOrNull ?? [];
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: slots.length,
+                  itemBuilder: (context, index) {
+                    final slot = slots[index];
+                    final isPast = AmenitySlotHelper.isSlotInPast(_selectedDate, slot);
+                    final isMaintenance = AmenitySlotHelper.isSlotInMaintenance(
+                      _selectedDate,
+                      slot,
+                      maintenanceList,
+                    );
+
+                    final isSameBookingSlot = _selectedDate.year == widget.booking.bookingDate.year &&
+                        _selectedDate.month == widget.booking.bookingDate.month &&
+                        _selectedDate.day == widget.booking.bookingDate.day &&
+                        slot == widget.booking.timeSlot;
+
+                    final otherBookings = existingBookings.where((b) => b.id != widget.booking.id).toList();
+                    final confirmedList = otherBookings
+                        .where((b) => b.timeSlot == slot && b.isConfirmed)
+                        .toList();
+                    final confirmedGuests = widget.amenity.isShared
+                        ? confirmedList.fold<int>(0, (sum, b) => sum + b.guestsCount)
+                        : confirmedList.length;
+
+                    final availableCapacity = widget.amenity.maxCapacity - confirmedGuests;
+                    final isFullyBooked = availableCapacity < _guestsCount;
+                    final isSelected = _selectedSlot == slot;
+
+                    Color cardBg = Colors.white;
+                    BorderSide cardBorder = BorderSide(color: Colors.grey.shade200);
+                    String subtitleText = 'Còn trống: $availableCapacity chỗ';
+                    Color subtitleColor = AppStatusColors.paid;
+
+                    if (isSameBookingSlot) {
+                      subtitleText = 'Khung giờ hiện tại của bạn';
+                      subtitleColor = Colors.blue;
+                    } else if (isMaintenance) {
+                      cardBg = Colors.orange.shade50;
+                      cardBorder = BorderSide(color: Colors.orange.shade200);
+                      subtitleText = 'Đang bảo trì / vệ sinh định kỳ';
+                      subtitleColor = AppTheme.warning;
+                    } else if (isPast) {
+                      cardBg = Colors.grey.shade100;
+                      cardBorder = BorderSide(color: Colors.grey.shade300);
+                      subtitleText = 'Khung giờ này đã trôi qua';
+                      subtitleColor = Colors.grey;
+                    } else if (isFullyBooked) {
+                      cardBg = Colors.purple.shade50;
+                      cardBorder = BorderSide(color: Colors.purple.shade200);
+                      subtitleText = 'Hết chỗ (sẽ vào danh sách chờ)';
+                      subtitleColor = Colors.purple;
+                    }
+
+                    final bool canSelect = !isPast && !isMaintenance;
+
+                    return Card(
+                      elevation: 0,
+                      color: cardBg,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: isSelected
+                            ? const BorderSide(color: AppTheme.primary, width: 2)
+                            : cardBorder,
+                      ),
+                      margin: const EdgeInsets.only(bottom: 10),
+                      child: ListTile(
+                        enabled: canSelect,
+                        title: Text(
+                          slot,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: canSelect ? Colors.black87 : Colors.grey,
+                          ),
+                        ),
+                        subtitle: Text(
+                          subtitleText,
+                          style: TextStyle(fontSize: 12, color: subtitleColor, fontWeight: FontWeight.w500),
+                        ),
+                        trailing: Icon(
+                          isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: isSelected ? AppTheme.primary : Colors.grey.shade400,
+                        ),
+                        onTap: canSelect
+                            ? () {
+                                setState(() {
+                                  _selectedSlot = slot;
+                                });
+                              }
+                            : null,
+                      ),
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text(formatErrorMessage(e))),
+            ),
+          ),
+
+          // Bottom Bar hành động
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: _isSubmitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.check, size: 20),
+                label: Text(_isSubmitting ? 'Đang xử lý...' : 'Xác Nhận Đổi Lịch'),
+                onPressed: _isSubmitting ? null : _handleConfirmReschedule,
+              ),
+            ),
           ),
         ],
       ),
