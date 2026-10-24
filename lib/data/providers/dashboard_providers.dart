@@ -1,26 +1,115 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/supabase_config.dart';
 
-final pendingIssuesCountProvider = StreamProvider<int>((ref) {
-  return SupabaseConfig.client
-      .from('issue_reports')
-      .stream(primaryKey: ['id'])
-      .map((list) => list.where((issue) => issue['status'] == 'pending').length);
+/// Helper tạo Stream có khả năng chịu lỗi (resilient):
+/// 1. Tải nhanh dữ liệu ban đầu qua HTTP để hiển thị ngay lập tức (không chờ handshake WebSocket).
+/// 2. Lắng nghe thay đổi Realtime qua WebSocket stream.
+/// 3. Nếu gặp sự cố Realtime (RealtimeSubscribeException code 1002, rớt mạng tạm thời):
+///    Tự động bắt lỗi, giữ nguyên dữ liệu đã nạp (hoặc fallback HTTP) thay vì vỡ UI hoặc quăng ngoại lệ ra ngoài.
+Stream<List<Map<String, dynamic>>> createResilientTableStream({
+  required Future<List<Map<String, dynamic>>> Function() httpFetch,
+  required Stream<List<Map<String, dynamic>>> Function() realtimeStream,
+  String debugLabel = 'Stream',
+}) async* {
+  List<Map<String, dynamic>> lastData = [];
+  try {
+    lastData = await httpFetch();
+    yield lastData;
+  } catch (e) {
+    debugPrint('[$debugLabel] Lỗi tải dữ liệu ban đầu qua HTTP: $e');
+  }
+
+  try {
+    final stream = realtimeStream();
+    await for (final data in stream) {
+      lastData = data;
+      yield data;
+    }
+  } catch (e) {
+    debugPrint('[$debugLabel] Bắt ngoại lệ Realtime ($e). Kích hoạt cơ chế chịu lỗi tự động.');
+    if (lastData.isNotEmpty) {
+      yield lastData;
+    } else {
+      try {
+        final fallback = await httpFetch();
+        yield fallback;
+      } catch (httpErr) {
+        rethrow;
+      }
+    }
+  }
+}
+
+final pendingIssuesCountProvider = StreamProvider<int>((ref) async* {
+  int lastCount = 0;
+  try {
+    final initial = await SupabaseConfig.client
+        .from('issue_reports')
+        .select('id')
+        .eq('status', 'pending');
+    lastCount = (initial as List).length;
+    yield lastCount;
+  } catch (e) {
+    debugPrint('[PendingIssues] Lỗi nạp phản ánh ban đầu: $e');
+  }
+
+  try {
+    final stream = SupabaseConfig.client
+        .from('issue_reports')
+        .stream(primaryKey: ['id'])
+        .map((list) => list.where((issue) => issue['status'] == 'pending').length);
+    await for (final count in stream) {
+      lastCount = count;
+      yield count;
+    }
+  } catch (e) {
+    debugPrint('[PendingIssues] Bắt lỗi stream sự cố: $e');
+    yield lastCount;
+  }
 });
 
-final pendingLinkRequestsCountProvider = StreamProvider<int>((ref) {
-  return SupabaseConfig.client
-      .from('apartment_link_requests')
-      .stream(primaryKey: ['id'])
-      .map((list) => list.where((req) => req['status'] == 'pending').length);
+final pendingLinkRequestsCountProvider = StreamProvider<int>((ref) async* {
+  int lastCount = 0;
+  try {
+    final initial = await SupabaseConfig.client
+        .from('apartment_link_requests')
+        .select('id')
+        .eq('status', 'pending');
+    lastCount = (initial as List).length;
+    yield lastCount;
+  } catch (e) {
+    debugPrint('[PendingLinkRequests] Lỗi nạp yêu cầu liên kết ban đầu: $e');
+  }
+
+  try {
+    final stream = SupabaseConfig.client
+        .from('apartment_link_requests')
+        .stream(primaryKey: ['id'])
+        .map((list) => list.where((req) => req['status'] == 'pending').length);
+    await for (final count in stream) {
+      lastCount = count;
+      yield count;
+    }
+  } catch (e) {
+    debugPrint('[PendingLinkRequests] Bắt lỗi stream liên kết: $e');
+    yield lastCount;
+  }
 });
 
-/// Shared Realtime Stream duy nhất cho bảng invoices, giảm tải kết nối WebSocket
+/// Shared Stream cho bảng invoices, kết hợp nạp nhanh qua HTTP và đồng bộ Realtime,
+/// tự động khôi phục và xử lý lỗi Realtime (như RealtimeSubscribeException code 1002).
 final rawInvoicesStream = Provider<Stream<List<Map<String, dynamic>>>>((ref) {
-  return SupabaseConfig.client
-      .from('invoices')
-      .stream(primaryKey: ['id'])
-      .asBroadcastStream();
+  return createResilientTableStream(
+    debugLabel: 'Invoices',
+    httpFetch: () async {
+      final res = await SupabaseConfig.client
+          .from('invoices')
+          .select('id, apartment_id, period, due_date, total_amount, status, created_at');
+      return List<Map<String, dynamic>>.from(res as List);
+    },
+    realtimeStream: () => SupabaseConfig.client.from('invoices').stream(primaryKey: ['id']),
+  ).asBroadcastStream();
 });
 
 final rawInvoicesStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
@@ -39,21 +128,49 @@ final unpaidInvoicesTotalProvider = Provider<AsyncValue<double>>((ref) {
 });
 
 final apartmentsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
-  return SupabaseConfig.client
-      .from('apartments')
-      .stream(primaryKey: ['id']);
+  return createResilientTableStream(
+    debugLabel: 'Apartments',
+    httpFetch: () async {
+      final res = await SupabaseConfig.client
+          .from('apartments')
+          .select('id, code, area, is_empty, building, floor');
+      return List<Map<String, dynamic>>.from(res as List);
+    },
+    realtimeStream: () => SupabaseConfig.client.from('apartments').stream(primaryKey: ['id']),
+  );
 });
 
 final totalApartmentsProvider = Provider<AsyncValue<int>>((ref) {
   return ref.watch(apartmentsStreamProvider).whenData((list) => list.length);
 });
 
-final totalResidentsProvider = StreamProvider<int>((ref) {
-  return SupabaseConfig.client
-      .from('users')
-      .stream(primaryKey: ['id'])
-      .eq('role', 'resident')
-      .map((list) => list.length);
+final totalResidentsProvider = StreamProvider<int>((ref) async* {
+  int lastCount = 0;
+  try {
+    final initial = await SupabaseConfig.client
+        .from('users')
+        .select('id')
+        .eq('role', 'resident');
+    lastCount = (initial as List).length;
+    yield lastCount;
+  } catch (e) {
+    debugPrint('[TotalResidents] Lỗi nạp số lượng cư dân: $e');
+  }
+
+  try {
+    final stream = SupabaseConfig.client
+        .from('users')
+        .stream(primaryKey: ['id'])
+        .eq('role', 'resident')
+        .map((list) => list.length);
+    await for (final count in stream) {
+      lastCount = count;
+      yield count;
+    }
+  } catch (e) {
+    debugPrint('[TotalResidents] Bắt lỗi stream cư dân: $e');
+    yield lastCount;
+  }
 });
 
 final occupancyRateProvider = Provider<AsyncValue<double>>((ref) {

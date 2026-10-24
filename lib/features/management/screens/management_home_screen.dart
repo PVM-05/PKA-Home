@@ -549,6 +549,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       color: AppTheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
+        ref.invalidate(rawInvoicesStream);
         ref.invalidate(pendingIssuesCountProvider);
         ref.invalidate(pendingLinkRequestsCountProvider);
         ref.invalidate(pendingConfirmationInvoicesProvider);

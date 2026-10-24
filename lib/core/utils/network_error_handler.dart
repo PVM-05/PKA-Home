@@ -99,6 +99,13 @@ class NetworkErrorHandler {
       return 'Kết nối máy chủ quá lâu. Vui lòng thử lại sau.';
     }
 
+    if (errStr.contains('realtimesubscribeexception') ||
+        errStr.contains('realtimecloseevent') ||
+        errStr.contains('channelerror') ||
+        errStr.contains('code: 1002')) {
+      return 'Kết nối máy chủ bị gián đoạn. Đang kết nối lại...';
+    }
+
     // Nếu là Exception mang thông báo tiếng Việt có chủ đích
     final isVietnamese = RegExp(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', caseSensitive: false).hasMatch(rawMsg);
     if (isVietnamese &&
