@@ -103,5 +103,20 @@ void main() {
       expect(content.contains('CREATE TRIGGER trg_check_vehicle_limits'), isTrue);
       expect(content.contains('REVOKE ALL ON FUNCTION public.check_vehicle_limits() FROM PUBLIC, anon'), isTrue);
     });
+
+    test('reschedule_amenity_booking phải kiểm tra định dạng giờ regex, logic start < end và Strict FIFO', () {
+      if (!migrationFile.existsSync()) return;
+      final content = migrationFile.readAsStringSync();
+      expect(content.contains('invalid_datetime_format'), isFalse,
+          reason: 'Không được nuốt lỗi invalid_datetime_format trong đổi lịch.');
+      expect(content.contains('^[0-2][0-9]:[0-5][0-9]'), isTrue,
+          reason: 'Phải kiểm tra regex định dạng khung giờ.');
+      expect(content.contains('v_slot_start_time >= v_slot_end_time'), isTrue,
+          reason: 'Phải kiểm tra giờ bắt đầu nhỏ hơn giờ kết thúc.');
+      expect(content.contains('v_old_slot_avail'), isTrue,
+          reason: 'Phải tính sức chứa còn lại của slot cũ.');
+      expect(content.contains('rescheduled_confirmed'), isTrue,
+          reason: 'Phải trả về action cụ thể để UI hiển thị chuẩn.');
+    });
   });
 }

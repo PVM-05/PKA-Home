@@ -288,7 +288,7 @@ FOR EACH ROW EXECUTE FUNCTION public.check_vehicle_limits();
 -- 3. RPC PHÂN HỆ ĐẶT TIỆN ÍCH (AMENITY BOOKINGS)
 -- ------------------------------------------------------------------------------
 
--- Đổi lịch đặt tiện ích an toàn (Chống Deadlock, Bảo toàn Tài chính & Đôn Waitlist)
+-- Đổi lịch đặt tiện ích an toàn (Chống Deadlock, Bảo toàn Tài chính & Đôn Waitlist Strict FIFO)
 CREATE OR REPLACE FUNCTION public.reschedule_amenity_booking(
     p_booking_id UUID,
     p_new_date DATE,
@@ -310,13 +310,21 @@ DECLARE
     v_lock1 BIGINT;
     v_lock2 BIGINT;
     v_now_vn TIMESTAMP := (now() AT TIME ZONE 'Asia/Ho_Chi_Minh');
-    v_slot_start_str TEXT;
     v_slot_start_time TIME;
+    v_slot_end_time TIME;
+    v_open_start TIME;
+    v_open_end TIME;
     v_final_guests INT;
     v_current_slot_capacity INT := 0;
     v_is_same_slot BOOLEAN := false;
     v_next_waitlist RECORD;
     v_new_fee NUMERIC;
+    v_old_slot_used_guests INT := 0;
+    v_old_slot_used_count INT := 0;
+    v_old_slot_avail INT := 0;
+    v_waitlist_promoted BOOLEAN := false;
+    v_promoted_fee NUMERIC := 0;
+    v_promoted_deposit NUMERIC := 0;
 BEGIN
     v_user_id := auth.uid();
     IF v_user_id IS NULL THEN
@@ -350,34 +358,44 @@ BEGIN
         RAISE EXCEPTION 'Tiện ích không tồn tại hoặc đã ngừng hoạt động';
     END IF;
 
-    -- 3. Kiểm tra xem slot cũ đã diễn ra hay chưa
+    -- 3. Xác thực định dạng khung giờ mới bằng regex
+    IF p_new_time_slot !~ '^[0-2][0-9]:[0-5][0-9]\s*-\s*[0-2][0-9]:[0-5][0-9]$' THEN
+        RAISE EXCEPTION 'Định dạng khung giờ không hợp lệ. Yêu cầu định dạng HH:mm - HH:mm (VD: 08:00 - 10:00).';
+    END IF;
+
+    v_slot_start_time := TRIM(SPLIT_PART(p_new_time_slot, '-', 1))::time;
+    v_slot_end_time := TRIM(SPLIT_PART(p_new_time_slot, '-', 2))::time;
+
+    IF v_slot_start_time >= v_slot_end_time THEN
+        RAISE EXCEPTION 'Khung giờ không hợp lệ: giờ bắt đầu (%) phải nhỏ hơn giờ kết thúc (%).', 
+            v_slot_start_time, v_slot_end_time;
+    END IF;
+
+    -- Kiểm tra giờ mở cửa của tiện ích
+    IF v_amenity.open_hours IS NOT NULL AND v_amenity.open_hours ~ '^[0-2][0-9]:[0-5][0-9]\s*-\s*[0-2][0-9]:[0-5][0-9]$' THEN
+        v_open_start := TRIM(SPLIT_PART(v_amenity.open_hours, '-', 1))::time;
+        v_open_end := TRIM(SPLIT_PART(v_amenity.open_hours, '-', 2))::time;
+        IF v_slot_start_time < v_open_start OR v_slot_end_time > v_open_end THEN
+            RAISE EXCEPTION 'Khung giờ mới (%) nằm ngoài giờ mở cửa của tiện ích (%).',
+                p_new_time_slot, v_amenity.open_hours;
+        END IF;
+    END IF;
+
+    -- 4. Kiểm tra slot cũ và slot mới so với thời điểm hiện tại
     IF v_booking.booking_date < (v_now_vn::date) THEN
         RAISE EXCEPTION 'Lượt đặt tiện ích này đã diễn ra trong quá khứ, không thể đổi lịch.';
     ELSIF v_booking.booking_date = (v_now_vn::date) THEN
-        v_slot_start_str := TRIM(SPLIT_PART(v_booking.time_slot, '-', 1));
-        BEGIN
-            v_slot_start_time := v_slot_start_str::time;
-            IF (v_now_vn::time) >= v_slot_start_time THEN
-                RAISE EXCEPTION 'Lượt đặt hiện tại (%) đã bắt đầu hoặc đã qua, không thể đổi lịch.', v_booking.time_slot;
-            END IF;
-        EXCEPTION 
-            WHEN invalid_datetime_format THEN NULL;
-        END;
+        IF (v_now_vn::time) >= (TRIM(SPLIT_PART(v_booking.time_slot, '-', 1))::time) THEN
+            RAISE EXCEPTION 'Lượt đặt hiện tại (%) đã bắt đầu hoặc đã qua, không thể đổi lịch.', v_booking.time_slot;
+        END IF;
     END IF;
 
-    -- 4. Kiểm tra slot mới hợp lệ
     IF p_new_date < (v_now_vn::date) THEN
         RAISE EXCEPTION 'Không thể dời lịch sang ngày trong quá khứ.';
     ELSIF p_new_date = (v_now_vn::date) THEN
-        v_slot_start_str := TRIM(SPLIT_PART(p_new_time_slot, '-', 1));
-        BEGIN
-            v_slot_start_time := v_slot_start_str::time;
-            IF (v_now_vn::time) >= v_slot_start_time THEN
-                RAISE EXCEPTION 'Khung giờ mới (%) đã bắt đầu hoặc đã qua trong hôm nay.', p_new_time_slot;
-            END IF;
-        EXCEPTION 
-            WHEN invalid_datetime_format THEN NULL;
-        END;
+        IF (v_now_vn::time) >= v_slot_start_time THEN
+            RAISE EXCEPTION 'Khung giờ mới (%) đã bắt đầu hoặc đã qua trong hôm nay.', p_new_time_slot;
+        END IF;
     END IF;
 
     -- Kiểm tra lịch bảo trì định kỳ tại slot mới
@@ -389,7 +407,7 @@ BEGIN
         RAISE EXCEPTION 'Tiện ích đang trong thời gian bảo trì vào ngày đã chọn.';
     END IF;
 
-    -- 5. Chống Deadlock: Sắp xếp khóa Advisory theo thứ tự giá trị băm
+    -- 5. Sắp xếp khóa Advisory theo thứ tự băm chống Deadlock
     v_h_old := hashtext(v_booking.amenity_id::text || '_' || v_booking.booking_date::text || '_' || v_booking.time_slot);
     v_h_new := hashtext(v_booking.amenity_id::text || '_' || p_new_date::text || '_' || p_new_time_slot);
     v_lock1 := LEAST(v_h_old, v_h_new);
@@ -415,7 +433,7 @@ BEGIN
         END IF;
     END IF;
 
-    -- 7. Kiểm tra sức chứa tại slot mới (loại trừ chính bản ghi hiện tại)
+    -- 7. Kiểm tra sức chứa tại slot mới
     IF v_amenity.booking_type = 'exclusive' THEN
         SELECT COUNT(*) INTO v_current_slot_capacity
         FROM public.amenity_bookings
@@ -429,7 +447,6 @@ BEGIN
             RAISE EXCEPTION 'Khung giờ mới đã có người đặt trước (Độc quyền).';
         END IF;
     ELSE
-        -- Dạng SHARED: Kiểm tra tổng số khách
         SELECT COALESCE(SUM(guests_count), 0) INTO v_current_slot_capacity
         FROM public.amenity_bookings
         WHERE amenity_id = v_booking.amenity_id
@@ -452,20 +469,18 @@ BEGIN
             v_booking.status := 'confirmed';
         END IF;
     ELSIF v_booking.status = 'pending_payment' AND v_amenity.booking_type = 'shared' THEN
-        -- Cập nhật lại phí theo số khách mới
         v_new_fee := COALESCE(v_amenity.fee_amount, 0) * v_final_guests;
         UPDATE public.amenity_bookings
         SET fee_amount = v_new_fee
         WHERE id = p_booking_id;
 
-        -- Đồng bộ số tiền trong payment_transactions PENDING nếu có
         UPDATE public.payment_transactions
         SET amount = (v_new_fee + COALESCE(v_booking.deposit_amount, 0))
         WHERE (booking_id = p_booking_id OR invoice_id = p_booking_id::text)
           AND status = 'PENDING';
     END IF;
 
-    -- 9. Thực hiện cập nhật slot mới cho booking hiện tại
+    -- 9. Cập nhật booking sang slot mới
     UPDATE public.amenity_bookings
     SET booking_date = p_new_date,
         time_slot = p_new_time_slot,
@@ -475,8 +490,20 @@ BEGIN
         updated_at = NOW()
     WHERE id = p_booking_id;
 
-    -- 10. Đôn hàng đợi (Waitlist Promotion) cho slot cũ nếu slot thực sự thay đổi
+    -- 10. Đôn Waitlist cho slot cũ theo quy tắc Strict FIFO
     IF NOT v_is_same_slot THEN
+        -- Tính sức chứa đã sử dụng của slot cũ sau khi lượt đặt dời đi
+        SELECT COALESCE(SUM(guests_count), 0), COUNT(*) 
+        INTO v_old_slot_used_guests, v_old_slot_used_count
+        FROM public.amenity_bookings
+        WHERE amenity_id = v_booking.amenity_id
+          AND booking_date = v_booking.booking_date
+          AND time_slot = v_booking.time_slot
+          AND status IN ('confirmed', 'pending_payment');
+
+        v_old_slot_avail := v_amenity.max_capacity - v_old_slot_used_guests;
+
+        -- Tìm lượt Waitlist đầu tiên của slot cũ
         SELECT * INTO v_next_waitlist
         FROM public.amenity_bookings
         WHERE amenity_id = v_booking.amenity_id
@@ -488,26 +515,52 @@ BEGIN
         FOR UPDATE;
 
         IF FOUND THEN
-            -- Nếu có phí/cọc thì đôn lên pending_payment để họ thanh toán, tuyệt đối không confirmed tự do
-            IF COALESCE(v_amenity.fee_amount, 0) > 0 OR COALESCE(v_amenity.deposit_amount, 0) > 0 THEN
-                UPDATE public.amenity_bookings
-                SET status = 'pending_payment', updated_at = NOW()
-                WHERE id = v_next_waitlist.id;
-            ELSE
-                UPDATE public.amenity_bookings
-                SET status = 'confirmed', updated_at = NOW()
-                WHERE id = v_next_waitlist.id;
+            -- Kiểm tra điều kiện đôn:
+            -- Exclusive: slot hoàn toàn chưa có ai xác nhận/chờ thanh toán
+            -- Shared: số khách lượt đầu <= sức chứa còn trống
+            IF (v_amenity.booking_type = 'exclusive' AND v_old_slot_used_count = 0)
+               OR (v_amenity.booking_type = 'shared' AND v_next_waitlist.guests_count <= v_old_slot_avail) THEN
+                
+                v_promoted_fee := COALESCE(v_amenity.fee_amount, 0) * v_next_waitlist.guests_count;
+                v_promoted_deposit := COALESCE(v_amenity.deposit_amount, 0);
+
+                IF (v_promoted_fee + v_promoted_deposit) > 0 THEN
+                    UPDATE public.amenity_bookings
+                    SET status = 'pending_payment',
+                        fee_amount = v_promoted_fee,
+                        deposit_amount = v_promoted_deposit,
+                        deposit_status = CASE WHEN v_promoted_deposit > 0 THEN 'pending' ELSE 'none' END,
+                        updated_at = NOW()
+                    WHERE id = v_next_waitlist.id;
+
+                    UPDATE public.payment_transactions
+                    SET amount = (v_promoted_fee + v_promoted_deposit),
+                        updated_at = NOW()
+                    WHERE booking_id = v_next_waitlist.id AND status = 'PENDING';
+                ELSE
+                    UPDATE public.amenity_bookings
+                    SET status = 'confirmed', updated_at = NOW()
+                    WHERE id = v_next_waitlist.id;
+                END IF;
+
+                v_waitlist_promoted := true;
             END IF;
+            -- Nếu không đủ chỗ: giữ nguyên trong Waitlist (Strict FIFO - không nhảy cóc)
         END IF;
     END IF;
 
     RETURN jsonb_build_object(
         'success', true,
+        'action', CASE 
+            WHEN v_booking.status = 'confirmed' THEN 'rescheduled_confirmed'
+            ELSE 'rescheduled_pending_payment'
+        END,
+        'status', v_booking.status,
+        'waitlist_promoted', v_waitlist_promoted,
         'message', 'Đổi lịch đặt tiện ích thành công',
         'booking_id', p_booking_id,
         'new_date', p_new_date,
-        'new_time_slot', p_new_time_slot,
-        'status', v_booking.status
+        'new_time_slot', p_new_time_slot
     );
 END;
 $$;
