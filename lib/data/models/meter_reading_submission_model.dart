@@ -38,6 +38,7 @@ class MeterReadingSubmissionModel {
   bool get isPending => status == 'pending';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';
+  bool get isCancelled => status == 'cancelled';
 
   String get statusDisplayName {
     switch (status) {
@@ -45,6 +46,8 @@ class MeterReadingSubmissionModel {
         return 'Đã phê duyệt';
       case 'rejected':
         return 'Đã từ chối';
+      case 'cancelled':
+        return 'Đã hủy';
       case 'pending':
       default:
         return 'Chờ phê duyệt';
