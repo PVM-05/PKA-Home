@@ -70,5 +70,25 @@ void main() {
       expect(rejectedModel.statusDisplayName, 'Đã từ chối');
       expect(rejectedModel.rejectReason, 'Ảnh mờ không nhìn rõ số');
     });
+
+    test('Parse submitterName và apartmentCode từ quan hệ nhúng PostgREST', () {
+      final json = {
+        'id': 'sub-456',
+        'apartment_id': 'apt-002',
+        'submitted_by': 'user-002',
+        'period': '10/2026',
+        'electric_reading': 120.0,
+        'water_reading': 15.0,
+        'apartments': {'code': 'B0205'},
+        'users': {'full_name': 'Trần Thị B'},
+        'status': 'pending',
+        'created_at': '2026-10-24T10:00:00.000Z',
+      };
+
+      final model = MeterReadingSubmissionModel.fromJson(json);
+
+      expect(model.apartmentCode, 'B0205');
+      expect(model.submitterName, 'Trần Thị B');
+    });
   });
 }
