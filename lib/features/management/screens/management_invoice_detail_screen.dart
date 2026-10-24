@@ -8,6 +8,7 @@ import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/invoice_items_provider.dart';
 import '../../../data/providers/payment_provider.dart';
 import 'edit_invoice_screen.dart';
+import '../../../core/utils/invoice_fee_helper.dart';
 
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
   final InvoiceModel invoice;
@@ -157,6 +158,17 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildFeeItem(Map<String, dynamic> item, NumberFormat formatCurrency) {
+    final rawFeeType = item['fee_type'] as String?;
+    final feeDisplayName = InvoiceFeeHelper.getFeeName(rawFeeType);
+    final feeIcon = InvoiceFeeHelper.getFeeIcon(rawFeeType);
+    final feeColor = InvoiceFeeHelper.getFeeColor(rawFeeType);
+    final feeUnit = InvoiceFeeHelper.getFeeUnit(rawFeeType);
+
+    final qty = item['quantity'] ?? 1;
+    final qtyStr = (qty is num && qty == qty.roundToDouble())
+        ? qty.toInt().toString()
+        : qty.toString();
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
@@ -165,16 +177,26 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: feeColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(feeIcon, color: feeColor, size: 20),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item['fee_type'] ?? 'Phí',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  feeDisplayName,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
+                const SizedBox(height: 2),
                 Text(
-                  '${formatCurrency.format(item['unit_price'] ?? 0)} x ${item['quantity'] ?? 1}',
+                  '${formatCurrency.format(item['unit_price'] ?? 0)} x $qtyStr$feeUnit',
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.textSecondary,
@@ -183,9 +205,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             formatCurrency.format(item['subtotal'] ?? 0),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
         ],
       ),
@@ -213,24 +236,40 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).cardTheme.color ?? Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, -4),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: 0.08),
+            offset: const Offset(0, -3),
+            blurRadius: 12,
           ),
         ],
       ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: AppTheme.success,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.success,
+                foregroundColor: Colors.white,
+                elevation: 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              icon: const Icon(Icons.check_circle_outline, size: 20),
+              label: Text(
+                buttonLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              onPressed: () => _confirmPayment(context, ref, isPending),
+            ),
+          ),
         ),
-        onPressed: () => _confirmPayment(context, ref, isPending),
-        child: Text(buttonLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
       ),
     );
   }

@@ -9,6 +9,7 @@ import '../../../core/widgets/unified_payment_sheet.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/services/payment_service.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
+import '../../../core/utils/invoice_fee_helper.dart';
 
 class ResidentInvoiceDetailScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
@@ -66,40 +67,36 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
       ),
       body: detailState.when(
         data: (items) {
-          return Column(
-            children: [
-              Expanded(
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: ListView(
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        _buildSummaryCard(context, formatCurrency, formatDate),
-                        const SizedBox(height: 32),
-                        const Text(
-                          'CHI TIẾT CÁC KHOẢN PHÍ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: AppTheme.textSecondary,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ...items.map((item) => _buildFeeItemCard(item, formatCurrency)),
-                      ],
+          return FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                children: [
+                  _buildSummaryCard(context, formatCurrency, formatDate),
+                  const SizedBox(height: 28),
+                  const Text(
+                    'CHI TIẾT CÁC KHOẢN PHÍ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: AppTheme.textSecondary,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  ...items.map((item) => _buildFeeItemCard(item, formatCurrency)),
+                ],
               ),
-              _buildBottomAction(context, items),
-            ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text(formatErrorMessage(error), style: const TextStyle(color: AppTheme.error))),
+      ),
+      bottomNavigationBar: detailState.whenOrNull(
+        data: (items) => _buildBottomAction(context, items),
       ),
     );
   }
@@ -233,23 +230,16 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
   }
 
   Widget _buildFeeItemCard(Map<String, dynamic> item, NumberFormat formatCurrency) {
-    String feeType = item['fee_type'] ?? 'Phí khác';
-    IconData feeIcon = Icons.receipt_long;
-    Color feeColor = AppTheme.primary;
+    final rawFeeType = item['fee_type'] as String?;
+    final feeDisplayName = InvoiceFeeHelper.getFeeName(rawFeeType);
+    final feeIcon = InvoiceFeeHelper.getFeeIcon(rawFeeType);
+    final feeColor = InvoiceFeeHelper.getFeeColor(rawFeeType);
+    final feeUnit = InvoiceFeeHelper.getFeeUnit(rawFeeType);
 
-    if (feeType.toLowerCase().contains('nước')) {
-      feeIcon = Icons.water_drop;
-      feeColor = Colors.blue;
-    } else if (feeType.toLowerCase().contains('điện')) {
-      feeIcon = Icons.electric_bolt;
-      feeColor = Colors.orange;
-    } else if (feeType.toLowerCase().contains('xe')) {
-      feeIcon = Icons.local_parking;
-      feeColor = Colors.teal;
-    } else if (feeType.toLowerCase().contains('quản lý')) {
-      feeIcon = Icons.admin_panel_settings;
-      feeColor = Colors.indigo;
-    }
+    final qty = item['quantity'] ?? 1;
+    final qtyStr = (qty is num && qty == qty.roundToDouble())
+        ? qty.toInt().toString()
+        : qty.toString();
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -259,8 +249,8 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: feeColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: feeColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(feeIcon, color: feeColor, size: 24),
           ),
@@ -270,20 +260,22 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  feeType,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  feeDisplayName,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${formatCurrency.format(item['unit_price'] ?? 0)} x ${item['quantity'] ?? 1}',
+                  '${formatCurrency.format(item['unit_price'] ?? 0)} x $qtyStr$feeUnit',
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             formatCurrency.format(item['subtotal'] ?? 0),
             style: const TextStyle(
@@ -299,86 +291,115 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
   Widget _buildBottomAction(BuildContext context, List<Map<String, dynamic>> items) {
     if (_invoice.status == 'unpaid') {
       return Container(
-        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: Theme.of(context).cardTheme.color ?? Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              offset: const Offset(0, -4),
-              blurRadius: 16,
+              color: Colors.black.withValues(alpha: 0.08),
+              offset: const Offset(0, -3),
+              blurRadius: 12,
             ),
           ],
         ),
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: AppTheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.payment_rounded, size: 22),
+                label: const Text(
+                  'THANH TOÁN NGAY',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                ),
+                onPressed: () {
+                  _handlePayment(context, items);
+                },
+              ),
+            ),
           ),
-          icon: const Icon(Icons.payment),
-          label: const Text('THANH TOÁN NGAY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          onPressed: () {
-            _handlePayment(context, items);
-          },
         ),
       );
     } else if (_invoice.status == 'pending_confirmation') {
       return Container(
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: Theme.of(context).cardTheme.color ?? Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              offset: const Offset(0, -4),
-              blurRadius: 16,
+              color: Colors.black.withValues(alpha: 0.08),
+              offset: const Offset(0, -3),
+              blurRadius: 12,
             ),
           ],
         ),
-        child: OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            side: const BorderSide(color: Colors.orange, width: 1.5),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.orange, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.hourglass_top_rounded, color: Colors.orange),
+                label: const Text(
+                  'ĐANG CHỜ BQL XÁC NHẬN (CHI TIẾT)',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
+                ),
+                onPressed: () {
+                  _showDigitalReceiptBottomSheet(context);
+                },
+              ),
+            ),
           ),
-          icon: const Icon(Icons.hourglass_top, color: Colors.orange),
-          label: const Text(
-            'ĐANG CHỜ BQL XÁC NHẬN (CHI TIẾT)',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
-          ),
-          onPressed: () {
-            _showDigitalReceiptBottomSheet(context);
-          },
         ),
       );
     } else if (_invoice.status == 'paid') {
       return Container(
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: Theme.of(context).cardTheme.color ?? Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              offset: const Offset(0, -4),
-              blurRadius: 16,
+              color: Colors.black.withValues(alpha: 0.08),
+              offset: const Offset(0, -3),
+              blurRadius: 12,
             ),
           ],
         ),
-        child: OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            side: const BorderSide(color: AppTheme.primary, width: 1.5),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.receipt_outlined, color: AppTheme.primary),
+                label: const Text(
+                  'XEM BIÊN NHẬN ĐIỆN TỬ',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                ),
+                onPressed: () {
+                  _showDigitalReceiptBottomSheet(context);
+                },
+              ),
+            ),
           ),
-          icon: const Icon(Icons.receipt_outlined, color: AppTheme.primary),
-          label: const Text(
-            'XEM BIÊN NHẬN ĐIỆN TỬ',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primary),
-          ),
-          onPressed: () {
-            _showDigitalReceiptBottomSheet(context);
-          },
         ),
       );
     }
@@ -394,7 +415,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
 
     try {
       final feeBreakdown = items.map((item) => {
-        'name': item['fee_type'] as String? ?? 'Khoản phí',
+        'name': InvoiceFeeHelper.getFeeName(item['fee_type'] as String?),
         'amount': (item['subtotal'] as num?)?.toDouble() ?? 0.0,
       }).toList();
 
