@@ -91,5 +91,17 @@ void main() {
       expect(meterBlock.contains('residents_apartments'), isFalse,
           reason: 'RPCs phiếu điện nước không được cho phép cư dân cùng căn hộ sửa/hủy chéo.');
     });
+
+    test('Migration phải định nghĩa trigger check_vehicle_limits có SECURITY DEFINER và khóa FOR UPDATE', () {
+      if (!migrationFile.existsSync()) return;
+      final content = migrationFile.readAsStringSync();
+      expect(content.contains('CREATE OR REPLACE FUNCTION public.check_vehicle_limits()'), isTrue);
+      expect(content.contains('SECURITY DEFINER'), isTrue);
+      expect(content.contains('SET search_path = public, pg_catalog'), isTrue);
+      expect(content.contains('PERFORM 1 FROM public.apartments WHERE id = NEW.apartment_id FOR UPDATE'), isTrue);
+      expect(content.contains('NEW.status IN (\'pending\', \'approved\')'), isTrue);
+      expect(content.contains('CREATE TRIGGER trg_check_vehicle_limits'), isTrue);
+      expect(content.contains('REVOKE ALL ON FUNCTION public.check_vehicle_limits() FROM PUBLIC, anon'), isTrue);
+    });
   });
 }
