@@ -1,7 +1,15 @@
 -- ==============================================================================
 -- PKA-HOME: SCRIPT XÓA TOÀN BỘ DỮ LIỆU MẪU (RESET DATA CLEAN SLATE)
--- Hướng dẫn: Mở Supabase SQL Editor -> Dán toàn bộ nội dung file này -> Bấm Run
+-- CẢNH BÁO AN TOÀN: Để thực thi script này, bạn BẮT BUỘC phải mở comment dòng sau:
+-- SET pka.confirm_reset_data = 'YES_I_WANT_TO_RESET_ALL_DATA';
 -- ==============================================================================
+
+DO $$
+BEGIN
+    IF current_setting('pka.confirm_reset_data', true) IS DISTINCT FROM 'YES_I_WANT_TO_RESET_ALL_DATA' THEN
+        RAISE EXCEPTION 'CẢNH BÁO AN TOÀN: Thao tác này sẽ xóa sạch toàn bộ dữ liệu tài khoản và giao dịch! Nếu chắc chắn muốn thực thi trên môi trường Test/Dev, vui lòng bỏ comment dòng lệnh: SET pka.confirm_reset_data = ''YES_I_WANT_TO_RESET_ALL_DATA''; ở đầu file trước khi Run.';
+    END IF;
+END $$;
 
 -- BƯỚC 1: XÓA SẠCH DỮ LIỆU CÁC BẢNG NGHIỆP VỤ PHÁT SINH
 -- Lệnh TRUNCATE ... CASCADE giúp xóa cực nhanh và tự động xử lý ràng buộc khóa ngoại

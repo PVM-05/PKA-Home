@@ -32,6 +32,11 @@ void main() async {
   }
   await SupabaseConfig.initialize();
 
+  if (!SupabaseConfig.isConfigured) {
+    runApp(const ConfigurationMissingApp());
+    return;
+  }
+
   // Khởi tạo Firebase (FCM) an toàn
   try {
     if (kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
@@ -50,6 +55,44 @@ void main() async {
       child: const MyApp(),
     ),
   );
+}
+
+class ConfigurationMissingApp extends StatelessWidget {
+  const ConfigurationMissingApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.settings_suggest_outlined, size: 72, color: Colors.amber),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Chưa Cấu Hình Supabase',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Ứng dụng cần thông tin kết nối Supabase để hoạt động.\n'
+                    'Vui lòng sao chép file .env.example thành .env và điền thông tin dự án (SUPABASE_URL, SUPABASE_ANON_KEY), hoặc truyền qua cờ biên dịch --dart-define.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends ConsumerWidget {

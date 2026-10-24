@@ -11,6 +11,7 @@ class AmenityBookingModel {
   final double depositAmount;
   final String depositStatus; // 'none' | 'pending' | 'received' | 'refunded' | 'forfeited'
   final String? depositNotes;
+  final String? notes;
   final DateTime? checkedInAt;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -31,6 +32,7 @@ class AmenityBookingModel {
     this.depositAmount = 0.0,
     this.depositStatus = 'none',
     this.depositNotes,
+    this.notes,
     this.checkedInAt,
     required this.createdAt,
     this.updatedAt,
@@ -77,6 +79,7 @@ class AmenityBookingModel {
       depositAmount: (json['deposit_amount'] as num?)?.toDouble() ?? 0.0,
       depositStatus: json['deposit_status'] as String? ?? 'none',
       depositNotes: json['deposit_notes'] as String?,
+      notes: json['notes'] as String?,
       checkedInAt: json['checked_in_at'] != null
           ? DateTime.parse(json['checked_in_at'] as String)
           : null,
@@ -106,6 +109,7 @@ class AmenityBookingModel {
       'deposit_amount': depositAmount,
       'deposit_status': depositStatus,
       if (depositNotes != null) 'deposit_notes': depositNotes,
+      if (notes != null) 'notes': notes,
       if (checkedInAt != null) 'checked_in_at': checkedInAt!.toIso8601String(),
     };
   }

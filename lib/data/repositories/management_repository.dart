@@ -350,10 +350,94 @@ class ManagementRepository {
 
   /// Khóa hoặc mở khóa tài khoản người dùng
   Future<void> toggleUserLock(String userId, bool isLocked) async {
-    await _client.from('users').update({
-      'is_locked': isLocked,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', userId);
+    await toggleUserStatus(
+      userId: userId,
+      action: isLocked ? 'lock' : 'unlock',
+    );
+  }
+
+  /// Admin tạo người dùng mới
+  Future<String> createUser({
+    required String email,
+    required String fullName,
+    String? password,
+    String? phone,
+    String role = 'resident',
+    String? apartmentId,
+    String relationRole = 'owner',
+  }) async {
+    final response = await _client.rpc('admin_create_user', params: {
+      'p_email': email.trim().toLowerCase(),
+      'p_password': password ?? 'PkaHome@2026',
+      'p_full_name': fullName.trim(),
+      'p_phone': phone?.trim(),
+      'p_role': role,
+      'p_apartment_id': apartmentId,
+      'p_relation_role': relationRole,
+    });
+    final res = response as Map<String, dynamic>;
+    if (res['success'] != true) {
+      throw Exception(res['message'] ?? 'Tạo người dùng thất bại');
+    }
+    return res['user_id'] as String;
+  }
+
+  /// Admin chỉnh sửa hồ sơ người dùng
+  Future<void> updateUserProfile({
+    required String userId,
+    required String fullName,
+    String? phone,
+    String? role,
+  }) async {
+    final response = await _client.rpc('admin_update_user_profile', params: {
+      'p_target_user_id': userId,
+      'p_full_name': fullName.trim(),
+      'p_phone': phone?.trim(),
+      'p_role': ?role,
+    });
+    final res = response as Map<String, dynamic>;
+    if (res['success'] != true) {
+      throw Exception(res['message'] ?? 'Cập nhật hồ sơ thất bại');
+    }
+  }
+
+  /// Thay đổi trạng thái tài khoản: 'lock', 'unlock', 'deactivate', 'activate'
+  Future<void> toggleUserStatus({
+    required String userId,
+    required String action,
+    String? reason,
+  }) async {
+    final response = await _client.rpc('admin_toggle_user_status', params: {
+      'p_target_user_id': userId,
+      'p_action': action,
+      'p_reason': ?reason,
+    });
+    final res = response as Map<String, dynamic>;
+    if (res['success'] != true) {
+      throw Exception(res['message'] ?? 'Thay đổi trạng thái thất bại');
+    }
+  }
+
+  /// Admin gửi email đặt lại mật khẩu cho người dùng
+  Future<void> sendAdminPasswordReset(String email) async {
+    await _client.auth.resetPasswordForEmail(
+      email.trim().toLowerCase(),
+    );
+  }
+
+  /// Admin gỡ liên kết một căn hộ cụ thể cho cư dân
+  Future<void> unlinkApartment({
+    required String userId,
+    required String apartmentId,
+  }) async {
+    final response = await _client.rpc('admin_unlink_apartment', params: {
+      'p_user_id': userId,
+      'p_apartment_id': apartmentId,
+    });
+    final res = response as Map<String, dynamic>;
+    if (res['success'] != true) {
+      throw Exception(res['message'] ?? 'Gỡ liên kết căn hộ thất bại');
+    }
   }
 
   /// Tạo hóa đơn hàng loạt theo tháng cho toàn bộ căn hộ đang có người ở
