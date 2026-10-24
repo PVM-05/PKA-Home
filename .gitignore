@@ -114,6 +114,8 @@ Thumbs.db
 .svn/
 .swiftpm/
 migrate_working_dir/
+*.rar
+*.zip
 
 # ==========================================
 # 5. AGENTS & LOCAL OVERRIDES
