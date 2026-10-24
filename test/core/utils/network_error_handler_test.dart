@@ -103,6 +103,12 @@ void main() {
       expect(msg, equals('Email hoặc mật khẩu không chính xác.'));
     });
 
+    test('Xử lý RealtimeSubscribeException trả về thông báo kết nối máy chủ tiếng Việt', () {
+      final error = Exception('RealtimeSubscribeException(status: channelError, details: RealtimeCloseEvent(code: 1002, reason: ))');
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, equals('Kết nối máy chủ bị gián đoạn. Đang kết nối lại...'));
+    });
+
     test('Xử lý lỗi bất định khác trả về thông báo an toàn mặc định', () {
       final error = FormatException('Bad format');
       final msg = NetworkErrorHandler.getMessage(error);

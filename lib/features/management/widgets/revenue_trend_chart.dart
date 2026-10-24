@@ -229,8 +229,34 @@ class RevenueTrendChart extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
               error: (err, _) => Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(formatErrorMessage(err), style: const TextStyle(color: AppTheme.error, fontSize: 12)),
+                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.cloud_off_rounded, color: AppTheme.textSecondary, size: 28),
+                      const SizedBox(height: 8),
+                      Text(
+                        formatErrorMessage(err),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppTheme.error, fontSize: 13),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          foregroundColor: AppTheme.primary,
+                        ),
+                        onPressed: () {
+                          ref.invalidate(rawInvoicesStream);
+                          ref.invalidate(monthlyRevenueTrendProvider);
+                        },
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Thử lại', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

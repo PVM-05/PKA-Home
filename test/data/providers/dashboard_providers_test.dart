@@ -72,5 +72,25 @@ void main() {
       // Kỳ lớn nhất là 09/2026 -> doanh thu phải là 700.000 đ, không phải 200.000 đ
       expect(stats.paidTotal, equals(700000.0));
     });
+
+    test('createResilientTableStream bắt RealtimeSubscribeException và giữ nguyên dữ liệu nạp ban đầu', () async {
+      final mockData = [
+        {'id': 'inv-1', 'period': '10/2026', 'total_amount': 1500000.0, 'status': 'paid'},
+      ];
+
+      Stream<List<Map<String, dynamic>>> failingRealtimeStream() async* {
+        throw Exception('RealtimeSubscribeException(status: channelError, details: RealtimeCloseEvent(code: 1002, reason: ))');
+      }
+
+      final stream = createResilientTableStream(
+        httpFetch: () async => mockData,
+        realtimeStream: () => failingRealtimeStream(),
+        debugLabel: 'TestStream',
+      );
+
+      final items = await stream.toList();
+      expect(items.isNotEmpty, isTrue);
+      expect(items.first.first['total_amount'], equals(1500000.0));
+    });
   });
 }
