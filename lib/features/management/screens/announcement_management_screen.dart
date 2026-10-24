@@ -71,72 +71,103 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Hàng trên: Nhãn đối tượng & Trạng thái (trái) - Nút thao tác (phải)
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              if (announcement.isUrgent)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.error.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
-                                      SizedBox(width: 4),
-                                      Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                margin: const EdgeInsets.only(right: 8),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                              Expanded(
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 6,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
-                                    const Icon(Icons.group_outlined, size: 13, color: AppTheme.primary),
-                                    const SizedBox(width: 4),
+                                    if (announcement.isUrgent)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.error.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'Khẩn cấp',
+                                              style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primary.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.group_outlined, size: 13, color: AppTheme.primary),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            announcement.targetDisplayName,
+                                            style: const TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                     Text(
-                                      announcement.targetDisplayName,
-                                      style: const TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600),
+                                      DateFormat('dd/MM/yyyy HH:mm').format(announcement.createdAt),
+                                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                                     ),
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                child: Text(
-                                  announcement.title,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: announcement.isUrgent ? AppTheme.error : null,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
+                                    tooltip: 'Chỉnh sửa',
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                    onPressed: () => _showEditDialog(context, ref, announcement),
                                   ),
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
-                                tooltip: 'Chỉnh sửa',
-                                onPressed: () => _showEditDialog(context, ref, announcement),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
-                                tooltip: 'Xóa thông báo',
-                                onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                                    tooltip: 'Xóa thông báo',
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                    onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
+
+                          // Tiêu đề thông báo chiếm toàn bộ chiều rộng
+                          Text(
+                            announcement.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+
+                          // Nội dung thông báo
                           Text(
                             announcement.content,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: AppTheme.textSecondary),
+                            style: const TextStyle(color: AppTheme.textSecondary, height: 1.4),
                           ),
                         ],
                       ),
@@ -397,30 +428,33 @@ class AnnouncementManagementScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (announcement.isUrgent)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: AppTheme.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
-                    SizedBox(width: 4),
-                    Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
-                  ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppTheme.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
+                      SizedBox(width: 4),
+                      Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ),
               ),
-            Expanded(
-              child: Text(
-                announcement.title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
+            Text(
+              announcement.title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ],
         ),
