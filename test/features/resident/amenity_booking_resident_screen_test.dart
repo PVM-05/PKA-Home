@@ -167,7 +167,7 @@ void main() {
   });
 
   testWidgets('AmenityBookingScreen: Tab Chọn Khung Giờ hiển thị huy hiệu Lịch của bạn và chỗ trống chính xác', (tester) async {
-    tester.view.physicalSize = const Size(360, 1000);
+    tester.view.physicalSize = const Size(400, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() => tester.view.resetPhysicalSize());
 
@@ -216,6 +216,12 @@ void main() {
 
     // Kiểm tra slot 06:00 - 07:30 có huy hiệu 'Lịch của bạn'
     expect(find.textContaining('Lịch của bạn'), findsWidgets);
+
+    // Chạm vào slot 06:00 - 07:30 đã đặt: thanh dưới phải chuyển thành nút hủy
+    final mySlotTile = find.text('06:00 - 07:30');
+    await tester.tap(mySlotTile);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Hủy lịch khung giờ 06:00 - 07:30'), findsOneWidget);
 
     // Kiểm tra slot 07:30 - 09:00 trừ 5 khách (30 - 5 = 25 chỗ)
     expect(find.textContaining('25 chỗ'), findsOneWidget);
