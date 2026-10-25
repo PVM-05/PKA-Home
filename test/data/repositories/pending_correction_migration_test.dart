@@ -10,7 +10,7 @@ void main() {
     });
 
     test('Migration phải định nghĩa đầy đủ 6 RPCs nguyên tử', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       expect(content.contains('cancel_pending_vehicle'), isTrue);
@@ -22,7 +22,7 @@ void main() {
     });
 
     test('reschedule_amenity_booking phải có cơ chế sắp xếp advisory lock chống Deadlock', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       expect(content.contains('pg_advisory_xact_lock'), isTrue);
@@ -31,7 +31,7 @@ void main() {
     });
 
     test('update_pending_vehicle phải khóa advisory theo căn hộ và kiểm tra hạn mức 2 xe máy', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       expect(content.contains('vehicle_limit_'), isTrue);
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('cancel_pending_vehicle phải kiểm tra quyền sở hữu nghiêm ngặt', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       expect(content.contains('user_id = v_user_id') || content.contains('registered_by = v_user_id'), isTrue);
@@ -47,7 +47,7 @@ void main() {
     });
 
     test('apartment_link_requests phải chuyển sang VARCHAR và dùng Partial Unique Index', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       expect(content.contains('uq_link_requests_active'), isTrue);
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('Migration phải dọn trùng dữ liệu và không chứa EXCEPTION WHEN OTHERS THEN NULL', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
       expect(content.contains('EXCEPTION WHEN OTHERS THEN NULL'), isFalse,
           reason: 'Khối nuốt lỗi DDL đã phải được loại bỏ hoàn toàn.');
@@ -74,7 +74,7 @@ void main() {
     });
 
     test('Các RPC sửa/hủy xe và điện nước không được chứa quyền thao tác chéo qua residents_apartments', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       // Khối RPC update_pending_vehicle
@@ -93,7 +93,7 @@ void main() {
     });
 
     test('Migration phải định nghĩa trigger check_vehicle_limits có SECURITY DEFINER và khóa FOR UPDATE', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
       expect(content.contains('CREATE OR REPLACE FUNCTION public.check_vehicle_limits()'), isTrue);
       expect(content.contains('SECURITY DEFINER'), isTrue);
@@ -105,7 +105,7 @@ void main() {
     });
 
     test('reschedule_amenity_booking phải kiểm tra định dạng giờ regex, logic start < end và Strict FIFO', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
       expect(content.contains('invalid_datetime_format'), isFalse,
           reason: 'Không được nuốt lỗi invalid_datetime_format trong đổi lịch.');
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('reschedule_amenity_booking phải dùng regex 24h chuẩn và báo lỗi khi open_hours sai định dạng', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       // Kiểm tra regex 24h chuẩn
@@ -133,7 +133,7 @@ void main() {
     });
 
     test('reschedule_amenity_booking phải tự động tạo hoặc đồng bộ payment_transactions PENDING khi đôn Waitlist', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       final rescheduleStart = content.indexOf('FUNCTION public.reschedule_amenity_booking');
@@ -147,7 +147,7 @@ void main() {
     });
 
     test('Migration phải cấp quyền REVOKE và GRANT EXECUTE tường minh cho approve_link_request', () {
-      if (!migrationFile.existsSync()) return;
+      expect(migrationFile.existsSync(), isTrue);
       final content = migrationFile.readAsStringSync();
 
       expect(content.contains('REVOKE ALL ON FUNCTION public.approve_link_request(UUID) FROM PUBLIC, anon;'), isTrue,
@@ -156,5 +156,45 @@ void main() {
           reason: 'Phải có GRANT EXECUTE cho approve_link_request');
     });
   });
-}
 
+  group('Task 1.2: Kiểm tra Migration 20261025_01 (Remediation SYS-01, SYS-02, SYS-04)', () {
+    final file = File('supabase/migrations/20261025_01_fix_waitlist_transactions_and_rpc_security.sql');
+
+    test('File migration 20261025_01 phải tồn tại', () {
+      expect(file.existsSync(), isTrue, reason: 'Chưa tạo file migration 20261025_01');
+    });
+
+    test('Migration 20261025_01 phải bổ sung updated_at và mở rộng status check cho payment_transactions', () {
+      expect(file.existsSync(), isTrue);
+      final content = file.readAsStringSync();
+      expect(content.contains('payment_transactions_status_check'), isTrue);
+      expect(content.contains('PENDING'), isTrue);
+      expect(content.contains('ADD COLUMN IF NOT EXISTS updated_at'), isTrue);
+      expect(content.contains('payment_transactions_type_check'), isTrue);
+    });
+
+    test('Migration 20261025_01 phải đồng bộ hóa RPC simulate_unified_payment và loại bỏ overload cũ', () {
+      expect(file.existsSync(), isTrue);
+      final content = file.readAsStringSync();
+      expect(content.contains('DROP FUNCTION IF EXISTS public.simulate_unified_payment(varchar, uuid, varchar, varchar, text);'), isTrue);
+      expect(content.contains('CREATE OR REPLACE FUNCTION public.simulate_unified_payment'), isTrue);
+      expect(content.contains('SET search_path = public, pg_catalog'), isTrue);
+    });
+
+    test('Migration 20261025_01 phải siết confirm_payment và phân quyền helper functions', () {
+      expect(file.existsSync(), isTrue);
+      final content = file.readAsStringSync();
+      expect(content.contains('confirm_payment'), isTrue);
+      expect(content.contains('public.is_admin() OR public.is_accountant()'), isTrue);
+      expect(content.contains('REVOKE ALL ON FUNCTION public.confirm_payment(UUID) FROM PUBLIC, anon;'), isTrue);
+      expect(content.contains('is_staff_or_management()'), isTrue);
+    });
+
+    test('Migration 20261025_01 phải kiểm tra khoảng bảo trì với start_time và end_time', () {
+      expect(file.existsSync(), isTrue);
+      final content = file.readAsStringSync();
+      expect(content.contains('start_time AT TIME ZONE'), isTrue);
+      expect(content.contains('end_time AT TIME ZONE'), isTrue);
+    });
+  });
+}
