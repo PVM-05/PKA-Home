@@ -19,6 +19,10 @@ class AmenityBookingModel {
   final String? apartmentCode;
   final String? bookerName;
   final bool isMyBooking;
+  final String? transactionCode;
+  final String? paymentMethod;
+  final String? paymentStatus;
+  final DateTime? paidAt;
 
   AmenityBookingModel({
     required this.id,
@@ -41,7 +45,14 @@ class AmenityBookingModel {
     this.apartmentCode,
     this.bookerName,
     this.isMyBooking = false,
+    this.transactionCode,
+    this.paymentMethod,
+    this.paymentStatus,
+    this.paidAt,
   });
+
+  bool get hasFee => (feeAmount > 0 || depositAmount > 0);
+  double get totalPaymentAmount => feeAmount + depositAmount;
 
   bool get isConfirmed => status == 'confirmed';
   bool get isPendingPayment => status == 'pending_payment';
@@ -85,6 +96,26 @@ class AmenityBookingModel {
       uName = json['users']['full_name'] as String?;
     }
 
+    String? txCode = json['transaction_code'] as String?;
+    String? pStatus = json['payment_status'] as String?;
+    String? pMethod = json['payment_method'] as String?;
+    DateTime? pPaidAt = json['paid_at'] != null ? DateTime.tryParse(json['paid_at'] as String) : null;
+
+    if (json['payment_transactions'] != null && json['payment_transactions'] is List) {
+      final txList = json['payment_transactions'] as List;
+      if (txList.isNotEmpty) {
+        final latestTx = txList.last as Map<String, dynamic>;
+        txCode ??= latestTx['transaction_code'] as String?;
+        pStatus ??= latestTx['status'] as String?;
+        pMethod ??= latestTx['payment_method'] as String?;
+        if (latestTx['confirmed_at'] != null) {
+          pPaidAt ??= DateTime.tryParse(latestTx['confirmed_at'] as String)?.toLocal();
+        } else if (latestTx['created_at'] != null) {
+          pPaidAt ??= DateTime.tryParse(latestTx['created_at'] as String)?.toLocal();
+        }
+      }
+    }
+
     return AmenityBookingModel(
       id: json['id'] as String? ?? '',
       amenityId: json['amenity_id'] as String? ?? '',
@@ -114,6 +145,10 @@ class AmenityBookingModel {
       apartmentCode: aptCode,
       bookerName: uName,
       isMyBooking: json['is_my_booking'] as bool? ?? false,
+      transactionCode: txCode,
+      paymentMethod: pMethod,
+      paymentStatus: pStatus,
+      paidAt: pPaidAt,
     );
   }
 
