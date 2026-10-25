@@ -331,6 +331,8 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         ],
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
           indicatorColor: AppTheme.primary,
           labelColor: AppTheme.primary,
           unselectedLabelColor: AppTheme.textSecondary,
@@ -429,34 +431,43 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         children: [
           // Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.apartment, color: AppTheme.primary, size: 20),
                     ),
-                    child: const Icon(Icons.apartment, color: AppTheme.primary, size: 20),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Căn hộ ${item.apartmentCode ?? ''}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Căn hộ ${item.apartmentCode ?? ''}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Kỳ: ${item.period} • Gửi lúc ${_dateFormat.format(item.createdAt)}',
+                            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      Text(
-                        'Kỳ: ${item.period} • Gửi lúc ${_dateFormat.format(item.createdAt)}',
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -492,13 +503,20 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                         children: [
                           Icon(Icons.bolt, color: Colors.amber.shade800, size: 18),
                           const SizedBox(width: 4),
-                          const Text('Điện (kWh)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          const Expanded(
+                            child: Text(
+                              'Điện (kWh)',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Text(
                         '${item.electricReading} kWh',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.amber.shade900),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       if (item.electricImageUrl != null) ...[
                         const SizedBox(height: 6),
@@ -533,13 +551,20 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                         children: [
                           Icon(Icons.water_drop, color: Colors.blue.shade800, size: 18),
                           const SizedBox(width: 4),
-                          const Text('Nước (m³)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          const Expanded(
+                            child: Text(
+                              'Nước (m³)',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Text(
                         '${item.waterReading} m³',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue.shade900),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       if (item.waterImageUrl != null) ...[
                         const SizedBox(height: 6),
