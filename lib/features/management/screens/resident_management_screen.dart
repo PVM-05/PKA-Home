@@ -23,9 +23,44 @@ class ResidentManagementScreen extends ConsumerStatefulWidget {
 }
 
 class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedRoleFilter = 'all';
   String _selectedStatusFilter = 'all';
+  String _selectedApartmentFilter = 'all';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  int get _activeFilterCount {
+    int count = 0;
+    if (_selectedRoleFilter != 'all') count++;
+    if (_selectedStatusFilter != 'all') count++;
+    if (_selectedApartmentFilter != 'all') count++;
+    return count;
+  }
+
+  String _getRoleLabel(String role) {
+    switch (role) {
+      case 'resident': return 'Cư dân';
+      case 'admin': return 'Quản trị viên';
+      case 'accountant': return 'Kế toán';
+      case 'technician': return 'Kỹ thuật viên';
+      default: return 'Tất cả';
+    }
+  }
+
+  String _getStatusLabel(String status) {
+    switch (status) {
+      case 'active': return 'Đang hoạt động';
+      case 'locked': return 'Đã khóa';
+      case 'deactivated': return 'Đã vô hiệu hóa';
+      default: return 'Tất cả';
+    }
+  }
 
   Color _getRoleColor(String role) {
     switch (role) {
@@ -538,44 +573,189 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
     );
   }
 
-  Widget _buildRoleFilterChip(String role, String label) {
-    final isSelected = _selectedRoleFilter == role;
-    final color = _getRoleColor(role == 'all' ? 'admin' : role);
-    return ChoiceChip(
-      selected: isSelected,
-      label: Text(label),
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppTheme.textPrimary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
+  void _showFilterBottomSheet(BuildContext context) {
+    String draftRole = _selectedRoleFilter;
+    String draftStatus = _selectedStatusFilter;
+    String draftApartment = _selectedApartmentFilter;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      selectedColor: color,
-      backgroundColor: AppTheme.background,
-      onSelected: (selected) {
-        setState(() {
-          _selectedRoleFilter = selected ? role : 'all';
-        });
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade400,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Bộ lọc người dùng',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(sheetCtx).pop(),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 1),
+                    const SizedBox(height: 12),
+
+                    // Nhóm: Vai trò
+                    const Text('Vai trò', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _buildSheetChoiceChip('Tất cả', draftRole == 'all', () {
+                          setSheetState(() => draftRole = 'all');
+                        }),
+                        _buildSheetChoiceChip('Cư dân', draftRole == 'resident', () {
+                          setSheetState(() => draftRole = 'resident');
+                        }),
+                        _buildSheetChoiceChip('Quản trị viên', draftRole == 'admin', () {
+                          setSheetState(() => draftRole = 'admin');
+                        }),
+                        _buildSheetChoiceChip('Kế toán', draftRole == 'accountant', () {
+                          setSheetState(() => draftRole = 'accountant');
+                        }),
+                        _buildSheetChoiceChip('Kỹ thuật viên', draftRole == 'technician', () {
+                          setSheetState(() => draftRole = 'technician');
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Nhóm: Trạng thái
+                    const Text('Trạng thái', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _buildSheetChoiceChip('Tất cả', draftStatus == 'all', () {
+                          setSheetState(() => draftStatus = 'all');
+                        }),
+                        _buildSheetChoiceChip('Đang hoạt động', draftStatus == 'active', () {
+                          setSheetState(() => draftStatus = 'active');
+                        }),
+                        _buildSheetChoiceChip('Đã khóa', draftStatus == 'locked', () {
+                          setSheetState(() => draftStatus = 'locked');
+                        }),
+                        _buildSheetChoiceChip('Đã vô hiệu hóa', draftStatus == 'deactivated', () {
+                          setSheetState(() => draftStatus = 'deactivated');
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Nhóm: Căn hộ
+                    const Text('Căn hộ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _buildSheetChoiceChip('Tất cả', draftApartment == 'all', () {
+                          setSheetState(() => draftApartment = 'all');
+                        }),
+                        _buildSheetChoiceChip('Đã gán căn hộ', draftApartment == 'assigned', () {
+                          setSheetState(() => draftApartment = 'assigned');
+                        }),
+                        _buildSheetChoiceChip('Chưa gán căn hộ', draftApartment == 'unassigned', () {
+                          setSheetState(() => draftApartment = 'unassigned');
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Nút Đặt lại & Áp dụng
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            onPressed: () {
+                              setSheetState(() {
+                                draftRole = 'all';
+                                draftStatus = 'all';
+                                draftApartment = 'all';
+                              });
+                            },
+                            child: const Text('Đặt lại'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _selectedRoleFilter = draftRole;
+                                _selectedStatusFilter = draftStatus;
+                                _selectedApartmentFilter = draftApartment;
+                              });
+                              Navigator.of(sheetCtx).pop();
+                            },
+                            child: const Text('Áp dụng', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       },
     );
   }
 
-  Widget _buildStatusFilterChip(String status, String label, Color color) {
-    final isSelected = _selectedStatusFilter == status;
+  Widget _buildSheetChoiceChip(String label, bool isSelected, VoidCallback onSelected) {
     return ChoiceChip(
-      selected: isSelected,
       label: Text(label),
+      selected: isSelected,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppTheme.textPrimary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         fontSize: 12,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected ? Colors.white : AppTheme.textPrimary,
       ),
-      selectedColor: color,
+      selectedColor: AppTheme.primary,
       backgroundColor: AppTheme.background,
-      onSelected: (selected) {
-        setState(() {
-          _selectedStatusFilter = selected ? status : 'all';
-        });
-      },
+      onSelected: (_) => onSelected(),
     );
   }
 
@@ -586,6 +766,41 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
     final isCurrentUserAdmin = ref.watch(authProvider).value?.isAdmin ?? false;
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final linkCount = pendingLinkReqAsync.value ?? 0;
+
+    final allResidents = residentsAsync.value ?? [];
+    final filteredResidents = allResidents.where((r) {
+      if (_selectedRoleFilter != 'all') {
+        if (_selectedRoleFilter == 'admin') {
+          if (!r.isAdmin) return false;
+        } else if (r.role != _selectedRoleFilter) {
+          return false;
+        }
+      }
+
+      if (_selectedStatusFilter != 'all') {
+        if (_selectedStatusFilter == 'active') {
+          if (!r.isActive || r.isLocked) return false;
+        } else if (_selectedStatusFilter == 'locked') {
+          if (!r.isLocked) return false;
+        } else if (_selectedStatusFilter == 'deactivated') {
+          if (r.isActive) return false;
+        }
+      }
+
+      if (_selectedApartmentFilter != 'all') {
+        final hasApartment = r.apartments.isNotEmpty || r.apartment != null;
+        if (_selectedApartmentFilter == 'assigned' && !hasApartment) return false;
+        if (_selectedApartmentFilter == 'unassigned' && hasApartment) return false;
+      }
+
+      if (_searchQuery.isEmpty) return true;
+      final nameMatch = r.fullName.toLowerCase().contains(_searchQuery);
+      final emailMatch = (r.email ?? '').toLowerCase().contains(_searchQuery);
+      final phoneMatch = (r.phone ?? '').toLowerCase().contains(_searchQuery);
+      final aptCodesMatch = r.apartments.any((a) => a.apartmentCode.toLowerCase().contains(_searchQuery));
+      final legacyAptMatch = r.apartment?.code.toLowerCase().contains(_searchQuery) ?? false;
+      return nameMatch || emailMatch || phoneMatch || aptCodesMatch || legacyAptMatch;
+    }).toList();
 
     return RoleGuard(
       permission: AppPermissions.residentManagement,
@@ -629,10 +844,22 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: TextField(
-                decoration: const InputDecoration(
+                controller: _searchController,
+                decoration: InputDecoration(
                   hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
-                  prefixIcon: Icon(Icons.search),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 onChanged: (val) {
                   setState(() {
@@ -642,41 +869,116 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
               ),
             ),
 
-            // Role Filter Chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+            // Tool row: Counter + Filter Button (A5)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildRoleFilterChip('all', 'Tất cả vai trò'),
+                  Expanded(
+                    child: Text(
+                      residentsAsync.hasValue
+                          ? 'Hiển thị ${filteredResidents.length}/${allResidents.length} người dùng'
+                          : 'Đang tải người dùng...',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   const SizedBox(width: 8),
-                  _buildRoleFilterChip('resident', 'Cư dân'),
-                  const SizedBox(width: 8),
-                  _buildRoleFilterChip('admin', 'Quản trị viên'),
-                  const SizedBox(width: 8),
-                  _buildRoleFilterChip('accountant', 'Kế toán'),
-                  const SizedBox(width: 8),
-                  _buildRoleFilterChip('technician', 'Kỹ thuật viên'),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => _showFilterBottomSheet(context),
+                    icon: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(Icons.filter_list, size: 18),
+                        if (_activeFilterCount > 0)
+                          Positioned(
+                            right: -4,
+                            top: -4,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    label: Text(_activeFilterCount > 0 ? 'Bộ lọc ($_activeFilterCount)' : 'Bộ lọc'),
+                  ),
                 ],
               ),
             ),
 
-            // Status Filter Chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-              child: Row(
-                children: [
-                  _buildStatusFilterChip('all', 'Tất cả trạng thái', AppTheme.primary),
-                  const SizedBox(width: 8),
-                  _buildStatusFilterChip('active', 'Đang hoạt động', AppTheme.success),
-                  const SizedBox(width: 8),
-                  _buildStatusFilterChip('locked', 'Đã khóa', AppTheme.error),
-                  const SizedBox(width: 8),
-                  _buildStatusFilterChip('deactivated', 'Đã vô hiệu hóa', Colors.grey.shade700),
-                ],
+            // Active Filter Chips (A5)
+            if (_activeFilterCount > 0)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                child: Row(
+                  children: [
+                    if (_selectedRoleFilter != 'all')
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: InputChip(
+                          label: Text('Vai trò: ${_getRoleLabel(_selectedRoleFilter)}', style: const TextStyle(fontSize: 12)),
+                          onDeleted: () {
+                            setState(() {
+                              _selectedRoleFilter = 'all';
+                            });
+                          },
+                          deleteIcon: const Icon(Icons.cancel, size: 16),
+                        ),
+                      ),
+                    if (_selectedStatusFilter != 'all')
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: InputChip(
+                          label: Text('Trạng thái: ${_getStatusLabel(_selectedStatusFilter)}', style: const TextStyle(fontSize: 12)),
+                          onDeleted: () {
+                            setState(() {
+                              _selectedStatusFilter = 'all';
+                            });
+                          },
+                          deleteIcon: const Icon(Icons.cancel, size: 16),
+                        ),
+                      ),
+                    if (_selectedApartmentFilter != 'all')
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: InputChip(
+                          label: Text('Căn hộ: ${_selectedApartmentFilter == 'assigned' ? 'Đã gán' : 'Chưa gán'}', style: const TextStyle(fontSize: 12)),
+                          onDeleted: () {
+                            setState(() {
+                              _selectedApartmentFilter = 'all';
+                            });
+                          },
+                          deleteIcon: const Icon(Icons.cancel, size: 16),
+                        ),
+                      ),
+                    if (_activeFilterCount > 1)
+                      ActionChip(
+                        label: const Text('Xóa tất cả', style: TextStyle(fontSize: 12)),
+                        avatar: const Icon(Icons.close, size: 14),
+                        onPressed: () {
+                          setState(() {
+                            _selectedRoleFilter = 'all';
+                            _selectedStatusFilter = 'all';
+                            _selectedApartmentFilter = 'all';
+                          });
+                        },
+                      ),
+                  ],
+                ),
               ),
-            ),
 
             const SizedBox(height: 4),
 
@@ -699,34 +1001,7 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
                   ref.invalidate(residentsProvider);
                   ref.invalidate(apartmentsProvider);
                 },
-                dataBuilder: (residents) {
-                  final filteredResidents = residents.where((r) {
-                    if (_selectedRoleFilter != 'all') {
-                      if (_selectedRoleFilter == 'admin') {
-                        if (!r.isAdmin) return false;
-                      } else if (r.role != _selectedRoleFilter) {
-                        return false;
-                      }
-                    }
-
-                    if (_selectedStatusFilter != 'all') {
-                      if (_selectedStatusFilter == 'active') {
-                        if (!r.isActive || r.isLocked) return false;
-                      } else if (_selectedStatusFilter == 'locked') {
-                        if (!r.isLocked) return false;
-                      } else if (_selectedStatusFilter == 'deactivated') {
-                        if (r.isActive) return false;
-                      }
-                    }
-
-                    if (_searchQuery.isEmpty) return true;
-                    final nameMatch = r.fullName.toLowerCase().contains(_searchQuery);
-                    final emailMatch = (r.email ?? '').toLowerCase().contains(_searchQuery);
-                    final phoneMatch = (r.phone ?? '').toLowerCase().contains(_searchQuery);
-                    final aptCodesMatch = r.apartments.any((a) => a.apartmentCode.toLowerCase().contains(_searchQuery));
-                    final legacyAptMatch = r.apartment?.code.toLowerCase().contains(_searchQuery) ?? false;
-                    return nameMatch || emailMatch || phoneMatch || aptCodesMatch || legacyAptMatch;
-                  }).toList();
+                dataBuilder: (_) {
 
                   if (filteredResidents.isEmpty) {
                     return RefreshIndicator(
