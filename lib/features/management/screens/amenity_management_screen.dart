@@ -370,7 +370,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Hủy lịch đặt của căn hộ ${b.apartmentCode ?? "***"} (${b.timeSlot})?'),
+            Text(b.isWaitlist
+                ? 'Hủy lượt đặt trong danh sách chờ của căn hộ ${b.apartmentCode ?? "***"} (${b.timeSlot})?'
+                : 'Hủy lịch đặt của căn hộ ${b.apartmentCode ?? "***"} (${b.timeSlot})?'),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
@@ -403,6 +405,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     AmenityDateQuery(amenityId: _selectedAmenityId!, date: _selectedDate),
                   ));
                 }
+                ref.invalidate(amenityBookingsForDateProvider(
+                  AmenityDateQuery(amenityId: b.amenityId, date: b.bookingDate),
+                ));
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -419,7 +424,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 }
               }
             },
-            child: const Text('Xác nhận từ chối'),
+            child: Text(b.isWaitlist ? 'Xác nhận hủy hàng chờ' : 'Xác nhận từ chối / hủy'),
           ),
         ],
       ),
@@ -1082,6 +1087,18 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   style: OutlinedButton.styleFrom(foregroundColor: AppTheme.error, side: const BorderSide(color: AppTheme.error), visualDensity: VisualDensity.compact),
                   icon: const Icon(Icons.cancel_outlined, size: 15),
                   label: const Text('Hủy lịch'),
+                  onPressed: () => _showRejectBookingDialog(b),
+                ),
+              ],
+              if (b.isWaitlist) ...[
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.error,
+                    side: const BorderSide(color: AppTheme.error),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: const Icon(Icons.cancel_outlined, size: 15),
+                  label: const Text('Hủy / Xóa khỏi hàng chờ'),
                   onPressed: () => _showRejectBookingDialog(b),
                 ),
               ],
