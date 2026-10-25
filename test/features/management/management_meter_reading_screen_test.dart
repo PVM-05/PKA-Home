@@ -229,4 +229,33 @@ void main() {
     expect(find.text('Căn hộ B0105'), findsOneWidget);
     expect(find.text('Lý do từ chối: Ảnh công tơ mờ không rõ số'), findsOneWidget);
   });
+
+  testWidgets('khong bi RenderFlex overflow tren man hinh hep 360px', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(createTestWidget(
+      pendingList: [
+        MeterReadingSubmissionModel(
+          id: 'sub-overflow-check',
+          apartmentId: 'apt-999',
+          apartmentCode: 'A0110-LONG-CODE',
+          submittedBy: 'user-long',
+          submitterName: 'Người gửi tên rất dài Nguyễn Hoàng Bảo Long',
+          period: '10/2026',
+          electricReading: 999.0,
+          waterReading: 888.0,
+          status: 'pending',
+          createdAt: DateTime(2026, 10, 25, 19, 21, 35),
+          updatedAt: DateTime(2026, 10, 25, 19, 21, 35),
+        ),
+      ],
+    ));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Căn hộ A0110-LONG-CODE'), findsOneWidget);
+  });
 }
