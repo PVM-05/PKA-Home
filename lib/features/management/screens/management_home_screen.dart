@@ -542,7 +542,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     final isAdmin = currentUser?.isAdmin ?? false;
 
     final pendingIssuesAsync = ref.watch(pendingIssuesCountProvider);
-    final unpaidInvoicesAsync = ref.watch(unpaidInvoicesTotalProvider);
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final allIssuesAsync = ref.watch(allIssuesProvider);
     final pendingMeterReadingsAsync = ref.watch(pendingMeterReadingsCountProvider);

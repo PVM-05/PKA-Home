@@ -41,6 +41,9 @@ void main() {
           unpaidCount: 1,
         ))),
         monthlyRevenueTrendProvider.overrideWith((ref) => Stream.value([])),
+        residentsProvider.overrideWith((ref) async => []),
+        apartmentsProvider.overrideWith((ref) async => []),
+        invoicesProvider.overrideWith((ref) async => []),
       ],
       child: const MaterialApp(
         home: ManagementHomeScreen(),
