@@ -75,6 +75,7 @@ class PaymentService {
     final res = await SupabaseConfig.client.rpc(
       'simulate_unified_payment',
       params: {
+        'p_payment_type': typeString,
         'p_type': typeString,
         'p_reference_id': referenceId,
         'p_payment_method': paymentMethod,

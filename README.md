@@ -229,7 +229,7 @@ Dự án duy trì kỷ luật kiểm thử phần mềm nghiêm ngặt với đ�
   ```bash
   flutter test
   ```
-  *(Kết quả xác minh: **`368/368 tests passed!`** — 100% tỷ lệ vượt qua trên toàn bộ suite).*
+  *(Kết quả xác minh: **`383/383 tests passed!`** (3 skipped an toàn khi thiếu tài khoản live trong `.env`) — 100% tỷ lệ vượt qua trên toàn bộ suite).*
 
 - **Kiểm thử Bảo mật RLS Trực Tiếp (Live Database Integration)**:
   ```bash

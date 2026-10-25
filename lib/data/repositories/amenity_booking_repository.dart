@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
+import '../../core/utils/app_logger.dart';
 import '../models/amenity_booking_model.dart';
 import '../models/amenity_maintenance_model.dart';
 
@@ -87,7 +88,7 @@ class AmenityBookingRepository {
         throw Exception('Khung giờ vừa được người khác đặt. Vui lòng chọn khung giờ khác.');
       }
       if (e.code == '23503') {
-        throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+        throw Exception('Thông tin tiện ích hoặc căn hộ liên kết không tồn tại hoặc không hợp lệ.');
       }
       throw Exception(e.message);
     } catch (e) {
@@ -98,10 +99,14 @@ class AmenityBookingRepository {
 
   /// Hủy đặt lịch tiện ích (Trigger Postgres sẽ tự động đôn người trong Waitlist)
   Future<void> cancelBooking(String bookingId) async {
-    await _client
+    final response = await _client
         .from('amenity_bookings')
         .update({'status': 'cancelled', 'updated_at': DateTime.now().toIso8601String()})
-        .eq('id', bookingId);
+        .eq('id', bookingId)
+        .select('id');
+    if ((response as List).isEmpty) {
+      throw Exception('Không tìm thấy lượt đặt chỗ hoặc bạn không có quyền hủy.');
+    }
   }
 
   /// Ban quản lý cập nhật trạng thái tiền cọc (none, pending, received, refunded, forfeited)
@@ -110,11 +115,14 @@ class AmenityBookingRepository {
     String depositStatus, {
     String? notes,
   }) async {
-    await _client.from('amenity_bookings').update({
+    final response = await _client.from('amenity_bookings').update({
       'deposit_status': depositStatus,
-      'deposit_notes': ?notes,
+      'deposit_notes': notes,
       'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', bookingId);
+    }).eq('id', bookingId).select('id');
+    if ((response as List).isEmpty) {
+      throw Exception('Không tìm thấy lượt đặt chỗ hoặc bạn không có quyền cập nhật tiền cọc.');
+    }
   }
 
   /// Ban quản lý xác nhận thu phí dịch vụ / tiền cọc tiện ích nguyên tử
@@ -133,10 +141,13 @@ class AmenityBookingRepository {
 
   /// Ban quản lý điểm danh cư dân đến nhận tiện ích (completed hoặc no_show)
   Future<void> markBookingAttendance(String bookingId, String status) async {
-    await _client.from('amenity_bookings').update({
+    final response = await _client.from('amenity_bookings').update({
       'status': status,
       'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', bookingId);
+    }).eq('id', bookingId).select('id');
+    if ((response as List).isEmpty) {
+      throw Exception('Không tìm thấy lượt đặt chỗ hoặc bạn không có quyền cập nhật điểm danh.');
+    }
   }
 
   /// Lấy danh sách tất cả các lượt đặt chỗ (cho Ban quản lý theo dõi)
@@ -181,7 +192,7 @@ class AmenityBookingRepository {
           .toList();
     } on PostgrestException catch (e) {
       if (e.code == 'PGRST205' || e.code == '42P01') {
-        // Bảng chưa được tạo trên CSDL, tạm thời xem như không có lịch bảo trì
+        AppLogger.w('Bảng amenity_maintenance_windows chưa khả dụng trên CSDL: ${e.message}');
         return [];
       }
       rethrow;
