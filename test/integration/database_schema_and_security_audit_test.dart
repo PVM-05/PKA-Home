@@ -66,5 +66,20 @@ void main() {
         reason: '${file.path} không được chứa pattern silent pass',
       );
     });
+
+    test('SYS-06: Migration 20261025_02 bổ sung trường target_type và target_apartment cho announcements', () {
+      final file = File('supabase/migrations/20261025_02_add_announcement_target_fields.sql');
+      expect(file.existsSync(), isTrue, reason: 'Migration 20261025_02 phải tồn tại');
+      final content = file.readAsStringSync();
+
+      expect(content, contains('ADD COLUMN IF NOT EXISTS target_type'));
+      expect(content, contains('ADD COLUMN IF NOT EXISTS target_apartment'));
+      expect(content, contains('announcements_target_type_check'));
+      expect(content, contains("target_type IN ('all', 'block_a', 'block_b', 'apartment')"));
+      expect(content, contains('is_staff_or_management()'));
+      expect(content, contains('"Management toàn quyền announcements"'));
+      expect(content, contains('"User đăng nhập xem announcements"'));
+    });
   });
 }
+
