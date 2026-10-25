@@ -325,6 +325,7 @@ DECLARE
     v_waitlist_promoted BOOLEAN := false;
     v_promoted_fee NUMERIC := 0;
     v_promoted_deposit NUMERIC := 0;
+    v_existing_tx_id UUID;
 BEGIN
     v_user_id := auth.uid();
     IF v_user_id IS NULL THEN
@@ -358,8 +359,8 @@ BEGIN
         RAISE EXCEPTION 'Tiện ích không tồn tại hoặc đã ngừng hoạt động';
     END IF;
 
-    -- 3. Xác thực định dạng khung giờ mới bằng regex
-    IF p_new_time_slot !~ '^[0-2][0-9]:[0-5][0-9]\s*-\s*[0-2][0-9]:[0-5][0-9]$' THEN
+    -- 3. Xác thực định dạng khung giờ mới bằng regex 24 giờ chuẩn
+    IF p_new_time_slot !~ '^([01][0-9]|2[0-3]):[0-5][0-9]\s*-\s*([01][0-9]|2[0-3]):[0-5][0-9]$' THEN
         RAISE EXCEPTION 'Định dạng khung giờ không hợp lệ. Yêu cầu định dạng HH:mm - HH:mm (VD: 08:00 - 10:00).';
     END IF;
 
@@ -372,9 +373,18 @@ BEGIN
     END IF;
 
     -- Kiểm tra giờ mở cửa của tiện ích
-    IF v_amenity.open_hours IS NOT NULL AND v_amenity.open_hours ~ '^[0-2][0-9]:[0-5][0-9]\s*-\s*[0-2][0-9]:[0-5][0-9]$' THEN
+    IF v_amenity.open_hours IS NOT NULL THEN
+        IF v_amenity.open_hours !~ '^([01][0-9]|2[0-3]):[0-5][0-9]\s*-\s*([01][0-9]|2[0-3]):[0-5][0-9]$' THEN
+            RAISE EXCEPTION 'Giờ mở cửa của tiện ích (%) không đúng định dạng chuẩn HH:mm - HH:mm.', v_amenity.open_hours;
+        END IF;
+
         v_open_start := TRIM(SPLIT_PART(v_amenity.open_hours, '-', 1))::time;
         v_open_end := TRIM(SPLIT_PART(v_amenity.open_hours, '-', 2))::time;
+
+        IF v_open_start >= v_open_end THEN
+            RAISE EXCEPTION 'Giờ mở cửa của tiện ích không hợp lệ (giờ mở phải trước giờ đóng): %', v_amenity.open_hours;
+        END IF;
+
         IF v_slot_start_time < v_open_start OR v_slot_end_time > v_open_end THEN
             RAISE EXCEPTION 'Khung giờ mới (%) nằm ngoài giờ mở cửa của tiện ích (%).',
                 p_new_time_slot, v_amenity.open_hours;
@@ -533,10 +543,44 @@ BEGIN
                         updated_at = NOW()
                     WHERE id = v_next_waitlist.id;
 
-                    UPDATE public.payment_transactions
-                    SET amount = (v_promoted_fee + v_promoted_deposit),
-                        updated_at = NOW()
-                    WHERE booking_id = v_next_waitlist.id AND status = 'PENDING';
+                    -- Tự động cập nhật hoặc tạo mới giao dịch PENDING cho lượt đặt được đôn
+                    SELECT id INTO v_existing_tx_id
+                    FROM public.payment_transactions
+                    WHERE booking_id = v_next_waitlist.id AND status = 'PENDING'
+                    LIMIT 1;
+
+                    IF v_existing_tx_id IS NOT NULL THEN
+                        UPDATE public.payment_transactions
+                        SET amount = (v_promoted_fee + v_promoted_deposit),
+                            updated_at = NOW()
+                        WHERE id = v_existing_tx_id;
+                    ELSE
+                        INSERT INTO public.payment_transactions (
+                            booking_id,
+                            user_id,
+                            apartment_id,
+                            amount,
+                            payment_method,
+                            status,
+                            transaction_code,
+                            type,
+                            title,
+                            created_at,
+                            updated_at
+                        ) VALUES (
+                            v_next_waitlist.id,
+                            v_next_waitlist.booked_by,
+                            v_next_waitlist.apartment_id,
+                            (v_promoted_fee + v_promoted_deposit),
+                            'DEMO',
+                            'PENDING',
+                            'SVC' || to_char(now(), 'YYYYMMDDHH24MISS') || UPPER(SUBSTRING(gen_random_uuid()::text, 1, 4)),
+                            'SERVICE',
+                            v_amenity.name || ' (' || v_booking.time_slot || ')',
+                            NOW(),
+                            NOW()
+                        );
+                    END IF;
                 ELSE
                     UPDATE public.amenity_bookings
                     SET status = 'confirmed', updated_at = NOW()
@@ -754,3 +798,7 @@ GRANT EXECUTE ON FUNCTION public.cancel_pending_meter_reading(UUID) TO authentic
 
 REVOKE ALL ON FUNCTION public.cancel_apartment_link_request(UUID) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.cancel_apartment_link_request(UUID) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.approve_link_request(UUID) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.approve_link_request(UUID) TO authenticated;
+

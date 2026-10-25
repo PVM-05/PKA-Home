@@ -225,17 +225,18 @@ Dự án duy trì kỷ luật kiểm thử phần mềm nghiêm ngặt với đ�
   ```
   *(Kết quả xác minh: **`No issues found!`** — 0 lỗi, 0 cảnh báo).*
 
-- **Chạy toàn bộ bộ kiểm thử tự động (Unit, Widget, TDD & Security Tests)**:
+- **Chạy toàn bộ bộ kiểm thử tự động (Unit, Widget, TDD & Migration Tests)**:
   ```bash
   flutter test
   ```
-  *(Kết quả xác minh: **`274/274 tests passed!`** — 100% tỷ lệ vượt qua).*
+  *(Kết quả xác minh: **`368/368 tests passed!`** — 100% tỷ lệ vượt qua trên toàn bộ suite).*
 
-- **Kiểm thử Bảo mật RLS Thực Tế**:
+- **Kiểm thử Bảo mật RLS Trực Tiếp (Live Database Integration)**:
   ```bash
   flutter test test/integration/rls_security_test.dart
   ```
-  *(Cơ chế nạp môi trường đồng bộ, tự động chạy kiểm thử khi cấu hình tài khoản).*
+  *(Gồm 3 bài test xác thực RLS trên cụm Supabase thật. Mặc định tự động bỏ qua (skip) an toàn khi chạy offline trong môi trường phát triển cục bộ và kích hoạt khi cấu hình tài khoản kiểm thử trong `.env`).*
+
 
 ---
 

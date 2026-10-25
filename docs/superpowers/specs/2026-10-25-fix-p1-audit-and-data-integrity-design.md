@@ -384,3 +384,26 @@ Cập nhật file `test/data/repositories/pending_correction_migration_test.dart
 - Kiểm tra thông báo SnackBar thành công hiển thị đúng nội dung theo `action`.
 - Kiểm tra hiển thị SnackBar lỗi khi đổi lịch thất bại.
 - Chạy `dart analyze` và toàn bộ `flutter test` để xác minh mọi bài kiểm thử vượt qua trước khi hoàn tất.
+
+---
+
+## 5. Củng Cố Giao Dịch Waitlist, Định Dạng Giờ & Quyền RPC (Audit Follow-up)
+
+### 5.1. Tự Động Tạo Bản Ghi Giao Dịch PENDING Khi Đôn Waitlist
+Trong `reschedule_amenity_booking` và trigger `handle_amenity_booking_cancellation`:
+Khi một booking trong Waitlist được đôn lên `pending_payment` (có `v_promoted_fee + v_promoted_deposit > 0`):
+- Kiểm tra xem đã có giao dịch `PENDING` cho booking đó chưa:
+  - Nếu đã có: Cập nhật `amount = (v_promoted_fee + v_promoted_deposit), updated_at = NOW()`.
+  - Nếu chưa có: `INSERT` vào `public.payment_transactions` bản ghi mới với `status = 'PENDING'`, `type = 'SERVICE'`, `amount = (v_promoted_fee + v_promoted_deposit)`, `transaction_code = 'SVC' || ...`.
+
+### 5.2. Chuẩn Hóa Regex 24 Giờ & Xác Thực Giờ Mở Cửa (open_hours)
+- Áp dụng regex 24h chặt chẽ: `^([01][0-9]|2[0-3]):[0-5][0-9]\s*-\s*([01][0-9]|2[0-3]):[0-5][0-9]$`.
+- Nếu `open_hours IS NOT NULL`:
+  - Kiểm tra regex: Ném ngoại lệ `'Giờ mở cửa của tiện ích (%) không đúng định dạng chuẩn HH:mm - HH:mm'` nếu không khớp.
+  - Kiểm tra `v_open_start >= v_open_end`: Ném ngoại lệ `'Giờ mở cửa của tiện ích không hợp lệ (giờ mở phải trước giờ đóng)'`.
+  - Kiểm tra `v_slot_start_time < v_open_start OR v_slot_end_time > v_open_end`: Ném ngoại lệ `'Khung giờ mới (%) nằm ngoài giờ mở cửa của tiện ích (%)'`.
+
+### 5.3. Bổ Sung Phân Quyền EXECUTE Tường Minh Cho approve_link_request
+- `REVOKE ALL ON FUNCTION public.approve_link_request(UUID) FROM PUBLIC, anon;`
+- `GRANT EXECUTE ON FUNCTION public.approve_link_request(UUID) TO authenticated;`
+
