@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
@@ -489,25 +490,76 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                           ),
                         ],
                       ),
-                      if (amenity.openHours != null && amenity.openHours!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(Icons.access_time, size: 14, color: AppStatusColors.paid),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Giờ mở cửa: ${amenity.openHours!}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppStatusColors.paid,
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          if (amenity.openHours != null && amenity.openHours!.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppStatusColors.paid.withAlpha(25),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.access_time, size: 14, color: AppStatusColors.paid),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    amenity.openHours!,
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppStatusColors.paid),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withAlpha(25),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(amenity.isShared ? Icons.groups_outlined : Icons.lock_clock_outlined, size: 14, color: AppTheme.primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  amenity.isShared ? 'Dùng chung (${amenity.maxCapacity} người)' : 'Bao trọn khung giờ',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (amenity.feeAmount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withAlpha(25),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Phí: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.feeAmount)}',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blue),
+                              ),
+                            ),
+                          if (amenity.requiresDeposit && amenity.depositAmount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withAlpha(35),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Cọc: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.depositAmount)}',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.brown),
+                              ),
+                            ),
+                        ],
+                      ),
                       if (amenity.description != null && amenity.description!.isNotEmpty) ...[
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
                         Text(
                           amenity.description!,
                           style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.4),
@@ -532,92 +584,196 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
     final hoursController = TextEditingController(text: amenity?.openHours ?? '');
     final descController = TextEditingController(text: amenity?.description ?? '');
     final orderController = TextEditingController(text: (amenity?.displayOrder ?? 0).toString());
+    final capacityController = TextEditingController(text: (amenity?.maxCapacity ?? 1).toString());
+    final durationController = TextEditingController(text: (amenity?.slotDurationMinutes ?? 60).toString());
+    final feeController = TextEditingController(text: (amenity?.feeAmount ?? 0).toInt().toString());
+    final depositController = TextEditingController(text: (amenity?.depositAmount ?? 0).toInt().toString());
+    String bookingType = amenity?.bookingType ?? 'shared';
+    bool requiresDeposit = amenity?.requiresDeposit ?? false;
+
     final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(isEditing ? 'Chỉnh sửa tiện ích' : 'Thêm tiện ích mới'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Tên tiện ích *'),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên tiện ích' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: hoursController,
-                  decoration: const InputDecoration(labelText: 'Giờ mở cửa (VD: 06:00 - 21:00)'),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: descController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(labelText: 'Mô tả & quy định sử dụng'),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: orderController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Thứ tự hiển thị (tùy chọn)'),
-                ),
-              ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(isEditing ? 'Chỉnh sửa tiện ích' : 'Thêm tiện ích mới'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Tên tiện ích *'),
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên tiện ích' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: bookingType,
+                    decoration: const InputDecoration(labelText: 'Hình thức đặt chỗ'),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'shared',
+                        child: Text('Dùng chung (nhiều người cùng đặt)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'exclusive',
+                        child: Text('Bao trọn khung giờ (1 lượt/khung)'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => bookingType = val);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: capacityController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Sức chứa tối đa (người) *',
+                      helperText: 'Số người tối đa cùng lúc trong một khung giờ',
+                    ),
+                    validator: (v) {
+                      final parsed = int.tryParse(v?.trim() ?? '');
+                      if (parsed == null || parsed <= 0) return 'Vui lòng nhập số người hợp lệ (> 0)';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: durationController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Thời lượng khung giờ (phút) *'),
+                    validator: (v) {
+                      final parsed = int.tryParse(v?.trim() ?? '');
+                      if (parsed == null || parsed <= 0) return 'Vui lòng nhập thời lượng (> 0)';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: hoursController,
+                    decoration: const InputDecoration(labelText: 'Giờ mở cửa (VD: 06:00 - 21:00)'),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: feeController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Phí sử dụng (đ)'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextFormField(
+                          controller: orderController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Thứ tự hiển thị'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Yêu cầu đặt cọc trước'),
+                    value: requiresDeposit,
+                    onChanged: (val) => setDialogState(() => requiresDeposit = val),
+                  ),
+                  if (requiresDeposit) ...[
+                    TextFormField(
+                      controller: depositController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Số tiền đặt cọc (đ) *'),
+                      validator: (v) {
+                        final parsed = double.tryParse(v?.trim() ?? '');
+                        if (parsed == null || parsed < 0) return 'Số tiền cọc không hợp lệ';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  TextFormField(
+                    controller: descController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(labelText: 'Mô tả & quy định sử dụng'),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
-          ElevatedButton(
-            onPressed: () async {
-              if (formKey.currentState?.validate() ?? false) {
-                Navigator.pop(ctx);
-                final order = int.tryParse(orderController.text.trim()) ?? 0;
-                final repo = ref.read(handbookRepositoryProvider);
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+            ElevatedButton(
+              onPressed: () async {
+                if (formKey.currentState?.validate() ?? false) {
+                  Navigator.pop(ctx);
+                  final order = int.tryParse(orderController.text.trim()) ?? 0;
+                  final capacity = int.tryParse(capacityController.text.trim()) ?? 1;
+                  final duration = int.tryParse(durationController.text.trim()) ?? 60;
+                  final fee = double.tryParse(feeController.text.trim()) ?? 0.0;
+                  final deposit = requiresDeposit ? (double.tryParse(depositController.text.trim()) ?? 0.0) : 0.0;
+                  final repo = ref.read(handbookRepositoryProvider);
 
-                try {
-                  if (isEditing) {
-                    await repo.updateBuildingAmenity(
-                      id: amenity.id,
-                      name: nameController.text.trim(),
-                      openHours: hoursController.text.trim(),
-                      description: descController.text.trim(),
-                      displayOrder: order,
-                    );
-                  } else {
-                    await repo.createBuildingAmenity(
-                      name: nameController.text.trim(),
-                      openHours: hoursController.text.trim(),
-                      description: descController.text.trim(),
-                      displayOrder: order,
-                    );
-                  }
-                  ref.invalidate(buildingAmenitiesProvider);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(isEditing ? 'Đã cập nhật tiện ích!' : 'Đã thêm tiện ích thành công!'),
-                        backgroundColor: AppTheme.success,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
-                    );
+                  try {
+                    if (isEditing) {
+                      await repo.updateBuildingAmenity(
+                        id: amenity.id,
+                        name: nameController.text.trim(),
+                        openHours: hoursController.text.trim(),
+                        description: descController.text.trim(),
+                        displayOrder: order,
+                        bookingType: bookingType,
+                        maxCapacity: capacity,
+                        slotDurationMinutes: duration,
+                        feeAmount: fee,
+                        depositAmount: deposit,
+                        requiresDeposit: requiresDeposit,
+                      );
+                    } else {
+                      await repo.createBuildingAmenity(
+                        name: nameController.text.trim(),
+                        openHours: hoursController.text.trim(),
+                        description: descController.text.trim(),
+                        displayOrder: order,
+                        bookingType: bookingType,
+                        maxCapacity: capacity,
+                        slotDurationMinutes: duration,
+                        feeAmount: fee,
+                        depositAmount: deposit,
+                        requiresDeposit: requiresDeposit,
+                      );
+                    }
+                    ref.invalidate(buildingAmenitiesProvider);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(isEditing ? 'Đã cập nhật tiện ích!' : 'Đã thêm tiện ích thành công!'),
+                          backgroundColor: AppTheme.success,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                      );
+                    }
                   }
                 }
-              }
-            },
-            child: const Text('Lưu'),
-          ),
-        ],
+              },
+              child: const Text('Lưu'),
+            ),
+          ],
+        ),
       ),
     );
   }
