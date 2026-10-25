@@ -109,8 +109,8 @@ void main() {
       final content = migrationFile.readAsStringSync();
       expect(content.contains('invalid_datetime_format'), isFalse,
           reason: 'Không được nuốt lỗi invalid_datetime_format trong đổi lịch.');
-      expect(content.contains('^[0-2][0-9]:[0-5][0-9]'), isTrue,
-          reason: 'Phải kiểm tra regex định dạng khung giờ.');
+      expect(content.contains('^([01][0-9]|2[0-3]):[0-5][0-9]'), isTrue,
+          reason: 'Phải kiểm tra regex 24h định dạng khung giờ.');
       expect(content.contains('v_slot_start_time >= v_slot_end_time'), isTrue,
           reason: 'Phải kiểm tra giờ bắt đầu nhỏ hơn giờ kết thúc.');
       expect(content.contains('v_old_slot_avail'), isTrue,
@@ -118,5 +118,43 @@ void main() {
       expect(content.contains('rescheduled_confirmed'), isTrue,
           reason: 'Phải trả về action cụ thể để UI hiển thị chuẩn.');
     });
+
+    test('reschedule_amenity_booking phải dùng regex 24h chuẩn và báo lỗi khi open_hours sai định dạng', () {
+      if (!migrationFile.existsSync()) return;
+      final content = migrationFile.readAsStringSync();
+
+      // Kiểm tra regex 24h chuẩn
+      expect(content.contains('^([01][0-9]|2[0-3]):[0-5][0-9]'), isTrue,
+          reason: 'Regex phải là chuẩn 24 giờ ^([01][0-9]|2[0-3]):[0-5][0-9]');
+      
+      // Kiểm tra báo lỗi khi open_hours sai định dạng
+      expect(content.contains('Giờ mở cửa của tiện ích') && content.contains('không đúng định dạng'), isTrue,
+          reason: 'Phải báo lỗi khi open_hours có dữ liệu nhưng sai định dạng');
+    });
+
+    test('reschedule_amenity_booking phải tự động tạo hoặc đồng bộ payment_transactions PENDING khi đôn Waitlist', () {
+      if (!migrationFile.existsSync()) return;
+      final content = migrationFile.readAsStringSync();
+
+      final rescheduleStart = content.indexOf('FUNCTION public.reschedule_amenity_booking');
+      final rescheduleEnd = content.indexOf('FUNCTION public.update_pending_meter_reading');
+      final rescheduleBlock = content.substring(rescheduleStart, rescheduleEnd);
+
+      expect(rescheduleBlock.contains('INSERT INTO public.payment_transactions'), isTrue,
+          reason: 'Phải có INSERT INTO payment_transactions khi booking chưa có giao dịch PENDING');
+      expect(rescheduleBlock.contains('SVC'), isTrue,
+          reason: 'Phải sinh mã giao dịch dịch vụ SVC chuẩn');
+    });
+
+    test('Migration phải cấp quyền REVOKE và GRANT EXECUTE tường minh cho approve_link_request', () {
+      if (!migrationFile.existsSync()) return;
+      final content = migrationFile.readAsStringSync();
+
+      expect(content.contains('REVOKE ALL ON FUNCTION public.approve_link_request(UUID) FROM PUBLIC, anon;'), isTrue,
+          reason: 'Phải có REVOKE ALL cho approve_link_request');
+      expect(content.contains('GRANT EXECUTE ON FUNCTION public.approve_link_request(UUID) TO authenticated;'), isTrue,
+          reason: 'Phải có GRANT EXECUTE cho approve_link_request');
+    });
   });
 }
+
