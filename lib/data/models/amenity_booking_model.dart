@@ -18,6 +18,7 @@ class AmenityBookingModel {
   final String? amenityName;
   final String? apartmentCode;
   final String? bookerName;
+  final bool isMyBooking;
 
   AmenityBookingModel({
     required this.id,
@@ -39,6 +40,7 @@ class AmenityBookingModel {
     this.amenityName,
     this.apartmentCode,
     this.bookerName,
+    this.isMyBooking = false,
   });
 
   bool get isConfirmed => status == 'confirmed';
@@ -47,6 +49,25 @@ class AmenityBookingModel {
   bool get isCancelled => status == 'cancelled';
   bool get isCompleted => status == 'completed';
   bool get isNoShow => status == 'no_show';
+
+  String get statusDisplayName {
+    switch (status) {
+      case 'confirmed':
+        return 'Đã xác nhận';
+      case 'pending_payment':
+        return 'Chờ thanh toán';
+      case 'waitlist':
+        return 'Danh sách chờ';
+      case 'completed':
+        return 'Đã hoàn thành';
+      case 'no_show':
+        return 'Vắng mặt';
+      case 'cancelled':
+        return 'Đã hủy';
+      default:
+        return 'Chờ duyệt';
+    }
+  }
 
   factory AmenityBookingModel.fromJson(Map<String, dynamic> json) {
     String? aName;
@@ -92,6 +113,7 @@ class AmenityBookingModel {
       amenityName: aName,
       apartmentCode: aptCode,
       bookerName: uName,
+      isMyBooking: json['is_my_booking'] as bool? ?? false,
     );
   }
 
