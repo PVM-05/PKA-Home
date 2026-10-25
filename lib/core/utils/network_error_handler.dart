@@ -77,7 +77,16 @@ class NetworkErrorHandler {
       if (msg.contains('password should be at least')) {
         return 'Mật khẩu phải có độ dài tối thiểu 6 ký tự.';
       }
-      if (error.message.isNotEmpty && !msg.contains('syntax') && !msg.contains('exception')) {
+      if (msg.contains('database error') || msg.contains('unexpected_failure')) {
+        return 'Không thể tạo tài khoản trên hệ thống. Vui lòng liên hệ Ban Quản Lý.';
+      }
+      if (msg.contains('over_email_send_rate_limit') || msg.contains('rate limit')) {
+        return 'Bạn đã gửi yêu cầu quá nhiều lần. Vui lòng thử lại sau.';
+      }
+      if (error.message.isNotEmpty &&
+          !msg.contains('syntax') &&
+          !msg.contains('exception') &&
+          !msg.startsWith('{')) {
         return error.message;
       }
       return 'Lỗi xác thực: Vui lòng kiểm tra lại thông tin đăng nhập.';
@@ -85,6 +94,16 @@ class NetworkErrorHandler {
 
     final rawMsg = error.toString().replaceFirst(RegExp(r'^Exception:\s*'), '').trim();
     final errStr = error.toString().toLowerCase();
+
+    // Bắt trường hợp lỗi trả về chuỗi JSON thô dạng {"code":"...", "message":"..."}
+    if (rawMsg.startsWith('{') && rawMsg.endsWith('}')) {
+      if (errStr.contains('database error saving new user') || errStr.contains('unexpected_failure')) {
+        return 'Không thể tạo tài khoản trên hệ thống. Vui lòng liên hệ Ban Quản Lý.';
+      }
+      if (errStr.contains('user already registered') || errStr.contains('user_already_exists')) {
+        return 'Email này đã được đăng ký tài khoản.';
+      }
+    }
 
     if (errStr.contains('socketexception') ||
         errStr.contains('failed host lookup') ||
