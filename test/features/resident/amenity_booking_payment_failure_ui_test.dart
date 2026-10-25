@@ -81,7 +81,7 @@ class FakeAmenityBookingRepo implements AmenityBookingRepository {
   Future<List<AmenityBookingModel>> getMyBookings(String userId) async => [];
 
   @override
-  Future<void> cancelBooking(String bookingId) async {}
+  Future<Map<String, dynamic>> cancelBooking(String bookingId) async => {'success': true};
 }
 
 class MockAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {

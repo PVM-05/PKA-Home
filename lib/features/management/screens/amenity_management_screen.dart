@@ -468,25 +468,15 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 ),
                 const SizedBox(height: 14),
                 const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                const SizedBox(height: 6),
-                RadioListTile<String>(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: const Text('Tiền mặt (CASH)'),
-                  value: 'CASH',
-                  groupValue: selectedMethod,
-                  onChanged: (val) {
-                    if (val != null) setDialogState(() => selectedMethod = val);
-                  },
-                ),
-                RadioListTile<String>(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: const Text('Chuyển khoản (BANK_TRANSFER)'),
-                  value: 'BANK_TRANSFER',
-                  groupValue: selectedMethod,
-                  onChanged: (val) {
-                    if (val != null) setDialogState(() => selectedMethod = val);
+                const SizedBox(height: 8),
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'CASH', label: Text('Tiền mặt'), icon: Icon(Icons.payments_outlined)),
+                    ButtonSegment(value: 'BANK_TRANSFER', label: Text('Chuyển khoản'), icon: Icon(Icons.account_balance_outlined)),
+                  ],
+                  selected: {selectedMethod},
+                  onSelectionChanged: (newSelection) {
+                    setDialogState(() => selectedMethod = newSelection.first);
                   },
                 ),
               ],
@@ -580,7 +570,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: bookingType,
+                    initialValue: bookingType,
                     decoration: const InputDecoration(labelText: 'Hình thức đặt chỗ *', border: OutlineInputBorder()),
                     items: const [
                       DropdownMenuItem(value: 'shared', child: Text('Dùng chung (Nhiều người/slot)')),
@@ -1200,7 +1190,13 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   children: [
                     Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
                     const SizedBox(width: 4),
-                    Text('Giờ mở cửa: ${a.openHours ?? "06:00 - 22:00"}', style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                    Expanded(
+                      child: Text(
+                        'Giờ mở cửa: ${a.openHours ?? "06:00 - 22:00"}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
                 const Divider(height: 16),
