@@ -22,7 +22,7 @@ class AmenityBookingRepository {
     final dateStr = _formatDate(date);
     final response = await _client
         .from('amenity_bookings')
-        .select('*, apartments(code), users(full_name)')
+        .select('*, apartments(code), users(full_name), payment_transactions(*)')
         .eq('amenity_id', amenityId)
         .eq('booking_date', dateStr)
         .inFilter('status', ['confirmed', 'waitlist', 'pending_payment']);
@@ -36,7 +36,7 @@ class AmenityBookingRepository {
   Future<List<AmenityBookingModel>> getMyBookings(String userId) async {
     final response = await _client
         .from('amenity_bookings')
-        .select('*, building_amenities(name), apartments(code), users(full_name)')
+        .select('*, building_amenities(name), apartments(code), users(full_name), payment_transactions(*)')
         .eq('booked_by', userId)
         .order('booking_date', ascending: false)
         .order('time_slot', ascending: false);
@@ -78,7 +78,7 @@ class AmenityBookingRepository {
       final bookingId = resMap['booking_id'] as String;
       final bookingData = await _client
           .from('amenity_bookings')
-          .select('*, building_amenities(name), apartments(code)')
+          .select('*, building_amenities(name), apartments(code), payment_transactions(*)')
           .eq('id', bookingId)
           .single();
 
@@ -180,7 +180,7 @@ class AmenityBookingRepository {
   Future<List<AmenityBookingModel>> getAllBookings() async {
     final response = await _client
         .from('amenity_bookings')
-        .select('*, building_amenities(name), apartments(code), users(full_name)')
+        .select('*, building_amenities(name), apartments(code), users(full_name), payment_transactions(*)')
         .order('booking_date', ascending: false)
         .order('time_slot', ascending: false);
 
