@@ -329,8 +329,16 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                 ref.invalidate(myAmenityBookingsProvider);
 
                 if (mounted) {
+                  setState(() {
+                    if (_selectedSlot == booking.timeSlot) {
+                      _isWaitlistSelection = false;
+                    }
+                  });
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã hủy lịch thành công.')),
+                    const SnackBar(
+                      content: Text('Đã hủy lịch thành công. Khung giờ đã được giải phóng để bạn có thể đặt lại.'),
+                      backgroundColor: AppTheme.success,
+                    ),
                   );
                 }
               } catch (e) {
@@ -581,27 +589,41 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                   Color subtitleColor = AppStatusColors.paid;
 
                   if (myBookingInSlot != null) {
-                    cardBg = Colors.green.shade50;
-                    cardBorder = BorderSide(color: Colors.green.shade400, width: 1.5);
-                    subtitleText = 'Lịch của bạn (${myBookingInSlot.statusDisplayName}) • Còn trống: $availableCapacity chỗ';
-                    subtitleColor = Colors.green.shade800;
-                    trailingWidget = Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check_circle, size: 14, color: Colors.green.shade800),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Lịch của bạn',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green.shade900),
+                    cardBg = isSelected ? Colors.red.shade50 : Colors.green.shade50;
+                    cardBorder = BorderSide(
+                      color: isSelected ? AppTheme.error : Colors.green.shade400,
+                      width: isSelected ? 2 : 1.5,
+                    );
+                    subtitleText = 'Lịch của bạn (${myBookingInSlot.statusDisplayName}) • Chạm để xem hoặc hủy lịch';
+                    subtitleColor = isSelected ? AppTheme.error : Colors.green.shade800;
+                    trailingWidget = Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ],
-                      ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_circle, size: 14, color: Colors.green.shade800),
+                              const SizedBox(width: 4),
+                              Text(
+                                myBookingInSlot.statusDisplayName,
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green.shade900),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          tooltip: 'Hủy lịch này',
+                          icon: const Icon(Icons.cancel_outlined, color: AppTheme.error, size: 20),
+                          onPressed: () => _confirmCancelBooking(myBookingInSlot),
+                        ),
+                      ],
                     );
                   } else if (isMaintenance) {
                     cardBg = Colors.orange.shade50;
@@ -705,7 +727,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           : () {
                               setState(() {
                                 _selectedSlot = slot;
-                                _isWaitlistSelection = isWaitlistChoice;
+                                _isWaitlistSelection = isWaitlistChoice && (myBookingInSlot == null);
                               });
                             },
                     ),
@@ -718,90 +740,141 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
           ),
         ),
 
-        // Nút bấm đặt lịch / vào hàng chờ
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -3),
+        // Nút bấm đặt lịch / hủy lịch / vào hàng chờ
+        Builder(
+          builder: (context) {
+            final allBookings = bookingsAsync.valueOrNull ?? [];
+            final mySelectedBooking = allBookings.where((b) {
+              final isMyId = (b.bookedBy != null && b.bookedBy == userId) || b.isMyBooking;
+              return b.timeSlot == _selectedSlot && isMyId && (b.isConfirmed || b.isPendingPayment || b.isWaitlist);
+            }).firstOrNull;
+
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -3),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (widget.amenity.isShared && _selectedSlot != null && !_isWaitlistSelection) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Số người tham gia:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle_outline, size: 20),
-                            onPressed: _guestsCount > 1
-                                ? () => setState(() => _guestsCount--)
-                                : null,
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (mySelectedBooking != null) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, size: 18, color: Colors.orange.shade800),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Bạn đã có lịch (${mySelectedBooking.statusDisplayName}) ở khung giờ này. Để đặt lại hoặc thay đổi, vui lòng hủy lịch hiện tại trước.',
+                                style: TextStyle(fontSize: 12, color: Colors.orange.shade900, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.error,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          Text('$_guestsCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                          IconButton(
-                            icon: const Icon(Icons.add_circle_outline, size: 20),
-                            onPressed: _guestsCount < widget.amenity.maxCapacity
-                                ? () => setState(() => _guestsCount++)
-                                : null,
+                          icon: const Icon(Icons.cancel_outlined),
+                          label: Text(
+                            'Hủy lịch khung giờ $_selectedSlot',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                           ),
-                        ],
+                          onPressed: () => _confirmCancelBooking(mySelectedBooking),
+                        ),
+                      ),
+                    ] else ...[
+                      if (widget.amenity.isShared && _selectedSlot != null && !_isWaitlistSelection) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Số người tham gia:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline, size: 20),
+                                  onPressed: _guestsCount > 1
+                                      ? () => setState(() => _guestsCount--)
+                                      : null,
+                                ),
+                                Text('$_guestsCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline, size: 20),
+                                  onPressed: _guestsCount < widget.amenity.maxCapacity
+                                      ? () => setState(() => _guestsCount++)
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _isWaitlistSelection ? Colors.purple : AppTheme.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          icon: _isSubmitting
+                              ? const SizedBox.shrink()
+                              : Icon(_isWaitlistSelection ? Icons.hourglass_top_outlined : Icons.check_circle_outline),
+                          label: _isSubmitting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                )
+                              : Text(
+                                  _selectedSlot == null
+                                      ? 'Vui lòng chọn 1 khung giờ'
+                                      : (_isWaitlistSelection
+                                          ? 'Vào danh sách chờ khung giờ $_selectedSlot'
+                                          : 'Đặt lịch khung giờ $_selectedSlot'),
+                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                ),
+                          onPressed: _selectedSlot == null || _isSubmitting
+                              ? null
+                              : () => _confirmAndBookSlot(
+                                    slot: _selectedSlot!,
+                                    apartmentId: apartmentId,
+                                    userId: userId,
+                                    isWaitlist: _isWaitlistSelection,
+                                    guestsCount: _guestsCount,
+                                  ),
+                        ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isWaitlistSelection ? Colors.purple : AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                icon: _isSubmitting
-                    ? const SizedBox.shrink()
-                    : Icon(_isWaitlistSelection ? Icons.hourglass_top_outlined : Icons.check_circle_outline),
-                label: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : Text(
-                        _selectedSlot == null
-                            ? 'Vui lòng chọn 1 khung giờ'
-                            : (_isWaitlistSelection
-                                ? 'Vào danh sách chờ khung giờ $_selectedSlot'
-                                : 'Đặt lịch khung giờ $_selectedSlot'),
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                      ),
-                onPressed: _selectedSlot == null || _isSubmitting
-                    ? null
-                    : () => _confirmAndBookSlot(
-                          slot: _selectedSlot!,
-                          apartmentId: apartmentId,
-                          userId: userId,
-                          isWaitlist: _isWaitlistSelection,
-                          guestsCount: _guestsCount,
-                        ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            );
+          },
         ),
-      ),
-    ),
       ],
     );
   }
