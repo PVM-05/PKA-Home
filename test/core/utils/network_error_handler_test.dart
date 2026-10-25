@@ -109,6 +109,18 @@ void main() {
       expect(msg, equals('Kết nối máy chủ bị gián đoạn. Đang kết nối lại...'));
     });
 
+    test('Xử lý AuthException database error saving new user trả về thông điệp tiếng Việt', () {
+      final error = AuthException('Database error saving new user', statusCode: '500');
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, equals('Không thể tạo tài khoản trên hệ thống. Vui lòng liên hệ Ban Quản Lý.'));
+    });
+
+    test('Xử lý raw JSON Auth error string từ SDK trả về thông điệp tiếng Việt', () {
+      final error = Exception('{"code":"unexpected_failure","message":"Database error saving new user"}');
+      final msg = NetworkErrorHandler.getMessage(error);
+      expect(msg, equals('Không thể tạo tài khoản trên hệ thống. Vui lòng liên hệ Ban Quản Lý.'));
+    });
+
     test('Xử lý lỗi bất định khác trả về thông báo an toàn mặc định', () {
       final error = FormatException('Bad format');
       final msg = NetworkErrorHandler.getMessage(error);
