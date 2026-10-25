@@ -47,6 +47,9 @@ void main() {
           ))),
           monthlyRevenueTrendProvider.overrideWith((ref) => Stream.value([])),
           paymentTransactionsProvider.overrideWith((ref) => []),
+          residentsProvider.overrideWith((ref) async => []),
+          apartmentsProvider.overrideWith((ref) async => []),
+          invoicesProvider.overrideWith((ref) async => []),
         ],
         child: const MaterialApp(
           home: ManagementHomeScreen(),

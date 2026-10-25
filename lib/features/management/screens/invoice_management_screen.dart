@@ -347,87 +347,98 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                                 borderRadius: BorderRadius.circular(4),
                                               ),
                                               child: const Text('MỚI', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                            )
-                                          ]
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: _getStatusColor(invoice.status).withValues(alpha: 0.12),
-                                            borderRadius: BorderRadius.circular(4),
-                                            border: isPendingConfirmation
-                                                ? Border.all(color: AppStatusColors.pendingConfirmation.withValues(alpha: 0.4))
-                                                : null,
-                                          ),
+                                    PopupMenuButton<String>(
+                                      icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      onSelected: (value) {
+                                        if (value == 'edit') {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (_) => EditInvoiceScreen(invoice: invoice),
+                                            ),
+                                          );
+                                        } else if (value == 'delete') {
+                                          _confirmDeleteInvoice(invoice);
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 'edit',
                                           child: Row(
-                                            mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              if (isPendingConfirmation) ...[
-                                                const Icon(Icons.rate_review_outlined, size: 12, color: AppStatusColors.pendingConfirmation),
-                                                const SizedBox(width: 4),
-                                              ],
-                                              Text(
+                                              Icon(Icons.edit, size: 18),
+                                              SizedBox(width: 8),
+                                              Text('Chỉnh sửa'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.delete, color: AppTheme.error, size: 18),
+                                              SizedBox(width: 8),
+                                              Text('Xóa', style: TextStyle(color: AppTheme.error)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Flexible(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _getStatusColor(invoice.status).withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: isPendingConfirmation
+                                              ? Border.all(color: AppStatusColors.pendingConfirmation.withValues(alpha: 0.4))
+                                              : null,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (isPendingConfirmation) ...[
+                                              const Icon(Icons.rate_review_outlined, size: 12, color: AppStatusColors.pendingConfirmation),
+                                              const SizedBox(width: 4),
+                                            ],
+                                            Flexible(
+                                              child: Text(
                                                 _getStatusText(invoice.status),
                                                 style: TextStyle(
                                                   color: _getStatusColor(invoice.status),
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.bold,
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuButton<String>(
-                                          icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                          onSelected: (value) {
-                                            if (value == 'edit') {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (_) => EditInvoiceScreen(invoice: invoice),
-                                                ),
-                                              );
-                                            } else if (value == 'delete') {
-                                              _confirmDeleteInvoice(invoice);
-                                            }
-                                          },
-                                          itemBuilder: (context) => [
-                                            const PopupMenuItem(
-                                              value: 'edit',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.edit, size: 18),
-                                                  SizedBox(width: 8),
-                                                  Text('Chỉnh sửa'),
-                                                ],
-                                              ),
-                                            ),
-                                            const PopupMenuItem(
-                                              value: 'delete',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.delete, color: AppTheme.error, size: 18),
-                                                  SizedBox(width: 8),
-                                                  Text('Xóa', style: TextStyle(color: AppTheme.error)),
-                                                ],
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        'Kỳ: ${invoice.period}',
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-                                Text('Kỳ hóa đơn: ${invoice.period}', style: Theme.of(context).textTheme.bodyMedium),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 8),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [

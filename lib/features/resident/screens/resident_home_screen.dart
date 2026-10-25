@@ -631,11 +631,14 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Thông báo mới nhất',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Expanded(
+                      child: Text(
+                        'Thông báo mới nhất',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     announcementsAsync.maybeWhen(
