@@ -244,4 +244,46 @@ void main() {
 
     expect(find.text('Hồ bơi vô cực'), findsOneWidget);
   });
+
+  testWidgets('Dropdown chọn tiện ích tên rất dài không bị RenderFlex overflow trên màn hình hẹp', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    final mockRepo = MockAmenityBookingRepo();
+    final testAmenityLong = BuildingAmenityModel(
+      id: 'amenity-long',
+      name: 'Phòng sinh hoạt cộng đồng Tòa A mở rộng tích hợp khu vui chơi trẻ em',
+      displayOrder: 1,
+      bookingType: 'exclusive',
+      maxCapacity: 50,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authProvider.overrideWith((ref) => FakeAuthNotifier(UserModel(
+                id: 'admin-1',
+                fullName: 'Quản trị viên',
+                phone: '0901234567',
+                role: 'admin',
+              ))),
+          amenityBookingRepositoryProvider.overrideWithValue(mockRepo),
+          buildingAmenitiesProvider.overrideWith((ref) => [testAmenityLong]),
+          amenityBookingsForDateProvider.overrideWith((ref, query) => []),
+          amenityMaintenanceForDateProvider.overrideWith((ref, query) => []),
+        ],
+        child: const MaterialApp(
+          home: AmenityManagementScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Xác nhận không ném ngoại lệ RenderFlex overflow và widget hiển thị bình thường
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+  });
 }
+

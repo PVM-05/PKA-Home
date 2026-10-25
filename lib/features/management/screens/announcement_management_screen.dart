@@ -280,6 +280,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         initialValue: targetType,
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Đối tượng nhận thông báo',
                           prefixIcon: Icon(Icons.group_outlined),
@@ -527,6 +528,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         initialValue: targetType,
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Đối tượng nhận thông báo',
                           prefixIcon: Icon(Icons.group_outlined),
