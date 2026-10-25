@@ -327,59 +327,56 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               ),
               child: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            AppAvatar(
-                              name: fullName,
-                              size: 46,
-                              fontSize: 18,
-                              onTap: () => _onItemTapped(3),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'Xin chào,',
-                                    style: TextStyle(color: Colors.white70, fontSize: 13),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    fullName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
                       Row(
                         children: [
+                          AppAvatar(
+                            name: fullName,
+                            size: 40,
+                            fontSize: 15,
+                            onTap: () => _onItemTapped(3),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'Xin chào,',
+                                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  fullName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Consumer(
                             builder: (context, ref, _) {
                               final unreadCount = ref.watch(unreadNotificationsCountProvider);
                               return IconButton(
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                                 icon: Badge(
                                   isLabelVisible: unreadCount > 0,
                                   label: Text('$unreadCount'),
                                   backgroundColor: AppStatusColors.unpaid,
-                                  child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 24),
+                                  child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
                                 ),
                                 tooltip: 'Thông báo',
                                 onPressed: () {
@@ -388,14 +385,19 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                               );
                             },
                           ),
-                          const ApartmentSwitcherChip(),
+                          const SizedBox(width: 4),
                           IconButton(
-                            icon: const Icon(Icons.logout_outlined, color: Colors.white, size: 24),
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                            icon: const Icon(Icons.logout_outlined, color: Colors.white, size: 22),
                             tooltip: 'Đăng xuất',
                             onPressed: () => _showLogoutDialog(context),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      const ApartmentSwitcherChip(),
                     ],
                   ),
                 ),
@@ -409,36 +411,9 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Quick Actions
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildQuickAction(Icons.payment, 'Thanh toán', () => _onItemTapped(1))
-                        .animate().fade(duration: 300.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
-                    _buildQuickAction(Icons.build_circle_outlined, 'Báo sự cố', () => _onItemTapped(2))
-                        .animate().fade(duration: 300.ms, delay: 100.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
-                    _buildQuickAction(
-                      Icons.emergency_outlined,
-                      'Hotline',
-                      () => context.push(AppRoutes.residentHandbook, extra: 0),
-                    ).animate().fade(duration: 300.ms, delay: 200.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
-                    _buildQuickAction(
-                      Icons.menu_book_outlined,
-                      'Cẩm nang',
-                      () => context.push(AppRoutes.residentHandbook, extra: 1),
-                    ).animate().fade(duration: 300.ms, delay: 300.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                
-                // Cảnh báo gián đoạn dịch vụ bảo trì thiết bị
-                const EquipmentInterruptionBanner(),
-
-                // Dịch vụ & Tiện ích Cư dân
-                _buildResidentServicesSection(context),
-                const SizedBox(height: 24),
-                
-                // Invoice Summary Card
+                // ══════════════════════════════════════════════════════════
+                // 02 · ƯU TIÊN: Tổng quan hóa đơn
+                // ══════════════════════════════════════════════════════════
                 const Text(
                   'Tổng quan hóa đơn',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -548,9 +523,51 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                     onRetry: () => ref.invalidate(residentInvoiceProvider),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 const MaintenanceFundCard(),
-                
+                const SizedBox(height: 20),
+
+                // ══════════════════════════════════════════════════════════
+                // 03 · CẦN QUAN TÂM: Cảnh báo gián đoạn & Thông báo quan trọng
+                // ══════════════════════════════════════════════════════════
+                const EquipmentInterruptionBanner(),
+                const SizedBox(height: 20),
+
+                // ══════════════════════════════════════════════════════════
+                // 04 · THAO TÁC: Lưới thao tác nhanh 4 nút
+                // ══════════════════════════════════════════════════════════
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildQuickAction(Icons.payment, 'Thanh toán', () => _onItemTapped(1))
+                          .animate().fade(duration: 300.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                    ),
+                    Expanded(
+                      child: _buildQuickAction(Icons.build_circle_outlined, 'Báo sự cố', () => _onItemTapped(2))
+                          .animate().fade(duration: 300.ms, delay: 100.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                    ),
+                    Expanded(
+                      child: _buildQuickAction(
+                        Icons.emergency_outlined,
+                        'Hotline',
+                        () => context.push(AppRoutes.residentHandbook, extra: 0),
+                      ).animate().fade(duration: 300.ms, delay: 200.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                    ),
+                    Expanded(
+                      child: _buildQuickAction(
+                        Icons.menu_book_outlined,
+                        'Cẩm nang',
+                        () => context.push(AppRoutes.residentHandbook, extra: 1),
+                      ).animate().fade(duration: 300.ms, delay: 300.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // ══════════════════════════════════════════════════════════
+                // 05 · DỊCH VỤ: Dịch vụ & Tiện ích Cư dân
+                // ══════════════════════════════════════════════════════════
+                _buildResidentServicesSection(context),
                 const SizedBox(height: 24),
                 
                 // Latest Issue Status
@@ -796,26 +813,32 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: AppTheme.primary, size: 24),
             ),
-            child: Icon(icon, color: AppTheme.primary, size: 28),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
