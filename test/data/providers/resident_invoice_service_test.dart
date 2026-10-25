@@ -37,6 +37,7 @@ void main() {
       });
 
       when(() => mockSupabase.rpc('simulate_unified_payment', params: {
+        'p_payment_type': 'INVOICE',
         'p_type': 'INVOICE',
         'p_reference_id': 'inv-101',
         'p_outcome': 'SUCCESS',
