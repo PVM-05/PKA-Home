@@ -78,9 +78,10 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
   RealtimeChannel? _aptChannel;
 
   SupabaseClient get _supabase => _client ?? SupabaseConfig.client;
+  String? get _effectiveUserId => _userId ?? _supabase.auth.currentUser?.id;
 
   ResidentLinkNotifier(this._userId, [this._client]) : super(ResidentLinkStatus(status: LinkStatus.loading)) {
-    if (_userId != null) {
+    if (_effectiveUserId != null) {
       checkStatus();
       _setupRealtime();
     } else {
@@ -89,11 +90,12 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
   }
 
   void _setupRealtime() {
-    if (_userId == null) return;
+    final uid = _effectiveUserId;
+    if (uid == null) return;
 
     try {
       _reqChannel = _supabase
-          .channel('apartment_link_requests_$_userId')
+          .channel('apartment_link_requests_$uid')
           .onPostgresChanges(
             event: PostgresChangeEvent.all,
             schema: 'public',
@@ -101,7 +103,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
             filter: PostgresChangeFilter(
               type: PostgresChangeFilterType.eq,
               column: 'user_id',
-              value: _userId,
+              value: uid,
             ),
             callback: (payload) {
               checkStatus();
@@ -110,7 +112,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
           .subscribe();
 
       _aptChannel = _supabase
-          .channel('residents_apartments_$_userId')
+          .channel('residents_apartments_$uid')
           .onPostgresChanges(
             event: PostgresChangeEvent.all,
             schema: 'public',
@@ -118,7 +120,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
             filter: PostgresChangeFilter(
               type: PostgresChangeFilterType.eq,
               column: 'user_id',
-              value: _userId,
+              value: uid,
             ),
             callback: (payload) {
               checkStatus();
@@ -140,7 +142,8 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
   }
 
   Future<void> checkStatus() async {
-    if (_userId == null) {
+    final uid = _effectiveUserId;
+    if (uid == null) {
       state = ResidentLinkStatus(status: LinkStatus.none);
       return;
     }
@@ -150,7 +153,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
       final res = await _supabase
           .from('residents_apartments')
           .select()
-          .eq('user_id', _userId)
+          .eq('user_id', uid)
           .limit(1)
           .maybeSingle();
 
@@ -164,7 +167,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
       final pendingReq = await _supabase
           .from('apartment_link_requests')
           .select('*, apartments(code)')
-          .eq('user_id', _userId)
+          .eq('user_id', uid)
           .eq('status', 'pending')
           .limit(1)
           .maybeSingle();
@@ -183,7 +186,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
       final req = await _supabase
           .from('apartment_link_requests')
           .select()
-          .eq('user_id', _userId)
+          .eq('user_id', uid)
           .order('created_at', ascending: false)
           .limit(1)
           .maybeSingle();
@@ -206,7 +209,8 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
   }
 
   Future<void> cancelPendingRequest([String? reqId]) async {
-    if (_userId == null) {
+    final uid = _effectiveUserId;
+    if (uid == null) {
       throw const AppException('Vui lòng đăng nhập để thực hiện thao tác này.');
     }
 
@@ -217,7 +221,7 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
         final pending = await _supabase
             .from('apartment_link_requests')
             .select('id')
-            .eq('user_id', _userId)
+            .eq('user_id', uid)
             .eq('status', 'pending')
             .limit(1)
             .maybeSingle();
@@ -251,19 +255,45 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
   }
 
   Future<void> submitRequest(String code, String relationRole) async {
-
-    if (_userId == null) {
+    final uid = _effectiveUserId;
+    if (uid == null) {
       throw const AppException('Vui lòng đăng nhập để thực hiện thao tác này.');
+    }
+
+    final cleanCode = code.trim().toUpperCase();
+    if (cleanCode.isEmpty) {
+      throw const AppException('Vui lòng nhập mã căn hộ.');
     }
 
     try {
       state = ResidentLinkStatus(status: LinkStatus.loading);
 
-      // Chặn tạo yêu cầu mới nếu đã có một yêu cầu đang pending
+      // 1. Ưu tiên gọi RPC submit_apartment_link_request nguyên tử
+      try {
+        final rpcRes = await _supabase.rpc('submit_apartment_link_request', params: {
+          'p_apartment_code': cleanCode,
+          'p_relation_role': relationRole,
+        });
+
+        if (rpcRes != null && rpcRes is Map && rpcRes['success'] == true) {
+          await checkStatus();
+          return;
+        }
+      } on PostgrestException catch (pe) {
+        // Lỗi nghiệp vụ từ RPC (căn hộ không tồn tại, đang chờ duyệt,...) -> hiển thị trực tiếp
+        if (pe.message.isNotEmpty && !pe.message.contains('function') && !pe.message.contains('not found')) {
+          await checkStatus();
+          throw AppException(NetworkErrorHandler.getMessage(pe));
+        }
+      } catch (e) {
+        if (e is AppException) rethrow;
+      }
+
+      // 2. Dự phòng an toàn (Fallback): Thao tác client trực tiếp
       final existingPending = await _supabase
           .from('apartment_link_requests')
           .select('id')
-          .eq('user_id', _userId)
+          .eq('user_id', uid)
           .eq('status', 'pending')
           .limit(1)
           .maybeSingle();
@@ -273,25 +303,27 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
         throw const AppException('Bạn đang có một yêu cầu liên kết đang chờ Ban quản lý phê duyệt. Vui lòng chờ xử lý trước khi gửi yêu cầu mới.');
       }
       
-      // Lấy ID căn hộ từ mã (code) (Chuyển sang viết hoa để không bị lỗi A0110 vs a0110)
+      // Lấy ID căn hộ từ mã (code)
       final res = await _supabase
-          .rpc('find_apartment_by_code', params: {'p_code': code.toUpperCase()});
+          .rpc('find_apartment_by_code', params: {'p_code': cleanCode});
           
       if (res == null || (res as List).isEmpty) {
-        throw const AppException('Không tìm thấy căn hộ với mã này.');
+        throw AppException('Không tìm thấy căn hộ với mã $cleanCode trong hệ thống.');
       }
       
       final apartmentId = res[0]['id'];
       
-      // Xóa các request cũ bị rejected trước khi tạo mới (tránh trùng lặp)
-      await _supabase
-          .from('apartment_link_requests')
-          .delete()
-          .eq('user_id', _userId)
-          .eq('status', 'rejected');
+      // Xóa các request cũ bị rejected/cancelled trước khi tạo mới
+      try {
+        await _supabase
+            .from('apartment_link_requests')
+            .delete()
+            .eq('user_id', uid)
+            .inFilter('status', ['rejected', 'cancelled']);
+      } catch (_) {}
 
       await _supabase.from('apartment_link_requests').insert({
-        'user_id': _userId,
+        'user_id': uid,
         'apartment_id': apartmentId,
         'requested_relation_role': relationRole,
         'status': 'pending',
