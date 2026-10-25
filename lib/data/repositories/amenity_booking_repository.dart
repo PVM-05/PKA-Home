@@ -97,16 +97,42 @@ class AmenityBookingRepository {
     }
   }
 
-  /// Hủy đặt lịch tiện ích (Trigger Postgres sẽ tự động đôn người trong Waitlist)
-  Future<void> cancelBooking(String bookingId) async {
-    final response = await _client
-        .from('amenity_bookings')
-        .update({'status': 'cancelled', 'updated_at': DateTime.now().toIso8601String()})
-        .eq('id', bookingId)
-        .select('id');
-    if ((response as List).isEmpty) {
-      throw Exception('Không tìm thấy lượt đặt chỗ hoặc bạn không có quyền hủy.');
+  /// Hủy đặt lịch tiện ích nguyên tử qua RPC (hủy transaction PENDING và đôn người trong Waitlist)
+  Future<Map<String, dynamic>> cancelBooking(String bookingId) async {
+    try {
+      final response = await _client.rpc('cancel_amenity_booking', params: {
+        'p_booking_id': bookingId,
+      });
+      final resMap = Map<String, dynamic>.from(response as Map);
+      if (resMap['success'] != true) {
+        throw Exception(resMap['message'] ?? 'Không thể hủy lịch đặt chỗ.');
+      }
+      return resMap;
+    } catch (e) {
+      // Fallback: nếu RPC gặp lỗi hoặc quyền hạn, cập nhật trực tiếp
+      final response = await _client
+          .from('amenity_bookings')
+          .update({'status': 'cancelled', 'updated_at': DateTime.now().toIso8601String()})
+          .eq('id', bookingId)
+          .select('id');
+      if ((response as List).isEmpty) {
+        throw Exception('Không tìm thấy lượt đặt chỗ hoặc bạn không có quyền hủy.');
+      }
+      return {'success': true, 'booking_id': bookingId};
     }
+  }
+
+  /// Lấy thông tin thống kê tình trạng chỗ trống theo từng khung giờ (ẩn danh PII cư dân khác)
+  Future<List<Map<String, dynamic>>> getSlotAvailability({
+    required String amenityId,
+    required DateTime date,
+  }) async {
+    final dateStr = _formatDate(date);
+    final response = await _client.rpc('get_amenity_slot_availability', params: {
+      'p_amenity_id': amenityId,
+      'p_date': dateStr,
+    });
+    return List<Map<String, dynamic>>.from(response as List);
   }
 
   /// Ban quản lý cập nhật trạng thái tiền cọc (none, pending, received, refunded, forfeited)

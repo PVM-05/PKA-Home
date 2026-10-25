@@ -136,17 +136,10 @@ class IssueRepository {
     // 2. Dọn dẹp ảnh trên Supabase Storage nếu có
     if (imageUrls != null && imageUrls.isNotEmpty) {
       try {
-        final filePaths = <String>[];
-        for (final url in imageUrls) {
-          final uri = Uri.tryParse(url);
-          if (uri != null) {
-            final segments = uri.pathSegments;
-            final bucketIndex = segments.indexOf('issue-images');
-            if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
-              filePaths.add(segments.sublist(bucketIndex + 1).join('/'));
-            }
-          }
-        }
+        final filePaths = imageUrls
+            .map(extractStoragePath)
+            .where((p) => p.isNotEmpty)
+            .toList();
         if (filePaths.isNotEmpty) {
           await _client.storage.from('issue-images').remove(filePaths);
         }
@@ -177,17 +170,10 @@ class IssueRepository {
           .inFilter('image_url', removedImageUrls);
 
       try {
-        final filePaths = <String>[];
-        for (final url in removedImageUrls) {
-          final uri = Uri.tryParse(url);
-          if (uri != null) {
-            final segments = uri.pathSegments;
-            final bucketIndex = segments.indexOf('issue-images');
-            if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
-              filePaths.add(segments.sublist(bucketIndex + 1).join('/'));
-            }
-          }
-        }
+        final filePaths = removedImageUrls
+            .map(extractStoragePath)
+            .where((p) => p.isNotEmpty)
+            .toList();
         if (filePaths.isNotEmpty) {
           await _client.storage.from('issue-images').remove(filePaths);
         }
@@ -206,11 +192,10 @@ class IssueRepository {
 
           await _client.storage.from('issue-images').upload(fileName, file);
 
-          final imageUrl = _client.storage.from('issue-images').getPublicUrl(fileName);
-
+          // Lưu trực tiếp object path (fileName) để bảo mật cho bucket private
           await _client.from('issue_images').insert({
             'issue_report_id': issueId,
-            'image_url': imageUrl,
+            'image_url': fileName,
           });
         } catch (e, stack) {
           AppLogger.e('Lỗi tải ảnh mới khi chỉnh sửa sự cố: $e', e, stack);
@@ -313,21 +298,27 @@ class IssueRepository {
     return _client.from('issue_ratings').stream(primaryKey: ['id']);
   }
 
+  /// Trích xuất object path thuần túy từ URL hoặc path hiện có
+  static String extractStoragePath(String urlOrPath) {
+    if (urlOrPath.isEmpty) return '';
+    if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+      final uri = Uri.tryParse(urlOrPath);
+      if (uri != null) {
+        final segments = uri.pathSegments;
+        final bucketIndex = segments.indexOf('issue-images');
+        if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
+          return segments.sublist(bucketIndex + 1).join('/');
+        }
+      }
+    }
+    return urlOrPath;
+  }
+
   /// Trích xuất object path và sinh Signed URL mới cho ảnh sự cố
   Future<String> getSignedImageUrl(String urlOrPath, {int expiresIn = 60 * 60 * 24 * 30}) async {
     try {
       if (urlOrPath.isEmpty) return '';
-      String objectPath = urlOrPath;
-      if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
-        final uri = Uri.parse(urlOrPath);
-        final segments = uri.pathSegments;
-        final bucketIndex = segments.indexOf('issue-images');
-        if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
-          objectPath = segments.sublist(bucketIndex + 1).join('/');
-        } else {
-          return urlOrPath;
-        }
-      }
+      final objectPath = extractStoragePath(urlOrPath);
       return await _client.storage.from('issue-images').createSignedUrl(objectPath, expiresIn);
     } catch (_) {
       return urlOrPath;

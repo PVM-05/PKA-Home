@@ -174,12 +174,26 @@ class HandbookRepository {
     String? description,
     String? openHours,
     int displayOrder = 0,
+    String bookingType = 'exclusive',
+    int maxCapacity = 1,
+    int slotDurationMinutes = 90,
+    double feeAmount = 0.0,
+    double depositAmount = 0.0,
+    bool requiresDeposit = false,
+    bool isActive = true,
   }) async {
     await _client.from('building_amenities').insert({
       'name': name,
       'description': description,
       'open_hours': openHours,
       'display_order': displayOrder,
+      'booking_type': bookingType,
+      'max_capacity': maxCapacity,
+      'slot_duration_minutes': slotDurationMinutes,
+      'fee_amount': feeAmount,
+      'deposit_amount': depositAmount,
+      'requires_deposit': requiresDeposit,
+      'is_active': isActive,
     });
   }
 
@@ -189,13 +203,29 @@ class HandbookRepository {
     String? description,
     String? openHours,
     int displayOrder = 0,
+    String? bookingType,
+    int? maxCapacity,
+    int? slotDurationMinutes,
+    double? feeAmount,
+    double? depositAmount,
+    bool? requiresDeposit,
+    bool? isActive,
   }) async {
-    await _client.from('building_amenities').update({
+    final payload = <String, dynamic>{
       'name': name,
       'description': description,
       'open_hours': openHours,
       'display_order': displayOrder,
-    }).eq('id', id);
+    };
+    if (bookingType != null) payload['booking_type'] = bookingType;
+    if (maxCapacity != null) payload['max_capacity'] = maxCapacity;
+    if (slotDurationMinutes != null) payload['slot_duration_minutes'] = slotDurationMinutes;
+    if (feeAmount != null) payload['fee_amount'] = feeAmount;
+    if (depositAmount != null) payload['deposit_amount'] = depositAmount;
+    if (requiresDeposit != null) payload['requires_deposit'] = requiresDeposit;
+    if (isActive != null) payload['is_active'] = isActive;
+
+    await _client.from('building_amenities').update(payload).eq('id', id);
   }
 
   Future<void> deleteBuildingAmenity(String id) async {
