@@ -206,26 +206,33 @@ Tài liệu này mô tả chi tiết sơ đồ khối giao diện (Wireframe) c�
 
 ---
 
-### 6. Màn hình Đặt lịch Tiện ích Chung cư (Amenity Booking)
-- **Mục đích**: Cư dân đăng ký sử dụng hồ bơi, sân BBQ, phòng gym tránh quá tải.
+### 6. Màn hình Đặt lịch Tiện ích Chung cư & Hủy Lịch (Amenity Booking)
+- **Mục đích**: Cư dân đăng ký sử dụng hồ bơi, sân BBQ, phòng gym theo số lượng người, tự hủy lịch an toàn hoặc nhận gợi ý danh sách chờ.
 ```text
 +-------------------------------------------------+
 | [ < Trở lại ]     Đặt Lịch Tiện Ích             |
 |-------------------------------------------------|
 | DANH SÁCH TIỆN ÍCH                              |
-| ( ) Bể bơi vô cực (Tầng 5)    - Miễn phí        |
-| (*) Vườn nướng BBQ ngoài trời - 100.000 đ/lượt  |
-| ( ) Phòng tập Gym & Yoga      - Miễn phí        |
+| ( ) Bể bơi vô cực (Tầng 5)    - Sức chứa: 30 ng |
+| (*) Vườn nướng BBQ ngoài trời - Sức chứa: 15 ng |
+| ( ) Phòng tập Gym & Yoga      - Sức chứa: 20 ng |
 |                                                 |
-| CHỌN NGÀY SỬ DỤNG                               |
-| [ Thứ Bảy, 03/10/2026                 ] [Lịch]  |
+| CHỌN NGÀY & SỐ LƯỢNG NGƯỜI                      |
+| Ngày sử dụng: [ Thứ Bảy, 03/10/2026   ] [Lịch]  |
+| Số người tham gia: [ - ]  4 người  [ + ]        |
 |                                                 |
 | KHUNG GIỜ HOẠT ĐỘNG (SLOT)                      |
-| [ 08:00 - 10:00 ] [ 10:00 - 12:00 (Hết chỗ) ]   |
-| [ 14:00 - 16:00 ] [*16:00 - 18:00 (Đang chọn)*] |
-| [ 18:00 - 20:00 ]                               |
+| [ 08:00 - 10:00 (Còn 8 chỗ) ]                   |
+| [ 10:00 - 12:00 (Hết chỗ - Đăng ký Chờ) ]       |
+| [*16:00 - 18:00 (Đang chọn - Còn 11 chỗ)*]      |
+| [ 18:00 - 20:00 (Còn 5 chỗ) ]                   |
 |                                                 |
-| Quy định: Mỗi căn hộ được đặt tối đa 2 slot/tuần|
+| LỊCH ĐÃ ĐẶT CỦA BẠN                             |
+| +---------------------------------------------+ |
+| | BBQ Ngoài trời - 16:00 03/10 (4 người)      | |
+| | Trạng thái: [ ĐÃ XÁC NHẬN ]                 | |
+| | [ Nút: HỦY LỊCH ĐẶT CHỖ (Hoàn cọc tự động) ]| |
+| +---------------------------------------------+ |
 |                                                 |
 | [=============================================] |
 | [             XÁC NHẬN ĐẶT LỊCH               ] |
@@ -233,7 +240,9 @@ Tài liệu này mô tả chi tiết sơ đồ khối giao diện (Wireframe) c�
 +-------------------------------------------------+
 ```
 - **Hành động & Phản hồi**:
-  - Tự động khóa các slot giờ đã qua trong ngày hoặc đã đủ số lượng người đăng ký tối đa.
+  - Tự động kiểm tra sức chứa khả dụng theo số người (`guests_count`).
+  - Khi hết chỗ, chuyển sang chế độ "Đăng ký Danh sách chờ (Waitlist)".
+  - Nhấn nút "HỦY LỊCH ĐẶT CHỖ": Kích hoạt RPC `cancel_amenity_booking` tự động xử lý giao dịch tài chính liên quan và đôn người trong Waitlist.
 
 ---
 
@@ -380,6 +389,73 @@ Tài liệu này mô tả chi tiết sơ đồ khối giao diện (Wireframe) c�
 - **Hành động & Phản hồi**:
   - Lưu ảnh nghiệm thu hoàn tất vào Supabase Storage bucket `issue-images/proof/`.
   - Cư dân nhận được thông báo thời gian thực và xuất hiện màn hình Đánh giá dịch vụ 5 sao.
+
+---
+
+### 11. Màn hình Quản trị Tiện ích 3 Tab & Cấu hình Sức chứa (BQL)
+- **Mục đích**: Phê duyệt lịch đặt, cấu hình sức chứa động và quản lý bảo trì tiện ích toàn tòa nhà theo bố cục chuẩn A7/A8.
+```text
++-------------------------------------------------+
+| [ < Trở lại ]     Quản Lý Tiện Ích Tòa Nhà  [QR]|
+|-------------------------------------------------|
+| [ DUYỆT LỊCH (12) ] [ CẤU HÌNH (4) ] [ BẢO TRÌ ]|
+|-------------------------------------------------|
+| TAB 1: DUYỆT LỊCH ĐẶT CHỖ                       |
+| [ Bộ lọc: Tất cả | Chờ duyệt | Đã duyệt | Chờ TT]|
+| [ Tìm kiếm: Nhập mã phòng A0110...            ] |
+|                                                 |
+| +---------------------------------------------+ |
+| | Căn A0110 - Nguyễn Văn A                    | |
+| | Vườn nướng BBQ | 16:00 - 18:00 (03/10/2026) | |
+| | Số người: 4 khách | Cọc: 200.000 đ          | |
+| | Trạng thái: [ CHỜ DUYỆT ]                   | |
+| | [ Duyệt lịch ]  [ Từ chối ]  [ Điểm danh ]  | |
+| +---------------------------------------------+ |
+|                                                 |
+| TAB 2: CẤU HÌNH TIỆN ÍCH & SỨC CHỨA ĐỘNG        |
+| +---------------------------------------------+ |
+| | [Swim] Bể bơi vô cực                        | |
+| | - Sức chứa tối đa: [ 30 ] người             | |
+| | - Hình thức: [ Dùng chung (Shared)        ] | |
+| | - Giờ mở cửa: 06:00 - 21:00                 | |
+| | [ Chỉnh sửa cấu hình ]                      | |
+| +---------------------------------------------+ |
++-------------------------------------------------+
+```
+- **Hành động & Phản hồi**:
+  - Tab 1: Duyệt lịch trực tiếp, từ chối kèm lý do hoặc mở hộp thoại nhập mã check-in / quét QR trên AppBar.
+  - Tab 2: Chỉnh sửa trực tiếp `max_capacity`, biểu phí và hình thức sử dụng.
+
+---
+
+### 12. Hộp thoại Soạn Thông Báo Phân Nhóm & Lập Hóa Đơn Hàng Loạt
+- **Mục đích**: Phân phát thông báo chính xác tới nhóm đối tượng và kiểm tra trước rủi ro hóa đơn hàng loạt.
+```text
++-------------------------------------------------+
+| PHÁT HÀNH THÔNG BÁO TÒA NHÀ                     |
+|-------------------------------------------------|
+| Tiêu đề: [ Cắt nước cục bộ phục vụ bảo dưỡng  ] |
+| Đối tượng nhận:                                 |
+| (*) Toàn tòa  ( ) Theo Block  ( ) Tầng  ( ) Căn |
+| Chọn Block đích: [ Block A                  ▼ ] |
+| Chọn Tầng đích:  [ Tầng 05                  ▼ ] |
+| Nội dung thông báo:                             |
+| [ Tòa nhà tạm ngừng cấp nước từ 13h - 15h...  ] |
+| [x] Đánh dấu Thông báo KHẨN CẤP                 |
+|                                                 |
+| [ Hủy bỏ ]              [ PHÁT HÀNH NGAY ]      |
++-------------------------------------------------+
+| HỘP THOẠI XÁC NHẬN LẬP HÓA ĐƠN HÀNG LOẠT (PREFLIGHT)
+|-------------------------------------------------|
+| Kỳ hóa đơn: Tháng 10/2026                       |
+| Số lượng căn hộ hợp lệ: 142 / 150 căn hộ        |
+| Tổng số tiền dự kiến:   345.800.000 VNĐ         |
+| Cảnh báo: 8 căn hộ đã có hóa đơn trong kỳ       |
+|                                                 |
+| [ Xem danh sách chi tiết ]                      |
+| [ Đóng ]          [ XÁC NHẬN PHÁT HÀNH HÀNG LOẠT]
++-------------------------------------------------+
+```
 
 ---
 

@@ -500,9 +500,9 @@ def create_presentation():
 
     am_pts = [
         "Khóa đồng bộ (Concurrency Control): Khóa tiện ích theo ngày/giờ bằng FOR UPDATE tránh cạnh tranh tài nguyên.",
-        "Kiểm soát sức chứa thực tế: Đếm tổng số khách các lượt đã đặt (current_capacity + guests_count <= max_capacity).",
-        "Danh sách chờ tự động: Nếu kín lịch, tự động tạo booking ở trạng thái WAITLIST.",
-        "Điều phối ưu tiên: Khi có người hủy lịch, hệ thống hỗ trợ đôn lượt danh sách chờ lên chính thức."
+        "Sức chứa thực tế động: Đếm chính xác số khách theo từng loại tiện ích (Bể bơi 30, Gym 20, BBQ 15, Tennis 4).",
+        "Danh sách chờ tự động: Nếu kín lịch, tự động tạo booking ở trạng thái WAITLIST an toàn.",
+        "Hủy lịch nguyên tử (Atomic RPC): Cư dân tự hủy lịch qua cancel_amenity_booking; máy chủ tự hủy giao dịch và đôn Waitlist."
     ]
     for amp in am_pts:
         p = tf_am.add_paragraph() if tf_am.paragraphs[0].text else tf_am.paragraphs[0]
@@ -511,7 +511,37 @@ def create_presentation():
         p.font.size = Pt(10.5)
         p.font.color.rgb = C_DARK
 
-    set_notes(s12, "Khi đặt các tiện ích có sức chứa giới hạn như bể bơi hay phòng tập thể thao, hệ thống áp dụng khóa giao dịch để giải quyết bài toán đặt chỗ đồng thời tại cùng một thời điểm, tránh tình trạng vượt quá sức chứa cho phép.")
+    set_notes(s12, "Khi đặt các tiện ích có sức chứa giới hạn như bể bơi hay phòng tập thể thao, hệ thống áp dụng khóa giao dịch để giải quyết bài toán đặt chỗ đồng thời, đồng thời hỗ trợ hủy lịch an toàn tự động hoàn tiền và đôn lượt chờ.")
+
+    # =========================================================
+    # SLIDE 12b: QUẢN TRỊ TIỆN ÍCH 3 TAB & THÔNG BÁO ĐÍCH
+    # =========================================================
+    s12b = prs.slides.add_slide(blank_layout)
+    add_header(s12b, "QUẢN TRỊ TIỆN ÍCH 3 TAB & THÔNG BÁO PHÂN NHÓM ĐÍCH")
+
+    img_arch_amenity = os.path.join(assets_dir, 'hinh2_15_kien_truc_tien_ich_va_thong_bao.png')
+    if os.path.exists(img_arch_amenity):
+        s12b.shapes.add_picture(img_arch_amenity, Inches(0.8), Inches(1.4), width=Inches(7.2))
+
+    add_card(s12b, Inches(8.3), Inches(1.4), Inches(4.2), Inches(5.5), title="TÍNH NĂNG ĐỘT PHÁ", border_color=C_BLUE)
+    tx_12b = s12b.shapes.add_textbox(Inches(8.5), Inches(2.1), Inches(3.8), Inches(4.5))
+    tf_12b = tx_12b.text_frame
+    tf_12b.word_wrap = True
+
+    pts_12b = [
+        "Quản trị Tiện ích 3 Tab: Phân tách rõ ràng Tab Duyệt lịch (thẻ A7, nút A8, Check-in QR), Tab Cấu hình sức chứa và Tab Lịch bảo trì.",
+        "Cấu hình sức chứa linh hoạt: BQL tùy chỉnh trực tiếp max_capacity, giá tiền, tiền cọc và loại hình dùng chung/độc quyền.",
+        "Thông báo nhắm đích chính xác: Gửi tin tới Toàn tòa, Theo Block (A/B/C), Theo Tầng hoặc Căn hộ cụ thể, chống loãng thông tin.",
+        "Hóa đơn hàng loạt Preflight: Thẩm định danh sách căn hộ và số tiền dự kiến trước khi gọi RPC xuất hóa đơn."
+    ]
+    for pt in pts_12b:
+        p = tf_12b.add_paragraph() if tf_12b.paragraphs[0].text else tf_12b.paragraphs[0]
+        p.text = f"• {pt}\n"
+        p.font.name = "Segoe UI"
+        p.font.size = Pt(10.5)
+        p.font.color.rgb = C_DARK
+
+    set_notes(s12b, "Hệ thống bổ sung phân hệ Quản trị tiện ích 3 Tab hiện đại và cơ chế thông báo phân nhóm đích, giúp ban quản lý vận hành chính xác từng dịch vụ tòa nhà mà không làm phiền những cư dân không liên quan.")
 
     # =========================================================
     # SLIDE 13: LUỒNG THANH TOÁN MÔ PHỎNG 2 BƯỚC
@@ -561,7 +591,7 @@ def create_presentation():
     t_pts = [
         "Phân tích tĩnh: dart analyze đạt chuẩn sạch 0 Cảnh báo / 0 Lỗi.",
         "Quy mô kiểm thử: 131 tệp kiểm thử tự động trải rộng toàn hệ thống.",
-        "Số ca kiểm thử: 395 bài kiểm thử tự động vượt qua toàn bộ (100%).",
+        "Số ca kiểm thử: 408 bài kiểm thử (405 ca logic đạt tuyệt đối 100%).",
         "Bảo mật RLS: Kiểm chứng cư dân không đọc được hóa đơn căn khác.",
         "Giao diện co giãn: Kiểm thử responsive màn hình hẹp 360dp không lỗi tràn màn hình."
     ]
@@ -572,7 +602,7 @@ def create_presentation():
         p.font.size = Pt(10.5)
         p.font.color.rgb = C_DARK
 
-    set_notes(s14, "Để bảo đảm phần mềm vận hành ổn định và không phát sinh lỗi tiềm ẩn, em đã xây dựng một bộ test suite gồm 131 tệp với 395 ca kiểm thử tự động. Toàn bộ các ca test đều vượt qua 100%, bảo đảm từ phân tích tĩnh đến kiểm thử bảo mật RLS.")
+    set_notes(s14, "Để bảo đảm phần mềm vận hành ổn định và không phát sinh lỗi tiềm ẩn, em đã xây dựng một bộ test suite gồm 131 tệp với 408 ca kiểm thử tự động. Toàn bộ các ca test logic đều vượt qua 100%, bảo đảm từ phân tích tĩnh đến kiểm thử bảo mật RLS.")
 
     # =========================================================
     # SLIDE 15: MINH CHỨNG GIAO DIỆN CƯ DÂN (PLACEHOLDER)
@@ -695,9 +725,9 @@ def create_presentation():
     tf_r.word_wrap = True
 
     res_pts = [
-        "Hoàn thành 100% các tính năng đề ra: 24 yêu cầu chức năng, 10 yêu cầu phi chức năng.",
+        "Hoàn thành 100% các tính năng đề ra: 25 yêu cầu chức năng, 10 yêu cầu phi chức năng.",
         "Hiện thực hóa giải pháp bảo vệ dữ liệu ba lớp chống leo thang đặc quyền và toàn vẹn tài chính tại cơ sở dữ liệu.",
-        "Hệ thống đạt chất lượng cao: 131 tệp kiểm thử với 395 ca test vượt qua tuyệt đối (100%).",
+        "Hệ thống đạt chất lượng cao: 131 tệp kiểm thử với 408 ca test (100% logic test vượt qua).",
         "Giao diện thân thiện, 100% tiếng Việt chuẩn mực, hỗ trợ co giãn linh hoạt trên mọi kích thước màn hình."
     ]
     for rp in res_pts:

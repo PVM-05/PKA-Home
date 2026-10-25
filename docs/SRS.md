@@ -10,27 +10,40 @@
 
 ## 3. Danh sách Use Case (Trường hợp sử dụng)
 
-### 3.1. Dành cho Cư dân
-- **UC-R1 (Đăng ký & Đăng nhập)**: Đăng ký tài khoản (họ tên, email, mật khẩu) và đăng nhập vào hệ thống.
-- **UC-R2 (Xin liên kết căn hộ)**: Nhập mã căn hộ (`a0110`), chọn vai trò (chủ hộ/người thuê), theo dõi trạng thái phê duyệt.
-- **UC-R3 (Trang chủ & Xem thông báo)**: Nhận và xem nội dung các thông báo, tin tức từ BQL (có gắn nhãn khẩn cấp).
-- **UC-R4 (Quản lý hóa đơn)**: Xem danh sách hóa đơn theo kỳ, phân rã chi tiết từng khoản phí (điện, nước, dịch vụ) và tổng tiền.
-- **UC-R5 (Báo đã thanh toán)**: Cập nhật trạng thái "chờ xác nhận" (`pending_confirmation`) qua RPC bảo mật kèm minh chứng.
-- **UC-R6 (Gửi phản ánh sự cố)**: Tạo phiếu yêu cầu hỗ trợ kèm ảnh, tự động phân loại mức độ ưu tiên theo từ khóa.
-- **UC-R7 (Theo dõi tiến độ)**: Xem trạng thái xử lý phản ánh (chờ tiếp nhận → đang xử lý → hoàn thành).
+### 3.1. Dành cho Cư dân (Resident)
+- **UC-R01 (Đăng ký & Đăng nhập)**: Đăng ký tài khoản (họ tên, email, mật khẩu) và đăng nhập hệ thống bảo mật.
+- **UC-R02 (Xin liên kết căn hộ)**: Nhập mã căn hộ chuẩn (`A0110`), chọn vai trò (chủ hộ/người thuê), theo dõi duyệt và tự hủy yêu cầu chờ.
+- **UC-R03 (Xem bảng tin & Thông báo đích)**: Nhận thông báo tòa nhà được phân nhóm linh hoạt (Toàn tòa, Theo block, Theo tầng, Căn hộ cụ thể).
+- **UC-R04 (Tra cứu hóa đơn & Chi tiết phí)**: Xem danh sách hóa đơn, phân rã chi tiết từng khoản phí (điện, nước, quản lý, gửi xe) tự động tính toán.
+- **UC-R05 (Thanh toán mô phỏng hai bước)**: Thanh toán an toàn qua VietQR mô phỏng hoặc chuyển khoản, tự động cập nhật trạng thái `pending_confirmation`.
+- **UC-R06 (Khai báo chỉ số điện nước)**: Nhập số điện/nước hàng tháng và chụp ảnh công tơ thực tế gửi Ban Quản Lý thẩm định.
+- **UC-R07 (Đặt lịch tiện ích & Chọn số người)**: Đặt khung giờ tiện ích, chọn số lượng người đi cùng (`guests_count`), tự động xếp vào danh sách chờ (`waitlist`) khi kín chỗ.
+- **UC-R08 (Tự hủy lịch tiện ích an toàn)**: Cư dân tự bấm hủy lịch trên giao diện co giãn không tràn viền, gọi RPC nguyên tử tự động hoàn cọc/hủy phí và đôn người tiếp theo từ danh sách chờ.
+- **UC-R09 (Đăng ký & Quản lý phương tiện)**: Đăng ký biển số xe máy, ô tô theo hạn mức tòa nhà, theo dõi duyệt và báo hủy phương tiện khi không còn gửi.
+- **UC-R10 (Gửi phản ánh sự cố kỹ thuật)**: Tạo phiếu hỗ trợ sự cố, tự động phân loại ưu tiên theo từ khóa, đính kèm ảnh lưu trữ vùng an toàn (Private Storage).
+- **UC-R11 (Chấm điểm đánh giá chất lượng)**: Khảo sát đánh giá 1 - 5 sao theo 3 tiêu chí (tốc độ, thái độ, chất lượng) khi sự cố được hoàn thành.
+- **UC-R12 (Cẩm nang & Danh bạ khẩn cấp)**: Tra cứu quy định tòa nhà, giờ mở cửa tiện ích, nội quy sinh hoạt và đường dây nóng ban quản lý.
 
-### 3.2. Dành cho Ban quản lý
-- **UC-M1 (Đăng nhập)**: Đăng nhập bằng tài khoản quản trị viên do hệ thống cấp sẵn.
-- **UC-M2 (Duyệt liên kết căn hộ)**: Phê duyệt hoặc từ chối các yêu cầu xin liên kết căn hộ từ cư dân.
-- **UC-M3 (Quản lý căn hộ & cư dân)**: Xem, thêm, sửa danh sách căn hộ (`a0110`), trạng thái trống/đã ở và danh sách cư dân liên kết.
-- **UC-M4 (Lập hóa đơn)**: Tạo hóa đơn hàng tháng cho từng căn hộ với các khoản phí chi tiết (`invoice_items`).
-- **UC-M5 (Xác nhận thanh toán)**: Kiểm tra minh chứng và duyệt chuyển trạng thái hóa đơn sang `paid`.
-- **UC-M6 (Thống kê tài chính & nợ)**: Xem tỷ lệ lấp đầy, doanh thu theo kỳ và tổng nợ đọng.
-- **UC-M7 (Xử lý phản ánh)**: Tiếp nhận phản ánh, phân công nhân viên xử lý và cập nhật tiến độ.
-- **UC-M8 (Soạn & gửi thông báo)**: Soạn thảo và phát thông báo diện rộng tới toàn bộ cư dân (có tùy chọn khẩn cấp).
+### 3.2. Dành cho Ban Quản Lý & Vận Hành (Management)
+- **UC-M01 (Quản lý danh mục căn hộ)**: Xem, thêm, sửa danh sách căn hộ theo chuẩn `A0110`, diện tích, số tầng, tình trạng trống/đã ở và cư dân liên kết.
+- **UC-M02 (Duyệt liên kết căn hộ)**: Phê duyệt hoặc từ chối yêu cầu liên kết căn hộ kèm lý do phản hồi cho cư dân.
+- **UC-M03 (Thẩm định chỉ số điện nước)**: So sánh ảnh chụp công tơ thực tế của cư dân, duyệt hoặc từ chối chỉ số điện nước định kỳ.
+- **UC-M04 (Lập hóa đơn hàng loạt an toàn)**: Phát hành hóa đơn đơn lẻ hoặc hàng loạt có bước kiểm tra trước (Preflight validation) ngăn ngừa sai sót dữ liệu.
+- **UC-M05 (Đối soát & Xác nhận thanh toán)**: Duyệt hóa đơn chuyển khoản sang `paid` và hỗ trợ thu tiền mặt/chuyển khoản trực tiếp tại quầy qua `SegmentedButton`.
+- **UC-M06 (Quản lý phương tiện cư dân)**: Thẩm định hồ sơ đăng ký xe máy/ô tô, duyệt biển số và tự động đồng bộ biểu phí gửi xe vào kỳ hóa đơn.
+- **UC-M07 (Quản trị Tiện ích 3 Tab)**:
+  - *Tab 1 (Duyệt lịch đặt chỗ)*: Danh sách phiếu đặt toàn tòa nhà theo thẻ chuẩn A7, bộ lọc trạng thái, tìm kiếm phòng, nút duyệt/từ chối/thu cọc chuẩn A8.
+  - *Tab 2 (Cấu hình tiện ích & Sức chứa động)*: Tùy chỉnh sức chứa tối đa (`max_capacity`) thực tế (Bể bơi: 30, Gym: 20, BBQ: 15), hình thức dùng chung/trọn gói, giá và tiền cọc.
+  - *Tab 3 (Lịch bảo trì)*: Bộ chọn tiện ích và ngày độc lập, lên lịch vệ sinh bảo dưỡng định kỳ và tạm khóa khung giờ đặt chỗ.
+- **UC-M08 (Điểm danh Check-in sử dụng)**: Nút Check-in trực tiếp trên thẻ hoặc mở hộp thoại nhập mã đặt chỗ / quét QR trên thanh tiêu đề.
+- **UC-M09 (Xử lý sự cố & Phân công kỹ thuật)**: Tiếp nhận phản ánh, phân công kỹ thuật viên phụ trách theo chuyên môn và cập nhật tiến độ xử lý.
+- **UC-M10 (Nghiệm thu sự cố & Minh chứng)**: Kỹ thuật viên hoàn thành sửa chữa, đính kèm ảnh minh chứng nghiệm thu và đóng phiếu.
+- **UC-M11 (Phát hành thông báo phân nhóm đích)**: Soạn thảo thông báo có gắn nhãn khẩn cấp và lựa chọn đối tượng nhận: Toàn tòa, Theo block (A, B, C), Theo tầng, hoặc Căn hộ đích cụ thể.
+- **UC-M12 (Quản trị thiết bị tòa nhà)**: Theo dõi danh mục máy móc (thang máy, máy phát điện, máy bơm), lịch bảo trì định kỳ và cảnh báo gián đoạn dịch vụ.
+- **UC-M13 (Phân quyền RBAC & Ủy quyền vai trò)**: Quản lý người dùng, phân quyền theo 4 vai trò vận hành, ủy quyền công việc có thời hạn (`role_delegations`) và giám sát kiểm toán.
 
 > [!TIP]
-> Bảng phân loại chi tiết các tính năng MVP, Nâng cao và Mở rộng được lưu trữ tại [feature-list.md](file:///c:/Users/ADMIN/StudioProjects/pka_home/docs/feature-list.md).
+> Bảng phân loại chi tiết các tính năng MVP, Nâng cao và Mở rộng được lưu trữ tại [feature-list.md](file:///c:/Users/ADMIN/StudioProjects/pka_home/docs/feature-list.md). Sơ đồ quan hệ thực thể xem tại [ERD.dbml](file:///c:/Users/ADMIN/StudioProjects/pka_home/docs/ERD.dbml).
 
 ## 4. Yêu cầu Phi chức năng
 - **Bảo mật (RLS)**: Dữ liệu phải được phân quyền cấp dòng (Row Level Security) trên Supabase. Cư dân không thể xem hoặc sửa dữ liệu của căn hộ khác. BQL có toàn quyền truy xuất.

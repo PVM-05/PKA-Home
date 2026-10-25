@@ -63,9 +63,15 @@ Mục tiêu của luồng Cư dân là cung cấp trải nghiệm tự phục v�
   - Đọc nội quy, quy định, danh bạ khẩn cấp của tòa nhà.
 
 ### 2.7. Đặt lịch tiện ích & Phương tiện (Amenity & Vehicles)
-- **Tính năng:**
-  - **Phương tiện:** Đăng ký biển số xe mới, xem danh sách xe đang gửi, báo mất thẻ xe.
-  - **Tiện ích:** (Đã thiết kế UI) Lựa chọn tiện ích (Gym, BBQ), chọn khung giờ chưa bị người khác đặt, xác nhận đặt lịch.
+- **Tính năng Phương tiện:**
+  - Đăng ký biển số xe mới (kiểm tra hạn mức tối đa 2 xe máy, 1 ô tô/căn hộ).
+  - Báo hủy phương tiện khi không còn gửi để giải phóng quota.
+  - Xem danh sách xe đang gửi và theo dõi lý do bị từ chối nếu có.
+- **Tính năng Tiện ích Cư dân:**
+  - Lựa chọn tiện ích (Bể bơi, Gym, BBQ, Sân Tennis...), chọn ngày và khung giờ.
+  - Chọn số lượng người tham gia (`guests_count`) phù hợp quy định từng tiện ích.
+  - Tự động kiểm tra sức chứa khả dụng còn lại theo thời gian thực; tự động gợi ý tham gia danh sách chờ (`waitlist`) nếu hết chỗ.
+  - **Tự hủy lịch tiện ích an toàn (Atomic RPC):** Cư dân có thể tự bấm hủy lịch trên app mà không bị lỗi giao diện tràn viền; gọi RPC `cancel_amenity_booking` hoàn tiền/hủy phí và đôn người trong danh sách chờ lên ngay lập tức.
 
 ---
 
@@ -74,7 +80,7 @@ Mục tiêu của luồng Cư dân là cung cấp trải nghiệm tự phục v�
 Luồng của BQL chú trọng vào tính năng kiểm soát, thao tác hàng loạt, và bảo mật (Role-Based Access Control).
 
 ### 3.1. Trang chủ & Bảng điều khiển (Management Home / Dashboard)
-- **UI:** Layout rộng rãi hơn, hiển thị biểu đồ và các thẻ chỉ số (KPIs). Không dùng AppBar thông thường mà dùng `IndexedStack` để quản lý các tab màn hình con không bị chồng chéo tiêu đề.
+- **UI:** Layout rộng rãi hơn, hiển thị biểu đồ và các thẻ chỉ số (KPIs). Không dùng AppBar thông thường mà dùng `IndexedStack` để quản lý các tab màn hình con không bị chồng chéo tiêu đề. Lối tắt thao tác nhanh (Quick Actions) được tổ chức theo khối chức năng chuẩn A1-A6.
 - **Tính năng:**
   - **Thống kê:** Biểu đồ doanh thu (`RevenueTrendChart`), số lượng hóa đơn chưa thu, sự cố tồn đọng.
   - **Hiệu suất:** Đánh giá hiệu suất của đội ngũ kỹ thuật (`TechnicianPerformanceCard`).
@@ -82,29 +88,36 @@ Luồng của BQL chú trọng vào tính năng kiểm soát, thao tác hàng lo
 ### 3.2. Quản lý Hóa đơn (Invoice Management)
 - **Tính năng:**
   - Khởi tạo hóa đơn cho từng căn hộ (thêm các hạng mục phí, đơn giá, số lượng, tính tổng).
-  - Sửa hóa đơn (khi có sai sót chỉ số điện nước).
-  - Duyệt và cập nhật trạng thái "Đã thanh toán" khi nhận được tiền từ cư dân.
+  - **Lập hóa đơn hàng loạt an toàn (Preflight Dialog):** Cung cấp hộp thoại thẩm định trước (Preflight validation) liệt kê danh sách căn hộ dự kiến, tổng tiền và cảnh báo trước khi xác nhận gọi RPC `generate_valid_bulk_invoices`.
+  - Duyệt và cập nhật trạng thái "Đã thanh toán" khi nhận được tiền từ cư dân hoặc xác nhận thu tiền mặt/chuyển khoản trực tiếp tại quầy qua `SegmentedButton`.
   - (Cần quyền Kế toán / Management / Admin).
 
 ### 3.3. Quản lý Sự cố (Issue Management)
 - **Tính năng:**
   - Xem danh sách toàn bộ sự cố trong tòa nhà. Lọc theo trạng thái và độ ưu tiên.
-  - Cập nhật trạng thái sự cố (Tiếp nhận -> Đang xử lý -> Hoàn thành).
+  - Cập nhật trạng thái sự cố (Tiếp nhận -> Đang xử lý -> Hoàn thành) kèm ảnh nghiệm thu lưu trữ Private Storage.
   - Điều phối và theo dõi đánh giá từ cư dân.
   - (Cần quyền Kỹ thuật / Management / Admin).
 
 ### 3.4. Quản lý Cư dân & Căn hộ (Resident & Apartment)
 - **Tính năng:**
-  - **Cư dân:** Xem danh sách toàn bộ User trong hệ thống.
-  - **Duyệt liên kết:** Khi cư dân gửi yêu cầu (`Link Request`), BQL sẽ kiểm tra và bấm "Duyệt" hoặc "Từ chối".
-  - **Căn hộ:** Quản lý sơ đồ phòng, diện tích, trạng thái trống/đang ở.
+  - **Cư dân:** Xem danh sách toàn bộ User trong hệ thống và hồ sơ cư dân 360 độ.
+  - **Duyệt liên kết:** Khi cư dân gửi yêu cầu (`Link Request`), BQL sẽ kiểm tra và bấm "Duyệt" hoặc "Từ chối" kèm lý do.
+  - **Căn hộ:** Quản lý sơ đồ phòng theo mã chuẩn `a0110`, diện tích, trạng thái trống/đang ở.
 
-### 3.5. Truyền thông nội bộ (Announcement & Handbook)
+### 3.5. Truyền thông nội bộ & Thông báo đích (Announcement & Handbook)
 - **Tính năng:**
-  - Soạn thảo và gửi thông báo mới. Có tùy chọn gửi toàn tòa nhà hoặc chọn lọc. Đánh dấu thông báo Khẩn cấp (hiển thị màu đỏ cho cư dân).
+  - **Soạn thảo thông báo phân nhóm đối tượng:** Cho phép BQL phát hành tin tức nhắm đích: Toàn tòa nhà (`ALL`), Theo Block (`BUILDING` - A/B/C), Theo Tầng (`FLOOR` - Tầng 1 đến 25), hoặc Căn hộ riêng biệt (`APARTMENT`).
+  - Đánh dấu thông báo Khẩn cấp (hiển thị màu đỏ nổi bật cho cư dân).
   - Cập nhật, chỉnh sửa các mục trong Cẩm nang (số điện thoại hotline, nội quy mới).
 
-### 3.6. Công cụ Quản trị Hệ thống (System Admin Tools)
+### 3.6. Quản trị Tiện ích 3 Tab Chuyên Sâu (Amenity Management)
+- **UI:** Màn hình phân tách thành 3 Tab chuyên biệt với bố cục co giãn chuẩn A7/A8:
+  - **Tab 1: Duyệt Lịch Đặt Chỗ:** Danh sách phiếu đặt toàn tòa nhà, bộ lọc trạng thái (Tất cả, Chờ duyệt, Chờ đóng tiền, Đã xác nhận, Danh sách chờ, Đã Check-in), ô tìm kiếm phòng, nút Duyệt lịch, Từ chối lịch (kèm lý do), Điểm danh Check-in hoặc Thu cọc tại chỗ.
+  - **Tab 2: Cấu hình Tiện ích & Sức chứa Động:** Cho phép BQL điều chỉnh trực tiếp sức chứa thực tế (`max_capacity`: Bể bơi 30 chỗ, Gym 20 chỗ, BBQ 15 chỗ, Tennis 4 chỗ), hình thức (dùng chung `shared` hoặc trọn gói `exclusive`), khung giờ mở cửa, đơn giá và mức tiền cọc.
+  - **Tab 3: Lịch Bảo Trì:** Quản lý lịch bảo dưỡng, vệ sinh định kỳ theo từng tiện ích với bộ chọn ngày và tiện ích độc lập; tạm khóa khung giờ không cho cư dân đặt lịch.
+
+### 3.7. Công cụ Quản trị Hệ thống (System Admin Tools)
 Chỉ hiển thị với Role là `admin`:
 - **Role Delegation (Ủy quyền):** Cấp quyền tạm thời cho một user (VD: Cho anh A làm Kỹ thuật viên trong 30 ngày).
 - **Permission Matrix (Ma trận quyền):** Màn hình lưới (Grid) hiển thị trực quan Role nào được phép làm hành động gì (dựa vào `permissions.dart`).
