@@ -51,6 +51,8 @@ class ParsedApartment {
 }
 
 final availableApartmentsProvider = FutureProvider<List<ParsedApartment>>((ref) async {
+  // Tự động làm mới danh mục căn hộ khi authState thay đổi
+  ref.watch(authProvider);
   try {
     final res = await SupabaseConfig.client
         .from('apartments')
