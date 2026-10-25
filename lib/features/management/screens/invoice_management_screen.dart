@@ -94,6 +94,11 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
   @override
   Widget build(BuildContext context) {
     final invoicesAsync = ref.watch(invoicesProvider);
+    final allInvoices = invoicesAsync.valueOrNull ?? [];
+    final allCount = allInvoices.length;
+    final pendingConfirmationCount = allInvoices.where((i) => i.status == 'pending_confirmation').length;
+    final unpaidCount = allInvoices.where((i) => i.status == 'unpaid').length;
+    final paidCount = allInvoices.where((i) => i.status == 'paid').length;
 
     return RoleGuard(
       permission: AppPermissions.invoiceManagement,
@@ -101,30 +106,57 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
         appBar: AppBar(
           title: const Text('Quản lý Hóa đơn'),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.auto_awesome),
-              tooltip: 'Tạo HĐ hàng loạt',
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => const BulkInvoiceDialog(),
-                );
-              },
-            ),
-            invoicesAsync.when(
-              data: (invoices) {
-                if (invoices.isEmpty) return const SizedBox.shrink();
-                return IconButton(
-                  icon: _isExporting 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.download),
-                  tooltip: 'Xuất Excel',
-                  onPressed: _isExporting ? null : () => _exportExcel(_filterInvoices(invoices)),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (err, st) => const SizedBox.shrink(),
-            ),
+            if (_isExporting)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14),
+                child: Center(
+                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+              )
+            else
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                tooltip: 'Tùy chọn khác',
+                onSelected: (value) {
+                  if (value == 'bulk') {
+                    showDialog(
+                      context: context,
+                      builder: (_) => const BulkInvoiceDialog(),
+                    );
+                  } else if (value == 'export') {
+                    final invoices = invoicesAsync.valueOrNull;
+                    if (invoices != null && invoices.isNotEmpty) {
+                      _exportExcel(_filterInvoices(invoices));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Không có dữ liệu để xuất Excel.')),
+                      );
+                    }
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'bulk',
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_awesome, size: 20, color: AppTheme.primary),
+                        SizedBox(width: 10),
+                        Text('Tạo HĐ hàng loạt'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'export',
+                    child: Row(
+                      children: [
+                        Icon(Icons.download, size: 20, color: AppTheme.primary),
+                        SizedBox(width: 10),
+                        Text('Xuất Excel'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
 
@@ -161,13 +193,18 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                _buildFilterChip('all', 'Tất cả', null),
+                _buildFilterChip('all', 'Tất cả ($allCount)', null),
                 const SizedBox(width: 8),
-                _buildFilterChip('pending_confirmation', 'Chờ xác nhận', AppStatusColors.pendingConfirmation),
+                _buildFilterChip(
+                  'pending_confirmation',
+                  'Chờ xác nhận ($pendingConfirmationCount)',
+                  AppStatusColors.pendingConfirmation,
+                  hasBadge: pendingConfirmationCount > 0,
+                ),
                 const SizedBox(width: 8),
-                _buildFilterChip('unpaid', 'Đang nợ', AppStatusColors.unpaid),
+                _buildFilterChip('unpaid', 'Đang nợ ($unpaidCount)', AppStatusColors.unpaid),
                 const SizedBox(width: 8),
-                _buildFilterChip('paid', 'Đã thanh toán', AppStatusColors.paid),
+                _buildFilterChip('paid', 'Đã thanh toán ($paidCount)', AppStatusColors.paid),
               ],
             ),
           ),
@@ -250,8 +287,21 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                       final invoice = filtered[index];
                       final isNew = DateTime.now().difference(invoice.createdAt).inMinutes < 15;
                       
+                      final isPendingConfirmation = invoice.status == 'pending_confirmation';
+
                       return Card(
                         clipBehavior: Clip.antiAlias,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: isPendingConfirmation
+                              ? BorderSide(color: AppStatusColors.pendingConfirmation, width: 1.5)
+                              : BorderSide(color: Colors.grey.shade200, width: 1),
+                        ),
+                        color: isPendingConfirmation
+                            ? AppStatusColors.pendingConfirmation.withValues(alpha: 0.04)
+                            : Colors.white,
+                        elevation: isPendingConfirmation ? 2 : 1,
+                        margin: const EdgeInsets.only(bottom: 12),
                         child: InkWell(
                           onTap: () {
                             Navigator.of(context).push(
@@ -271,12 +321,20 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                     Expanded(
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.domain, color: AppTheme.primary, size: 20),
+                                          Icon(
+                                            Icons.domain,
+                                            color: isPendingConfirmation ? AppStatusColors.pendingConfirmation : AppTheme.primary,
+                                            size: 20,
+                                          ),
                                           const SizedBox(width: 8),
                                           Flexible(
                                             child: Text(
                                               'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
-                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: isPendingConfirmation ? AppStatusColors.pendingConfirmation : null,
+                                              ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
@@ -301,16 +359,28 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: _getStatusColor(invoice.status).withValues(alpha: 0.1),
+                                            color: _getStatusColor(invoice.status).withValues(alpha: 0.12),
                                             borderRadius: BorderRadius.circular(4),
+                                            border: isPendingConfirmation
+                                                ? Border.all(color: AppStatusColors.pendingConfirmation.withValues(alpha: 0.4))
+                                                : null,
                                           ),
-                                          child: Text(
-                                            _getStatusText(invoice.status),
-                                            style: TextStyle(
-                                              color: _getStatusColor(invoice.status),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (isPendingConfirmation) ...[
+                                                const Icon(Icons.rate_review_outlined, size: 12, color: AppStatusColors.pendingConfirmation),
+                                                const SizedBox(width: 4),
+                                              ],
+                                              Text(
+                                                _getStatusText(invoice.status),
+                                                style: TextStyle(
+                                                  color: _getStatusColor(invoice.status),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                         PopupMenuButton<String>(
@@ -361,15 +431,26 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}', 
-                                      style: const TextStyle(
-                                        color: AppTheme.error, 
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16
-                                      )
+                                    Expanded(
+                                      child: Text(
+                                        'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}', 
+                                        style: const TextStyle(
+                                          color: AppTheme.error, 
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                    const Text('Xem chi tiết >', style: TextStyle(color: AppTheme.primary, fontSize: 12)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      isPendingConfirmation ? 'Đối soát & Duyệt →' : 'Xem chi tiết >',
+                                      style: TextStyle(
+                                        color: isPendingConfirmation ? AppStatusColors.pendingConfirmation : AppTheme.primary,
+                                        fontWeight: isPendingConfirmation ? FontWeight.bold : FontWeight.normal,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -397,14 +478,29 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
     ));
   }
 
-
-  Widget _buildFilterChip(String filterKey, String label, Color? highlightColor) {
+  Widget _buildFilterChip(String filterKey, String label, Color? highlightColor, {bool hasBadge = false}) {
     final isSelected = _statusFilter == filterKey;
     final color = highlightColor ?? AppTheme.primary;
 
     return FilterChip(
       selected: isSelected,
-      label: Text(label),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          if (hasBadge && !isSelected) ...[
+            const SizedBox(width: 4),
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: highlightColor ?? AppTheme.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ],
+      ),
       labelStyle: TextStyle(
         color: isSelected ? Colors.white : AppTheme.textPrimary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -416,7 +512,8 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected ? color : Colors.grey.shade300,
+          color: isSelected ? color : (hasBadge ? color : Colors.grey.shade300),
+          width: hasBadge ? 1.5 : 1.0,
         ),
       ),
       onSelected: (_) {
