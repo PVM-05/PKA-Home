@@ -404,6 +404,7 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                       child: DropdownButtonFormField<String>(
                         key: ValueKey(_selectedAmenityId),
                         initialValue: _selectedAmenityId,
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Chọn tiện ích',
                           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -429,7 +430,12 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         icon: const Icon(Icons.calendar_today, size: 16),
-                        label: Text(_dateFormat.format(_selectedDate), style: const TextStyle(fontSize: 13)),
+                        label: Text(
+                          _dateFormat.format(_selectedDate),
+                          style: const TextStyle(fontSize: 13),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                         onPressed: _selectDate,
                       ),
                     ),
