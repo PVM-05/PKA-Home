@@ -125,7 +125,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
         ref.invalidate(invoicesProvider);
         Navigator.of(context).pop(true);
 
-        final created = result['invoices_created'] ?? 0;
+        final created = result['invoices_created'] ?? result['created_count'] ?? 0;
         final totalAmount = (result['total_amount'] as num?)?.toDouble() ?? 0.0;
 
         ScaffoldMessenger.of(context).showSnackBar(

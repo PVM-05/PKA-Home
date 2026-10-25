@@ -133,7 +133,7 @@ final apartmentsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref
     httpFetch: () async {
       final res = await SupabaseConfig.client
           .from('apartments')
-          .select('id, code, area, is_empty, building, floor');
+          .select('id, code, area, is_empty, building_code, floor_number');
       return List<Map<String, dynamic>>.from(res as List);
     },
     realtimeStream: () => SupabaseConfig.client.from('apartments').stream(primaryKey: ['id']),

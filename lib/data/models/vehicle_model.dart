@@ -79,6 +79,7 @@ class VehicleModel {
   bool get isPending => status == 'pending';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';
+  bool get isCancelled => status == 'cancelled';
   bool get isActive => isPending || isApproved;
   bool get hasRejectionReason =>
       rejectionReason != null && rejectionReason!.trim().isNotEmpty;
@@ -107,6 +108,8 @@ class VehicleModel {
         return 'Đã phê duyệt';
       case 'rejected':
         return 'Đã từ chối';
+      case 'cancelled':
+        return 'Đã hủy';
       case 'pending':
       default:
         return 'Chờ phê duyệt';
