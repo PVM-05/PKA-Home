@@ -243,17 +243,22 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                           borderRadius: AppTheme.radiusMd,
                           side: const BorderSide(color: AppTheme.warningBorder),
                         ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(AppTheme.spacingMd),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppTheme.spacingMd),
                           child: Row(
                             children: [
-                              Icon(Icons.info_outline, color: AppTheme.warningText, size: 28),
-                              SizedBox(width: 12),
-                              Expanded(
+                              const Icon(Icons.info_outline, color: AppTheme.warningText, size: 28),
+                              const SizedBox(width: 12),
+                              const Expanded(
                                 child: Text(
-                                  'Chưa tải được danh mục căn hộ tự động. Bạn vui lòng nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
+                                  'Chưa tải được danh mục căn hộ tự động. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
                                   style: TextStyle(color: AppTheme.warningText, fontSize: 13),
                                 ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.refresh, color: AppTheme.warningText),
+                                tooltip: 'Tải lại danh mục',
+                                onPressed: () => ref.invalidate(availableApartmentsProvider),
                               ),
                             ],
                           ),
@@ -410,17 +415,22 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                       borderRadius: AppTheme.radiusMd,
                       side: const BorderSide(color: AppTheme.error),
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(AppTheme.spacingMd),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppTheme.spacingMd),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: AppTheme.error, size: 28),
-                          SizedBox(width: 12),
-                          Expanded(
+                          const Icon(Icons.error_outline, color: AppTheme.error, size: 28),
+                          const SizedBox(width: 12),
+                          const Expanded(
                             child: Text(
-                              'Không thể tải danh mục căn hộ. Bạn vui lòng nhập trực tiếp mã căn hộ ở ô bên dưới.',
+                              'Không thể tải danh mục căn hộ. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ ở ô bên dưới.',
                               style: TextStyle(color: AppTheme.error, fontSize: 13),
                             ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh, color: AppTheme.error),
+                            tooltip: 'Tải lại danh mục',
+                            onPressed: () => ref.invalidate(availableApartmentsProvider),
                           ),
                         ],
                       ),

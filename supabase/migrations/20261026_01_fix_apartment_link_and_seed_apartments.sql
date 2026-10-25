@@ -133,6 +133,14 @@ CREATE POLICY "Resident xóa yêu cầu bị từ chối hoặc đã hủy của
 ON public.apartment_link_requests FOR DELETE 
 USING (user_id = auth.uid() AND status IN ('rejected', 'cancelled'));
 
+-- 5. Cho phép cả anon và authenticated đọc danh mục apartments phục vụ chọn mã căn hộ khi liên kết
+DROP POLICY IF EXISTS "Allow authenticated users to select apartments" ON public.apartments;
+DROP POLICY IF EXISTS "Allow anon and authenticated to view apartments" ON public.apartments;
+CREATE POLICY "Allow anon and authenticated to view apartments"
+ON public.apartments FOR SELECT
+TO anon, authenticated
+USING (true);
+
 -- Ghi nhận migration vào _applied_migrations
 INSERT INTO public._applied_migrations (name) 
 VALUES ('20261026_01_fix_apartment_link_and_seed_apartments.sql')
