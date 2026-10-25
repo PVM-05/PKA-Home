@@ -22,7 +22,9 @@ class ValidApartmentBillingItem {
       area: (json['area'] as num?)?.toDouble() ?? 0.0,
       electricUsage: (json['electric_usage'] as num?)?.toDouble() ?? 0.0,
       waterUsage: (json['water_usage'] as num?)?.toDouble() ?? 0.0,
-      estimatedTotal: (json['estimated_total'] as num?)?.toDouble() ?? 0.0,
+      estimatedTotal: (json['estimated_total'] as num?)?.toDouble() ??
+          (json['total_amount'] as num?)?.toDouble() ??
+          0.0,
     );
   }
 
