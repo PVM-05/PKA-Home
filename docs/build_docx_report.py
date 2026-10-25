@@ -470,6 +470,7 @@ def create_report_docx():
         ["simulate_unified_payment", "p_invoice_id, p_payment_method, p_amount", "json (mã giao dịch)", "Kiểm tra quyền sở hữu, hỗ trợ chuyển khoản PENDING và chống gửi lặp an toàn."],
         ["record_manual_payment", "p_invoice_id, p_amount, p_notes", "json (bản ghi thu)", "Chỉ Kế toán/BQL được gọi; chuyển hóa đơn sang paid và ghi nhật ký thu tiền mặt."],
         ["book_amenity_slot", "p_amenity_id, p_date, p_slot, p_guests, p_waitlist", "json (mã đặt chỗ)", "Khóa tài nguyên theo ngày/giờ; kiểm tra vượt sức chứa; tự động đưa vào danh sách chờ."],
+        ["cancel_amenity_booking", "p_booking_id", "json (kết quả hủy)", "Hủy lịch an toàn cho cư dân/BQL, tự động hủy giao dịch tài chính liên quan và đôn lượt Waitlist."],
         ["update_own_profile", "p_full_name, p_phone", "void", "Chạy quyền SECURITY DEFINER, chỉ nhận họ tên và SĐT, triệt tiêu nguy cơ tự sửa role."]
     ]
     create_styled_table(rpc_data[0], rpc_data[1:], [Inches(1.8), Inches(1.8), Inches(1.1), Inches(1.8)])
@@ -479,6 +480,7 @@ def create_report_docx():
     add_image_figure(os.path.join(assets_dir, 'hinh2_13a_tuan_tu_thanh_toan.png'), "Hình 2.13a. Sơ đồ tuần tự luồng thanh toán mô phỏng và đối soát hai bước an toàn")
     add_image_figure(os.path.join(assets_dir, 'hinh2_13b_tuan_tu_dat_tien_ich.png'), "Hình 2.13b. Sơ đồ tuần tự luồng đặt chỗ tiện ích và xử lý sức chứa đồng thời")
     add_image_figure(os.path.join(assets_dir, 'hinh2_14a_trang_thai_hoa_don.png'), "Hình 2.14a. Sơ đồ trạng thái vòng đời hóa đơn và phiếu phản ánh sự cố")
+    add_image_figure(os.path.join(assets_dir, 'hinh2_15_kien_truc_tien_ich_va_thong_bao.png'), "Hình 2.15. Sơ đồ kiến trúc Quản trị tiện ích 3 Tab và cơ chế thông báo phân nhóm đích")
 
     # =========================================================
     # MINH CHỨNG GIAO DIỆN & KHUNG CHÚ THÍCH ẢNH CHỤP THỰC TẾ
@@ -526,9 +528,10 @@ def create_report_docx():
         ["Mô hình dữ liệu (Models)", "18 tệp", "74 bài kiểm thử", "Vượt qua thành công", "100%"],
         ["Kho lưu trữ (Repositories)", "35 tệp", "112 bài kiểm thử", "Vượt qua thành công", "100%"],
         ["Bộ điều phối (Providers)", "22 tệp", "65 bài kiểm thử", "Vượt qua thành công", "100%"],
-        ["Màn hình Ban Quản Lý", "24 tệp", "52 bài kiểm thử", "Vượt qua thành công", "100%"],
-        ["Màn hình Cư dân", "15 tệp", "34 bài kiểm thử", "Vượt qua thành công", "100%"],
-        ["Tổng cộng toàn hệ thống", "131 tệp kiểm thử", "395 bài kiểm thử", "Vượt qua toàn bộ", "100%"]
+        ["Màn hình Ban Quản Lý (3 Tab & A7/A8)", "24 tệp", "62 bài kiểm thử", "Vượt qua thành công", "100%"],
+        ["Màn hình Cư dân (Hủy lịch & Payment)", "15 tệp", "37 bài kiểm thử", "Vượt qua thành công", "100%"],
+        ["Kiểm thử tích hợp & Cloud RLS", "Tích hợp", "3 bài test Cloud RLS", "Bỏ qua khi test nội bộ", "Khảo nghiệm Cloud"],
+        ["Tổng cộng toàn hệ thống", "131 tệp kiểm thử", "408 bài kiểm thử", "405/405 Logic Đạt 100%", "100% (Logic)"]
     ]
     create_styled_table(test_data[0], test_data[1:], [Inches(1.8), Inches(1.1), Inches(1.5), Inches(1.3), Inches(0.8)])
 

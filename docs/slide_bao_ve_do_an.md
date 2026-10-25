@@ -96,19 +96,19 @@
 ---
 
 ## SLIDE 7: SƠ ĐỒ CA SỬ DỤNG TỔNG QUAN
-* **Phân hệ Cư dân**: 11 nhóm ca sử dụng phục vụ đầy đủ nhu cầu sinh hoạt hàng ngày.
-* **Phân hệ Vận hành**: 12 nhóm ca sử dụng chuyên biệt cho công tác quản trị, kế toán và kỹ thuật.
+* **Phân hệ Cư dân**: 12 nhóm ca sử dụng phục vụ đầy đủ nhu cầu sinh hoạt hàng ngày (bao gồm tự hủy lịch tiện ích, chọn số lượng người, nhận thông báo phân nhóm đích).
+* **Phân hệ Vận hành**: 13 nhóm ca sử dụng chuyên biệt cho công tác quản trị, kế toán và kỹ thuật (bao gồm phân hệ Quản trị Tiện ích 3 Tab, thông báo nhắm đối tượng, lập hóa đơn hàng loạt an toàn).
 * **Các ca sử dụng trọng tâm**:
-  * Đặt tiện ích kèm kiểm soát sức chứa và danh sách chờ.
-  * Thẩm định chỉ số điện nước kèm tự động xuất hóa đơn.
-  * Lập hóa đơn hàng loạt an toàn theo diện tích và số lượng phương tiện.
+  * Đặt tiện ích kèm kiểm soát sức chứa động, danh sách chờ và tự hủy lịch an toàn.
+  * Thẩm định chỉ số điện nước kèm đối soát ảnh công tơ và tự động xuất hóa đơn.
+  * Lập hóa đơn hàng loạt có bước kiểm tra trước (Preflight validation) theo diện tích và phương tiện.
 
 ```
 [CHÚ THÍCH HÌNH VẼ]: Sơ đồ ca sử dụng tổng quan và phân hệ (Hình 2.2a và Hình 2.2b)
 ```
 
 > **Lời thoại thuyết trình:**
-> "Hệ thống được thiết kế với 23 ca sử dụng chính, bao phủ từ các thao tác đơn giản như xem thông báo đến các nghiệp vụ phức tạp như điều phối danh sách chờ tiện ích và lập hóa đơn hàng loạt."
+> "Hệ thống được thiết kế với 25 ca sử dụng chi tiết, bao phủ từ các thao tác đơn giản như xem thông báo đến các nghiệp vụ phức tạp như điều phối danh sách chờ tiện ích, tự hủy lịch hoàn tiền và lập hóa đơn hàng loạt."
 
 ---
 
@@ -165,15 +165,16 @@
 
 ---
 
-## SLIDE 12: ĐIỂM SÁNG KỸ THUẬT 3: KIỂM SOÁT SỨC CHỨA & DANH SÁCH CHỜ TIỆN ÍCH
+## SLIDE 12: ĐIỂM SÁNG KỸ THUẬT 3: SỨC CHỨA ĐỘNG, HỦY LỊCH AN TOÀN & QUẢN TRỊ 3 TAB
 * **Xử lý đồng thời (Concurrency Control)**: Khóa tài nguyên tiện ích theo ngày và khung giờ bằng lệnh `FOR UPDATE`.
-* **Cơ chế điều phối thông minh**:
-  * Kiểm tra số lượng khách thực tế (`guests_count`) so với sức chứa tối đa (`max_capacity`).
-  * Nếu còn chỗ: Xác nhận đặt chỗ thành công.
-  * Nếu kín lịch: Tự động ghi nhận vào danh sách chờ (`WAITLIST`). Khi có người hủy lịch, hệ thống hỗ trợ đôn lượt ưu tiên tiếp theo.
+* **Cơ chế điều phối thông minh & Hủy lịch an toàn**:
+  * Kiểm soát sức chứa động theo số lượng khách thực tế (`guests_count`) so với sức chứa tối đa (`max_capacity`: Bể bơi 30, Gym 20, BBQ 15, Tennis 4).
+  * Tự động xếp vào danh sách chờ (`WAITLIST`) khi kín chỗ.
+  * Thủ tục lưu trữ `cancel_amenity_booking` xử lý hủy lịch an toàn: giải phóng chỗ, cập nhật giao dịch thanh toán và tự động đôn người kế tiếp trong Waitlist.
+* **Giao diện Quản trị Tiện ích 3 Tab chuyên sâu**: Duyệt lịch chuẩn thẻ A7/A8 & Check-in QR, cấu hình sức chứa động, quản lý lịch bảo trì.
 
 > **Lời thoại thuyết trình:**
-> "Khi đặt các tiện ích có sức chứa giới hạn như bể bơi hay phòng tập thể thao, hệ thống áp dụng khóa giao dịch để giải quyết bài toán đặt chỗ đồng thời tại cùng một thời điểm, tránh tình trạng vượt quá sức chứa cho phép."
+> "Hệ thống tiện ích giải quyết toàn diện bài toán sức chứa thực tế và xử lý hủy lịch an toàn. Cư dân có thể tự hủy lịch trên ứng dụng; thủ tục lưu trữ máy chủ sẽ tự động hoàn tất các giao dịch liên quan và đôn lượt đặt chỗ từ danh sách chờ lên chính thức mà không cần thao tác thủ công."
 
 ---
 
@@ -196,15 +197,15 @@
 * **Phân tích tĩnh mã nguồn (`dart analyze`)**: Đạt **0 Cảnh báo / 0 Lỗi**.
 * **Quy mô bộ kiểm thử tự động**:
   * **131 tệp kiểm thử** trải dài từ tầng cơ sở đến tầng màn hình.
-  * **395 bài kiểm thử** tự động được thực thi thành công (**Tỷ lệ đạt: 100%**).
-  * Kiểm chứng đầy đủ: Kiểm thử đơn vị, kiểm thử giao diện co giãn trên màn hình 360 điểm ảnh, kiểm thử bảo mật RLS và kiểm thử hàm lưu trữ RPC.
+  * **408 bài kiểm thử** tự động được xây dựng với **405 bài kiểm thử logic vượt qua tuyệt đối (Tỷ lệ đạt: 100%)** (3 ca kiểm thử cloud RLS bỏ qua khi chạy nội bộ).
+  * Kiểm chứng đầy đủ: Kiểm thử đơn vị, kiểm thử giao diện co giãn trên màn hình 360 điểm ảnh (0 lỗi tràn viền RenderFlex), kiểm thử bảo mật RLS và kiểm thử hàm lưu trữ RPC.
 
 ```
 [CHÚ THÍCH HÌNH VẼ]: Bảng số liệu kiểm thử tự động (Bảng 2.10 trong Báo cáo)
 ```
 
 > **Lời thoại thuyết trình:**
-> "Để bảo đảm phần mềm vận hành ổn định và không phát sinh lỗi tiềm ẩn, em đã xây dựng một bộ test suite gồm 131 tệp với 395 ca kiểm thử tự động. Toàn bộ các ca test đều vượt qua 100%, bảo đảm từ phân tích tĩnh đến kiểm thử bảo mật RLS."
+> "Để bảo đảm phần mềm vận hành ổn định và không phát sinh lỗi tiềm ẩn, em đã xây dựng một bộ test suite gồm 131 tệp với 408 ca kiểm thử tự động. Toàn bộ 405 ca test logic đều vượt qua 100%, bảo đảm từ phân tích tĩnh đến kiểm thử responsive và bảo mật cơ sở dữ liệu."
 
 ---
 
@@ -242,9 +243,9 @@
 
 ## SLIDE 17: KẾT LUẬN & ĐÓNG GÓP CỦA ĐỒ ÁN
 * **Các kết quả đạt được**:
-  * Xây dựng thành công nguyên mẫu ứng dụng quản lý chung cư hoàn chỉnh, đáp ứng 24 yêu cầu chức năng.
+  * Xây dựng thành công nguyên mẫu ứng dụng quản lý chung cư hoàn chỉnh, đáp ứng 25 yêu cầu chức năng.
   * Hiện thực hóa thành công kiến trúc bảo mật ba lớp chống leo thang đặc quyền và toàn vẹn dữ liệu tài chính tại cơ sở dữ liệu.
-  * Ứng dụng hoạt động mượt mà, giao diện 100% tiếng Việt, vượt qua toàn bộ 395 bài kiểm thử tự động.
+  * Ứng dụng hoạt động mượt mà, giao diện 100% tiếng Việt, vượt qua toàn bộ 408 bài kiểm thử tự động (100% logic test đạt chuẩn).
 * **Giá trị thực tiễn**:
   * Đóng góp một giải pháp tham khảo chất lượng cao cho bài toán số hóa công tác quản trị chung cư và tòa nhà thông minh.
 

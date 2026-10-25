@@ -72,7 +72,7 @@ Table vehicles {
   plate_number varchar [note: 'Đồng bộ biển số']
   vehicle_type varchar [not null, note: 'motorbike, car, bicycle']
   brand_model varchar [note: 'Hãng và mẫu xe']
-  status varchar [default: 'pending', note: 'pending, approved, rejected']
+  status varchar [default: 'pending', note: 'pending, approved, rejected, cancelled']
   notes text
   rejection_reason text
   created_at timestamp [default: `now()`]
@@ -121,12 +121,12 @@ Table building_amenities {
   fee_amount decimal [default: 0, note: 'Giá phí mỗi lượt hoặc mỗi người']
   deposit_amount decimal [default: 0, note: 'Tiền đặt cọc']
   requires_deposit boolean [default: false]
-  booking_type varchar [default: 'exclusive', note: 'exclusive hoặc shared']
+  booking_type varchar [default: 'shared', note: 'shared (dùng chung nhiều người) hoặc exclusive (bao trọn khung giờ)']
   open_hours varchar [default: '06:00 - 22:00']
   open_time time
   close_time time
   slot_duration_minutes integer [default: 60]
-  max_capacity integer [default: 1]
+  max_capacity integer [default: 1, note: 'Sức chứa tối đa (Hồ bơi: 30, Gym: 20, BBQ: 15, Tennis: 4)']
   display_order integer [default: 0]
   is_active boolean [default: true]
   created_at timestamp [default: `now()`]
@@ -139,13 +139,13 @@ Table amenity_bookings {
   apartment_id uuid [ref: > apartments.id, not null]
   booked_by uuid [ref: > users.id, not null]
   booking_date date [not null]
-  time_slot varchar [not null, note: 'Ví dụ: 08:00 - 09:00']
-  guests_count integer [default: 1]
+  time_slot varchar [not null, note: 'Ví dụ: 08:00 - 09:30']
+  guests_count integer [default: 1, note: 'Số lượng người đi cùng trong nhóm']
   fee_amount decimal [default: 0]
   deposit_amount decimal [default: 0]
-  deposit_status varchar [default: 'none', note: 'none, pending, received, refunded, forfeited']
+  deposit_status varchar [default: 'none', note: 'none, pending, unpaid, received, refunded, forfeited']
   deposit_notes text
-  checked_in_at timestamp
+  checked_in_at timestamp [note: 'Thời điểm ban quản lý điểm danh tại quầy']
   status varchar [default: 'confirmed', note: 'confirmed, pending_payment, waitlist, cancelled, completed, no_show']
   notes text
   created_at timestamp [default: `now()`]
@@ -243,6 +243,10 @@ Table announcements {
   title varchar [not null]
   content text
   is_urgent boolean [default: false]
+  target_type varchar [default: 'ALL', note: 'Phân nhóm gửi: ALL (Toàn tòa), BUILDING (Theo block), FLOOR (Theo tầng), APARTMENT (Căn hộ đích)']
+  target_building varchar [null, note: 'Mã tòa: A, B, C']
+  target_floor integer [null, note: 'Số tầng: 1-10']
+  target_apartment_id uuid [ref: > apartments.id, null, note: 'Khóa ngoại tới căn hộ đích nhận thông báo riêng']
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
 }

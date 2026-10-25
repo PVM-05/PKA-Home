@@ -40,7 +40,7 @@ PKA-Home là hệ sinh thái phần mềm quản lý chung cư hiện đại, đ
 2. **Bảo toàn toàn vẹn dữ liệu tài chính**: Toàn bộ phép tính chi tiết và tổng hóa đơn được thực hiện tự động bằng cột tính toán sẵn của PostgreSQL (Generated Column) và hàm trigger nội bộ, triệt tiêu nguy cơ gian lận từ giao diện người dùng.
 3. **Cơ chế xử lý đồng thời và chống trùng lặp**: Khóa đồng bộ giao dịch được áp dụng trong quy trình đặt tiện ích và thanh toán nhằm ngăn chặn vượt quá sức chứa và tình trạng phát sinh giao dịch kép.
 
-Hệ thống đã trải qua quá trình kiểm thử tự động nghiêm ngặt với 131 tệp kiểm thử và gần 400 ca kiểm thử tự động vượt qua 100%, bảo đảm chất lượng phần mềm trước khi nghiệm thu.
+Hệ thống đã trải qua quá trình kiểm thử tự động nghiêm ngặt với 131 tệp kiểm thử và 408 ca kiểm thử tự động (405 ca logic đạt 100%, 3 ca cloud RLS bỏ qua khi chạy nội bộ), bảo đảm chất lượng phần mềm trước khi nghiệm thu.
 
 ---
 
@@ -150,7 +150,7 @@ Hệ thống đã trải qua quá trình kiểm thử tự động nghiêm ngặ
 * Hình 2.13b. Sơ đồ tuần tự luồng đặt chỗ tiện ích và xếp danh sách chờ
 * Hình 2.14. Sơ đồ trạng thái vòng đời lượt đặt tiện ích
 * Hình 2.14a. Sơ đồ trạng thái vòng đời hóa đơn và phiếu phản ánh sự cố
-* Hình 2.15. Thiết kế giao diện và minh chứng thực nghiệm các màn hình chính
+* Hình 2.15. Sơ đồ kiến trúc Quản trị tiện ích 3 Tab và cơ chế thông báo phân nhóm đích
 * Hình 3.1. Biểu đồ tiến độ thực hiện dự án theo tuần
 
 ---
@@ -650,6 +650,7 @@ Bảng 2.6a. Danh mục các hàm thủ tục lưu trữ máy chủ (RPC) then c
 | **`simulate_unified_payment`** | `p_invoice_id`, `p_payment_method`, `p_amount` | `json` (Mã giao dịch và trạng thái) | Kiểm tra quyền sở hữu hóa đơn, nới lỏng trạng thái chờ duyệt cho chuyển khoản ngân hàng và kích hoạt cơ chế chống gửi lặp an toàn. |
 | **`record_manual_payment`** | `p_invoice_id`, `p_amount`, `p_cashier_notes` | `json` (Bản ghi giao dịch) | Chỉ cho phép Kế toán hoặc Ban Quản Lý thực hiện; cập nhật trạng thái hóa đơn sang đã thanh toán và ghi nhật ký thu tiền. |
 | **`book_amenity_slot`** | `p_amenity_id`, `p_apartment_id`, `p_date`, `p_time_slot`, `p_guests_count`, `p_allow_waitlist` | `json` (Mã đặt chỗ, trạng thái) | Khóa tài nguyên tiện ích theo ngày/giờ; kiểm tra vượt sức chứa; tự động điều phối vào danh sách chờ an toàn. |
+| **`cancel_amenity_booking`** | `p_booking_id` | `json` (Trạng thái và kết quả hủy) | Thực thi nguyên tử cho Cư dân/BQL: giải phóng chỗ, cập nhật giao dịch tài chính liên quan và tự động đôn người kế tiếp trong Waitlist. |
 | **`update_own_profile`** | `p_full_name`, `p_phone` | `void` | Chạy dưới quyền `SECURITY DEFINER`, chỉ nhận hai tham số thông tin cá nhân, triệt tiêu hoàn toàn khả năng người dùng tự sửa cột vai trò. |
 
 ---
@@ -787,14 +788,15 @@ Toàn bộ mã kiểm thử được thực thi tự động thông qua công c�
 Bảng 2.10. Bảng tổng hợp số liệu kiểm thử tự động thực tế
 | Nhóm kiểm thử | Số lượng tệp kiểm thử | Số ca kiểm thử thực thi | Kết quả đạt được | Tỷ lệ thành công |
 | :--- | :---: | :---: | :---: | :---: |
-| **Phân tích tĩnh (`dart analyze`)** | Toàn bộ mã nguồn | 0 Cảnh báo / 0 Lỗi | Đạt chuẩn sạch 100% | 100% |
+| **Phân tích tĩnh (`dart analyze`)** | Toàn bộ mã nguồn | Toàn bộ mã nguồn | 0 Cảnh báo / 0 Lỗi | Đạt chuẩn sạch 100% |
 | **Hằng số, Tiện ích & Giao diện cơ sở**| 17 tệp | 58 bài kiểm thử | Vượt qua 100% | 100% |
 | **Mô hình dữ liệu & Chuyển đổi JSON** | 18 tệp | 74 bài kiểm thử | Vượt qua 100% | 100% |
 | **Kho lưu trữ & Chuyển đổi CSDL** | 35 tệp | 112 bài kiểm thử | Vượt qua 100% | 100% |
 | **Bộ điều phối trạng thái (Providers)**| 22 tệp | 65 bài kiểm thử | Vượt qua 100% | 100% |
-| **Màn hình Ban Quản Lý** | 24 tệp | 52 bài kiểm thử | Vượt qua 100% | 100% |
-| **Màn hình Cư dân** | 15 tệp | 34 bài kiểm thử | Vượt qua 100% | 100% |
-| **Tổng cộng toàn hệ thống** | **131 tệp kiểm thử** | **395 bài kiểm thử** | **Vượt qua toàn bộ** | **100%** |
+| **Màn hình Ban Quản Lý (3 Tab & A7/A8)**| 24 tệp | 62 bài kiểm thử | Vượt qua 100% | 100% |
+| **Màn hình Cư dân (Hủy lịch & Payment)** | 15 tệp | 37 bài kiểm thử | Vượt qua 100% | 100% |
+| **Kiểm thử tích hợp & Bảo mật RLS** | Tích hợp | 3 bài test Cloud RLS | Bỏ qua khi chạy nội bộ | Khảo nghiệm Cloud |
+| **Tổng cộng toàn hệ thống** | **131 tệp kiểm thử** | **408 bài kiểm thử** | **405/405 Logic Đạt 100%** | **100% (Logic)** |
 
 ---
 

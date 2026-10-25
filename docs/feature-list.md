@@ -44,11 +44,13 @@
 | **Chỉnh sửa hồ sơ cá nhân** | Cập nhật họ tên, SĐT (không lưu CCCD dạng số). |
 | **Thành viên cùng căn hộ** | Xem danh sách người đang liên kết với cùng căn hộ (owner/tenant/family). |
 | **Cẩm nang tòa nhà** | Danh bạ khẩn cấp (nút gọi trực tiếp), nội quy, biểu phí minh bạch, giờ hoạt động tiện ích — quản lý CRUD động, không hard-code. |
-| **Đăng ký & Quản lý Phương tiện** | Đăng ký thẻ xe máy, ô tô theo hạn mức từng căn hộ (tối đa 2 xe máy, 1 ô tô), kiểm tra biển số trùng lặp, xem lý do bị từ chối và nộp lại hồ sơ. |
-| **Tiện ích Tòa nhà & Đặt chỗ** | Xem danh mục tiện ích (Gym, BBQ, Bể bơi, Sân Tennis...), đặt chỗ theo khung giờ với kiểm soát sức chứa thực tế (`guests_count`), tiền cọc, và danh sách chờ (`waitlist`). |
+| **Đăng ký & Quản lý Phương tiện** | Đăng ký thẻ xe máy, ô tô theo hạn mức từng căn hộ (tối đa 2 xe máy, 1 ô tô), kiểm tra biển số trùng lặp, xem lý do bị từ chối, tự hủy hồ sơ xe và nộp lại hồ sơ khi cần. |
+| **Tiện ích Tòa nhà & Đặt chỗ linh hoạt** | Xem danh mục tiện ích (Gym, BBQ, Bể bơi, Sân Tennis...), chọn số lượng người tham gia (`guests_count`), kiểm soát sức chứa thực tế động, đẩy vào danh sách chờ (`waitlist`) khi quá tải. |
+| **Tự hủy lịch tiện ích an toàn (Atomic RPC)** | Cư dân tự bấm hủy lịch đặt chỗ trên app mà không bị lỗi giao diện; gọi RPC `cancel_amenity_booking` xử lý đồng bộ: giải phóng chỗ, cập nhật giao dịch thanh toán và tự động đôn người kế tiếp từ danh sách chờ. |
 | **Cổng thanh toán mô phỏng (Unified Payment)** | Thanh toán trực tuyến mô phỏng VietQR, Chuyển khoản ngân hàng 2 bước (`PENDING`), hoặc Đăng ký thanh toán tiền mặt tại quầy BQL. |
 | **Khai báo chỉ số điện nước** | Cư dân chụp ảnh công tơ điện nước gửi định kỳ hàng tháng cho BQL thẩm định. |
 | **Đánh giá xử lý sự cố** | Chấm điểm 1-5 sao kèm nhận xét sau khi kỹ thuật viên hoàn thành sửa chữa. |
+| **Nhận thông báo phân nhóm đối tượng** | Nhận các thông báo từ ban quản lý được nhắm đích chính xác (Toàn tòa, Theo Block A/B/C, Theo Tầng hoặc Căn hộ riêng). |
 
 ### 2.2. Ban quản lý
 
@@ -62,8 +64,10 @@
 | **CRUD Cẩm nang tòa nhà** | Quản lý động: nội quy, danh bạ khẩn cấp, tiện ích — không cần sửa mã nguồn khi có thay đổi. |
 | **Danh bạ cư dân & Hồ sơ 360 độ** | Tra cứu nhanh cư dân theo tên hoặc mã căn hộ (`a0110`), xem toàn cảnh lịch sử căn hộ, thành viên, thẻ xe, hóa đơn và lịch sử đặt tiện ích. |
 | **Duyệt Thẻ xe cư dân** | Xem danh sách xe chờ duyệt, phê duyệt hoặc từ chối kèm lý do phản hồi cho cư dân. |
-| **Lập hóa đơn hàng loạt an toàn** | RPC CSDL `generate_valid_bulk_invoices` tự động tính phí quản lý, phí gửi xe máy/ô tô theo căn hộ và xuất hóa đơn định kỳ. |
+| **Lập hóa đơn hàng loạt an toàn (Preflight Dialog)** | Hộp thoại kiểm tra trước (Preflight Validation) hiển thị danh sách căn hộ dự kiến, tổng số tiền và cảnh báo trước khi gọi RPC CSDL `generate_valid_bulk_invoices` tự động xuất hóa đơn định kỳ. |
 | **Duyệt chỉ số điện nước** | Kế toán thẩm định ảnh chụp công tơ và số chỉ số do cư dân gửi, duyệt để đưa vào kỳ tính phí. |
+| **Quản trị Tiện ích 3 Tab Chuyên sâu** | • **Tab 1 (Duyệt Lịch Đặt Chỗ)**: Danh sách phiếu đặt toàn tòa nhà theo thiết kế thẻ A7, bộ lọc trạng thái, tìm kiếm phòng, nút duyệt/từ chối A8, Check-in và Thu cọc.<br>• **Tab 2 (Cấu hình Tiện ích & Sức chứa Động)**: Tùy chỉnh trực tiếp sức chứa thực tế (`max_capacity`: Bể bơi 30, Gym 20, BBQ 15, Tennis 4), hình thức dùng chung/độc quyền, đơn giá & tiền cọc.<br>• **Tab 3 (Lịch Bảo trì Tiện ích)**: Bộ chọn tiện ích và ngày độc lập, quản lý lịch vệ sinh bảo dưỡng định kỳ và tạm khóa khung giờ. |
+| **Phát hành thông báo phân nhóm đối tượng** | Soạn thảo thông báo có gắn nhãn khẩn cấp và lựa chọn đối tượng nhận: Toàn tòa, Theo block (A, B, C), Theo tầng, hoặc Căn hộ đích cụ thể. |
 | **Quản lý Bảo trì thiết bị** | Theo dõi lịch bảo trì định kỳ của các thiết bị trọng yếu tòa nhà (Thang máy, PCCC, Máy bơm, Máy phát điện). |
 
 ### 2.3. Hạ tầng / Kỹ thuật dùng chung (Cả 2 phía)
