@@ -140,23 +140,21 @@ BEGIN
         RAISE EXCEPTION 'Tiện ích đang trong khung giờ bảo trì vào ngày này';
     END IF;
 
-    -- 8. Tính toán lượng chiếm dụng hiện tại trong khung giờ (kèm FOR UPDATE)
+    -- 8. Tính toán lượng chiếm dụng hiện tại trong khung giờ
     IF COALESCE(v_amenity.booking_type, 'exclusive') = 'exclusive' THEN
         SELECT COUNT(*) INTO v_current_occupancy
         FROM public.amenity_bookings
         WHERE amenity_id = p_amenity_id
           AND booking_date = p_booking_date
           AND time_slot = p_time_slot
-          AND status IN ('confirmed', 'pending_payment')
-        FOR UPDATE;
+          AND status IN ('confirmed', 'pending_payment');
     ELSE
         SELECT COALESCE(SUM(guests_count), 0) INTO v_current_occupancy
         FROM public.amenity_bookings
         WHERE amenity_id = p_amenity_id
           AND booking_date = p_booking_date
           AND time_slot = p_time_slot
-          AND status IN ('confirmed', 'pending_payment')
-        FOR UPDATE;
+          AND status IN ('confirmed', 'pending_payment');
     END IF;
 
     -- 9. Tính toán phí dịch vụ và tiền cọc theo công thức chuẩn
@@ -229,6 +227,9 @@ BEGIN
     );
 END;
 $function$;
+
+REVOKE ALL ON FUNCTION public.book_amenity_slot(uuid, date, character varying, integer, uuid, boolean, text) FROM anon, PUBLIC;
+GRANT EXECUTE ON FUNCTION public.book_amenity_slot(uuid, date, character varying, integer, uuid, boolean, text) TO authenticated;
 
 -- 4. NÂNG CẤP CONFIRM_PAYMENT: GHI NHẬT KÝ AUDIT_LOGS
 CREATE OR REPLACE FUNCTION public.confirm_payment(p_invoice_id uuid)
