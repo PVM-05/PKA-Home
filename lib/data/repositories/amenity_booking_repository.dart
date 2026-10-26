@@ -90,7 +90,7 @@ class AmenityBookingRepository {
       if (e.code == '23503') {
         throw Exception('Thông tin tiện ích hoặc căn hộ liên kết không tồn tại hoặc không hợp lệ.');
       }
-      throw Exception(e.message);
+      rethrow;
     } catch (e) {
       if (e is Exception) rethrow;
       throw Exception('Không thể đặt lịch: $e');
