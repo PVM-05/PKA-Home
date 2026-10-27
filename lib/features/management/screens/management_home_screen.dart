@@ -19,6 +19,7 @@ import 'announcement_management_screen.dart';
 import '../widgets/role_onboarding_dialog.dart';
 import '../widgets/revenue_trend_chart.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
+import '../../../core/widgets/building_switcher_dropdown.dart';
 import '../../../core/widgets/font_size_sheet.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../../core/constants/permissions.dart';
@@ -377,6 +378,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ],
         ),
         actions: [
+          const BuildingSwitcherDropdown(),
           if (canViewAuditTrail)
             IconButton(
               icon: const Icon(Icons.history),
