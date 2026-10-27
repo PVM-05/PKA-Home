@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -6,7 +6,7 @@ void main() {
     late String migration20261025;
 
     setUpAll(() {
-      final file20261025 = File('supabase/migrations/20261025_01_fix_waitlist_transactions_and_rpc_security.sql');
+      final file20261025 = File('supabase/migrations_archive/20261025_01_fix_waitlist_transactions_and_rpc_security.sql');
       expect(file20261025.existsSync(), isTrue, reason: 'Migration 20261025_01 phải tồn tại');
       migration20261025 = file20261025.readAsStringSync();
     });
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('SYS-06: Migration 20261025_02 bổ sung trường target_type và target_apartment cho announcements', () {
-      final file = File('supabase/migrations/20261025_02_add_announcement_target_fields.sql');
+      final file = File('supabase/migrations_archive/20261025_02_add_announcement_target_fields.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration 20261025_02 phải tồn tại');
       final content = file.readAsStringSync();
 
@@ -82,4 +82,5 @@ void main() {
     });
   });
 }
+
 

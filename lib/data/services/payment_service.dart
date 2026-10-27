@@ -28,21 +28,18 @@ class PaymentResult {
   factory PaymentResult.fromJson(Map<String, dynamic> json) {
     final rawStatus = json['status'] as String?;
     final isExplicitPending = (json['is_pending'] as bool?) == true;
-    final isExplicitSuccess = (json['success'] as bool?) == true;
 
     final String statusVal;
     if (rawStatus != null && rawStatus.isNotEmpty) {
       statusVal = rawStatus.toUpperCase();
     } else if (isExplicitPending) {
       statusVal = 'PENDING';
-    } else if (isExplicitSuccess) {
-      statusVal = 'SUCCESS';
     } else {
-      statusVal = 'FAILED';
+      statusVal = 'UNKNOWN';
     }
 
     final isPendingVal = statusVal == 'PENDING';
-    final isSuccessVal = statusVal == 'SUCCESS' && (json['success'] as bool? ?? true);
+    final isSuccessVal = (json['success'] as bool? ?? false) && statusVal == 'SUCCESS';
     final hasValidState = isSuccessVal || isPendingVal;
 
     final txCode = (json['receipt_number'] as String?) ??
@@ -58,7 +55,9 @@ class PaymentResult {
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       title: json['title'] as String? ?? 'Giao dịch',
       paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at'] as String).toLocal() : DateTime.now(),
-      errorMessage: json['message'] as String? ?? json['error'] as String?,
+      errorMessage: hasValidState
+          ? (json['message'] as String? ?? json['error'] as String?)
+          : (json['message'] as String? ?? json['error'] as String? ?? 'Dữ liệu phản hồi thiếu trạng thái giao dịch hợp lệ.'),
     );
   }
 }
@@ -84,7 +83,7 @@ class PaymentService {
         'p_payment_type': typeString,
         'p_payment_method': paymentMethod,
         'p_outcome': outcome,
-        if (failureReason != null) 'p_failure_reason': failureReason,
+        'p_failure_reason': ?failureReason,
       },
     );
 

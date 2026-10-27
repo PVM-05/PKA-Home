@@ -1,16 +1,16 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/models/resident_model.dart';
 
 void main() {
   group('Admin User Management & Multi-Apartment Tests (20261024_03)', () {
     test('Tập tin migration 20261024_03_admin_user_management.sql phải tồn tại', () {
-      final file = File('supabase/migrations/20261024_03_admin_user_management.sql');
+      final file = File('supabase/migrations_archive/20261024_03_admin_user_management.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration 20261024_03_admin_user_management.sql chưa được tạo');
     });
 
     test('Migration phải định nghĩa đầy đủ RPC quản trị, audit log và trigger khóa tài khoản', () {
-      final file = File('supabase/migrations/20261024_03_admin_user_management.sql');
+      final file = File('supabase/migrations_archive/20261024_03_admin_user_management.sql');
       final content = file.readAsStringSync();
 
       // 1. Cột email và is_active trên public.users
@@ -140,3 +140,4 @@ void main() {
     });
   });
 }
+

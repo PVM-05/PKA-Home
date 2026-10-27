@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -6,7 +6,7 @@ void main() {
     late String migrationContent;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261026_03_core_audit_locking_and_amenity_payment.sql');
+      final file = File('supabase/migrations_archive/20261026_03_core_audit_locking_and_amenity_payment.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration 20261026_03 phải tồn tại');
       migrationContent = file.readAsStringSync();
     });
@@ -33,3 +33,4 @@ void main() {
     });
   });
 }
+

@@ -1,15 +1,15 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Issue Comments Migration & Realtime Configuration Tests', () {
     test('Tập tin migration 20260926_01_issue_comments.sql phải tồn tại', () {
-      final file = File('supabase/migrations/20260926_01_issue_comments.sql');
+      final file = File('supabase/migrations_archive/20260926_01_issue_comments.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration 20260926_01_issue_comments.sql chưa tồn tại');
     });
 
     test('Migration phải có đầy đủ cấu trúc bảng, RLS policies, REPLICA IDENTITY FULL và Realtime publication', () {
-      final file = File('supabase/migrations/20260926_01_issue_comments.sql');
+      final file = File('supabase/migrations_archive/20260926_01_issue_comments.sql');
       final content = file.readAsStringSync();
 
       // 1. Tạo bảng issue_comments
@@ -36,3 +36,4 @@ void main() {
     });
   });
 }
+

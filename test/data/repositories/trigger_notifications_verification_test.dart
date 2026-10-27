@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('P0 Database Verification: Notification Triggers', () {
     test('Triggers use valid column names and enum values', () {
-      final file = File('supabase/migrations/20261007_01_fix_p0_database_and_security.sql');
+      final file = File('supabase/migrations_archive/20261007_01_fix_p0_database_and_security.sql');
       final content = file.readAsStringSync();
       
       // Issue trigger checks
@@ -23,3 +23,4 @@ void main() {
     });
   });
 }
+

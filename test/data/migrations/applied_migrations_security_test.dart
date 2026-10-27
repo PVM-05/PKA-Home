@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Kiểm tra Migration bảo mật bảng public._applied_migrations', () {
     final migrationFile = File(
-      'supabase/migrations/20261011_02_secure_applied_migrations.sql',
+      'supabase/migrations_archive/20261011_02_secure_applied_migrations.sql',
     );
 
     test('File migration 20261011_02_secure_applied_migrations.sql phải tồn tại', () {
@@ -37,3 +37,4 @@ void main() {
     });
   });
 }
+

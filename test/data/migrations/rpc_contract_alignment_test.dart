@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Kiểm tra Migration 20261011_03: Đồng bộ hợp đồng RPC', () {
     final migrationFile = File(
-      'supabase/migrations/20261011_03_harmonize_amenity_and_invoice_rpcs.sql',
+      'supabase/migrations_archive/20261011_03_harmonize_amenity_and_invoice_rpcs.sql',
     );
 
     test('File migration 20261011_03_harmonize_amenity_and_invoice_rpcs.sql phải tồn tại', () {
@@ -58,3 +58,4 @@ void main() {
     });
   });
 }
+

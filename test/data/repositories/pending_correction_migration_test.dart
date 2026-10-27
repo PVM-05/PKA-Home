@@ -1,9 +1,9 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Task 1: Kiểm tra tính hợp lệ của Migration 20261024_04', () {
-    final migrationFile = File('supabase/migrations/20261024_04_pending_requests_correction_and_reschedule.sql');
+    final migrationFile = File('supabase/migrations_archive/20261024_04_pending_requests_correction_and_reschedule.sql');
 
     test('File migration 20261024_04 phải tồn tại', () {
       expect(migrationFile.existsSync(), isTrue, reason: 'Chưa tạo file migration 20261024_04');
@@ -158,7 +158,7 @@ void main() {
   });
 
   group('Task 1.2: Kiểm tra Migration 20261025_01 (Remediation SYS-01, SYS-02, SYS-04)', () {
-    final file = File('supabase/migrations/20261025_01_fix_waitlist_transactions_and_rpc_security.sql');
+    final file = File('supabase/migrations_archive/20261025_01_fix_waitlist_transactions_and_rpc_security.sql');
 
     test('File migration 20261025_01 phải tồn tại', () {
       expect(file.existsSync(), isTrue, reason: 'Chưa tạo file migration 20261025_01');
@@ -198,3 +198,4 @@ void main() {
     });
   });
 }
+

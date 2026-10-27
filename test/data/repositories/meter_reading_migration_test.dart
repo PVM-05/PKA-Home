@@ -1,9 +1,9 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Meter Reading Submissions Migration Tests', () {
-    const migrationPath = 'supabase/migrations/20261005_05_meter_reading_submissions.sql';
+    const migrationPath = 'supabase/migrations_archive/20261005_05_meter_reading_submissions.sql';
 
     test('Tập tin migration 20261005_05_meter_reading_submissions.sql phải tồn tại', () {
       final file = File(migrationPath);
@@ -35,3 +35,4 @@ void main() {
     });
   });
 }
+

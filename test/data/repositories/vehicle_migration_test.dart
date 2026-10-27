@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Vehicle Migration SQL Tests', () {
     test('Migration file 20261006_02_vehicle_rejection_reason_and_limit_fix.sql ton tai va dung cu phap', () {
-      final file = File('supabase/migrations/20261006_02_vehicle_rejection_reason_and_limit_fix.sql');
+      final file = File('supabase/migrations_archive/20261006_02_vehicle_rejection_reason_and_limit_fix.sql');
       expect(file.existsSync(), isTrue);
 
       final content = file.readAsStringSync();
@@ -16,3 +16,4 @@ void main() {
     });
   });
 }
+
