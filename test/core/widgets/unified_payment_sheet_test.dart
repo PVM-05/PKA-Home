@@ -84,7 +84,7 @@ void main() {
     expect(find.text('Thanh toán hóa đơn'), findsOneWidget);
     expect(find.text('#INV-202610-A0110'), findsOneWidget);
     expect(find.textContaining('Quy trình mô phỏng phục vụ đánh giá đồ án'), findsOneWidget);
-    expect(find.text('Chuyển khoản (VietQR Mô Phỏng)'), findsOneWidget);
+    expect(find.text('Chuyển khoản VietQR (Napas 247)'), findsOneWidget);
     expect(find.text('Tiền mặt tại văn phòng Ban Quản Lý'), findsOneWidget);
     expect(find.text('GỬI THÔNG BÁO THANH TOÁN'), findsOneWidget);
 
