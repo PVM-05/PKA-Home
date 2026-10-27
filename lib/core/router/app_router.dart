@@ -52,6 +52,7 @@ import '../../features/management/screens/equipment_detail_screen.dart';
 import '../../features/management/screens/management_payment_transactions_screen.dart';
 import '../../features/management/screens/vehicle_approval_screen.dart';
 import '../../features/management/screens/management_meter_reading_screen.dart';
+import '../../features/management/screens/maintenance_fund_ledger_screen.dart';
 import 'route_names.dart';
 import 'page_transitions.dart';
 
@@ -471,6 +472,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 AppPageTransitions.slideFromRight(
               state: state,
               child: const ManagementMeterReadingScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'maintenance-fund-ledger',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const MaintenanceFundLedgerScreen(),
             ),
           ),
         ],
