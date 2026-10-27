@@ -102,7 +102,7 @@ void main() {
 
     // Mở UnifiedPaymentSheet
     expect(find.text('Thanh toán hóa đơn'), findsOneWidget);
-    expect(find.text('Chuyển khoản (VietQR Mô Phỏng)'), findsOneWidget);
+    expect(find.text('Chuyển khoản VietQR (Napas 247)'), findsOneWidget);
     expect(find.descendant(of: find.byType(UnifiedPaymentSheet), matching: find.text('Phí quản lý')), findsOneWidget);
 
     // Bấm GỬI THÔNG BÁO THANH TOÁN trong sheet

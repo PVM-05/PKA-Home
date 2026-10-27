@@ -173,7 +173,7 @@ void main() {
 
     // Kiểm tra UnifiedPaymentSheet mở ra
     expect(find.byType(UnifiedPaymentSheet), findsOneWidget);
-    expect(find.text('Chuyển khoản (VietQR Mô Phỏng)'), findsOneWidget);
+    expect(find.text('Chuyển khoản VietQR (Napas 247)'), findsOneWidget);
     expect(find.text('GỬI THÔNG BÁO THANH TOÁN'), findsOneWidget);
 
     // Bấm GỬI THÔNG BÁO THANH TOÁN
