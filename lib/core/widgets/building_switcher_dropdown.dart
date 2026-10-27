@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/models/building_model.dart';
 import '../../data/providers/building_provider.dart';
 import '../../data/providers/management_provider.dart';
 import '../theme/app_theme.dart';
@@ -15,7 +14,7 @@ class BuildingSwitcherDropdown extends ConsumerWidget {
 
     return buildingsAsync.when(
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (buildings) {
         if (buildings.isEmpty) return const SizedBox.shrink();
 
