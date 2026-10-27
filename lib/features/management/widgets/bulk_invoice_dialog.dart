@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/network_error_handler.dart';
 import '../../../data/models/bulk_invoice_validation_model.dart';
 import '../../../data/providers/management_provider.dart';
+import '../../../data/providers/fee_schedule_provider.dart';
 
 class BulkInvoiceDialog extends ConsumerStatefulWidget {
   const BulkInvoiceDialog({super.key});
@@ -17,9 +18,10 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _periodController;
   late final TextEditingController _dueDateController;
-  final TextEditingController _mgmtRateController = TextEditingController(text: '10000');
+  final TextEditingController _mgmtRateController = TextEditingController(text: '16500');
   final TextEditingController _electricRateController = TextEditingController(text: '3500');
   final TextEditingController _waterRateController = TextEditingController(text: '18000');
+  bool _hasLoadedRates = false;
 
   final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
@@ -151,8 +153,35 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
     }
   }
 
+  void _applyFeeRates(Map<String, double> rates) {
+    if (rates.containsKey('management')) {
+      _mgmtRateController.text = rates['management']!.toInt().toString();
+    }
+    if (rates.containsKey('electricity')) {
+      _electricRateController.text = rates['electricity']!.toInt().toString();
+    }
+    if (rates.containsKey('water')) {
+      _waterRateController.text = rates['water']!.toInt().toString();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<Map<String, double>>>(feeScheduleMapProvider, (prev, next) {
+      next.whenData((rates) {
+        if (!_hasLoadedRates) {
+          _hasLoadedRates = true;
+          _applyFeeRates(rates);
+        }
+      });
+    });
+
+    final feeRatesAsync = ref.watch(feeScheduleMapProvider);
+    if (!_hasLoadedRates && feeRatesAsync.hasValue && feeRatesAsync.value != null) {
+      _hasLoadedRates = true;
+      _applyFeeRates(feeRatesAsync.value!);
+    }
+
     if (_currentStep == 1) {
       return _buildStep1Configuration(context);
     } else {

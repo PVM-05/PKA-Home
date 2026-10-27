@@ -11,6 +11,7 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
+import '../../../data/providers/fee_schedule_provider.dart';
 import '../../../data/models/apartment_model.dart';
 
 class CreateInvoiceScreen extends ConsumerStatefulWidget {
@@ -43,6 +44,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   // Phí gửi xe (Theo quy định tòa nhà: 100.000đ/xe máy, 1.200.000đ/ô tô)
   final _motorbikeQtyController = TextEditingController();
   final _carQtyController = TextEditingController();
+
+  double _motorbikeFee = AppConstants.kMotorbikeFee;
+  double _carFee = AppConstants.kCarFee;
+  bool _hasLoadedRates = false;
 
   bool _isSubmitting = false;
 
@@ -97,14 +102,33 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     return qty * price;
   }
 
+  void _applyFeeRates(Map<String, double> rates) {
+    if (rates.containsKey('management')) {
+      _managementPriceController.text = rates['management']!.toInt().toString();
+    }
+    if (rates.containsKey('electricity')) {
+      _elecPriceController.text = rates['electricity']!.toInt().toString();
+    }
+    if (rates.containsKey('water')) {
+      _waterPriceController.text = rates['water']!.toInt().toString();
+    }
+    if (rates.containsKey('parking_motorcycle')) {
+      _motorbikeFee = rates['parking_motorcycle']!;
+    }
+    if (rates.containsKey('parking_car')) {
+      _carFee = rates['parking_car']!;
+    }
+    if (mounted) setState(() {});
+  }
+
   double _getMotorbikeTotal() {
     final qty = double.tryParse(_motorbikeQtyController.text) ?? 0.0;
-    return qty * AppConstants.kMotorbikeFee;
+    return qty * _motorbikeFee;
   }
 
   double _getCarTotal() {
     final qty = double.tryParse(_carQtyController.text) ?? 0.0;
-    return qty * AppConstants.kCarFee;
+    return qty * _carFee;
   }
 
   double _getParkingTotal() => _getMotorbikeTotal() + _getCarTotal();
@@ -170,7 +194,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       if (mbQty > 0) {
         items.add({
           'fee_type': 'Phí gửi xe máy',
-          'unit_price': AppConstants.kMotorbikeFee,
+          'unit_price': _motorbikeFee,
           'quantity': mbQty,
         });
       }
@@ -180,7 +204,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       if (carQty > 0) {
         items.add({
           'fee_type': 'Phí gửi ô tô',
-          'unit_price': AppConstants.kCarFee,
+          'unit_price': _carFee,
           'quantity': carQty,
         });
       }
@@ -238,6 +262,21 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<Map<String, double>>>(feeScheduleMapProvider, (prev, next) {
+      next.whenData((rates) {
+        if (!_hasLoadedRates) {
+          _hasLoadedRates = true;
+          _applyFeeRates(rates);
+        }
+      });
+    });
+
+    final feeRatesAsync = ref.watch(feeScheduleMapProvider);
+    if (!_hasLoadedRates && feeRatesAsync.hasValue && feeRatesAsync.value != null) {
+      _hasLoadedRates = true;
+      _applyFeeRates(feeRatesAsync.value!);
+    }
+
     final apartmentsAsync = ref.watch(apartmentsProvider);
     final total = _getManagementTotal() + _getElecTotal() + _getWaterTotal() + _getParkingTotal();
 
@@ -617,9 +656,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _motorbikeQtyController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Số xe máy (${AppConstants.kMotorbikeFeeLabel})',
-                                      prefixIcon: Icon(Icons.two_wheeler_outlined),
+                                    decoration: InputDecoration(
+                                      labelText: 'Số xe máy (${_currencyFormat.format(_motorbikeFee)}/xe)',
+                                      prefixIcon: const Icon(Icons.two_wheeler_outlined),
                                     ),
                                     keyboardType: TextInputType.number,
                                     validator: (v) => validateNonNegativeInt(v, 'Số xe máy'),
@@ -630,9 +669,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _carQtyController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Số ô tô (${AppConstants.kCarFeeLabel})',
-                                      prefixIcon: Icon(Icons.directions_car_outlined),
+                                    decoration: InputDecoration(
+                                      labelText: 'Số ô tô (${_currencyFormat.format(_carFee)}/xe)',
+                                      prefixIcon: const Icon(Icons.directions_car_outlined),
                                     ),
                                     keyboardType: TextInputType.number,
                                     validator: (v) => validateNonNegativeInt(v, 'Số ô tô'),
