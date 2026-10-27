@@ -10,6 +10,10 @@ import '../../../data/providers/equipment_provider.dart';
 import '../widgets/equipment_form_dialog.dart';
 import '../widgets/maintenance_task_form_dialog.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/accounting_voucher_dialog.dart';
+import '../../../data/models/maintenance_fund_transaction_model.dart';
+import '../../../data/providers/maintenance_fund_provider.dart';
+import '../../../data/providers/building_provider.dart';
 
 /// Màn hình Chi tiết Thiết bị, lịch sử bảo dưỡng và hạch toán chi phí
 class EquipmentDetailScreen extends ConsumerStatefulWidget {
@@ -52,6 +56,108 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
       context: context,
       builder: (_) => MaintenanceTaskFormDialog(equipment: _equipment),
     );
+  }
+
+  void _disburseMaintenanceFund(EquipmentMaintenanceTaskModel task) async {
+    final activeBuilding = ref.read(activeBuildingProvider).valueOrNull;
+    final buildingId = activeBuilding?.id ?? _equipment.building ?? '';
+    final vendorName = task.vendorName ?? 'Đơn vị bảo trì thiết bị';
+    final desc = 'Nghiệm thu bảo dưỡng ${_equipment.name} (${_equipment.code}): ${task.title}';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.account_balance_wallet_outlined, color: AppTheme.error),
+            SizedBox(width: 8),
+            Expanded(child: Text('Lập phiếu chi Quỹ bảo trì', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Xác nhận lập phiếu chi từ Quỹ bảo trì 2% cho hạng mục sau:', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+            const SizedBox(height: 12),
+            Text('Thiết bị: ${_equipment.name} (${_equipment.code})', style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('Công việc: ${task.title}'),
+            const SizedBox(height: 4),
+            Text('Đơn vị nhận: $vendorName'),
+            const SizedBox(height: 8),
+            Text('Số tiền chi: ${_currencyFormat.format(task.cost)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.error, fontSize: 16)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Xác nhận chi'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final repo = ref.read(maintenanceFundRepositoryProvider);
+      final res = await repo.recordTransaction(
+        buildingId: buildingId,
+        transactionType: 'EXPENSE',
+        category: 'EQUIPMENT_REPAIR',
+        amount: task.cost,
+        description: desc,
+        recipientOrPayer: vendorName,
+        referenceType: 'EQUIPMENT_TASK',
+        referenceId: task.id,
+      );
+
+      if (mounted) {
+        if (res != null && res['success'] == true) {
+          ref.invalidate(activeMaintenanceFundProvider);
+          ref.invalidate(maintenanceFundLedgerProvider);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Đã lập phiếu chi ${res['voucher_number']} thành công!'),
+              backgroundColor: AppTheme.success,
+            ),
+          );
+
+          final dummyTx = MaintenanceFundTransactionModel(
+            id: res['transaction_id']?.toString() ?? '',
+            buildingId: buildingId,
+            fundId: '',
+            voucherNumber: res['voucher_number']?.toString() ?? 'PC-...',
+            transactionType: 'EXPENSE',
+            category: 'EQUIPMENT_REPAIR',
+            amount: task.cost,
+            balanceAfter: (res['new_balance'] as num?)?.toDouble() ?? 0.0,
+            recipientOrPayer: vendorName,
+            description: desc,
+            referenceType: 'EQUIPMENT_TASK',
+            referenceId: task.id,
+            createdAt: DateTime.now(),
+          );
+
+          AccountingVoucherDialog.show(
+            context,
+            transaction: dummyTx,
+            buildingName: activeBuilding?.name ?? 'Tòa nhà Landmark PKA',
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể lập phiếu chi. Vui lòng kiểm tra lại số dư Quỹ bảo trì.'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _confirmDelete() async {
@@ -405,6 +511,22 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               Text(
                 'Ghi chú: ${task.notes!}',
                 style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+              ),
+            ],
+            if (task.isCompleted && task.cost > 0) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.error,
+                    side: const BorderSide(color: AppTheme.error),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  ),
+                  icon: const Icon(Icons.receipt_long_outlined, size: 16),
+                  label: const Text('Chi từ Quỹ bảo trì', style: TextStyle(fontSize: 12)),
+                  onPressed: () => _disburseMaintenanceFund(task),
+                ),
               ),
             ],
           ],
