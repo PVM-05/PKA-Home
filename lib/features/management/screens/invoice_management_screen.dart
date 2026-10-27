@@ -15,7 +15,8 @@ import 'create_invoice_screen.dart';
 import 'edit_invoice_screen.dart';
 import 'management_invoice_detail_screen.dart';
 import '../widgets/bulk_invoice_dialog.dart';
-import '../../../core/utils/excel_export_helper.dart';
+import '../../../data/services/accounting_export_service.dart';
+import '../../../data/providers/building_provider.dart';
 
 class InvoiceManagementScreen extends ConsumerStatefulWidget {
   const InvoiceManagementScreen({super.key});
@@ -39,22 +40,25 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
 
   Future<void> _exportExcel(List<InvoiceModel> invoices) async {
     setState(() => _isExporting = true);
-    final path = await ExcelExportHelper.exportInvoices(invoices);
+    final activeBuilding = ref.read(activeBuildingProvider).value;
+    final buildingName = activeBuilding?.name ?? 'Tòa nhà PKA';
+    final period = invoices.isNotEmpty ? invoices.first.period : 'Tất cả';
+
+    final service = AccountingExportService();
+    final path = await service.exportAndShare(
+      invoices: invoices,
+      buildingName: buildingName,
+      period: period,
+    );
     setState(() => _isExporting = false);
     
     if (mounted) {
       if (path != null) {
-        ExcelExportHelper.shareFile(path, subject: 'Danh sách hóa đơn PKA-Home');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Đã xuất file thành công!'),
+          const SnackBar(
+            content: Text('Đã xuất báo cáo đối soát Excel thành công!'),
             backgroundColor: AppTheme.success,
-            duration: const Duration(seconds: 4),
-            action: SnackBarAction(
-              label: 'Chia sẻ lại',
-              textColor: Colors.white,
-              onPressed: () => ExcelExportHelper.shareFile(path, subject: 'Danh sách hóa đơn PKA-Home'),
-            ),
+            duration: Duration(seconds: 4),
           ),
         );
       } else {
@@ -151,7 +155,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                       children: [
                         Icon(Icons.download, size: 20, color: AppTheme.primary),
                         SizedBox(width: 10),
-                        Text('Xuất Excel'),
+                        Text('Xuất báo cáo Excel'),
                       ],
                     ),
                   ),
