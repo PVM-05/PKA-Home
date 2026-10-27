@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('P0 Database Verification: RBAC Helpers & Amenity RLS', () {
     test('Migration defines correct columns for role_delegations and amenity RLS', () {
-      final file = File('supabase/migrations/20261007_01_fix_p0_database_and_security.sql');
+      final file = File('supabase/migrations_archive/20261007_01_fix_p0_database_and_security.sql');
       final content = file.readAsStringSync();
       
       // Check column references in is_staff_or_management
@@ -22,3 +22,4 @@ void main() {
     });
   });
 }
+

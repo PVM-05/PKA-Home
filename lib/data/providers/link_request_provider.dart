@@ -78,9 +78,16 @@ class ResidentLinkNotifier extends StateNotifier<ResidentLinkStatus> {
   final SupabaseClient? _client;
   RealtimeChannel? _reqChannel;
   RealtimeChannel? _aptChannel;
-
   SupabaseClient get _supabase => _client ?? SupabaseConfig.client;
-  String? get _effectiveUserId => _userId ?? _supabase.auth.currentUser?.id;
+
+  String? get _effectiveUserId {
+    if (_userId != null) return _userId;
+    try {
+      return _supabase.auth.currentUser?.id;
+    } catch (_) {
+      return null;
+    }
+  }
 
   ResidentLinkNotifier(this._userId, [this._client]) : super(ResidentLinkStatus(status: LinkStatus.loading)) {
     if (_effectiveUserId != null) {

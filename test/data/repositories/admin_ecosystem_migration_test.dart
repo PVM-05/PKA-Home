@@ -1,9 +1,9 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Admin Ecosystem Migration Tests', () {
-    const migrationPath = 'supabase/migrations/20261005_04_admin_management_ecosystem.sql';
+    const migrationPath = 'supabase/migrations_archive/20261005_04_admin_management_ecosystem.sql';
 
     test('Tập tin migration 20261005_04_admin_management_ecosystem.sql phải tồn tại', () {
       final file = File(migrationPath);
@@ -31,3 +31,4 @@ void main() {
     });
   });
 }
+

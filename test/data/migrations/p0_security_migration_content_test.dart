@@ -1,9 +1,9 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Migration 20261007_02 chứa đầy đủ các bản vá bảo mật RPC và RLS', () {
-    final file = File('supabase/migrations/20261007_02_fix_critical_security_and_policies.sql');
+    final file = File('supabase/migrations_archive/20261007_02_fix_critical_security_and_policies.sql');
     expect(file.existsSync(), isTrue, reason: 'File migration 20261007_02 phải tồn tại');
 
     final content = file.readAsStringSync();
@@ -19,7 +19,7 @@ void main() {
   });
 
   test('Migration 20261004_02 dùng đúng các cột của bảng role_delegations', () {
-    final file = File('supabase/migrations/20261004_02_building_equipment_maintenance.sql');
+    final file = File('supabase/migrations_archive/20261004_02_building_equipment_maintenance.sql');
     expect(file.existsSync(), isTrue);
 
     final content = file.readAsStringSync();
@@ -29,7 +29,7 @@ void main() {
   });
 
   test('Migration 20261010_01 chứa đầy đủ các bản vá bổ sung', () {
-    final file = File('supabase/migrations/20261010_01_comprehensive_database_and_security_patches.sql');
+    final file = File('supabase/migrations_archive/20261010_01_comprehensive_database_and_security_patches.sql');
     expect(file.existsSync(), isTrue);
 
     final content = file.readAsStringSync();
@@ -44,7 +44,7 @@ void main() {
   });
 
   test('Migration 20261010_01 siết chặt quyền và trạng thái trong simulate_unified_payment', () {
-    final file = File('supabase/migrations/20261010_01_comprehensive_database_and_security_patches.sql');
+    final file = File('supabase/migrations_archive/20261010_01_comprehensive_database_and_security_patches.sql');
     final content = file.readAsStringSync();
     expect(content.contains("v_user_id IS NULL THEN"), isTrue, reason: 'Phải bắt buộc đăng nhập');
     expect(content.contains("residents_apartments"), isTrue, reason: 'Phải kiểm tra quyền cư dân căn hộ');
@@ -54,10 +54,11 @@ void main() {
   });
 
   test('Migration 20261010_01 approve_meter_reading khóa FOR UPDATE và từ chối chỉ số mới nhỏ hơn chỉ số cũ', () {
-    final file = File('supabase/migrations/20261010_01_comprehensive_database_and_security_patches.sql');
+    final file = File('supabase/migrations_archive/20261010_01_comprehensive_database_and_security_patches.sql');
     final content = file.readAsStringSync();
     expect(content.contains("FROM public.apartments\n    WHERE id = v_sub.apartment_id FOR UPDATE;"), isTrue);
     expect(content.contains("v_sub.electric_reading < v_old_elec"), isTrue);
     expect(content.contains("v_sub.water_reading < v_old_water"), isTrue);
   });
 }
+

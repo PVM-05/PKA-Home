@@ -15,6 +15,7 @@ class FakePaymentService extends PaymentService {
     required String referenceId,
     String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
+    String? failureReason,
   }) async {
     return fakeResult;
   }

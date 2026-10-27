@@ -6,6 +6,7 @@ void main() {
     test('PaymentResult.fromJson parses canonical server response properly', () {
       final json = {
         'success': true,
+        'status': 'SUCCESS',
         'transaction_id': '11111111-2222-3333-4444-555555555555',
         'receipt_number': 'INV-20261027-ABC123',
         'message': 'Thanh toán hóa đơn thành công',
@@ -24,6 +25,7 @@ void main() {
     test('PaymentResult.fromJson handles failure properly', () {
       final json = {
         'success': false,
+        'status': 'FAILED',
         'transaction_id': '11111111-2222-3333-4444-555555555555',
         'message': 'Số dư không đủ',
       };

@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -6,7 +6,7 @@ void main() {
     late String migrationContent;
 
     setUpAll(() {
-      final migrationFile = File('supabase/migrations/20261011_05_fix_amenity_payment_and_method_sync.sql');
+      final migrationFile = File('supabase/migrations_archive/20261011_05_fix_amenity_payment_and_method_sync.sql');
       expect(migrationFile.existsSync(), isTrue, reason: 'File migration 20261011_05 phải tồn tại');
       migrationContent = migrationFile.readAsStringSync();
     });
@@ -48,3 +48,4 @@ void main() {
     });
   });
 }
+

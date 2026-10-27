@@ -1,9 +1,9 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Migration 20261025_03 phải chứa các định nghĩa vá bảo mật và RPC tiện ích', () {
-    final file = File('supabase/migrations/20261025_03_audit_remediation_and_amenity_system.sql');
+    final file = File('supabase/migrations_archive/20261025_03_audit_remediation_and_amenity_system.sql');
     expect(file.existsSync(), isTrue, reason: 'File migration 20261025_03 phải tồn tại');
 
     final content = file.readAsStringSync();
@@ -25,3 +25,4 @@ void main() {
         reason: 'Phải cấu hình lại bucket issue-images sang private');
   });
 }
+

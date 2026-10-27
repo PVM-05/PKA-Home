@@ -1,16 +1,16 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/models/amenity_booking_model.dart';
 
 void main() {
   group('P1 & P2 System Audit Migration Tests (20261024_02)', () {
     test('Tập tin migration 20261024_02_system_audit_p1_p2_fixes.sql phải tồn tại', () {
-      final file = File('supabase/migrations/20261024_02_system_audit_p1_p2_fixes.sql');
+      final file = File('supabase/migrations_archive/20261024_02_system_audit_p1_p2_fixes.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration 20261024_02_system_audit_p1_p2_fixes.sql chưa được tạo');
     });
 
     test('Migration phải định nghĩa cột notes, Partial Unique Index và RPC ẩn danh PII', () {
-      final file = File('supabase/migrations/20261024_02_system_audit_p1_p2_fixes.sql');
+      final file = File('supabase/migrations_archive/20261024_02_system_audit_p1_p2_fixes.sql');
       final content = file.readAsStringSync();
 
       // 1. Cột notes
@@ -61,3 +61,4 @@ void main() {
     });
   });
 }
+

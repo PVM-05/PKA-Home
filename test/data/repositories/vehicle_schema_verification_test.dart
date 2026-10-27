@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('P0 Database Verification: Vehicles & Users Security', () {
     test('Migration file exists and defines vehicle columns and users protection trigger', () {
-      final file = File('supabase/migrations/20261007_01_fix_p0_database_and_security.sql');
+      final file = File('supabase/migrations_archive/20261007_01_fix_p0_database_and_security.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration file must exist');
       final content = file.readAsStringSync();
       
@@ -22,3 +22,4 @@ void main() {
     });
   });
 }
+

@@ -790,6 +790,7 @@ BEGIN
 
             RETURN jsonb_build_object(
                 'success', true,
+                'status', 'SUCCESS',
                 'transaction_id', v_tx_id,
                 'receipt_number', v_tx_code,
                 'message', 'Thanh toán hóa đơn thành công'
@@ -805,6 +806,7 @@ BEGIN
 
             RETURN jsonb_build_object(
                 'success', false,
+                'status', 'FAILED',
                 'transaction_id', v_tx_id,
                 'message', COALESCE(p_failure_reason, 'Giao dịch thất bại')
             );
@@ -821,7 +823,7 @@ BEGIN
         END IF;
 
         IF v_booking.status = 'confirmed' AND v_booking.payment_status = 'paid' THEN
-            RETURN jsonb_build_object('success', false, 'message', 'Lịch đặt này đã được thanh toán và xác nhận.');
+            RETURN jsonb_build_object('success', false, 'status', 'FAILED', 'message', 'Lịch đặt này đã được thanh toán và xác nhận.');
         END IF;
 
         v_target_apartment := v_booking.apartment_id;
@@ -846,6 +848,7 @@ BEGIN
 
             RETURN jsonb_build_object(
                 'success', true,
+                'status', 'SUCCESS',
                 'transaction_id', v_tx_id,
                 'receipt_number', v_tx_code,
                 'message', 'Thanh toán tiện ích thành công'
@@ -861,6 +864,7 @@ BEGIN
 
             RETURN jsonb_build_object(
                 'success', false,
+                'status', 'FAILED',
                 'transaction_id', v_tx_id,
                 'message', COALESCE(p_failure_reason, 'Giao dịch thất bại')
             );
@@ -1017,10 +1021,11 @@ $$;
 -- 3. book_amenity_slot (Canonical Definition with Advisory Locking)
 CREATE OR REPLACE FUNCTION public.book_amenity_slot(
     p_amenity_id UUID,
-    p_apartment_id UUID,
     p_booking_date DATE,
     p_time_slot VARCHAR,
     p_guests_count INT DEFAULT 1,
+    p_apartment_id UUID DEFAULT NULL,
+    p_allow_waitlist BOOLEAN DEFAULT true,
     p_notes TEXT DEFAULT NULL
 )
 RETURNS JSONB
@@ -1031,6 +1036,7 @@ AS $$
 DECLARE
     v_user_id UUID;
     v_amenity RECORD;
+    v_target_apartment UUID;
     v_day_start TIMESTAMPTZ;
     v_day_end TIMESTAMPTZ;
     v_current_slot_capacity INT := 0;
@@ -1047,6 +1053,18 @@ BEGIN
 
     IF p_booking_date < CURRENT_DATE THEN
         RAISE EXCEPTION 'Không thể đặt lịch ngày trong quá khứ.';
+    END IF;
+
+    v_target_apartment := p_apartment_id;
+    IF v_target_apartment IS NULL THEN
+        SELECT apartment_id INTO v_target_apartment
+        FROM public.residents_apartments
+        WHERE user_id = v_user_id
+        LIMIT 1;
+    END IF;
+
+    IF v_target_apartment IS NULL THEN
+        RAISE EXCEPTION 'Người dùng chưa được liên kết với bất kỳ căn hộ nào.';
     END IF;
 
     SELECT * INTO v_amenity
@@ -1084,6 +1102,9 @@ BEGIN
           AND status IN ('confirmed', 'pending_payment', 'completed');
 
         IF v_current_slot_capacity > 0 THEN
+            IF NOT p_allow_waitlist THEN
+                RAISE EXCEPTION 'Khung giờ này đã được đặt kín.';
+            END IF;
             v_status := 'waitlist';
         END IF;
     ELSE
@@ -1095,6 +1116,9 @@ BEGIN
           AND status IN ('confirmed', 'pending_payment', 'completed');
 
         IF (v_current_slot_capacity + p_guests_count) > v_amenity.max_capacity THEN
+            IF NOT p_allow_waitlist THEN
+                RAISE EXCEPTION 'Khung giờ này không đủ chỗ cho % người.', p_guests_count;
+            END IF;
             v_status := 'waitlist';
         END IF;
     END IF;
@@ -1119,7 +1143,7 @@ BEGIN
         guests_count, status, fee_amount, deposit_amount, deposit_status,
         payment_status, notes, created_at, updated_at
     ) VALUES (
-        p_amenity_id, p_apartment_id, v_user_id, p_booking_date, p_time_slot,
+        p_amenity_id, v_target_apartment, v_user_id, p_booking_date, p_time_slot,
         p_guests_count, v_status, v_fee, v_deposit,
         CASE WHEN v_deposit > 0 THEN 'pending' ELSE 'none' END,
         CASE WHEN (v_fee + v_deposit) > 0 THEN 'unpaid' ELSE 'none' END,

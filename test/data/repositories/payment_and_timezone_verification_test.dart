@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('P0 Database Verification: Payment Concurrency & Timezone', () {
     test('simulate_unified_payment has FOR UPDATE and timezone is Asia/Ho_Chi_Minh', () {
-      final file = File('supabase/migrations/20261007_01_fix_p0_database_and_security.sql');
+      final file = File('supabase/migrations_archive/20261007_01_fix_p0_database_and_security.sql');
       final content = file.readAsStringSync();
       
       // Concurrency checks
@@ -22,3 +22,4 @@ void main() {
     });
   });
 }
+

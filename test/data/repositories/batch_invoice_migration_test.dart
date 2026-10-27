@@ -1,9 +1,9 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Batch Invoice Prevalidation Migration Tests', () {
-    const migrationPath = 'supabase/migrations/20261006_01_batch_invoice_prevalidation.sql';
+    const migrationPath = 'supabase/migrations_archive/20261006_01_batch_invoice_prevalidation.sql';
 
     test('Tập tin migration 20261006_01_batch_invoice_prevalidation.sql phải tồn tại', () {
       final file = File(migrationPath);
@@ -34,3 +34,4 @@ void main() {
     });
   });
 }
+

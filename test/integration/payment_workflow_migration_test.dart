@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -6,7 +6,7 @@ void main() {
     late String migrationContent;
 
     setUpAll(() {
-      final migrationFile = File('supabase/migrations/20261011_04_resident_payment_submission_workflow.sql');
+      final migrationFile = File('supabase/migrations_archive/20261011_04_resident_payment_submission_workflow.sql');
       expect(migrationFile.existsSync(), isTrue, reason: 'File migration 20261011_04 phải tồn tại');
       migrationContent = migrationFile.readAsStringSync();
     });
@@ -46,3 +46,4 @@ void main() {
     });
   });
 }
+

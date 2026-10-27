@@ -22,6 +22,7 @@ class FailingPaymentService extends PaymentService {
     required String referenceId,
     String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
+    String? failureReason,
   }) async {
     return PaymentResult(
       success: false,
