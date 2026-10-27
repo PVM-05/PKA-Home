@@ -48,12 +48,7 @@ final currentApartmentReadingsProvider = FutureProvider<Map<String, dynamic>?>((
 
     return response;
   } catch (_) {
-    return {
-      'id': aptId,
-      'code': 'A0110',
-      'electric_reading': 1250.0,
-      'water_reading': 80.0,
-    };
+    return null;
   }
 });
 
