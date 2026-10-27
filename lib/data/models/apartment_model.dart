@@ -7,6 +7,7 @@ class ApartmentModel {
   final bool isEmpty;
   final double electricReading;
   final double waterReading;
+  final String? buildingId;
 
   ApartmentModel({
     required this.id,
@@ -17,6 +18,7 @@ class ApartmentModel {
     this.isEmpty = true,
     this.electricReading = 0,
     this.waterReading = 0,
+    this.buildingId,
   });
 
   factory ApartmentModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class ApartmentModel {
       isEmpty: json['is_empty'] as bool? ?? true,
       electricReading: json['electric_reading'] != null ? (json['electric_reading'] as num).toDouble() : 0,
       waterReading: json['water_reading'] != null ? (json['water_reading'] as num).toDouble() : 0,
+      buildingId: json['building_id'] as String?,
     );
   }
 
@@ -48,6 +51,7 @@ class ApartmentModel {
       'is_empty': isEmpty,
       'electric_reading': electricReading,
       'water_reading': waterReading,
+      if (buildingId != null) 'building_id': buildingId,
     };
   }
 
@@ -60,6 +64,7 @@ class ApartmentModel {
     bool? isEmpty,
     double? electricReading,
     double? waterReading,
+    String? buildingId,
   }) {
     return ApartmentModel(
       id: id ?? this.id,
@@ -70,6 +75,7 @@ class ApartmentModel {
       isEmpty: isEmpty ?? this.isEmpty,
       electricReading: electricReading ?? this.electricReading,
       waterReading: waterReading ?? this.waterReading,
+      buildingId: buildingId ?? this.buildingId,
     );
   }
 }
