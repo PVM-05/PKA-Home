@@ -72,16 +72,22 @@ class MaintenanceFundRepository {
     if (client == null) return null;
 
     try {
-      final res = await client.rpc('record_maintenance_fund_transaction', params: {
+      final params = <String, dynamic>{
         'p_building_id': buildingId,
         'p_transaction_type': transactionType,
         'p_category': category,
         'p_amount': amount,
         'p_description': description,
         'p_recipient_or_payer': recipientOrPayer,
-        if (referenceType != null) 'p_reference_type': referenceType,
-        if (referenceId != null) 'p_reference_id': referenceId,
-      });
+      };
+      if (referenceType != null) {
+        params['p_reference_type'] = referenceType;
+      }
+      if (referenceId != null) {
+        params['p_reference_id'] = referenceId;
+      }
+
+      final res = await client.rpc('record_maintenance_fund_transaction', params: params);
       return res as Map<String, dynamic>?;
     } catch (_) {
       return null;
