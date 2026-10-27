@@ -13,6 +13,9 @@ class InvoiceModel {
   final String? paymentMethod;
   final String? transactionCode;
   final DateTime? paidAt;
+  final String? receiptNumber;
+  final String? einvoiceLookupCode;
+  final double? paidAmount;
 
   InvoiceModel({
     required this.id,
@@ -27,7 +30,28 @@ class InvoiceModel {
     this.paymentMethod,
     this.transactionCode,
     this.paidAt,
+    this.receiptNumber,
+    this.einvoiceLookupCode,
+    this.paidAmount,
   });
+
+  String get displayReceiptNumber {
+    if (receiptNumber != null && receiptNumber!.isNotEmpty) {
+      return receiptNumber!;
+    }
+    final cleanPeriod = period.replaceAll('/', '');
+    final suffix = (transactionCode ?? id).replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').padRight(5, '0');
+    final code = suffix.length >= 5 ? suffix.substring(suffix.length - 5) : suffix;
+    return 'PT-$cleanPeriod-${code.toUpperCase()}';
+  }
+
+  String get displayLookupCode {
+    if (einvoiceLookupCode != null && einvoiceLookupCode!.isNotEmpty) {
+      return einvoiceLookupCode!;
+    }
+    final clean = (transactionCode ?? id).replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+    return clean.length >= 8 ? clean.substring(0, 8).toUpperCase() : clean.toUpperCase().padRight(8, '0');
+  }
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
     return InvoiceModel(
@@ -43,6 +67,9 @@ class InvoiceModel {
       paymentMethod: json['payment_method'] as String?,
       transactionCode: json['transaction_code'] as String?,
       paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at']) : null,
+      receiptNumber: json['receipt_number'] as String?,
+      einvoiceLookupCode: json['einvoice_lookup_code'] as String?,
+      paidAmount: (json['paid_amount'] as num?)?.toDouble(),
     );
   }
 }
