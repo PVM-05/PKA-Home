@@ -1,0 +1,6 @@
+# Cấu hình khóa ký Android Release (Mẫu tham khảo)
+# Sao chép file này thành key.properties (tại thư mục android/ hoặc root) và điền thông tin thực tế
+storePassword=your_keystore_password
+keyPassword=your_key_password
+keyAlias=pka_home_release_key
+storeFile=/path/to/upload-keystore.jks
