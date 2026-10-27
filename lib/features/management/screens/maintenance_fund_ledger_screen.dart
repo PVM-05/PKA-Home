@@ -6,7 +6,6 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/accounting_voucher_dialog.dart';
 import '../../../core/widgets/building_switcher_dropdown.dart';
-import '../../../data/models/maintenance_fund_transaction_model.dart';
 import '../../../data/providers/maintenance_fund_provider.dart';
 import '../../../data/providers/building_provider.dart';
 
@@ -91,7 +90,7 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                     const SizedBox(height: 16),
                     // Danh mục
                     DropdownButtonFormField<String>(
-                      value: category,
+                      initialValue: category,
                       decoration: const InputDecoration(
                         labelText: 'Danh mục giao dịch',
                         border: OutlineInputBorder(),
@@ -361,7 +360,7 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: transactions.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final tx = transactions[index];
                     final isIncome = tx.isIncome;

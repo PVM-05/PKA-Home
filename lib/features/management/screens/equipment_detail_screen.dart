@@ -60,7 +60,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
 
   void _disburseMaintenanceFund(EquipmentMaintenanceTaskModel task) async {
     final activeBuilding = ref.read(activeBuildingProvider).valueOrNull;
-    final buildingId = activeBuilding?.id ?? _equipment.building ?? '';
+    final buildingId = activeBuilding?.id ?? _equipment.building;
     final vendorName = task.vendorName ?? 'Đơn vị bảo trì thiết bị';
     final desc = 'Nghiệm thu bảo dưỡng ${_equipment.name} (${_equipment.code}): ${task.title}';
 
