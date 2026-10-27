@@ -28,33 +28,37 @@ class PaymentResult {
   factory PaymentResult.fromJson(Map<String, dynamic> json) {
     final rawStatus = json['status'] as String?;
     final isExplicitPending = (json['is_pending'] as bool?) == true;
+    final isExplicitSuccess = (json['success'] as bool?) == true;
 
-    // Tuyệt đối không suy đoán SUCCESS từ boolean success nếu thiếu status tường minh
     final String statusVal;
     if (rawStatus != null && rawStatus.isNotEmpty) {
       statusVal = rawStatus.toUpperCase();
     } else if (isExplicitPending) {
       statusVal = 'PENDING';
+    } else if (isExplicitSuccess) {
+      statusVal = 'SUCCESS';
     } else {
-      statusVal = 'UNKNOWN';
+      statusVal = 'FAILED';
     }
 
     final isPendingVal = statusVal == 'PENDING';
-    final isSuccessVal = (json['success'] as bool? ?? false) && statusVal == 'SUCCESS';
+    final isSuccessVal = statusVal == 'SUCCESS' && (json['success'] as bool? ?? true);
     final hasValidState = isSuccessVal || isPendingVal;
+
+    final txCode = (json['receipt_number'] as String?) ??
+        (json['transaction_code'] as String?) ??
+        '';
 
     return PaymentResult(
       success: hasValidState,
       isPending: isPendingVal,
       status: statusVal,
-      transactionCode: json['transaction_code'] as String? ?? '',
+      transactionCode: txCode,
       transactionId: json['transaction_id'] as String? ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       title: json['title'] as String? ?? 'Giao dịch',
       paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at'] as String).toLocal() : DateTime.now(),
-      errorMessage: hasValidState
-          ? (json['message'] as String? ?? json['error'] as String?)
-          : (json['message'] as String? ?? json['error'] as String? ?? 'Dữ liệu phản hồi thiếu trạng thái giao dịch hợp lệ.'),
+      errorMessage: json['message'] as String? ?? json['error'] as String?,
     );
   }
 }
@@ -69,17 +73,18 @@ class PaymentService {
     required String referenceId,
     String paymentMethod = 'bank_transfer',
     String outcome = 'SUCCESS',
+    String? failureReason,
   }) async {
     final typeString = type == PaymentType.invoice ? 'INVOICE' : 'SERVICE';
 
     final res = await SupabaseConfig.client.rpc(
       'simulate_unified_payment',
       params: {
-        'p_payment_type': typeString,
-        'p_type': typeString,
         'p_reference_id': referenceId,
+        'p_payment_type': typeString,
         'p_payment_method': paymentMethod,
         'p_outcome': outcome,
+        if (failureReason != null) 'p_failure_reason': failureReason,
       },
     );
 
