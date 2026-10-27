@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
+import '../router/route_names.dart';
 import '../../data/providers/maintenance_fund_provider.dart';
 import 'app_card.dart';
 
@@ -295,6 +297,22 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.menu_book_outlined, size: 18),
+                  label: const Text('Xem sổ quỹ & chứng từ'),
+                  onPressed: () {
+                    context.push(AppRoutes.managementMaintenanceFundLedger);
+                  },
                 ),
               ),
             ],

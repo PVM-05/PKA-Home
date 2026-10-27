@@ -52,4 +52,5 @@ class AppRoutes {
   static const String managementPaymentTransactions = '/management/payment-transactions';
   static const String managementVehicleApproval = '/management/vehicle-approval';
   static const String managementMeterReading = '/management/meter-readings';
+  static const String managementMaintenanceFundLedger = '/management/maintenance-fund-ledger';
 }
