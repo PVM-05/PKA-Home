@@ -3,17 +3,27 @@ import '../../core/supabase_config.dart';
 import '../models/building_model.dart';
 
 class BuildingRepository {
-  final SupabaseClient _client;
+  final SupabaseClient? _customClient;
 
-  BuildingRepository([SupabaseClient? client])
-      : _client = client ?? SupabaseConfig.client;
+  BuildingRepository([SupabaseClient? client]) : _customClient = client;
+
+  SupabaseClient? get _client {
+    if (_customClient != null) return _customClient;
+    try {
+      return SupabaseConfig.client;
+    } catch (_) {
+      return null;
+    }
+  }
 
   static const String kDefaultCanonicalBuildingId = '00000000-0000-0000-0000-000000000002';
   static const String kDefaultCanonicalOrgId = '00000000-0000-0000-0000-000000000001';
 
   Future<List<BuildingModel>> getAllActiveBuildings() async {
     try {
-      final response = await _client
+      final client = _client;
+      if (client == null) return [];
+      final response = await client
           .from('buildings')
           .select()
           .eq('is_active', true)
@@ -28,7 +38,9 @@ class BuildingRepository {
 
   Future<List<BuildingModel>> getUserAssignedBuildings(String userId) async {
     try {
-      final response = await _client
+      final client = _client;
+      if (client == null) return [];
+      final response = await client
           .from('building_staff')
           .select('building_id, buildings(*)')
           .eq('user_id', userId);
@@ -47,7 +59,9 @@ class BuildingRepository {
 
   Future<BuildingModel?> getBuildingById(String buildingId) async {
     try {
-      final response = await _client
+      final client = _client;
+      if (client == null) return null;
+      final response = await client
           .from('buildings')
           .select()
           .eq('id', buildingId)

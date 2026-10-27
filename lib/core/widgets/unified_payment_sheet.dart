@@ -6,7 +6,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../theme/app_theme.dart';
 import '../../data/services/payment_service.dart';
 import '../../data/providers/payment_provider.dart';
+import '../../data/providers/building_provider.dart';
 import '../utils/network_error_handler.dart';
+import '../utils/vietqr_generator.dart';
 
 enum _PaymentStep { confirmation, processing, success, pendingConfirmation, failed }
 
@@ -166,6 +168,19 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
 
   Widget _buildConfirmationStep(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final activeBuilding = ref.watch(activeBuildingProvider).value;
+    final bankBin = activeBuilding?.bankBin ?? '970418';
+    final bankName = activeBuilding?.bankName ?? 'BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam';
+    final bankAccountNumber = activeBuilding?.bankAccountNumber ?? '1234567890';
+    final bankAccountName = activeBuilding?.bankAccountName ?? 'BQL PKA LANDMARK';
+
+    final vietQrString = VietQrGenerator.generate(
+      bankBin: bankBin,
+      bankAccount: bankAccountNumber,
+      amount: widget.amount,
+      memo: widget.referenceCode,
+      accountName: bankAccountName,
+    );
 
     return Column(
       key: const ValueKey('step_confirmation'),
@@ -304,7 +319,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         ),
         const SizedBox(height: 8),
 
-        // Lựa chọn 1: Chuyển khoản mô phỏng
+        // Lựa chọn 1: Chuyển khoản VietQR
         InkWell(
           onTap: () {
             setState(() {
@@ -336,11 +351,11 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Chuyển khoản (VietQR Mô Phỏng)',
+                        'Chuyển khoản VietQR (Napas 247)',
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       Text(
-                        'Gửi xác nhận đã chuyển để BQL kiểm tra và gạch nợ',
+                        'Quét mã chuyển tiền nhanh 24/7 liên ngân hàng',
                         style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                       ),
                     ],
@@ -353,7 +368,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         ),
         const SizedBox(height: 10),
 
-        // Thông tin QR mô phỏng nếu chọn chuyển khoản
+        // Thông tin VietQR nếu chọn chuyển khoản
         if (_selectedMethod == 'bank_transfer') ...[
           Container(
             padding: const EdgeInsets.all(14),
@@ -374,31 +389,11 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          QrImageView(
-                            data: 'PKA-HOME-DEMO-PAYMENT|REF:${widget.referenceCode}|AMT:${widget.amount.toInt()}',
-                            version: QrVersions.auto,
-                            size: 110.0,
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'DEMO ONLY',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: QrImageView(
+                        key: ValueKey('vietqr_$vietQrString'),
+                        data: vietQrString,
+                        version: QrVersions.auto,
+                        size: 110.0,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -407,16 +402,16 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'NGÂN HÀNG QUÂN ĐỘI (MB)',
+                            bankName,
                             style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'STK: 88889999DEMO',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          Text(
+                            'STK: $bankAccountNumber',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                           ),
-                          const Text(
-                            'Tên: BQL CHUNG CƯ PKA-HOME',
+                          Text(
+                            'Tên: $bankAccountName',
                             style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                           ),
                           const SizedBox(height: 6),
@@ -431,7 +426,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '💡 Mã QR trên là dữ liệu mô phỏng nội bộ đồ án, không dùng để giao dịch thật.',
+                  '💡 Quét mã QR bằng ứng dụng ngân hàng bất kỳ để chuyển tiền nhanh 24/7.',
                   style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
                 ),
               ],
