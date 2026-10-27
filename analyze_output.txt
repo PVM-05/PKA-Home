@@ -1,9 +1,0 @@
-Analyzing pka_home...
-No issues found!
-
-[Xác minh ngày 11/10/2026]
-- PostgrestException trong link_request_provider.dart: Đã được khắc phục hoàn toàn (import supabase_flutter chuẩn).
-- authState trong login_screen / register_screen: Không còn tồn tại biến không sử dụng.
-- fluentui_system_icons trong resident_invoice_detail_screen: Không còn tồn tại import thừa.
-- Kết quả flutter analyze: 0 lỗi, 0 cảnh báo.
-- Kết quả flutter test: 272/272 tests vượt qua.
