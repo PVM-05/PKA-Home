@@ -9,6 +9,7 @@ import '../../../data/providers/invoice_items_provider.dart';
 import '../../../data/providers/payment_provider.dart';
 import 'edit_invoice_screen.dart';
 import '../../../core/utils/invoice_fee_helper.dart';
+import '../../../core/widgets/electronic_receipt_sheet.dart';
 
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
   final InvoiceModel invoice;
@@ -218,9 +219,50 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
   Widget _buildBottomAction(BuildContext context, WidgetRef ref) {
     final isPending = invoice.status == 'pending_confirmation';
     final isUnpaid = invoice.status == 'unpaid';
+    final isPaid = invoice.status == 'paid';
 
-    if (!isPending && !isUnpaid) {
+    if (!isPending && !isUnpaid && !isPaid) {
       return const SizedBox.shrink();
+    }
+
+    if (isPaid) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color ?? Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              offset: const Offset(0, -3),
+              blurRadius: 12,
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                icon: const Icon(Icons.receipt_long, size: 20),
+                label: const Text(
+                  'XEM BIÊN LAI THU TIỀN',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+                onPressed: () => showElectronicReceiptSheet(context: context, invoice: invoice),
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     final reqMethod = (invoice.paymentMethod ?? '').toLowerCase();
