@@ -10,12 +10,25 @@ import 'resident_invoice_screen.dart';
 import 'resident_issue_screen.dart';
 
 /// Màn hình Trung tâm Thông báo & Nhắc nhở dành cho Cư dân.
-class NotificationCenterScreen extends ConsumerWidget {
+class NotificationCenterScreen extends ConsumerStatefulWidget {
   const NotificationCenterScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationCenterScreen> createState() => _NotificationCenterScreenState();
+}
+
+class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScreen> {
+  @override
+  void initState() {
+    super.initState();
+    timeago.setLocaleMessages('vi', timeago.ViMessages());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final notificationsAsync = ref.watch(notificationsStreamProvider);
+    final filteredNotifications = ref.watch(filteredNotificationsProvider);
+    final activeFilter = ref.watch(notificationFilterTypeProvider);
     final user = ref.watch(authProvider).value;
 
     return Scaffold(
@@ -45,64 +58,135 @@ class NotificationCenterScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: notificationsAsync.when(
-        data: (notifications) {
-          if (notifications.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
+      body: Column(
+        children: [
+          // Thanh lọc danh mục
+          _buildFilterChips(activeFilter),
+
+          // Nội dung danh sách
+          Expanded(
+            child: notificationsAsync.when(
+              data: (allNotifications) {
+                if (allNotifications.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.notifications_none,
+                              size: 64,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Chưa có thông báo nào',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Bạn sẽ nhận được thông báo tự động khi có hóa đơn mới, lịch nhắc hạn thanh toán hoặc thông báo khẩn cấp từ Ban Quản Lý.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary, height: 1.4),
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.notifications_none,
-                        size: 64,
-                        color: AppTheme.primary,
+                    ),
+                  );
+                }
+
+                if (filteredNotifications.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Text(
+                        'Không có thông báo nào phù hợp với bộ lọc đã chọn',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Chưa có thông báo nào',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Bạn sẽ nhận được thông báo tự động khi có hóa đơn mới, lịch nhắc hạn thanh toán hoặc thông báo khẩn cấp từ Ban Quản Lý.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: AppTheme.textSecondary, height: 1.4),
-                    ),
-                  ],
+                  );
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filteredNotifications.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
+                    final item = filteredNotifications[index];
+                    return _NotificationCard(notification: item);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Lỗi tải thông báo: $err',
+                    style: const TextStyle(color: AppTheme.error),
+                  ),
                 ),
               ),
-            );
-          }
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: notifications.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              final item = notifications[index];
-              return _NotificationCard(notification: item);
+  Widget _buildFilterChips(String activeFilter) {
+    final filters = [
+      {'key': 'ALL', 'label': 'Tất cả'},
+      {'key': 'UNREAD', 'label': 'Chưa đọc'},
+      {'key': 'INVOICE', 'label': 'Hóa đơn & Phí'},
+      {'key': 'BUILDING', 'label': 'Tòa nhà'},
+    ];
+
+    return Container(
+      height: 48,
+      margin: const EdgeInsets.only(top: 8, bottom: 4),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: filters.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final filter = filters[index];
+          final isSelected = activeFilter == filter['key'];
+          return ChoiceChip(
+            label: Text(
+              filter['label']!,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? Colors.white : AppTheme.textSecondary,
+              ),
+            ),
+            selected: isSelected,
+            selectedColor: AppTheme.primary,
+            backgroundColor: Colors.grey.shade100,
+            showCheckmark: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: isSelected ? AppTheme.primary : Colors.grey.shade300,
+              ),
+            ),
+            onSelected: (selected) {
+              if (selected) {
+                ref.read(notificationFilterTypeProvider.notifier).state = filter['key']!;
+              }
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Lỗi tải thông báo: $err',
-              style: const TextStyle(color: AppTheme.error),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -115,12 +199,17 @@ class _NotificationCard extends ConsumerWidget {
 
   Color _getIconColor() {
     switch (notification.type) {
+      case 'invoice_overdue':
+        return AppTheme.error;
+      case 'invoice_due_today':
+        return const Color(0xFFE65100);
+      case 'invoice_due_soon':
       case 'invoice_due_reminder':
         return AppStatusColors.unpaid;
       case 'new_invoice':
         return AppTheme.primary;
       case 'equipment_maintenance':
-        return const Color(0xFFE65100);
+        return const Color(0xFFF57C00);
       case 'issue_update':
         return const Color(0xFF00897B);
       default:
@@ -130,6 +219,10 @@ class _NotificationCard extends ConsumerWidget {
 
   IconData _getIconData() {
     switch (notification.type) {
+      case 'invoice_overdue':
+        return Icons.warning_amber_rounded;
+      case 'invoice_due_today':
+      case 'invoice_due_soon':
       case 'invoice_due_reminder':
         return Icons.alarm_outlined;
       case 'new_invoice':
@@ -143,19 +236,33 @@ class _NotificationCard extends ConsumerWidget {
     }
   }
 
+  String? _getStatusBadgeText() {
+    switch (notification.type) {
+      case 'invoice_overdue':
+        return 'Quá hạn';
+      case 'invoice_due_today':
+        return 'Hạn hôm nay';
+      case 'invoice_due_soon':
+        return 'Sắp đến hạn';
+      default:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final iconColor = _getIconColor();
     final isUnread = !notification.isRead;
+    final badgeText = _getStatusBadgeText();
 
     final cardBgColor = isUnread
         ? (isDark ? theme.colorScheme.surface : Colors.white)
         : (isDark ? theme.colorScheme.surface.withValues(alpha: 0.6) : Colors.grey.shade50);
 
     final borderColor = isUnread
-        ? AppTheme.primary.withValues(alpha: 0.4)
+        ? iconColor.withValues(alpha: 0.5)
         : (isDark ? theme.dividerColor.withValues(alpha: 0.2) : Colors.grey.shade200);
 
     return Card(
@@ -176,7 +283,7 @@ class _NotificationCard extends ConsumerWidget {
           }
           if (!context.mounted) return;
 
-          if (notification.type == 'invoice_due_reminder' || notification.type == 'new_invoice') {
+          if (notification.isInvoiceReminder) {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ResidentInvoiceScreen()),
             );
@@ -221,7 +328,23 @@ class _NotificationCard extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        if (isUnread)
+                        if (badgeText != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: iconColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: iconColor.withValues(alpha: 0.3)),
+                            ),
+                            child: Text(
+                              badgeText,
+                              style: TextStyle(color: iconColor, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                        if (isUnread) ...[
+                          const SizedBox(width: 6),
                           Container(
                             width: 8,
                             height: 8,
@@ -230,6 +353,7 @@ class _NotificationCard extends ConsumerWidget {
                               shape: BoxShape.circle,
                             ),
                           ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -265,7 +389,11 @@ class _NotificationCard extends ConsumerWidget {
     final difference = now.difference(dateTime);
 
     if (difference.inDays < 7) {
-      return timeago.format(dateTime, locale: 'vi');
+      try {
+        return timeago.format(dateTime, locale: 'vi');
+      } catch (_) {
+        return timeago.format(dateTime);
+      }
     } else {
       return DateFormat('dd/MM/yyyy HH:mm').format(dateTime.toLocal());
     }
