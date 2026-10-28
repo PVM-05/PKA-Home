@@ -3,7 +3,8 @@ class AnnouncementModel {
   final String title;
   final String content;
   final bool isUrgent;
-  final String targetType; // 'all' | 'block_a' | 'block_b' | 'apartment'
+  final String targetType; // 'all' | 'block' | 'floor' | 'apartment' | 'block_a' | 'block_b'
+  final String? targetValue;
   final String? targetApartment;
   final DateTime createdAt;
 
@@ -13,21 +14,27 @@ class AnnouncementModel {
     required this.content,
     required this.isUrgent,
     this.targetType = 'all',
+    this.targetValue,
     this.targetApartment,
     required this.createdAt,
   });
 
   String get targetDisplayName {
     switch (targetType) {
+      case 'block':
+        return 'Block ${targetValue ?? ""}';
+      case 'floor':
+        return 'Tầng ${targetValue ?? ""}';
+      case 'apartment':
+        final apt = targetValue ?? targetApartment ?? '';
+        return 'Căn hộ $apt';
       case 'block_a':
         return 'Tòa A';
       case 'block_b':
         return 'Tòa B';
-      case 'apartment':
-        return 'Căn hộ ${targetApartment ?? ""}';
       case 'all':
       default:
-        return 'Tất cả cư dân';
+        return 'Toàn bộ cư dân';
     }
   }
 
@@ -38,6 +45,7 @@ class AnnouncementModel {
       content: json['content'] as String? ?? '',
       isUrgent: json['is_urgent'] ?? false,
       targetType: json['target_type'] as String? ?? 'all',
+      targetValue: json['target_value'] as String?,
       targetApartment: json['target_apartment'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
@@ -52,6 +60,7 @@ class AnnouncementModel {
       'content': content,
       'is_urgent': isUrgent,
       'target_type': targetType,
+      if (targetValue != null) 'target_value': targetValue,
       if (targetApartment != null) 'target_apartment': targetApartment,
       'created_at': createdAt.toIso8601String(),
     };
