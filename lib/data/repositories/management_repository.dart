@@ -6,6 +6,7 @@ import '../../../data/models/resident_model.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/role_delegation_model.dart';
+import '../../../data/models/audit_log_model.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/models/bulk_invoice_validation_model.dart';
 
@@ -334,8 +335,30 @@ class ManagementRepository {
 
   Future<void> revokeDelegation(String id) async {
     await _client.from('role_delegations').update({
+      'is_revoked': true,
       'ends_at': DateTime.now().toUtc().toIso8601String(),
     }).eq('id', id);
+  }
+
+  /// Lấy danh sách nhật ký kiểm toán bất biến (Audit Logs)
+  Future<List<AuditLogModel>> fetchAuditLogs({
+    String? buildingId,
+    String? entityName,
+    int limit = 50,
+  }) async {
+    var query = _client
+        .from('audit_logs')
+        .select('*, actor:actor_id(full_name)');
+
+    if (buildingId != null) {
+      query = query.eq('building_id', buildingId);
+    }
+    if (entityName != null && entityName.isNotEmpty && entityName != 'all') {
+      query = query.eq('entity_name', entityName);
+    }
+
+    final response = await query.order('created_at', ascending: false).limit(limit);
+    return (response as List).map((e) => AuditLogModel.fromJson(e)).toList();
   }
 
   /// Lấy toàn bộ danh sách đánh giá dịch vụ sự cố cho Ban Quản Lý
