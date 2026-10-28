@@ -318,7 +318,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                         initialValue: targetType,
                         isExpanded: true,
                         decoration: const InputDecoration(
-                          labelText: 'Phạm vi đối tượng',
+                          labelText: 'Đối tượng nhận thông báo',
                           prefixIcon: Icon(Icons.group_outlined),
                         ),
                         items: const [

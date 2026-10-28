@@ -34,7 +34,7 @@ class AnnouncementModel {
         return 'Tòa B';
       case 'all':
       default:
-        return 'Toàn bộ cư dân';
+        return 'Tất cả cư dân';
     }
   }
 
