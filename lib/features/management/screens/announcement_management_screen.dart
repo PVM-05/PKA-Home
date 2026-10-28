@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/announcement_provider.dart';
+import '../../../data/providers/building_provider.dart';
+import '../../../data/providers/notification_provider.dart';
 import '../../../data/repositories/announcement_repository.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_error_card.dart';
@@ -18,6 +20,13 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quản lý Thông báo'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.schedule_send_outlined),
+            tooltip: 'Quét nhắc nợ hóa đơn',
+            onPressed: () => _triggerRemindersScan(context, ref),
+          ),
+        ],
       ),
       body: announcementsAsync.when(
         data: (announcements) {
@@ -194,6 +203,32 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     );
   }
 
+  void _triggerRemindersScan(BuildContext context, WidgetRef ref) async {
+    try {
+      final activeBuilding = ref.read(activeBuildingProvider).value;
+      final count = await ref.read(notificationRepositoryProvider).triggerInvoiceRemindersScan(
+        buildingId: activeBuilding?.id,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã quét và phát sinh $count thông báo nhắc nợ thành công.'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   void _confirmDelete(BuildContext context, WidgetRef ref, String id, String title) {
     showDialog(
       context: context,
@@ -245,6 +280,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
   void _showCreateDialog(BuildContext context, WidgetRef ref) {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
+    final targetValueController = TextEditingController();
     final apartmentController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     String targetType = 'all';
@@ -282,7 +318,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                         initialValue: targetType,
                         isExpanded: true,
                         decoration: const InputDecoration(
-                          labelText: 'Đối tượng nhận thông báo',
+                          labelText: 'Phạm vi đối tượng',
                           prefixIcon: Icon(Icons.group_outlined),
                         ),
                         items: const [
@@ -291,12 +327,12 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             child: Text('Tất cả cư dân (Toàn tòa)'),
                           ),
                           DropdownMenuItem(
-                            value: 'block_a',
-                            child: Text('Chỉ cư dân Tòa A'),
+                            value: 'block',
+                            child: Text('Theo Block'),
                           ),
                           DropdownMenuItem(
-                            value: 'block_b',
-                            child: Text('Chỉ cư dân Tòa B'),
+                            value: 'floor',
+                            child: Text('Theo Tầng'),
                           ),
                           DropdownMenuItem(
                             value: 'apartment',
@@ -309,6 +345,43 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           }
                         },
                       ),
+                      if (targetType == 'block') ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: targetValueController,
+                          decoration: const InputDecoration(
+                            labelText: 'Mã Block nhận tin *',
+                            hintText: 'VD: A hoặc B',
+                            prefixIcon: Icon(Icons.apartment_outlined),
+                          ),
+                          validator: (v) {
+                            if (targetType == 'block' && (v == null || v.trim().isEmpty)) {
+                              return 'Vui lòng nhập mã Block';
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                        ),
+                      ],
+                      if (targetType == 'floor') ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: targetValueController,
+                          decoration: const InputDecoration(
+                            labelText: 'Số tầng nhận tin *',
+                            hintText: 'VD: 05 hoặc 12',
+                            prefixIcon: Icon(Icons.layers_outlined),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (v) {
+                            if (targetType == 'floor' && (v == null || v.trim().isEmpty)) {
+                              return 'Vui lòng nhập số tầng';
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                        ),
+                      ],
                       if (targetType == 'apartment') ...[
                         const SizedBox(height: 12),
                         TextFormField(
@@ -381,12 +454,17 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           setState(() => isSubmitting = true);
                           try {
                             final repo = ref.read(announcementRepositoryProvider);
+                            final targetVal = targetType == 'apartment'
+                                ? apartmentController.text.trim().toUpperCase()
+                                : (targetType == 'all' ? null : targetValueController.text.trim());
+
                             await repo.createAnnouncement(
                               title: titleController.text.trim(),
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
                               targetType: targetType,
-                              targetApartment: targetType == 'apartment' ? apartmentController.text.trim().toUpperCase() : null,
+                              targetValue: targetVal,
+                              targetApartment: targetType == 'apartment' ? targetVal : null,
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
@@ -500,7 +578,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
   void _showEditDialog(BuildContext context, WidgetRef ref, AnnouncementModel announcement) {
     final titleController = TextEditingController(text: announcement.title);
     final contentController = TextEditingController(text: announcement.content);
-    final apartmentController = TextEditingController(text: announcement.targetApartment ?? '');
+    final targetValueController = TextEditingController(text: announcement.targetValue ?? '');
+    final apartmentController = TextEditingController(text: announcement.targetApartment ?? announcement.targetValue ?? '');
     final formKey = GlobalKey<FormState>();
     String targetType = announcement.targetType;
     bool isUrgent = announcement.isUrgent;
@@ -530,26 +609,36 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                         initialValue: targetType,
                         isExpanded: true,
                         decoration: const InputDecoration(
-                          labelText: 'Đối tượng nhận thông báo',
+                          labelText: 'Phạm vi đối tượng',
                           prefixIcon: Icon(Icons.group_outlined),
                         ),
-                        items: const [
-                          DropdownMenuItem(
+                        items: [
+                          const DropdownMenuItem(
                             value: 'all',
                             child: Text('Tất cả cư dân (Toàn tòa)'),
                           ),
-                          DropdownMenuItem(
-                            value: 'block_a',
-                            child: Text('Chỉ cư dân Tòa A'),
+                          const DropdownMenuItem(
+                            value: 'block',
+                            child: Text('Theo Block'),
                           ),
-                          DropdownMenuItem(
-                            value: 'block_b',
-                            child: Text('Chỉ cư dân Tòa B'),
+                          const DropdownMenuItem(
+                            value: 'floor',
+                            child: Text('Theo Tầng'),
                           ),
-                          DropdownMenuItem(
+                          const DropdownMenuItem(
                             value: 'apartment',
                             child: Text('Căn hộ cụ thể'),
                           ),
+                          if (targetType == 'block_a')
+                            const DropdownMenuItem(
+                              value: 'block_a',
+                              child: Text('Chỉ cư dân Tòa A'),
+                            ),
+                          if (targetType == 'block_b')
+                            const DropdownMenuItem(
+                              value: 'block_b',
+                              child: Text('Chỉ cư dân Tòa B'),
+                            ),
                         ],
                         onChanged: (val) {
                           if (val != null) {
@@ -557,6 +646,41 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           }
                         },
                       ),
+                      if (targetType == 'block') ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: targetValueController,
+                          decoration: const InputDecoration(
+                            labelText: 'Mã Block nhận tin *',
+                            hintText: 'VD: A hoặc B',
+                            prefixIcon: Icon(Icons.apartment_outlined),
+                          ),
+                          validator: (v) {
+                            if (targetType == 'block' && (v == null || v.trim().isEmpty)) {
+                              return 'Vui lòng nhập mã Block';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                      if (targetType == 'floor') ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: targetValueController,
+                          decoration: const InputDecoration(
+                            labelText: 'Số tầng nhận tin *',
+                            hintText: 'VD: 05 hoặc 12',
+                            prefixIcon: Icon(Icons.layers_outlined),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (v) {
+                            if (targetType == 'floor' && (v == null || v.trim().isEmpty)) {
+                              return 'Vui lòng nhập số tầng';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                       if (targetType == 'apartment') ...[
                         const SizedBox(height: 12),
                         TextFormField(
@@ -613,13 +737,18 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           setState(() => isSubmitting = true);
                           try {
                             final repo = ref.read(announcementRepositoryProvider);
+                            final targetVal = targetType == 'apartment'
+                                ? apartmentController.text.trim().toUpperCase()
+                                : (targetType == 'all' ? null : targetValueController.text.trim());
+
                             await repo.updateAnnouncement(
                               id: announcement.id,
                               title: titleController.text.trim(),
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
                               targetType: targetType,
-                              targetApartment: targetType == 'apartment' ? apartmentController.text.trim().toUpperCase() : null,
+                              targetValue: targetVal,
+                              targetApartment: targetType == 'apartment' ? targetVal : null,
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
@@ -657,4 +786,3 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     );
   }
 }
-

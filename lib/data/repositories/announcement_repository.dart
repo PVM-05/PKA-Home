@@ -7,7 +7,11 @@ final announcementRepositoryProvider = Provider<AnnouncementRepository>((ref) {
 });
 
 class AnnouncementRepository {
-  final SupabaseClient _client = SupabaseConfig.client;
+  final SupabaseClient? _customClient;
+
+  AnnouncementRepository([SupabaseClient? client]) : _customClient = client;
+
+  SupabaseClient get _client => _customClient ?? SupabaseConfig.client;
 
   Stream<List<Map<String, dynamic>>> streamAnnouncements() {
     return _client
@@ -21,14 +25,17 @@ class AnnouncementRepository {
     required String content,
     required bool isUrgent,
     String targetType = 'all',
+    String? targetValue,
     String? targetApartment,
   }) async {
+    final effectiveValue = targetValue ?? targetApartment;
     await _client.from('announcements').insert({
       'title': title,
       'content': content,
       'is_urgent': isUrgent,
       'target_type': targetType,
-      'target_apartment': ?targetApartment,
+      if (effectiveValue != null) 'target_value': effectiveValue,
+      if (effectiveValue != null) 'target_apartment': effectiveValue,
     });
   }
 
@@ -38,14 +45,17 @@ class AnnouncementRepository {
     required String content,
     required bool isUrgent,
     String targetType = 'all',
+    String? targetValue,
     String? targetApartment,
   }) async {
+    final effectiveValue = targetValue ?? targetApartment;
     await _client.from('announcements').update({
       'title': title,
       'content': content,
       'is_urgent': isUrgent,
       'target_type': targetType,
-      'target_apartment': ?targetApartment,
+      if (effectiveValue != null) 'target_value': effectiveValue,
+      if (effectiveValue != null) 'target_apartment': effectiveValue,
       'updated_at': DateTime.now().toIso8601String(),
     }).eq('id', id);
   }
