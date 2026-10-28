@@ -34,8 +34,8 @@ class AnnouncementRepository {
       'content': content,
       'is_urgent': isUrgent,
       'target_type': targetType,
-      if (effectiveValue != null) 'target_value': effectiveValue,
-      if (effectiveValue != null) 'target_apartment': effectiveValue,
+      'target_value': ?effectiveValue,
+      'target_apartment': ?effectiveValue,
     });
   }
 
@@ -54,8 +54,8 @@ class AnnouncementRepository {
       'content': content,
       'is_urgent': isUrgent,
       'target_type': targetType,
-      if (effectiveValue != null) 'target_value': effectiveValue,
-      if (effectiveValue != null) 'target_apartment': effectiveValue,
+      'target_value': ?effectiveValue,
+      'target_apartment': ?effectiveValue,
       'updated_at': DateTime.now().toIso8601String(),
     }).eq('id', id);
   }

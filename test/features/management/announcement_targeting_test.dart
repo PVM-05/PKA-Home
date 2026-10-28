@@ -20,11 +20,12 @@ class MockAnnouncementRepository implements AnnouncementRepository {
     required String content,
     required bool isUrgent,
     String targetType = 'all',
+    String? targetValue,
     String? targetApartment,
   }) async {
     createCalled = true;
     lastTargetType = targetType;
-    lastTargetApartment = targetApartment;
+    lastTargetApartment = targetValue ?? targetApartment;
   }
 
   @override
@@ -34,6 +35,7 @@ class MockAnnouncementRepository implements AnnouncementRepository {
     required String content,
     required bool isUrgent,
     String targetType = 'all',
+    String? targetValue,
     String? targetApartment,
   }) async {}
 

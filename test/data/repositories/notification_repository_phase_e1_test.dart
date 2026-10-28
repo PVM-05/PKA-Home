@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/notification_model.dart';
 import 'package:pka_home/data/repositories/notification_repository.dart';
 
 void main() {

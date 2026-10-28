@@ -45,7 +45,7 @@ void main() {
         targetType: 'all',
         createdAt: DateTime.now(),
       );
-      expect(annAll.targetDisplayName, equals('Toàn bộ cư dân'));
+      expect(annAll.targetDisplayName, equals('Tất cả cư dân'));
     });
 
     test('Tương thích ngược với targetApartment và block_a, block_b cũ', () {
