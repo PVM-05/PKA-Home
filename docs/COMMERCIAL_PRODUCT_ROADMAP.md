@@ -1,0 +1,106 @@
+# Lộ Trình Phát Triển Sản Phẩm Thương Mại PKA-Home (Commercial Roadmap)
+
+> **Mô hình kinh doanh:** B2B SaaS đa tenant dành cho (a) Các công ty quản lý vận hành chung cư, (b) Ban quản trị tòa nhà tự quản, (c) Chuỗi nhà trọ / căn hộ dịch vụ cho thuê chuyên nghiệp. Cư dân và khách thuê sử dụng ứng dụng di động miễn phí.
+
+---
+
+## PHẦN 1: Nguyên Tắc Định Hướng Sản Phẩm
+
+### 3 Trụ Cột Giá Trị Cốt Lõi (Value Propositions để bán được):
+1. **Thu phí đúng, đủ, nhanh:** Giảm tỷ lệ nợ đọng là lợi tức đầu tư (ROI) dễ chứng minh nhất đối với Ban Quản Lý và Chủ tòa nhà.
+2. **Minh bạch:** Cư dân và khách thuê thấy rõ tiền của mình đi đâu (biên lai điện tử, quỹ bảo trì), sự cố kỹ thuật được xử lý tới đâu (timeline minh bạch).
+3. **Giảm việc thủ công cho BQL:** Hóa đơn tự động, nhắc nợ thông minh đa tầng, sổ sách và đối soát ngân hàng tự động.
+
+### Phạm Vi Pháp Lý Việt Nam Bắt Buộc Tuân Thủ:
+- **Nghị định 13/2023/NĐ-CP:** Bảo vệ dữ liệu cá nhân (CCCD, SĐT, tài khoản ngân hàng).
+- **Luật Nhà ở 2023:** Quản lý Quỹ bảo trì 2% tách biệt tài khoản, công bố thu chi, hội nghị nhà chung cư online.
+- **Nghị định 123/2020/NĐ-CP:** Quy chuẩn hóa đơn điện tử và chứng từ thu chi.
+- **Quy định PCCC:** Quản lý an toàn phòng cháy chữa cháy, thông báo khẩn cấp và bảo trì thiết bị định kỳ.
+
+---
+
+## PHẦN 2: Lộ Trình Triển Khai Theo Giai Đoạn
+
+```mermaid
+graph TD
+    PhaseA["GIAI ĐOẠN A: Dọn Móng Kỹ Thuật (Foundation)"]
+    PhaseB["GIAI ĐOẠN B: Đa Tenant & Nền Tảng SaaS (B1, B2)"]
+    PhaseC["GIAI ĐOẠN C: Lõi Tài Chính Thương Mại (C1, C2, C3)"]
+    PhaseD["GIAI ĐOẠN D: Vận Hành Tòa Nhà Cốt Lõi (D1-D5)"]
+    PhaseF["GIAI ĐOẠN F: Hạ Tầng, Tuân Thủ & Pháp Lý (F1, F2)"]
+    Pilot["PILOT THỰC TẾ (1-2 Tòa Nhà / Chuỗi Trọ Thật)"]
+    PhaseE["GIAI ĐOẠN E: Tính Năng Thông Minh (AI, OCR, IoT)"]
+
+    PhaseA --> PhaseB
+    PhaseB --> PhaseC
+    PhaseC --> PhaseD
+    PhaseC --> PhaseF
+    PhaseD --> Pilot
+    PhaseF --> Pilot
+    Pilot --> PhaseE
+```
+
+---
+
+### GIAI ĐOẠN A: Dọn Móng Kỹ Thuật (Foundation Hardening)
+- [x] **A1. Hợp nhất Database:** Rút gọn còn 8 migration chuẩn tiến lên (từ `20261027_01` đến `20261028_03`). Mỗi RPC có một định nghĩa duy nhất.
+- [ ] **A2. Hợp đồng Client ↔ Server chặt chẽ:** DTO có kiểu strongly-typed, contract test cho mọi RPC, loại bỏ `Map<String, dynamic>` lỏng lẻo.
+- [x] **A3. Bảng cấu hình tiền tệ:** `building_fee_configs` theo thời gian, chống hardcode giá.
+- [ ] **A4. Bảo mật nền:** Xoay key, thống nhất bucket private + signed URL ngắn hạn, rate limit đăng nhập/OTP, MFA cho BQL/Kế toán.
+- [x] **A5. Chất lượng:** 489 tests tự động, RLS security test, Static Analysis 0 issues.
+
+---
+
+### GIAI ĐOẠN B: Đa Tenant & Nền Tảng SaaS
+- [x] **B1. Mô hình dữ liệu:** `organizations`, `buildings`, `apartments`. Thêm bảng `memberships` để 1 user có thể thuộc nhiều tòa/cơ sở với vai trò khác nhau.
+- [ ] **B2. Onboarding khách hàng:** Bộ công cụ import hàng loạt căn hộ/cư dân/chỉ số điện nước từ Excel kèm validation và báo lỗi từng dòng.
+- [ ] **B3. Gói dịch vụ & Billing cho khách:** Định giá theo quy mô số căn hộ (dưới 100 / 100–500 / trên 500 căn).
+- [ ] **B4. Dashboard Web Quản Trị:** Giao diện web tối ưu cho kế toán và quản lý làm việc với bảng biểu lớn (đối soát, báo cáo, phát hành hóa đơn).
+
+---
+
+### GIAI ĐOẠN C: Lõi Tài Chính Đạt Chuẩn Thương Mại (Trọng Tâm Bán Hàng)
+- [ ] **C1. Sổ cái kế toán thật (`ledger_entries`):**
+  - Bút toán kép hoặc sổ chi tiết công nợ theo từng căn hộ: phát sinh, thu, điều chỉnh, hoàn tiền, miễn giảm.
+  - Công nợ cộng dồn + số dư đầu kỳ/cuối kỳ trên mỗi hóa đơn.
+  - Hóa đơn đã phát hành mang tính bất biến: sửa = phát hành hóa đơn điều chỉnh (credit note), không xóa/sửa đè trực tiếp hóa đơn đã thanh toán.
+  - Đóng kỳ kế toán (period close).
+- [ ] **C2. Engine tính phí đa dạng:**
+  - Điện/nước bậc thang (EVN 6 bậc, nước sinh hoạt theo định mức nhân khẩu).
+  - Phí quản lý theo m² hoặc theo loại căn hộ/phòng trọ.
+  - Phí gửi xe tính theo ngày nếu đăng ký giữa kỳ (pro-rata).
+  - Lãi phạt trễ hạn tự động theo quy chế (cron hàng ngày).
+- [ ] **C3. Thanh toán trực tuyến thật:**
+  - Tích hợp VietQR động (chuẩn Napas 247) / Virtual Account riêng cho từng hóa đơn.
+  - Webhook xác nhận tự động (PayOS, SePay, Casso hoặc API ngân hàng) có xác thực chữ ký (HMAC SHA256), Idempotency key, chống gian lận.
+  - Tự động gạch nợ, cấp biên lai điện tử và bắn thông báo tức thời.
+- [ ] **C4. Hóa đơn điện tử & Chứng từ:**
+  - Xuất PDF hóa đơn/biên lai chuẩn có mã tra cứu. Kết nối phần mềm HĐĐT (VNPT, Viettel, MISA) nếu khách yêu cầu.
+- [x] **C5. Quỹ bảo trì 2%:** Bảng sổ cái `maintenance_fund_ledger` tách biệt với quỹ vận hành, theo dõi lãi ngân hàng và giải ngân sửa chữa lớn.
+- [ ] **C6. Báo cáo tài chính & Tuổi nợ:** Báo cáo dòng tiền, tuổi nợ aging (30/60/90 ngày), tỷ lệ thu theo kỳ/tòa/tầng.
+
+---
+
+### GIAI ĐOẠN D: Vận Hành Tòa Nhà Cốt Lõi (Core Operations)
+- [ ] **D1. Cư dân & Hợp đồng:** Quản lý hợp đồng thuê (ngày bắt đầu, kết thúc, cọc giữ chỗ), mời thành viên qua link/QR.
+- [ ] **D2. Phương tiện & Bãi xe:** Quản lý slot hầm, xe vãng lai tính phí theo giờ.
+- [ ] **D3. Sự cố & SLA:** Cảnh báo quá hạn xử lý sự cố (SLA), phân công theo ca trực/chuyên môn, vật tư tiêu hao.
+- [x] **D4. Tiện ích & Waitlist FIFO:** Đặt chỗ, hàng đợi First-In-First-Out, tự hủy hoàn cọc và đôn người trong danh sách chờ.
+- [x] **D5. Thông báo đa kênh & Triggers:** Triggers tự động hóa thông báo, CDC Realtime Stream đẩy Heads-up notification, quét nhắc nợ định kỳ.
+- [ ] **D6. An ninh & Khách:** Đăng ký khách trước (mã QR), quản lý bưu kiện tại quầy lễ tân.
+- [ ] **D7. Biểu quyết & Cộng đồng:** Khảo sát online, kiến nghị cư dân.
+- [ ] **D8. Phân quyền chi tiết & Ủy quyền vai trò:** Ủy quyền có thời hạn (`role_delegations`), quyền chi tiết lưu trong CSDL.
+
+---
+
+### GIAI ĐOẠN E: Tính Năng Thông Minh (AI, OCR & Tối Ưu)
+- [ ] **OCR đồng hồ điện nước thực tế:** Tích hợp ML Kit on-device, nhận diện số công tơ cơ, phát hiện số tiêu thụ bất thường.
+- [ ] **AI phân loại sự cố:** Phân tích mô tả sự cố để tự động gán kỹ thuật viên phù hợp.
+- [ ] **Dự báo nợ xấu & Nhắc nợ thông minh:** Dự đoán căn hộ có rủi ro trễ hạn để BQL chủ động chăm sóc.
+
+---
+
+### GIAI ĐOẠN F: Hạ Tầng, Tuân Thủ & Vận Hành
+- [ ] **Hạ tầng môi trường tách bạch:** Dev / Staging / Production. Giám sát uptime, cảnh báo lỗi qua Telegram/Slack.
+- [ ] **Tuân thủ pháp lý & Bảo mật:** Mã hóa thông tin nhạy cảm, nhật ký kiểm toán bất biến (`audit_logs`).
+- [ ] **Offline-First & Resilience:** Hoàn thiện hàng đợi đồng bộ khi mất sóng.
