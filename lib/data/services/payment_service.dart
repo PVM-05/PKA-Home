@@ -89,4 +89,16 @@ class PaymentService {
 
     return PaymentResult.fromJson(Map<String, dynamic>.from(res as Map));
   }
+
+  /// Xử lý Webhook biến động số dư từ cổng ngân hàng / VietQR (Napas 247)
+  Future<Map<String, dynamic>> processBankPaymentWebhook(Map<String, dynamic> payload) async {
+    final res = await SupabaseConfig.client.rpc(
+      'process_bank_payment_webhook',
+      params: {
+        'p_payload': payload,
+      },
+    );
+    return Map<String, dynamic>.from(res as Map);
+  }
 }
+

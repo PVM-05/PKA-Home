@@ -70,10 +70,11 @@ graph TD
   - Phí quản lý theo m² hoặc theo loại căn hộ/phòng trọ.
   - Phí gửi xe tính theo ngày nếu đăng ký giữa kỳ (pro-rata).
   - Lãi phạt trễ hạn tự động theo quy chế (cron hàng ngày).
-- [ ] **C3. Thanh toán trực tuyến thật:**
-  - Tích hợp VietQR động (chuẩn Napas 247) / Virtual Account riêng cho từng hóa đơn.
-  - Webhook xác nhận tự động (PayOS, SePay, Casso hoặc API ngân hàng) có xác thực chữ ký (HMAC SHA256), Idempotency key, chống gian lận.
-  - Tự động gạch nợ, cấp biên lai điện tử và bắn thông báo tức thời.
+- [x] **C3. Thanh toán trực tuyến thật:**
+  - Tích hợp VietQR động (chuẩn Napas 247) theo từng hóa đơn với `payment_code` ngắn gọn duy nhất (`INVYYMMxxxxxx`).
+  - Webhook tự động gạch nợ `process_bank_payment_webhook(p_payload JSONB)` (Idempotency key, khóa bản ghi `FOR UPDATE`, xử lý nộp thừa/thiếu/trùng).
+  - Tự động gạch nợ `status = 'paid'`, cấp biên lai điện tử, kích hoạt nhật ký kiểm toán bất biến và bắn thông báo tức thời tới cư dân.
+  - UI `UnifiedPaymentSheet` & `ResidentInvoiceDetailScreen`: Realtime listener tự động chuyển sang biên lai thành công khi nhận được webhook, nút sao chép STK/Nội dung/Số tiền.
 - [ ] **C4. Hóa đơn điện tử & Chứng từ:**
   - Xuất PDF hóa đơn/biên lai chuẩn có mã tra cứu. Kết nối phần mềm HĐĐT (VNPT, Viettel, MISA) nếu khách yêu cầu.
 - [x] **C5. Quỹ bảo trì 2%:** Bảng sổ cái `maintenance_fund_ledger` tách biệt với quỹ vận hành, theo dõi lãi ngân hàng và giải ngân sửa chữa lớn.

@@ -419,15 +419,12 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         'amount': (item['subtotal'] as num?)?.toDouble() ?? 0.0,
       }).toList();
 
-      final aptCode = _invoice.apartment?.code ?? '';
-      final periodClean = _invoice.period.replaceAll('/', '');
-
       final result = await showUnifiedPaymentSheet(
         context: context,
         type: PaymentType.invoice,
         referenceId: _invoice.id,
         title: 'Thanh toán hóa đơn',
-        referenceCode: '#INV-$periodClean-$aptCode',
+        referenceCode: _invoice.effectivePaymentCode,
         amount: _invoice.totalAmount,
         feeBreakdown: feeBreakdown,
       );
