@@ -11,6 +11,7 @@ class BuildingModel {
   final String bankName;
   final String bankAccountNumber;
   final String bankAccountName;
+  final String propertyType;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -27,9 +28,12 @@ class BuildingModel {
     this.bankName = 'BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',
     this.bankAccountNumber = '1234567890',
     this.bankAccountName = 'BQL PKA LANDMARK',
+    this.propertyType = 'apartment',
     this.createdAt,
     this.updatedAt,
   });
+
+  bool get isBoardingHouse => propertyType == 'boarding_house';
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
     return BuildingModel(
@@ -45,6 +49,7 @@ class BuildingModel {
       bankName: json['bank_name'] as String? ?? 'BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',
       bankAccountNumber: json['bank_account_number'] as String? ?? '1234567890',
       bankAccountName: json['bank_account_name'] as String? ?? 'BQL PKA LANDMARK',
+      propertyType: json['property_type'] as String? ?? 'apartment',
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,
     );
@@ -63,6 +68,7 @@ class BuildingModel {
     'bank_name': bankName,
     'bank_account_number': bankAccountNumber,
     'bank_account_name': bankAccountName,
+    'property_type': propertyType,
   };
 
   @override

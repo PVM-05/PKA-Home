@@ -165,7 +165,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                     const SizedBox(height: 20),
 
                     // Thông tin chi tiết
-                    _buildReceiptRow('Căn hộ nộp tiền', invoice.apartment?.code ?? 'A0110', isBold: true),
+                    _buildReceiptRow('Căn hộ nộp tiền', invoice.apartment?.code ?? 'Chưa xác định', isBold: true),
                     const SizedBox(height: 8),
                     _buildReceiptRow('Kỳ thu phí', 'Tháng ${invoice.period}'),
                     const SizedBox(height: 8),
@@ -295,7 +295,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
 Ban Quản Lý: $buildingName
 Số biên lai: $receiptNumber
 Mã tra cứu: $lookupCode
-Căn hộ: ${invoice.apartment?.code ?? 'A0110'}
+Căn hộ: ${invoice.apartment?.code ?? 'Chưa xác định'}
 Kỳ phí: ${invoice.period}
 Số tiền: ${formatCurrency.format(invoice.totalAmount)}
 Bằng chữ: $amountWords

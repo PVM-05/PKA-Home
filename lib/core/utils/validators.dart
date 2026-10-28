@@ -3,34 +3,64 @@
 // Được sử dụng với [TextFormField.validator] để kiểm tra dữ liệu
 // nhập vào theo các quy chuẩn đặt ra trong `database-rules.md`.
 
-/// Validate mã căn hộ theo định dạng chuẩn:
-/// `<Block chữ cái><Tầng 2 số><Phòng 2 số>` (VD: A0110, b0512).
+/// Validate mã căn hộ / phòng trọ.
 ///
-/// Trả về `null` nếu hợp lệ, trả về thông báo lỗi nếu không hợp lệ.
-String? validateApartmentCode(String? value) {
+/// Hỗ trợ cả định dạng chung cư chuẩn (`<Block chữ cái><Tầng 2 số><Phòng 2 số>`, VD: A0110, b0512)
+/// lẫn định dạng phòng trọ linh hoạt (VD: P101, 101, Phòng 3, P-201, T2-05).
+///
+/// Nếu [strictApartmentFormat] là `true`, bắt buộc tuân theo định dạng chung cư `A0110`.
+String? validateApartmentCode(String? value, {bool strictApartmentFormat = false}) {
   if (value == null || value.trim().isEmpty) {
     return 'Vui lòng nhập mã căn hộ';
   }
 
   final trimmed = value.trim();
 
-  // Regex: 1 chữ cái + 4 chữ số (VD: A0110, b0512)
-  final pattern = RegExp(r'^[A-Za-z]\d{4}$');
+  if (strictApartmentFormat) {
+    // Regex: 1 chữ cái + 4 chữ số (VD: A0110, b0512)
+    final pattern = RegExp(r'^[A-Za-z]\d{4}$');
+    if (!pattern.hasMatch(trimmed)) {
+      return 'Mã căn hộ phải có dạng: 1 chữ cái + 4 chữ số (VD: A0110)';
+    }
 
-  if (!pattern.hasMatch(trimmed)) {
-    return 'Mã căn hộ phải có dạng: 1 chữ cái + 4 chữ số (VD: A0110)';
+    final floor = int.tryParse(trimmed.substring(1, 3)) ?? 0;
+    if (floor <= 0) {
+      return 'Số tầng phải lớn hơn 0 (VD: A0110 = Tầng 01)';
+    }
+
+    final room = int.tryParse(trimmed.substring(3, 5)) ?? 0;
+    if (room <= 0) {
+      return 'Số phòng phải lớn hơn 0 (VD: A0110 = Phòng 10)';
+    }
+
+    return null;
   }
 
-  // Kiểm tra tầng (2 chữ số giữa) phải > 0
-  final floor = int.tryParse(trimmed.substring(1, 3)) ?? 0;
-  if (floor <= 0) {
-    return 'Số tầng phải lớn hơn 0 (VD: A0110 = Tầng 01)';
+  // Chế độ linh hoạt cho phòng trọ / căn hộ chung:
+  // Nếu người dùng nhập định dạng A0110 thì vẫn kiểm tra tính hợp lệ của tầng/phòng
+  final standardApartmentPattern = RegExp(r'^[A-Za-z]\d{4}$');
+  if (standardApartmentPattern.hasMatch(trimmed)) {
+    final floor = int.tryParse(trimmed.substring(1, 3)) ?? 0;
+    if (floor <= 0) {
+      return 'Số tầng phải lớn hơn 0 (VD: A0110 = Tầng 01)';
+    }
+    final room = int.tryParse(trimmed.substring(3, 5)) ?? 0;
+    if (room <= 0) {
+      return 'Số phòng phải lớn hơn 0 (VD: A0110 = Phòng 10)';
+    }
+    return null;
   }
 
-  // Kiểm tra phòng (2 chữ số cuối) phải > 0
-  final room = int.tryParse(trimmed.substring(3, 5)) ?? 0;
-  if (room <= 0) {
-    return 'Số phòng phải lớn hơn 0 (VD: A0110 = Phòng 10)';
+  // Đối với mã phòng tự do (VD: P101, 101, Phòng 3, P-201, T2-05):
+  if (trimmed.length > 15) {
+    return 'Mã phòng không được vượt quá 15 ký tự';
+  }
+
+  final flexiblePattern = RegExp(r'^[A-Za-z0-9À-ỹ\s\-\._]{1,15}$');
+  final hasAlphaNum = RegExp(r'[A-Za-z0-9À-ỹ]').hasMatch(trimmed);
+
+  if (!flexiblePattern.hasMatch(trimmed) || !hasAlphaNum) {
+    return 'Mã phòng chỉ được chứa chữ cái, số, gạch nối hoặc dấu chấm';
   }
 
   return null;

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../router/route_names.dart';
 import '../../data/providers/maintenance_fund_provider.dart';
+import '../../data/providers/building_provider.dart';
 import 'app_card.dart';
 
 /// Card thông tin Quỹ bảo trì 2% phần sở hữu chung theo Điều 108 Luật Nhà ở.
@@ -29,6 +30,12 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Nếu cơ sở đang chọn là nhà trọ / phòng trọ, tự động ẩn Quỹ bảo trì 2% chung cư
+    final activeBuilding = ref.watch(activeBuildingProvider).valueOrNull;
+    if (activeBuilding?.isBoardingHouse == true) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final statBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : AppTheme.background;
