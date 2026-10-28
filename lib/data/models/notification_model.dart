@@ -1,5 +1,6 @@
 class NotificationModel {
   final String id;
+  final String? buildingId;
   final String userId;
   final String? apartmentId;
   final String title;
@@ -11,6 +12,7 @@ class NotificationModel {
 
   NotificationModel({
     required this.id,
+    this.buildingId,
     required this.userId,
     this.apartmentId,
     required this.title,
@@ -21,9 +23,38 @@ class NotificationModel {
     required this.createdAt,
   });
 
+  bool get isInvoiceReminder =>
+      type == 'invoice_due_reminder' ||
+      type == 'invoice_due_soon' ||
+      type == 'invoice_due_today' ||
+      type == 'invoice_overdue' ||
+      type == 'new_invoice';
+
+  bool get isAnnouncement => type == 'announcement';
+  bool get isIssueUpdate => type == 'issue_update';
+
+  String get typeDisplayName {
+    switch (type) {
+      case 'invoice_due_reminder':
+      case 'invoice_due_soon':
+      case 'invoice_due_today':
+      case 'invoice_overdue':
+      case 'new_invoice':
+        return 'Hóa đơn';
+      case 'equipment_maintenance':
+        return 'Bảo trì';
+      case 'issue_update':
+        return 'Sự cố';
+      case 'announcement':
+      default:
+        return 'Thông báo';
+    }
+  }
+
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
       id: json['id'] ?? '',
+      buildingId: json['building_id'],
       userId: json['user_id'] ?? '',
       apartmentId: json['apartment_id'],
       title: json['title'] ?? '',
@@ -38,6 +69,7 @@ class NotificationModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      if (buildingId != null) 'building_id': buildingId,
       'user_id': userId,
       'apartment_id': apartmentId,
       'title': title,
@@ -51,6 +83,7 @@ class NotificationModel {
 
   NotificationModel copyWith({
     String? id,
+    String? buildingId,
     String? userId,
     String? apartmentId,
     String? title,
@@ -62,6 +95,7 @@ class NotificationModel {
   }) {
     return NotificationModel(
       id: id ?? this.id,
+      buildingId: buildingId ?? this.buildingId,
       userId: userId ?? this.userId,
       apartmentId: apartmentId ?? this.apartmentId,
       title: title ?? this.title,
