@@ -5,12 +5,17 @@ import '../../core/services/push_notification_service.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 
-/// Provider tự động kích hoạt đồng bộ hóa FCM Device Token khi người dùng đăng nhập
+/// Provider tự động kích hoạt đồng bộ hóa FCM Device Token và Realtime Notification Dispatcher khi người dùng đăng nhập
 final fcmTokenSyncProvider = Provider<void>((ref) {
   final authState = ref.watch(authProvider);
   final user = authState.valueOrNull;
+  final pushService = ref.read(pushNotificationServiceProvider);
+
   if (user != null) {
-    ref.read(pushNotificationServiceProvider).safeInitialize(userId: user.id);
+    pushService.safeInitialize(userId: user.id);
+    pushService.startRealtimeNotificationListener(userId: user.id);
+  } else {
+    pushService.stopRealtimeNotificationListener();
   }
 });
 
