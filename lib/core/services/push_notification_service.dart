@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/models/notification_model.dart';
 import '../../data/providers/notification_provider.dart';
 import '../../data/repositories/notification_repository.dart';
 import '../router/route_names.dart';
@@ -44,6 +45,51 @@ class PushNotificationService {
 
   StreamSubscription<String>? _tokenRefreshSub;
   StreamSubscription<RemoteMessage>? _onMessageSub;
+  StreamSubscription<List<NotificationModel>>? _realtimeNotifSub;
+  final Set<String> _seenNotificationIds = {};
+
+  /// Danh sách các mã thông báo đã được ghi nhận trong phiên
+  Set<String> get seenNotificationIds => Set.unmodifiable(_seenNotificationIds);
+
+  /// Bắt đầu lắng nghe stream thông báo thời gian thực từ Supabase Realtime
+  void startRealtimeNotificationListener({
+    required String userId,
+    String? buildingId,
+  }) {
+    _realtimeNotifSub?.cancel();
+    _realtimeNotifSub = _notificationRepo
+        .streamUserNotifications(userId, buildingId: buildingId)
+        .listen((notifications) {
+      for (final notif in notifications) {
+        if (!notif.isRead && !_seenNotificationIds.contains(notif.id)) {
+          _seenNotificationIds.add(notif.id);
+          // Nếu thông báo mới phát sinh trong vòng 5 phút gần đây -> hiển thị heads-up
+          final diff = DateTime.now().difference(notif.createdAt);
+          if (diff.inMinutes < 5) {
+            showSystemNotification(
+              id: notif.id.hashCode,
+              title: notif.title,
+              body: notif.body,
+              payload: {
+                'id': notif.id,
+                'type': notif.type,
+                'apartment_id': notif.apartmentId,
+              },
+            );
+          }
+        } else {
+          _seenNotificationIds.add(notif.id);
+        }
+      }
+    });
+  }
+
+  /// Hủy lắng nghe realtime khi đăng xuất và dọn dẹp bộ nhớ
+  void stopRealtimeNotificationListener() {
+    _realtimeNotifSub?.cancel();
+    _realtimeNotifSub = null;
+    _seenNotificationIds.clear();
+  }
 
   /// Đảm bảo plugin local notifications và notification channel luôn được khởi tạo trước khi gọi show
   Future<void> ensureLocalNotificationsInitialized([
@@ -63,6 +109,7 @@ class PushNotificationService {
     _tokenRefreshSub = null;
     _onMessageSub?.cancel();
     _onMessageSub = null;
+    stopRealtimeNotificationListener();
   }
 
   /// Khởi tạo an toàn (Fail-safe): Tự động bắt lỗi nếu chạy trên môi trường test,

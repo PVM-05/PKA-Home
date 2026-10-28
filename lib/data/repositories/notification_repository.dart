@@ -20,6 +20,22 @@ class NotificationRepository {
     return (response as List).map((json) => NotificationModel.fromJson(json)).toList();
   }
 
+  /// Lắng nghe stream thông báo thời gian thực của người dùng qua Supabase Realtime
+  Stream<List<NotificationModel>> streamUserNotifications(String userId, {String? buildingId}) {
+    return _client
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', userId)
+        .order('created_at', ascending: false)
+        .map((rows) {
+          var filtered = rows;
+          if (buildingId != null) {
+            filtered = filtered.where((r) => r['building_id'] == buildingId).toList();
+          }
+          return filtered.map((json) => NotificationModel.fromJson(json)).toList();
+        });
+  }
+
   /// Đánh dấu một thông báo đã đọc
   Future<void> markAsRead(String notificationId) async {
     await _client

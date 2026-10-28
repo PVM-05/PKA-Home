@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/supabase_config.dart';
 import '../models/notification_model.dart';
 import '../repositories/notification_repository.dart';
 import 'auth_provider.dart';
@@ -13,12 +12,8 @@ final notificationsStreamProvider = StreamProvider.autoDispose<List<Notification
     return Stream.value([]);
   }
 
-  return SupabaseConfig.client
-      .from('notifications')
-      .stream(primaryKey: ['id'])
-      .eq('user_id', user.id)
-      .order('created_at', ascending: false)
-      .map((list) => list.map((json) => NotificationModel.fromJson(json)).toList());
+  final repo = ref.watch(notificationRepositoryProvider);
+  return repo.streamUserNotifications(user.id);
 });
 
 /// Số lượng thông báo chưa đọc của người dùng hiện tại
