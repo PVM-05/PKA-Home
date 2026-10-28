@@ -8,6 +8,7 @@ import '../../../core/widgets/role_guard.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/models/audit_log_model.dart';
 import '../widgets/technician_performance_card.dart';
 
 class AuditLogItem {
@@ -16,7 +17,7 @@ class AuditLogItem {
   final DateTime updatedAt;
   final IconData icon;
   final Color color;
-  final String category; // 'invoice', 'issue', 'link', 'rbac'
+  final String category; // 'invoice', 'issue', 'link', 'rbac', 'vehicle'
   final String? changedBy;
   final String? performerName;
 
@@ -36,7 +37,46 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((ref) 
   final client = SupabaseConfig.client;
   List<AuditLogItem> logs = [];
 
-  // 1. Fetch Invoices
+  // 1. Truy vấn nhật ký kiểm toán bất biến (Primary Immutable Audit Logs)
+  try {
+    final auditLogsRes = await client
+        .from('audit_logs')
+        .select('*, actor:actor_id(full_name)')
+        .order('created_at', ascending: false)
+        .limit(50);
+
+    for (var row in (auditLogsRes as List)) {
+      final model = AuditLogModel.fromJson(row);
+      Color c = AppTheme.primary;
+      IconData icon = Icons.history;
+      if (model.category == 'invoice') {
+        icon = Icons.receipt_long_outlined;
+        c = model.action == 'CONFIRM_PAYMENT' ? AppStatusColors.paid : AppTheme.primary;
+      } else if (model.category == 'vehicle') {
+        icon = Icons.directions_car_outlined;
+        c = (model.newValues?['status'] == 'approved') ? AppStatusColors.paid : AppStatusColors.priorityHigh;
+      } else if (model.category == 'rbac') {
+        icon = Icons.admin_panel_settings_outlined;
+        c = AppTheme.secondary;
+      } else if (model.category == 'issue') {
+        icon = Icons.report_problem_outlined;
+        c = AppStatusColors.pendingConfirmation;
+      }
+
+      logs.add(AuditLogItem(
+        title: model.actionDisplayName,
+        subtitle: '${model.summaryDescription}${model.actorName != null ? ' (Thực hiện bởi: ${model.actorName})' : ''}',
+        updatedAt: model.createdAt,
+        icon: icon,
+        color: c,
+        category: model.category,
+        changedBy: model.actorId,
+        performerName: model.actorName,
+      ));
+    }
+  } catch (_) {}
+
+  // 2. Fetch Invoices (Fallback / Bổ trợ cho dữ liệu lịch sử)
   try {
     final invoicesRes = await client
         .from('invoices')
@@ -254,6 +294,8 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
                 _buildFilterChip('issue', 'Sự cố'),
                 const SizedBox(width: 8),
                 _buildFilterChip('link', 'Liên kết'),
+                const SizedBox(width: 8),
+                _buildFilterChip('vehicle', 'Thẻ xe'),
                 const SizedBox(width: 8),
                 _buildFilterChip('rbac', 'Phân quyền'),
                 const SizedBox(width: 12),
