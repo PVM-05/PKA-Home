@@ -26,3 +26,25 @@ final unreadNotificationsCountProvider = Provider.autoDispose<int>((ref) {
   final notificationsAsync = ref.watch(notificationsStreamProvider);
   return notificationsAsync.value?.where((n) => !n.isRead).length ?? 0;
 });
+
+/// Bộ lọc loại thông báo hiện tại: 'ALL', 'UNREAD', 'INVOICE', 'BUILDING'
+final notificationFilterTypeProvider = StateProvider<String>((ref) => 'ALL');
+
+/// Danh sách thông báo sau khi lọc theo `notificationFilterTypeProvider`
+final filteredNotificationsProvider = Provider.autoDispose<List<NotificationModel>>((ref) {
+  final notificationsAsync = ref.watch(notificationsStreamProvider);
+  final filter = ref.watch(notificationFilterTypeProvider);
+
+  final list = notificationsAsync.value ?? [];
+  switch (filter) {
+    case 'UNREAD':
+      return list.where((n) => !n.isRead).toList();
+    case 'INVOICE':
+      return list.where((n) => n.isInvoiceReminder).toList();
+    case 'BUILDING':
+      return list.where((n) => n.isAnnouncement || n.type == 'equipment_maintenance').toList();
+    case 'ALL':
+    default:
+      return list;
+  }
+});
