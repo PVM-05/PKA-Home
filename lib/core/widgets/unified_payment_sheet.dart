@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../theme/app_theme.dart';
+import '../../data/models/invoice_model.dart';
+import '../../data/providers/resident_invoice_provider.dart';
 import '../../data/services/payment_service.dart';
 import '../../data/providers/payment_provider.dart';
 import '../../data/providers/building_provider.dart';
@@ -121,8 +124,36 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
     }
   }
 
+  void _handleInvoiceStatusChange(List<InvoiceModel>? invoices) {
+    if (invoices == null || _step == _PaymentStep.success) return;
+    final invoice = invoices.cast<InvoiceModel?>().firstWhere(
+      (inv) => inv?.id == widget.referenceId,
+      orElse: () => null,
+    );
+    if (invoice != null && invoice.status == 'paid' && mounted) {
+      setState(() {
+        _result = PaymentResult(
+          success: true,
+          status: 'SUCCESS',
+          transactionCode: invoice.displayReceiptNumber,
+          transactionId: invoice.transactionCode ?? invoice.id,
+          amount: invoice.paidAmount ?? invoice.totalAmount,
+          title: widget.title,
+          paidAt: invoice.paidAt ?? DateTime.now(),
+        );
+        _step = _PaymentStep.success;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.type == PaymentType.invoice) {
+      ref.listen<AsyncValue<List<InvoiceModel>>>(residentInvoiceProvider, (previous, next) {
+        _handleInvoiceStatusChange(next.valueOrNull);
+      });
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
 
@@ -220,25 +251,25 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         ),
         const SizedBox(height: 12),
 
-        // Cảnh báo mô phỏng demo phục vụ đồ án
+        // Huy hiệu đối soát tự động VietQR Napas 247
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.amber.withValues(alpha: 0.12),
+            color: isDark ? const Color(0xFF0F2942) : const Color(0xFFF0FDF4),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.amber.shade700.withValues(alpha: 0.3)),
+            border: Border.all(color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFBBF7D0)),
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.amber.shade800, size: 20),
+              Icon(Icons.verified_user_outlined, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF16A34A), size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Quy trình mô phỏng phục vụ đánh giá đồ án. Hệ thống không trừ tiền tài khoản thực tế.',
+                  'Thanh toán tự động 24/7 qua VietQR Napas 247. Hệ thống tự động đối soát và gạch nợ tức thì qua Webhook ngân hàng.',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                    color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF15803D),
                   ),
                 ),
               ),
@@ -421,6 +452,58 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                           ),
                         ],
                       ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                      label: const Text('Sao chép STK', style: TextStyle(fontSize: 11)),
+                      backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                      side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: bankAccountNumber));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Đã sao chép số tài khoản vào bộ nhớ tạm'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                      label: const Text('Sao chép Nội dung', style: TextStyle(fontSize: 11)),
+                      backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                      side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: widget.referenceCode));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Đã sao chép nội dung chuyển khoản vào bộ nhớ tạm'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                      label: const Text('Sao chép Số tiền', style: TextStyle(fontSize: 11)),
+                      backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                      side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: widget.amount.toInt().toString()));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Đã sao chép số tiền vào bộ nhớ tạm'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -639,7 +722,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
               _buildInfoRow(
                 'Hình thức',
                 _selectedMethod == 'bank_transfer'
-                    ? 'Chuyển khoản (Mô phỏng)'
+                    ? 'Chuyển khoản VietQR (Napas 247)'
                     : 'Tiền mặt tại BQL',
               ),
               const Divider(height: 16),
@@ -725,7 +808,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
               const Divider(height: 16),
               _buildInfoRow(
                 'Phương thức',
-                _selectedMethod == 'bank_transfer' ? 'Chuyển khoản (Mô phỏng)' : 'Tiền mặt tại BQL',
+                _selectedMethod == 'bank_transfer' ? 'Chuyển khoản VietQR (Napas 247)' : 'Tiền mặt tại BQL',
               ),
             ],
           ),

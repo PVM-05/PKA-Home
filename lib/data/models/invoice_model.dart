@@ -16,6 +16,7 @@ class InvoiceModel {
   final String? receiptNumber;
   final String? einvoiceLookupCode;
   final double? paidAmount;
+  final String? paymentCode;
 
   InvoiceModel({
     required this.id,
@@ -33,7 +34,18 @@ class InvoiceModel {
     this.receiptNumber,
     this.einvoiceLookupCode,
     this.paidAmount,
+    this.paymentCode,
   });
+
+  String get effectivePaymentCode {
+    if (paymentCode != null && paymentCode!.isNotEmpty) {
+      return paymentCode!;
+    }
+    final cleanPeriod = period.replaceAll(RegExp(r'[^0-9]'), '');
+    final suffix = id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+    final shortId = suffix.length >= 6 ? suffix.substring(0, 6) : suffix.padRight(6, '0');
+    return 'INV$cleanPeriod${shortId.toUpperCase()}';
+  }
 
   String get displayReceiptNumber {
     if (receiptNumber != null && receiptNumber!.isNotEmpty) {
@@ -70,6 +82,7 @@ class InvoiceModel {
       receiptNumber: json['receipt_number'] as String?,
       einvoiceLookupCode: json['einvoice_lookup_code'] as String?,
       paidAmount: (json['paid_amount'] as num?)?.toDouble(),
+      paymentCode: json['payment_code'] as String?,
     );
   }
 }

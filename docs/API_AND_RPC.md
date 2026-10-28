@@ -18,6 +18,8 @@
 | 8 | `approve_meter_reading` | `accountant`, `admin`, `management` | Thẩm định số điện nước cư dân gửi, duyệt chỉ số và kết chuyển sang hóa đơn dịch vụ. |
 | 9 | `record_maintenance_fund_expense` | `accountant`, `admin` | Trích tiền từ Quỹ Bảo Trì tòa nhà phục vụ sửa chữa lớn, tự động ghi sổ cái kiểm toán. |
 | 10 | `is_admin_or_accountant` | `SECURITY DEFINER Helper` | Hàm tiện ích nội tại kiểm tra vai trò người dùng trong CSDL an toàn. |
+| 11 | `process_bank_payment_webhook` | `service_role`, `gateway` | Webhook biến động số dư VietQR Napas 247: tự động gạch nợ hóa đơn, chống trùng, kích hoạt audit log và thông báo. |
+| 12 | `get_effective_user_role` | `authenticated` | Tính toán vai trò thực tế của người dùng kết hợp ủy quyền vai trò có thời hạn (`role_delegations`). |
 
 ---
 
@@ -125,3 +127,35 @@ Quét và tự động phát hành thông báo nhắc phí đa tầng.
   3. **Đã quá hạn (`invoice_overdue`):** Hóa đơn có `due_date < CURRENT_DATE` và chưa đóng tiền (`unpaid`).
 - **Chống làm phiền (Rate Limiting):** Mỗi hóa đơn chỉ nhận tối đa 1 thông báo cùng loại trong vòng 24 giờ.
 - **Giá trị trả về:** Tổng số thông báo đã được gửi đi thành công (`INT`).
+
+---
+
+### 2.6. RPC: `process_bank_payment_webhook`
+Nhận Webhook biến động số dư từ cổng ngân hàng / VietQR Napas 247 để tự động gạch nợ hóa đơn chuẩn thương mại.
+
+- **Chữ ký (Signature):**
+  ```sql
+  process_bank_payment_webhook(p_payload JSONB) RETURNS JSONB
+  ```
+- **Tham số vào:**
+  - `p_payload`: Dữ liệu biến động số dư từ ngân hàng (chứa `gateway_transaction_id`, `amount`, `content` / `description`).
+- **Nghiệp vụ cốt lõi:**
+  1. **Idempotency Key:** Kiểm tra `gateway_transaction_id` trong `payment_transactions`, từ chối trùng lặp (`DUPLICATE`).
+  2. **Khóa bản ghi (Row Locking):** Khóa hóa đơn tương ứng với `FOR UPDATE` theo `payment_code` trích xuất từ nội dung chuyển khoản.
+  3. **Tự động gạch nợ:** Nếu số tiền nhận $\ge$ `total_amount`, cập nhật `invoices.status = 'paid'`, sinh mã biên nhận `receipt_number`.
+  4. **Kích hoạt Audit & Notification:** Kích hoạt trigger `trg_audit_invoice_changes` (ghi nhật ký kiểm toán bất biến) và `trg_notify_on_invoice_paid` (bắn thông báo biên lai tới cư dân).
+  5. **Xử lý bất thường:** Tự động phát hiện và phân loại `UNMATCHED` (không tìm thấy hóa đơn), `OVERPAID` (nộp thừa tiền), `PARTIAL_PAID` (nộp thiếu tiền).
+
+---
+
+### 2.7. RPC: `get_effective_user_role`
+Tính toán vai trò thực tế của người dùng kết hợp ủy quyền vai trò có thời hạn (`role_delegations`).
+
+- **Chữ ký (Signature):**
+  ```sql
+  get_effective_user_role(p_user_id UUID, p_building_id UUID DEFAULT NULL) RETURNS TEXT
+  ```
+- **Nghiệp vụ:**
+  - Kiểm tra các ủy quyền còn hiệu lực trong bảng `role_delegations` (`now() BETWEEN start_date AND end_date` và `is_revoked = false`).
+  - Trả về vai trò được ủy quyền ưu tiên cao hơn (VD: `resident` được ủy quyền quyền `management` trong 7 ngày) hoặc trả về vai trò gốc từ bảng `users`.
+
