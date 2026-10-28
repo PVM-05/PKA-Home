@@ -9,17 +9,38 @@ void main() {
         expect(validateApartmentCode('b0512'), isNull);
       });
 
+      test('chấp nhận mã phòng trọ linh hoạt ở chế độ mặc định', () {
+        expect(validateApartmentCode('P101'), isNull);
+        expect(validateApartmentCode('101'), isNull);
+        expect(validateApartmentCode('Phòng 3'), isNull);
+        expect(validateApartmentCode('P-201'), isNull);
+        expect(validateApartmentCode('T2.05'), isNull);
+        expect(validateApartmentCode('A101'), isNull);
+      });
+
       test('báo lỗi khi mã căn hộ rỗng', () {
         expect(validateApartmentCode(''), isNotNull);
         expect(validateApartmentCode(null), isNotNull);
         expect(validateApartmentCode('   '), isNotNull);
       });
 
-      test('báo lỗi khi sai định dạng hoặc thiếu số tầng/phòng', () {
-        expect(validateApartmentCode('A101'), isNotNull);
-        expect(validateApartmentCode('101A'), isNotNull);
+      test('báo lỗi khi mã phòng chứa ký tự đặc biệt không hợp lệ hoặc quá dài', () {
+        expect(validateApartmentCode('!@#%^&*'), isNotNull);
+        expect(validateApartmentCode('A' * 20), isNotNull);
+      });
+
+      test('kiểm tra số tầng và phòng khi nhập định dạng chung cư A0110', () {
         expect(validateApartmentCode('A0001'), contains('Số tầng'));
         expect(validateApartmentCode('A0100'), contains('Số phòng'));
+      });
+
+      test('báo lỗi khi sai định dạng ở chế độ nghiêm ngặt (strictApartmentFormat)', () {
+        expect(validateApartmentCode('A101', strictApartmentFormat: true), isNotNull);
+        expect(validateApartmentCode('101A', strictApartmentFormat: true), isNotNull);
+        expect(validateApartmentCode('P101', strictApartmentFormat: true), isNotNull);
+        expect(validateApartmentCode('Phòng 3', strictApartmentFormat: true), isNotNull);
+        expect(validateApartmentCode('A0001', strictApartmentFormat: true), contains('Số tầng'));
+        expect(validateApartmentCode('A0100', strictApartmentFormat: true), contains('Số phòng'));
       });
     });
 

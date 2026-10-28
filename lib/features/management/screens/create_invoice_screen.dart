@@ -48,6 +48,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   double _motorbikeFee = AppConstants.kMotorbikeFee;
   double _carFee = AppConstants.kCarFee;
   bool _hasLoadedRates = false;
+  bool _isFixedRent = false;
 
   bool _isSubmitting = false;
 
@@ -85,6 +86,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   }
 
   double _getManagementTotal() {
+    if (_isFixedRent) {
+      return double.tryParse(_managementPriceController.text) ?? 0.0;
+    }
     final area = _selectedApartment?.area ?? 0.0;
     final price = double.tryParse(_managementPriceController.text) ?? 0.0;
     return area * price;
@@ -160,12 +164,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     try {
       final items = <Map<String, dynamic>>[];
       
-      // Phí quản lý
+      // Phí quản lý / Tiền thuê phòng
       if (_getManagementTotal() > 0) {
         items.add({
-          'fee_type': 'Phí quản lý',
-          'unit_price': double.tryParse(_managementPriceController.text) ?? 0,
-          'quantity': _selectedApartment!.area ?? 0,
+          'fee_type': _isFixedRent ? 'Tiền thuê phòng' : 'Phí quản lý',
+          'unit_price': _isFixedRent
+              ? _getManagementTotal()
+              : (double.tryParse(_managementPriceController.text) ?? 0),
+          'quantity': _isFixedRent ? 1.0 : (_selectedApartment!.area ?? 0),
         });
       }
       
@@ -406,7 +412,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                   );
                                 }).toList(),
                                 onChanged: (val) async {
-                                  setState(() => _selectedApartment = val);
+                                  setState(() {
+                                    _selectedApartment = val;
+                                    if (val != null && val.rentPrice != null && val.rentPrice! > 0) {
+                                      _isFixedRent = true;
+                                      _managementPriceController.text = val.rentPrice!.toInt().toString();
+                                    }
+                                  });
                                   if (val != null) {
                                     try {
                                       final counts = await ref.read(vehicleRepositoryProvider).getVehicleCounts(val.id);
@@ -421,7 +433,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                 validator: (val) => val == null ? 'Vui lòng chọn căn hộ' : null,
                               ),
                             ],
-                            if (_selectedApartment != null && (_selectedApartment!.area == null || _selectedApartment!.area! <= 0)) ...[
+                            if (_selectedApartment != null && !_isFixedRent && (_selectedApartment!.area == null || _selectedApartment!.area! <= 0)) ...[
                               const SizedBox(height: 12),
                               Container(
                                 padding: const EdgeInsets.all(12),
@@ -487,7 +499,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Phí quản lý', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                Text(_isFixedRent ? 'Tiền thuê phòng' : 'Phí quản lý', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 const SizedBox(width: 8),
                                 Flexible(
                                   child: Text(
@@ -498,24 +510,65 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                ChoiceChip(
+                                  label: const Text('Theo diện tích m²'),
+                                  selected: !_isFixedRent,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() {
+                                        _isFixedRent = false;
+                                        _managementPriceController.text = '16500';
+                                      });
+                                    }
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                ChoiceChip(
+                                  label: const Text('Tiền phòng cố định'),
+                                  selected: _isFixedRent,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() {
+                                        _isFixedRent = true;
+                                        if (_selectedApartment?.rentPrice != null && _selectedApartment!.rentPrice! > 0) {
+                                          _managementPriceController.text = _selectedApartment!.rentPrice!.toInt().toString();
+                                        }
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
                             const SizedBox(height: 12),
                             Row(
                               children: [
                                 Expanded(
                                   child: TextFormField(
-                                    initialValue: _selectedApartment?.area?.toString() ?? '0',
+                                    initialValue: _isFixedRent ? '1 phòng' : (_selectedApartment?.area?.toString() ?? '0'),
                                     readOnly: true,
-                                    key: ValueKey(_selectedApartment?.id), // Để rebuild khi đổi căn hộ
-                                    decoration: const InputDecoration(labelText: 'Diện tích (m²)', filled: true),
+                                    key: ValueKey('${_selectedApartment?.id}_$_isFixedRent'),
+                                    decoration: InputDecoration(
+                                      labelText: _isFixedRent ? 'Số lượng' : 'Diện tích (m²)',
+                                      filled: true,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: TextFormField(
                                     controller: _managementPriceController,
-                                    decoration: const InputDecoration(labelText: 'Đơn giá (đ/m²)'),
+                                    decoration: InputDecoration(
+                                      labelText: _isFixedRent ? 'Tiền thuê (đ/tháng)' : 'Đơn giá (đ/m²)',
+                                    ),
                                     keyboardType: TextInputType.number,
-                                    validator: (v) => validatePositiveNumber(v, 'Đơn giá quản lý', true),
+                                    validator: (v) => validatePositiveNumber(
+                                      v,
+                                      _isFixedRent ? 'Tiền thuê phòng' : 'Đơn giá quản lý',
+                                      true,
+                                    ),
                                     autovalidateMode: AutovalidateMode.onUserInteraction,
                                   ),
                                 ),

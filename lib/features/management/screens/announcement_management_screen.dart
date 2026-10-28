@@ -8,6 +8,7 @@ import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/notification_provider.dart';
 import '../../../data/repositories/announcement_repository.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_error_card.dart';
 
 class AnnouncementManagementScreen extends ConsumerWidget {
@@ -391,18 +392,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             hintText: 'VD: A0110',
                             prefixIcon: Icon(Icons.door_front_door_outlined),
                           ),
-                          validator: (v) {
-                            if (targetType == 'apartment') {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Vui lòng nhập mã căn hộ';
-                              }
-                              final regex = RegExp(r'^[a-zA-Z]\d{4}$');
-                              if (!regex.hasMatch(v.trim())) {
-                                return 'Mã căn hộ phải có định dạng Block + Tầng (2 số) + Phòng (2 số), VD: A0110';
-                              }
-                            }
-                            return null;
-                          },
+                          validator: (v) => targetType == 'apartment' ? validateApartmentCode(v) : null,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                         ),
                       ],
@@ -690,18 +680,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             hintText: 'VD: A0110',
                             prefixIcon: Icon(Icons.door_front_door_outlined),
                           ),
-                          validator: (v) {
-                            if (targetType == 'apartment') {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Vui lòng nhập mã căn hộ';
-                              }
-                              final regex = RegExp(r'^[a-zA-Z]\d{4}$');
-                              if (!regex.hasMatch(v.trim())) {
-                                return 'Mã căn hộ phải có định dạng Block + Tầng (2 số) + Phòng (2 số), VD: A0110';
-                              }
-                            }
-                            return null;
-                          },
+                          validator: (v) => targetType == 'apartment' ? validateApartmentCode(v) : null,
                         ),
                       ],
                       const SizedBox(height: 12),
