@@ -89,7 +89,7 @@ graph TD
 - [x] **D5. Thông báo đa kênh & Triggers:** Triggers tự động hóa thông báo, CDC Realtime Stream đẩy Heads-up notification, quét nhắc nợ định kỳ.
 - [ ] **D6. An ninh & Khách:** Đăng ký khách trước (mã QR), quản lý bưu kiện tại quầy lễ tân.
 - [ ] **D7. Biểu quyết & Cộng đồng:** Khảo sát online, kiến nghị cư dân.
-- [ ] **D8. Phân quyền chi tiết & Ủy quyền vai trò:** Ủy quyền có thời hạn (`role_delegations`), quyền chi tiết lưu trong CSDL.
+- [x] **D8. Phân quyền chi tiết & Ủy quyền vai trò:** Ủy quyền có thời hạn (`role_delegations`), RPC `get_effective_user_role` kiểm tra quyền động.
 
 ---
 
@@ -102,5 +102,5 @@ graph TD
 
 ### GIAI ĐOẠN F: Hạ Tầng, Tuân Thủ & Vận Hành
 - [ ] **Hạ tầng môi trường tách bạch:** Dev / Staging / Production. Giám sát uptime, cảnh báo lỗi qua Telegram/Slack.
-- [ ] **Tuân thủ pháp lý & Bảo mật:** Mã hóa thông tin nhạy cảm, nhật ký kiểm toán bất biến (`audit_logs`).
+- [x] **Tuân thủ pháp lý & Bảo mật:** Nhật ký kiểm toán bất biến (`audit_logs` Append-Only, tự động ghi log qua Triggers hóa đơn/thẻ xe/ủy quyền).
 - [ ] **Offline-First & Resilience:** Hoàn thiện hàng đợi đồng bộ khi mất sóng.
