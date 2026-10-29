@@ -10,6 +10,7 @@ import '../../../data/models/invoice_model.dart';
 import '../../../data/services/payment_service.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../core/utils/invoice_fee_helper.dart';
+import '../widgets/resident_ledger_history_sheet.dart';
 
 class ResidentInvoiceDetailScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
@@ -198,6 +199,34 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
             _buildInfoRow(Icons.calendar_today, 'Hạn thanh toán', formatDate.format(_invoice.dueDate)),
             const SizedBox(height: 12),
             _buildInfoRow(Icons.apartment, 'Căn hộ', _invoice.apartment?.code ?? 'N/A'),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.history_edu_outlined, size: 18),
+                label: const Text('Lịch sử đối soát công nợ'),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (_) => FractionallySizedBox(
+                      heightFactor: 0.7,
+                      child: ResidentLedgerHistorySheet(
+                        apartmentId: _invoice.apartmentId,
+                        apartmentCode: _invoice.apartment?.code ?? 'N/A',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
