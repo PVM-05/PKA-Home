@@ -15,6 +15,8 @@ import '../../../data/models/tiered_calculation_result_model.dart';
 import '../../../data/providers/fee_policy_providers.dart';
 import '../widgets/resident_ledger_history_sheet.dart';
 import '../widgets/tiered_fee_breakdown_dialog.dart';
+import '../../../core/utils/document_pdf_builder.dart';
+import '../../document/screens/document_preview_screen.dart';
 
 class ResidentInvoiceDetailScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
@@ -69,6 +71,16 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     return Scaffold(
       appBar: AppBar(
         title: Text('Chi tiết hóa đơn ${_invoice.period}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            tooltip: 'Xuất PDF chứng từ',
+            onPressed: () {
+              final items = detailState.valueOrNull ?? <Map<String, dynamic>>[];
+              _openPdfPreview(context, items);
+            },
+          ),
+        ],
       ),
       body: detailState.when(
         data: (items) {
@@ -104,6 +116,40 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         data: (items) => _buildBottomAction(context, items),
       ),
     );
+  }
+
+  void _openPdfPreview(BuildContext context, List<Map<String, dynamic>> items) {
+    final isPaid = _invoice.status.toLowerCase() == 'paid';
+    final periodSlug = _invoice.period.replaceAll('/', '_');
+    final aptCode = _invoice.apartment?.code ?? _invoice.apartmentId;
+
+    if (isPaid) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => DocumentPreviewScreen(
+            title: 'Biên lai điện tử ${_invoice.period} - $aptCode',
+            fileName: 'bien_lai_${aptCode}_$periodSlug.pdf',
+            buildPdf: (format) => DocumentPdfBuilder.buildReceiptPdfA4(
+              invoice: _invoice,
+              items: items,
+            ),
+          ),
+        ),
+      );
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => DocumentPreviewScreen(
+            title: 'Hóa đơn dịch vụ ${_invoice.period} - $aptCode',
+            fileName: 'hoa_don_${aptCode}_$periodSlug.pdf',
+            buildPdf: (format) => DocumentPdfBuilder.buildInvoicePdfA4(
+              invoice: _invoice,
+              items: items,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildSummaryCard(BuildContext context, NumberFormat formatCurrency, DateFormat formatDate) {

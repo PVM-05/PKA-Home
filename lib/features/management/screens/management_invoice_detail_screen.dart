@@ -10,6 +10,8 @@ import '../../../data/providers/payment_provider.dart';
 import 'edit_invoice_screen.dart';
 import '../../../core/utils/invoice_fee_helper.dart';
 import '../../../core/widgets/electronic_receipt_sheet.dart';
+import '../../../core/utils/document_pdf_builder.dart';
+import '../../document/screens/document_preview_screen.dart';
 
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
   final InvoiceModel invoice;
@@ -26,6 +28,14 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('Chi tiết Hóa đơn ${invoice.period}'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.print_outlined),
+            tooltip: 'Xuất PDF / In chứng từ',
+            onPressed: () {
+              final items = detailState.valueOrNull ?? <Map<String, dynamic>>[];
+              _showPrintExportBottomSheet(context, items);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: 'Sửa hóa đơn',
@@ -448,6 +458,143 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
         );
       }
     }
+  }
+
+  void _showPrintExportBottomSheet(
+    BuildContext context,
+    List<Map<String, dynamic>> items,
+  ) {
+    final periodSlug = invoice.period.replaceAll('/', '_');
+    final aptCode = invoice.apartment?.code ?? invoice.apartmentId;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.print_outlined, color: AppTheme.primary),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Tùy chọn In ấn & Xuất chứng từ',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            'Chọn mẫu định dạng tài liệu cần xuất hoặc in',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.description_outlined, color: AppTheme.primary),
+                  title: const Text(
+                    'Hóa đơn dịch vụ (Khổ A4)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text('Bảng kê chi tiết phí và mã VietQR thanh toán 24/7'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(bottomSheetContext).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => DocumentPreviewScreen(
+                          title: 'Hóa đơn dịch vụ A4 - Căn hộ $aptCode',
+                          fileName: 'hoa_don_${aptCode}_$periodSlug.pdf',
+                          buildPdf: (format) => DocumentPdfBuilder.buildInvoicePdfA4(
+                            invoice: invoice,
+                            items: items,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.verified_outlined, color: AppTheme.success),
+                  title: const Text(
+                    'Biên lai thu tiền điện tử (Khổ A4)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text('Chứng từ thu phí chính thức có con dấu mộc số BQL'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(bottomSheetContext).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => DocumentPreviewScreen(
+                          title: 'Biên lai thu tiền A4 - Căn hộ $aptCode',
+                          fileName: 'bien_lai_${aptCode}_$periodSlug.pdf',
+                          buildPdf: (format) => DocumentPdfBuilder.buildReceiptPdfA4(
+                            invoice: invoice,
+                            items: items,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.receipt_long_outlined, color: AppTheme.warning),
+                  title: const Text(
+                    'Phiếu in nhiệt quầy thu ngân (Cuộn 80mm)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text('Phiếu thu gọn cho máy in bill nhiệt POS tại quầy BQL'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(bottomSheetContext).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => DocumentPreviewScreen(
+                          title: 'Phiếu in nhiệt 80mm - Căn hộ $aptCode',
+                          fileName: 'phieu_thu_80mm_${aptCode}_$periodSlug.pdf',
+                          buildPdf: (format) => DocumentPdfBuilder.buildReceiptPdf80mm(
+                            invoice: invoice,
+                            items: items,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _confirmDeleteInvoice(BuildContext context, WidgetRef ref) async {
