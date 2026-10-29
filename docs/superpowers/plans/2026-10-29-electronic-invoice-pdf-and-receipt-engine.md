@@ -142,19 +142,19 @@ git commit -m "feat(pdf): engine sinh pdf hoa don a4 bien lai dien tu va phieu n
   - Providers: `documentRepositoryProvider`, `documentLookupProvider`
   - `DocumentLookupScreen`: Màn hình tra cứu chứng từ (nhập mã, hiển thị trạng thái hợp lệ, thông tin đối soát hoặc báo lỗi).
 
-- [ ] **Step 1: Viết test cho Repository & `DocumentLookupScreen`**
+- [x] **Step 1: Viết test cho Repository & `DocumentLookupScreen`**
 Kiểm thử gọi RPC tra cứu và hiển thị kết quả xác thực trên UI.
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy test, xác nhận FAIL.
 
-- [ ] **Step 3: Triển khai Repository, Providers & Screen**
+- [x] **Step 3: Triển khai Repository, Providers & Screen**
 Viết `DocumentRepository`, `document_providers.dart` và `DocumentLookupScreen`.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy test, đảm bảo PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add lib/data/repositories/document_repository.dart lib/data/providers/document_providers.dart lib/features/document/screens/document_lookup_screen.dart test/data/repositories/document_repository_test.dart test/features/document/screens/document_lookup_screen_test.dart
 git commit -m "feat(lookup): them repository provider va man hinh tra cuu chung tu C4"
