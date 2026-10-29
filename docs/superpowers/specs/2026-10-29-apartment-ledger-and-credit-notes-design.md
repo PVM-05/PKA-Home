@@ -264,3 +264,4 @@ get_apartment_ledger_balance(
    - Kiểm tra hiển thị ngày tháng đúng chuẩn `dd/MM/yyyy HH:mm` và kỳ `Tháng MM/yyyy`.
    - Kiểm tra màn hình `ApartmentLedgerScreen` hiển thị đúng thẻ trạng thái số dư, danh sách bút toán và form lập phiếu điều chỉnh.
    - Kiểm tra chi tiết hóa đơn cư dân hiển thị đúng nghĩa vụ nợ cũ + phát sinh mới.
+
