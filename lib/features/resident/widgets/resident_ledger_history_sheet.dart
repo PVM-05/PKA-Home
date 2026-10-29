@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../data/models/apartment_ledger_entry_model.dart';
 import '../../../data/providers/accounting_providers.dart';
 
 class ResidentLedgerHistorySheet extends ConsumerWidget {
@@ -71,9 +70,9 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.08),
+                  color: color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: color.withOpacity(0.3)),
+                  border: Border.all(color: color.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -94,7 +93,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
               );
             },
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (e, s) => const SizedBox.shrink(),
           ),
           const SizedBox(height: 12),
 
@@ -113,7 +112,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
 
                 return ListView.separated(
                   itemCount: entries.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (context, index) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final item = entries[index];
                     final isDebit = item.isDebit;
@@ -173,7 +172,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Lỗi tải dữ liệu: $err')),
+              error: (err, stack) => Center(child: Text('Lỗi tải dữ liệu: $err')),
             ),
           ),
         ],

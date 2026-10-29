@@ -31,13 +31,13 @@
   - Trigger: `trg_enforce_invoice_immutability`, `trg_prevent_closed_period_mutation`, `trg_auto_post_ledger_on_invoice_paid`
   - RPCs: `record_apartment_ledger_entry`, `issue_credit_note`, `close_accounting_period`, `get_apartment_ledger_balance`
 
-- [ ] **Step 1: Viết test kiểm tra migration**
+- [x] **Step 1: Viết test kiểm tra migration**
 Viết `test/integration/apartment_ledger_migration_test.dart` kiểm tra file migration tồn tại, chứa định nghĩa các bảng `accounting_periods`, `apartment_ledger_entries`, `credit_notes`, trigger `trg_enforce_invoice_immutability` và các RPCs cần thiết.
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/integration/apartment_ledger_migration_test.dart` và xác nhận thất bại do chưa có file migration.
 
-- [ ] **Step 3: Viết migration SQL**
+- [x] **Step 3: Viết migration SQL**
 Tạo file `supabase/migrations/20261029_03_apartment_ledger_and_credit_notes.sql`:
 - Tạo bảng `accounting_periods` (id, building_id, period, status, opened_at, closed_at, closed_by, notes, created_at, updated_at).
 - Tạo bảng `apartment_ledger_entries` (id, building_id, apartment_id, entry_code, entry_type, amount, balance_after, period, reference_type, reference_id, description, created_by, created_at).
@@ -48,10 +48,10 @@ Tạo file `supabase/migrations/20261029_03_apartment_ledger_and_credit_notes.sq
 - RPCs: `record_apartment_ledger_entry`, `issue_credit_note`, `close_accounting_period`, `get_apartment_ledger_balance`.
 - RLS policies cho BQL và Cư dân.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy `flutter test test/integration/apartment_ledger_migration_test.dart` đảm bảo pass 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add supabase/migrations/20261029_03_apartment_ledger_and_credit_notes.sql test/integration/apartment_ledger_migration_test.dart
 git commit -m "feat(db): migration so cai cong no can ho credit notes va hoa don bat bien C1"
@@ -78,19 +78,19 @@ git commit -m "feat(db): migration so cai cong no can ho credit notes va hoa don
   - `CreditNoteModel` (id, creditNoteCode, buildingId, apartmentId, invoiceId, noteType, amount, reason, status, approvedBy, approvedAt, createdAt, formattedCreatedAt, formattedAmount)
   - `AccountingPeriodModel` (id, buildingId, period, status, openedAt, closedAt, closedBy, notes, formattedPeriod, isClosed)
 
-- [ ] **Step 1: Viết test cho các Models**
+- [x] **Step 1: Viết test cho các Models**
 Viết unit test cho `fromJson`, `toJson`, các helper format tiếng Việt (`formattedCreatedAt` dạng `dd/MM/yyyy HH:mm`, `formattedPeriod` dạng `Tháng MM/yyyy`, tiền tệ `#,##0 đ`).
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/data/models/apartment_ledger_entry_model_test.dart` xác nhận FAIL.
 
-- [ ] **Step 3: Triển khai các Model classes**
+- [x] **Step 3: Triển khai các Model classes**
 Tạo 3 file models tương ứng, triển khai đầy đủ các thuộc tính strongly-typed và helper format tiếng Việt với `intl`.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy lại bộ test models, xác nhận PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add lib/data/models/ test/data/models/
 git commit -m "feat(models): bo sung model so cai cong no phieu dieu chinh va ky ke toan"
@@ -126,19 +126,19 @@ git commit -m "feat(models): bo sung model so cai cong no phieu dieu chinh va ky
     - `accountingPeriodsProvider(buildingId)`
     - `creditNotesProvider(buildingId)`
 
-- [ ] **Step 1: Viết unit tests cho Repository & Providers**
+- [x] **Step 1: Viết unit tests cho Repository & Providers**
 Tạo mock client, kiểm thử gọi đúng RPCs và queries, xử lý mapping dữ liệu an toàn.
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/data/repositories/accounting_repository_test.dart` xác nhận FAIL.
 
-- [ ] **Step 3: Triển khai Repository & Providers**
+- [x] **Step 3: Triển khai Repository & Providers**
 Viết `AccountingRepository` và `accounting_providers.dart` gọi Supabase an toàn, chuẩn hóa kiểu dữ liệu strongly-typed.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy test repository và providers, xác nhận PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add lib/data/repositories/accounting_repository.dart lib/data/providers/accounting_providers.dart test/data/repositories/accounting_repository_test.dart test/data/providers/accounting_providers_test.dart
 git commit -m "feat(repo): them accounting_repository va riverpod providers cho so cai cong no"
@@ -163,19 +163,19 @@ git commit -m "feat(repo): them accounting_repository va riverpod providers cho 
   - `CreateCreditNoteDialog`: Form lập phiếu điều chỉnh công nợ (chọn hóa đơn, nhập lý do, số tiền).
   - `ClosePeriodDialog`: Xác nhận khóa sổ kỳ kế toán tháng.
 
-- [ ] **Step 1: Viết widget test cho `ApartmentLedgerScreen`**
+- [x] **Step 1: Viết widget test cho `ApartmentLedgerScreen`**
 Kiểm thử hiển thị thẻ số dư công nợ, danh sách bút toán (thời gian `dd/MM/yyyy HH:mm`, mã bút toán, diễn giải, số dư lũy kế), và sự hiện diện của nút "Lập phiếu điều chỉnh" & "Khóa sổ kỳ".
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/features/management/apartment_ledger_screen_test.dart` xác nhận FAIL.
 
-- [ ] **Step 3: Triển khai UI Widgets & Screen**
+- [x] **Step 3: Triển khai UI Widgets & Screen**
 Viết màn hình `ApartmentLedgerScreen` và 2 dialog, tuân thủ 100% `design-rules.md`, sử dụng Material Icons, màu sắc từ Theme, word-wrap an toàn chống tràn pixel.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy widget test, xác nhận PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add lib/features/management/screens/apartment_ledger_screen.dart lib/features/management/widgets/ test/features/management/apartment_ledger_screen_test.dart
 git commit -m "feat(ui): them man hinh so cai cong no can ho va dialog lap phieu dieu chinh cho BQL"
@@ -203,19 +203,19 @@ git commit -m "feat(ui): them man hinh so cai cong no can ho va dialog lap phieu
     - `Tổng tiền thanh toán`: `...,... đ`
   - Nút/Modal `ResidentLedgerHistorySheet` cho phép cư dân xem minh bạch lịch sử giao dịch và đối soát của căn hộ mình.
 
-- [ ] **Step 1: Viết widget test cho chi tiết hóa đơn cư dân**
+- [x] **Step 1: Viết widget test cho chi tiết hóa đơn cư dân**
 Kiểm thử hiển thị phân rã nghĩa vụ nợ cũ + phát sinh mới và mở modal lịch sử đối soát công nợ.
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/features/resident/resident_invoice_ledger_summary_test.dart` xác nhận FAIL.
 
-- [ ] **Step 3: Cập nhật `ResidentInvoiceDetailScreen` & tạo Modal**
+- [x] **Step 3: Cập nhật `ResidentInvoiceDetailScreen` & tạo Modal**
 Bổ sung widget thẻ nghĩa vụ tài chính và bottom sheet xem lịch sử bút toán theo chuẩn `dd/MM/yyyy HH:mm`.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy widget test, xác nhận PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add lib/features/resident/screens/resident_invoice_detail_screen.dart lib/features/resident/widgets/ test/features/resident/resident_invoice_ledger_summary_test.dart
 git commit -m "feat(ui): hien thi minh bach no ky truoc va lich su doi soat tren hoa don cu dan"
@@ -229,17 +229,18 @@ git commit -m "feat(ui): hien thi minh bach no ky truoc va lich su doi soat tren
 - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md`
 - Test: Toàn bộ test suite `flutter test`, `dart analyze`
 
-- [ ] **Step 1: Chạy toàn bộ test suite**
+- [x] **Step 1: Chạy toàn bộ test suite**
 Chạy `flutter test` đảm bảo 100% tests vượt qua không có lỗi.
 
-- [ ] **Step 2: Chạy static analysis**
+- [x] **Step 2: Chạy static analysis**
 Chạy `dart analyze lib test` đảm bảo 0 cảnh báo, 0 lỗi.
 
-- [ ] **Step 3: Cập nhật tiến độ roadmap**
+- [x] **Step 3: Cập nhật tiến độ roadmap**
 Đánh dấu `[x] C1. Sổ cái kế toán thật (ledger_entries)` trong `docs/COMMERCIAL_PRODUCT_ROADMAP.md`.
 
-- [ ] **Step 4: Commit hoàn tất**
+- [x] **Step 4: Commit hoàn tất**
 ```bash
 git add docs/COMMERCIAL_PRODUCT_ROADMAP.md
 git commit -m "docs: cap nhat tien do hoan thanh C1 so cai cong no trong lo trinh thuong mai"
 ```
+
