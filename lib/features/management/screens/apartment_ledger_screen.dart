@@ -86,7 +86,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
             balanceAsync.when(
               data: (balance) => _buildBalanceCard(context, balance),
               loading: () => const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-              error: (err, _) => Card(
+              error: (err, stack) => Card(
                 color: Colors.red.shade50,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -172,7 +172,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                 );
               },
               loading: () => const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator())),
-              error: (err, _) => Card(
+              error: (err, stack) => Card(
                 color: Colors.red.shade50,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -225,9 +225,9 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withOpacity(0.5)),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

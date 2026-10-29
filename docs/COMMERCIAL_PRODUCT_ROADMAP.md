@@ -60,11 +60,13 @@ graph TD
 ---
 
 ### GIAI ĐOẠN C: Lõi Tài Chính Đạt Chuẩn Thương Mại (Trọng Tâm Bán Hàng)
-- [ ] **C1. Sổ cái kế toán thật (`ledger_entries`):**
-  - Bút toán kép hoặc sổ chi tiết công nợ theo từng căn hộ: phát sinh, thu, điều chỉnh, hoàn tiền, miễn giảm.
-  - Công nợ cộng dồn + số dư đầu kỳ/cuối kỳ trên mỗi hóa đơn.
-  - Hóa đơn đã phát hành mang tính bất biến: sửa = phát hành hóa đơn điều chỉnh (credit note), không xóa/sửa đè trực tiếp hóa đơn đã thanh toán.
-  - Đóng kỳ kế toán (period close).
+- [x] **C1. Sổ cái kế toán thật (`ledger_entries`):**
+  - Bút toán sổ chi tiết công nợ từng căn hộ Append-Only (`apartment_ledger_entries`), tự động tính `balance_after` tức thời (DEBIT phát sinh, CREDIT thu tiền, CREDIT_NOTE giảm nợ, DEBIT_NOTE truy thu, REFUND hoàn tiền).
+  - Phiếu điều chỉnh công nợ chính quy (`credit_notes` mã `CN-YYYYMM-XXXXX`) có căn cứ kiểm toán thay vì sửa đè hóa đơn.
+  - Hóa đơn đã phát hành/thanh toán hoặc trong kỳ kế toán đã đóng mang tính bất biến (Trigger DB `trg_enforce_invoice_immutability` chặn sửa `total_amount` và chặn `DELETE`).
+  - Chốt kỳ kế toán (`accounting_periods` & RPC `close_accounting_period`), khóa sổ mọi thay đổi dữ liệu cũ.
+  - Chuẩn hóa 100% hiển thị thời gian (`dd/MM/yyyy HH:mm`), kỳ kế toán (`Tháng MM/yyyy`) và tiền tệ (`#,##0 đ`) cho người Việt.
+  - UI `ApartmentLedgerScreen` (BQL) xem thẻ số dư, danh sách bút toán, lập phiếu điều chỉnh; UI `ResidentLedgerHistorySheet` (Cư dân) tra cứu minh bạch lịch sử đối soát công nợ.
 - [ ] **C2. Engine tính phí đa dạng:**
   - Điện/nước bậc thang (EVN 6 bậc, nước sinh hoạt theo định mức nhân khẩu).
   - Phí quản lý theo m² hoặc theo loại căn hộ/phòng trọ.
