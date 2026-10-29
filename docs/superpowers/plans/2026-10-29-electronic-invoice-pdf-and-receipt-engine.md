@@ -31,19 +31,19 @@
   - Trigger `trg_ensure_invoice_lookup_code`: Tự động sinh mã `INV-YYYYMM-XXXXX` khi thêm hóa đơn nếu rỗng
   - RPC `verify_document_lookup(p_lookup_code TEXT)`: Trả về JSONB thông tin xác thực hóa đơn / biên lai
 
-- [ ] **Step 1: Viết integration test cho migration**
+- [x] **Step 1: Viết integration test cho migration**
 Viết `test/integration/electronic_invoice_migration_test.dart` kiểm tra file migration tồn tại, chứa lệnh `ADD COLUMN lookup_code`, định nghĩa trigger tự sinh mã và RPC `verify_document_lookup`.
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/integration/electronic_invoice_migration_test.dart` xác nhận FAIL.
 
-- [ ] **Step 3: Viết migration SQL**
+- [x] **Step 3: Viết migration SQL**
 Tạo `supabase/migrations/20261029_05_electronic_invoice_and_lookup_engine.sql` định nghĩa đầy đủ schema, backfill mã tra cứu cho các hóa đơn hiện hữu và RPC `verify_document_lookup`.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy lại test, đảm bảo PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add supabase/migrations/20261029_05_electronic_invoice_and_lookup_engine.sql test/integration/electronic_invoice_migration_test.dart
 git commit -m "feat(db): migration lookup_code va rpc tra cuu hoa don bien lai C4"
@@ -179,19 +179,19 @@ git commit -m "feat(lookup): them repository provider va man hinh tra cuu chung 
   - `DocumentPreviewScreen`: Màn hình xem trước toàn trang, In trực tiếp, Tải xuống và Chia sẻ file PDF.
   - Tích hợp nút "Xuất PDF / Biên lai" trên AppBar và action buttons của `ResidentInvoiceDetailScreen` và `ManagementInvoiceDetailScreen`.
 
-- [ ] **Step 1: Viết widget test cho `DocumentPreviewScreen` & tích hợp nút xuất PDF**
+- [x] **Step 1: Viết widget test cho `DocumentPreviewScreen` & tích hợp nút xuất PDF**
 Kiểm thử nút xuất PDF mở màn hình preview và cho phép chọn định dạng (A4 Hóa đơn, A4 Biên lai, Phiếu nhiệt 80mm).
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy test, xác nhận FAIL.
 
-- [ ] **Step 3: Triển khai Screen Preview & Cập nhật màn hình chi tiết**
+- [x] **Step 3: Triển khai Screen Preview & Cập nhật màn hình chi tiết**
 Viết `DocumentPreviewScreen` và cập nhật 2 màn hình hóa đơn cư dân và BQL.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy test, đảm bảo PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add lib/features/document/screens/document_preview_screen.dart lib/features/resident/screens/resident_invoice_detail_screen.dart lib/features/management/screens/management_invoice_detail_screen.dart test/features/document/screens/document_preview_screen_test.dart test/features/resident/resident_invoice_pdf_export_ui_test.dart
 git commit -m "feat(ui): man hinh xem truoc in an chia se pdf va tich hop nut xuat hoa don C4"
@@ -205,16 +205,16 @@ git commit -m "feat(ui): man hinh xem truoc in an chia se pdf va tich hop nut xu
 - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md`
 - Test: Toàn bộ test suite `flutter test`, `flutter analyze`
 
-- [ ] **Step 1: Chạy toàn bộ test suite**
+- [x] **Step 1: Chạy toàn bộ test suite**
 Chạy `flutter test` đảm bảo 100% tests vượt qua không có lỗi hay hồi quy.
 
-- [ ] **Step 2: Chạy static analysis**
+- [x] **Step 2: Chạy static analysis**
 Chạy `flutter analyze` đảm bảo 0 cảnh báo, 0 lỗi.
 
-- [ ] **Step 3: Cập nhật lộ trình thương mại**
+- [x] **Step 3: Cập nhật lộ trình thương mại**
 Đánh dấu `[x] C4. Hóa đơn điện tử & Chứng từ` trong `docs/COMMERCIAL_PRODUCT_ROADMAP.md`.
 
-- [ ] **Step 4: Commit hoàn tất**
+- [x] **Step 4: Commit hoàn tất**
 ```bash
 git add docs/COMMERCIAL_PRODUCT_ROADMAP.md docs/superpowers/plans/2026-10-29-electronic-invoice-pdf-and-receipt-engine.md
 git commit -m "docs: hoan thanh C4 hoa don dien tu bien lai pdf va tra cuu ma qr trong lo trinh thuong mai"
