@@ -10,7 +10,11 @@ import '../../../data/models/invoice_model.dart';
 import '../../../data/services/payment_service.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../core/utils/invoice_fee_helper.dart';
+import '../../../core/utils/utility_fee_calculator.dart';
+import '../../../data/models/tiered_calculation_result_model.dart';
+import '../../../data/providers/fee_policy_providers.dart';
 import '../widgets/resident_ledger_history_sheet.dart';
+import '../widgets/tiered_fee_breakdown_dialog.dart';
 
 class ResidentInvoiceDetailScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
@@ -87,7 +91,7 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ...items.map((item) => _buildFeeItemCard(item, formatCurrency)),
+                  ...items.map((item) => _buildFeeItemCard(context, item, formatCurrency)),
                 ],
               ),
             ),
@@ -123,6 +127,18 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         statusText = 'Chưa thanh toán';
         statusIcon = Icons.error_outline;
     }
+
+    final isOverdue = _invoice.status == 'unpaid' && DateTime.now().isAfter(_invoice.dueDate);
+    final latePenaltyAsync = isOverdue ? ref.watch(calculatedLatePenaltyProvider(_invoice.id)) : null;
+    final latePenalty = isOverdue
+        ? (latePenaltyAsync?.valueOrNull ??
+            UtilityFeeCalculator.calculateLatePaymentPenalty(
+              invoiceId: _invoice.id,
+              totalAmount: _invoice.totalAmount,
+              dueDate: _invoice.dueDate,
+              asOfDate: DateTime.now(),
+            ))
+        : null;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark
@@ -193,6 +209,10 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                 color: statusColor,
               ),
             ),
+            if (latePenalty != null && latePenalty.daysOverdue > 0) ...[
+              const SizedBox(height: 16),
+              _buildLatePenaltyWarningBox(latePenalty, formatCurrency),
+            ],
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 16),
@@ -258,7 +278,79 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     );
   }
 
-  Widget _buildFeeItemCard(Map<String, dynamic> item, NumberFormat formatCurrency) {
+  Widget _buildLatePenaltyWarningBox(LatePenaltyResultModel penalty, NumberFormat formatCurrency) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.error.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Cảnh báo trễ hạn',
+                      style: TextStyle(
+                        color: AppTheme.error,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppTheme.error,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Quá hạn ${penalty.daysOverdue} ngày',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Hóa đơn đã quá hạn thanh toán. Tiền lãi phạt trễ hạn ước tính: ${penalty.formattedPenaltyAmount} (0.05%/ngày).',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                if (penalty.penaltyAmount > 0) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tổng cộng kèm tiền phạt: ${formatCurrency.format(penalty.totalWithPenalty)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.error,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeeItemCard(BuildContext context, Map<String, dynamic> item, NumberFormat formatCurrency) {
     final rawFeeType = item['fee_type'] as String?;
     final feeDisplayName = InvoiceFeeHelper.getFeeName(rawFeeType);
     final feeIcon = InvoiceFeeHelper.getFeeIcon(rawFeeType);
@@ -266,14 +358,26 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
     final feeUnit = InvoiceFeeHelper.getFeeUnit(rawFeeType);
 
     final qty = item['quantity'] ?? 1;
+    final qtyNum = (qty is num) ? qty : (num.tryParse(qty.toString()) ?? 1);
     final qtyStr = (qty is num && qty == qty.roundToDouble())
         ? qty.toInt().toString()
         : qty.toString();
+
+    final feeTypeLower = (rawFeeType ?? '').toLowerCase().trim();
+    final noteText = '${item['note'] ?? ''} ${item['description'] ?? ''}'.toLowerCase();
+
+    final isElectricity = feeTypeLower == 'electricity' || feeTypeLower.contains('điện');
+    final isWater = feeTypeLower == 'water' || feeTypeLower.contains('nước');
+    final isTiered = isElectricity || isWater;
+
+    final isParking = feeTypeLower.contains('parking') || feeTypeLower.contains('xe');
+    final isProratedParking = isParking && (noteText.contains('ngày') || noteText.contains('pro-rata') || noteText.contains('prorated'));
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -301,6 +405,66 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                if (isTiered) ...[
+                  const SizedBox(height: 6),
+                  InkWell(
+                    onTap: () {
+                      _showTieredBreakdownDialog(context, isElectricity: isElectricity, quantity: qtyNum);
+                    },
+                    borderRadius: BorderRadius.circular(6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: feeColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: feeColor.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.tune_rounded, size: 13, color: feeColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Chi tiết bậc thang',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: feeColor,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Icon(Icons.chevron_right_rounded, size: 14, color: feeColor),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                if (isProratedParking) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.teal.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.calendar_month_outlined, size: 13, color: Colors.teal),
+                        SizedBox(width: 4),
+                        Text(
+                          'Phí theo ngày lẻ',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -315,6 +479,30 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
         ],
       ),
     );
+  }
+
+  void _showTieredBreakdownDialog(BuildContext context, {required bool isElectricity, required num quantity}) {
+    if (isElectricity) {
+      final result = UtilityFeeCalculator.calculateElectricityEVN6Tiers(quantity);
+      showDialog(
+        context: context,
+        builder: (_) => TieredFeeBreakdownDialog(
+          title: 'Chi tiết bậc thang tiền điện',
+          unit: 'kWh',
+          result: result,
+        ),
+      );
+    } else {
+      final result = UtilityFeeCalculator.calculateWaterQuota(consumption: quantity);
+      showDialog(
+        context: context,
+        builder: (_) => TieredFeeBreakdownDialog(
+          title: 'Chi tiết định mức tiền nước',
+          unit: 'm³',
+          result: result,
+        ),
+      );
+    }
   }
 
   Widget _buildBottomAction(BuildContext context, List<Map<String, dynamic>> items) {
