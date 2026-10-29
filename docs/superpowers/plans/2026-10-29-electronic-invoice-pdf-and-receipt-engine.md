@@ -104,19 +104,19 @@ git commit -m "feat(core): them tien ich doc tien bang chu va model tra cuu C4"
   - `DocumentPdfBuilder.buildReceiptPdfA4(...)`: Trả về `Future<Uint8List>` của Biên lai thu tiền A4 (mã biên lai, thông tin đối soát, con dấu mộc số điện tử "ĐÃ THU TIỀN", chữ ký).
   - `DocumentPdfBuilder.buildReceiptPdf80mm(...)`: Trả về `Future<Uint8List>` của Phiếu in nhiệt cuộn 80mm POS.
 
-- [ ] **Step 1: Viết unit tests cho `DocumentPdfBuilder`**
+- [x] **Step 1: Viết unit tests cho `DocumentPdfBuilder`**
 Kiểm thử tạo byte PDF hợp lệ (%PDF-1.), kích thước trang chuẩn A4 và Roll 80mm, không bị lỗi font hoặc null exceptions.
 
-- [ ] **Step 2: Chạy test để xác nhận FAIL**
+- [x] **Step 2: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/core/utils/document_pdf_builder_test.dart` xác nhận FAIL.
 
-- [ ] **Step 3: Triển khai `DocumentPdfBuilder`**
+- [x] **Step 3: Triển khai `DocumentPdfBuilder`**
 Dựng layout PDF vector bằng thư viện `pdf/widgets.dart`, sử dụng font Unicode tiếng Việt, vẽ vector con dấu điện tử BQL.
 
-- [ ] **Step 4: Chạy test để xác nhận PASS**
+- [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy test, đảm bảo PASS 100%.
 
-- [ ] **Step 5: Commit vào git**
+- [x] **Step 5: Commit vào git**
 ```bash
 git add lib/core/utils/document_pdf_builder.dart test/core/utils/document_pdf_builder_test.dart
 git commit -m "feat(pdf): engine sinh pdf hoa don a4 bien lai dien tu va phieu nhiet 80mm C4"
