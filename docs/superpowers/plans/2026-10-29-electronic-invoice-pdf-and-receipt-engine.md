@@ -68,22 +68,22 @@ git commit -m "feat(db): migration lookup_code va rpc tra cuu hoa don bien lai C
   - `DocumentLookupResultModel`: Ánh xạ kết quả JSON từ RPC `verify_document_lookup`
   - `VietnameseCurrencyTextFormatter.toWords(num amount)`: Trả về chuỗi tiếng Việt chuẩn mực (VD: `1250000` -> `"Một triệu hai trăm năm mươi nghìn đồng"`)
 
-- [ ] **Step 1: Thêm dependencies vào pubspec.yaml & chạy flutter pub get**
+- [x] **Step 1: Thêm dependencies vào pubspec.yaml & chạy flutter pub get**
 Bổ sung `pdf: ^3.10.8` và `printing: ^5.13.2` vào `pubspec.yaml`. Chạy `flutter pub get`.
 
-- [ ] **Step 2: Viết unit tests cho Model & Tiện ích đọc tiền bằng chữ**
+- [x] **Step 2: Viết unit tests cho Model & Tiện ích đọc tiền bằng chữ**
 Tạo các test case bao quát: 0 đ, hàng chục, trăm, nghìn, triệu, tỷ, các trường hợp đặc biệt ("linh", "mốt", "lăm", "mười").
 
-- [ ] **Step 3: Chạy test để xác nhận FAIL**
+- [x] **Step 3: Chạy test để xác nhận FAIL**
 Chạy `flutter test test/data/models/document_lookup_result_model_test.dart test/core/utils/vietnamese_currency_text_formatter_test.dart` xác nhận FAIL.
 
-- [ ] **Step 4: Triển khai Model & Tiện ích đọc tiền**
+- [x] **Step 4: Triển khai Model & Tiện ích đọc tiền**
 Viết `DocumentLookupResultModel` và thuật toán đọc tiền `VietnameseCurrencyTextFormatter`.
 
-- [ ] **Step 5: Chạy test để xác nhận PASS**
+- [x] **Step 5: Chạy test để xác nhận PASS**
 Chạy test, đảm bảo PASS 100%.
 
-- [ ] **Step 6: Commit vào git**
+- [x] **Step 6: Commit vào git**
 ```bash
 git add pubspec.yaml pubspec.lock lib/data/models/document_lookup_result_model.dart lib/core/utils/vietnamese_currency_text_formatter.dart test/data/models/document_lookup_result_model_test.dart test/core/utils/vietnamese_currency_text_formatter_test.dart
 git commit -m "feat(core): them tien ich doc tien bang chu va model tra cuu C4"
@@ -219,3 +219,4 @@ Chạy `flutter analyze` đảm bảo 0 cảnh báo, 0 lỗi.
 git add docs/COMMERCIAL_PRODUCT_ROADMAP.md docs/superpowers/plans/2026-10-29-electronic-invoice-pdf-and-receipt-engine.md
 git commit -m "docs: hoan thanh C4 hoa don dien tu bien lai pdf va tra cuu ma qr trong lo trinh thuong mai"
 ```
+

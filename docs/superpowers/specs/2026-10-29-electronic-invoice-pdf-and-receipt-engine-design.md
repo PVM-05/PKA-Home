@@ -222,3 +222,4 @@ lib/
 - [x] Không bị lỗi font tiếng Việt khi sinh file PDF (Unicode chuẩn tiếng Việt đầy đủ thanh dấu).
 - [x] Xuất được đầy đủ 3 mẫu: Hóa đơn A4, Biên lai A4, Phiếu nhiệt 80mm.
 - [x] Commit trực tiếp vào nhánh `main` theo quy định dự án.
+
