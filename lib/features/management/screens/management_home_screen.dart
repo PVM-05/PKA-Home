@@ -572,6 +572,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         color: Colors.teal,
         onTap: () => context.push(AppRoutes.managementBatchImport),
       ));
+      quickActionItems.add(_buildQuickAction(
+        context,
+        icon: Icons.card_membership_outlined,
+        label: 'Gói cước',
+        color: Colors.purple,
+        onTap: () => context.push(AppRoutes.managementSubscription),
+      ));
     }
     if (canManageInvoices) {
       quickActionItems.add(_buildQuickAction(

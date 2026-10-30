@@ -55,4 +55,5 @@ class AppRoutes {
   static const String managementFinancialReport = '/management/financial-report';
   static const String managementMaintenanceFundLedger = '/management/maintenance-fund-ledger';
   static const String managementBatchImport = '/management/batch-import';
+  static const String managementSubscription = '/management/subscription';
 }

@@ -1,3 +1,4 @@
+import '../../features/management/screens/subscription_management_screen.dart';
 import '../../features/management/screens/batch_import_center_screen.dart';
 import '../../features/management/screens/financial_report_screen.dart';
 import 'package:flutter/material.dart';
@@ -498,6 +499,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 AppPageTransitions.slideFromRight(
               state: state,
               child: const BatchImportCenterScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'subscription',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const SubscriptionManagementScreen(),
             ),
           ),
         ],
