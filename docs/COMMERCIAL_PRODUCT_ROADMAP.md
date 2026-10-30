@@ -91,7 +91,11 @@ graph TD
   - Tiện ích `VietnameseCurrencyTextFormatter` đọc chính xác số tiền thành chữ tiếng Việt chuẩn mực.
   - Giao diện: Màn hình xem trước `DocumentPreviewScreen` (in trực tiếp qua AirPrint/Wifi/Bluetooth, lưu file PDF, chia sẻ qua Zalo/Email), màn hình tra cứu đối soát công khai `DocumentLookupScreen`, tích hợp nút xuất PDF trên cả màn hình cư dân và ban quản lý.
 - [x] **C5. Quỹ bảo trì 2%:** Bảng sổ cái `maintenance_fund_ledger` tách biệt với quỹ vận hành, theo dõi lãi ngân hàng và giải ngân sửa chữa lớn.
-- [ ] **C6. Báo cáo tài chính & Tuổi nợ:** Báo cáo dòng tiền, tuổi nợ aging (30/60/90 ngày), tỷ lệ thu theo kỳ/tòa/tầng.
+- [x] **C6. Báo cáo tài chính & Tuổi nợ:**
+  - CSDL & RPC: RPC PostgreSQL `get_financial_aging_report(p_building_id, p_period)` gom nhóm và tính toán tức thời 4 xô tuổi nợ (`0-30 ngày`, `31-60 ngày`, `61-90 ngày`, `>90 ngày`), tỷ lệ thu hồi phân bổ theo Block, và danh sách căn hộ nợ đọng có rủi ro cao nhất kèm số ngày quá hạn và tiền nợ.
+  - Tầng Dữ liệu: Data models strongly-typed (`FinancialAgingReportModel`, `DebtAgingBucketModel`, `DebtorApartmentModel`, `BlockCollectionRateModel`), `AccountingRepository` tích hợp cơ chế tính toán offline fallback tự động, Provider `financialAgingReportProvider` hỗ trợ lọc theo kỳ thu và xô nợ.
+  - Xuất dữ liệu Excel: Mở rộng `ExcelExportHelper.exportAgingReport` tạo file `.xlsx` gồm 2 trang tính (Sheet 1: Tổng quan KPI & Phân tích 4 xô tuổi nợ; Sheet 2: Danh sách chi tiết con nợ phục vụ đối soát, kiểm toán và báo cáo Ban Quản Trị).
+  - Giao diện Ban Quản Lý: Màn hình quản trị `FinancialReportScreen` (4 thẻ KPI dòng tiền, thanh đo tỷ lệ thu hồi %, bộ lọc chip xô nợ tương tác trực tiếp, danh sách căn hộ nợ đọng có nút "Nhắc nợ nhanh" và liên kết điều hướng sang Sổ cái căn hộ `ApartmentLedgerScreen`).
 
 ---
 

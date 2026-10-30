@@ -56,7 +56,7 @@ final filteredDebtorsProvider = Provider<List<DebtorApartmentModel>>((ref) {
       return report.debtors.where((d) => d.riskLevel == bucket).toList();
     },
     loading: () => [],
-    error: (_, __) => [],
+    error: (_, _) => [],
   );
 });
 

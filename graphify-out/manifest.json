@@ -240,9 +240,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/app_router.dart": {
-    "mtime": 1793119163.422844,
-    "seen": 1793342452.1356795,
-    "ast_hash": "504e71dcd4caffee5a22c88f6af77e4d",
+    "mtime": 1793344311.6067019,
+    "seen": 1793344822.2632868,
+    "ast_hash": "0ce4e47ce5dcbd83a2f2cefd5588c96d",
     "semantic_hash": ""
   },
   "lib/core/router/page_transitions.dart": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/route_names.dart": {
-    "mtime": 1793119099.862016,
-    "seen": 1793342452.1356795,
-    "ast_hash": "3628dc175e5bb3e86755004ceb970437",
+    "mtime": 1793343795.8921938,
+    "seen": 1793344822.2632868,
+    "ast_hash": "749178dc620c60475084e6fc34a11a44",
     "semantic_hash": ""
   },
   "lib/core/services/push_notification_service.dart": {
@@ -312,9 +312,9 @@
     "semantic_hash": ""
   },
   "lib/core/utils/excel_export_helper.dart": {
-    "mtime": 1793341001.4075396,
-    "seen": 1793342452.1356795,
-    "ast_hash": "1ea7a4c0e10064509f03cde29a44bf65",
+    "mtime": 1793344335.1018615,
+    "seen": 1793344822.2632868,
+    "ast_hash": "30156cbb143a254b2898ed9c94cb5d66",
     "semantic_hash": ""
   },
   "lib/core/utils/invoice_fee_helper.dart": {
@@ -822,9 +822,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/accounting_repository.dart": {
-    "mtime": 1793276125.7501333,
-    "seen": 1793342452.1356795,
-    "ast_hash": "74d449aa5baea6c09560f7f4af1fde8b",
+    "mtime": 1793344401.7254255,
+    "seen": 1793344822.264285,
+    "ast_hash": "5739b730bd187265b0f088c2a332e232",
     "semantic_hash": ""
   },
   "lib/data/repositories/amenity_booking_repository.dart": {
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_home_screen.dart": {
-    "mtime": 1793109082.7394962,
-    "seen": 1793342452.1356795,
-    "ast_hash": "c94929e10d8ca573df6eecb174ca8e21",
+    "mtime": 1793343905.6779556,
+    "seen": 1793344822.264285,
+    "ast_hash": "7d3004c25edcc1eebaaba50992afa2a7",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
@@ -3125,78 +3125,6 @@
     "ast_hash": "3b7b7942a42cb0450896d4b48cd49ed0",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/2026-10-29-electronic-invoice-pdf-and-receipt-engine/briefs/task-1.md": {
-    "mtime": 1793289729.0870314,
-    "seen": 1793342452.1356795,
-    "ast_hash": "df89a6b9c8b176490c3911cb10f15c4c",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-electronic-invoice-pdf-and-receipt-engine/briefs/task-2.md": {
-    "mtime": 1793289729.158275,
-    "seen": 1793342452.1356795,
-    "ast_hash": "4aca2c95a7b2f302ffa1011dc4a34336",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-electronic-invoice-pdf-and-receipt-engine/briefs/task-3.md": {
-    "mtime": 1793290021.3512259,
-    "seen": 1793342452.1356795,
-    "ast_hash": "dc30b3c5c74646aeffeeb87c99874f39",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-electronic-invoice-pdf-and-receipt-engine/briefs/task-4.md": {
-    "mtime": 1793290310.9891815,
-    "seen": 1793342452.1356795,
-    "ast_hash": "5d727315b61d378cb539d3bc5d78dc8b",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-electronic-invoice-pdf-and-receipt-engine/briefs/task-5.md": {
-    "mtime": 1793290955.3978262,
-    "seen": 1793342452.1356795,
-    "ast_hash": "5ed3583054092abeed04a36418c1c02b",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-electronic-invoice-pdf-and-receipt-engine/progress.md": {
-    "mtime": 1793292496.3879473,
-    "seen": 1793342452.1356795,
-    "ast_hash": "a09495e6b48396a3945fcc308fc06c23",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-progressive-fees-and-prorata-engine/briefs/task-1.md": {
-    "mtime": 1793277572.4400904,
-    "seen": 1793342452.1356795,
-    "ast_hash": "f828c2b788af48e712c75c0213bf2fcd",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-progressive-fees-and-prorata-engine/briefs/task-2.md": {
-    "mtime": 1793277572.6099524,
-    "seen": 1793342452.1356795,
-    "ast_hash": "58e3e2aaf5e4327998d6a843927f29b5",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-progressive-fees-and-prorata-engine/briefs/task-3.md": {
-    "mtime": 1793277572.6394224,
-    "seen": 1793342452.1356795,
-    "ast_hash": "2a32c8fa01b097acfde671977794fd3c",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-progressive-fees-and-prorata-engine/briefs/task-4.md": {
-    "mtime": 1793277572.6709602,
-    "seen": 1793342452.1356795,
-    "ast_hash": "5a8f21c1f556f3fd6e1216f70c384a88",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-progressive-fees-and-prorata-engine/briefs/task-5.md": {
-    "mtime": 1793277572.707076,
-    "seen": 1793342452.1356795,
-    "ast_hash": "0eaac5f3c7ee3255ca29edcdd590fef5",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/2026-10-29-progressive-fees-and-prorata-engine/progress.md": {
-    "mtime": 1793279087.632617,
-    "seen": 1793342452.1356795,
-    "ast_hash": "b585dd58525a80e81bf61ef63ba4d1e5",
-    "semantic_hash": ""
-  },
   "README.md": {
     "mtime": 1792933849.680207,
     "seen": 1793342452.1356795,
@@ -4887,6 +4815,72 @@
     "mtime": 1792846635.7153,
     "seen": 1793342480.9026148,
     "ast_hash": "f84bf08a19368af1f853be92b6560397",
+    "semantic_hash": ""
+  },
+  "lib/data/models/financial_aging_report_model.dart": {
+    "mtime": 1793343933.7176719,
+    "seen": 1793344822.264285,
+    "ast_hash": "4428dbc3b84c27f752b41281207d450f",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/financial_report_provider.dart": {
+    "mtime": 1793344335.1008513,
+    "seen": 1793344822.264285,
+    "ast_hash": "0fde2123cca9a6104c0eda34310b8153",
+    "semantic_hash": ""
+  },
+  "lib/features/management/screens/financial_report_screen.dart": {
+    "mtime": 1793344335.1028607,
+    "seen": 1793344822.264285,
+    "ast_hash": "0d0a481fd7deed697ea9d6e17d5f6ae3",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261030_01_financial_aging_report_rpc.sql": {
+    "mtime": 1793343934.3144433,
+    "seen": 1793344822.264285,
+    "ast_hash": "a79f18df6103eb597e9e6ca019be2065",
+    "semantic_hash": ""
+  },
+  "test/core/utils/excel_export_aging_report_test.dart": {
+    "mtime": 1793344335.0981016,
+    "seen": 1793344822.264285,
+    "ast_hash": "7afd0a161bc01f9245f2654a53fd72c8",
+    "semantic_hash": ""
+  },
+  "test/data/models/financial_aging_report_model_test.dart": {
+    "mtime": 1793343934.4645922,
+    "seen": 1793344822.264285,
+    "ast_hash": "fc118fb4e35bfb6a6858e5a1b56175cd",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/accounting_repository_aging_report_test.dart": {
+    "mtime": 1793343934.5085957,
+    "seen": 1793344822.264285,
+    "ast_hash": "97e6a2fc90b71c6dc02a29796d5d2e68",
+    "semantic_hash": ""
+  },
+  "test/features/management/screens/financial_report_screen_test.dart": {
+    "mtime": 1793344110.205683,
+    "seen": 1793344822.2652838,
+    "ast_hash": "bcbeee5ed404d79f91177f5f35e37eac",
+    "semantic_hash": ""
+  },
+  "test/integration/financial_aging_report_migration_test.dart": {
+    "mtime": 1793343934.5922875,
+    "seen": 1793344822.2652838,
+    "ast_hash": "a2b6c3429b94a3496eb34afae139ff10",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-10-30-financial-aging-report-and-debt-analytics.md": {
+    "mtime": 1793343933.6266222,
+    "seen": 1793344822.2652838,
+    "ast_hash": "362a92d00d344c6360602efdd39d59df",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-10-30-financial-aging-report-and-debt-analytics-design.md": {
+    "mtime": 1793343207.118807,
+    "seen": 1793344822.2652838,
+    "ast_hash": "bf205259266c2b83299b7578c635785f",
     "semantic_hash": ""
   }
 }

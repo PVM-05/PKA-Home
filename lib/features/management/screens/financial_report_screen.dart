@@ -160,7 +160,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
               onPressed: _isExporting ? null : () => _handleExportExcel(report),
             ),
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -495,7 +495,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.08) : Colors.transparent,
+          color: isSelected ? color.withValues(alpha: 0.08) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: isSelected ? Border.all(color: color, width: 1.5) : null,
         ),
@@ -658,7 +658,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: debtors.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (ctx, index) {
               final debtor = debtors[index];
               final isOver90 = debtor.isSevereRisk;
@@ -676,7 +676,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: isOver90 ? AppTheme.error.withOpacity(0.12) : AppTheme.primary.withOpacity(0.1),
+                                color: isOver90 ? AppTheme.error.withValues(alpha: 0.12) : AppTheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(

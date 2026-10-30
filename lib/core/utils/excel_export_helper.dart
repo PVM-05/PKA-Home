@@ -180,10 +180,10 @@ class ExcelExportHelper {
         TextCellValue('BÁO CÁO TÀI CHÍNH VÀ PHÂN TÍCH TUỔI NỢ CÔNG NỢ'),
       ]);
       overviewSheet.appendRow([
-        TextCellValue('Thời gian xuất: ' + DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())),
+        TextCellValue('Thời gian xuất: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}'),
       ]);
       overviewSheet.appendRow([
-        TextCellValue('Kỳ đối soát: ' + (report.filterPeriod ?? 'Tất cả các kỳ')),
+        TextCellValue('Kỳ đối soát: ${report.filterPeriod ?? 'Tất cả các kỳ'}'),
       ]);
       overviewSheet.appendRow([TextCellValue('')]);
 
@@ -194,15 +194,15 @@ class ExcelExportHelper {
       ]);
       overviewSheet.appendRow([
         TextCellValue('Tổng doanh thu phát hành'),
-        TextCellValue(moneyFormat.format(report.summary.totalBilled) + ' đ'),
+        TextCellValue('${moneyFormat.format(report.summary.totalBilled)} đ'),
       ]);
       overviewSheet.appendRow([
         TextCellValue('Doanh thu thực tế đã thu'),
-        TextCellValue(moneyFormat.format(report.summary.actualCollected) + ' đ'),
+        TextCellValue('${moneyFormat.format(report.summary.actualCollected)} đ'),
       ]);
       overviewSheet.appendRow([
         TextCellValue('Tổng công nợ tồn đọng'),
-        TextCellValue(moneyFormat.format(report.summary.totalOutstanding) + ' đ'),
+        TextCellValue('${moneyFormat.format(report.summary.totalOutstanding)} đ'),
       ]);
       overviewSheet.appendRow([
         TextCellValue('Tỷ lệ thu hồi công nợ'),
@@ -234,25 +234,25 @@ class ExcelExportHelper {
       overviewSheet.appendRow([
         TextCellValue('0 - 30 ngày (Trong hạn / Mới phát sinh)'),
         IntCellValue(report.agingBuckets.count0To30),
-        TextCellValue(moneyFormat.format(report.agingBuckets.amount0To30) + ' đ'),
+        TextCellValue('${moneyFormat.format(report.agingBuckets.amount0To30)} đ'),
         TextCellValue('${((report.agingBuckets.amount0To30 / totalDebt) * 100).toStringAsFixed(1)}%'),
       ]);
       overviewSheet.appendRow([
         TextCellValue('31 - 60 ngày (Quá hạn mức 1 - Đôn đốc)'),
         IntCellValue(report.agingBuckets.count31To60),
-        TextCellValue(moneyFormat.format(report.agingBuckets.amount31To60) + ' đ'),
+        TextCellValue('${moneyFormat.format(report.agingBuckets.amount31To60)} đ'),
         TextCellValue('${((report.agingBuckets.amount31To60 / totalDebt) * 100).toStringAsFixed(1)}%'),
       ]);
       overviewSheet.appendRow([
         TextCellValue('61 - 90 ngày (Quá hạn mức 2 - Cảnh báo dịch vụ)'),
         IntCellValue(report.agingBuckets.count61To90),
-        TextCellValue(moneyFormat.format(report.agingBuckets.amount61To90) + ' đ'),
+        TextCellValue('${moneyFormat.format(report.agingBuckets.amount61To90)} đ'),
         TextCellValue('${((report.agingBuckets.amount61To90 / totalDebt) * 100).toStringAsFixed(1)}%'),
       ]);
       overviewSheet.appendRow([
         TextCellValue('> 90 ngày (Nợ xấu / Khó đòi)'),
         IntCellValue(report.agingBuckets.countOver90),
-        TextCellValue(moneyFormat.format(report.agingBuckets.amountOver90) + ' đ'),
+        TextCellValue('${moneyFormat.format(report.agingBuckets.amountOver90)} đ'),
         TextCellValue('${((report.agingBuckets.amountOver90 / totalDebt) * 100).toStringAsFixed(1)}%'),
       ]);
 
