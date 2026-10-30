@@ -11,7 +11,13 @@ class ExcelExportHelper {
   static Future<void> shareFile(String filePath, {String? subject, String? text}) async {
     try {
       final xFile = XFile(filePath);
-      await Share.shareXFiles([xFile], subject: subject, text: text);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [xFile],
+          subject: subject,
+          text: text,
+        ),
+      );
     } catch (_) {}
   }
   /// Xuất danh sách Hóa đơn ra file .xlsx

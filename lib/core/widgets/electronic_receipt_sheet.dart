@@ -303,7 +303,12 @@ Hình thức: $paymentMethodLabel
 Thời gian: ${formatDateTime.format(paidDate)}
 Trạng thái: ĐÃ THU TIỀN
 ''';
-                  Share.share(text.trim(), subject: 'Biên lai thu tiền điện tử - $receiptNumber');
+                  SharePlus.instance.share(
+                    ShareParams(
+                      text: text.trim(),
+                      subject: 'Biên lai thu tiền điện tử - $receiptNumber',
+                    ),
+                  );
                 },
               ),
             ),
