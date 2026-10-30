@@ -96,7 +96,7 @@ class _SubscriptionManagementScreenState
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                  error: (_, __) => _buildPlansList(
+                  error: (_, _) => _buildPlansList(
                     context,
                     status,
                     ref.read(subscriptionRepositoryProvider).getFallbackPlans(),
