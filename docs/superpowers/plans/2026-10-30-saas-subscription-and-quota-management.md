@@ -74,3 +74,4 @@
   3. Chạy `python -m graphify update .` để đồng bộ Knowledge Graph.
   4. Cập nhật `docs/COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu `[x] B3. Gói dịch vụ & Billing cho khách`.
   5. Commit hoàn tất Giai đoạn B3 vào `main`.
+

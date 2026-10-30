@@ -112,7 +112,7 @@ class AdaptiveManagementScaffold extends StatelessWidget {
                       child: ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         itemCount: destinations.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 4),
+                        separatorBuilder: (_, _) => const SizedBox(height: 4),
                         itemBuilder: (context, index) {
                           final item = destinations[index];
                           final isSelected = index == selectedIndex;
@@ -197,7 +197,7 @@ class AdaptiveManagementScaffold extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    if (appBar != null) appBar!,
+                    ?appBar,
                     Expanded(child: body),
                   ],
                 ),

@@ -340,3 +340,4 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_organization_subscription_status(UUID) TO authenticated;
+

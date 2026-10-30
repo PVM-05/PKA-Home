@@ -131,3 +131,4 @@ CREATE TABLE IF NOT EXISTS public.organization_subscriptions (
 4. **Tiêu chuẩn chất lượng**:
    - `dart analyze`: 0 issues.
    - `flutter test`: 100% tests pass.
+

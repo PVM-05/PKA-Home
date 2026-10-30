@@ -46,6 +46,7 @@ void main() {
             unpaidCount: 1,
           ))),
           monthlyRevenueTrendProvider.overrideWith((ref) => Stream.value([])),
+          invoicesProvider.overrideWith((ref) async => []),
         ],
         child: const MaterialApp(
           home: ManagementHomeScreen(),
