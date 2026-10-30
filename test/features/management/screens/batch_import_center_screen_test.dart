@@ -98,7 +98,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Inject validation result via notifier
-      final notifier = container.read(batchImportProvider.notifier);
+      
       container.read(batchImportProvider.notifier).state =
           container.read(batchImportProvider).copyWith(
                 selectedFileName: 'test_can_ho.xlsx',

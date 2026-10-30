@@ -177,3 +177,4 @@ Bao gồm:
 4. **Quality Gate:**
    - `dart analyze`: 0 issues.
    - `flutter test`: 100% tests pass.
+
