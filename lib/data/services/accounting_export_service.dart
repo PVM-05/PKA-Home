@@ -110,9 +110,11 @@ class AccountingExportService {
     final file = File(filePath);
     await file.writeAsBytes(bytes);
 
-    await Share.shareXFiles(
-      [XFile(filePath)],
-      text: 'Báo cáo đối soát kế toán $buildingName - Kỳ $period',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(filePath)],
+        text: 'Báo cáo đối soát kế toán $buildingName - Kỳ $period',
+      ),
     );
 
     return filePath;
