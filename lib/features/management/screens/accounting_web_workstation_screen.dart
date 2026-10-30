@@ -14,9 +14,8 @@ class AccountingWebWorkstationScreen extends ConsumerStatefulWidget {
 class _AccountingWebWorkstationScreenState
     extends ConsumerState<AccountingWebWorkstationScreen> {
   final TextEditingController _searchController = TextEditingController();
-  int _rowsPerPage = 10;
-  int _sortColumnIndex = 0;
-  bool _sortAscending = true;
+  final int _sortColumnIndex = 0;
+  final bool _sortAscending = true;
 
   @override
   void dispose() {
@@ -71,7 +70,7 @@ class _AccountingWebWorkstationScreenState
   Widget _buildHeader(BuildContext context, List<InvoiceTableRowItem> rows) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 600;
+        final isCompact = constraints.maxWidth < 800;
         final titleContent = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -79,12 +78,14 @@ class _AccountingWebWorkstationScreenState
               children: [
                 Icon(Icons.table_chart_rounded, color: AppTheme.primary, size: 28),
                 const SizedBox(width: 10),
-                const Text(
-                  'Bàn Làm Việc Kế Toán & Đối Soát',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                const Expanded(
+                  child: Text(
+                    'Bàn Làm Việc Kế Toán & Đối Soát',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -114,7 +115,7 @@ class _AccountingWebWorkstationScreenState
             const SizedBox(width: 12),
             FilledButton.icon(
               onPressed: () {
-                final csvData = exportWorkstationToCsv(rows);
+                exportWorkstationToCsv(rows);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -361,7 +362,8 @@ class _AccountingWebWorkstationScreenState
           );
 
           final periodDropdown = DropdownButtonFormField<String?>(
-            value: filter.period,
+            isExpanded: true,
+            initialValue: filter.period,
             decoration: InputDecoration(
               labelText: 'Kỳ thu',
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -389,7 +391,8 @@ class _AccountingWebWorkstationScreenState
           );
 
           final statusDropdown = DropdownButtonFormField<String?>(
-            value: filter.status,
+            isExpanded: true,
+            initialValue: filter.status,
             decoration: InputDecoration(
               labelText: 'Trạng thái',
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -552,7 +555,6 @@ class _AccountingWebWorkstationScreenState
             );
           }
 
-          final allSelected = rows.isNotEmpty && rows.every((r) => selectedIds.contains(r.id));
 
           return ClipRRect(
             borderRadius: BorderRadius.circular(12),
