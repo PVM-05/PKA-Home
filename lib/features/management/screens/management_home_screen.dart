@@ -564,6 +564,15 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         badgeCount: pendingLinkReqAsync.valueOrNull ?? 0,
       ));
     }
+    if (canManageResidents || canManageApartments) {
+      quickActionItems.add(_buildQuickAction(
+        context,
+        icon: Icons.upload_file_outlined,
+        label: 'Nhập Excel',
+        color: Colors.teal,
+        onTap: () => context.push(AppRoutes.managementBatchImport),
+      ));
+    }
     if (canManageInvoices) {
       quickActionItems.add(_buildQuickAction(
         context,

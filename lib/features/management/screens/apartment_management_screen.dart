@@ -1,3 +1,5 @@
+import '../../../core/router/route_names.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
@@ -40,6 +42,11 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
         appBar: AppBar(
           title: const Text('Quản lý Căn hộ'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.upload_file),
+            tooltip: 'Nhập Excel',
+            onPressed: () => context.push(AppRoutes.managementBatchImport),
+          ),
           IconButton(
             icon: Icon(_isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded),
             tooltip: _isGridView ? 'Chuyển sang danh sách' : 'Chuyển sang dạng lưới',

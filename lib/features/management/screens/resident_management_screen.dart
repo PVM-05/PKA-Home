@@ -1,3 +1,5 @@
+import '../../../core/router/route_names.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -219,6 +221,11 @@ class _ResidentManagementScreenState extends ConsumerState<ResidentManagementScr
               ),
             ),
             actions: [
+            IconButton(
+              icon: const Icon(Icons.upload_file),
+              tooltip: 'Nhập Excel',
+              onPressed: () => context.push(AppRoutes.managementBatchImport),
+            ),
               TextButton(
                 onPressed: isSubmitting ? null : () => Navigator.pop(context),
                 child: const Text('Hủy', style: TextStyle(color: AppTheme.textSecondary)),

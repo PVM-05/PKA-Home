@@ -1,3 +1,4 @@
+import '../../features/management/screens/batch_import_center_screen.dart';
 import '../../features/management/screens/financial_report_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -489,6 +490,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 AppPageTransitions.slideFromRight(
               state: state,
               child: const FinancialReportScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'batch-import',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const BatchImportCenterScreen(),
             ),
           ),
         ],
