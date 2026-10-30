@@ -240,9 +240,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/app_router.dart": {
-    "mtime": 1793344311.6067019,
-    "seen": 1793344822.2632868,
-    "ast_hash": "0ce4e47ce5dcbd83a2f2cefd5588c96d",
+    "mtime": 1793349041.490693,
+    "seen": 1793349369.2049654,
+    "ast_hash": "8de468b9ca6aa08f3fba9d96aa0b639f",
     "semantic_hash": ""
   },
   "lib/core/router/page_transitions.dart": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/route_names.dart": {
-    "mtime": 1793343795.8921938,
-    "seen": 1793344822.2632868,
-    "ast_hash": "749178dc620c60475084e6fc34a11a44",
+    "mtime": 1793349006.2782648,
+    "seen": 1793349369.2049654,
+    "ast_hash": "c156d790c1839b493b45d4387c6268d3",
     "semantic_hash": ""
   },
   "lib/core/services/push_notification_service.dart": {
@@ -1008,9 +1008,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/apartment_management_screen.dart": {
-    "mtime": 1792861590.0594907,
-    "seen": 1793342452.1356795,
-    "ast_hash": "f70dd58b93f8725e3467c0b0867addf4",
+    "mtime": 1793349094.2530732,
+    "seen": 1793349369.2049654,
+    "ast_hash": "17a8c20eeea8b21cff5e6dfb29814c6d",
     "semantic_hash": ""
   },
   "lib/features/management/screens/audit_trail_screen.dart": {
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_home_screen.dart": {
-    "mtime": 1793343905.6779556,
-    "seen": 1793344822.264285,
-    "ast_hash": "7d3004c25edcc1eebaaba50992afa2a7",
+    "mtime": 1793349207.9411974,
+    "seen": 1793349369.2049654,
+    "ast_hash": "920606b9b31ddfc07334abc26bdd52bb",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
@@ -1110,9 +1110,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/resident_management_screen.dart": {
-    "mtime": 1792937954.905867,
-    "seen": 1793342452.1356795,
-    "ast_hash": "fe8edab1c9d207be050663cf5efd3a24",
+    "mtime": 1793349094.255041,
+    "seen": 1793349369.2049654,
+    "ast_hash": "942fd22b7d538a185c5155c7cb828619",
     "semantic_hash": ""
   },
   "lib/features/management/screens/role_delegation_screen.dart": {
@@ -1338,9 +1338,9 @@
     "semantic_hash": ""
   },
   "pubspec.yaml": {
-    "mtime": 1793342086.7394722,
-    "seen": 1793342452.1356795,
-    "ast_hash": "8f04cace52e2a22cad323195634375ee",
+    "mtime": 1793348806.079082,
+    "seen": 1793349369.2049654,
+    "ast_hash": "cdfef28ebd1a9e72d852507c51afe273",
     "semantic_hash": ""
   },
   "supabase/functions/send-fcm-notification/index.ts": {
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793293864.4009745,
-    "seen": 1793342452.1356795,
-    "ast_hash": "1804ec5fb155d5c06adb4a9592977e56",
+    "mtime": 1793344839.5943658,
+    "seen": 1793349369.205945,
+    "ast_hash": "9b792aa4a07ec1d6123107213db12e64",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -4872,15 +4872,93 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-10-30-financial-aging-report-and-debt-analytics.md": {
-    "mtime": 1793343933.6266222,
-    "seen": 1793344822.2652838,
-    "ast_hash": "362a92d00d344c6360602efdd39d59df",
+    "mtime": 1793344854.206099,
+    "seen": 1793349369.205945,
+    "ast_hash": "e3e418467173653aaf68e4392b85f76a",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-10-30-financial-aging-report-and-debt-analytics-design.md": {
     "mtime": 1793343207.118807,
     "seen": 1793344822.2652838,
     "ast_hash": "bf205259266c2b83299b7578c635785f",
+    "semantic_hash": ""
+  },
+  "lib/core/utils/excel_import_helper.dart": {
+    "mtime": 1793348675.0194683,
+    "seen": 1793349369.2049654,
+    "ast_hash": "d4177846b364cde68c895b9b2735fd49",
+    "semantic_hash": ""
+  },
+  "lib/data/models/batch_import_model.dart": {
+    "mtime": 1793348555.1616797,
+    "seen": 1793349369.2049654,
+    "ast_hash": "4a6c1ac26fa72e87e2caf53a620e09f7",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/batch_import_provider.dart": {
+    "mtime": 1793349145.6482482,
+    "seen": 1793349369.2049654,
+    "ast_hash": "4cb4409689f9b099bdbdd4ce8321cde6",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/batch_import_repository.dart": {
+    "mtime": 1793348754.6393402,
+    "seen": 1793349369.2049654,
+    "ast_hash": "ab89cf07a20219637e0854ed7c80574d",
+    "semantic_hash": ""
+  },
+  "lib/features/management/screens/batch_import_center_screen.dart": {
+    "mtime": 1793349218.094487,
+    "seen": 1793349369.2049654,
+    "ast_hash": "dbcabb3dccb33bad71cb59d9ca29dec5",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261030_02_residents_apartments_lifecycle_and_batch_import.sql": {
+    "mtime": 1793348455.8462136,
+    "seen": 1793349369.2049654,
+    "ast_hash": "44624e195779aa049ecacc3539273d96",
+    "semantic_hash": ""
+  },
+  "test/core/utils/excel_import_helper_test.dart": {
+    "mtime": 1793348595.5406227,
+    "seen": 1793349369.2049654,
+    "ast_hash": "27b4a975c81241fbaf03dd8eb0cde404",
+    "semantic_hash": ""
+  },
+  "test/data/models/batch_import_model_test.dart": {
+    "mtime": 1793348495.7674966,
+    "seen": 1793349369.2049654,
+    "ast_hash": "4626326cc717ce9ffd8b627374ece9eb",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/batch_import_repository_test.dart": {
+    "mtime": 1793348717.3821602,
+    "seen": 1793349369.2049654,
+    "ast_hash": "f2f653d7dd778deb17742eb2e4c0038f",
+    "semantic_hash": ""
+  },
+  "test/features/management/screens/batch_import_center_screen_test.dart": {
+    "mtime": 1793349212.071054,
+    "seen": 1793349369.2049654,
+    "ast_hash": "6ebede8b5b48cc566fe4edd770f0db16",
+    "semantic_hash": ""
+  },
+  "test/integration/batch_import_migration_test.dart": {
+    "mtime": 1793348385.7062771,
+    "seen": 1793349369.205945,
+    "ast_hash": "f49e5bb7b32aa92ba350c8a2a9adb86e",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-10-30-batch-import-and-resident-onboarding.md": {
+    "mtime": 1793348385.6465738,
+    "seen": 1793349369.205945,
+    "ast_hash": "2d362766ef88ed088643013b0940c2ad",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-10-30-batch-import-and-resident-onboarding-design.md": {
+    "mtime": 1793347803.6888704,
+    "seen": 1793349369.205945,
+    "ast_hash": "f5d8d12e06248111708017ee559e5669",
     "semantic_hash": ""
   }
 }

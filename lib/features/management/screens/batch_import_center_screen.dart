@@ -122,10 +122,10 @@ class _BatchImportCenterScreenState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.08),
+                        color: AppTheme.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppTheme.primary.withOpacity(0.2)),
+                            color: AppTheme.primary.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         children: [
@@ -174,9 +174,9 @@ class _BatchImportCenterScreenState
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.08),
+        color: AppTheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
       ),
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,9 +376,9 @@ class _BatchImportCenterScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppTheme.success.withOpacity(0.1),
+              color: AppTheme.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.success.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.success.withValues(alpha: 0.3)),
             ),
             child: const Row(
               children: [
@@ -403,9 +403,9 @@ class _BatchImportCenterScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppTheme.error.withOpacity(0.08),
+              color: AppTheme.error.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.error.withOpacity(0.2)),
+              border: Border.all(color: AppTheme.error.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -519,9 +519,9 @@ class _BatchImportCenterScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -539,7 +539,7 @@ class _BatchImportCenterScreenState
               label,
               style: TextStyle(
                 fontSize: 11,
-                color: color.withOpacity(0.85),
+                color: color.withValues(alpha: 0.85),
               ),
               textAlign: TextAlign.center,
             ),

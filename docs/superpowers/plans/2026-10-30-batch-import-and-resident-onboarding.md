@@ -136,3 +136,4 @@
 - [ ] **Step 3:** Chạy `python -m graphify update .` cập nhật Knowledge Graph.
 - [ ] **Step 4:** Cập nhật mục `B2` thành `[x]` trong `docs/COMMERCIAL_PRODUCT_ROADMAP.md`.
 - [ ] **Step 5:** Commit hoàn tất toàn bộ tính năng B2 vào `main`.
+

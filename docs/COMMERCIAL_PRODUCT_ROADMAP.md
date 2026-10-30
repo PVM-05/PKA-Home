@@ -53,7 +53,7 @@ graph TD
 
 ### GIAI ĐOẠN B: Đa Tenant & Nền Tảng SaaS
 - [x] **B1. Mô hình dữ liệu:** `organizations`, `buildings`, `apartments`. Thêm bảng `memberships` để 1 user có thể thuộc nhiều tòa/cơ sở với vai trò khác nhau.
-- [ ] **B2. Onboarding khách hàng:** Bộ công cụ import hàng loạt căn hộ/cư dân/chỉ số điện nước từ Excel kèm validation và báo lỗi từng dòng.
+- [x] **B2. Onboarding khách hàng:** Bộ công cụ import hàng loạt căn hộ/cư dân/chỉ số điện nước từ Excel kèm validation và báo lỗi từng dòng.
 - [ ] **B3. Gói dịch vụ & Billing cho khách:** Định giá theo quy mô số căn hộ (dưới 100 / 100–500 / trên 500 căn).
 - [ ] **B4. Dashboard Web Quản Trị:** Giao diện web tối ưu cho kế toán và quản lý làm việc với bảng biểu lớn (đối soát, báo cáo, phát hành hóa đơn).
 

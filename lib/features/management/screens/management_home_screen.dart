@@ -564,7 +564,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         badgeCount: pendingLinkReqAsync.valueOrNull ?? 0,
       ));
     }
-    if (canManageResidents || canManageApartments) {
+    if (isAdmin) {
       quickActionItems.add(_buildQuickAction(
         context,
         icon: Icons.upload_file_outlined,
