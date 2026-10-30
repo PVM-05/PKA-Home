@@ -122,3 +122,10 @@ migrate_working_dir/
 # ==========================================
 .agents/plugins/
 .agents/mcp_config.json
+.superpowers/
+
+# Graphify Local Cache
+graphify-out/cache/
+graphify-out/converted/
+graphify-out/.graphify_*
+
