@@ -195,7 +195,7 @@ class PushNotificationService {
       if (kIsWeb) return;
       if (!Platform.isAndroid && !Platform.isIOS) return;
 
-      const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidInit = AndroidInitializationSettings('@drawable/ic_notification');
       const iosInit = DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
@@ -252,7 +252,7 @@ class PushNotificationService {
             priority: Priority.high,
             playSound: true,
             enableVibration: true,
-            icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+            icon: android?.smallIcon ?? '@drawable/ic_notification',
             styleInformation: notification.body != null
                 ? BigTextStyleInformation(
                     notification.body!,
@@ -302,7 +302,7 @@ class PushNotificationService {
             priority: Priority.high,
             playSound: true,
             enableVibration: true,
-            icon: '@mipmap/ic_launcher',
+            icon: '@drawable/ic_notification',
             styleInformation: BigTextStyleInformation(
               body,
               contentTitle: title,

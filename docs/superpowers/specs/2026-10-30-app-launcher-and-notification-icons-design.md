@@ -90,3 +90,4 @@ Mục tiêu của tài liệu này là thiết kế và triển khai trọn bộ
    - `dart analyze` đạt 0 lỗi.
    - `flutter test` đạt 100% pass (646+ tests).
    - `flutter build apk --debug` hoàn thành thành công không có lỗi tài nguyên drawable.
+

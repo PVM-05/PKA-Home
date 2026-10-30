@@ -28,11 +28,11 @@
 - Consumes: Brand palette (`#1E88E5`, `#03A9F4`, `#1E3A8A`, `#FFFFFF`)
 - Produces: PNG files trong `assets/icons/` dùng làm nguồn cho `flutter_launcher_icons` và drawable resizers.
 
-- [ ] **Step 1:** Viết script generator hoặc vẽ đồ họa vector chất lượng cao kết xuất ra `assets/icons/app_icon.png` (gradient background + stylized high-rise residential building + smart home roofline).
-- [ ] **Step 2:** Kết xuất `assets/icons/app_icon_foreground.png` với kích thước 1024x1024 trong suốt, họa tiết chính nằm trong safe zone (đường kính ~680px).
-- [ ] **Step 3:** Kết xuất `assets/icons/notification_icon.png` hình chuông lồng mái nhà đơn sắc trắng trên nền trong suốt.
-- [ ] **Step 4:** Kiểm tra sự tồn tại và tính hợp lệ của các file ảnh qua PowerShell test.
-- [ ] **Step 5:** Commit task 1 vào `main`.
+- [x] **Step 1:** Viết script generator hoặc vẽ đồ họa vector chất lượng cao kết xuất ra `assets/icons/app_icon.png` (gradient background + stylized high-rise residential building + smart home roofline).
+- [x] **Step 2:** Kết xuất `assets/icons/app_icon_foreground.png` với kích thước 1024x1024 trong suốt, họa tiết chính nằm trong safe zone (đường kính ~680px).
+- [x] **Step 3:** Kết xuất `assets/icons/notification_icon.png` hình chuông lồng mái nhà đơn sắc trắng trên nền trong suốt.
+- [x] **Step 4:** Kiểm tra sự tồn tại và tính hợp lệ của các file ảnh qua PowerShell test.
+- [x] **Step 5:** Commit task 1 vào `main`.
 
 ---
 
@@ -48,11 +48,11 @@
 - Consumes: `assets/icons/app_icon.png` & `assets/icons/app_icon_foreground.png`
 - Produces: Full density icon mipmaps cho Android & iOS.
 
-- [ ] **Step 1:** Thêm `flutter_launcher_icons: ^0.14.3` và cấu hình `flutter_launcher_icons` vào `pubspec.yaml`.
-- [ ] **Step 2:** Chạy `flutter pub get`.
-- [ ] **Step 3:** Chạy `dart run flutter_launcher_icons` để tự động cập nhật toàn bộ icon launcher.
-- [ ] **Step 4:** Xác minh các file mipmap và adaptive XML đã được cập nhật thành công trong `android/app/src/main/res/`.
-- [ ] **Step 5:** Commit task 2 vào `main`.
+- [x] **Step 1:** Thêm `flutter_launcher_icons: ^0.14.3` và cấu hình `flutter_launcher_icons` vào `pubspec.yaml`.
+- [x] **Step 2:** Chạy `flutter pub get`.
+- [x] **Step 3:** Chạy `dart run flutter_launcher_icons` để tự động cập nhật toàn bộ icon launcher.
+- [x] **Step 4:** Xác minh các file mipmap và adaptive XML đã được cập nhật thành công trong `android/app/src/main/res/`.
+- [x] **Step 5:** Commit task 2 vào `main`.
 
 ---
 
@@ -70,10 +70,10 @@
 - Consumes: Vector path / master notification icon (White Bell + Home).
 - Produces: Chuẩn Android status bar notification drawables.
 
-- [ ] **Step 1:** Tạo file vector XML `android/app/src/main/res/drawable/ic_notification.xml` với path chuông thông báo kết hợp mái nhà PKA màu trắng.
-- [ ] **Step 2:** Sinh các file PNG bitmap tương ứng ở 5 mức mật độ (`mdpi` 24px, `hdpi` 36px, `xhdpi` 48px, `xxhdpi` 72px, `xxxhdpi` 96px).
-- [ ] **Step 3:** Viết unit/integration test kiểm tra sự tồn tại và tính hợp lệ của tất cả các file resource drawable.
-- [ ] **Step 4:** Commit task 3 vào `main`.
+- [x] **Step 1:** Tạo file vector XML `android/app/src/main/res/drawable/ic_notification.xml` với path chuông thông báo kết hợp mái nhà PKA màu trắng.
+- [x] **Step 2:** Sinh các file PNG bitmap tương ứng ở 5 mức mật độ (`mdpi` 24px, `hdpi` 36px, `xhdpi` 48px, `xxhdpi` 72px, `xxxhdpi` 96px).
+- [x] **Step 3:** Viết unit/integration test kiểm tra sự tồn tại và tính hợp lệ của tất cả các file resource drawable.
+- [x] **Step 4:** Commit task 3 vào `main`.
 
 ---
 
@@ -88,10 +88,10 @@
 - Consumes: `@drawable/ic_notification`
 - Produces: Thông báo hệ thống Android tự động sử dụng icon `ic_notification` chuẩn.
 
-- [ ] **Step 1:** Cập nhật `AndroidManifest.xml` đổi `default_notification_icon` từ `@mipmap/ic_launcher` thành `@drawable/ic_notification`.
-- [ ] **Step 2:** Cập nhật `push_notification_service.dart` đổi cấu hình `AndroidInitializationSettings` và default notification icon sang `@drawable/ic_notification`.
-- [ ] **Step 3:** Chạy các unit test liên quan đến notification service để kiểm tra cấu hình.
-- [ ] **Step 4:** Commit task 4 vào `main`.
+- [x] **Step 1:** Cập nhật `AndroidManifest.xml` đổi `default_notification_icon` từ `@mipmap/ic_launcher` thành `@drawable/ic_notification`.
+- [x] **Step 2:** Cập nhật `push_notification_service.dart` đổi cấu hình `AndroidInitializationSettings` và default notification icon sang `@drawable/ic_notification`.
+- [x] **Step 3:** Chạy các unit test liên quan đến notification service để kiểm tra cấu hình.
+- [x] **Step 4:** Commit task 4 vào `main`.
 
 ---
 
@@ -100,7 +100,8 @@
 **Files:**
 - Verify: Toàn bộ codebase
 
-- [ ] **Step 1:** Chạy `dart analyze` đảm bảo 0 issues.
-- [ ] **Step 2:** Chạy `flutter test` đảm bảo 100% tests pass (646+ tests).
-- [ ] **Step 3:** Chạy `flutter build apk --debug` để xác minh Android Asset Packaging Tool (AAPT2) biên dịch toàn bộ icon và drawable thành công, không có lỗi tài nguyên.
-- [ ] **Step 4:** Báo cáo hoàn tất và bàn giao cho người dùng.
+- [x] **Step 1:** Chạy `dart analyze` đảm bảo 0 issues.
+- [x] **Step 2:** Chạy `flutter test` đảm bảo 100% tests pass (646+ tests).
+- [x] **Step 3:** Chạy `flutter build apk --debug` để xác minh Android Asset Packaging Tool (AAPT2) biên dịch toàn bộ icon và drawable thành công, không có lỗi tài nguyên.
+- [x] **Step 4:** Báo cáo hoàn tất và bàn giao cho người dùng.
+
