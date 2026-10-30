@@ -55,7 +55,15 @@ graph TD
 - [x] **B1. Mô hình dữ liệu:** `organizations`, `buildings`, `apartments`. Thêm bảng `memberships` để 1 user có thể thuộc nhiều tòa/cơ sở với vai trò khác nhau.
 - [x] **B2. Onboarding khách hàng:** Bộ công cụ import hàng loạt căn hộ/cư dân/chỉ số điện nước từ Excel kèm validation và báo lỗi từng dòng.
 - [x] **B3. Gói dịch vụ & Billing cho khách:** Định giá theo quy mô số căn hộ (dưới 100 / 100–500 / trên 500 căn).
-- [ ] **B4. Dashboard Web Quản Trị:** Giao diện web tối ưu cho kế toán và quản lý làm việc với bảng biểu lớn (đối soát, báo cáo, phát hành hóa đơn).
+- [x] **B4. Dashboard Web Quản Trị & Trạm Làm Việc Kế Toán:**
+  - Bố cục Adaptive Navigation Layout (`AdaptiveManagementScaffold`): Tự động chuyển đổi mượt mà giữa NavigationBar trên thiết bị di động (< 900dp) và Sidebar cố định bên trái (250dp) với nhận diện vai trò Ban Quản Lý trên màn hình máy tính / Web (≥ 900dp).
+  - Trạm làm việc Kế toán bảng lớn (`AccountingWebWorkstationScreen`):
+    - Dải KPI thời gian thực: Tổng phát hành, Thực thu (kèm tỷ lệ thu hồi %), Chờ thu trong hạn, Nợ quá hạn.
+    - Bộ lọc tức thời: Tìm kiếm đa năng (mã căn hộ chuẩn, tên cư dân, mã VietQR), lọc theo kỳ thu (`YYYY-MM`) và trạng thái hóa đơn.
+    - Bảng dữ liệu đối soát lớn cuộn 2 chiều: Đầy đủ căn hộ, kỳ thu, tổng tiền, mã VietQR, hạn nộp, ngày thu, chip trạng thái màu ngữ nghĩa tiếng Việt.
+    - Thanh công cụ thao tác hàng loạt (Bulk Actions): Chọn nhiều dòng hóa đơn để đôn đốc gửi nhắc nợ tập trung một chạm hoặc hủy chọn.
+    - Công cụ xuất Excel (CSV có UTF-8 BOM chuẩn) mở trực tiếp trên Excel tiếng Việt không lỗi font.
+  - Tích hợp liền mạch: Route `/management/accounting-workstation`, tab "Đối soát" trên thanh điều hướng và lối tắt thao tác nhanh "Bàn kế toán" tại Dashboard BQL.
 
 ---
 

@@ -37,8 +37,7 @@ final accountingWorkstationFilterProvider =
 
 final accountingWorkstationRawInvoicesProvider =
     FutureProvider<List<InvoiceModel>>((ref) async {
-  final repo = ref.watch(managementRepositoryProvider);
-  return repo.fetchInvoices();
+  return ref.watch(invoicesProvider.future);
 });
 
 final accountingWorkstationRowsProvider =

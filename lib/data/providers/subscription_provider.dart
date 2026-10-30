@@ -23,3 +23,4 @@ final availablePlansProvider = FutureProvider<List<SubscriptionPlanModel>>((ref)
   final repo = ref.watch(subscriptionRepositoryProvider);
   return repo.fetchAvailablePlans();
 });
+
