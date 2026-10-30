@@ -482,6 +482,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               state: state,
               child: const MaintenanceFundLedgerScreen(),
             ),
+          ),
           GoRoute(
             path: 'financial-report',
             pageBuilder: (context, state) =>
@@ -489,8 +490,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               state: state,
               child: const FinancialReportScreen(),
             ),
-          ),
-
           ),
         ],
       ),

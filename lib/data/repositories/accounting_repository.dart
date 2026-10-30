@@ -239,13 +239,11 @@ class AccountingRepository {
           query = query.eq('period', period);
         }
         final list = await query;
-        if (list is List) {
-          return calculateAgingReportFallback(
-            invoices: list.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
-            filterBuildingId: buildingId,
-            filterPeriod: period,
-          );
-        }
+        return calculateAgingReportFallback(
+          invoices: list.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
+          filterBuildingId: buildingId,
+          filterPeriod: period,
+        );
       }
     } catch (_) {}
 

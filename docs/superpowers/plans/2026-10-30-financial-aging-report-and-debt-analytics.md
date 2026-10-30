@@ -28,11 +28,11 @@
 - Consumes: Bảng `invoices`, `apartments`, `residents_apartments`, `users`, `role_delegations`.
 - Produces: RPC `get_financial_aging_report(p_building_id UUID, p_period TEXT)` trả về JSONB tổng hợp tài chính và 4 xô tuổi nợ.
 
-- [ ] **Step 1:** Viết failing test `financial_aging_report_migration_test.dart` kiểm tra sự tồn tại của tệp migration, cấu trúc hàm RPC, kiểm tra quyền truy cập RBAC, các CTE tính toán (`filtered_invoices`, `summary_calc`, `aging_calc`, `debtors`, `collection_by_block`) và cấu trúc JSON trả về.
-- [ ] **Step 2:** Chạy `flutter test test/integration/financial_aging_report_migration_test.dart` để xác nhận test FAIL.
-- [ ] **Step 3:** Tạo tệp migration `supabase/migrations/20261030_01_financial_aging_report_rpc.sql` với đầy đủ logic phân quyền và tổng hợp tính toán.
-- [ ] **Step 4:** Chạy lại test `financial_aging_report_migration_test.dart` để xác nhận PASS.
-- [ ] **Step 5:** Commit task 1 vào `main`.
+- [x] **Step 1:** Viết failing test `financial_aging_report_migration_test.dart` kiểm tra sự tồn tại của tệp migration, cấu trúc hàm RPC, kiểm tra quyền truy cập RBAC, các CTE tính toán (`filtered_invoices`, `summary_calc`, `aging_calc`, `debtors`, `collection_by_block`) và cấu trúc JSON trả về.
+- [x] **Step 2:** Chạy `flutter test test/integration/financial_aging_report_migration_test.dart` để xác nhận test FAIL.
+- [x] **Step 3:** Tạo tệp migration `supabase/migrations/20261030_01_financial_aging_report_rpc.sql` với đầy đủ logic phân quyền và tổng hợp tính toán.
+- [x] **Step 4:** Chạy lại test `financial_aging_report_migration_test.dart` để xác nhận PASS.
+- [x] **Step 5:** Commit task 1 vào `main`.
 
 ---
 
@@ -46,11 +46,11 @@
 - Consumes: Cấu trúc JSONB từ RPC `get_financial_aging_report`.
 - Produces: `FinancialAgingReportModel`, `FinancialAgingSummaryModel`, `DebtAgingBucketModel`, `DebtorApartmentModel`, `BlockCollectionRateModel`.
 
-- [ ] **Step 1:** Viết failing test `financial_aging_report_model_test.dart` kiểm tra `fromJson`, `toJson`, các getters tiện ích (`collectionRateFormatted`, `riskLevelText`, `isSevereRisk`), và xử lý an toàn dữ liệu null/khuyết thiếu.
-- [ ] **Step 2:** Chạy `flutter test test/data/models/financial_aging_report_model_test.dart` để xác nhận test FAIL.
-- [ ] **Step 3:** Hiện thực hóa các class model trong `lib/data/models/financial_aging_report_model.dart`.
-- [ ] **Step 4:** Chạy lại test model để xác nhận PASS.
-- [ ] **Step 5:** Commit task 2 vào `main`.
+- [x] **Step 1:** Viết failing test `financial_aging_report_model_test.dart` kiểm tra `fromJson`, `toJson`, các getters tiện ích (`collectionRateFormatted`, `riskLevelText`, `isSevereRisk`), và xử lý an toàn dữ liệu null/khuyết thiếu.
+- [x] **Step 2:** Chạy `flutter test test/data/models/financial_aging_report_model_test.dart` để xác nhận test FAIL.
+- [x] **Step 3:** Hiện thực hóa các class model trong `lib/data/models/financial_aging_report_model.dart`.
+- [x] **Step 4:** Chạy lại test model để xác nhận PASS.
+- [x] **Step 5:** Commit task 2 vào `main`.
 
 ---
 
@@ -64,11 +64,11 @@
 - Consumes: Supabase RPC client, bảng `invoices`, `apartments`.
 - Produces: `Future<FinancialAgingReportModel> fetchAgingReport({String? buildingId, String? period})`.
 
-- [ ] **Step 1:** Viết failing test `accounting_repository_aging_report_test.dart` kiểm tra việc gọi RPC thành công, xử lý mapping model và cơ chế offline fallback tự động tính toán từ danh sách invoices cục bộ khi RPC lỗi.
-- [ ] **Step 2:** Chạy test để xác nhận FAIL.
-- [ ] **Step 3:** Thêm phương thức `fetchAgingReport` và thuật toán `calculateAgingReportFallback` vào `AccountingRepository`.
-- [ ] **Step 4:** Chạy lại test để xác nhận PASS.
-- [ ] **Step 5:** Commit task 3 vào `main`.
+- [x] **Step 1:** Viết failing test `accounting_repository_aging_report_test.dart` kiểm tra việc gọi RPC thành công, xử lý mapping model và cơ chế offline fallback tự động tính toán từ danh sách invoices cục bộ khi RPC lỗi.
+- [x] **Step 2:** Chạy test để xác nhận FAIL.
+- [x] **Step 3:** Thêm phương thức `fetchAgingReport` và thuật toán `calculateAgingReportFallback` vào `AccountingRepository`.
+- [x] **Step 4:** Chạy lại test để xác nhận PASS.
+- [x] **Step 5:** Commit task 3 vào `main`.
 
 ---
 
@@ -82,11 +82,11 @@
 - Consumes: `FinancialAgingReportModel`.
 - Produces: `Future<String?> exportAgingReport({required FinancialAgingReportModel report, String? period})`.
 
-- [ ] **Step 1:** Viết failing test `excel_export_aging_report_test.dart` kiểm tra sinh file `.xlsx` chứa 2 sheets: `Tổng Quan & Tuổi Nợ` và `Danh Sách Căn Hộ Nợ`, kiểm tra đầy đủ cột header, định dạng số tiền và dữ liệu từng căn.
-- [ ] **Step 2:** Chạy test để xác nhận FAIL.
-- [ ] **Step 3:** Triển khai phương thức `exportAgingReport` trong `ExcelExportHelper`.
-- [ ] **Step 4:** Chạy lại test để xác nhận PASS.
-- [ ] **Step 5:** Commit task 4 vào `main`.
+- [x] **Step 1:** Viết failing test `excel_export_aging_report_test.dart` kiểm tra sinh file `.xlsx` chứa 2 sheets: `Tổng Quan & Tuổi Nợ` và `Danh Sách Căn Hộ Nợ`, kiểm tra đầy đủ cột header, định dạng số tiền và dữ liệu từng căn.
+- [x] **Step 2:** Chạy test để xác nhận FAIL.
+- [x] **Step 3:** Triển khai phương thức `exportAgingReport` trong `ExcelExportHelper`.
+- [x] **Step 4:** Chạy lại test để xác nhận PASS.
+- [x] **Step 5:** Commit task 4 vào `main`.
 
 ---
 
@@ -103,13 +103,13 @@
 - Consumes: `financialAgingReportProvider`, `accountingRepositoryProvider`, `pushNotificationServiceProvider`.
 - Produces: Giao diện trực quan phân tích tuổi nợ, bộ lọc kỳ/tòa, nút xuất Excel, hộp thoại nhắc nợ nhanh, điều hướng sang Sổ cái.
 
-- [ ] **Step 1:** Viết widget test `financial_report_screen_test.dart` kiểm tra hiển thị KPI, 4 thẻ xô nợ, bộ lọc chip tuổi nợ, danh sách căn hộ nợ, nút bấm nhắc nợ và nút xuất file Excel.
-- [ ] **Step 2:** Chạy test để xác nhận FAIL.
-- [ ] **Step 3:** Tạo provider `financial_report_provider.dart` quản lý bộ lọc và fetch dữ liệu.
-- [ ] **Step 4:** Xây dựng màn hình `FinancialReportScreen` chuẩn Material Design và thiết kế tiếng Việt 100%.
-- [ ] **Step 5:** Đăng ký route `/management/financial-report` trong `app_router.dart` và tích hợp lối tắt vào `ManagementHomeScreen`.
-- [ ] **Step 6:** Chạy lại widget test để xác nhận PASS.
-- [ ] **Step 7:** Commit task 5 vào `main`.
+- [x] **Step 1:** Viết widget test `financial_report_screen_test.dart` kiểm tra hiển thị KPI, 4 thẻ xô nợ, bộ lọc chip tuổi nợ, danh sách căn hộ nợ, nút bấm nhắc nợ và nút xuất file Excel.
+- [x] **Step 2:** Chạy test để xác nhận FAIL.
+- [x] **Step 3:** Tạo provider `financial_report_provider.dart` quản lý bộ lọc và fetch dữ liệu.
+- [x] **Step 4:** Xây dựng màn hình `FinancialReportScreen` chuẩn Material Design và thiết kế tiếng Việt 100%.
+- [x] **Step 5:** Đăng ký route `/management/financial-report` trong `app_router.dart` và tích hợp lối tắt vào `ManagementHomeScreen`.
+- [x] **Step 6:** Chạy lại widget test để xác nhận PASS.
+- [x] **Step 7:** Commit task 5 vào `main`.
 
 ---
 
@@ -119,9 +119,9 @@
 - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md` (Đánh dấu hoàn tất C6)
 - Update: `graphify-out/` qua `python -m graphify update .`
 
-- [ ] **Step 1:** Chạy `dart analyze` đảm bảo 0 warning, 0 error.
-- [ ] **Step 2:** Chạy `flutter test` đảm bảo toàn bộ bộ test (655+ tests) vượt qua 100%.
-- [ ] **Step 3:** Chạy `python -m graphify update .` để cập nhật Knowledge Graph kiến trúc dự án.
-- [ ] **Step 4:** Cập nhật mục `C6` thành `[x]` trong `docs/COMMERCIAL_PRODUCT_ROADMAP.md`.
-- [ ] **Step 5:** Commit hoàn tất toàn bộ tính năng C6 vào `main`.
+- [x] **Step 1:** Chạy `dart analyze` đảm bảo 0 warning, 0 error.
+- [x] **Step 2:** Chạy `flutter test` đảm bảo toàn bộ bộ test (655+ tests) vượt qua 100%.
+- [x] **Step 3:** Chạy `python -m graphify update .` để cập nhật Knowledge Graph kiến trúc dự án.
+- [x] **Step 4:** Cập nhật mục `C6` thành `[x]` trong `docs/COMMERCIAL_PRODUCT_ROADMAP.md`.
+- [x] **Step 5:** Commit hoàn tất toàn bộ tính năng C6 vào `main`.
 
