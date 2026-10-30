@@ -1,3 +1,4 @@
+import '../../data/models/financial_aging_report_model.dart';
 import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -159,6 +160,158 @@ class ExcelExportHelper {
       }
       return null;
     } catch (e) {
+      return null;
+    }
+  }
+
+  /// Tạo bytes file Excel Báo cáo Tài chính & Phân tích Tuổi nợ (2 Sheets)
+  static List<int>? generateAgingReportBytes(FinancialAgingReportModel report) {
+    try {
+      var excel = Excel.createExcel();
+
+      // Sheet 1: Tổng Quan & Tuổi Nợ
+      Sheet overviewSheet = excel['Tổng Quan & Tuổi Nợ'];
+      excel.delete('Sheet1');
+
+      final moneyFormat = NumberFormat('#,##0', 'vi_VN');
+      final dateFormat = DateFormat('dd/MM/yyyy');
+
+      overviewSheet.appendRow([
+        TextCellValue('BÁO CÁO TÀI CHÍNH VÀ PHÂN TÍCH TUỔI NỢ CÔNG NỢ'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Thời gian xuất: ' + DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Kỳ đối soát: ' + (report.filterPeriod ?? 'Tất cả các kỳ')),
+      ]);
+      overviewSheet.appendRow([TextCellValue('')]);
+
+      // Bảng Chỉ số tổng quan
+      overviewSheet.appendRow([
+        TextCellValue('CHỈ SỐ TÀI CHÍNH'),
+        TextCellValue('GIÁ TRỊ'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Tổng doanh thu phát hành'),
+        TextCellValue(moneyFormat.format(report.summary.totalBilled) + ' đ'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Doanh thu thực tế đã thu'),
+        TextCellValue(moneyFormat.format(report.summary.actualCollected) + ' đ'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Tổng công nợ tồn đọng'),
+        TextCellValue(moneyFormat.format(report.summary.totalOutstanding) + ' đ'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Tỷ lệ thu hồi công nợ'),
+        TextCellValue('${report.summary.collectionRate}%'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Tổng số hóa đơn phát hành'),
+        IntCellValue(report.summary.totalInvoiceCount),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Số hóa đơn đã thanh toán'),
+        IntCellValue(report.summary.paidInvoiceCount),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('Số hóa đơn chưa thanh toán'),
+        IntCellValue(report.summary.unpaidInvoiceCount),
+      ]);
+
+      overviewSheet.appendRow([TextCellValue('')]);
+      overviewSheet.appendRow([
+        TextCellValue('PHÂN LOẠI 4 XÔ TUỔI NỢ (AGING BUCKETS)'),
+        TextCellValue('SỐ LƯỢNG HÓA ĐƠN'),
+        TextCellValue('SỐ TIỀN (VNĐ)'),
+        TextCellValue('TỶ TRỌNG CÔNG NỢ'),
+      ]);
+
+      final totalDebt = report.agingBuckets.totalDebt > 0 ? report.agingBuckets.totalDebt : 1.0;
+
+      overviewSheet.appendRow([
+        TextCellValue('0 - 30 ngày (Trong hạn / Mới phát sinh)'),
+        IntCellValue(report.agingBuckets.count0To30),
+        TextCellValue(moneyFormat.format(report.agingBuckets.amount0To30) + ' đ'),
+        TextCellValue('${((report.agingBuckets.amount0To30 / totalDebt) * 100).toStringAsFixed(1)}%'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('31 - 60 ngày (Quá hạn mức 1 - Đôn đốc)'),
+        IntCellValue(report.agingBuckets.count31To60),
+        TextCellValue(moneyFormat.format(report.agingBuckets.amount31To60) + ' đ'),
+        TextCellValue('${((report.agingBuckets.amount31To60 / totalDebt) * 100).toStringAsFixed(1)}%'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('61 - 90 ngày (Quá hạn mức 2 - Cảnh báo dịch vụ)'),
+        IntCellValue(report.agingBuckets.count61To90),
+        TextCellValue(moneyFormat.format(report.agingBuckets.amount61To90) + ' đ'),
+        TextCellValue('${((report.agingBuckets.amount61To90 / totalDebt) * 100).toStringAsFixed(1)}%'),
+      ]);
+      overviewSheet.appendRow([
+        TextCellValue('> 90 ngày (Nợ xấu / Khó đòi)'),
+        IntCellValue(report.agingBuckets.countOver90),
+        TextCellValue(moneyFormat.format(report.agingBuckets.amountOver90) + ' đ'),
+        TextCellValue('${((report.agingBuckets.amountOver90 / totalDebt) * 100).toStringAsFixed(1)}%'),
+      ]);
+
+      // Sheet 2: Danh Sách Căn Hộ Nợ
+      Sheet debtorSheet = excel['Danh Sách Căn Hộ Nợ'];
+      debtorSheet.appendRow([
+        TextCellValue('STT'),
+        TextCellValue('Mã Căn Hộ'),
+        TextCellValue('Chủ Hộ / Người Đại Diện'),
+        TextCellValue('Số Điện Thoại'),
+        TextCellValue('Số Hóa Đơn Nợ'),
+        TextCellValue('Ngày Đến Hạn Cũ Nhất'),
+        TextCellValue('Số Ngày Quá Hạn'),
+        TextCellValue('Mức Độ Rủi Ro'),
+        TextCellValue('Tổng Tiền Nợ (VNĐ)'),
+      ]);
+
+      int index = 1;
+      for (final debtor in report.debtors) {
+        debtorSheet.appendRow([
+          IntCellValue(index++),
+          TextCellValue(debtor.apartmentCode),
+          TextCellValue(debtor.ownerName),
+          TextCellValue(debtor.ownerPhone),
+          IntCellValue(debtor.unpaidInvoicesCount),
+          TextCellValue(debtor.oldestDueDate != null ? dateFormat.format(debtor.oldestDueDate!) : '-'),
+          IntCellValue(debtor.maxDaysOverdue),
+          TextCellValue(debtor.riskLevelText),
+          DoubleCellValue(debtor.totalDebt),
+        ]);
+      }
+
+      return excel.save();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Xuất Báo cáo Tài chính & Phân tích Tuổi nợ ra file .xlsx
+  static Future<String?> exportAgingReport({
+    required FinancialAgingReportModel report,
+    String? period,
+  }) async {
+    try {
+      final fileBytes = generateAgingReportBytes(report);
+      if (fileBytes != null) {
+        final directory = await getApplicationDocumentsDirectory();
+        final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+        final safePeriod = (period ?? 'TatCa').replaceAll('/', '_');
+        final filePath = '${directory.path}/BaoCaoTuoiNo_${safePeriod}_$timestamp.xlsx';
+
+        File(filePath)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(fileBytes);
+
+        return filePath;
+      }
+      return null;
+    } catch (_) {
       return null;
     }
   }
