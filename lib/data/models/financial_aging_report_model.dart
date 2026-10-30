@@ -278,3 +278,4 @@ class FinancialAgingReportModel {
         'debtors': debtors.map((e) => e.toJson()).toList(),
       };
 }
+

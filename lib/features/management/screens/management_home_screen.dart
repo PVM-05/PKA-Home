@@ -567,6 +567,15 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     if (canManageInvoices) {
       quickActionItems.add(_buildQuickAction(
         context,
+        icon: Icons.analytics_outlined,
+        label: 'Báo cáo TC',
+        color: Colors.indigo,
+        onTap: () => context.push(AppRoutes.managementFinancialReport),
+      ));
+    }
+    if (canManageInvoices) {
+      quickActionItems.add(_buildQuickAction(
+        context,
         icon: Icons.receipt_long,
         label: 'Lập hóa đơn',
         color: AppTheme.secondary,
