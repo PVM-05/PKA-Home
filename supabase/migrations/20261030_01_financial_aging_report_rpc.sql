@@ -164,3 +164,4 @@ $$;
 -- Cấp quyền gọi hàm cho người dùng đã xác thực
 GRANT EXECUTE ON FUNCTION public.get_financial_aging_report(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_financial_aging_report(UUID, TEXT) TO service_role;
+

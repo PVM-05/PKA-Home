@@ -1,3 +1,4 @@
+import '../../features/management/screens/financial_report_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -481,6 +482,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               state: state,
               child: const MaintenanceFundLedgerScreen(),
             ),
+          GoRoute(
+            path: 'financial-report',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const FinancialReportScreen(),
+            ),
+          ),
+
           ),
         ],
       ),

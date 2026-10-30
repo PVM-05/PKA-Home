@@ -124,3 +124,4 @@
 - [ ] **Step 3:** Chạy `python -m graphify update .` để cập nhật Knowledge Graph kiến trúc dự án.
 - [ ] **Step 4:** Cập nhật mục `C6` thành `[x]` trong `docs/COMMERCIAL_PRODUCT_ROADMAP.md`.
 - [ ] **Step 5:** Commit hoàn tất toàn bộ tính năng C6 vào `main`.
+
