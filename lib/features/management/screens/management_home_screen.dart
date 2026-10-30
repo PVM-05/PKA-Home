@@ -1,3 +1,5 @@
+import '../../../core/widgets/adaptive_management_scaffold.dart';
+import 'accounting_web_workstation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,12 +43,12 @@ class ManagementHomeScreen extends ConsumerStatefulWidget {
 class _ManagementTab {
   final String key;
   final Widget screen;
-  final NavigationDestination destination;
+  final AdaptiveNavigationItem adaptiveItem;
 
   const _ManagementTab({
     required this.key,
     required this.screen,
-    required this.destination,
+    required this.adaptiveItem,
   });
 }
 
@@ -295,9 +297,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           canViewPaymentTransactions: canViewPaymentTransactions,
           canViewAuditTrail: canViewAuditTrail,
         ),
-        destination: const NavigationDestination(
-          icon: Icon(Icons.bar_chart_outlined),
-          selectedIcon: Icon(Icons.bar_chart, color: AppTheme.primary),
+        adaptiveItem: const AdaptiveNavigationItem(
+          icon: Icons.bar_chart_outlined,
+          selectedIcon: Icons.bar_chart,
           label: 'Tổng quan',
         ),
       ),
@@ -305,38 +307,51 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         _ManagementTab(
           key: 'residents',
           screen: const ResidentManagementScreen(),
-          destination: NavigationDestination(
-            icon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups_outlined)) : const Icon(Icons.groups_outlined),
-            selectedIcon: linkCount > 0 ? Badge(label: Text('$linkCount'), child: const Icon(Icons.groups, color: AppTheme.primary)) : const Icon(Icons.groups, color: AppTheme.primary),
+          adaptiveItem: AdaptiveNavigationItem(
+            icon: Icons.groups_outlined,
+            selectedIcon: Icons.groups,
             label: 'Cư dân',
+            badgeCount: linkCount > 0 ? linkCount : null,
           ),
         ),
       if (canManageInvoices)
         _ManagementTab(
           key: 'invoices',
           screen: const InvoiceManagementScreen(),
-          destination: NavigationDestination(
-            icon: invoiceCount > 0 ? Badge(label: Text('$invoiceCount'), child: const Icon(Icons.receipt_long_outlined)) : const Icon(Icons.receipt_long_outlined),
-            selectedIcon: invoiceCount > 0 ? Badge(label: Text('$invoiceCount'), child: const Icon(Icons.receipt_long, color: AppTheme.primary)) : const Icon(Icons.receipt_long, color: AppTheme.primary),
+          adaptiveItem: AdaptiveNavigationItem(
+            icon: Icons.receipt_long_outlined,
+            selectedIcon: Icons.receipt_long,
             label: 'Hóa đơn',
+            badgeCount: invoiceCount > 0 ? invoiceCount : null,
+          ),
+        ),
+      if (canManageInvoices)
+        _ManagementTab(
+          key: 'workstation',
+          screen: const AccountingWebWorkstationScreen(),
+          adaptiveItem: const AdaptiveNavigationItem(
+            icon: Icons.table_chart_outlined,
+            selectedIcon: Icons.table_chart,
+            label: 'Đối soát',
           ),
         ),
       if (canManageIssues)
         _ManagementTab(
           key: 'issues',
           screen: const IssueManagementScreen(),
-          destination: NavigationDestination(
-            icon: issueCount > 0 ? Badge(label: Text('$issueCount'), child: const Icon(Icons.report_problem_outlined)) : const Icon(Icons.report_problem_outlined),
-            selectedIcon: issueCount > 0 ? Badge(label: Text('$issueCount'), child: const Icon(Icons.report_problem, color: AppTheme.primary)) : const Icon(Icons.report_problem, color: AppTheme.primary),
+          adaptiveItem: AdaptiveNavigationItem(
+            icon: Icons.report_problem_outlined,
+            selectedIcon: Icons.report_problem,
             label: 'Phản ánh',
+            badgeCount: issueCount > 0 ? issueCount : null,
           ),
         ),
       _ManagementTab(
         key: 'announcements',
         screen: const AnnouncementManagementScreen(),
-        destination: const NavigationDestination(
-          icon: Icon(Icons.notifications_outlined),
-          selectedIcon: Icon(Icons.notifications, color: AppTheme.primary),
+        adaptiveItem: const AdaptiveNavigationItem(
+          icon: Icons.notifications_outlined,
+          selectedIcon: Icons.notifications,
           label: 'Thông báo',
         ),
       ),
@@ -344,7 +359,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
 
     final currentIndex = _selectedIndex < tabs.length ? _selectedIndex : 0;
 
-    return Scaffold(
+    return AdaptiveManagementScaffold(
+      selectedIndex: currentIndex,
+      onDestinationSelected: _onItemTapped,
+      destinations: tabs.map((t) => t.adaptiveItem).toList(),
       appBar: currentIndex == 0
           ? AppBar(
         title: Row(
@@ -515,15 +533,57 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ),
         ],
       ) : null,
+      sidebarHeader: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.apartment_rounded, color: AppTheme.primary, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'PKA HOME',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Text(
+                    currentUser?.roleDisplayName ?? 'Ban Quản Lý',
+                    style: TextStyle(
+                      color: _getRoleBadgeColor(currentUser?.role ?? ''),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      sidebarFooter: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: OutlinedButton.icon(
+          onPressed: () => _showLogoutDialog(context),
+          icon: const Icon(Icons.logout, size: 18, color: AppTheme.error),
+          label: const Text('Đăng xuất', style: TextStyle(color: AppTheme.error)),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppTheme.error),
+            minimumSize: const Size.fromHeight(40),
+          ),
+        ),
+      ),
       body: IndexedStack(
         index: currentIndex,
         children: tabs.map((t) => t.screen).toList(),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: _onItemTapped,
-        indicatorColor: AppTheme.primary.withValues(alpha: 0.15),
-        destinations: tabs.map((t) => t.destination).toList(),
       ),
     );
   }
@@ -587,6 +647,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         label: 'Báo cáo TC',
         color: Colors.indigo,
         onTap: () => context.push(AppRoutes.managementFinancialReport),
+      ));
+      quickActionItems.add(_buildQuickAction(
+        context,
+        icon: Icons.table_chart_rounded,
+        label: 'Bàn kế toán',
+        color: Colors.blueGrey,
+        onTap: () => context.push(AppRoutes.managementAccountingWorkstation),
       ));
     }
     if (canManageInvoices) {
