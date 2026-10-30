@@ -183,3 +183,4 @@ class BatchImportResultModel<T> {
   bool get hasErrors => rowErrors.isNotEmpty;
   bool get isAllValid => errorCount == 0 && totalRows > 0;
 }
+

@@ -277,3 +277,4 @@ $$;
 GRANT EXECUTE ON FUNCTION public.batch_import_apartments(UUID, JSONB) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.batch_import_residents(UUID, JSONB) TO authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.batch_import_meter_readings(UUID, TEXT, JSONB) TO authenticated, service_role;
+
