@@ -277,3 +277,4 @@ SELECT
     CASE WHEN i <= 10 THEN 'occupied' ELSE 'available' END
 FROM generate_series(1, 30) AS i
 ON CONFLICT (building_id, zone, slot_number) DO NOTHING;
+
