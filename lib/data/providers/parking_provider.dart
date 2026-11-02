@@ -75,3 +75,4 @@ final activeVisitorTicketsProvider = FutureProvider<List<VisitorParkingTicketMod
   final repo = ref.watch(parkingRepositoryProvider);
   return repo.fetchActiveVisitorTickets();
 });
+

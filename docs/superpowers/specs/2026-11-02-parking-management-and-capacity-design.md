@@ -143,3 +143,4 @@ Bao gồm 2 Tabs:
    - Test lưới ô đỗ `ParkingSlotsGrid` hiển thị đúng màu và trạng thái.
    - Test modal Check-in sinh vé và Check-out hiển thị VietQR thu phí.
    - Test thẻ xe cư dân hiển thị vị trí ô đỗ.
+
