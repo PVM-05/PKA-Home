@@ -3,7 +3,7 @@ import 'package:pka_home/data/models/apartment_invitation_model.dart';
 
 void main() {
   group('ApartmentInvitationModel Tests', () {
-    final now = DateTime(2026, 10, 30);
+    final now = DateTime.now();
     final futureDate = now.add(const Duration(hours: 48));
     final pastDate = now.subtract(const Duration(hours: 1));
 

@@ -121,7 +121,22 @@ graph TD
     - Màn hình Quản lý Căn hộ (`ApartmentManagementScreen`): Nút "Mã mời" và "Hợp đồng & Lưu trú" trực tiếp trong modal chi tiết căn hộ.
     - Màn hình Cư dân xin liên kết (`LinkRequestScreen`): Nút "Gia nhập bằng mã mời (Tự phục vụ)" mở hộp thoại kích hoạt một chạm.
     - Resident 360 (`Resident360DetailSheet`): Lối tắt "Xem hợp đồng & lưu trú" tra cứu nhanh tình trạng hợp đồng và tiền cọc từng căn hộ liên kết.
-- [ ] **D2. Phương tiện & Bãi xe:** Quản lý slot hầm, xe vãng lai tính phí theo giờ.
+- [x] **D2. Phương tiện & Bãi xe (Parking Operations):**
+  - CSDL & Migration:
+    - Bảng `parking_slots` quản lý ô đỗ hầm theo Zone (`B1`, `B2`), phân loại ô tô/xe máy, gắn căn hộ và biển số xe cố định.
+    - Bảng vé xe vãng lai `visitor_parking_tickets` mã `TKT-YYYYMM-XXXXX` kèm chuỗi `qr_payload` vector và lưu vết thời gian check-in/check-out.
+    - RPCs PostgreSQL: `get_parking_capacity_stats` (thống kê sức chứa hầm thời gian thực: tổng ô, đã đỗ, còn trống cho ô tô/xe máy/khách), `calculate_visitor_parking_fee` (tính cước đỗ xe theo giờ lũy tiến & phụ thu qua đêm), `checkout_visitor_ticket` (chuyển trạng thái hoàn tất, ghi nhận phương thức thanh toán VietQR/tiền mặt).
+  - Tầng Dữ liệu & Provider:
+    - Models strongly-typed: `ParkingSlotModel`, `VisitorParkingTicketModel`, `ParkingCapacityStatsModel`.
+    - `ParkingRepository` tích hợp engine offline-fallback tự động mô phỏng 50 ô đỗ mẫu tầng B1/B2 và các vé xe vãng lai hoạt động độc lập ngay cả khi mất mạng.
+    - Providers: `parkingSlotsProvider`, `parkingCapacityStatsProvider`, `activeVisitorTicketsProvider`.
+  - Giao diện Ban Quản Lý & Bảo Vệ (`ParkingManagementScreen`):
+    - Dải KPI sức chứa thời gian thực: Ô tô hầm, Xe máy hầm, Xe vãng lai trong bãi.
+    - Tab 1 - Sơ đồ Ô đỗ (Floor Plan): Grid trực quan các ô B1/B2, chip trạng thái Còn trống / Đã đỗ / Bảo trì, thao tác "Gán xe" cho căn hộ và "Giải phóng" ô đỗ một chạm.
+    - Tab 2 - Trạm soát vé cổng (Gate Workstation): Check-in xe vào tạo vé và hiển thị mã QR vé, Check-out xe ra tự động tính cước theo giờ, tích hợp mã VietQR Napas 247 cho khách quét trả tiền tức thời.
+  - Tích hợp luồng Cư dân:
+    - Màn hình Phương tiện cư dân (`VehicleManagementScreen`): Tự động nhận diện và hiển thị huy hiệu vị trí ô đỗ cố định dưới hầm (VD: `Vị trí ô đỗ: P-B1-01 (Tầng B1)`).
+    - Lối tắt điều hướng "Bãi xe" trực tiếp từ Dashboard BQL và Menu "Tất cả thao tác quản trị".
 - [ ] **D3. Sự cố & SLA:** Cảnh báo quá hạn xử lý sự cố (SLA), phân công theo ca trực/chuyên môn, vật tư tiêu hao.
 - [x] **D4. Tiện ích & Waitlist FIFO:** Đặt chỗ, hàng đợi First-In-First-Out, tự hủy hoàn cọc và đôn người trong danh sách chờ.
 - [x] **D5. Thông báo đa kênh & Triggers:** Triggers tự động hóa thông báo, CDC Realtime Stream đẩy Heads-up notification, quét nhắc nợ định kỳ.

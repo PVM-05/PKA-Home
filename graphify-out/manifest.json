@@ -240,9 +240,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/app_router.dart": {
-    "mtime": 1793364942.8448982,
-    "seen": 1793607203.7039938,
-    "ast_hash": "7e245d751bc4df0c02116ddb1f3a3b9f",
+    "mtime": 1793611298.9487605,
+    "seen": 1793611825.0829496,
+    "ast_hash": "c061c92b73255dc9d3bee3998756ca9f",
     "semantic_hash": ""
   },
   "lib/core/router/page_transitions.dart": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/route_names.dart": {
-    "mtime": 1793360526.1421568,
-    "seen": 1793361504.1552382,
-    "ast_hash": "68181232f427bf8bdd5e8007e00e7e4c",
+    "mtime": 1793611258.836046,
+    "seen": 1793611825.0829496,
+    "ast_hash": "8349bfa8ff27b20a2b0f115315b0da9b",
     "semantic_hash": ""
   },
   "lib/core/services/push_notification_service.dart": {
@@ -1008,8 +1008,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/apartment_management_screen.dart": {
-    "mtime": 1793606824.0415149,
-    "seen": 1793607203.7045057,
+    "mtime": 1793608554.4176269,
+    "seen": 1793611825.083931,
     "ast_hash": "81af05db6366ca0f3835bab76aa0bf9e",
     "semantic_hash": ""
   },
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_home_screen.dart": {
-    "mtime": 1793360628.1547022,
-    "seen": 1793361504.1562395,
-    "ast_hash": "16586c5cc99d1f7fa523d6ad1693bb4f",
+    "mtime": 1793611317.1629016,
+    "seen": 1793611825.083931,
+    "ast_hash": "f203407e8392c973b8a27b42fe39c2f6",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/vehicle_management_screen.dart": {
-    "mtime": 1792861881.7524185,
-    "seen": 1793342452.1356795,
-    "ast_hash": "e71818d15809f23113ad87696f5de440",
+    "mtime": 1793611484.8160887,
+    "seen": 1793611825.083931,
+    "ast_hash": "60786ad2f487834f6bb7619049826b33",
     "semantic_hash": ""
   },
   "lib/features/resident/widgets/apartment_switcher_chip.dart": {
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793361341.6148086,
-    "seen": 1793361504.157241,
-    "ast_hash": "5b3ba37ba64d56b758e5936be7ef4474",
+    "mtime": 1793611718.8781211,
+    "seen": 1793611825.083931,
+    "ast_hash": "2f558539ca13b38934806c73cec3466e",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -5100,9 +5100,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/apartment_invitation_model.dart": {
-    "mtime": 1793365263.5219908,
-    "seen": 1793607203.7039938,
-    "ast_hash": "fa803fd75a5048671a2cb3e37075d19b",
+    "mtime": 1793611763.8576257,
+    "seen": 1793611825.0829496,
+    "ast_hash": "8babbb2ca42219403c55df88927c4d5a",
     "semantic_hash": ""
   },
   "lib/data/models/resident_lease_contract_model.dart": {
@@ -5124,8 +5124,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/widgets/apartment_contract_sheet.dart": {
-    "mtime": 1793607050.061776,
-    "seen": 1793607203.7045057,
+    "mtime": 1793608554.5659666,
+    "seen": 1793611825.083931,
     "ast_hash": "095628f75605ff438d58063ed43ffa75",
     "semantic_hash": ""
   },
@@ -5148,9 +5148,9 @@
     "semantic_hash": ""
   },
   "test/data/models/apartment_invitation_model_test.dart": {
-    "mtime": 1793365242.1439795,
-    "seen": 1793607203.7045057,
-    "ast_hash": "63adddbb17a19963862f94e0af4a0dfd",
+    "mtime": 1793611772.8981578,
+    "seen": 1793611825.083931,
+    "ast_hash": "dc0340bf631e24624cf7eef6f959cad5",
     "semantic_hash": ""
   },
   "test/data/models/resident_lease_contract_model_test.dart": {
@@ -5166,8 +5166,8 @@
     "semantic_hash": ""
   },
   "test/features/management/widgets/apartment_contract_sheet_test.dart": {
-    "mtime": 1793606676.4364967,
-    "seen": 1793607203.7045057,
+    "mtime": 1793608554.6478708,
+    "seen": 1793611825.083931,
     "ast_hash": "265c2e1a4c4d3cd6b4cf72a340e18702",
     "semantic_hash": ""
   },
@@ -5184,21 +5184,111 @@
     "semantic_hash": ""
   },
   "test/integration/resident_lifecycle_workflow_integration_test.dart": {
-    "mtime": 1793607122.19718,
-    "seen": 1793607203.7055075,
+    "mtime": 1793608554.7152357,
+    "seen": 1793611825.083931,
     "ast_hash": "c7142a8ca96dce65eb83499f4b83d539",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-10-30-resident-lifecycle-and-contracts.md": {
-    "mtime": 1793365127.8122709,
-    "seen": 1793607203.7055075,
-    "ast_hash": "350f3e65b93ceadcfc87603a7ca8d5a8",
+    "mtime": 1793608554.3542125,
+    "seen": 1793611825.083931,
+    "ast_hash": "db0826298c84ca0f31d1fa12b1778404",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-10-30-resident-lifecycle-and-contracts-design.md": {
     "mtime": 1793365109.567186,
     "seen": 1793607203.7055075,
     "ast_hash": "8f17954ce8022bde145291ad37df14cb",
+    "semantic_hash": ""
+  },
+  "lib/data/models/parking_capacity_stats_model.dart": {
+    "mtime": 1793610601.6996138,
+    "seen": 1793611825.0829496,
+    "ast_hash": "a1e60b46fb436b6c7f289f5713d44f93",
+    "semantic_hash": ""
+  },
+  "lib/data/models/parking_slot_model.dart": {
+    "mtime": 1793611568.1023002,
+    "seen": 1793611825.0829496,
+    "ast_hash": "dce17c29638bde5d3e5a12c08bc0b5cb",
+    "semantic_hash": ""
+  },
+  "lib/data/models/visitor_parking_ticket_model.dart": {
+    "mtime": 1793610643.9119103,
+    "seen": 1793611825.0829496,
+    "ast_hash": "1a1a934ca0ce912fcd766c0d2a94dded",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/parking_provider.dart": {
+    "mtime": 1793610725.9144678,
+    "seen": 1793611825.0829496,
+    "ast_hash": "75f3ea383b16c302d904f463ca906b6c",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/parking_repository.dart": {
+    "mtime": 1793611576.3249607,
+    "seen": 1793611825.083931,
+    "ast_hash": "602081eb02a38106e4d234465391af7a",
+    "semantic_hash": ""
+  },
+  "lib/features/management/screens/parking_management_screen.dart": {
+    "mtime": 1793611066.7120917,
+    "seen": 1793611825.083931,
+    "ast_hash": "fc3e186d8305357346d30e6ddc60748a",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261102_01_parking_slots_and_visitor_tickets.sql": {
+    "mtime": 1793610543.74263,
+    "seen": 1793611825.083931,
+    "ast_hash": "7cba941de2f3e6ca1177efa79e1fd7d7",
+    "semantic_hash": ""
+  },
+  "test/data/models/parking_slot_model_test.dart": {
+    "mtime": 1793610573.9076104,
+    "seen": 1793611825.083931,
+    "ast_hash": "8d7965b4dce32a839c72e00477df91de",
+    "semantic_hash": ""
+  },
+  "test/data/models/visitor_parking_ticket_model_test.dart": {
+    "mtime": 1793610582.8325424,
+    "seen": 1793611825.083931,
+    "ast_hash": "2f8b80737a489be149562193b25531fd",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/parking_repository_test.dart": {
+    "mtime": 1793610826.8549023,
+    "seen": 1793611825.083931,
+    "ast_hash": "42c743180daf15f8ec9163fe6a021fc5",
+    "semantic_hash": ""
+  },
+  "test/features/management/screens/parking_management_screen_test.dart": {
+    "mtime": 1793611133.3660889,
+    "seen": 1793611825.083931,
+    "ast_hash": "e0be38ccd5132bb34249ea83d2579aa7",
+    "semantic_hash": ""
+  },
+  "test/integration/parking_management_migration_test.dart": {
+    "mtime": 1793610479.1838164,
+    "seen": 1793611825.083931,
+    "ast_hash": "9c6834f14978bc540b099e430bd10653",
+    "semantic_hash": ""
+  },
+  "test/integration/parking_workflow_integration_test.dart": {
+    "mtime": 1793611529.321503,
+    "seen": 1793611825.083931,
+    "ast_hash": "f349b854a04af246ab52b1d17be7e29b",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-02-parking-management-and-capacity.md": {
+    "mtime": 1793611709.8055,
+    "seen": 1793611825.083931,
+    "ast_hash": "8f240327e0097c868ba52a5b26ee77a3",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-02-parking-management-and-capacity-design.md": {
+    "mtime": 1793610434.5465884,
+    "seen": 1793611825.083931,
+    "ast_hash": "053fbc35c446baeef077c4743263a2a4",
     "semantic_hash": ""
   }
 }

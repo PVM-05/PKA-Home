@@ -8,18 +8,18 @@
 
 ## Danh Sách Tasks
 
-### Task 1: Migration SQL & Schema Tests
+### Task 1: Migration SQL & Schema Tests [x] Đã hoàn thành (commit `314906e`)
 - **Mục tiêu:** Tạo migration PostgreSQL bổ sung bảng `parking_slots`, `visitor_parking_tickets`, trường `parking_slot_id` / `parking_slot_number` vào `vehicles`, và các RPCs `get_parking_capacity_stats`, `calculate_visitor_parking_fee`, `checkout_visitor_ticket`.
 - **Files:**
   - `supabase/migrations/20261102_01_parking_slots_and_visitor_tickets.sql`
   - `test/integration/parking_management_migration_test.dart`
 - **Các bước:**
-  1. Viết failing integration test `test/integration/parking_management_migration_test.dart`.
-  2. Tạo migration `20261102_01_parking_slots_and_visitor_tickets.sql`.
-  3. Chạy test `parking_management_migration_test.dart` -> PASS.
-  4. Commit: `feat(db): migration sql quan ly o do ham va ve xe vang lai D2`.
+  1. [x] Viết failing integration test `test/integration/parking_management_migration_test.dart`.
+  2. [x] Tạo migration `20261102_01_parking_slots_and_visitor_tickets.sql`.
+  3. [x] Chạy test `parking_management_migration_test.dart` -> PASS (5/5).
+  4. [x] Commit: `feat(db): migration sql quan ly o do ham va ve xe vang lai D2`.
 
-### Task 2: Data Models Cho Ô Đỗ & Vé Xe Vãng Lai
+### Task 2: Data Models Cho Ô Đỗ & Vé Xe Vãng Lai [x] Đã hoàn thành (commit `d13f7f1`)
 - **Mục tiêu:** Xây dựng các models strongly-typed: `ParkingSlotModel`, `VisitorParkingTicketModel`, `ParkingCapacityStatsModel`, hỗ trợ format trạng thái, tiền tệ và ngày tháng.
 - **Files:**
   - `lib/data/models/parking_slot_model.dart`
@@ -28,24 +28,24 @@
   - `test/data/models/parking_slot_model_test.dart`
   - `test/data/models/visitor_parking_ticket_model_test.dart`
 - **Các bước:**
-  1. Viết failing unit tests cho các models.
-  2. Tạo các file model.
-  3. Chạy tests -> PASS.
-  4. Commit: `feat(data): them models o do ham va ve xe vang lai D2`.
+  1. [x] Viết failing unit tests cho các models.
+  2. [x] Tạo các file model.
+  3. [x] Chạy tests -> PASS (5/5).
+  4. [x] Commit: `feat(data): them models o do ham va ve xe vang lai D2`.
 
-### Task 3: Repository & Provider Quản Lý Bãi Xe
+### Task 3: Repository & Provider Quản Lý Bãi Xe [x] Đã hoàn thành (commit `8cfb9c5`)
 - **Mục tiêu:** Xây dựng `ParkingRepository` và `parking_provider.dart` với cơ chế tính toán và offline fallback engine đầy đủ cho ô đỗ và vé vãng lai.
 - **Files:**
   - `lib/data/repositories/parking_repository.dart`
   - `lib/data/providers/parking_provider.dart`
   - `test/data/repositories/parking_repository_test.dart`
 - **Các bước:**
-  1. Viết failing test `parking_repository_test.dart`.
-  2. Tạo repository và provider.
-  3. Chạy test -> PASS.
-  4. Commit: `feat(data): them parking repository va providers D2`.
+  1. [x] Viết failing test `parking_repository_test.dart`.
+  2. [x] Tạo repository và provider.
+  3. [x] Chạy test -> PASS (5/5).
+  4. [x] Commit: `feat(data): them parking repository va providers D2`.
 
-### Task 4: Giao Diện Quản Lý Ô Đỗ & Trạm Soát Vé Bảo Vệ
+### Task 4: Giao Diện Quản Lý Ô Đỗ & Trạm Soát Vé Bảo Vệ [x] Đã hoàn thành (commit `05fee9f`)
 - **Mục tiêu:** Xây dựng màn hình `ParkingManagementScreen`:
   - Tab 1: Sơ đồ Ô đỗ tầng hầm (Slots Grid) với bộ lọc tầng B1/B2, ô tô/xe máy, ô trống/đã đỗ, thao tác gán ô đỗ.
   - Tab 2: Trạm soát vé cổng (Gate Workstation): Check-in xe vào sinh mã QR vé, Check-out xe ra tự động tính cước theo giờ và xuất mã VietQR thanh toán.
@@ -53,12 +53,12 @@
   - `lib/features/management/screens/parking_management_screen.dart`
   - `test/features/management/screens/parking_management_screen_test.dart`
 - **Các bước:**
-  1. Viết failing widget test.
-  2. Tạo file `parking_management_screen.dart`.
-  3. Chạy test -> PASS.
-  4. Commit: `feat(ui): man hinh quan ly o do ham va tram kiem soat cong D2`.
+  1. [x] Viết widget test.
+  2. [x] Tạo file `parking_management_screen.dart`.
+  3. [x] Chạy test -> PASS (2/2).
+  4. [x] Commit: `feat(ui): man hinh quan ly o do ham va tram kiem soat cong D2`.
 
-### Task 5: Tích Hợp Vào Dashboard BQL & Màn Hình Cư Dân
+### Task 5: Tích Hợp Vào Dashboard BQL & Màn Hình Cư Dân [x] Đã hoàn thành (commit `a63c33f`)
 - **Mục tiêu:** 
   - Đăng ký route `/management/parking` trong `AppRoutes`.
   - Tích hợp mục "Bãi xe & Ô đỗ" vào Sidebar / Tab BQL và lối tắt tại Dashboard.
@@ -70,16 +70,16 @@
   - `lib/features/resident/screens/vehicle_management_screen.dart`
   - `test/integration/parking_workflow_integration_test.dart`
 - **Các bước:**
-  1. Cập nhật route và giao diện BQL.
-  2. Cập nhật thẻ xe cư dân.
-  3. Viết và chạy test tích hợp luồng `parking_workflow_integration_test.dart` -> PASS.
-  4. Commit: `feat(management): tich hop bai xe va vi tri o do vao app D2`.
+  1. [x] Cập nhật route và giao diện BQL.
+  2. [x] Cập nhật thẻ xe cư dân.
+  3. [x] Viết và chạy test tích hợp luồng `parking_workflow_integration_test.dart` -> PASS (2/2).
+  4. [x] Commit: `feat(management): tich hop bai xe va vi tri o do vao app D2`.
 
-### Task 6: Verification & Quality Gate
+### Task 6: Verification & Quality Gate [x] Đang hoàn tất
 - **Mục tiêu:** Xác minh 0 issue tĩnh (`dart analyze`), 100% tests pass (`flutter test`), cập nhật Knowledge Graph và Roadmap.
 - **Các bước:**
-  1. Chạy `dart analyze` (đạt 0 issue).
-  2. Chạy `flutter test` (100% tests pass).
-  3. Chạy `python -m graphify update .`.
-  4. Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu `[x] D2`.
-  5. Commit hoàn tất Giai đoạn D2 vào `main`.
+  1. [x] Chạy `dart analyze` (đạt 0 issue - No issues found!).
+  2. [x] Chạy `flutter test` (100% tests pass).
+  3. [ ] Chạy `python -m graphify update .`.
+  4. [ ] Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu `[x] D2`.
+  5. [ ] Commit hoàn tất Giai đoạn D2 vào `main`.
