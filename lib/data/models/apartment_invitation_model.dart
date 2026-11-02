@@ -46,9 +46,9 @@ class ApartmentInvitationModel {
   }
 
   String get displayStatus {
-    if (isExpired) return 'Đã hết hạn';
-    if (status == 'exhausted' || usedCount >= maxUses) return 'Đã dùng hết';
     if (status == 'revoked') return 'Đã hủy';
+    if (status == 'exhausted' || usedCount >= maxUses) return 'Đã dùng hết';
+    if (isExpired) return 'Đã hết hạn';
     return 'Còn hiệu lực';
   }
 
