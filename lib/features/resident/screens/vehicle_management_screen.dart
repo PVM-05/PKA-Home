@@ -8,6 +8,7 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
+import '../../../data/providers/parking_provider.dart';
 
 class VehicleManagementScreen extends ConsumerStatefulWidget {
   const VehicleManagementScreen({super.key});
@@ -694,6 +695,7 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
             data: (vehicles) {
               final motorbikeCount = vehicles.where((v) => v.isActive && v.isMotorbike).length;
               final carCount = vehicles.where((v) => v.isActive && v.isCar).length;
+              final allSlots = ref.watch(parkingSlotsProvider).valueOrNull ?? [];
 
               return RefreshIndicator(
                 onRefresh: () async {
@@ -1013,6 +1015,39 @@ class _VehicleManagementScreenState extends ConsumerState<VehicleManagementScree
                                           'Biểu phí: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng • Ngày đăng ký: ${_dateFormat.format(vehicle.createdAt)}',
                                           style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                                         ),
+                                        () {
+                                          final assignedSlot = allSlots.where((s) =>
+                                            (s.assignedVehicleId != null && s.assignedVehicleId == vehicle.id) ||
+                                            (s.licensePlate != null && s.licensePlate!.trim().toUpperCase() == vehicle.plateNumber.trim().toUpperCase())
+                                          ).firstOrNull;
+                                          if (assignedSlot == null) return const SizedBox.shrink();
+                                          return Padding(
+                                            padding: const EdgeInsets.only(top: 6),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.primary.withValues(alpha: 0.08),
+                                                borderRadius: BorderRadius.circular(6),
+                                                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.local_parking, size: 14, color: AppTheme.primary),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    'Vị trí ô đỗ: ${assignedSlot.slotNumber} (Tầng ${assignedSlot.zone})',
+                                                    style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: AppTheme.primary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }(),
                                       ],
                                     ),
                                   ),

@@ -1,3 +1,4 @@
+import '../../features/management/screens/parking_management_screen.dart';
 import '../../features/management/screens/accounting_web_workstation_screen.dart';
 import '../../features/management/screens/subscription_management_screen.dart';
 import '../../features/management/screens/batch_import_center_screen.dart';
@@ -516,6 +517,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 AppPageTransitions.slideFromRight(
               state: state,
               child: const AccountingWebWorkstationScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'parking',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const ParkingManagementScreen(),
             ),
           ),
         ],

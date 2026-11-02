@@ -706,6 +706,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         onTap: () => context.push(AppRoutes.managementVehicleApproval),
       ));
     }
+    quickActionItems.add(_buildQuickAction(
+      context,
+      icon: Icons.local_parking_rounded,
+      label: 'Bãi xe',
+      color: Colors.indigo,
+      onTap: () => context.push(AppRoutes.managementParking),
+    ));
     if (canViewPaymentTransactions) {
       quickActionItems.add(_buildQuickAction(
         context,
@@ -1598,6 +1605,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           color: Colors.blueGrey,
                           onTap: () => context.push(AppRoutes.managementVehicleApproval),
                         ),
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.local_parking_rounded,
+                        title: 'Bãi xe & Ô đỗ',
+                        subtitle: 'Sơ đồ ô đỗ hầm, kiểm soát sức chứa và trạm soát vé',
+                        color: Colors.blue.shade700,
+                        onTap: () => context.push(AppRoutes.managementParking),
+                      ),
                       if (canManageIssues)
                         _buildSheetActionItem(
                           context: context,

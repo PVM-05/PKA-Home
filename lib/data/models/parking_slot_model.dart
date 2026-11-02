@@ -99,6 +99,7 @@ class ParkingSlotModel {
     String? apartmentCode,
     String? note,
     DateTime? createdAt,
+    bool clearAssigned = false,
   }) {
     return ParkingSlotModel(
       id: id ?? this.id,
@@ -107,10 +108,10 @@ class ParkingSlotModel {
       slotNumber: slotNumber ?? this.slotNumber,
       slotType: slotType ?? this.slotType,
       status: status ?? this.status,
-      assignedVehicleId: assignedVehicleId ?? this.assignedVehicleId,
-      assignedApartmentId: assignedApartmentId ?? this.assignedApartmentId,
-      licensePlate: licensePlate ?? this.licensePlate,
-      apartmentCode: apartmentCode ?? this.apartmentCode,
+      assignedVehicleId: clearAssigned ? null : (assignedVehicleId ?? this.assignedVehicleId),
+      assignedApartmentId: clearAssigned ? null : (assignedApartmentId ?? this.assignedApartmentId),
+      licensePlate: clearAssigned ? null : (licensePlate ?? this.licensePlate),
+      apartmentCode: clearAssigned ? null : (apartmentCode ?? this.apartmentCode),
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
     );

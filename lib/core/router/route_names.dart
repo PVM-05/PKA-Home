@@ -57,4 +57,5 @@ class AppRoutes {
   static const String managementBatchImport = '/management/batch-import';
   static const String managementSubscription = '/management/subscription';
   static const String managementAccountingWorkstation = '/management/accounting-workstation';
+  static const String managementParking = '/management/parking';
 }
