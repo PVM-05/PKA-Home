@@ -360,3 +360,4 @@ VALUES
     (NULL, 'MAT-ELEV-01', 'Đèn chiếu sáng cabin thang máy LED 12V', 'elevator', 'bộ', 220000, 6, 2),
     (NULL, 'MAT-FIRE-01', 'Đầu phun sprinkler chữa cháy quay xuống', 'fire_safety', 'cái', 75000, 15, 5)
 ON CONFLICT DO NOTHING;
+

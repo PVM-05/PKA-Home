@@ -25,3 +25,4 @@ final issueSlaStatsProvider = FutureProvider<IssueSlaStatsModel>((ref) async {
   final repo = ref.watch(materialRepositoryProvider);
   return repo.fetchSlaStats();
 });
+

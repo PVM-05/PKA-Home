@@ -137,7 +137,24 @@ graph TD
   - Tích hợp luồng Cư dân:
     - Màn hình Phương tiện cư dân (`VehicleManagementScreen`): Tự động nhận diện và hiển thị huy hiệu vị trí ô đỗ cố định dưới hầm (VD: `Vị trí ô đỗ: P-B1-01 (Tầng B1)`).
     - Lối tắt điều hướng "Bãi xe" trực tiếp từ Dashboard BQL và Menu "Tất cả thao tác quản trị".
-- [ ] **D3. Sự cố & SLA:** Cảnh báo quá hạn xử lý sự cố (SLA), phân công theo ca trực/chuyên môn, vật tư tiêu hao.
+- [x] **D3. Sự cố Kỹ Thuật, Cảnh Báo SLA Đa Tầng, Phân Công Chuyên Môn & Quản Lý Vật Tư Tiêu Hao:**
+  - Cơ sở dữ liệu & Business Triggers (`20261102_02_issue_sla_and_materials.sql`):
+    - Cột SLA và phân loại chuyên môn (`category`: điện, nước, thang máy, PCCC, xây dựng, khác) trên `issue_reports`.
+    - Trigger `trg_calculate_issue_sla_deadline` tự động ấn định hạn chót xử lý theo mức độ khẩn cấp (Khẩn cấp: 2h, Cao: 8h, Bình thường: 24h, Thấp: 72h).
+    - Danh mục kho vật tư kỹ thuật `maintenance_materials` (đơn vị tính, tồn kho, định mức tối thiểu, đơn giá xuất kho).
+    - Bảng nhật ký sử dụng vật tư `issue_materials` liên kết trực tiếp với sự cố và cờ `is_chargeable` (tính phí căn hộ hoặc tòa nhà đài thọ).
+    - 3 RPCs PostgreSQL: `get_issue_sla_stats` (KPI SLA thời gian thực), `record_issue_materials_usage` (tự động trừ tồn kho và ghi nhật ký), `charge_issue_materials_to_invoice` (kết chuyển chi phí vật tư vào hóa đơn kế tiếp).
+  - Tầng Dữ Liệu & Fallback Engine:
+    - 3 Data models Dart: `MaintenanceMaterialModel`, `IssueMaterialUsageModel`, `IssueSlaStatsModel` và mở rộng `IssueModel` với các getters SLA động (`isSlaBreached`, `isSlaWarning`, `slaRemainingFormatted`, `categoryDisplayName`).
+    - `MaterialRepository` tích hợp Offline Fallback Engine 10 vật tư thiết yếu và tính toán SLA fallback mượt mà khi mất kết nối mạng.
+  - Giao diện Ban Quản Lý:
+    - Màn hình Xử lý sự cố (`IssueManagementScreen`): Dải KPI SLA thời gian thực (Đúng hạn, Sắp trễ <2h, Trễ SLA), chip Chuyên môn và đếm ngược SLA đổi màu ngữ nghĩa trên thẻ sự cố.
+    - Hộp thoại nghiệm thu & xuất kho vật tư (`ResolveIssueMaterialsSheet`): Chọn vật tư tiêu hao từ kho, chỉnh số lượng, kiểm tra tồn kho, đánh dấu tính phí cư dân, bắt buộc chụp ảnh nghiệm thu hoàn thành.
+    - Màn hình Quản lý kho vật tư kỹ thuật (`MaintenanceMaterialsScreen`): Danh mục vật tư theo chuyên môn, cảnh báo sắp hết hàng (< định mức an toàn) và hộp thoại nhập kho nhanh.
+    - Lối tắt điều hướng "Kho vật tư" trên Dashboard BQL và menu "Tất cả thao tác quản trị".
+  - Giao diện Cư Dân:
+    - Màn hình Gửi phản ánh (`CreateIssueScreen`): Dropdown chọn chuyên môn sự cố và chọn mức độ khẩn cấp kèm banner cam kết thời gian SLA minh bạch.
+    - Màn hình Chi tiết sự cố (`IssueDetailScreen`): Header hiển thị chip chuyên môn & đếm ngược SLA, dải thẻ đối soát vật tư kỹ thuật đã sử dụng (đơn giá, số lượng, thành tiền, ghi chú, tính phí căn hộ hay BQL bảo dưỡng, tổng tính vào hóa đơn kỳ tới).
 - [x] **D4. Tiện ích & Waitlist FIFO:** Đặt chỗ, hàng đợi First-In-First-Out, tự hủy hoàn cọc và đôn người trong danh sách chờ.
 - [x] **D5. Thông báo đa kênh & Triggers:** Triggers tự động hóa thông báo, CDC Realtime Stream đẩy Heads-up notification, quét nhắc nợ định kỳ.
 - [ ] **D6. An ninh & Khách:** Đăng ký khách trước (mã QR), quản lý bưu kiện tại quầy lễ tân.
