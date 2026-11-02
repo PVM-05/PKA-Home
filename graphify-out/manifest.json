@@ -240,8 +240,8 @@
     "semantic_hash": ""
   },
   "lib/core/router/app_router.dart": {
-    "mtime": 1793360578.8927395,
-    "seen": 1793361504.1552382,
+    "mtime": 1793364942.8448982,
+    "seen": 1793607203.7039938,
     "ast_hash": "7e245d751bc4df0c02116ddb1f3a3b9f",
     "semantic_hash": ""
   },
@@ -1008,9 +1008,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/apartment_management_screen.dart": {
-    "mtime": 1793349094.2530732,
-    "seen": 1793349369.2049654,
-    "ast_hash": "17a8c20eeea8b21cff5e6dfb29814c6d",
+    "mtime": 1793606824.0415149,
+    "seen": 1793607203.7045057,
+    "ast_hash": "81af05db6366ca0f3835bab76aa0bf9e",
     "semantic_hash": ""
   },
   "lib/features/management/screens/audit_trail_screen.dart": {
@@ -1170,9 +1170,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/widgets/resident_360_detail_sheet.dart": {
-    "mtime": 1792861556.0213182,
-    "seen": 1793342452.1356795,
-    "ast_hash": "6965c6f920e3bd4105f55aefc4e0b1b3",
+    "mtime": 1793606897.219349,
+    "seen": 1793607203.7045057,
+    "ast_hash": "1eaadff4861bc3e7a48a10c4c1ea9739",
     "semantic_hash": ""
   },
   "lib/features/management/widgets/revenue_trend_chart.dart": {
@@ -1224,9 +1224,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/link_request_screen.dart": {
-    "mtime": 1792949737.057125,
-    "seen": 1793342452.1356795,
-    "ast_hash": "b711a955f353ed1c965bc3e73ddddc55",
+    "mtime": 1793606850.7816484,
+    "seen": 1793607203.7045057,
+    "ast_hash": "80365ec6c03f64aeab0addc3178a6aa6",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/notification_center_screen.dart": {
@@ -5034,69 +5034,171 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/adaptive_management_scaffold.dart": {
-    "mtime": 1793360992.9992728,
-    "seen": 1793361504.1552382,
+    "mtime": 1793364943.284332,
+    "seen": 1793607203.7039938,
     "ast_hash": "6b6d108f621e9ab3c20de3bd009237fd",
     "semantic_hash": ""
   },
   "lib/data/models/accounting_workstation_model.dart": {
-    "mtime": 1793360279.3369112,
-    "seen": 1793361504.1552382,
+    "mtime": 1793364942.928309,
+    "seen": 1793607203.7039938,
     "ast_hash": "0784d4ae2a530b813979bcf5b5a09047",
     "semantic_hash": ""
   },
   "lib/data/providers/accounting_workstation_provider.dart": {
-    "mtime": 1793361223.8868728,
-    "seen": 1793361504.1552382,
+    "mtime": 1793364942.9949367,
+    "seen": 1793607203.7039938,
     "ast_hash": "0b5b9c405c421071fb065f26da66f9b8",
     "semantic_hash": ""
   },
   "lib/features/management/screens/accounting_web_workstation_screen.dart": {
-    "mtime": 1793360918.2039182,
-    "seen": 1793361504.1552382,
+    "mtime": 1793364943.0608158,
+    "seen": 1793607203.7045057,
     "ast_hash": "0046030e479743c16ee9abf32a923870",
     "semantic_hash": ""
   },
   "test/core/widgets/adaptive_management_scaffold_test.dart": {
-    "mtime": 1793360105.0603628,
-    "seen": 1793361504.1562395,
-    "ast_hash": "7521341d0843d5b28878e01c7c21585d",
+    "mtime": 1793606633.116243,
+    "seen": 1793607203.7045057,
+    "ast_hash": "dea9c57f5f5e746abfdd194151479bde",
     "semantic_hash": ""
   },
   "test/data/models/accounting_workstation_model_test.dart": {
-    "mtime": 1793360260.325046,
-    "seen": 1793361504.1562395,
+    "mtime": 1793364943.1219473,
+    "seen": 1793607203.7045057,
     "ast_hash": "5ee5baaff69e35f4b81234eaf4522789",
     "semantic_hash": ""
   },
   "test/data/providers/accounting_workstation_provider_test.dart": {
-    "mtime": 1793360342.722141,
-    "seen": 1793361504.1562395,
-    "ast_hash": "83472b3a286f313998619ec263eb4182",
+    "mtime": 1793606633.117252,
+    "seen": 1793607203.7045057,
+    "ast_hash": "9d5e5d16bc55ec780d5277bd7886e2c7",
     "semantic_hash": ""
   },
   "test/features/management/screens/accounting_web_workstation_screen_test.dart": {
-    "mtime": 1793360385.5461826,
-    "seen": 1793361504.1562395,
-    "ast_hash": "6ca39aa3df30d963e168ac9ed385de42",
+    "mtime": 1793606633.1182516,
+    "seen": 1793607203.7045057,
+    "ast_hash": "15e794ee061ba530249d0a988a8f4d17",
     "semantic_hash": ""
   },
   "test/integration/web_workstation_responsive_test.dart": {
-    "mtime": 1793360872.3230002,
-    "seen": 1793361504.1562395,
+    "mtime": 1793364943.1805522,
+    "seen": 1793607203.7055075,
     "ast_hash": "9299d619c1340a695c33a25d3fcdebfc",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-10-30-web-admin-workstation-and-large-screen.md": {
-    "mtime": 1793361360.5746758,
-    "seen": 1793361504.157241,
-    "ast_hash": "b7a772e8c09472eeb3cc3c6e44acc8db",
+    "mtime": 1793606633.1137185,
+    "seen": 1793607203.7055075,
+    "ast_hash": "1d34099add3b6cc1b4a5a4d755f7c62d",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-10-30-web-admin-workstation-and-large-screen-design.md": {
-    "mtime": 1793360050.1885402,
-    "seen": 1793361504.157241,
-    "ast_hash": "04f5c35d42962d35edd654f70c508f99",
+    "mtime": 1793606633.1147277,
+    "seen": 1793607203.7055075,
+    "ast_hash": "fdf13f6bbb1bd8c0df689f7b5cdbfe1a",
+    "semantic_hash": ""
+  },
+  "lib/data/models/apartment_invitation_model.dart": {
+    "mtime": 1793365263.5219908,
+    "seen": 1793607203.7039938,
+    "ast_hash": "fa803fd75a5048671a2cb3e37075d19b",
+    "semantic_hash": ""
+  },
+  "lib/data/models/resident_lease_contract_model.dart": {
+    "mtime": 1793365254.0397298,
+    "seen": 1793607203.7039938,
+    "ast_hash": "83a03217c82ae68983db297fadbf926c",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/resident_lifecycle_provider.dart": {
+    "mtime": 1793365320.87275,
+    "seen": 1793607203.7039938,
+    "ast_hash": "91b4561dbfa8bef6b84b3d045f1c547c",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/resident_lifecycle_repository.dart": {
+    "mtime": 1793365314.0502632,
+    "seen": 1793607203.7045057,
+    "ast_hash": "dd33bc577ddc2296b82d247f9e67fb98",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/apartment_contract_sheet.dart": {
+    "mtime": 1793607050.061776,
+    "seen": 1793607203.7045057,
+    "ast_hash": "095628f75605ff438d58063ed43ffa75",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/create_apartment_invitation_sheet.dart": {
+    "mtime": 1793365397.4495022,
+    "seen": 1793607203.7045057,
+    "ast_hash": "68667e3bd17ba0169ea4d9413507351b",
+    "semantic_hash": ""
+  },
+  "lib/features/resident/widgets/accept_invitation_dialog.dart": {
+    "mtime": 1793365430.5618873,
+    "seen": 1793607203.7045057,
+    "ast_hash": "fe5fb405b34cfe2c3ac7b93d0c9c4feb",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261030_04_resident_lifecycle_and_contracts.sql": {
+    "mtime": 1793365181.816096,
+    "seen": 1793607203.7045057,
+    "ast_hash": "62912efb405da0fee2f415467a12d979",
+    "semantic_hash": ""
+  },
+  "test/data/models/apartment_invitation_model_test.dart": {
+    "mtime": 1793365242.1439795,
+    "seen": 1793607203.7045057,
+    "ast_hash": "63adddbb17a19963862f94e0af4a0dfd",
+    "semantic_hash": ""
+  },
+  "test/data/models/resident_lease_contract_model_test.dart": {
+    "mtime": 1793365224.5917864,
+    "seen": 1793607203.7045057,
+    "ast_hash": "92c6a9d53915c2e0baf163253177e3d8",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/resident_lifecycle_repository_test.dart": {
+    "mtime": 1793365300.6582558,
+    "seen": 1793607203.7045057,
+    "ast_hash": "3878906c68434af34449d0ecede0618b",
+    "semantic_hash": ""
+  },
+  "test/features/management/widgets/apartment_contract_sheet_test.dart": {
+    "mtime": 1793606676.4364967,
+    "seen": 1793607203.7045057,
+    "ast_hash": "265c2e1a4c4d3cd6b4cf72a340e18702",
+    "semantic_hash": ""
+  },
+  "test/features/resident/widgets/accept_invitation_dialog_test.dart": {
+    "mtime": 1793365377.916638,
+    "seen": 1793607203.7055075,
+    "ast_hash": "532c43b7577a4fa373e0fc9721d71728",
+    "semantic_hash": ""
+  },
+  "test/integration/resident_lifecycle_migration_test.dart": {
+    "mtime": 1793365138.9216297,
+    "seen": 1793607203.7055075,
+    "ast_hash": "5262659b479dbd0e9649d04cbb982ac8",
+    "semantic_hash": ""
+  },
+  "test/integration/resident_lifecycle_workflow_integration_test.dart": {
+    "mtime": 1793607122.19718,
+    "seen": 1793607203.7055075,
+    "ast_hash": "c7142a8ca96dce65eb83499f4b83d539",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-10-30-resident-lifecycle-and-contracts.md": {
+    "mtime": 1793365127.8122709,
+    "seen": 1793607203.7055075,
+    "ast_hash": "350f3e65b93ceadcfc87603a7ca8d5a8",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-10-30-resident-lifecycle-and-contracts-design.md": {
+    "mtime": 1793365109.567186,
+    "seen": 1793607203.7055075,
+    "ast_hash": "8f17954ce8022bde145291ad37df14cb",
     "semantic_hash": ""
   }
 }
