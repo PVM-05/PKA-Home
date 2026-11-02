@@ -22,6 +22,8 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   final ImagePicker _picker = ImagePicker();
   final List<File> _imageFiles = [];
   bool _isLoading = false;
+  String _selectedCategory = 'electrical';
+  String _selectedPriority = 'low';
 
   Future<void> _pickImage(ImageSource source) async {
     final remaining = 3 - _imageFiles.length;
@@ -130,6 +132,8 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
         reporterId: user.id,
         apartmentId: activeAptId,
         description: description,
+        priority: _selectedPriority,
+        category: _selectedCategory,
         imageFiles: _imageFiles,
       );
 
@@ -176,6 +180,93 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Text(
+              'Chuyên môn sự cố:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedCategory,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.handyman_outlined),
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'electrical', child: Text('Điện / Thiết bị điện')),
+                DropdownMenuItem(value: 'plumbing', child: Text('Nước / Thiết bị vệ sinh')),
+                DropdownMenuItem(value: 'construction', child: Text('Xây dựng / Cửa / Sơn bả')),
+                DropdownMenuItem(value: 'elevator', child: Text('Thang máy / Cửa từ')),
+                DropdownMenuItem(value: 'fire_safety', child: Text('PCCC & Cảnh báo an toàn')),
+                DropdownMenuItem(value: 'other', child: Text('Sự cố khác')),
+              ],
+              onChanged: (val) {
+                if (val != null) setState(() => _selectedCategory = val);
+              },
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Mức độ khẩn cấp & Cam kết SLA:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'low', label: Text('Thường (72h)')),
+                ButtonSegment(value: 'medium', label: Text('Ưu tiên (24h)')),
+                ButtonSegment(value: 'high', label: Text('Khẩn cấp (2h)')),
+              ],
+              selected: {_selectedPriority},
+              onSelectionChanged: (set) {
+                setState(() => _selectedPriority = set.first);
+              },
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _selectedPriority == 'high'
+                    ? AppTheme.error.withValues(alpha: 0.1)
+                    : (_selectedPriority == 'medium' ? Colors.orange.withValues(alpha: 0.1) : Colors.blue.withValues(alpha: 0.08)),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _selectedPriority == 'high'
+                      ? AppTheme.error.withValues(alpha: 0.3)
+                      : (_selectedPriority == 'medium' ? Colors.orange.withValues(alpha: 0.3) : Colors.blue.withValues(alpha: 0.2)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _selectedPriority == 'high'
+                        ? Icons.timer_outlined
+                        : Icons.info_outline,
+                    size: 18,
+                    color: _selectedPriority == 'high'
+                        ? AppTheme.error
+                        : (_selectedPriority == 'medium' ? Colors.orange.shade800 : Colors.blue.shade800),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _selectedPriority == 'high'
+                          ? 'Cam kết SLA: Tiếp nhận và xử lý trong vòng 2 giờ (Chập cháy điện, vỡ ống nước, kẹt thang).'
+                          : (_selectedPriority == 'medium'
+                              ? 'Cam kết SLA: Đội kỹ thuật xử lý trong vòng 24 giờ.'
+                              : 'Cam kết SLA: Xử lý theo lịch bảo trì định kỳ trong vòng 72 giờ.'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _selectedPriority == 'high'
+                            ? AppTheme.error
+                            : (_selectedPriority == 'medium' ? Colors.orange.shade800 : Colors.blue.shade800),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             const Text(
               'Vui lòng mô tả sự cố hoặc yêu cầu hỗ trợ:',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

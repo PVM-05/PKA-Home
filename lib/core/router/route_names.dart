@@ -58,4 +58,5 @@ class AppRoutes {
   static const String managementSubscription = '/management/subscription';
   static const String managementAccountingWorkstation = '/management/accounting-workstation';
   static const String managementParking = '/management/parking';
+  static const String managementMaterials = '/management/materials';
 }

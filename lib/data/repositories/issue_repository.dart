@@ -28,6 +28,8 @@ class IssueRepository {
     required String reporterId,
     String? apartmentId,
     required String description,
+    String priority = 'low',
+    String category = 'other',
     File? imageFile,
     List<File>? imageFiles,
   }) async {
@@ -51,6 +53,8 @@ class IssueRepository {
       'apartment_id': targetApartmentId,
       'reporter_id': reporterId,
       'description': description,
+      'priority': priority,
+      'category': category,
     }).select().single();
     
     final issueId = issueData['id'] as String;
