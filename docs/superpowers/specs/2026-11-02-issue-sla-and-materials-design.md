@@ -189,3 +189,4 @@ CREATE TABLE IF NOT EXISTS issue_materials (
 - [ ] Kỹ thuật viên nghiệm thu có thể kê khai vật tư, số lượng tự động trừ trong kho.
 - [ ] Vật tư đánh dấu tính phí được lưu vết đầy đủ để kết chuyển hóa đơn.
 - [ ] Đạt 100% tests pass và 0 issue static analysis (`dart analyze`).
+
