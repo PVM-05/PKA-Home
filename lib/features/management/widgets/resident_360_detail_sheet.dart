@@ -5,6 +5,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../data/models/resident_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../core/utils/error_formatter.dart';
+import 'apartment_contract_sheet.dart';
 
 class Resident360DetailSheet extends ConsumerStatefulWidget {
   final ResidentModel resident;
@@ -591,6 +592,32 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                 ],
               ),
             ),
+            if (aptId != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (_) => ApartmentContractSheet(
+                            apartmentId: aptId,
+                            apartmentCode: aptCode ?? 'Căn hộ',
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.assignment_outlined, size: 16),
+                      label: const Text('Xem hợp đồng & lưu trú', style: TextStyle(fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ),
             const Divider(height: 1),
           ],
 

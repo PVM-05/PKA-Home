@@ -10,6 +10,8 @@ import '../../../data/models/apartment_model.dart';
 import '../../../core/supabase_config.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../widgets/apartment_contract_sheet.dart';
+import '../widgets/create_apartment_invitation_sheet.dart';
 
 class ApartmentManagementScreen extends ConsumerStatefulWidget {
   const ApartmentManagementScreen({super.key});
@@ -686,6 +688,52 @@ class _ApartmentManagementScreenState extends ConsumerState<ApartmentManagementS
                       );
                     }),
                   const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.qr_code_2_rounded, color: AppTheme.primary),
+                          label: const Text('Mã mời', style: TextStyle(color: AppTheme.primary)),
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              builder: (_) => CreateApartmentInvitationSheet(
+                                apartmentId: apt.id,
+                                apartmentCode: apt.code,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.assignment_outlined, color: AppTheme.primary),
+                          label: const Text('Hợp đồng & Lưu trú', style: TextStyle(color: AppTheme.primary)),
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              builder: (_) => ApartmentContractSheet(
+                                apartmentId: apt.id,
+                                apartmentCode: apt.code,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(

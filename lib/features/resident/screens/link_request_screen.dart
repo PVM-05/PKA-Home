@@ -5,6 +5,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/link_request_provider.dart';
+import '../widgets/accept_invitation_dialog.dart';
 
 class LinkRequestScreen extends ConsumerStatefulWidget {
   const LinkRequestScreen({super.key});
@@ -476,6 +477,28 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : const Text('Gửi yêu cầu'),
+            ),
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Expanded(child: Divider()),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('HOẶC', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                ),
+                Expanded(child: Divider()),
+              ],
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => const AcceptInvitationDialog(),
+                );
+              },
+              icon: const Icon(Icons.qr_code_scanner_rounded),
+              label: const Text('Gia nhập bằng mã mời (Tự phục vụ)'),
             ),
           ],
         ),
