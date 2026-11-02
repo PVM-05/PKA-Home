@@ -713,6 +713,15 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       color: Colors.indigo,
       onTap: () => context.push(AppRoutes.managementParking),
     ));
+    if (canManageIssues) {
+      quickActionItems.add(_buildQuickAction(
+        context,
+        icon: Icons.inventory_2_outlined,
+        label: 'Kho vật tư',
+        color: Colors.teal,
+        onTap: () => context.push(AppRoutes.managementMaterials),
+      ));
+    }
     if (canViewPaymentTransactions) {
       quickActionItems.add(_buildQuickAction(
         context,
@@ -1613,6 +1622,15 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         color: Colors.blue.shade700,
                         onTap: () => context.push(AppRoutes.managementParking),
                       ),
+                      if (canManageIssues)
+                        _buildSheetActionItem(
+                          context: context,
+                          icon: Icons.inventory_2_outlined,
+                          title: 'Kho vật tư kỹ thuật',
+                          subtitle: 'Định mức tồn, xuất kho bảo trì & trừ kho theo sự cố',
+                          color: Colors.teal,
+                          onTap: () => context.push(AppRoutes.managementMaterials),
+                        ),
                       if (canManageIssues)
                         _buildSheetActionItem(
                           context: context,

@@ -7,6 +7,7 @@ import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../core/widgets/app_storage_image.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../../data/models/issue_model.dart';
+import '../../../data/providers/material_provider.dart';
 import '../../../data/models/issue_comment_model.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -116,6 +117,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
 
                 // ─── Timeline trạng thái ───
                 _buildStatusTimeline(),
+                _buildMaterialsSection(isDark),
                 const SizedBox(height: 16),
 
                 // ─── Đánh giá dịch vụ (khi đã giải quyết) ───
@@ -235,8 +237,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Trạng thái + Ưu tiên
-            Row(
+            // Trạng thái + Ưu tiên + Chuyên môn + SLA
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
                   padding:
@@ -281,6 +286,83 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     ),
                   ),
                 ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppTheme.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.handyman_outlined,
+                          size: 13, color: AppTheme.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        issue.categoryDisplayName,
+                        style: const TextStyle(
+                          color: AppTheme.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (issue.slaDeadline != null)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: issue.isSlaBreached
+                          ? AppTheme.error.withValues(alpha: 0.1)
+                          : (issue.isSlaWarning
+                              ? Colors.orange.withValues(alpha: 0.1)
+                              : Colors.blue.withValues(alpha: 0.08)),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: issue.isSlaBreached
+                            ? AppTheme.error.withValues(alpha: 0.3)
+                            : (issue.isSlaWarning
+                                ? Colors.orange.withValues(alpha: 0.3)
+                                : Colors.blue.withValues(alpha: 0.2)),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          issue.isSlaBreached
+                              ? Icons.timer_off_outlined
+                              : (issue.isSlaWarning
+                                  ? Icons.warning_amber_rounded
+                                  : Icons.access_time),
+                          size: 13,
+                          color: issue.isSlaBreached
+                              ? AppTheme.error
+                              : (issue.isSlaWarning
+                                  ? Colors.orange.shade800
+                                  : Colors.blue.shade800),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          issue.slaRemainingFormatted,
+                          style: TextStyle(
+                            color: issue.isSlaBreached
+                                ? AppTheme.error
+                                : (issue.isSlaWarning
+                                    ? Colors.orange.shade800
+                                    : Colors.blue.shade800),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),
@@ -968,6 +1050,150 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         return _PriorityInfo('Trung bình', AppStatusColors.priorityMedium);
     }
   }
+
+Widget _buildMaterialsSection(bool isDark) {
+    final materialsAsync = ref.watch(issueMaterialsProvider(widget.issue.id));
+    final currencyFormat = NumberFormat('#,###', 'vi_VN');
+
+    return materialsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (materials) {
+        if (materials.isEmpty) return const SizedBox.shrink();
+
+        final chargeableAmount = materials
+            .where((item) => item.isChargeable)
+            .fold<double>(0, (sum, item) => sum + item.totalAmount);
+
+        return Card(
+          elevation: 0,
+          margin: const EdgeInsets.only(top: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.inventory_2_outlined, size: 20, color: AppTheme.primary),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Vật tư kỹ thuật đã sử dụng',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${materials.length} mục',
+                        style: const TextStyle(
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ...materials.map((item) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.materialName,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Số lượng: ${item.quantity} ${item.unit} x ${currencyFormat.format(item.unitPrice)} đ',
+                                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                              ),
+                              if (item.note != null && item.note!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Ghi chú: ${item.note}',
+                                  style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${currencyFormat.format(item.totalAmount)} đ',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.primary),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: item.isChargeable
+                                    ? Colors.orange.withValues(alpha: 0.1)
+                                    : Colors.green.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                item.chargeableDisplayName,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: item.isChargeable ? Colors.orange.shade800 : Colors.green.shade800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                if (chargeableAmount > 0) ...[
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Tổng tính vào hóa đơn kỳ tới:',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      Text(
+                        '${currencyFormat.format(chargeableAmount)} đ',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.orange),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _StatusInfo {
@@ -997,4 +1223,5 @@ class _TimelineStep {
     required this.icon,
     required this.color,
   });
+
 }
