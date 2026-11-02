@@ -108,7 +108,19 @@ graph TD
 ---
 
 ### GIAI ĐOẠN D: Vận Hành Tòa Nhà Cốt Lõi (Core Operations)
-- [ ] **D1. Cư dân & Hợp đồng:** Quản lý hợp đồng thuê (ngày bắt đầu, kết thúc, cọc giữ chỗ), mời thành viên qua link/QR.
+- [x] **D1. Cư dân & Hợp đồng:**
+  - CSDL & Migration: Bổ sung các trường quản lý hợp đồng thuê (`start_date`, `end_date`, `deposit_amount`, `contract_number`, `status`, `termination_date`, `handover_notes`) vào bảng `residents_apartments`; tạo bảng mã mời `apartment_invitations` có cơ chế tự hủy hết hạn (`expires_at`, `max_uses`, `used_count`).
+  - RPCs PostgreSQL bảo mật: `create_apartment_invitation`, `accept_apartment_invitation` (kích hoạt cư dân/khách thuê tự phục vụ vào căn hộ), và `terminate_resident_stay` (kết thúc lưu trú có lưu vết vĩnh viễn, bảo toàn lịch sử công nợ).
+  - Tầng dữ liệu & Provider: Models `ResidentLeaseContractModel`, `ApartmentInvitationModel`; Repository `ResidentLifecycleRepository` tích hợp cơ chế offline fallback engine, Provider `apartmentContractsProvider` và `apartmentInvitationsProvider`.
+  - Giao diện Ban Quản Lý:
+    - Hộp thoại tạo mã mời `CreateApartmentInvitationSheet`: Sinh mã QR đồ họa, mã chữ 8 ký tự, cấu hình thời hạn hiệu lực (24h/48h/72h/7 ngày) và vai trò được mời (chủ hộ / thành viên / khách thuê).
+    - Bảng quản lý hợp đồng `ApartmentContractSheet`: Xem danh sách cư dân hiện tại/lịch sử lưu trú, số hợp đồng, tiền cọc đã giữ, nút xác nhận kết thúc lưu trú kèm biên bản ghi chú bàn giao & hoàn cọc.
+  - Giao diện Cư Dân:
+    - Hộp thoại `AcceptInvitationDialog`: Nhập mã mời tự phục vụ (hoặc quét QR) kích hoạt tức thời quyền truy cập căn hộ không cần chờ duyệt thủ công.
+  - Tích hợp luồng nghiệp vụ:
+    - Màn hình Quản lý Căn hộ (`ApartmentManagementScreen`): Nút "Mã mời" và "Hợp đồng & Lưu trú" trực tiếp trong modal chi tiết căn hộ.
+    - Màn hình Cư dân xin liên kết (`LinkRequestScreen`): Nút "Gia nhập bằng mã mời (Tự phục vụ)" mở hộp thoại kích hoạt một chạm.
+    - Resident 360 (`Resident360DetailSheet`): Lối tắt "Xem hợp đồng & lưu trú" tra cứu nhanh tình trạng hợp đồng và tiền cọc từng căn hộ liên kết.
 - [ ] **D2. Phương tiện & Bãi xe:** Quản lý slot hầm, xe vãng lai tính phí theo giờ.
 - [ ] **D3. Sự cố & SLA:** Cảnh báo quá hạn xử lý sự cố (SLA), phân công theo ca trực/chuyên môn, vật tư tiêu hao.
 - [x] **D4. Tiện ích & Waitlist FIFO:** Đặt chỗ, hàng đợi First-In-First-Out, tự hủy hoàn cọc và đôn người trong danh sách chờ.
