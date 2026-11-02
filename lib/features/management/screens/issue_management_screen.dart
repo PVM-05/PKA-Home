@@ -12,14 +12,14 @@ import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import '../../../data/providers/auth_provider.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../core/widgets/app_storage_image.dart';
 import '../../../core/utils/excel_export_helper.dart';
+import '../../../data/providers/material_provider.dart';
+import '../widgets/resolve_issue_materials_sheet.dart';
+import 'maintenance_materials_screen.dart';
 
 class IssueManagementScreen extends ConsumerStatefulWidget {
   const IssueManagementScreen({super.key});
@@ -193,275 +193,6 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
     }
   }
 
-  void _showResolveWithProofDialog(IssueModel issue) async {
-    final picker = ImagePicker();
-    List<File> proofFiles = [];
-    bool isUploading = false;
-    String? errorMessage;
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (modalCtx, setModalState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(modalCtx).viewInsets.bottom,
-            ),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppStatusColors.paid.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.verified_outlined, color: AppStatusColors.paid, size: 22),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text(
-                          'Nghiệm Thu Hoàn Thành Sự Cố',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Căn hộ: ${issue.apartment?.code ?? "N/A"} — ${issue.description}',
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.blue.shade200),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.camera_alt_outlined, size: 18, color: AppTheme.primary),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Quy định chất lượng: Bắt buộc chụp/tải lên ít nhất 1 ảnh hiện trạng đã sửa xong trước khi đánh dấu hoàn thành.',
-                            style: TextStyle(fontSize: 12, color: Colors.blue.shade900, height: 1.3),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  if (proofFiles.isNotEmpty) ...[
-                    SizedBox(
-                      height: 90,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: proofFiles.length,
-                        itemBuilder: (context, i) {
-                          return Stack(
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(right: 12),
-                                width: 90,
-                                height: 90,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(proofFiles[i], fit: BoxFit.cover),
-                                ),
-                              ),
-                              Positioned(
-                                top: 2,
-                                right: 14,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setModalState(() {
-                                      proofFiles.removeAt(i);
-                                      if (proofFiles.isEmpty) {
-                                        errorMessage = 'Vui lòng chọn ít nhất 1 ảnh minh chứng.';
-                                      }
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black54,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.close, size: 14, color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: isUploading
-                              ? null
-                              : () async {
-                                  final picked = await picker.pickImage(
-                                    source: ImageSource.camera,
-                                    maxWidth: 1600,
-                                    maxHeight: 1600,
-                                    imageQuality: 80,
-                                  );
-                                  if (picked != null) {
-                                    setModalState(() {
-                                      proofFiles.add(File(picked.path));
-                                      errorMessage = null;
-                                    });
-                                  }
-                                },
-                          icon: const Icon(Icons.camera_alt, size: 18),
-                          label: const Text('Chụp ảnh'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: isUploading
-                              ? null
-                              : () async {
-                                  final picked = await picker.pickMultiImage(
-                                    maxWidth: 1600,
-                                    maxHeight: 1600,
-                                    imageQuality: 80,
-                                  );
-                                  if (picked.isNotEmpty) {
-                                    setModalState(() {
-                                      proofFiles.addAll(picked.map((x) => File(x.path)));
-                                      errorMessage = null;
-                                    });
-                                  }
-                                },
-                          icon: const Icon(Icons.photo_library, size: 18),
-                          label: const Text('Chọn từ máy'),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  if (errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      errorMessage!,
-                      style: const TextStyle(fontSize: 12, color: AppTheme.error),
-                    ),
-                  ],
-
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppStatusColors.paid,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      icon: isUploading
-                          ? const SizedBox.shrink()
-                          : const Icon(Icons.verified, size: 20),
-                      label: isUploading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                            )
-                          : const Text(
-                              'Xác Nhận Đã Xử Lý Xong',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                      onPressed: isUploading
-                          ? null
-                          : () async {
-                              if (proofFiles.isEmpty) {
-                                setModalState(() {
-                                  errorMessage = 'Vui lòng chụp hoặc chọn ít nhất 1 ảnh minh chứng hoàn thành!';
-                                });
-                                return;
-                              }
-
-                              setModalState(() => isUploading = true);
-                              try {
-                                final user = ref.read(authProvider).valueOrNull;
-                                final staffId = user?.id ?? issue.assignedStaffId ?? '';
-
-                                await ref.read(managementRepositoryProvider).resolveIssueWithProof(
-                                      issueId: issue.id,
-                                      staffId: staffId,
-                                      proofFiles: proofFiles,
-                                    );
-
-                                if (modalCtx.mounted) {
-                                  Navigator.pop(modalCtx);
-                                }
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Đã cập nhật hoàn thành kèm ảnh nghiệm thu!'),
-                                      backgroundColor: AppStatusColors.paid,
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-                                setModalState(() {
-                                  isUploading = false;
-                                  errorMessage = formatErrorMessage(e);
-                                });
-                              }
-                            },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final issuesAsync = ref.watch(allIssuesProvider);
@@ -472,6 +203,13 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
         appBar: AppBar(
           title: const Text('Xử lý Phản ánh'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.inventory_2_outlined),
+              tooltip: 'Kho vật tư kỹ thuật',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MaintenanceMaterialsScreen()),
+              ),
+            ),
             issuesAsync.when(
               data: (issues) {
                 if (issues.isEmpty) return const SizedBox.shrink();
@@ -495,6 +233,82 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
 
       body: Column(
         children: [
+          // Dải Thẻ KPI SLA Thời Gian Thực
+          Consumer(
+            builder: (context, ref, _) {
+              final slaStatsAsync = ref.watch(issueSlaStatsProvider);
+              return slaStatsAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (stats) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Đúng hạn', style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 2),
+                                Text('${stats.onTimeCount} sự cố', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Sắp trễ (<2h)', style: TextStyle(fontSize: 11, color: Colors.orange, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 2),
+                                Text('${stats.warningCount} sự cố', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Trễ SLA', style: TextStyle(fontSize: 11, color: AppTheme.error, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 2),
+                                Text('${stats.breachedCount} sự cố', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.error)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+
           // Thanh tìm kiếm
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -671,6 +485,72 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primary.withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.handyman_outlined, size: 12, color: AppTheme.primary),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          issue.categoryDisplayName,
+                                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (issue.slaDeadline != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: issue.isSlaBreached
+                                            ? AppTheme.error.withValues(alpha: 0.1)
+                                            : (issue.isSlaWarning ? Colors.orange.withValues(alpha: 0.1) : Colors.blue.withValues(alpha: 0.08)),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: issue.isSlaBreached
+                                              ? AppTheme.error.withValues(alpha: 0.3)
+                                              : (issue.isSlaWarning ? Colors.orange.withValues(alpha: 0.3) : Colors.blue.withValues(alpha: 0.2)),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            issue.isSlaBreached
+                                                ? Icons.timer_off_outlined
+                                                : (issue.isSlaWarning ? Icons.warning_amber_rounded : Icons.access_time),
+                                            size: 12,
+                                            color: issue.isSlaBreached
+                                                ? AppTheme.error
+                                                : (issue.isSlaWarning ? Colors.orange.shade800 : Colors.blue.shade800),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            issue.slaRemainingFormatted,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: issue.isSlaBreached
+                                                  ? AppTheme.error
+                                                  : (issue.isSlaWarning ? Colors.orange.shade800 : Colors.blue.shade800),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
                               const SizedBox(height: 12),
                               Text(issue.description, style: Theme.of(context).textTheme.bodyMedium),
                               
@@ -805,10 +685,23 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
-                                    onPressed: () => _showResolveWithProofDialog(issue),
-                                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (_) => ResolveIssueMaterialsSheet(
+                                          issue: issue,
+                                          onResolved: () => ref.invalidate(allIssuesProvider),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppTheme.success,
+                                      foregroundColor: Colors.white,
+                                    ),
                                     icon: const Icon(Icons.check_circle_outline, size: 18),
-                                    label: const Text('Đánh dấu Hoàn thành (Cần ảnh)'),
+                                    label: const Text('Nghiệm thu & Kê khai vật tư'),
                                   ),
                                 ),
                               const SizedBox(height: 8),
