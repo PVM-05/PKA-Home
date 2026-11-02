@@ -219,10 +219,7 @@ class ParkingRepository {
     if (index != -1) {
       _inMemorySlots[index] = _inMemorySlots[index].copyWith(
         status: 'available',
-        assignedVehicleId: null,
-        assignedApartmentId: null,
-        licensePlate: null,
-        apartmentCode: null,
+        clearAssigned: true,
       );
     }
     return {'success': true, 'message': 'Đã giải phóng ô đỗ'};
