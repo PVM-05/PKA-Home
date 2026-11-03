@@ -110,3 +110,4 @@ RPC PostgreSQL: `detect_meter_reading_anomaly(p_apartment_id UUID, p_meter_type 
    - Thêm tab / bộ lọc "Bất thường" lọc nhanh các bản ghi có cờ `is_anomaly = true`.
    - Thẻ hiển thị có viền màu ngữ nghĩa và icon cảnh báo cảnh giác.
    - Nút "Yêu cầu kỹ thuật kiểm tra lại" hoặc "Duyệt đặc cách".
+

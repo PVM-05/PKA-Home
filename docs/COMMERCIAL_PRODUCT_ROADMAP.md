@@ -207,7 +207,7 @@ graph TD
 ---
 
 ### GIAI ĐOẠN E: Tính Năng Thông Minh (AI, OCR & Tối Ưu)
-- [ ] **OCR đồng hồ điện nước thực tế:** Tích hợp ML Kit on-device, nhận diện số công tơ cơ, phát hiện số tiêu thụ bất thường.
+- [x] **E1. OCR Đồng hồ điện nước thực tế & Cảnh báo bất thường:** Thuật toán OCR bóc tách công tơ điện cơ/điện tử & đồng hồ nước (`UtilityMeterOcrEngine`), tính điểm tin cậy OCR, engine phát hiện tiêu thụ bất thường (`UtilityAnomalyDetector`) gắn cờ chỉ số lùi, tăng vọt > 50% hoặc nhảy vọt cực đại > 2.5x so với mức trung bình kèm hộp thoại xác nhận và tab lọc bất thường cho Ban Quản Lý.
 - [ ] **AI phân loại sự cố:** Phân tích mô tả sự cố để tự động gán kỹ thuật viên phù hợp.
 - [ ] **Dự báo nợ xấu & Nhắc nợ thông minh:** Dự đoán căn hộ có rủi ro trễ hạn để BQL chủ động chăm sóc.
 

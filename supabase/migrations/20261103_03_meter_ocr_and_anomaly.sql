@@ -178,3 +178,4 @@ CREATE TRIGGER trg_check_meter_reading_anomaly
 
 -- 5. Cấp quyền truy cập cho authenticated users
 GRANT EXECUTE ON FUNCTION public.detect_meter_reading_anomaly(UUID, NUMERIC, NUMERIC, VARCHAR) TO authenticated;
+
