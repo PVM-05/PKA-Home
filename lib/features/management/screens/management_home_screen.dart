@@ -713,6 +713,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       color: Colors.indigo,
       onTap: () => context.push(AppRoutes.managementParking),
     ));
+    quickActionItems.add(_buildQuickAction(
+      context,
+      icon: Icons.desk_outlined,
+      label: 'Lễ tân',
+      color: Colors.deepOrange,
+      onTap: () => context.push(AppRoutes.managementFrontDesk),
+    ));
     if (canManageIssues) {
       quickActionItems.add(_buildQuickAction(
         context,
@@ -1621,6 +1628,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         subtitle: 'Sơ đồ ô đỗ hầm, kiểm soát sức chứa và trạm soát vé',
                         color: Colors.blue.shade700,
                         onTap: () => context.push(AppRoutes.managementParking),
+                      ),
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.desk_outlined,
+                        title: 'Lễ tân & An ninh sảnh',
+                        subtitle: 'Quét QR đón khách, tiếp nhận bưu kiện shipper và tra cứu mã PIN',
+                        color: Colors.deepOrange,
+                        onTap: () => context.push(AppRoutes.managementFrontDesk),
                       ),
                       if (canManageIssues)
                         _buildSheetActionItem(
