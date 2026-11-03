@@ -29,6 +29,7 @@ class AppRoutes {
   static const String residentPaymentHistory = '/resident/payment-history';
   static const String residentMeterReading = '/resident/meter-reading';
   static const String residentVisitorParcel = '/resident/visitor-parcel';
+  static const String residentCommunity = '/resident/community';
 
   // Management
   static const String managementHome = '/management';
@@ -61,4 +62,5 @@ class AppRoutes {
   static const String managementParking = '/management/parking';
   static const String managementMaterials = '/management/materials';
   static const String managementFrontDesk = '/management/front-desk';
+  static const String managementCommunity = '/management/community';
 }

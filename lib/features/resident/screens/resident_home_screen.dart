@@ -810,6 +810,14 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         ),
         const SizedBox(height: 10),
         buildServiceCard(
+          title: 'Biểu quyết & Ý kiến',
+          subtitle: 'Tham gia biểu quyết điện tử & Đóng góp kiến nghị',
+          icon: Icons.how_to_vote_outlined,
+          color: const Color(0xFF00897B),
+          onTap: () => context.push(AppRoutes.residentCommunity),
+        ),
+        const SizedBox(height: 10),
+        buildServiceCard(
           title: 'Tiện ích chung',
           subtitle: 'BBQ, Hồ bơi, Phòng gym & Quy định sinh hoạt',
           icon: Icons.pool_outlined,

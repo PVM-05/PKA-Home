@@ -720,6 +720,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       color: Colors.deepOrange,
       onTap: () => context.push(AppRoutes.managementFrontDesk),
     ));
+    quickActionItems.add(_buildQuickAction(
+      context,
+      icon: Icons.how_to_vote_outlined,
+      label: 'Cộng đồng',
+      color: Colors.blueGrey,
+      onTap: () => context.push(AppRoutes.managementCommunity),
+    ));
     if (canManageIssues) {
       quickActionItems.add(_buildQuickAction(
         context,
@@ -1636,6 +1643,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         subtitle: 'Quét QR đón khách, tiếp nhận bưu kiện shipper và tra cứu mã PIN',
                         color: Colors.deepOrange,
                         onTap: () => context.push(AppRoutes.managementFrontDesk),
+                      ),
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.how_to_vote_outlined,
+                        title: 'Cộng đồng & Biểu quyết',
+                        subtitle: 'Tổ chức biểu quyết điện tử Luật Nhà ở 2023 & Xử lý kiến nghị cư dân',
+                        color: Colors.blueGrey,
+                        onTap: () => context.push(AppRoutes.managementCommunity),
                       ),
                       if (canManageIssues)
                         _buildSheetActionItem(
