@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/issue_smart_triage_engine.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../data/providers/resident_issue_provider.dart';
@@ -24,6 +26,65 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   bool _isLoading = false;
   String _selectedCategory = 'electrical';
   String _selectedPriority = 'low';
+  IssueTriageResult? _triageResult;
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController.addListener(_onDescriptionChanged);
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.removeListener(_onDescriptionChanged);
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _onDescriptionChanged() {
+    final text = _descriptionController.text.trim();
+    if (text.length >= 6) {
+      final result = IssueSmartTriageEngine.triage(text);
+      if (mounted) {
+        setState(() {
+          _triageResult = result;
+        });
+      }
+    } else if (_triageResult != null) {
+      if (mounted) {
+        setState(() {
+          _triageResult = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _callHotline() async {
+    final uri = Uri.parse('tel:02439998888');
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Hotline Ban Quản Lý: 024.3999.8888 (24/7)'),
+              backgroundColor: AppTheme.primary,
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hotline Ban Quản Lý: 024.3999.8888 (24/7)'),
+            backgroundColor: AppTheme.primary,
+          ),
+        );
+      }
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final remaining = 3 - _imageFiles.length;
@@ -135,6 +196,12 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
         priority: _selectedPriority,
         category: _selectedCategory,
         imageFiles: _imageFiles,
+        aiCategoryConfidence: _triageResult?.confidence,
+        aiSuggestedCategory: _triageResult?.category,
+        aiSuggestedPriority: _triageResult?.priority,
+        aiTriageReason: _triageResult?.reason,
+        isHazardous: _triageResult?.isHazardous ?? false,
+        autoAssign: true,
       );
 
       ref.invalidate(residentIssueProvider);
@@ -186,6 +253,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
+              key: const Key('issue_category_dropdown'),
               initialValue: _selectedCategory,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.handyman_outlined),
@@ -211,6 +279,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
             ),
             const SizedBox(height: 8),
             SegmentedButton<String>(
+              key: const Key('issue_priority_segmented'),
               segments: const [
                 ButtonSegment(value: 'low', label: Text('Thường (72h)')),
                 ButtonSegment(value: 'medium', label: Text('Ưu tiên (24h)')),
@@ -273,13 +342,132 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
             ),
             const SizedBox(height: 8),
             TextField(
+              key: const Key('issue_description_field'),
               controller: _descriptionController,
               maxLines: 5,
               decoration: const InputDecoration(
-                hintText: 'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy...',
+                hintText: 'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy, hoặc vỡ ống nước...',
                 alignLabelWithHint: true,
               ),
             ),
+            if (_triageResult != null) ...[
+              const SizedBox(height: 12),
+              if (_triageResult!.isHazardous)
+                Container(
+                  key: const Key('ai_hazardous_alert_banner'),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.error, width: 1.5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: AppTheme.error, size: 20),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'CẢNH BÁO NGUY HIỂM KHẨN CẤP',
+                              style: TextStyle(
+                                color: AppTheme.error,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _triageResult!.reason,
+                        style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          key: const Key('call_hotline_emergency_button'),
+                          onPressed: _callHotline,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.error,
+                            foregroundColor: Colors.white,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          icon: const Icon(Icons.phone_in_talk, size: 16),
+                          label: const Text(
+                            'GỌI HOTLINE KHẨN CẤP BQL (24/7): 024.3999.8888',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  key: const Key('ai_suggestion_banner'),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.auto_awesome, color: AppTheme.primary, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Gợi ý từ trợ lý AI (Độ tin cậy: ${(_triageResult!.confidence * 100).toInt()}%)',
+                              style: const TextStyle(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            key: const Key('apply_ai_suggestion_button'),
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _selectedCategory = _triageResult!.category;
+                                _selectedPriority = _triageResult!.priority;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Đã tự động áp dụng phân loại và mức ưu tiên theo AI!'),
+                                  duration: Duration(seconds: 2),
+                                  backgroundColor: AppTheme.primary,
+                                ),
+                              );
+                            },
+                            child: const Text('Áp dụng gợi ý', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'Đề xuất: ${_triageResult!.suggestedStaffRole} • Ưu tiên: ${_triageResult!.priorityDisplayName}',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _triageResult!.reason,
+                        style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -358,7 +546,6 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                               },
                               child: const Padding(
                                 padding: EdgeInsets.all(4.0),
-                                child: Icon(Icons.close, color: Colors.white, size: 16),
                               ),
                             ),
                           ),
@@ -394,6 +581,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               ),
             const SizedBox(height: 32),
             ElevatedButton(
+              key: const Key('submit_issue_button'),
               onPressed: _isLoading ? null : _submit,
               child: _isLoading 
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
