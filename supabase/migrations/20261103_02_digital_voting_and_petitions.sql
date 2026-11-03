@@ -464,3 +464,4 @@ CREATE POLICY "Residents can insert endorsement"
             WHERE ra.user_id = auth.uid() AND ra.apartment_id = petition_endorsements.apartment_id
         )
     );
+

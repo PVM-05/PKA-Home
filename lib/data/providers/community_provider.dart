@@ -43,3 +43,4 @@ final communityStatsProvider = FutureProvider<Map<String, int>>((ref) async {
     'resolvedPetitions': resolvedPetitions,
   };
 });
+
