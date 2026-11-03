@@ -31,10 +31,10 @@
   - Nâng cấp: `record_maintenance_fund_transaction` (kiểm tra `has_building_role`, `auth.uid()`, sinh số từ sequence)
   - Thu hồi quyền: `REVOKE EXECUTE ON FUNCTION public.simulate_unified_payment(...) FROM authenticated, anon, PUBLIC;`
 
-- [ ] **Step 1: Viết test kiểm tra migration SQL** (`test/database/financial_integrity_migration_test.dart`)
-- [ ] **Step 2: Viết migration SQL** (`supabase/migrations/20261104_01_financial_integrity_and_real_payment.sql`)
-- [ ] **Step 3: Chạy test xác minh**
-- [ ] **Step 4: Commit trực tiếp vào `main`**
+- [x] **Step 1: Viết test kiểm tra migration SQL** (`test/database/financial_integrity_migration_test.dart`) (5/5 tests pass)
+- [x] **Step 2: Viết migration SQL** (`supabase/migrations/20261104_01_financial_integrity_and_real_payment.sql`)
+- [x] **Step 3: Chạy test xác minh**
+- [x] **Step 4: Commit trực tiếp vào `main`**: `555ffdc`
 
 ---
 
@@ -48,10 +48,10 @@
 - Consumes: RPC `cancel_amenity_booking`.
 - Produces: `AmenityBookingRepository.cancelBooking(String bookingId)` ném ngoại lệ rõ ràng khi RPC thất bại, không thực hiện `update` ngầm.
 
-- [ ] **Step 1: Viết unit test xác nhận fail-closed** (`test/data/repositories/amenity_booking_fail_closed_test.dart`)
-- [ ] **Step 2: Xóa khối fallback cập nhật lén trong `cancelBooking()`**
-- [ ] **Step 3: Chạy test xác minh**
-- [ ] **Step 4: Commit trực tiếp vào `main`**
+- [x] **Step 1: Viết unit test xác nhận fail-closed** (`test/data/repositories/amenity_booking_fail_closed_test.dart`) (3/3 tests pass)
+- [x] **Step 2: Xóa khối fallback cập nhật lén trong `cancelBooking()`**
+- [x] **Step 3: Chạy test xác minh**
+- [x] **Step 4: Commit trực tiếp vào `main`**: `1075c97`
 
 ---
 
@@ -66,10 +66,10 @@
 - Consumes: RPC `create_payment_intent`.
 - Produces: `PaymentService.pay()` gọi `create_payment_intent`, trả về `PaymentResult` có `isPending = true` và `status = 'PENDING'`.
 
-- [ ] **Step 1: Viết unit test cho `PaymentService` & `PaymentResult`** (`test/data/services/payment_service_real_test.dart`)
-- [ ] **Step 2: Cập nhật `PaymentService` & `PaymentController`**
-- [ ] **Step 3: Chạy test xác minh**
-- [ ] **Step 4: Commit trực tiếp vào `main`**
+- [x] **Step 1: Viết unit test cho `PaymentService` & `PaymentResult`** (`test/data/services/payment_service_real_test.dart`) (5/5 tests pass)
+- [x] **Step 2: Cập nhật `PaymentService` & `PaymentController`**
+- [x] **Step 3: Chạy test xác minh**
+- [x] **Step 4: Commit trực tiếp vào `main`**: `4be448a`
 
 ---
 
@@ -82,9 +82,9 @@
 - Consumes: `PaymentController.pay()`.
 - Produces: Màn hình hiển thị `_PaymentStep.pendingConfirmation` thông báo rõ ràng cho cư dân đang chờ hệ thống ngân hàng đối soát.
 
-- [ ] **Step 1: Kiểm tra và hoàn thiện luồng hiển thị `_PaymentStep.pendingConfirmation` trong `UnifiedPaymentSheet`**
-- [ ] **Step 2: Chạy kiểm thử widget & tích hợp**
-- [ ] **Step 3: Commit trực tiếp vào `main`**
+- [x] **Step 1: Kiểm tra và hoàn thiện luồng hiển thị `_PaymentStep.pendingConfirmation` trong `UnifiedPaymentSheet`**
+- [x] **Step 2: Chạy kiểm thử widget & tích hợp** (2/2 tests pass)
+- [x] **Step 3: Commit trực tiếp vào `main`**: `aa7244a`
 
 ---
 
@@ -94,8 +94,8 @@
 - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md`
 - Knowledge Graph: `graphify-out/`
 
-- [ ] **Step 1: Chạy toàn bộ test suite Gói 2**
-- [ ] **Step 2: Chạy `dart analyze lib test` (0 lỗi, 0 cảnh báo)**
-- [ ] **Step 3: Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu hoàn tất Gói 2**
-- [ ] **Step 4: Cập nhật Knowledge Graph `python -m graphify update .`**
-- [ ] **Step 5: Commit nghiệm thu Gói 2 vào `main`**
+- [x] **Step 1: Chạy toàn bộ test suite Gói 2** (19/19 tests pass)
+- [x] **Step 2: Chạy `dart analyze lib test` (0 lỗi, 0 cảnh báo, 0 info)**
+- [x] **Step 3: Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu hoàn tất Gói 2**
+- [x] **Step 4: Cập nhật Knowledge Graph `python -m graphify update .`**
+- [x] **Step 5: Commit nghiệm thu Gói 2 vào `main`**

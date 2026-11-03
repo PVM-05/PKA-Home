@@ -63,19 +63,19 @@ graph TD
   - Nâng cấp `RoleGuard(buildingId: ...)` tự động nạp membership qua Riverpod để bảo vệ màn hình quản trị.
   - Đầy đủ test suite: 17/17 tests tự động pass 100%, Static Analysis 0 issues.
 
-#### Gói 2: Tính Toàn Vẹn Tài Chính & Thanh Toán Thật (FIN-01, FIN-02, FIN-03, SEC-04, SEC-05, OPS-FIX) - [ĐANG TRIỂN KHAI]
-- [ ] **FIN-01. Khai tử thanh toán giả lập `simulate_unified_payment`:**
-  - Vô hiệu hóa RPC giả lập trong production migration.
-  - `PaymentService.pay()` chỉ tạo giao dịch chờ thanh toán (`status = 'pending'`), xuất mã VietQR động Napas 247.
+#### Gói 2: Tính Toàn Vẹn Tài Chính & Thanh Toán Thật (FIN-01, FIN-02, FIN-03, SEC-04, SEC-05, OPS-FIX) - [HOÀN THÀNH 100%]
+- [x] **FIN-01. Khai tử thanh toán giả lập `simulate_unified_payment`:**
+  - Vô hiệu hóa RPC giả lập trong production migration (`20261104_01_financial_integrity_and_real_payment.sql`).
+  - `PaymentService.pay()` và `createPaymentIntent()` chỉ tạo giao dịch chờ thanh toán (`status = 'pending'`), xuất mã VietQR động Napas 247.
   - Tuyệt đối không tự động chuyển hóa đơn sang `paid` từ phía client.
-- [ ] **FIN-02. Củng cố Webhook gạch nợ ngân hàng (`process_bank_payment_webhook`):**
+- [x] **FIN-02. Củng cố Webhook gạch nợ ngân hàng (`process_bank_payment_webhook`):**
   - Khóa bản ghi `FOR UPDATE`, kiểm tra Idempotency Key chống replay attack.
   - Chỉ gạch nợ khi số tiền thực nhận khớp hoặc thừa, xử lý an toàn giao dịch thiếu/thừa/trùng.
-- [ ] **SEC-04. Bảo mật Sổ Quỹ Bảo Trì 2% (`record_maintenance_fund_transaction`):**
+- [x] **SEC-04. Bảo mật Sổ Quỹ Bảo Trì 2% (`record_maintenance_fund_transaction`):**
   - Tự động lấy `created_by = auth.uid()`, xác minh quyền kế toán của đúng tòa nhà (`has_building_role`).
-  - Thay thế cơ chế sinh số chứng từ `COUNT(*) + 1` bằng PostgreSQL Sequence an toàn chống race condition.
-- [ ] **OPS-FIX. Khắc phục Fail-Closed khi hủy tiện ích (`AmenityBookingRepository.cancelBooking`):**
-  - Loại bỏ fallback âm thầm cập nhật `cancelled` khi RPC thất bại, đảm bảo giao dịch fail-closed an toàn.
+  - Thay thế cơ chế sinh số chứng từ `COUNT(*) + 1` bằng PostgreSQL Sequences (`maintenance_fund_pt_seq`, `maintenance_fund_pc_seq`) kết hợp ràng buộc `UNIQUE(building_id, voucher_number)` an toàn chống race condition.
+- [x] **OPS-FIX. Khắc phục Fail-Closed khi hủy tiện ích (`AmenityBookingRepository.cancelBooking`):**
+  - Loại bỏ hoàn toàn fallback âm thầm cập nhật `cancelled` khi RPC thất bại, đảm bảo giao dịch fail-closed an toàn 100%.
 
 #### Gói 3: Hạ Tầng CI/CD & Làm Sạch Dữ Liệu (INF-01, INF-02) - [CHỜ TRIỂN KHAI]
 - [ ] **INF-01. Tự động hóa CI/CD GitHub Actions:**
