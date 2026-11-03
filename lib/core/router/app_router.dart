@@ -1,3 +1,4 @@
+import '../../features/management/screens/front_desk_workstation_screen.dart';
 import '../../features/management/screens/maintenance_materials_screen.dart';
 import '../../features/management/screens/parking_management_screen.dart';
 import '../../features/management/screens/accounting_web_workstation_screen.dart';
@@ -37,6 +38,7 @@ import '../../features/resident/screens/amenity_booking_screen.dart';
 import '../../features/resident/screens/resident_announcement_detail_screen.dart';
 import '../../features/resident/screens/payment_history_screen.dart';
 import '../../features/resident/screens/resident_meter_reading_screen.dart';
+import '../../features/resident/screens/resident_visitor_parcel_screen.dart';
 import '../../features/management/screens/management_home_screen.dart';
 import '../../features/management/screens/resident_management_screen.dart';
 import '../../features/management/screens/invoice_management_screen.dart';
@@ -277,6 +279,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
               state: state,
               child: const PaymentHistoryScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'visitor-parcel',
+            pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
+              state: state,
+              child: const ResidentVisitorParcelScreen(),
             ),
           ),
           GoRoute(
@@ -526,6 +535,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 AppPageTransitions.slideFromRight(
               state: state,
               child: const ParkingManagementScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'front-desk',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const FrontDeskWorkstationScreen(),
             ),
           ),
           GoRoute(

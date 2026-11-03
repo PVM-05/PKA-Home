@@ -26,3 +26,15 @@ final frontDeskStatsProvider = FutureProvider<FrontDeskStatsModel>((ref) async {
   return repo.fetchFrontDeskStats();
 });
 
+/// Danh sách vé khách của một căn hộ dành cho Cư dân
+final residentVisitorPassesProvider = FutureProvider.family<List<VisitorPassModel>, String>((ref, apartmentId) async {
+  final repo = ref.watch(frontDeskRepositoryProvider);
+  return repo.fetchVisitorPasses(apartmentId: apartmentId);
+});
+
+/// Danh sách bưu kiện của một căn hộ dành cho Cư dân
+final residentParcelsProvider = FutureProvider.family<List<ParcelModel>, String>((ref, apartmentId) async {
+  final repo = ref.watch(frontDeskRepositoryProvider);
+  return repo.fetchParcels(apartmentId: apartmentId);
+});
+

@@ -802,6 +802,14 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         ),
         const SizedBox(height: 10),
         buildServiceCard(
+          title: 'Đón khách & Bưu kiện',
+          subtitle: 'Tạo mã QR đón khách & Mã PIN nhận hàng',
+          icon: Icons.mark_as_unread_outlined,
+          color: const Color(0xFF673AB7),
+          onTap: () => context.push(AppRoutes.residentVisitorParcel),
+        ),
+        const SizedBox(height: 10),
+        buildServiceCard(
           title: 'Tiện ích chung',
           subtitle: 'BBQ, Hồ bơi, Phòng gym & Quy định sinh hoạt',
           icon: Icons.pool_outlined,
