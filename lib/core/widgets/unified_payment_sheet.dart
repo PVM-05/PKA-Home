@@ -90,7 +90,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         type: widget.type,
         referenceId: widget.referenceId,
         paymentMethod: _selectedMethod,
-        outcome: 'SUCCESS',
+        outcome: 'PENDING',
       );
 
       if (mounted) {
