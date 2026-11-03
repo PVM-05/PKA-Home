@@ -208,7 +208,20 @@ graph TD
 
 ### GIAI ĐOẠN E: Tính Năng Thông Minh (AI, OCR & Tối Ưu)
 - [x] **E1. OCR Đồng hồ điện nước thực tế & Cảnh báo bất thường:** Thuật toán OCR bóc tách công tơ điện cơ/điện tử & đồng hồ nước (`UtilityMeterOcrEngine`), tính điểm tin cậy OCR, engine phát hiện tiêu thụ bất thường (`UtilityAnomalyDetector`) gắn cờ chỉ số lùi, tăng vọt > 50% hoặc nhảy vọt cực đại > 2.5x so với mức trung bình kèm hộp thoại xác nhận và tab lọc bất thường cho Ban Quản Lý.
-- [ ] **AI phân loại sự cố:** Phân tích mô tả sự cố để tự động gán kỹ thuật viên phù hợp.
+- [x] **E2. AI Phân Loại Sự Cố & Tự Động Gán Kỹ Thuật Viên (Smart Issue Triage & Auto-Assignment):**
+  - Engine ngữ nghĩa tiếng Việt `IssueSmartTriageEngine`: Nhận diện 6 chuyên môn kỹ thuật (`electrical`, `plumbing`, `elevator`, `fire_safety`, `construction`, `other`), tính toán độ tin cậy ngữ cảnh, phân biệt tinh tế giữa cháy bóng đèn thông thường (Điện - thường) và chập cháy nổ/khói khét (PCCC/Điện - khẩn cấp), nhận diện tình huống nguy hiểm khẩn cấp (`isHazardous`).
+  - Migration CSDL & RPC Auto-Assignment PostgreSQL (`20261103_04_issue_smart_triage_and_auto_assign.sql`):
+    - Bổ sung các cột AI Triage vào `issue_reports`: `ai_category_confidence`, `ai_suggested_category`, `ai_suggested_priority`, `ai_triage_reason`, `is_hazardous`, `auto_assigned`.
+    - RPC `triage_and_auto_assign_issue(p_issue_id, p_auto_assign)`: Tự động phân loại sự cố và thực hiện phân bổ cân bằng tải (load-balancing) cho KTV phù hợp chuyên môn đang có ít sự cố mở nhất.
+  - Tầng Dữ liệu & Repository:
+    - Mở rộng `IssueModel`: bổ sung các trường AI Triage, `isHazardous`, `autoAssigned`, các getters hiển thị tiếng Việt và khôi phục toàn vẹn các getters SLA.
+    - Cập nhật `IssueRepository`: hỗ trợ lưu trữ metadata AI Triage khi tạo phản ánh và cung cấp method `autoAssignIssue(issueId)`.
+  - Giao diện Cư Dân & Ban Quản Lý:
+    - `CreateIssueScreen`: Gợi ý chuyên môn & mức ưu tiên 1 chạm thời gian thực khi gõ mô tả, banner cảnh báo khẩn cấp màu đỏ nổi bật kèm nút gọi ngay Hotline Ban Quản Lý (24/7) khi phát hiện sự cố nguy hiểm.
+    - `IssueManagementScreen`: Huy hiệu màu đỏ `NGUY HIỂM` trên thẻ sự cố khẩn cấp, chip tím `AI: Chuyên môn (XX%)` trên từng thẻ sự cố, nút hành động một chạm "Gán theo AI" tự động gán KTV theo thuật toán cân bằng tải.
+  - Chất lượng & Kiểm thử:
+    - 17/17 unit & widget tests E2 tự động pass 100%.
+    - Phân tích tĩnh `dart analyze` toàn bộ dự án đạt 0 issues.
 - [ ] **Dự báo nợ xấu & Nhắc nợ thông minh:** Dự đoán căn hộ có rủi ro trễ hạn để BQL chủ động chăm sóc.
 
 ---

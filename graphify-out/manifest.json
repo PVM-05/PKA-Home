@@ -582,9 +582,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/issue_model.dart": {
-    "mtime": 1793633510.576957,
-    "seen": 1793635204.7335231,
-    "ast_hash": "58ca3a4658e2a4e52b23e6e9596fd0ee",
+    "mtime": 1793689762.0979478,
+    "seen": 1793690076.4830112,
+    "ast_hash": "d7d6671b690949ddf510cace34b73573",
     "semantic_hash": ""
   },
   "lib/data/models/issue_rating_model.dart": {
@@ -606,8 +606,8 @@
     "semantic_hash": ""
   },
   "lib/data/models/meter_reading_submission_model.dart": {
-    "mtime": 1793686731.7606995,
-    "seen": 1793687673.7040741,
+    "mtime": 1793688721.0507553,
+    "seen": 1793690076.4830112,
     "ast_hash": "a9e4af4e0463a8807fef5bd6966fb37d",
     "semantic_hash": ""
   },
@@ -774,8 +774,8 @@
     "semantic_hash": ""
   },
   "lib/data/providers/meter_reading_provider.dart": {
-    "mtime": 1793686772.6530697,
-    "seen": 1793687673.7040741,
+    "mtime": 1793688721.095606,
+    "seen": 1793690076.4830112,
     "ast_hash": "c18e5185ca894943068e8c31cd959413",
     "semantic_hash": ""
   },
@@ -882,9 +882,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/issue_repository.dart": {
-    "mtime": 1793634554.516627,
-    "seen": 1793635204.7335231,
-    "ast_hash": "d22d0b595e66c1586945482ac79a2d86",
+    "mtime": 1793689429.4698694,
+    "seen": 1793690076.4830112,
+    "ast_hash": "61fec2f3662ffe0c63d5876051fd899f",
     "semantic_hash": ""
   },
   "lib/data/repositories/maintenance_fund_repository.dart": {
@@ -900,8 +900,8 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/meter_reading_repository.dart": {
-    "mtime": 1793686891.7636907,
-    "seen": 1793687673.7040741,
+    "mtime": 1793688721.1729956,
+    "seen": 1793690076.4830112,
     "ast_hash": "ef803ac98d64853b2f412777604c28f4",
     "semantic_hash": ""
   },
@@ -1062,9 +1062,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/issue_management_screen.dart": {
-    "mtime": 1793634289.5156577,
-    "seen": 1793635204.7335231,
-    "ast_hash": "6f4d44fbe6d9d654e3d9eb0a5f04c9f6",
+    "mtime": 1793689730.081725,
+    "seen": 1793690076.4830112,
+    "ast_hash": "6571c983785e91d6987b6be6301a21ff",
     "semantic_hash": ""
   },
   "lib/features/management/screens/link_request_management_screen.dart": {
@@ -1206,9 +1206,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/create_issue_screen.dart": {
-    "mtime": 1793634603.2209601,
-    "seen": 1793635204.7340853,
-    "ast_hash": "e39ddeb5498bddd73ecadd407ad0d209",
+    "mtime": 1793689594.059935,
+    "seen": 1793690076.4830112,
+    "ast_hash": "14ac1897251eed1ca34fb327911ad3a9",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/edit_issue_screen.dart": {
@@ -1668,8 +1668,8 @@
     "semantic_hash": ""
   },
   "test/data/models/meter_reading_submission_model_test.dart": {
-    "mtime": 1793686713.8744452,
-    "seen": 1793687673.7040741,
+    "mtime": 1793688721.2220604,
+    "seen": 1793690076.4830112,
     "ast_hash": "46ec813927b8bc2883d5b1770773c083",
     "semantic_hash": ""
   },
@@ -1944,8 +1944,8 @@
     "semantic_hash": ""
   },
   "test/data/repositories/meter_reading_repository_test.dart": {
-    "mtime": 1793686798.7745197,
-    "seen": 1793687673.7040741,
+    "mtime": 1793688721.2735107,
+    "seen": 1793690076.4840121,
     "ast_hash": "c0d876714eab92a49898e16092ff7c73",
     "semantic_hash": ""
   },
@@ -2340,8 +2340,8 @@
     "semantic_hash": ""
   },
   "test/features/resident/meter_reading_ocr_simulation_ui_test.dart": {
-    "mtime": 1793687296.2717483,
-    "seen": 1793687673.7040741,
+    "mtime": 1793688721.3705294,
+    "seen": 1793690076.4840121,
     "ast_hash": "723c6f655b119118cb7d7b1d4b414caa",
     "semantic_hash": ""
   },
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793686293.7104049,
-    "seen": 1793687673.7055802,
-    "ast_hash": "88f404b3642fad0852ca80aef364d793",
+    "mtime": 1793690012.6616983,
+    "seen": 1793690076.4840121,
+    "ast_hash": "83fc671fa8a1a3478334adcc4253bad6",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -5664,8 +5664,8 @@
     "semantic_hash": ""
   },
   "lib/core/utils/utility_meter_ocr_engine.dart": {
-    "mtime": 1793686578.865007,
-    "seen": 1793687673.7040741,
+    "mtime": 1793688720.9999058,
+    "seen": 1793690076.482014,
     "ast_hash": "83d8551ee1ae52aa7b0c58a85c017ef1",
     "semantic_hash": ""
   },
@@ -5700,15 +5700,69 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-03-meter-reading-ocr-and-anomaly-detection.md": {
-    "mtime": 1793686811.639923,
-    "seen": 1793687673.705883,
-    "ast_hash": "6661dab3cc679b2871b0bcf1380c156d",
+    "mtime": 1793687703.2049086,
+    "seen": 1793690076.4850132,
+    "ast_hash": "a762f183b792d256dde53ed93fac5aa5",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-03-meter-reading-ocr-and-anomaly-detection-design.md": {
     "mtime": 1793686811.7368371,
     "seen": 1793687673.705883,
     "ast_hash": "9c7b8e9b95f07af6ffa41bc67eaa2a86",
+    "semantic_hash": ""
+  },
+  "lib/core/utils/issue_smart_triage_engine.dart": {
+    "mtime": 1793688936.463089,
+    "seen": 1793690076.482014,
+    "ast_hash": "16938656e51ea41e53b77bc37f91b157",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261103_04_issue_smart_triage_and_auto_assign.sql": {
+    "mtime": 1793689034.979583,
+    "seen": 1793690076.4830112,
+    "ast_hash": "9b0cac2b0acb42c2532d412b54c1f8b3",
+    "semantic_hash": ""
+  },
+  "test/core/utils/issue_smart_triage_engine_test.dart": {
+    "mtime": 1793688863.838645,
+    "seen": 1793690076.4830112,
+    "ast_hash": "f5f2e6f4d031a76066ede8453fe34f88",
+    "semantic_hash": ""
+  },
+  "test/data/models/issue_model_smart_triage_test.dart": {
+    "mtime": 1793689069.304001,
+    "seen": 1793690076.4830112,
+    "ast_hash": "4994139ee7245552699ccb11e8c3027a",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/issue_smart_triage_repository_test.dart": {
+    "mtime": 1793689375.4224865,
+    "seen": 1793690076.4840121,
+    "ast_hash": "7ae38431ba353f9ebdb0fb8d80d09154",
+    "semantic_hash": ""
+  },
+  "test/database/issue_smart_triage_migration_test.dart": {
+    "mtime": 1793689015.7073598,
+    "seen": 1793690076.4840121,
+    "ast_hash": "97476d36dead586569eb802b38b397b0",
+    "semantic_hash": ""
+  },
+  "test/features/issue/issue_smart_triage_ui_test.dart": {
+    "mtime": 1793689885.5919344,
+    "seen": 1793690076.4840121,
+    "ast_hash": "edb966134000b090ce49eb272094212c",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-03-issue-smart-triage-and-auto-assign.md": {
+    "mtime": 1793689980.910801,
+    "seen": 1793690076.4850132,
+    "ast_hash": "0e136250f04339da3b4afe5df42966f7",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-03-issue-smart-triage-and-auto-assign-design.md": {
+    "mtime": 1793688863.6695924,
+    "seen": 1793690076.4850132,
+    "ast_hash": "06ced4451246e81cacab940531966f5e",
     "semantic_hash": ""
   }
 }
