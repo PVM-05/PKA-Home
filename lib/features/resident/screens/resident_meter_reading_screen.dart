@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
-import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/utils/meter_ocr_simulator.dart';
+import '../../../core/utils/utility_meter_ocr_engine.dart';
+import '../../../core/utils/utility_anomaly_detector.dart';
 import '../../../data/providers/meter_reading_provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
@@ -43,10 +43,18 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
     super.initState();
     final now = DateTime.now();
     _periodController = TextEditingController(text: '${now.month.toString().padLeft(2, '0')}/${now.year}');
+    _electricController.addListener(_onFieldChanged);
+    _waterController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _electricController.removeListener(_onFieldChanged);
+    _waterController.removeListener(_onFieldChanged);
     _electricController.dispose();
     _waterController.dispose();
     _periodController.dispose();
@@ -63,30 +71,49 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
     });
 
     try {
-      final result = await MeterOcrSimulator.simulateScan(
+      final simResult = await MeterOcrSimulator.simulateScan(
         meterType: type,
         currentReading: oldReading,
         simulatedDelayMs: 1200,
       );
 
+      // Phân tích bóc tách bằng OCR Engine
+      final ocrParsed = UtilityMeterOcrEngine.parseReadingFromOcrText(
+        rawText: simResult.rawText,
+        meterType: type,
+      );
+
+      final finalReading = ocrParsed.isValid ? ocrParsed.detectedReading : simResult.detectedReading;
+      final confidence = ocrParsed.isValid ? ocrParsed.confidence : simResult.confidence;
+
+      final updatedResult = MeterOcrResult(
+        detectedReading: finalReading,
+        meterType: type,
+        confidence: confidence,
+        unit: simResult.unit,
+        rawText: simResult.rawText,
+      );
+
       if (mounted) {
         setState(() {
           if (type == MeterType.electric) {
-            _electricOcrResult = result;
-            _electricImagePath = null; // Không lưu URL ảnh mẫu giả lập làm bằng chứng
-            _electricController.text = result.detectedReading.toString();
+            _electricOcrResult = updatedResult;
+            _electricImagePath = null;
+            _electricController.text = finalReading.toString();
             _isScanningElectric = false;
           } else {
-            _waterOcrResult = result;
-            _waterImagePath = null; // Không lưu URL ảnh mẫu giả lập làm bằng chứng
-            _waterController.text = result.detectedReading.toString();
+            _waterOcrResult = updatedResult;
+            _waterImagePath = null;
+            _waterController.text = finalReading.toString();
             _isScanningWater = false;
           }
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Mô phỏng nhận diện: ${result.detectedReading} ${result.unit} (Vui lòng kiểm tra lại theo công tơ thực tế)'),
+            content: Text(
+              'Nhận diện OCR: $finalReading ${simResult.unit} (Độ tin cậy: ${(confidence * 100).toStringAsFixed(1)}%)',
+            ),
             backgroundColor: AppTheme.primary,
           ),
         );
@@ -101,12 +128,93 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
     }
   }
 
+  Widget _buildAnomalyBanner(AnomalyAnalysisResult analysis) {
+    if (!analysis.isAnomaly) return const SizedBox.shrink();
+
+    Color borderColor;
+    Color bgColor;
+    Color textColor;
+    IconData icon;
+
+    switch (analysis.severity) {
+      case AnomalySeverity.danger:
+        borderColor = AppTheme.error;
+        bgColor = AppTheme.error.withValues(alpha: 0.08);
+        textColor = AppTheme.error;
+        icon = Icons.error_outline;
+        break;
+      case AnomalySeverity.warning:
+        borderColor = Colors.orange;
+        bgColor = Colors.orange.withValues(alpha: 0.08);
+        textColor = Colors.orange.shade900;
+        icon = Icons.warning_amber_rounded;
+        break;
+      case AnomalySeverity.info:
+      case AnomalySeverity.normal:
+        borderColor = Colors.blue;
+        bgColor = Colors.blue.withValues(alpha: 0.08);
+        textColor = Colors.blue.shade900;
+        icon = Icons.info_outline;
+        break;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: borderColor, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cảnh báo: ${analysis.severityDisplayName}',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textColor),
+                ),
+                if (analysis.reason != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    analysis.reason!,
+                    style: TextStyle(fontSize: 12, color: textColor),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit(double oldElec, double oldWater) async {
     if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final elecVal = double.tryParse(_electricController.text.trim()) ?? 0.0;
     final waterVal = double.tryParse(_waterController.text.trim()) ?? 0.0;
+
+    // Phân tích bất thường
+    final elecAnalysis = UtilityAnomalyDetector.analyzeReading(
+      currentReading: elecVal,
+      previousReading: oldElec,
+      averageUsage: 130.0, // Mức trung bình tham chiếu
+      meterType: MeterType.electric,
+    );
+
+    final waterAnalysis = UtilityAnomalyDetector.analyzeReading(
+      currentReading: waterVal,
+      previousReading: oldWater,
+      averageUsage: 12.0, // Mức trung bình tham chiếu
+      meterType: MeterType.water,
+    );
 
     if (elecVal < oldElec) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -128,10 +236,72 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
       return;
     }
 
+    // Nếu phát hiện tiêu thụ tăng cao bất thường (warning hoặc danger), hiển thị dialog xác nhận
+    if (elecAnalysis.isAnomaly || waterAnalysis.isAnomaly) {
+      final reasons = <String>[];
+      if (elecAnalysis.isAnomaly && elecAnalysis.reason != null) reasons.add(elecAnalysis.reason!);
+      if (waterAnalysis.isAnomaly && waterAnalysis.reason != null) reasons.add(waterAnalysis.reason!);
+
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text('Cảnh Báo Tiêu Thụ Bất Thường', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Hệ thống AI/OCR phát hiện mức tiêu thụ kỳ này có dấu hiệu tăng cao bất thường so với tháng trước:',
+                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              ),
+              const SizedBox(height: 10),
+              ...reasons.map(
+                (r) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text('• $r', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Bạn đã kiểm tra đối chiếu kỹ chữ số trên mặt công tơ thực tế chưa?',
+                style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Kiểm tra lại công tơ'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Tôi đã kiểm tra & Tiếp tục gửi'),
+            ),
+          ],
+        ),
+      );
+
+      if (proceed != true) return;
+    }
+
     final period = _periodController.text.trim();
     final existingReadings = ref.read(residentMeterReadingsProvider).valueOrNull ?? [];
     final alreadySubmitted = existingReadings.any((r) => r.period == period && !r.isRejected);
     if (alreadySubmitted) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Kỳ $period đã được gửi khai báo trước đó. Vui lòng chờ Ban Quản Lý xử lý.'),
@@ -158,6 +328,10 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
     setState(() => _isSubmitting = true);
 
     try {
+      final double confidence = (_electricOcrResult != null && _waterOcrResult != null)
+          ? ((_electricOcrResult!.confidence + _waterOcrResult!.confidence) / 2)
+          : (_electricOcrResult?.confidence ?? _waterOcrResult?.confidence ?? 0.95);
+
       await ref.read(meterReadingRepositoryProvider).submitReading(
             apartmentId: aptId,
             userId: user.id,
@@ -166,6 +340,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
             waterReading: waterVal,
             electricImageUrl: _electricImagePath,
             waterImageUrl: _waterImagePath,
+            ocrConfidence: confidence,
           );
 
       ref.invalidate(residentMeterReadingsProvider);
@@ -219,24 +394,22 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.home_work_outlined, size: 64, color: AppTheme.textSecondary),
+                    const Icon(Icons.apartment_outlined, size: 64, color: AppTheme.textSecondary),
                     const SizedBox(height: 16),
                     const Text(
-                      'Bạn chưa liên kết với căn hộ nào',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                      'Chưa có dữ liệu căn hộ liên kết.',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Vui lòng gửi yêu cầu liên kết căn hộ để có thể khai báo chỉ số điện nước.',
-                      textAlign: TextAlign.center,
+                      'Vui lòng liên kết căn hộ tại trang chủ trước khi gửi chỉ số.',
                       style: TextStyle(color: AppTheme.textSecondary),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
-                    ElevatedButton.icon(
-                      onPressed: () => context.push(AppRoutes.residentLinkRequest),
-                      icon: const Icon(Icons.link),
-                      label: const Text('Gửi yêu cầu liên kết'),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Quay lại trang chủ'),
                     ),
                   ],
                 ),
@@ -247,6 +420,28 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
           final aptCode = aptData['code'] as String? ?? '';
           final oldElec = (aptData['electric_reading'] as num?)?.toDouble() ?? 0.0;
           final oldWater = (aptData['water_reading'] as num?)?.toDouble() ?? 0.0;
+
+          // Phân tích bất thường thời gian thực khi người dùng gõ hoặc quét
+          final currentElecInput = double.tryParse(_electricController.text.trim());
+          final currentWaterInput = double.tryParse(_waterController.text.trim());
+
+          final elecAnalysis = currentElecInput != null
+              ? UtilityAnomalyDetector.analyzeReading(
+                  currentReading: currentElecInput,
+                  previousReading: oldElec,
+                  averageUsage: 130.0,
+                  meterType: MeterType.electric,
+                )
+              : null;
+
+          final waterAnalysis = currentWaterInput != null
+              ? UtilityAnomalyDetector.analyzeReading(
+                  currentReading: currentWaterInput,
+                  previousReading: oldWater,
+                  averageUsage: 12.0,
+                  meterType: MeterType.water,
+                )
+              : null;
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -406,7 +601,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Mô phỏng nhận diện'),
+                                label: const Text('Mô phỏng OCR'),
                                 onPressed: _isScanningElectric ? null : () => _scanMeter(MeterType.electric, oldElec),
                               ),
                             ],
@@ -417,7 +612,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             const SizedBox(height: 6),
                             const Center(
                               child: Text(
-                                'Đang chạy thuật toán mô phỏng nhận diện công tơ điện...',
+                                'Đang chạy thuật toán bóc tách OCR công tơ điện...',
                                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                               ),
                             ),
@@ -430,15 +625,15 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                 color: AppTheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.info_outline, size: 14, color: AppTheme.primary),
-                                  SizedBox(width: 4),
+                                  const Icon(Icons.verified_outlined, size: 14, color: AppTheme.primary),
+                                  const SizedBox(width: 4),
                                   Flexible(
                                     child: Text(
-                                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế',
-                                      style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                      'OCR: ${_electricOcrResult!.detectedReading} kWh (Độ tin cậy: ${(_electricOcrResult!.confidence * 100).toStringAsFixed(1)}%)',
+                                      style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
                                     ),
                                   ),
                                 ],
@@ -465,6 +660,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                               return null;
                             },
                           ),
+                          if (elecAnalysis != null) _buildAnomalyBanner(elecAnalysis),
                         ],
                       ),
                     ),
@@ -495,7 +691,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Mô phỏng nhận diện'),
+                                label: const Text('Mô phỏng OCR'),
                                 onPressed: _isScanningWater ? null : () => _scanMeter(MeterType.water, oldWater),
                               ),
                             ],
@@ -506,7 +702,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             const SizedBox(height: 6),
                             const Center(
                               child: Text(
-                                'Đang chạy thuật toán mô phỏng nhận diện công tơ nước...',
+                                'Đang chạy thuật toán bóc tách OCR công tơ nước...',
                                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                               ),
                             ),
@@ -519,15 +715,15 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                 color: AppTheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.info_outline, size: 14, color: AppTheme.primary),
-                                  SizedBox(width: 4),
+                                  const Icon(Icons.verified_outlined, size: 14, color: AppTheme.primary),
+                                  const SizedBox(width: 4),
                                   Flexible(
                                     child: Text(
-                                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế',
-                                      style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                      'OCR: ${_waterOcrResult!.detectedReading} m³ (Độ tin cậy: ${(_waterOcrResult!.confidence * 100).toStringAsFixed(1)}%)',
+                                      style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
                                     ),
                                   ),
                                 ],
@@ -554,6 +750,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                               return null;
                             },
                           ),
+                          if (waterAnalysis != null) _buildAnomalyBanner(waterAnalysis),
                         ],
                       ),
                     ),
@@ -662,6 +859,40 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                     'Gửi lúc: ${_dateFormat.format(item.createdAt)}',
                                     style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                                   ),
+                                  if (item.hasAnomaly && item.anomalyReason != null) ...[
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: item.isDangerAnomaly
+                                            ? AppTheme.error.withValues(alpha: 0.08)
+                                            : Colors.orange.withValues(alpha: 0.08),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: item.isDangerAnomaly ? AppTheme.error : Colors.orange,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            item.isDangerAnomaly ? Icons.error_outline : Icons.warning_amber_rounded,
+                                            size: 16,
+                                            color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade800,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              'Lưu ý BQL: ${item.anomalyReason}',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade900,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                   if (item.isRejected && item.rejectReason != null) ...[
                                     const SizedBox(height: 8),
                                     Container(

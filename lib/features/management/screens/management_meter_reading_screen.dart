@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
@@ -7,7 +7,7 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/meter_reading_submission_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/meter_reading_provider.dart';
-import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/network_error_handler.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/constants/permissions.dart';
 
@@ -26,7 +26,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -37,7 +37,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
 
   void _refreshAll() {
     ref.invalidate(allMeterReadingsProvider);
+    ref.invalidate(anomalyMeterReadingsProvider);
     ref.invalidate(pendingMeterReadingsCountProvider);
+    ref.invalidate(pendingAnomalyCountProvider);
   }
 
   Future<void> _showApproveDialog(MeterReadingSubmissionModel item) async {
@@ -73,6 +75,45 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   children: [
                     Text('Kỳ: ${item.period} • Người gửi: ${item.submitterName ?? 'Cư dân'}'),
                     const SizedBox(height: 12),
+
+                    // Cảnh báo nếu chỉ số có cờ bất thường
+                    if (item.hasAnomaly) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: item.isDangerAnomaly
+                              ? AppTheme.error.withValues(alpha: 0.1)
+                              : Colors.orange.withValues(alpha: 0.1),
+                          border: Border.all(
+                            color: item.isDangerAnomaly ? AppTheme.error : Colors.orange,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              item.isDangerAnomaly ? Icons.error_outline : Icons.warning_amber_rounded,
+                              color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade800,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Cảnh báo ${item.anomalySeverityDisplayName}: ${item.anomalyReason ?? ''}. Đề nghị kỹ thuật kiểm tra thực tế trước khi phát hành hóa đơn!',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -119,6 +160,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () => Navigator.pop(ctx, true),
                   child: const Text('Xác nhận duyệt'),
@@ -130,45 +172,38 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
       },
     );
 
-    if (confirmed == true && mounted) {
-      try {
-        await ref.read(meterReadingRepositoryProvider).approveReading(
-              submissionId: item.id,
-              generateInvoice: generateInvoice,
-              dueDate: generateInvoice ? defaultDueDate : null,
-            );
+    if (confirmed != true || !mounted) return;
 
-        _refreshAll();
+    try {
+      final res = await ref.read(meterReadingRepositoryProvider).approveReading(
+            submissionId: item.id,
+            generateInvoice: generateInvoice,
+            dueDate: defaultDueDate,
+          );
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                generateInvoice
-                    ? 'Đã duyệt chỉ số và tự động tạo hóa đơn tháng thành công!'
-                    : 'Đã duyệt chỉ số thành công!',
-              ),
-              backgroundColor: AppStatusColors.paid,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(formatErrorMessage(e)),
-              backgroundColor: AppTheme.error,
-            ),
-          );
-        }
+      _refreshAll();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? 'Đã phê duyệt chỉ số thành công!'),
+            backgroundColor: AppStatusColors.paid,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(NetworkErrorHandler.getMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
       }
     }
   }
 
   Future<void> _showRejectDialog(MeterReadingSubmissionModel item) async {
-    final user = ref.read(authProvider).valueOrNull;
-    if (user == null) return;
-
     final reasonController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
@@ -189,35 +224,32 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               ),
             ],
           ),
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Vui lòng nhập lý do từ chối để cư dân nắm được thông tin và khai báo lại:',
-                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Vui lòng nhập lý do từ chối để cư dân nắm được và thực hiện khai báo lại:',
+                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    hintText: 'VD: Ảnh chụp đồng hồ nước bị mờ, không rõ 2 số cuối...',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: reasonController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Lý do từ chối *',
-                      hintText: 'VD: Ảnh mờ không rõ số, số điện thấp hơn thực tế...',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return 'Vui lòng nhập lý do từ chối';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Vui lòng nhập lý do từ chối';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
           ),
           actions: [
@@ -229,6 +261,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.error,
                 foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () {
                 if (formKey.currentState?.validate() ?? false) {
@@ -242,32 +275,32 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
       },
     );
 
-    if (confirmed == true && mounted) {
-      try {
-        await ref.read(meterReadingRepositoryProvider).rejectReading(
-              submissionId: item.id,
-              reason: reasonController.text.trim(),
-            );
+    if (confirmed != true || !mounted) return;
 
-        _refreshAll();
+    try {
+      final res = await ref.read(meterReadingRepositoryProvider).rejectReading(
+            submissionId: item.id,
+            reason: reasonController.text.trim(),
+          );
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã từ chối chỉ số thành công.'),
-              backgroundColor: AppTheme.warning,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(formatErrorMessage(e)),
-              backgroundColor: AppTheme.error,
-            ),
-          );
-        }
+      _refreshAll();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? 'Đã từ chối chỉ số.'),
+            backgroundColor: AppTheme.textSecondary,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(NetworkErrorHandler.getMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
       }
     }
   }
@@ -282,7 +315,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
             mainAxisSize: MainAxisSize.min,
             children: [
               AppBar(
-                title: Text(title, style: const TextStyle(fontSize: 16)),
+                title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 automaticallyImplyLeading: false,
                 actions: [
                   IconButton(
@@ -291,19 +324,31 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   ),
                 ],
               ),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Text('Không thể tải hình ảnh công tơ'),
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broken_image, size: 48, color: AppTheme.textSecondary),
+                          SizedBox(height: 8),
+                          Text('Không thể tải ảnh minh chứng', style: TextStyle(color: AppTheme.textSecondary)),
+                        ],
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -316,67 +361,133 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
   @override
   Widget build(BuildContext context) {
     final pendingCountAsync = ref.watch(pendingMeterReadingsCountProvider);
+    final pendingAnomalyAsync = ref.watch(pendingAnomalyCountProvider);
 
     return RoleGuard(
       permission: AppPermissions.meterReadingManagement,
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Duyệt Chỉ Số Điện Nước'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Làm mới',
-            onPressed: _refreshAll,
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          indicatorColor: AppTheme.primary,
-          labelColor: AppTheme.primary,
-          unselectedLabelColor: AppTheme.textSecondary,
-          tabs: [
-            Tab(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Chờ duyệt'),
-                  const SizedBox(width: 6),
-                  pendingCountAsync.when(
-                    data: (count) => count > 0
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppTheme.error,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '$count',
-                              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, _) => const SizedBox.shrink(),
-                  ),
-                ],
-              ),
+        appBar: AppBar(
+          title: const Text('Duyệt Chỉ Số Điện Nước'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Làm mới',
+              onPressed: _refreshAll,
             ),
-            const Tab(text: 'Đã duyệt'),
-            const Tab(text: 'Đã từ chối'),
+          ],
+          bottom: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            indicatorColor: AppTheme.primary,
+            labelColor: AppTheme.primary,
+            unselectedLabelColor: AppTheme.textSecondary,
+            tabs: [
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Chờ duyệt'),
+                    const SizedBox(width: 6),
+                    pendingCountAsync.when(
+                      data: (count) => count > 0
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.error,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$count',
+                                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Bất thường'),
+                    const SizedBox(width: 6),
+                    pendingAnomalyAsync.when(
+                      data: (count) => count > 0
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade800,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$count',
+                                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+              const Tab(text: 'Đã duyệt'),
+              const Tab(text: 'Đã từ chối'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildSubmissionList('pending'),
+            _buildAnomalyList(),
+            _buildSubmissionList('approved'),
+            _buildSubmissionList('rejected'),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildSubmissionList('pending'),
-          _buildSubmissionList('approved'),
-          _buildSubmissionList('rejected'),
-        ],
+    );
+  }
+
+  Widget _buildAnomalyList() {
+    final anomaliesAsync = ref.watch(anomalyMeterReadingsProvider);
+
+    return RefreshIndicator(
+      onRefresh: () async => _refreshAll(),
+      child: anomaliesAsync.when(
+        data: (items) {
+          if (items.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.verified_outlined, size: 64, color: AppStatusColors.paid),
+                  SizedBox(height: 16),
+                  Text(
+                    'Không có chỉ số nào bị gắn cờ bất thường.',
+                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 15),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return _buildSubmissionCard(item, item.status);
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: AppErrorCard(error: e, onRetry: _refreshAll)),
       ),
-    ),
     );
   }
 
@@ -397,7 +508,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.check_circle_outline, size: 64, color: AppTheme.textSecondary),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Text(emptyMessage, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 15)),
                 ],
               ),
@@ -481,6 +592,64 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               ),
             ],
           ),
+
+          // Banner cảnh báo bất thường AI/OCR nếu có
+          if (item.hasAnomaly) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: item.isDangerAnomaly
+                    ? AppTheme.error.withValues(alpha: 0.08)
+                    : Colors.orange.withValues(alpha: 0.08),
+                border: Border.all(
+                  color: item.isDangerAnomaly ? AppTheme.error : Colors.orange,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        item.isDangerAnomaly ? Icons.error_outline : Icons.warning_amber_rounded,
+                        size: 16,
+                        color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade800,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Phát hiện bất thường: ${item.anomalySeverityDisplayName}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade900,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (item.anomalyReason != null && item.anomalyReason!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      item.anomalyReason!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade900,
+                      ),
+                    ),
+                  ],
+                  if (item.previousElectricReading != null || item.previousWaterReading != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '• Đối chiếu cũ: Điện ${item.previousElectricReading ?? '—'} kWh (TB: ${item.avgElectricUsage ?? '—'}) | Nước ${item.previousWaterReading ?? '—'} m³ (TB: ${item.avgWaterUsage ?? '—'})',
+                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: 12),
           const Divider(height: 1),
           const SizedBox(height: 12),
@@ -588,9 +757,21 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
 
           if (item.submitterName != null) ...[
             const SizedBox(height: 8),
-            Text(
-              'Người gửi: ${item.submitterName}',
-              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Người gửi: ${item.submitterName}',
+                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  'Độ tin cậy OCR: ${(item.ocrConfidence * 100).toStringAsFixed(1)}%',
+                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                ),
+              ],
             ),
           ],
 
@@ -617,7 +798,7 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
             ),
           ],
 
-          // Hành động nếu là Tab Chờ duyệt
+          // Hành động nếu là Tab Chờ duyệt hoặc Bất thường có status pending
           if (currentTabStatus == 'pending') ...[
             const SizedBox(height: 16),
             Row(
@@ -655,3 +836,4 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
     );
   }
 }
+
