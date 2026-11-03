@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/role_delegation_provider.dart';
+import '../../data/repositories/membership_repository.dart';
 import '../constants/permissions.dart';
 import '../theme/app_theme.dart';
 
@@ -10,11 +11,13 @@ import '../theme/app_theme.dart';
 /// dựa trên vai trò chính thức và các ủy quyền vai trò tạm thời đang có hiệu lực.
 class RoleGuard extends ConsumerWidget {
   final PermissionItem permission;
+  final String? buildingId;
   final Widget child;
   final Widget? fallback;
 
   const RoleGuard({
     required this.permission,
+    this.buildingId,
     required this.child,
     this.fallback,
     super.key,
@@ -25,9 +28,20 @@ class RoleGuard extends ConsumerWidget {
     final user = ref.watch(authProvider).valueOrNull;
     final activeDelegations = ref.watch(activeDelegationsProvider).valueOrNull ?? [];
 
+    List<String> contextBuildingRoles = const [];
+    if (buildingId != null && user != null) {
+      final membershipsAsync = ref.watch(userBuildingMembershipsProvider(user.id));
+      final memberships = membershipsAsync.valueOrNull ?? [];
+      contextBuildingRoles = memberships
+          .where((m) => m.buildingId == buildingId && m.isActive && !m.isExpired)
+          .map((m) => m.buildingRole)
+          .toList();
+    }
+
     final hasAccess = permission.allows(
       user?.role,
       activeDelegations: activeDelegations,
+      buildingRoles: contextBuildingRoles,
     );
 
     if (hasAccess) {
