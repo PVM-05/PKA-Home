@@ -379,3 +379,4 @@ CREATE POLICY "Residents can view their own apartment parcels"
             WHERE ra.user_id = auth.uid() AND ra.apartment_id = parcels.apartment_id
         )
     );
+
