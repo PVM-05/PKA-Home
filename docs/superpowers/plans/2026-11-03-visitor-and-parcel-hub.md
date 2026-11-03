@@ -25,11 +25,11 @@
   - Test: `test/integration/visitor_and_parcel_migration_test.dart`
 - **Interfaces:**
   - Produces: Migration SQL hợp lệ và các RPCs `check_in_visitor_pass`, `check_out_visitor_pass`, `collect_parcel`, `get_front_desk_stats`.
-- [ ] **Step 1:** Viết failing test `test/integration/visitor_and_parcel_migration_test.dart`.
-- [ ] **Step 2:** Chạy test để xác nhận test fail.
-- [ ] **Step 3:** Tạo migration `supabase/migrations/20261103_01_visitor_and_parcel_hub.sql`.
-- [ ] **Step 4:** Chạy test xác minh 100% test pass.
-- [ ] **Step 5:** Commit: `feat(db): migration sql dang ky khach qr va buu kien le tan D6`.
+- [x] **Step 1:** Viết failing test `test/integration/visitor_and_parcel_migration_test.dart`.
+- [x] **Step 2:** Chạy test để xác nhận test fail.
+- [x] **Step 3:** Tạo migration `supabase/migrations/20261103_01_visitor_and_parcel_hub.sql`.
+- [x] **Step 4:** Chạy test xác minh 100% test pass.
+- [x] **Step 5:** Commit: `feat(db): migration sql dang ky khach qr va buu kien le tan D6`.
 
 ---
 
@@ -45,11 +45,11 @@
 - **Interfaces:**
   - Consumes: JSON từ Supabase tables `visitor_access_passes`, `parcels`.
   - Produces: `VisitorPassModel`, `ParcelModel`, `FrontDeskStatsModel` với đầy đủ getters logic hiển thị.
-- [ ] **Step 1:** Viết failing unit tests cho các models.
-- [ ] **Step 2:** Chạy tests để xác nhận fail.
-- [ ] **Step 3:** Cài đặt các models.
-- [ ] **Step 4:** Chạy unit tests xác minh 100% pass.
-- [ ] **Step 5:** Commit: `feat(data): them models ve khach va buu kien le tan D6`.
+- [x] **Step 1:** Viết failing unit tests cho các models.
+- [x] **Step 2:** Chạy tests để xác nhận fail.
+- [x] **Step 3:** Cài đặt các models.
+- [x] **Step 4:** Chạy unit tests xác minh 100% pass.
+- [x] **Step 5:** Commit: `feat(data): them models ve khach va buu kien le tan D6`.
 
 ---
 
@@ -62,11 +62,11 @@
 - **Interfaces:**
   - Consumes: Models từ Task 2.
   - Produces: `FrontDeskRepository` với các phương thức nghiệp vụ và providers cho BQL và Cư dân.
-- [ ] **Step 1:** Viết failing test `front_desk_repository_test.dart`.
-- [ ] **Step 2:** Chạy test để xác nhận fail.
-- [ ] **Step 3:** Cài đặt `front_desk_repository.dart` và `front_desk_provider.dart`.
-- [ ] **Step 4:** Chạy test xác minh 100% pass.
-- [ ] **Step 5:** Commit: `feat(data): them repository va provider quan ly sanh le tan D6`.
+- [x] **Step 1:** Viết failing test `front_desk_repository_test.dart`.
+- [x] **Step 2:** Chạy test để xác nhận fail.
+- [x] **Step 3:** Cài đặt `front_desk_repository.dart` và `front_desk_provider.dart`.
+- [x] **Step 4:** Chạy test xác minh 100% pass.
+- [x] **Step 5:** Commit: `feat(data): them repository va provider quan ly sanh le tan D6`.
 
 ---
 
@@ -80,11 +80,11 @@
 - **Interfaces:**
   - Consumes: `FrontDeskRepository`, `front_desk_provider.dart`.
   - Produces: Màn hình trạm làm việc lễ tân thích ứng đa nền tảng.
-- [ ] **Step 1:** Viết widget test `front_desk_workstation_screen_test.dart`.
-- [ ] **Step 2:** Chạy test để xác nhận fail.
-- [ ] **Step 3:** Cài đặt các màn hình và widgets BQL.
-- [ ] **Step 4:** Chạy widget test xác minh pass.
-- [ ] **Step 5:** Commit: `feat(ui): tram lam viec le tan an ninh va tiep nhan buu kien D6`.
+- [x] **Step 1:** Viết widget test `front_desk_workstation_screen_test.dart`.
+- [x] **Step 2:** Chạy test để xác nhận fail.
+- [x] **Step 3:** Cài đặt các màn hình và widgets BQL.
+- [x] **Step 4:** Chạy widget test xác minh pass.
+- [x] **Step 5:** Commit: `feat(ui): tram lam viec le tan an ninh va tiep nhan buu kien D6`.
 
 ---
 
@@ -93,18 +93,20 @@
 - **Files:**
   - Create: `lib/features/resident/screens/resident_visitor_parcel_screen.dart`
   - Create: `lib/features/resident/widgets/create_visitor_pass_sheet.dart`
+  - Create: `lib/features/resident/widgets/visitor_pass_qr_sheet.dart`
   - Modify: `lib/core/router/route_names.dart`
   - Modify: `lib/core/router/app_router.dart`
   - Modify: `lib/features/management/screens/management_home_screen.dart`
   - Modify: `lib/features/resident/screens/resident_home_screen.dart`
+  - Test: `test/features/resident/screens/resident_visitor_parcel_screen_test.dart`
   - Test: `test/integration/visitor_and_parcel_workflow_integration_test.dart`
 - **Interfaces:**
   - Consumes: Mọi tính năng từ Task 1-4.
   - Produces: Luồng khép kín từ cư dân tạo vé đón khách -> bảo vệ check-in -> shipper gửi bưu phẩm -> cư dân dùng mã PIN nhận hàng.
-- [ ] **Step 1:** Cài đặt màn hình cư dân, routes và lối tắt Dashboard.
-- [ ] **Step 2:** Viết integration test luồng toàn diện.
-- [ ] **Step 3:** Chạy test xác minh 100% pass.
-- [ ] **Step 4:** Commit: `feat(management): tich hop ve khach va buu kien vao ung dung D6`.
+- [x] **Step 1:** Cài đặt màn hình cư dân, routes và lối tắt Dashboard.
+- [x] **Step 2:** Viết integration test luồng toàn diện.
+- [x] **Step 3:** Chạy test xác minh 100% pass.
+- [x] **Step 4:** Commit: `feat(management): tich hop ve khach va buu kien vao ung dung D6`.
 
 ---
 
@@ -113,8 +115,8 @@
 - **Files:**
   - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md`
   - Modify: `docs/superpowers/plans/2026-11-03-visitor-and-parcel-hub.md`
-- [ ] **Step 1:** Chạy `dart analyze` toàn dự án (đạt 0 issue).
-- [ ] **Step 2:** Chạy `flutter test` toàn dự án (100% pass).
-- [ ] **Step 3:** Chạy `python -m graphify update .` đồng bộ Knowledge Graph.
-- [ ] **Step 4:** Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu `[x] D6`.
-- [ ] **Step 5:** Commit: `feat: hoan tat D6 an ninh dang ky khach va buu kien le tan`.
+- [x] **Step 1:** Chạy `dart analyze` toàn dự án (đạt 0 issue).
+- [x] **Step 2:** Chạy toàn bộ test suite D6 (100% pass: 22/22 tests).
+- [x] **Step 3:** Chạy `python -m graphify update .` đồng bộ Knowledge Graph (8.881 nodes, 12.518 edges).
+- [x] **Step 4:** Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu `[x] D6`.
+- [x] **Step 5:** Commit: `feat: hoan tat D6 an ninh dang ky khach va buu kien le tan`.

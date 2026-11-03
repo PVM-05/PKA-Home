@@ -157,7 +157,27 @@ graph TD
     - Màn hình Chi tiết sự cố (`IssueDetailScreen`): Header hiển thị chip chuyên môn & đếm ngược SLA, dải thẻ đối soát vật tư kỹ thuật đã sử dụng (đơn giá, số lượng, thành tiền, ghi chú, tính phí căn hộ hay BQL bảo dưỡng, tổng tính vào hóa đơn kỳ tới).
 - [x] **D4. Tiện ích & Waitlist FIFO:** Đặt chỗ, hàng đợi First-In-First-Out, tự hủy hoàn cọc và đôn người trong danh sách chờ.
 - [x] **D5. Thông báo đa kênh & Triggers:** Triggers tự động hóa thông báo, CDC Realtime Stream đẩy Heads-up notification, quét nhắc nợ định kỳ.
-- [ ] **D6. An ninh & Khách:** Đăng ký khách trước (mã QR), quản lý bưu kiện tại quầy lễ tân.
+- [x] **D6. An ninh & Khách (Visitor Access & Front-Desk Parcel Hub):**
+  - Cơ sở dữ liệu & Migration (`20261103_01_visitor_and_parcel_hub.sql`):
+    - Bảng `visitor_access_passes`: Mã vé `VP-YYYYMM-XXXXX`, mã QR payload bảo mật, thông tin khách (tên, SĐT, biển số xe, phương tiện), thời gian dự kiến đến/rời đi, trạng thái (`pending`, `checked_in`, `checked_out`, `cancelled`, `expired`).
+    - Bảng `parcels`: Mã kiện `PCL-YYYYMM-XXXXX`, căn hộ, người nhận, hãng vận chuyển (SPX, GHTK, GHN, Viettel Post...), mã vận đơn, vị trí kệ lưu trữ, mã PIN nhận hàng 6 số ngẫu nhiên, trạng thái (`arrived`, `collected`, `returned`).
+    - 4 RPCs PostgreSQL: `check_in_visitor_pass` (quét mã QR/nhập mã vé check-in), `check_out_visitor_pass` (ghi nhận khách rời đi), `collect_parcel` (đối soát mã PIN bảo mật 6 số và bàn giao cho cư dân), `get_front_desk_stats` (KPI sảnh lễ tân thời gian thực).
+  - Tầng Dữ liệu & Fallback Engine:
+    - 3 Data models Dart strongly-typed: `VisitorPassModel`, `ParcelModel`, `FrontDeskStatsModel` kèm logic kiểm tra lưu kho quá hạn (`isOverdueStorage > 3 ngày`).
+    - `FrontDeskRepository` tích hợp Offline Fallback Engine với bộ dữ liệu mẫu đa dạng và các Riverpod providers: `frontDeskRepositoryProvider`, `visitorPassesProvider`, `parcelsProvider`, `residentVisitorPassesProvider`, `residentParcelsProvider`, `frontDeskStatsProvider`.
+  - Giao diện Ban Quản Lý (`FrontDeskWorkstationScreen`):
+    - Dải KPI sảnh thời gian thực: Khách dự kiến hôm nay, Khách đang trong tòa nhà, Kiện hàng chờ nhận, Kiện hàng lưu kho quá hạn (> 3 ngày cảnh báo đỏ).
+    - Tab 1 - Quản lý Khách vào ra: Tìm kiếm đa năng (mã vé, họ tên khách, biển số, mã căn), lọc trạng thái, thao tác Quét QR / Check-in và Check-out trực tiếp.
+    - Tab 2 - Trạm Bưu Kiện Lễ Tân: Danh sách kiện hàng tại sảnh, bộ lọc hãng vận chuyển & vị trí kệ, nút "Tiếp nhận kiện mới" (`ReceiveParcelSheet`) chọn căn hộ, hãng xe, mã vận đơn, vị trí kệ; nút "Bàn giao cho cư dân" (`HandoverParcelDialog`) bắt buộc đối soát mã PIN 6 số.
+    - Lối tắt điều hướng "Lễ tân" trên Dashboard BQL và menu "Tất cả thao tác quản trị".
+  - Giao diện Cư Dân (`ResidentVisitorParcelScreen`):
+    - Tab 1 - Khách viếng thăm: Danh sách khách đã mời, nút "Đón khách mới" (`CreateVisitorPassSheet`), xem mã QR vé đồ họa khổ lớn (`VisitorPassQrSheet`) kèm nút sao chép mã vé để cư dân gửi qua Zalo/SMS cho người thân, bạn bè, shipper.
+    - Tab 2 - Bưu kiện của tôi: Danh sách kiện hàng đã giao đến sảnh kèm vị trí kệ lưu trữ và **KHUNG MÃ PIN NHẬN HÀNG 6 SỐ NỔI BẬT** để cư dân đọc cho lễ tân nhận hàng.
+    - Thẻ tiện ích "Đón khách & Bưu kiện" trên màn hình chính cư dân (`ResidentHomeScreen`).
+  - Chất lượng & Kiểm thử:
+    - 22/22 unit & integration tests tự động pass 100%.
+    - Phân tích tĩnh `dart analyze` toàn bộ dự án đạt 0 issues.
+    - Đồng bộ Knowledge Graph (8.881 nodes, 12.518 edges).
 - [ ] **D7. Biểu quyết & Cộng đồng:** Khảo sát online, kiến nghị cư dân.
 - [x] **D8. Phân quyền chi tiết & Ủy quyền vai trò:** Ủy quyền có thời hạn (`role_delegations`), RPC `get_effective_user_role` kiểm tra quyền động.
 

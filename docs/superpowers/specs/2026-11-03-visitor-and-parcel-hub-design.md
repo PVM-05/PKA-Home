@@ -145,3 +145,4 @@ CREATE TABLE public.parcels (
 - **Static Analysis:** `dart analyze` toàn bộ codebase đạt 0 issues (0 errors, 0 warnings).
 - **Quy tắc thiết kế:** 100% tiếng Việt chuẩn mực, không hardcode màu sắc, co giãn linh hoạt word-wrap.
 - **Commit:** Commit trực tiếp trên nhánh `main`.
+
