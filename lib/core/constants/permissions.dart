@@ -15,12 +15,17 @@ class PermissionItem {
     required this.allowedRoles,
   });
 
-  /// Kiểm tra xem vai trò hiện tại (kèm danh sách ủy quyền tạm thời đang active)
-  /// có được phép truy cập chức năng này không.
-  bool allows(String? role, {List<String> activeDelegations = const []}) {
-    if (role == null) return false;
-    if (allowedRoles.contains(role)) return true;
-    return activeDelegations.any((delRole) => allowedRoles.contains(delRole));
+  /// Kiểm tra xem vai trò hiện tại (kèm danh sách ủy quyền tạm thời đang active
+  /// và vai trò theo ngữ cảnh tòa nhà) có được phép truy cập chức năng này không.
+  bool allows(
+    String? role, {
+    List<String> activeDelegations = const [],
+    List<String> buildingRoles = const [],
+  }) {
+    if (role == null && buildingRoles.isEmpty) return false;
+    if (role != null && allowedRoles.contains(role)) return true;
+    if (activeDelegations.any((delRole) => allowedRoles.contains(delRole))) return true;
+    return buildingRoles.any((bRole) => allowedRoles.contains(bRole));
   }
 }
 
