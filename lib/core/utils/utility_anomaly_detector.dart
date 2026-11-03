@@ -119,3 +119,4 @@ class UtilityAnomalyDetector {
     return AnomalyAnalysisResult.normal(deltaUsage: deltaUsage);
   }
 }
+
