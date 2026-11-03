@@ -101,3 +101,4 @@ RPC PostgreSQL: `triage_and_auto_assign_issue(p_issue_id UUID)`
 - Nếu chưa có `assigned_staff_id`, truy vấn danh sách nhân viên kỹ thuật có chuyên môn tương ứng hoặc vai trò kỹ thuật/bảo trì (`role IN ('staff', 'technician')`).
 - Chọn nhân viên có ít sự cố đang xử lý nhất (`status IN ('assigned', 'in_progress')`).
 - Tự động gán `assigned_staff_id`, cập nhật trạng thái `status = 'assigned'` và ghi lịch sử phân công.
+
