@@ -601,7 +601,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Mô phỏng OCR'),
+                                label: const Text('Mô phỏng nhận diện'),
                                 onPressed: _isScanningElectric ? null : () => _scanMeter(MeterType.electric, oldElec),
                               ),
                             ],
@@ -612,7 +612,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             const SizedBox(height: 6),
                             const Center(
                               child: Text(
-                                'Đang chạy thuật toán bóc tách OCR công tơ điện...',
+                                'Đang chạy thuật toán mô phỏng nhận diện công tơ điện...',
                                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                               ),
                             ),
@@ -632,7 +632,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   const SizedBox(width: 4),
                                   Flexible(
                                     child: Text(
-                                      'OCR: ${_electricOcrResult!.detectedReading} kWh (Độ tin cậy: ${(_electricOcrResult!.confidence * 100).toStringAsFixed(1)}%)',
+                                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế (OCR: ${_electricOcrResult!.detectedReading} kWh)',
                                       style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
                                     ),
                                   ),
@@ -691,7 +691,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.document_scanner_outlined, size: 16),
-                                label: const Text('Mô phỏng OCR'),
+                                label: const Text('Mô phỏng nhận diện'),
                                 onPressed: _isScanningWater ? null : () => _scanMeter(MeterType.water, oldWater),
                               ),
                             ],
@@ -702,7 +702,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                             const SizedBox(height: 6),
                             const Center(
                               child: Text(
-                                'Đang chạy thuật toán bóc tách OCR công tơ nước...',
+                                'Đang chạy thuật toán mô phỏng nhận diện công tơ nước...',
                                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                               ),
                             ),
@@ -722,7 +722,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
                                   const SizedBox(width: 4),
                                   Flexible(
                                     child: Text(
-                                      'OCR: ${_waterOcrResult!.detectedReading} m³ (Độ tin cậy: ${(_waterOcrResult!.confidence * 100).toStringAsFixed(1)}%)',
+                                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế (OCR: ${_waterOcrResult!.detectedReading} m³)',
                                       style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
                                     ),
                                   ),
@@ -1175,3 +1175,7 @@ class _ResidentMeterReadingScreenState extends ConsumerState<ResidentMeterReadin
     );
   }
 }
+
+
+
+
