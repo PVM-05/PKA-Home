@@ -25,3 +25,4 @@ final frontDeskStatsProvider = FutureProvider<FrontDeskStatsModel>((ref) async {
   final repo = ref.watch(frontDeskRepositoryProvider);
   return repo.fetchFrontDeskStats();
 });
+
