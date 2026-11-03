@@ -32,6 +32,12 @@ class IssueRepository {
     String category = 'other',
     File? imageFile,
     List<File>? imageFiles,
+    double? aiCategoryConfidence,
+    String? aiSuggestedCategory,
+    String? aiSuggestedPriority,
+    String? aiTriageReason,
+    bool isHazardous = false,
+    bool autoAssign = false,
   }) async {
     // 1. Get apartment_id
     String targetApartmentId = apartmentId ?? '';
@@ -55,6 +61,11 @@ class IssueRepository {
       'description': description,
       'priority': priority,
       'category': category,
+      'ai_category_confidence': ?aiCategoryConfidence,
+      'ai_suggested_category': ?aiSuggestedCategory,
+      'ai_suggested_priority': ?aiSuggestedPriority,
+      'ai_triage_reason': ?aiTriageReason,
+      'is_hazardous': isHazardous,
     }).select().single();
     
     final issueId = issueData['id'] as String;
@@ -90,10 +101,27 @@ class IssueRepository {
       }
     }
 
+    if (autoAssign) {
+      try {
+        await autoAssignIssue(issueId, autoAssign: true);
+      } catch (e, stack) {
+        AppLogger.w('Không thể tự động gán kỹ thuật viên cho sự cố $issueId: $e', e, stack);
+      }
+    }
+
     return CreateIssueResult(
       issueId: issueId,
       imageUploadFailed: imageUploadFailed,
     );
+  }
+
+  /// Gọi RPC phân loại và tự động gán KTV theo chuyên môn và cân bằng tải
+  Future<Map<String, dynamic>> autoAssignIssue(String issueId, {bool autoAssign = true}) async {
+    final response = await _client.rpc('triage_and_auto_assign_issue', params: {
+      'p_issue_id': issueId,
+      'p_auto_assign': autoAssign,
+    });
+    return Map<String, dynamic>.from(response as Map);
   }
 
   Stream<List<Map<String, dynamic>>> streamIssues({String? userId, String? apartmentId}) async* {

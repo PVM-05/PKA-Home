@@ -36,6 +36,12 @@ class IssueModel {
   final DateTime? acknowledgedAt;
   final DateTime? resolvedAt;
   final String slaStatus; // 'on_time', 'warning', 'breached'
+  final double aiCategoryConfidence;
+  final String? aiSuggestedCategory;
+  final String? aiSuggestedPriority;
+  final String? aiTriageReason;
+  final bool isHazardous;
+  final bool autoAssigned;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final ApartmentModel? apartment;
@@ -59,6 +65,12 @@ class IssueModel {
     this.acknowledgedAt,
     this.resolvedAt,
     this.slaStatus = 'on_time',
+    this.aiCategoryConfidence = 0.0,
+    this.aiSuggestedCategory,
+    this.aiSuggestedPriority,
+    this.aiTriageReason,
+    this.isHazardous = false,
+    this.autoAssigned = false,
     required this.createdAt,
     this.updatedAt,
     this.apartment,
@@ -81,6 +93,9 @@ class IssueModel {
     return images.where((i) => i.isResolutionProof).map((i) => i.imageUrl).toList();
   }
 
+  /// Có phân tích AI Triage với độ tin cậy cao
+  bool get hasAiTriage => aiCategoryConfidence >= 0.70 || aiSuggestedCategory != null;
+
   /// Tên chuyên môn hiển thị tiếng Việt
   String get categoryDisplayName {
     switch (category.toLowerCase()) {
@@ -100,42 +115,96 @@ class IssueModel {
     }
   }
 
-  /// Trạng thái SLA thời gian thực
-  bool get isSlaBreached {
-    if (slaStatus == 'breached') return true;
-    if (status != 'resolved' && slaDeadline != null) {
-      return DateTime.now().isAfter(slaDeadline!);
+  /// Tên chuyên môn AI đề xuất hiển thị tiếng Việt
+  String get aiSuggestedCategoryDisplayName {
+    if (aiSuggestedCategory == null) return categoryDisplayName;
+    switch (aiSuggestedCategory!.toLowerCase()) {
+      case 'electrical':
+        return 'Điện / Thiết bị điện';
+      case 'plumbing':
+        return 'Nước / Cấp thoát nước';
+      case 'construction':
+        return 'Xây dựng / Hoàn thiện';
+      case 'elevator':
+        return 'Thang máy';
+      case 'fire_safety':
+        return 'PCCC & An toàn';
+      case 'other':
+      default:
+        return 'Sự cố khác';
     }
-    if (resolvedAt != null && slaDeadline != null) {
-      return resolvedAt!.isAfter(slaDeadline!);
-    }
-    return false;
   }
 
-  bool get isSlaWarning {
-    if (status == 'resolved' || isSlaBreached || slaDeadline == null) return false;
-    final remaining = slaDeadline!.difference(DateTime.now());
-    return remaining.inMinutes > 0 && remaining.inMinutes <= 120; // Còn dưới 2 giờ
+  /// Mức ưu tiên AI đề xuất
+  String get aiSuggestedPriorityDisplayName {
+    if (aiSuggestedPriority == null) return priorityDisplayName;
+    switch (aiSuggestedPriority!.toLowerCase()) {
+      case 'high':
+        return 'Khẩn cấp (2h)';
+      case 'medium':
+        return 'Ưu tiên (24h)';
+      case 'low':
+      default:
+        return 'Thường (72h)';
+    }
   }
 
-  /// Định dạng thời gian SLA còn lại hoặc trễ hạn
-  String get slaRemainingFormatted {
-    if (slaDeadline == null) return 'Chưa có SLA';
+  /// Mức ưu tiên hiển thị tiếng Việt
+  String get priorityDisplayName {
+    switch (priority.toLowerCase()) {
+      case 'high':
+        return 'Khẩn cấp (2h)';
+      case 'medium':
+        return 'Ưu tiên (24h)';
+      case 'low':
+      default:
+        return 'Thường (72h)';
+    }
+  }
+
+  /// Trạng thái SLA hiển thị tiếng Việt
+  String get slaStatusDisplayName {
+    switch (slaStatus.toLowerCase()) {
+      case 'warning':
+        return 'Sắp trễ hạn';
+      case 'breached':
+        return 'Đã trễ hạn';
+      case 'on_time':
+      default:
+        return 'Đúng hạn';
+    }
+  }
+
+  /// Trạng thái sự cố tiếng Việt
+  String get statusDisplayName {
+    switch (status.toLowerCase()) {
+      case 'assigned':
+        return 'Đã phân công';
+      case 'in_progress':
+        return 'Đang xử lý';
+      case 'resolved':
+        return 'Đã giải quyết';
+      case 'closed':
+        return 'Đã đóng';
+      case 'reported':
+      case 'pending':
+      default:
+        return 'Chờ tiếp nhận';
+    }
+  }
+
+  /// Tính thời gian còn lại trước hạn chót SLA
+  String get slaRemainingText {
+    if (slaDeadline == null) return 'Không có hạn SLA';
     final now = DateTime.now();
-
-    if (status == 'resolved') {
-      if (resolvedAt != null && resolvedAt!.isAfter(slaDeadline!)) {
-        final diff = resolvedAt!.difference(slaDeadline!);
-        return 'Hoàn thành trễ (${diff.inHours}h ${diff.inMinutes % 60}p)';
-      }
-      return 'Đã hoàn thành đúng hạn';
+    if (status == 'resolved' || status == 'closed') {
+      return 'Đã hoàn tất';
     }
-
     if (now.isAfter(slaDeadline!)) {
-      final diff = now.difference(slaDeadline!);
-      if (diff.inDays > 0) return 'Trễ hạn ${diff.inDays} ngày';
-      if (diff.inHours > 0) return 'Trễ hạn ${diff.inHours}h ${diff.inMinutes % 60}p';
-      return 'Trễ hạn ${diff.inMinutes} phút';
+      final overdue = now.difference(slaDeadline!);
+      if (overdue.inDays > 0) return 'Quá hạn ${overdue.inDays} ngày';
+      if (overdue.inHours > 0) return 'Quá hạn ${overdue.inHours}h ${overdue.inMinutes % 60}p';
+      return 'Quá hạn ${overdue.inMinutes} phút';
     }
 
     final diff = slaDeadline!.difference(now);
@@ -182,6 +251,12 @@ class IssueModel {
       acknowledgedAt: json['acknowledged_at'] != null ? DateTime.parse(json['acknowledged_at']) : null,
       resolvedAt: json['resolved_at'] != null ? DateTime.parse(json['resolved_at']) : null,
       slaStatus: json['sla_status'] as String? ?? 'on_time',
+      aiCategoryConfidence: (json['ai_category_confidence'] as num?)?.toDouble() ?? 0.0,
+      aiSuggestedCategory: json['ai_suggested_category'] as String?,
+      aiSuggestedPriority: json['ai_suggested_priority'] as String?,
+      aiTriageReason: json['ai_triage_reason'] as String?,
+      isHazardous: json['is_hazardous'] as bool? ?? false,
+      autoAssigned: json['auto_assigned'] as bool? ?? false,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       apartment: json['apartments'] != null ? ApartmentModel.fromJson(json['apartments']) : null,
@@ -214,6 +289,12 @@ class IssueModel {
       'acknowledged_at': acknowledgedAt?.toIso8601String(),
       'resolved_at': resolvedAt?.toIso8601String(),
       'sla_status': slaStatus,
+      'ai_category_confidence': aiCategoryConfidence,
+      if (aiSuggestedCategory != null) 'ai_suggested_category': aiSuggestedCategory,
+      if (aiSuggestedPriority != null) 'ai_suggested_priority': aiSuggestedPriority,
+      if (aiTriageReason != null) 'ai_triage_reason': aiTriageReason,
+      'is_hazardous': isHazardous,
+      'auto_assigned': autoAssigned,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
@@ -232,6 +313,12 @@ class IssueModel {
     DateTime? acknowledgedAt,
     DateTime? resolvedAt,
     String? slaStatus,
+    double? aiCategoryConfidence,
+    String? aiSuggestedCategory,
+    String? aiSuggestedPriority,
+    String? aiTriageReason,
+    bool? isHazardous,
+    bool? autoAssigned,
     DateTime? createdAt,
     DateTime? updatedAt,
     ApartmentModel? apartment,
@@ -255,6 +342,12 @@ class IssueModel {
       acknowledgedAt: acknowledgedAt ?? this.acknowledgedAt,
       resolvedAt: resolvedAt ?? this.resolvedAt,
       slaStatus: slaStatus ?? this.slaStatus,
+      aiCategoryConfidence: aiCategoryConfidence ?? this.aiCategoryConfidence,
+      aiSuggestedCategory: aiSuggestedCategory ?? this.aiSuggestedCategory,
+      aiSuggestedPriority: aiSuggestedPriority ?? this.aiSuggestedPriority,
+      aiTriageReason: aiTriageReason ?? this.aiTriageReason,
+      isHazardous: isHazardous ?? this.isHazardous,
+      autoAssigned: autoAssigned ?? this.autoAssigned,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       apartment: apartment ?? this.apartment,
