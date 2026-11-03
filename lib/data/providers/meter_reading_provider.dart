@@ -23,11 +23,28 @@ final allMeterReadingsProvider = FutureProvider.family<List<MeterReadingSubmissi
   return await repo.getAllSubmissions(status: status);
 });
 
+/// Danh sách các lượt gửi chỉ số bị gắn cờ bất thường (cho BQL kiểm tra kỹ thuật)
+final anomalyMeterReadingsProvider = FutureProvider<List<MeterReadingSubmissionModel>>((ref) async {
+  final repo = ref.watch(meterReadingRepositoryProvider);
+  return await repo.getAllSubmissions(isAnomaly: true);
+});
+
 /// Số lượng chỉ số đang chờ BQL duyệt
 final pendingMeterReadingsCountProvider = FutureProvider<int>((ref) async {
   try {
     final repo = ref.watch(meterReadingRepositoryProvider);
     final list = await repo.getAllSubmissions(status: 'pending');
+    return list.length;
+  } catch (_) {
+    return 0;
+  }
+});
+
+/// Số lượng chỉ số có cờ bất thường đang chờ duyệt
+final pendingAnomalyCountProvider = FutureProvider<int>((ref) async {
+  try {
+    final repo = ref.watch(meterReadingRepositoryProvider);
+    final list = await repo.getAllSubmissions(status: 'pending', isAnomaly: true);
     return list.length;
   } catch (_) {
     return 0;
@@ -51,4 +68,3 @@ final currentApartmentReadingsProvider = FutureProvider<Map<String, dynamic>?>((
     return null;
   }
 });
-
