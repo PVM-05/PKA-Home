@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793729158.488351,
-    "seen": 1793729204.5114038,
-    "ast_hash": "faa85e4dfe519f68918b5fc6410bb3e4",
+    "mtime": 1793729707.2973795,
+    "seen": 1793729750.243793,
+    "ast_hash": "55e295804e70c37846d6bcb06130ec4c",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -4812,9 +4812,9 @@
     "semantic_hash": ""
   },
   "supabase/seed.sql": {
-    "mtime": 1792846635.7153,
-    "seen": 1793342480.9026148,
-    "ast_hash": "f84bf08a19368af1f853be92b6560397",
+    "mtime": 1793729576.622014,
+    "seen": 1793729750.243793,
+    "ast_hash": "d889a1ed1c25d4af7f2f2d21c08b8eed",
     "semantic_hash": ""
   },
   "lib/data/models/financial_aging_report_model.dart": {
@@ -5826,39 +5826,75 @@
     "semantic_hash": ""
   },
   "supabase/migrations/20261104_01_financial_integrity_and_real_payment.sql": {
-    "mtime": 1793728454.1159136,
-    "seen": 1793729204.5102994,
-    "ast_hash": "5f2f819dd5e100e2197f770ab1b0c6b6",
+    "mtime": 1793729516.8964252,
+    "seen": 1793729750.243793,
+    "ast_hash": "809f6d6dd3d74286f9467a34b58fd38e",
     "semantic_hash": ""
   },
   "test/data/repositories/amenity_booking_fail_closed_test.dart": {
-    "mtime": 1793728568.3727565,
-    "seen": 1793729204.5108454,
+    "mtime": 1793729385.993819,
+    "seen": 1793729750.243793,
     "ast_hash": "81e4a45c7f525da9614ddb7444bbb91b",
     "semantic_hash": ""
   },
   "test/data/services/payment_service_real_test.dart": {
-    "mtime": 1793728803.9038122,
-    "seen": 1793729204.5108454,
-    "ast_hash": "19cb89e8c37b12d2c77b3daa3e0a000a",
+    "mtime": 1793729516.897431,
+    "seen": 1793729750.243793,
+    "ast_hash": "bced126584a2544edba6e06b0f76f2ec",
     "semantic_hash": ""
   },
   "test/database/financial_integrity_migration_test.dart": {
-    "mtime": 1793728344.511053,
-    "seen": 1793729204.5108454,
-    "ast_hash": "73c4ffe2eaa23f1bd0525e1bae7291b4",
+    "mtime": 1793729516.8984313,
+    "seen": 1793729750.243793,
+    "ast_hash": "49fd1855965b0e9d61f1bf5ff318c7b1",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-04-financial-integrity-and-real-payment.md": {
-    "mtime": 1793729137.432522,
-    "seen": 1793729204.5119472,
+    "mtime": 1793729385.8430898,
+    "seen": 1793729750.2452977,
     "ast_hash": "3ff3a8b8da9ad044386f1241a9c36d74",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-04-financial-integrity-and-real-payment-design.md": {
-    "mtime": 1793728269.4740126,
-    "seen": 1793729204.5119472,
-    "ast_hash": "aea3c465a4139a7ac0aafbcbd088879f",
+    "mtime": 1793729516.8944154,
+    "seen": 1793729750.2452977,
+    "ast_hash": "bd0f98cd3116414ab4ef4a03c3f93531",
+    "semantic_hash": ""
+  },
+  ".github/workflows/ci.yml": {
+    "mtime": 1793729496.3550966,
+    "seen": 1793729750.242739,
+    "ast_hash": "330c657cfb3a3fbedc7f87a71af76d6d",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261104_02_production_clean_seed_separation.sql": {
+    "mtime": 1793729563.070998,
+    "seen": 1793729750.243793,
+    "ast_hash": "3286dff104ca5bb2950936fe589add4c",
+    "semantic_hash": ""
+  },
+  "test/ci/github_actions_workflow_test.dart": {
+    "mtime": 1793729476.968182,
+    "seen": 1793729750.243793,
+    "ast_hash": "1084097b6d5b8f4025d563b3a1f0e785",
+    "semantic_hash": ""
+  },
+  "test/database/seed_separation_migration_test.dart": {
+    "mtime": 1793729532.8488984,
+    "seen": 1793729750.243793,
+    "ast_hash": "a38acf0952425f9a05fe89a3a4d396d5",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-04-ci-cd-and-clean-seed-separation.md": {
+    "mtime": 1793729684.8714936,
+    "seen": 1793729750.2452977,
+    "ast_hash": "c0ab827c43bc6e31b5c5d78d19af1dd1",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-04-ci-cd-and-clean-seed-separation-design.md": {
+    "mtime": 1793729445.8962288,
+    "seen": 1793729750.2452977,
+    "ast_hash": "5e3c4cf80d6a356c9c2a2082aa9b76a1",
     "semantic_hash": ""
   }
 }

@@ -1,17 +1,17 @@
 # Graph Report - pka_home  (2026-11-04)
 
 ## Corpus Check
-- 898 files · ~699,318 words
+- 904 files · ~692,624 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 36 file(s) not represented in the graph (top: .xml 10, (none) 4, .plist 4)
 
 ## Summary
-- 9455 nodes · 13355 edges · 557 communities (506 shown, 51 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 13 edges (avg confidence: 0.88)
+- 9498 nodes · 13397 edges · 571 communities (518 shown, 53 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `aa7244a5`
+- Built from commit: `f032fae5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -56,7 +56,7 @@
 - notification_repository.dart
 - 20261027_01_baseline_schema.sql
 - quick_fee_calculator_sheet.dart
-- resident_management_screen.dart
+- core/theme/app_theme.dart
 - Test-Driven Development (TDD)
 - issue_rating_bottom_sheet.dart
 - ConsumerState
@@ -83,7 +83,7 @@
 - meter_reading_submission_model.dart
 - payment_transaction_model.dart
 - vehicle_model.dart
-- equipment_management_screen_test.dart
+- resident_handbook_screen.dart
 - dependencies
 - 2. Syntax Reference
 - link_request_provider.dart
@@ -150,12 +150,12 @@
 - audit_log_model.dart
 - credit_note_model.dart
 - user_model.dart
-- package:mocktail/mocktail.dart
+- community_management_screen.dart
 - Implementing Dart and Flutter Test Coverage
 - Root Cause Tracing
 - Systematic Debugging
 - Persuasion Principles for Skill Design
-- maintenance_fund_provider.dart
+- activeBuildingProvider
 - accounting_period_model.dart
 - Đặc Tả Thiết Kế: Quản Lý Bảo Trì & Bảo Dưỡng Thiết Bị Toàn Tòa Nhà (Building Equipment & Preventive Maintenance)
 - Thiết Kế Kỹ Thuật: Hệ Thống Cổng Thanh Toán Mô Phỏng (Demo Payment Gateway & Transactions)
@@ -164,7 +164,7 @@
 - Thiết Kế Kỹ Thuật: Cơ Chế Sửa Sai và Hủy Yêu Cầu Đang Chờ Duyệt (Gói 1) - Bản Hiệu Chỉnh V2
 - 2. Thiết Kế Cơ Sở Dữ Liệu (Database Schema Design)
 - Đặc Tả Kỹ Thuật: Giai Đoạn D - Báo Cáo Tài Chính Chuyên Sâu, Sổ Quỹ Bảo Trì 2% (Live Ledger) & Chứng Từ Kế Toán Chuẩn
-- resident_home_screen.dart
+- notification_center_screen.dart
 - fee_schedule_model.dart
 - maintenance_fund_model.dart
 - accounting_web_workstation_screen.dart
@@ -257,8 +257,8 @@
 - 2. Kiến Trúc Cơ Sở Dữ Liệu & RPC Chuẩn Tắc
 - parking_slot_model.dart
 - 20261007_01_fix_p0_database_and_security.sql
-- ConsumerWidget
-- app_card.dart
+- resident_profile_screen.dart
+- FormState
 - fee_policy_management_screen.dart
 - manifest.json
 - caveman-explore/package.json
@@ -299,7 +299,7 @@
 - subscription_plan_model.dart
 - Skill authoring best practices
 - Advanced: Skills with executable code
-- issue_comment_provider.dart
+- main.dart
 - NỘI DUNG BÁO CÁO CHI TIẾT
 - BÁO CÁO ĐỒ ÁN LIÊN NGÀNH
 - Global Constraints
@@ -448,8 +448,9 @@
 - vehicle_repository.dart
 - Global Constraints
 - public.buildings
+- test-and-analyze
 - membership_repository.dart
-- resident_issue_screen.dart
+- issue_management_screen.dart
 - apartment_ledger_screen.dart
 - Global Constraints
 - parking_management_screen_test.dart
@@ -463,14 +464,14 @@
 - 20260906_01_building_handbook_and_resident_features.sql
 - Danh Sách Tasks
 - managementRepositoryProvider
-- issue_management_screen.dart
+- public.apartment_link_requests
 - apartment_invitation_model.dart
-- _
+- management_invoice_detail_screen.dart
 - List
 - resident_lease_contract_model.dart
-- 20261030_04_resident_lifecycle_and_contracts.sql
+- amenity_booking_provider.dart
 - amenity_booking_repository.dart
-- parking_management_screen.dart
+- parking_repository.dart
 - resident_invoice_unified_payment_test.dart
 - payment_provider.dart
 - apartment_management_screen.dart
@@ -485,22 +486,22 @@
 - front_desk_repository.dart
 - Đặc Tả Thiết Kế: E2 - AI Phân Loại Sự Cố & Tự Động Gán Kỹ Thuật Viên
 - resident_lifecycle_provider.dart
-- _ManagementHomeScreenState
+- subscription_provider.dart
 - Đặc Tả Thiết Kế: Cách Ly Tenant & Mô Hình Membership Đa Tầng (SEC-01, SEC-02, SaaS-01)
 - front_desk_workstation_screen_test.dart
 - create_visitor_pass_sheet.dart
-- amenity_booking_repository_update_check_test.dart
+- login_screen.dart
 - app_logger.dart
 - Danh Sách Tasks
 - bulk_invoice_dialog.dart
 - Danh Sách Tasks
-- edit_issue_screen.dart
-- 20261102_01_parking_slots_and_visitor_tickets.sql
+- parking_provider.dart
+- payment_service.dart
 - issue_rating_widget_test.dart
 - 20261103_01_visitor_and_parcel_hub.sql
 - Đặc Tả Thiết Kế: An Ninh Tòa Nhà, Đăng Ký Khách Trước Bằng Mã QR & Quản Lý Bưu Kiện Lễ Tân (D6)
-- core/supabase_config.dart
-- announcement_model.dart
+- resident_community_screen_test.dart
+- public.maintenance_fund_transactions
 - rls_security_test.dart
 - issue_sla_and_materials_workflow_integration_test.dart
 - financial_report_screen_test.dart
@@ -510,13 +511,13 @@
 - package:supabase_flutter/supabase_flutter.dart
 - handover_parcel_dialog.dart
 - Đặc Tả Thiết Kế: Tính Toàn Vẹn Tài Chính, Thanh Toán Thực Tế & Bảo Mật Sổ Quỹ (FIN-01, FIN-02, FIN-03, SEC-04, SEC-05, OPS-FIX)
-- List
-- document_preview_screen.dart
+- reset_password_screen.dart
+- document_pdf_builder_test.dart
 - 20260922_01_invoice_due_reminders_and_cron.sql
 - amenity_slot_helper.dart
 - Danh Sách Tasks
 - building_provider.dart
-- public.vehicles
+- 20261010_01_comprehensive_database_and_security_patches.sql
 - app_constants.dart
 - auth_repository.dart
 - create_apartment_invitation_sheet.dart
@@ -526,22 +527,35 @@
 - utility_meter_ocr_engine.dart
 - meter_reading_repository.dart
 - resident_lifecycle_repository_test.dart
-- activeBuildingProvider
+- user_repository.dart
 - Kế Hoạch Thực Thi: E2 - AI Phân Loại Sự Cố & Tự Động Gán Kỹ Thuật Viên
 - bulk_invoice_dialog_preflight_test.dart
 - Kế Hoạch Thực Thi: Gói 1 - Cách Ly Tenant & Mô Hình Membership Đa Tầng (SEC-01, SEC-02, SaaS-01)
 - Đặc Tả Thiết Kế: E1 - OCR Đồng Hồ Điện / Nước & Cảnh Báo Tiêu Thụ Bất Thường
-- bool get
+- change_password_screen.dart
 - parking_capacity_stats_model.dart
-- accounting_repository_test.dart
+- authRepositoryProvider
 - Kế Hoạch Thực Thi: E1 - OCR Đồng Hồ Điện / Nước & Cảnh Báo Tiêu Thụ Bất Thường
 - resident_lifecycle_repository.dart
 - Danh Sách Các Bước Thực Thi (Tasks)
 - MaterialPageRoute
 - vietnamese_currency_text_formatter.dart
 - _AccountingWebWorkstationScreenState
-- handbook_models_test.dart
+- 2. Thiết Kế Chi Tiết
 - ResidentLifecycleRepository
+- theme_mode_provider.dart
+- building_repository.dart
+- document_lookup_screen_test.dart
+- page_transitions.dart
+- 20261024_04_pending_requests_correction_and_reschedule.sql
+- utility_fee_calculator.dart
+- package:pka_home/data/models/visitor_parking_ticket_model.dart
+- visitor_pass_qr_sheet.dart
+- fee_policy_repository_test.dart
+- Danh Sách Các Bước Thực Thi (Tasks)
+- 20260929_03_fix_business_logic_and_amenities.sql
+- AppRoutes.forgotPassword
+- public.prevent_apartment_delete_when_occupied
 
 ## God Nodes (most connected - your core abstractions)
 1. `authProvider` - 50 edges
@@ -558,19 +572,19 @@
 ## Surprising Connections (you probably didn't know these)
 - `Gemini CLI Tool Mapping` --references--> `read_file()`  [INFERRED]
   .agents/skills/using-superpowers/references/gemini-tools.md → .agents/skills/caveman-compress/scripts/validate.py
-- `MockWebhookPaymentService` --inherits--> `PaymentService`  [EXTRACTED]
-  test/data/services/payment_service_webhook_test.dart → lib/data/services/payment_service.dart
 - `Implementation` --references--> `waitForEvent()`  [INFERRED]
   .agents/skills/systematic-debugging/condition-based-waiting.md → .agents/skills/systematic-debugging/condition-based-waiting-example.ts
 - `Implementation` --references--> `waitForEventCount()`  [INFERRED]
   .agents/skills/systematic-debugging/condition-based-waiting.md → .agents/skills/systematic-debugging/condition-based-waiting-example.ts
 - `Implementation` --references--> `waitForEventMatch()`  [INFERRED]
   .agents/skills/systematic-debugging/condition-based-waiting.md → .agents/skills/systematic-debugging/condition-based-waiting-example.ts
+- `FakeAccountingRepository` --inherits--> `AccountingRepository`  [EXTRACTED]
+  test/data/providers/accounting_providers_test.dart → lib/data/repositories/accounting_repository.dart
 
 ## Import Cycles
 - None detected.
 
-## Communities (557 total, 51 thin omitted)
+## Communities (571 total, 53 thin omitted)
 
 ### Community 0 - "package:flutter_test/flutter_test.dart"
 Cohesion: 0.01
@@ -578,59 +592,59 @@ Nodes (74): main, main, main, main, main, main, main, main (+66 more)
 
 ### Community 1 - "amenity_management_checkin_test.dart"
 Cohesion: 0.03
-Nodes (81): AmenityBookingRepository, main, main, main, main, MockSupabaseClient, main, noSuchMethod (+73 more)
+Nodes (80): AmenityBookingRepository, main, main, main, main, MockSupabaseClient, main, main (+72 more)
 
 ### Community 2 - "package:flutter_riverpod/flutter_riverpod.dart"
 Cohesion: 0.03
-Nodes (62): main, main, noSuchMethod, createWidgetUnderTest, main, noSuchMethod, main, main (+54 more)
+Nodes (57): main, main, noSuchMethod, createWidgetUnderTest, main, noSuchMethod, main, main (+49 more)
 
 ### Community 3 - "resolve_issue_materials_sheet.dart"
 Cohesion: 0.07
 Nodes (34): maintenanceMaterialsProvider, materialRepositoryProvider, build, _buildCategoryFilterChip, createState, dispose, MaintenanceMaterialsScreen, _MaintenanceMaterialsScreenState (+26 more)
 
 ### Community 4 - "package:pka_home/data/models/apartment_model.dart"
-Cohesion: 0.03
-Nodes (38): PaymentResult, main, main, main, main, fakeResult, main, pay (+30 more)
+Cohesion: 0.04
+Nodes (31): main, main, main, main, main, main, main, main (+23 more)
 
 ### Community 5 - "accounting_workstation_model.dart"
 Cohesion: 0.07
 Nodes (25): apartmentCode, buildingId, collectionRate, copyWith, createdAt, displayStatus, dueDate, fromInvoice (+17 more)
 
 ### Community 6 - "verify_otp_screen.dart"
-Cohesion: 0.04
-Nodes (52): authRepositoryProvider, build, ChangePasswordScreen, _ChangePasswordScreenState, _confirmPasswordController, createState, dispose, _formKey (+44 more)
+Cohesion: 0.13
+Nodes (13): _countdownTimer, createState, _currentOtp, dispose, email, _errorMessage, initState, _isLoading (+5 more)
 
 ### Community 7 - "invoice_management_screen.dart"
-Cohesion: 0.09
-Nodes (19): build, BuildingSwitcherDropdown, activeBuildingIdProvider, userBuildingsProvider, invoicesProvider, build, _buildFilterChip, createState (+11 more)
+Cohesion: 0.05
+Nodes (30): linkRequestManagementProvider, invoicesProvider, delegationsListProvider, build, _buildFilterChip, createState, _currencyFormat, dispose (+22 more)
 
 ### Community 8 - "management_meter_reading_screen_test.dart"
-Cohesion: 0.05
-Nodes (38): MeterReadingRepository, main, main, MockMeterReadingRepository, adminUser, approveCalled, approveReading, createTestWidget (+30 more)
+Cohesion: 0.03
+Nodes (58): MeterReadingRepository, main, main, approveCalled, approveReading, cancelPendingSubmission, detectAnomaly, detectAnomalyCalled (+50 more)
 
 ### Community 9 - "resident_meter_reading_screen.dart"
 Cohesion: 0.04
 Nodes (46): allMeterReadingsProvider, anomalyMeterReadingsProvider, aptId, currentApartmentReadingsProvider, getAllSubmissions, getMySubmissions, meterReadingRepositoryProvider, pendingAnomalyCountProvider (+38 more)
 
 ### Community 10 - "amenity_booking_screen.dart"
-Cohesion: 0.03
-Nodes (68): allAmenityBookingsProvider, amenityBookingRepositoryProvider, AmenityDateQuery, amenityId, date, getAllBookings, getBookingsByAmenityAndDate, getMaintenanceWindows (+60 more)
+Cohesion: 0.04
+Nodes (53): amenityBookingRepositoryProvider, build, _buildAmenitiesConfigTab, _buildBookingApprovalCard, _buildFilterChip, _buildMaintenanceTab, _buildMaintenanceTabWithSelector, _buildReceiptRow (+45 more)
 
 ### Community 12 - "Mock"
-Cohesion: 0.08
-Nodes (21): AuthRepository, EquipmentRepository, MockAuthRepository, MockWidgetRef, MockAuthRepository, main, mockAuth, MockAuthResponse (+13 more)
+Cohesion: 0.07
+Nodes (25): AuthRepository, EquipmentRepository, MockAuthRepository, MockWidgetRef, MockAuthRepository, MockSupabaseClient, main, mockAuth (+17 more)
 
 ### Community 13 - "edit_invoice_screen.dart"
-Cohesion: 0.04
-Nodes (47): InvoiceModel, invoiceDetailProvider, _addNewItem, build, _buildFeeItemsCard, _buildGeneralInfoCard, _buildTotalCard, createState (+39 more)
+Cohesion: 0.07
+Nodes (30): _addNewItem, _buildFeeItemsCard, _buildGeneralInfoCard, _buildTotalCard, createState, _currencyFormat, _dateFormat, dispose (+22 more)
 
 ### Community 14 - "app_theme.dart"
 Cohesion: 0.06
 Nodes (31): AppStatusColors, AppTheme, background, border, error, paid, pending, pendingConfirmation (+23 more)
 
 ### Community 15 - "dashboard_providers.dart"
-Cohesion: 0.07
-Nodes (27): actualRevenue, cancelledCount, cancelledTotal, collectionRate, createResilientTableStream, debugLabel, FinancialStats, lastCount (+19 more)
+Cohesion: 0.05
+Nodes (42): pushNotificationServiceProvider, actualRevenue, cancelledCount, cancelledTotal, collectionRate, createResilientTableStream, debugLabel, emptyApartmentsProvider (+34 more)
 
 ### Community 16 - "StateNotifier"
 Cohesion: 0.10
@@ -649,15 +663,15 @@ Cohesion: 0.08
 Nodes (20): accountingPeriodsProvider, creditNotesProvider, fetchAccountingPeriods, fetchApartmentBalance, fetchCreditNotes, fetchLedgerEntries, repo, calculateAgingReportFallback (+12 more)
 
 ### Community 20 - "package:flutter/material.dart"
-Cohesion: 0.05
-Nodes (16): main, main, buildScaffold, main, testDestinations, main, main, main (+8 more)
+Cohesion: 0.04
+Nodes (25): main, main, buildScaffold, main, testDestinations, main, main, main (+17 more)
 
 ### Community 21 - "management_repository.dart"
 Cohesion: 0.04
 Nodes (44): assignResidentToApartment, _client, createApartment, createDelegation, createInvoice, createUser, deleteApartment, deleteInvoice (+36 more)
 
 ### Community 22 - "parking_management_screen.dart"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (21): activeVisitorTicketsProvider, parkingCapacityStatsProvider, parkingFilterProvider, parkingRepositoryProvider, parkingSlotsProvider, build, _buildGateWorkstationTab, _buildKpiBox (+13 more)
 
 ### Community 23 - "tiered_calculation_result_model.dart"
@@ -665,8 +679,8 @@ Cohesion: 0.05
 Nodes (38): amount, asOfDate, baseQuota, breakdown, consumption, daysInMonth, daysOverdue, daysUsed (+30 more)
 
 ### Community 24 - "resident_home_hierarchy_test.dart"
-Cohesion: 0.07
-Nodes (22): main, main, createAnnouncement, createCalled, deleteAnnouncement, lastTargetApartment, lastTargetType, main (+14 more)
+Cohesion: 0.04
+Nodes (33): main, main, main, container, main, mockRepository, MockSupabaseClient, main (+25 more)
 
 ### Community 25 - "Key Syntax Differences and Pitfalls"
 Cohesion: 0.05
@@ -685,8 +699,8 @@ Cohesion: 0.07
 Nodes (26): buildingId, checkInAt, checkOutAt, copyWith, createdAt, displayVehicleType, feeAmount, fromJson (+18 more)
 
 ### Community 29 - "permissions.dart"
-Cohesion: 0.08
-Nodes (22): all, allowedRoles, allows, amenityManagement, apartmentManagement, AppPermissions, auditTrail, category (+14 more)
+Cohesion: 0.09
+Nodes (21): all, allowedRoles, allows, amenityManagement, apartmentManagement, AppPermissions, auditTrail, category (+13 more)
 
 ### Community 30 - "accounting_workstation_provider.dart"
 Cohesion: 0.10
@@ -698,15 +712,15 @@ Nodes (31): apartmentCode, area, BatchRowErrorModel, block, code, columnName, di
 
 ### Community 32 - "public.amenity_bookings"
 Cohesion: 0.06
-Nodes (41): idx_payment_transactions_booking, idx_payment_transactions_type, public.book_amenity_slot(), public.handle_amenity_booking_cancellation(), public.simulate_unified_payment(), public.record_manual_payment(), trg_check_amenity_booking_resident_update, public.check_in_amenity_booking() (+33 more)
+Nodes (41): idx_payment_transactions_booking, idx_payment_transactions_type, public.simulate_unified_payment(), public.book_amenity_slot(), public.handle_amenity_booking_cancellation(), public.record_manual_payment(), trg_check_amenity_booking_resident_update, public.handle_amenity_booking_cancellation() (+33 more)
 
 ### Community 33 - "../../../core/widgets/app_card.dart"
-Cohesion: 0.05
-Nodes (37): _buildDetailItem, createState, _currencyFormat, _isExpanded, isManagement, MaintenanceFundCard, _MaintenanceFundCardState, monthlyRevenueTrendProvider (+29 more)
+Cohesion: 0.07
+Nodes (30): paymentTransactionsProvider, createState, dispose, _emailController, _errorMessage, ForgotPasswordScreen, _ForgotPasswordScreenState, _formKey (+22 more)
 
 ### Community 34 - "../../../core/utils/error_formatter.dart"
-Cohesion: 0.11
-Nodes (15): linkRequestManagementProvider, delegationsListProvider, build, _handleApprove, _handleReject, LinkRequestManagementScreen, build, _buildStatusIcon (+7 more)
+Cohesion: 0.29
+Nodes (6): monthlyRevenueTrendProvider, build, _buildDetailRow, _buildLegendItem, RevenueTrendChart, _showMonthDetail
 
 ### Community 35 - "resident_invoice_ledger_summary_test.dart"
 Cohesion: 0.11
@@ -721,28 +735,28 @@ Cohesion: 0.10
 Nodes (16): AnnouncementRepository, _client, createAnnouncement, _customClient, deleteAnnouncement, streamAnnouncements, updateAnnouncement, _client (+8 more)
 
 ### Community 38 - "20261027_01_baseline_schema.sql"
-Cohesion: 0.06
-Nodes (61): idx_amenity_bookings_slot, idx_announcements_urgent, idx_apartments_code, idx_invoice_items_invoice, idx_invoices_apt_period, idx_invoices_status, idx_issue_reports_apt, idx_meter_submissions_apt (+53 more)
+Cohesion: 0.08
+Nodes (53): idx_amenity_bookings_slot, idx_announcements_urgent, idx_apartments_code, idx_invoice_items_invoice, idx_invoices_apt_period, idx_invoices_status, idx_issue_reports_apt, idx_meter_submissions_apt (+45 more)
 
 ### Community 39 - "quick_fee_calculator_sheet.dart"
 Cohesion: 0.06
-Nodes (35): build, _buildElectricityTab, _buildInfoBanner, _buildParkingTab, _buildPenaltyTab, _buildSummaryRow, _buildTierBreakdownTable, _buildTotalAmountCard (+27 more)
+Nodes (33): build, _buildElectricityTab, _buildInfoBanner, _buildParkingTab, _buildPenaltyTab, _buildSummaryRow, _buildTierBreakdownTable, _buildTotalAmountCard (+25 more)
 
-### Community 40 - "resident_management_screen.dart"
-Cohesion: 0.09
-Nodes (21): apartmentsProvider, residentsProvider, build, build, _buildSheetChoiceChip, createState, dispose, _getRoleColor (+13 more)
+### Community 40 - "core/theme/app_theme.dart"
+Cohesion: 0.05
+Nodes (30): AnnouncementModel, _buildSheetChoiceChip, createState, dispose, _getRoleColor, _getRoleLabel, _getStatusLabel, ResidentManagementScreen (+22 more)
 
 ### Community 41 - "Test-Driven Development (TDD)"
 Cohesion: 0.06
 Nodes (29): Common Rationalizations, Debugging Integration, Example: Bug Fix, Final Rule, Good Tests, GREEN - Minimal Code, Overview, Red Flags - STOP and Start Over (+21 more)
 
 ### Community 42 - "issue_rating_bottom_sheet.dart"
-Cohesion: 0.09
-Nodes (22): issueRepositoryProvider, _autoAssignWithAi, _submitUpdate, _sendComment, _confirmDeleteIssue, _attitudeRating, build, _buildStarRow (+14 more)
+Cohesion: 0.07
+Nodes (25): AcceptInvitationDialog, _AcceptInvitationDialogState, build, _codeController, createState, dispose, _errorMessage, _isLoading (+17 more)
 
 ### Community 43 - "ConsumerState"
-Cohesion: 0.05
-Nodes (61): amenityBookingsForDateProvider, amenityMaintenanceForDateProvider, authProvider, communityRepositoryProvider, buildingAmenitiesProvider, buildingRulesProvider, emergencyContactsProvider, handbookRepositoryProvider (+53 more)
+Cohesion: 0.08
+Nodes (47): amenityBookingsForDateProvider, amenityMaintenanceForDateProvider, residentAnnouncementsProvider, authProvider, communityRepositoryProvider, buildingAmenitiesProvider, buildingRulesProvider, emergencyContactsProvider (+39 more)
 
 ### Community 44 - "subscription_model.dart"
 Cohesion: 0.06
@@ -753,8 +767,8 @@ Cohesion: 0.04
 Nodes (49): PollModel, pollResultsProvider, _addOption, build, _category, _choiceType, createState, _dateFormat (+41 more)
 
 ### Community 46 - "document_pdf_builder.dart"
-Cohesion: 0.06
-Nodes (26): _buildBankRow, _buildInfoLine, buildInvoicePdfA4, _buildItemsTable, buildReceiptPdf80mm, buildReceiptPdfA4, _buildRollLine, _buildTableCell (+18 more)
+Cohesion: 0.05
+Nodes (30): _buildBankRow, _buildInfoLine, buildInvoicePdfA4, _buildItemsTable, buildReceiptPdf80mm, buildReceiptPdfA4, _buildRollLine, _buildTableCell (+22 more)
 
 ### Community 47 - "create_credit_note_dialog.dart"
 Cohesion: 0.14
@@ -778,11 +792,11 @@ Nodes (23): dispose, ensureLocalNotificationsInitialized, firebaseMessagingBackg
 
 ### Community 52 - "shimmer_loading.dart"
 Cohesion: 0.08
-Nodes (24): AdaptiveManagementScaffold, AppStateView, PhotoViewerScreen, _animation, baseColor, borderRadius, build, child (+16 more)
+Nodes (23): AdaptiveManagementScaffold, AppStateView, _animation, baseColor, borderRadius, build, child, color (+15 more)
 
 ### Community 53 - "resident_invoice_detail_screen.dart"
-Cohesion: 0.08
-Nodes (22): calculatedLatePenaltyProvider, residentInvoiceDetailProvider, _animationController, build, _buildBottomAction, _buildCopyableRow, _buildFeeItemCard, _buildInfoRow (+14 more)
+Cohesion: 0.09
+Nodes (20): calculatedLatePenaltyProvider, _animationController, _buildBottomAction, _buildCopyableRow, _buildFeeItemCard, _buildInfoRow, _buildLatePenaltyWarningBox, _buildSummaryCard (+12 more)
 
 ### Community 54 - "bulk_invoice_validation_model.dart"
 Cohesion: 0.07
@@ -809,8 +823,8 @@ Cohesion: 0.07
 Nodes (28): amount, build, _buildCurrentStep, _buildFailedStep, _buildInfoRow, _buildPendingConfirmationStep, _buildProcessingStep, _buildSuccessStep (+20 more)
 
 ### Community 60 - "management_home_screen.dart"
-Cohesion: 0.04
-Nodes (33): ThemeModeNotifier, build, buildingId, child, fallback, permission, RoleGuard, activeDelegationsProvider (+25 more)
+Cohesion: 0.07
+Nodes (17): adaptiveItem, _buildDashboard, _buildLegendItem, _buildQuickAction, _buildSheetActionItem, _buildSheetSectionHeader, createState, _getRoleBadgeColor (+9 more)
 
 ### Community 61 - "document_lookup_result_model.dart"
 Cohesion: 0.08
@@ -836,9 +850,9 @@ Nodes (24): amount, apartmentId, bookingId, confirmedAt, confirmedBy, createdAt,
 Cohesion: 0.08
 Nodes (24): apartmentId, brandModel, copyWith, createdAt, fromJson, hasRejectionReason, id, isActive (+16 more)
 
-### Community 67 - "equipment_management_screen_test.dart"
-Cohesion: 0.08
-Nodes (14): main, main, main, adminUser, buildTestWidget, main, mockRepo, noSuchMethod (+6 more)
+### Community 67 - "resident_handbook_screen.dart"
+Cohesion: 0.06
+Nodes (26): build, _confirmDelete, createState, dispose, HandbookManagementScreen, initState, _showAmenityDialog, _showContactDialog (+18 more)
 
 ### Community 68 - "dependencies"
 Cohesion: 0.08
@@ -861,8 +875,8 @@ Cohesion: 0.05
 Nodes (36): acknowledgedAt, aiCategoryConfidence, aiSuggestedCategory, aiSuggestedPriority, aiTriageReason, apartment, apartmentId, assignedStaff (+28 more)
 
 ### Community 73 - "accessibility_provider.dart"
-Cohesion: 0.09
-Nodes (15): description, FontSizeNotifier, FontSizeOption, fromScale, kFontSizeScaleKey, label, _loadFromPreferences, scale (+7 more)
+Cohesion: 0.13
+Nodes (12): description, FontSizeNotifier, FontSizeOption, fromScale, kFontSizeScaleKey, label, _loadFromPreferences, scale (+4 more)
 
 ### Community 74 - "resident_model.dart"
 Cohesion: 0.08
@@ -870,7 +884,7 @@ Nodes (23): apartment, apartmentCode, apartmentCodes, apartmentId, apartments, a
 
 ### Community 75 - "service_rating_overview_screen.dart"
 Cohesion: 0.08
-Nodes (24): allIssueRatingsProvider, allIssuesProvider, build, _buildEmptyState, _buildFilterChip, _buildKpiCard, _buildMetricColumn, _buildRatingItemCard (+16 more)
+Nodes (25): allIssueRatingsProvider, residentsProvider, _showCreateDelegationDialog, build, _buildEmptyState, _buildFilterChip, _buildKpiCard, _buildMetricColumn (+17 more)
 
 ### Community 76 - "maintenance_task_form_dialog.dart"
 Cohesion: 0.09
@@ -897,8 +911,8 @@ Cohesion: 0.09
 Nodes (22): amount, balanceAfter, buildingId, category, createdAt, createdBy, description, fromJson (+14 more)
 
 ### Community 82 - "auth_provider.dart"
-Cohesion: 0.07
-Nodes (28): accountLockedNoticeProvider, authState, _authSubscription, _checkAuthState, dispose, _fetchUserInfo, _isManualLogout, login (+20 more)
+Cohesion: 0.11
+Nodes (15): authState, _authSubscription, _checkAuthState, dispose, _fetchUserInfo, _isManualLogout, login, logout (+7 more)
 
 ### Community 83 - "caveman-compress/README.md"
 Cohesion: 0.09
@@ -910,7 +924,7 @@ Nodes (21): 1. `FfiGenerator`, 2. `Headers`, 3. `Functions`, 4. `Output`, AFTER:
 
 ### Community 85 - "public.users"
 Cohesion: 0.04
-Nodes (43): public.get_financial_aging_report(), idx_residents_apartments_status, public.batch_import_apartments(), public.batch_import_meter_readings(), public.batch_import_residents(), public.is_management(), public.prevent_role_self_escalation(), public.update_own_profile() (+35 more)
+Nodes (53): public.get_financial_aging_report(), idx_residents_apartments_status, public.batch_import_apartments(), public.batch_import_meter_readings(), public.batch_import_residents(), idx_apt_invites_apt, idx_apt_invites_code, idx_apt_invites_status (+45 more)
 
 ### Community 86 - "BỘ SLIDE THUYẾT TRÌNH BẢO VỆ ĐỒ ÁN LIÊN NGÀNH"
 Cohesion: 0.09
@@ -942,19 +956,19 @@ Nodes (18): DocumentLookupResultModel, documentRepositoryProvider, build, _build
 
 ### Community 93 - "apartment_model.dart"
 Cohesion: 0.10
-Nodes (20): ApartmentModel, area, buildingCode, buildingId, code, contractEndDate, contractStartDate, copyWith (+12 more)
+Nodes (19): area, buildingCode, buildingId, code, contractEndDate, contractStartDate, copyWith, depositAmount (+11 more)
 
 ### Community 94 - "building_amenity_model.dart"
 Cohesion: 0.10
 Nodes (20): bookingType, BuildingAmenityModel, createdAt, depositAmount, description, displayOrder, feeAmount, fromJson (+12 more)
 
 ### Community 95 - "organization_model.dart"
-Cohesion: 0.12
-Nodes (15): contactEmail, contactPhone, createdAt, fromJson, hashCode, id, logoUrl, name (+7 more)
+Cohesion: 0.10
+Nodes (18): contactEmail, contactPhone, createdAt, fromJson, hashCode, id, logoUrl, name (+10 more)
 
 ### Community 96 - "issue_repository.dart"
-Cohesion: 0.07
-Nodes (24): fetchAllRatings, fetchRatingForIssue, issueRatingsStreamProvider, repo, streamRatings, addComment, autoAssignIssue, _client (+16 more)
+Cohesion: 0.09
+Nodes (21): addComment, autoAssignIssue, _client, createIssue, CreateIssueResult, deleteIssue, extractStoragePath, fetchComments (+13 more)
 
 ### Community 97 - "equipment_form_dialog.dart"
 Cohesion: 0.10
@@ -977,8 +991,8 @@ Cohesion: 0.11
 Nodes (6): Flutter, AppDelegate, SceneDelegate, RunnerTests, UIKit, XCTest
 
 ### Community 102 - "community_repository.dart"
-Cohesion: 0.04
-Nodes (45): activePolls, communityStatsProvider, fetchPetitions, fetchPolls, getPollResults, pendingPetitions, petitions, petitionsProvider (+37 more)
+Cohesion: 0.07
+Nodes (23): activePolls, fetchPetitions, fetchPolls, getPollResults, pendingPetitions, petitions, polls, repo (+15 more)
 
 ### Community 103 - "DateTime?"
 Cohesion: 0.10
@@ -993,12 +1007,12 @@ Cohesion: 0.10
 Nodes (19): building, category, code, copyWith, createdAt, fromJson, id, installationDate (+11 more)
 
 ### Community 106 - "handbook_repository.dart"
-Cohesion: 0.06
-Nodes (30): _amenitiesStreamProvider, _contactsStreamProvider, fetchBuildingAmenities, fetchBuildingRules, fetchEmergencyContacts, repo, _rulesStreamProvider, watch (+22 more)
+Cohesion: 0.05
+Nodes (36): _, _computeCrc16, generate, generateQuickLinkUrl, _tlv, VietQrGenerator, _amenitiesStreamProvider, _contactsStreamProvider (+28 more)
 
 ### Community 107 - "invoice_model.dart"
-Cohesion: 0.11
-Nodes (17): apartment, apartmentId, createdAt, dueDate, einvoiceLookupCode, fromJson, id, paidAmount (+9 more)
+Cohesion: 0.10
+Nodes (18): ApartmentModel, apartment, apartmentId, createdAt, dueDate, einvoiceLookupCode, fromJson, id (+10 more)
 
 ### Community 108 - "financial_aging_report_model.dart"
 Cohesion: 0.05
@@ -1017,8 +1031,8 @@ Cohesion: 0.11
 Nodes (18): apartmentCode, attitudeRating, calculateOverall, comment, copyWith, createdAt, fromJson, getSatisfactionLabel (+10 more)
 
 ### Community 112 - "fee_policy_management_screen_test.dart"
-Cohesion: 0.10
-Nodes (16): FeeTierPolicyModel, LatePenaltyResultModel, ProratedFeeResultModel, FeePolicyRepository, main, calculateLatePaymentPenalty, FakeFeePolicyRepository, fetchPolicies (+8 more)
+Cohesion: 0.13
+Nodes (10): FeePolicyRepository, main, calculateLatePaymentPenalty, FakeFeePolicyRepository, fetchPolicies, main, createTestApp, fetchPolicies (+2 more)
 
 ### Community 113 - "Implementing Routing and Deep Linking"
 Cohesion: 0.11
@@ -1061,8 +1075,8 @@ Cohesion: 0.12
 Nodes (16): Documentation Variants to Test, Expected Results, Next Steps, NULL (Baseline - no skills doc), Scenario 1: Time Pressure + Confidence, Scenario 2: Sunk Cost + Works Already, Scenario 3: Authority + Speed Bias, Scenario 4: Familiarity + Efficiency (+8 more)
 
 ### Community 123 - "amenity_booking_repository_update_check_test.dart"
-Cohesion: 0.10
-Nodes (15): AppException, message, toString, main, mockClient, MockSupabaseClient, repository, _val (+7 more)
+Cohesion: 0.07
+Nodes (28): AppException, message, toString, FakePostgrestFilterBuilder, FakeFilterBuilder, main, mockClient, MockSupabaseClient (+20 more)
 
 ### Community 124 - "create_report_docx"
 Cohesion: 0.16
@@ -1089,8 +1103,8 @@ Cohesion: 0.12
 Nodes (16): area, flexiblePattern, hasAlphaNum, null, num, pattern, standardApartmentPattern, trimmed (+8 more)
 
 ### Community 130 - "apartment_ledger_entry_model.dart"
-Cohesion: 0.12
-Nodes (16): amount, apartmentId, balanceAfter, buildingId, createdAt, createdBy, description, entryCode (+8 more)
+Cohesion: 0.07
+Nodes (22): AccountingPeriodModel, amount, apartmentId, ApartmentLedgerEntryModel, balanceAfter, buildingId, createdAt, createdBy (+14 more)
 
 ### Community 131 - "audit_log_model.dart"
 Cohesion: 0.12
@@ -1104,9 +1118,9 @@ Nodes (16): amount, apartmentId, approvedAt, approvedBy, buildingId, createdAt, 
 Cohesion: 0.12
 Nodes (16): copyWith, fromJson, fullName, id, isAccountant, isAdmin, isLocked, isManagement (+8 more)
 
-### Community 134 - "package:mocktail/mocktail.dart"
+### Community 134 - "community_management_screen.dart"
 Cohesion: 0.09
-Nodes (12): IssueRepository, main, container, main, MockIssueRepository, mockRepository, MockSupabaseClient, main (+4 more)
+Nodes (22): communityStatsProvider, petitionsProvider, pollsProvider, build, _buildPetitionCard, _buildPetitionsTab, _buildPollCard, _buildPollsTab (+14 more)
 
 ### Community 135 - "Implementing Dart and Flutter Test Coverage"
 Cohesion: 0.12
@@ -1124,13 +1138,13 @@ Nodes (15): Common Rationalizations, Overview, Phase 1: Root Cause Investigation
 Cohesion: 0.12
 Nodes (15): 1. Authority, 2. Commitment, 3. Scarcity, 4. Social Proof, 5. Unity, 6. Reciprocity, 7. Liking, Ethical Use (+7 more)
 
-### Community 139 - "maintenance_fund_provider.dart"
-Cohesion: 0.12
-Nodes (12): build, activeBuilding, fetchFundByBuilding, fetchTransactions, filter, maintenanceFundProvider, repo, watch (+4 more)
+### Community 139 - "activeBuildingProvider"
+Cohesion: 0.06
+Nodes (34): build, _buildDetailItem, createState, _currencyFormat, _isExpanded, isManagement, MaintenanceFundCard, _MaintenanceFundCardState (+26 more)
 
 ### Community 140 - "accounting_period_model.dart"
-Cohesion: 0.09
-Nodes (20): buildingId, closedAt, closedBy, fromJson, id, isClosed, notes, openedAt (+12 more)
+Cohesion: 0.08
+Nodes (22): buildingId, closedAt, closedBy, fromJson, id, isClosed, notes, openedAt (+14 more)
 
 ### Community 141 - "Đặc Tả Thiết Kế: Quản Lý Bảo Trì & Bảo Dưỡng Thiết Bị Toàn Tòa Nhà (Building Equipment & Preventive Maintenance)"
 Cohesion: 0.12
@@ -1160,9 +1174,9 @@ Nodes (15): 1. Bối Cảnh & Vấn Đề (Context & Problem Statement), 2.1. C�
 Cohesion: 0.12
 Nodes (15): 1. Bối Cảnh & Vấn Đề, 2.1. Cập Nhật Bảng `maintenance_funds`, 2.2. Tạo Bảng Sổ Quỹ Biến Động `maintenance_fund_transactions`, 2.3. RLS Policies Bảo Mật Sổ Quỹ, 2.4. RPC Ghi Sổ Quỹ & Đồng Bộ Số Dư An Toàn (ACID Safe), 2. Thiết Kế Cơ Sở Dữ Liệu (Supabase / PostgreSQL), 3.1. Models, 3.2. Repositories & Providers (+7 more)
 
-### Community 148 - "resident_home_screen.dart"
-Cohesion: 0.04
-Nodes (47): announcementsStreamProvider, residentAnnouncementsProvider, filter, filteredNotificationsProvider, list, notificationFilterTypeProvider, notificationRepositoryProvider, notificationsAsync (+39 more)
+### Community 148 - "notification_center_screen.dart"
+Cohesion: 0.09
+Nodes (23): filter, filteredNotificationsProvider, list, notificationFilterTypeProvider, notificationRepositoryProvider, notificationsAsync, notificationsStreamProvider, repo (+15 more)
 
 ### Community 149 - "fee_schedule_model.dart"
 Cohesion: 0.07
@@ -1173,8 +1187,8 @@ Cohesion: 0.12
 Nodes (15): annualInterestEarned, bankAccountInfo, bankAccountNumber, bankName, collectedPercent, createdAt, fromJson, hashCode (+7 more)
 
 ### Community 151 - "accounting_web_workstation_screen.dart"
-Cohesion: 0.14
-Nodes (13): selectedInvoiceIdsProvider, _buildBulkActionBar, _buildFilterBar, _buildHeader, _buildKpiCard, _buildKpiStrip, _buildMainTableCard, _buildStatusChip (+5 more)
+Cohesion: 0.15
+Nodes (10): _buildFilterBar, _buildHeader, _buildKpiCard, _buildKpiStrip, _buildStatusChip, createState, dispose, _searchController (+2 more)
 
 ### Community 152 - "poll_model.dart"
 Cohesion: 0.07
@@ -1238,11 +1252,11 @@ Nodes (14): 1. Mục Tiêu & Bối Cảnh Nghiệp Vụ, 2.1 Bảng `fee_tier_po
 
 ### Community 167 - "public.apartments"
 Cohesion: 0.05
-Nodes (52): public.generate_receipt_number(), public.check_and_generate_invoice_due_reminders(), public.fn_notify_on_invoice_paid(), public.fn_notify_on_issue_status_change(), public.fn_notify_on_link_request_status(), public.fn_notify_on_new_invoice(), trg_notify_on_invoice_paid, trg_notify_on_issue_status_change (+44 more)
+Nodes (51): public.generate_receipt_number(), public.fn_notify_on_invoice_paid(), public.fn_notify_on_issue_status_change(), public.fn_notify_on_link_request_status(), public.fn_notify_on_new_invoice(), trg_notify_on_invoice_paid, trg_notify_on_issue_status_change, trg_notify_on_new_invoice (+43 more)
 
 ### Community 168 - "respond_petition_dialog.dart"
-Cohesion: 0.05
-Nodes (37): PetitionModel, AmenityManagementScreen, ManagementHomeScreen, CreatePollSheet, build, createState, dispose, _formKey (+29 more)
+Cohesion: 0.06
+Nodes (27): PermissionItem, buildingId, child, fallback, permission, PetitionModel, build, createState (+19 more)
 
 ### Community 169 - "building_membership_model.dart"
 Cohesion: 0.08
@@ -1285,8 +1299,8 @@ Cohesion: 0.15
 Nodes (12): 1.1. Bối cảnh, 1.2. Mục tiêu cụ thể, 1. Mục Tiêu & Bối Cảnh Nghiệp Vụ, 2.1. Breakpoints, 2.2. Thành phần Sidebar (Trình duyệt Web/Desktop), 2.3. Bàn Làm Việc Kế Toán (`AccountingWebWorkstationScreen`), 2. Kiến Trúc Giao Diện & Bố Cục Thích Ứng, 3.1. Models (`lib/data/models/`) (+4 more)
 
 ### Community 179 - "create_invoice_vehicle_billing_test.dart"
-Cohesion: 0.05
-Nodes (36): main, approveVehicle, cancelPendingVehicle, countsByApartment, deleteVehicle, getActiveMotorbikeCount, getAllVehicles, getVehicleCounts (+28 more)
+Cohesion: 0.04
+Nodes (41): VehicleRepository, main, main, MockSupabaseClient, approveVehicle, cancelPendingVehicle, countsByApartment, deleteVehicle (+33 more)
 
 ### Community 180 - "Danh Sách Tài Khoản Demo & Kịch Bản Thuyết Trình (PKA-Home)"
 Cohesion: 0.14
@@ -1341,8 +1355,8 @@ Cohesion: 0.15
 Nodes (13): Common Mistakes (Same as TDD), GREEN Phase: Write Minimal Skill (Make It Pass), Meta-Testing (When GREEN Isn't Working), Overview, Quick Reference (TDD Cycle), Real-World Impact, RED Phase: Baseline Testing (Watch It Fail), TDD Mapping for Skill Testing (+5 more)
 
 ### Community 193 - "resident_visitor_parcel_screen.dart"
-Cohesion: 0.08
-Nodes (20): VisitorPassModel, residentParcelsProvider, residentVisitorPassesProvider, build, _buildParcelCard, _buildParcelsTab, _buildVisitorPassCard, _buildVisitorPassesTab (+12 more)
+Cohesion: 0.11
+Nodes (15): residentParcelsProvider, residentVisitorPassesProvider, build, _buildParcelCard, _buildParcelsTab, _buildVisitorPassCard, _buildVisitorPassesTab, createState (+7 more)
 
 ### Community 194 - "close_period_dialog.dart"
 Cohesion: 0.14
@@ -1373,7 +1387,7 @@ Cohesion: 0.15
 Nodes (12): 1. Tổng Quan Sự Khác Biệt & Cơ Chế Hoạt Động, 2. Đặc Tả 6 Sheet File Excel Thu Thập Dữ Liệu Ban Đầu, 3. Quy Trình Kỹ Thuật Nạp Dữ Liệu, 4. Danh Sách Kiểm Tra Khi Nghiệm Thu (UAT Checklist), 5. Hướng Dẫn Vận Hành Song Song (Parallel Run), Sheet 1: `CoSo_DayNha` (Danh sách cơ sở / dãy trọ), Sheet 2: `DanhSach_Phong` (Danh mục phòng trọ), Sheet 3: `Khach_Thue` (Thông tin người thuê phòng) (+4 more)
 
 ### Community 201 - "app_avatar.dart"
-Cohesion: 0.17
+Cohesion: 0.15
 Nodes (11): AppAvatar, badge, build, fontSize, _getGradientForName, getInitials, _gradientPalettes, imageUrl (+3 more)
 
 ### Community 202 - "excel_import_helper.dart"
@@ -1438,15 +1452,15 @@ Nodes (11): 1. Bối Cảnh & Vấn Đề, 2.1. Cập Nhật Bảng `buildings`,
 
 ### Community 217 - "PHẦN 2: Lộ Trình Triển Khai Theo Giai Đoạn"
 Cohesion: 0.12
-Nodes (15): 3 Trụ Cột Giá Trị Cốt Lõi (Value Propositions để bán được):, GIAI ĐOẠN 0: Product Hardening & Real Commercial SaaS (Củng Cố Sản Phẩm Thực Tế), GIAI ĐOẠN A: Dọn Móng Kỹ Thuật (Foundation Hardening), GIAI ĐOẠN B: Đa Tenant & Nền Tảng SaaS, GIAI ĐOẠN C: Lõi Tài Chính Đạt Chuẩn Thương Mại (Trọng Tâm Bán Hàng), GIAI ĐOẠN D: Vận Hành Tòa Nhà Cốt Lõi (Core Operations), GIAI ĐOẠN E: Tính Năng Thông Minh (AI, OCR & Tối Ưu), GIAI ĐOẠN F: Hạ Tầng, Tuân Thủ & Vận Hành (+7 more)
+Nodes (15): 3 Trụ Cột Giá Trị Cốt Lõi (Value Propositions để bán được):, GIAI ĐOẠN 0: Product Hardening & Real Commercial SaaS (Củng Cố Sản Phẩm Thực Tế) - [HOÀN THÀNH 100%], GIAI ĐOẠN A: Dọn Móng Kỹ Thuật (Foundation Hardening), GIAI ĐOẠN B: Đa Tenant & Nền Tảng SaaS, GIAI ĐOẠN C: Lõi Tài Chính Đạt Chuẩn Thương Mại (Trọng Tâm Bán Hàng), GIAI ĐOẠN D: Vận Hành Tòa Nhà Cốt Lõi (Core Operations), GIAI ĐOẠN E: Tính Năng Thông Minh (AI, OCR & Tối Ưu), GIAI ĐOẠN F: Hạ Tầng, Tuân Thủ & Vận Hành (+7 more)
 
 ### Community 218 - "amenity_maintenance_model.dart"
-Cohesion: 0.11
-Nodes (16): amenityId, AmenityMaintenanceModel, amenityName, createdAt, createdBy, endTime, fromJson, id (+8 more)
+Cohesion: 0.07
+Nodes (26): amenityId, AmenityMaintenanceModel, amenityName, createdAt, createdBy, endTime, fromJson, id (+18 more)
 
 ### Community 219 - "20261025_01_fix_waitlist_transactions_and_rpc_security.sql"
-Cohesion: 0.08
-Nodes (15): idx_notifications_building, idx_notifications_created, idx_notifications_user_read, public.notifications, public.user_fcm_tokens, trg_notify_on_link_request_status, uq_apartment_link_requests_user_pending, public.simulate_unified_payment() (+7 more)
+Cohesion: 0.10
+Nodes (13): public.user_fcm_tokens, idx_ftp_active_type, idx_ftp_building_type, public.calculate_late_payment_penalty(), public.calculate_progressive_electricity_fee(), public.calculate_quota_water_fee(), public.fee_tier_policies, public.simulate_unified_payment() (+5 more)
 
 ### Community 220 - "handleRequest"
 Cohesion: 0.22
@@ -1529,16 +1543,16 @@ Cohesion: 0.09
 Nodes (22): apartmentCode, assignedApartmentId, assignedVehicleId, buildingId, copyWith, createdAt, displayType, fromJson (+14 more)
 
 ### Community 240 - "20261007_01_fix_p0_database_and_security.sql"
-Cohesion: 0.16
-Nodes (17): idx_building_equipments_building, idx_building_equipments_category, idx_building_equipments_next_maint, idx_building_equipments_status, idx_equipment_tasks_dates, idx_equipment_tasks_equipment_id, idx_equipment_tasks_status, public.building_equipments (+9 more)
+Cohesion: 0.14
+Nodes (18): idx_building_equipments_building, idx_building_equipments_category, idx_building_equipments_next_maint, idx_building_equipments_status, idx_equipment_tasks_dates, idx_equipment_tasks_equipment_id, idx_equipment_tasks_status, public.building_equipments (+10 more)
 
-### Community 241 - "ConsumerWidget"
-Cohesion: 0.04
-Nodes (44): appRouterProvider, AppPageTransitions, _defaultDuration, fade, _fastDuration, scaleFade, slideFromRight, slideUp (+36 more)
+### Community 241 - "resident_profile_screen.dart"
+Cohesion: 0.09
+Nodes (15): appRouterProvider, fontSizeScaleProvider, themeModeProvider, fcmTokenSyncProvider, userRepositoryProvider, _showManagementThemeModeSheet, _buildResidentServicesSection, aptData (+7 more)
 
-### Community 242 - "app_card.dart"
-Cohesion: 0.17
-Nodes (10): AppCard, borderColor, borderRadius, build, child, color, elevation, margin (+2 more)
+### Community 242 - "FormState"
+Cohesion: 0.10
+Nodes (14): announcementsAsync, announcementsStreamProvider, aptsAsync, repo, selectedApt, streamAnnouncements, whenData, announcementRepositoryProvider (+6 more)
 
 ### Community 243 - "fee_policy_management_screen.dart"
 Cohesion: 0.14
@@ -1585,8 +1599,8 @@ Cohesion: 0.20
 Nodes (10): Avoid deeply nested references, Naming conventions, Pattern 1: High-level guide with references, Pattern 2: Domain-specific organization, Pattern 3: Conditional details, Progressive disclosure patterns, Skill structure, Structure longer reference files with table of contents (+2 more)
 
 ### Community 254 - "issue_material_usage_model.dart"
-Cohesion: 0.12
-Nodes (15): chargeableDisplayName, createdAt, fromJson, id, isChargeable, IssueMaterialUsageModel, issueReportId, materialId (+7 more)
+Cohesion: 0.08
+Nodes (23): chargeableDisplayName, createdAt, fromJson, id, isChargeable, IssueMaterialUsageModel, issueReportId, materialId (+15 more)
 
 ### Community 256 - "Danh Sách Tính Năng Tổng Hợp"
 Cohesion: 0.20
@@ -1645,28 +1659,28 @@ Cohesion: 0.20
 Nodes (9): 1. Thiết Kế Chi Tiết Từng Hạng Mục (A1 - A6), 2. Kế hoạch Kiểm thử & Xác minh (Verification Plan), A1. Tái cấu trúc Thao tác nhanh Dashboard (`management_home_screen.dart`), A2. Phân cấp Thông tin Dashboard Admin (`management_home_screen.dart`), A3. Chuẩn hóa Thẻ Thống kê (`stat_card.dart`), A4. Tinh gọn Thanh điều hướng & Nhãn hiển thị (`management_home_screen.dart`), A5. Tối ưu Bộ lọc Quản lý Cư dân (`resident_management_screen.dart`), A6. Tối ưu Tìm kiếm & Đối soát Hóa đơn (`invoice_management_screen.dart`) (+1 more)
 
 ### Community 270 - "app_error_card.dart"
-Cohesion: 0.11
-Nodes (12): AppErrorCard, build, customMessage, error, margin, onRetry, build, content (+4 more)
+Cohesion: 0.07
+Nodes (22): AppCard, borderColor, borderRadius, build, child, color, elevation, margin (+14 more)
 
 ### Community 271 - "tiered_fee_breakdown_dialog.dart"
-Cohesion: 0.11
-Nodes (15): calculateElectricityEVN6Tiers, calculateLatePaymentPenalty, calculateProratedVehicleFee, calculateWaterQuota, defaultElectricityTiers, UtilityFeeCalculator, TieredCalculationResultModel, build (+7 more)
+Cohesion: 0.20
+Nodes (9): TieredCalculationResultModel, build, _buildAllocationBar, _buildSummaryHeader, _buildTierItem, result, TieredFeeBreakdownDialog, title (+1 more)
 
 ### Community 272 - "public.issue_reports"
 Cohesion: 0.09
 Nodes (18): idx_issue_reports_auto_assigned, idx_issue_reports_triage, public.triage_and_auto_assign_issue(), public.classify_issue_priority(), trigger_classify_issue_priority, idx_issue_comments_report, public.issue_comments, public.issue_ratings (+10 more)
 
 ### Community 273 - "excel_export_helper.dart"
-Cohesion: 0.11
-Nodes (12): ExcelExportHelper, exportAgingReport, exportInvoices, exportIssues, generateAgingReportBytes, shareFile, _buildReceiptRow, invoice (+4 more)
+Cohesion: 0.09
+Nodes (14): ExcelExportHelper, exportAgingReport, exportInvoices, exportIssues, generateAgingReportBytes, shareFile, build, _buildReceiptRow (+6 more)
 
 ### Community 274 - "Tài Liệu Thiết Kế Kỹ Thuật: Bộ Công Cụ Onboarding & Nhập Liệu Hàng Loạt Từ Excel (B2)"
 Cohesion: 0.12
 Nodes (16): 1. Bối Cảnh & Đột Phá Kiến Trúc Thương Mại, 2.1. Migration SQL: `20261030_02_residents_apartments_lifecycle_and_batch_import.sql`, 2. Thiết Kế Cơ Sở Dữ Liệu & Migration, 3.1. Danh mục Căn hộ (Apartments Sheet), 3.2. Danh mục Cư dân (Residents Sheet), 3.3. Danh mục Chỉ số Điện Nước (Meter Readings Sheet), 3. Quy Chuẩn Thẩm Định Từng Dòng (Strict Validation Rules), 4.1. Models (+8 more)
 
 ### Community 275 - "batch_import_center_screen_test.dart"
-Cohesion: 0.13
-Nodes (8): ApartmentImportItem, main, main, main, buildTestWidget, fetchExistingApartmentCodes, importApartments, main
+Cohesion: 0.16
+Nodes (7): ApartmentImportItem, main, main, buildTestWidget, fetchExistingApartmentCodes, importApartments, main
 
 ### Community 276 - "pubspec.yaml"
 Cohesion: 0.20
@@ -1685,8 +1699,8 @@ Cohesion: 0.22
 Nodes (8): Background Parsing, Configuration & Permissions, Contents, Examples, High-Fidelity Implementation: Fetching and Parsing in the Background, Implementing Flutter Networking, Request Execution & Response Handling, Workflow: Executing Network Operations
 
 ### Community 280 - "subscription_plan_model.dart"
-Cohesion: 0.05
-Nodes (29): code, description, displayMaxApartments, displayMaxBuildings, displayMaxStaff, features, fromJson, id (+21 more)
+Cohesion: 0.09
+Nodes (21): code, description, displayMaxApartments, displayMaxBuildings, displayMaxStaff, features, fromJson, id (+13 more)
 
 ### Community 281 - "Skill authoring best practices"
 Cohesion: 0.22
@@ -1696,9 +1710,9 @@ Nodes (8): Avoid time-sensitive information, Content guidelines, Implement feedb
 Cohesion: 0.22
 Nodes (9): Advanced: Skills with executable code, Avoid assuming tools are installed, Create verifiable intermediate outputs, MCP tool references, Package dependencies, Provide utility scripts, Runtime environment, Solve, don't punt (+1 more)
 
-### Community 283 - "issue_comment_provider.dart"
-Cohesion: 0.17
-Nodes (5): client, initialize, SupabaseConfig, currentComments, repo
+### Community 283 - "main.dart"
+Cohesion: 0.11
+Nodes (7): client, initialize, SupabaseConfig, initialize, initializeDateFormatting, main, null
 
 ### Community 284 - "NỘI DUNG BÁO CÁO CHI TIẾT"
 Cohesion: 0.22
@@ -1813,8 +1827,8 @@ Cohesion: 0.22
 Nodes (8): 1. Tổng Quan Bộ Kiểm Thử Tự Động (Test Suite Metrics), 2.1. Kiểm Thử Bảo Mật & Độc Lập Dữ Liệu (RLS Security Suite), 2.2. Kiểm Thử Giao Dịch Tài Chính Nguyên Tử (Financial Integrity Suite), 2.3. Kiểm Thử Thông Báo Realtime & Database Triggers, 2.4. Kiểm Thử Giao Diện Co Giãn & Trợ Năng (Responsive & Accessibility Suite), 2. Các Phân Hệ Kiểm Thử Trọng Yếu, 3. Lệnh Kiểm Tra Chất Lượng Định Kỳ (Verification Commands), Quy Chuẩn Kiểm Thử & Đảm Bảo Chất Lượng (QA & Testing)
 
 ### Community 312 - "resident_invoice_provider.dart"
-Cohesion: 0.10
-Nodes (15): announcementsAsync, aptsAsync, repo, selectedApt, streamAnnouncements, whenData, confirmPayment, fromFuture (+7 more)
+Cohesion: 0.13
+Nodes (14): confirmPayment, fromFuture, _invoicesStreamProvider, query, residentInvoiceDetailProvider, residentInvoiceProvider, ResidentInvoiceService, response (+6 more)
 
 ### Community 313 - "Brainstorming Ideas Into Designs"
 Cohesion: 0.25
@@ -1957,8 +1971,8 @@ Cohesion: 0.29
 Nodes (7): 1. Explicit Negation in Rules, 2. Entry in Rationalization Table, 3. Red Flag Entry, 4. Update description, Plugging Each Hole, Re-verify After Refactoring, REFACTOR Phase: Close Loopholes (Stay Green)
 
 ### Community 348 - "issue_detail_screen.dart"
-Cohesion: 0.07
-Nodes (30): issueCommentsProvider, issueRatingProvider, issueMaterialsProvider, build, _buildCommentBubble, _buildCommentInput, _buildInfoChip, _buildIssueHeader (+22 more)
+Cohesion: 0.05
+Nodes (37): currentComments, issueCommentsProvider, repo, fetchAllRatings, fetchRatingForIssue, issueRatingProvider, issueRatingsStreamProvider, repo (+29 more)
 
 ### Community 349 - "Global Constraints"
 Cohesion: 0.29
@@ -2057,8 +2071,8 @@ Cohesion: 0.33
 Nodes (6): dev_dependencies, flutter_launcher_icons, flutter_lints, flutter_test, mocktail, sdk
 
 ### Community 374 - "subscription_management_screen.dart"
-Cohesion: 0.12
-Nodes (16): availablePlansProvider, subscriptionRepositoryProvider, subscriptionStatusProvider, build, _buildAlertBanner, _buildBenefitItem, _buildCurrentSubscriptionCard, _buildPlansList (+8 more)
+Cohesion: 0.14
+Nodes (10): _buildAlertBanner, _buildBenefitItem, _buildCurrentSubscriptionCard, _buildPlansList, _buildQuotaRow, _buildQuotaUsageCard, createState, dispose (+2 more)
 
 ### Community 375 - "Quy Tắc Thiết Kế Giao Diện (UI/UX)"
 Cohesion: 0.40
@@ -2225,8 +2239,8 @@ Cohesion: 0.15
 Nodes (12): Common Mistakes, Condition-Based Waiting, Core Pattern, waitForEvent(), waitForEventCount(), waitForEventMatch(), Implementation, Overview (+4 more)
 
 ### Community 436 - "vehicle_repository.dart"
-Cohesion: 0.11
-Nodes (16): approveVehicle, cancelPendingVehicle, _client, deleteVehicle, getActiveMotorbikeCount, getAllVehicles, getVehicleCounts, getVehiclesByApartment (+8 more)
+Cohesion: 0.13
+Nodes (13): approveVehicle, cancelPendingVehicle, _client, deleteVehicle, getActiveMotorbikeCount, getAllVehicles, getVehicleCounts, getVehiclesByApartment (+5 more)
 
 ### Community 437 - "Global Constraints"
 Cohesion: 0.22
@@ -2234,27 +2248,31 @@ Nodes (8): Global Constraints, Kế Hoạch Triển Khai: Báo Cáo Tài Chính 
 
 ### Community 438 - "public.buildings"
 Cohesion: 0.10
-Nodes (27): public.building_staff, public.buildings, public.organizations, idx_ftp_active_type, idx_ftp_building_type, public.calculate_late_payment_penalty(), public.calculate_progressive_electricity_fee(), public.calculate_quota_water_fee() (+19 more)
+Nodes (32): public.building_staff, public.buildings, public.organizations, idx_notifications_building, idx_notifications_created, idx_notifications_user_read, public.check_and_generate_invoice_due_reminders(), public.notifications (+24 more)
+
+### Community 442 - "test-and-analyze"
+Cohesion: 0.09
+Nodes (20): jobs, test-and-analyze, name, on, pull_request, push, branches, branches (+12 more)
 
 ### Community 447 - "membership_repository.dart"
-Cohesion: 0.14
-Nodes (10): assignBuildingMembership, buildAssignPayload, _client, fetchBuildingMembers, fetchUserBuildingMemberships, fetchUserOrganizations, MembershipRepository, membershipRepositoryProvider (+2 more)
-
-### Community 448 - "resident_issue_screen.dart"
 Cohesion: 0.12
-Nodes (12): activeAptId, empty, _issueReportsStreamProvider, mapped, repo, residentIssueProvider, response, userId (+4 more)
+Nodes (14): build, RoleGuard, activeDelegationsProvider, assignBuildingMembership, buildAssignPayload, _client, fetchBuildingMembers, fetchUserBuildingMemberships (+6 more)
+
+### Community 448 - "issue_management_screen.dart"
+Cohesion: 0.04
+Nodes (51): IssueModel, allIssuesProvider, issueSlaStatsProvider, activeAptId, empty, _issueReportsStreamProvider, mapped, repo (+43 more)
 
 ### Community 449 - "apartment_ledger_screen.dart"
-Cohesion: 0.12
-Nodes (16): apartmentBalanceProvider, apartmentLedgerEntriesProvider, apartmentCode, apartmentId, ApartmentLedgerScreen, _ApartmentLedgerScreenState, build, _buildBalanceCard (+8 more)
+Cohesion: 0.14
+Nodes (14): apartmentBalanceProvider, apartmentLedgerEntriesProvider, apartmentCode, apartmentId, ApartmentLedgerScreen, _ApartmentLedgerScreenState, build, _buildBalanceCard (+6 more)
 
 ### Community 450 - "Global Constraints"
 Cohesion: 0.22
 Nodes (8): Global Constraints, Kế Hoạch Triển Khai: Bộ Công Cụ Onboarding & Nhập Liệu Hàng Loạt Từ Excel (B2), Task 1: Migration SQL Vòng Đời Cư Dân & RPCs Batch Import, Task 2: Data Models (Batch Import Models), Task 3: Excel Import Helper & Engine Thẩm Định (Parser, Validator & Templates), Task 4: Batch Import Repository & Service, Task 5: Providers & Màn Hình `BatchImportCenterScreen`, Task 6: Quality Gate, Graphify Update & Cập Nhật Roadmap
 
 ### Community 451 - "parking_management_screen_test.dart"
-Cohesion: 0.10
-Nodes (12): main, main, main, createTestWidget, fetchActiveVisitorTickets, fetchCapacityStats, fetchSlots, main (+4 more)
+Cohesion: 0.12
+Nodes (11): ParkingRepository, main, createTestWidget, FakeParkingRepo, fetchActiveVisitorTickets, fetchCapacityStats, fetchSlots, main (+3 more)
 
 ### Community 452 - "register_screen.dart"
 Cohesion: 0.15
@@ -2265,8 +2283,8 @@ Cohesion: 0.14
 Nodes (11): _client, createEquipment, createMaintenanceTask, deleteEquipment, getActiveServiceInterruptions, getEquipmentById, getEquipments, getMaintenanceTasks (+3 more)
 
 ### Community 454 - "subscription_repository.dart"
-Cohesion: 0.11
-Nodes (13): activeBuilding, buildingId, fetchAvailablePlans, fetchSubscriptionStatus, repo, buildOfflineFallbackStatus, fetchAvailablePlans, fetchSubscriptionStatus (+5 more)
+Cohesion: 0.18
+Nodes (8): buildOfflineFallbackStatus, fetchAvailablePlans, fetchSubscriptionStatus, getFallbackPlans, _injectedClient, requestPlanUpgrade, SubscriptionRepository, FakeSubscriptionRepository
 
 ### Community 455 - "front_desk_workstation_screen.dart"
 Cohesion: 0.10
@@ -2293,64 +2311,64 @@ Cohesion: 0.22
 Nodes (8): Danh Sách Tasks, Kế Hoạch Thực Thi: Gói Dịch Vụ SaaS & Quản Lý Hạn Mức Tòa Nhà (B3), Task 1: Migration CSDL & RPC Kiểm Soát Hạn Mức (Database Migration & Integration Test), Task 2: Data Models (Subscription & Quota Models), Task 3: Subscription Repository, Task 4: UI Màn Hình Quản Lý Gói Cước & Hạn Mức (Subscription Management Screen), Task 5: Routing & Lối Tắt Trên Dashboard BQL, Task 6: Verification & Quality Gate
 
 ### Community 461 - "managementRepositoryProvider"
-Cohesion: 0.06
-Nodes (39): apartmentId, assignResidentProvider, assignResidentToApartment, fetchApartments, fetchInvoices, fetchIssues, fetchResidents, managementApartmentVehiclesProvider (+31 more)
+Cohesion: 0.05
+Nodes (41): apartmentId, assignResidentProvider, assignResidentToApartment, fetchApartments, fetchInvoices, fetchIssues, fetchResidents, managementApartmentVehiclesProvider (+33 more)
 
-### Community 478 - "issue_management_screen.dart"
+### Community 478 - "public.apartment_link_requests"
 Cohesion: 0.12
-Nodes (15): issueSlaStatsProvider, build, _buildFilterChip, createState, dispose, _exportExcel, _filterIssues, _isExporting (+7 more)
+Nodes (10): trg_notify_on_link_request_status, public.apartment_link_requests, public.approve_link_request(), public.confirm_payment(), update_apartment_link_requests_modtime, uq_apartment_link_requests_user_pending, public.approve_link_request(), public.approve_link_request() (+2 more)
 
 ### Community 479 - "apartment_invitation_model.dart"
 Cohesion: 0.11
 Nodes (18): apartmentCode, apartmentId, ApartmentInvitationModel, createdAt, createdBy, expiresAt, formattedExpiresAt, fromJson (+10 more)
 
-### Community 480 - "_"
-Cohesion: 0.29
-Nodes (6): _, _computeCrc16, generate, generateQuickLinkUrl, _tlv, VietQrGenerator
+### Community 480 - "management_invoice_detail_screen.dart"
+Cohesion: 0.11
+Nodes (12): ElectronicReceiptSheet, invoiceDetailProvider, build, build, _buildBottomAction, _buildFeeItem, _buildInfoRow, _buildSummaryCard (+4 more)
 
 ### Community 481 - "List"
 Cohesion: 0.25
-Nodes (3): build, imageUrls, initialIndex
+Nodes (4): build, imageUrls, initialIndex, PhotoViewerScreen
 
 ### Community 482 - "resident_lease_contract_model.dart"
 Cohesion: 0.11
 Nodes (18): apartmentId, contractNumber, createdAt, depositAmount, endDate, formattedStartDate, fromJson, fullName (+10 more)
 
-### Community 483 - "20261030_04_resident_lifecycle_and_contracts.sql"
-Cohesion: 0.22
-Nodes (10): idx_apt_invites_apt, idx_apt_invites_code, idx_apt_invites_status, idx_residents_apartments_dates, idx_residents_apartments_status, public.accept_apartment_invitation(), public.apartment_invitations, public.create_apartment_invitation() (+2 more)
+### Community 483 - "amenity_booking_provider.dart"
+Cohesion: 0.11
+Nodes (15): allAmenityBookingsProvider, AmenityDateQuery, amenityId, date, getAllBookings, getBookingsByAmenityAndDate, getMaintenanceWindows, getMyBookings (+7 more)
 
 ### Community 484 - "amenity_booking_repository.dart"
 Cohesion: 0.12
 Nodes (16): cancelBooking, checkInBooking, _client, createBooking, createMaintenanceWindow, deleteMaintenanceWindow, _formatDate, getAllBookings (+8 more)
 
-### Community 485 - "parking_management_screen.dart"
-Cohesion: 0.06
-Nodes (28): copyWith, fetchActiveVisitorTickets, fetchCapacityStats, filter, ParkingFilter, query, repo, searchQuery (+20 more)
+### Community 485 - "parking_repository.dart"
+Cohesion: 0.12
+Nodes (13): assignSlot, calculateVisitorFee, checkoutVisitorTicket, _client, createVisitorTicket, fetchActiveVisitorTickets, fetchCapacityStats, fetchSlots (+5 more)
 
 ### Community 486 - "resident_invoice_unified_payment_test.dart"
 Cohesion: 0.05
-Nodes (31): amount, createPaymentIntent, errorMessage, fromJson, isPending, paidAt, pay, PaymentService (+23 more)
+Nodes (28): PaymentResult, PaymentService, FakePaymentService, fakeResult, main, pay, main, main (+20 more)
 
 ### Community 487 - "payment_provider.dart"
 Cohesion: 0.15
 Nodes (8): pay, PaymentController, paymentServiceProvider, _paymentTransactionsStreamProvider, _ref, response, _service, user
 
 ### Community 488 - "apartment_management_screen.dart"
-Cohesion: 0.11
-Nodes (17): ApartmentManagementScreen, _ApartmentManagementScreenState, _buildDetailTile, _buildGridView, _buildListView, _buildStatusChip, createState, _deleteApartment (+9 more)
+Cohesion: 0.09
+Nodes (20): apartmentsProvider, ApartmentManagementScreen, _ApartmentManagementScreenState, build, _buildDetailTile, _buildGridView, _buildListView, _buildStatusChip (+12 more)
 
 ### Community 489 - "apartment_contract_sheet_test.dart"
-Cohesion: 0.13
-Nodes (10): contracts, createTestWidget, fetchApartmentContracts, main, mockContract, now, terminateResidentStay, acceptInvitation (+2 more)
+Cohesion: 0.09
+Nodes (16): main, main, contracts, createTestWidget, fetchApartmentContracts, main, mockContract, now (+8 more)
 
 ### Community 490 - "2. Kiến Trúc Dữ Liệu (PostgreSQL & Supabase)"
 Cohesion: 0.13
 Nodes (14): 1.1. Biểu Quyết Điện Tử (Digital Voting & AGM), 1.2. Kiến Nghị Cộng Đồng (Resident Petitions), 1. Cơ Sở Pháp Lý & Yêu Cầu Nghiệp Vụ, 2.1. Bảng `polls` (Đợt biểu quyết / Khảo sát), 2.2. Bảng `poll_options` (Các phương án lựa chọn), 2.3. Bảng `poll_votes` (Phiếu bầu của căn hộ), 2.4. Bảng `resident_petitions` (Kiến nghị cư dân), 2.5. Bảng `petition_endorsements` (Lượt đồng thuận kiến nghị) (+6 more)
 
 ### Community 491 - "create_issue_screen.dart"
-Cohesion: 0.11
-Nodes (15): build, _callHotline, createState, _descriptionController, dispose, _imageFiles, initState, _isLoading (+7 more)
+Cohesion: 0.05
+Nodes (39): activeServiceInterruptionsProvider, apts, clear, currentSelectedApartmentProvider, firstWhere, notifier, residentApartmentsProvider, response (+31 more)
 
 ### Community 492 - "apartment_contract_sheet.dart"
 Cohesion: 0.20
@@ -2384,9 +2402,9 @@ Nodes (8): 1. Mục Tiêu & Vấn Đề Nghiệp Vụ, 2. Kiến Trúc Giải Ph
 Cohesion: 0.25
 Nodes (4): apartmentInvitationsProvider, fetchApartmentContracts, fetchApartmentInvitations, repo
 
-### Community 500 - "_ManagementHomeScreenState"
-Cohesion: 0.13
-Nodes (12): pushNotificationServiceProvider, emptyApartmentsProvider, financialStatsProvider, occupancyRateProvider, pendingConfirmationInvoicesProvider, pendingIssuesCountProvider, pendingLinkRequestsCountProvider, totalApartmentsProvider (+4 more)
+### Community 500 - "subscription_provider.dart"
+Cohesion: 0.17
+Nodes (11): activeBuilding, availablePlansProvider, buildingId, fetchAvailablePlans, fetchSubscriptionStatus, repo, subscriptionRepositoryProvider, subscriptionStatusProvider (+3 more)
 
 ### Community 501 - "Đặc Tả Thiết Kế: Cách Ly Tenant & Mô Hình Membership Đa Tầng (SEC-01, SEC-02, SaaS-01)"
 Cohesion: 0.18
@@ -2400,9 +2418,9 @@ Nodes (12): main, main, main, createTestWidget, main, mockParcels, mockStats, mo
 Cohesion: 0.10
 Nodes (21): apartmentId, build, createState, CreateVisitorPassSheet, _CreateVisitorPassSheetState, _dateFormat, dispose, _expectedArrival (+13 more)
 
-### Community 504 - "amenity_booking_repository_update_check_test.dart"
-Cohesion: 0.10
-Nodes (17): FakePostgrestFilterBuilder, main, FakeFilterBuilder, FakeFilterBuilder, FakeQueryBuilder, FakeTransformBuilder, FakePostgrestFilterBuilder, FakePostgrestFilterBuilder (+9 more)
+### Community 504 - "login_screen.dart"
+Cohesion: 0.16
+Nodes (13): accountLockedNoticeProvider, sessionExpiredNoticeProvider, build, createState, dispose, _emailController, _errorMessage, _isLoading (+5 more)
 
 ### Community 505 - "app_logger.dart"
 Cohesion: 0.18
@@ -2414,19 +2432,19 @@ Nodes (9): Danh Sách Tasks, Global Constraints, Kế Hoạch Thực Thi: Biểu
 
 ### Community 507 - "bulk_invoice_dialog.dart"
 Cohesion: 0.07
-Nodes (28): feeScheduleMapProvider, build, _applyFeeRates, build, _buildIssuesList, _buildKpiCard, _buildStep1Configuration, _buildStep2PreflightResult (+20 more)
+Nodes (27): feeScheduleMapProvider, _applyFeeRates, build, _buildIssuesList, _buildKpiCard, _buildStep1Configuration, _buildStep2PreflightResult, _buildValidItemsList (+19 more)
 
 ### Community 508 - "Danh Sách Tasks"
 Cohesion: 0.22
 Nodes (8): Danh Sách Tasks, Kế Hoạch Thực Thi: Quản Lý Ô Đỗ Hầm, Sức Chứa Bãi Xe & Vé Xe Vãng Lai (D2), Task 1: Migration SQL & Schema Tests [x] Đã hoàn thành (commit `314906e`), Task 2: Data Models Cho Ô Đỗ & Vé Xe Vãng Lai [x] Đã hoàn thành (commit `d13f7f1`), Task 3: Repository & Provider Quản Lý Bãi Xe [x] Đã hoàn thành (commit `8cfb9c5`), Task 4: Giao Diện Quản Lý Ô Đỗ & Trạm Soát Vé Bảo Vệ [x] Đã hoàn thành (commit `05fee9f`), Task 5: Tích Hợp Vào Dashboard BQL & Màn Hình Cư Dân [x] Đã hoàn thành (commit `a63c33f`), Task 6: Verification & Quality Gate [x] Đang hoàn tất
 
-### Community 509 - "edit_issue_screen.dart"
-Cohesion: 0.12
-Nodes (17): IssueModel, build, createState, _descriptionController, dispose, EditIssueScreen, _EditIssueScreenState, _existingImages (+9 more)
+### Community 509 - "parking_provider.dart"
+Cohesion: 0.13
+Nodes (13): copyWith, fetchActiveVisitorTickets, fetchCapacityStats, filter, ParkingFilter, query, repo, searchQuery (+5 more)
 
-### Community 510 - "20261102_01_parking_slots_and_visitor_tickets.sql"
-Cohesion: 0.33
-Nodes (9): idx_parking_slots_building, idx_parking_slots_status, idx_parking_slots_type, idx_visitor_tickets_plate, idx_visitor_tickets_status, public.calculate_visitor_parking_fee(), public.get_parking_capacity_stats(), public.parking_slots (+1 more)
+### Community 510 - "payment_service.dart"
+Cohesion: 0.13
+Nodes (14): amount, createPaymentIntent, errorMessage, fromJson, isPending, paidAt, pay, PaymentType (+6 more)
 
 ### Community 511 - "issue_rating_widget_test.dart"
 Cohesion: 0.25
@@ -2440,25 +2458,21 @@ Nodes (16): idx_parcels_apartment, idx_parcels_arrived, idx_parcels_status, idx_
 Cohesion: 0.11
 Nodes (17): 1. Bối Cảnh Nghiệp Vụ & Bài Toán Thực Tế, 2. Kiến Trúc Cơ Sở Dữ Liệu (PostgreSQL / Supabase), 3. Thiết Kế Tầng Dữ Liệu & Riverpod State Management, 4. Thiết Kế Giao Diện Người Dùng (UI/UX), 5. Quy Trình Kiểm Thử & Tiêu Chí Nghiệm Thu (Quality Gate), A. Ban Quản Lý: Trạm Lễ Tân & An Ninh ([`FrontDeskWorkstationScreen`](file:///c:/Users/ADMIN/StudioProjects/pka_home/lib/features/management/screens/front_desk_workstation_screen.dart)), A. Bảng `visitor_access_passes` (Vé khách ra vào):, A. Data Models: (+9 more)
 
-### Community 514 - "core/supabase_config.dart"
-Cohesion: 0.12
-Nodes (13): invoiceItemsDetailProvider, invoiceItemsStreamProvider, response, apts, clear, firstWhere, notifier, response (+5 more)
+### Community 514 - "resident_community_screen_test.dart"
+Cohesion: 0.15
+Nodes (5): main, main, main, main, noSuchMethod
 
-### Community 515 - "announcement_model.dart"
-Cohesion: 0.12
-Nodes (14): AnnouncementModel, content, createdAt, fromJson, id, isUrgent, targetApartment, targetType (+6 more)
+### Community 515 - "public.maintenance_fund_transactions"
+Cohesion: 0.21
+Nodes (10): public.fee_schedules, public.get_effective_fee_schedule(), public.maintenance_funds, idx_mft_building, idx_mft_created_at, idx_mft_voucher, public.maintenance_fund_transactions, public.record_maintenance_fund_transaction() (+2 more)
 
 ### Community 516 - "rls_security_test.dart"
-Cohesion: 0.11
-Nodes (15): main, MockSupabaseClient, MockSupabaseClient, main, MockSupabaseClient, client, envMap, isConfigured (+7 more)
+Cohesion: 0.13
+Nodes (12): main, MockSupabaseClient, client, envMap, isConfigured, main, skipReason, supabaseAnonKey (+4 more)
 
 ### Community 517 - "issue_sla_and_materials_workflow_integration_test.dart"
 Cohesion: 0.08
 Nodes (16): main, main, main, main, createTestWidget, main, mockIssues, mockSlaStats (+8 more)
-
-### Community 518 - "financial_report_screen_test.dart"
-Cohesion: 0.18
-Nodes (3): main, main, main
 
 ### Community 519 - "_"
 Cohesion: 0.33
@@ -2473,8 +2487,8 @@ Cohesion: 0.50
 Nodes (4): idx_invoices_payment_code, public.fn_generate_invoice_payment_code(), public.process_bank_payment_webhook(), trg_generate_invoice_payment_code
 
 ### Community 522 - "package:supabase_flutter/supabase_flutter.dart"
-Cohesion: 0.07
-Nodes (20): _, getMessage, NetworkErrorHandler, main, main, main, main, MockSupabaseClient (+12 more)
+Cohesion: 0.13
+Nodes (9): _, getMessage, NetworkErrorHandler, main, main, main, main, main (+1 more)
 
 ### Community 523 - "handover_parcel_dialog.dart"
 Cohesion: 0.14
@@ -2484,17 +2498,17 @@ Nodes (12): ParcelModel, build, _collectorCtrl, createState, dispose, _errorMess
 Cohesion: 0.12
 Nodes (15): 1.1. Lỗ hổng P0: Thanh toán giả lập `simulate_unified_payment`, 1.2. Lỗ hổng P0: Sổ Quỹ Bảo Trì 2% (`record_maintenance_fund_transaction`), 1.3. Lỗ hổng P1: Bỏ qua kiểm soát lỗi khi hủy tiện ích (`AmenityBookingRepository.cancelBooking`), 1. Bối Cảnh & Vấn Đề Cần Khắc Phục, 1. RPC `create_payment_intent`, 2.1. Luồng Thanh Toán Thực Tế (Real Payment Lifecycle), 2.2. Chi Tiết RPCs Cơ Sở Dữ Liệu (`20261104_01_financial_integrity_and_real_payment.sql`), 2. Kiến Trúc Giải Pháp & Luồng Dữ Liệu (+7 more)
 
-### Community 525 - "List"
-Cohesion: 0.12
-Nodes (15): approveCalled, approveReading, cancelPendingSubmission, detectAnomaly, detectAnomalyCalled, getAllSubmissions, getLatestApprovedReading, getMySubmissions (+7 more)
+### Community 525 - "reset_password_screen.dart"
+Cohesion: 0.18
+Nodes (10): _confirmPasswordController, createState, dispose, _errorMessage, _isLoading, _obscureConfirmPassword, _obscurePassword, _passwordController (+2 more)
 
-### Community 526 - "document_preview_screen.dart"
-Cohesion: 0.17
-Nodes (6): build, DocumentPreviewScreen, fileName, title, createSamplePdf, main
+### Community 526 - "document_pdf_builder_test.dart"
+Cohesion: 0.12
+Nodes (10): InvoiceModel, isValidPdf, main, sampleItems, samplePaidInvoice, sampleUnpaidInvoice, main, main (+2 more)
 
 ### Community 527 - "20260922_01_invoice_due_reminders_and_cron.sql"
-Cohesion: 0.48
-Nodes (6): idx_notifications_created, idx_notifications_user_read, idx_user_fcm_tokens_token, idx_user_fcm_tokens_user, public.notifications, public.user_fcm_tokens
+Cohesion: 0.36
+Nodes (8): idx_notifications_created, idx_notifications_user_read, idx_user_fcm_tokens_token, idx_user_fcm_tokens_user, public.notifications, public.trigger_notify_on_new_invoice(), public.user_fcm_tokens, trg_notify_on_new_invoice
 
 ### Community 528 - "amenity_slot_helper.dart"
 Cohesion: 0.25
@@ -2505,12 +2519,12 @@ Cohesion: 0.20
 Nodes (9): Danh Sách Tasks, Global Constraints, Kế Hoạch Thực Thi: An Ninh Tòa Nhà, Đăng Ký Khách Trước Bằng Mã QR & Quản Lý Bưu Kiện Lễ Tân (D6), Task 1: Migration SQL & Schema Tests (D6), Task 2: Data Models Khách Viếng Thăm & Bưu Kiện (D6), Task 3: Repository & Provider Quản Lý Sảnh & Bưu Kiện (D6), Task 4: Giao Diện Ban Quản Lý - Trạm Lễ Tân & An Ninh (D6), Task 5: Giao Diện Cư Dân & Tích Hợp Luồng Nghiệp Vụ Toàn App (D6) (+1 more)
 
 ### Community 530 - "building_provider.dart"
-Cohesion: 0.10
-Nodes (17): ActiveBuildingIdNotifier, activeId, allBuildingsProvider, assigned, buildingRepositoryProvider, getAllActiveBuildings, getBuildingById, repo (+9 more)
+Cohesion: 0.15
+Nodes (14): build, BuildingSwitcherDropdown, ActiveBuildingIdNotifier, activeBuildingIdProvider, activeId, allBuildingsProvider, assigned, buildingRepositoryProvider (+6 more)
 
-### Community 531 - "public.vehicles"
-Cohesion: 0.06
-Nodes (26): idx_meter_submissions_anomaly, idx_meter_submissions_period_status, public.detect_meter_reading_anomaly(), trg_check_meter_reading_anomaly, public.check_amenity_booking_update(), public.get_amenity_bookings(), trg_check_amenity_booking_update, uq_vehicles_plate_number (+18 more)
+### Community 531 - "20261010_01_comprehensive_database_and_security_patches.sql"
+Cohesion: 0.15
+Nodes (7): public.book_amenity_slot(), public.check_in_amenity_booking(), public.is_admin_or_accountant(), public.reject_meter_reading(), trg_amenity_booking_cancellation, trg_check_amenity_booking_resident_update, trg_protect_user_sensitive_fields
 
 ### Community 532 - "app_constants.dart"
 Cohesion: 0.15
@@ -2521,7 +2535,7 @@ Cohesion: 0.15
 Nodes (10): authStateChanges, _client, currentUser, fetchUserInfo, login, logout, register, sendPasswordResetOtp (+2 more)
 
 ### Community 534 - "create_apartment_invitation_sheet.dart"
-Cohesion: 0.18
+Cohesion: 0.20
 Nodes (10): apartmentCode, apartmentId, build, CreateApartmentInvitationSheet, _CreateApartmentInvitationSheetState, _createdInvite, createState, _isLoading (+2 more)
 
 ### Community 535 - "front_desk_stats_model.dart"
@@ -2529,8 +2543,8 @@ Cohesion: 0.25
 Nodes (7): expectedVisitorsToday, fromJson, FrontDeskStatsModel, overdueParcels, pendingParcels, toJson, visitorsInBuilding
 
 ### Community 536 - "document_repository.dart"
-Cohesion: 0.14
-Nodes (10): documentLookupFamilyProvider, repo, verifyLookupCode, DocumentRepository, generateInvoicePdf, generateReceiptPdf80mm, generateReceiptPdfA4, _injectedClient (+2 more)
+Cohesion: 0.11
+Nodes (13): documentLookupFamilyProvider, repo, verifyLookupCode, invoiceItemsDetailProvider, invoiceItemsStreamProvider, response, DocumentRepository, generateInvoicePdf (+5 more)
 
 ### Community 537 - "utility_anomaly_detector.dart"
 Cohesion: 0.17
@@ -2548,29 +2562,29 @@ Nodes (10): approveReading, cancelPendingSubmission, _client, detectAnomaly, get
 Cohesion: 0.13
 Nodes (10): main, main, acceptInvitation, createInvitation, fetchApartmentContracts, fetchApartmentInvitations, main, mockContracts (+2 more)
 
-### Community 541 - "activeBuildingProvider"
-Cohesion: 0.19
-Nodes (14): build, _buildConfirmationStep, activeBuildingProvider, activeMaintenanceFundProvider, maintenanceFundLedgerFilterProvider, maintenanceFundLedgerProvider, maintenanceFundRepositoryProvider, _disburseMaintenanceFund (+6 more)
+### Community 541 - "user_repository.dart"
+Cohesion: 0.17
+Nodes (8): coResidentsProvider, fetchCoResidents, repo, _client, fetchCoResidents, updateProfile, UserRepository, _ApartmentCardWithCoResidents
 
 ### Community 543 - "bulk_invoice_dialog_preflight_test.dart"
-Cohesion: 0.08
-Nodes (18): ManagementRepository, main, main, generateCalled, generateValidBulkInvoices, main, MockManagementRepository, noSuchMethod (+10 more)
+Cohesion: 0.06
+Nodes (22): ManagementRepository, main, main, main, generateCalled, generateValidBulkInvoices, main, MockManagementRepository (+14 more)
 
 ### Community 545 - "Đặc Tả Thiết Kế: E1 - OCR Đồng Hồ Điện / Nước & Cảnh Báo Tiêu Thụ Bất Thường"
 Cohesion: 0.22
 Nodes (8): 1. Mục Tiêu & Bối Cảnh Nghiệp Vụ, 2. Kiến Trúc Giải Pháp & Luồng Dữ Liệu, 3.1. Engine OCR Bóc Tách Số (`UtilityMeterOcrEngine`), 3.2. Thuật Toán Cảnh Báo Bất Thường (`UtilityAnomalyDetector`), 3. Quy Tắc Thuật Toán Phân Tích & OCR, 4. Thiết Kế Cơ Sở Dữ Liệu (Supabase/PostgreSQL), 5. Thiết Kế Giao Diện Người Dùng (UI/UX), Đặc Tả Thiết Kế: E1 - OCR Đồng Hồ Điện / Nước & Cảnh Báo Tiêu Thụ Bất Thường
 
-### Community 546 - "bool get"
-Cohesion: 0.17
-Nodes (10): content, createdAt, fromJson, id, isManagement, IssueCommentModel, issueReportId, userId (+2 more)
+### Community 546 - "change_password_screen.dart"
+Cohesion: 0.18
+Nodes (11): build, ChangePasswordScreen, _ChangePasswordScreenState, _confirmPasswordController, createState, dispose, _formKey, _isLoading (+3 more)
 
 ### Community 547 - "parking_capacity_stats_model.dart"
 Cohesion: 0.17
 Nodes (11): carAvailable, carOccupied, carTotal, empty, fromJson, motoAvailable, motoOccupied, motoTotal (+3 more)
 
-### Community 548 - "accounting_repository_test.dart"
-Cohesion: 0.18
-Nodes (6): AccountingPeriodModel, ApartmentLedgerEntryModel, CreditNoteModel, main, main, main
+### Community 548 - "authRepositoryProvider"
+Cohesion: 0.20
+Nodes (8): authRepositoryProvider, _submit, build, _submit, build, _submit, _resendOtp, _verifyOtp
 
 ### Community 550 - "resident_lifecycle_repository.dart"
 Cohesion: 0.22
@@ -2589,32 +2603,80 @@ Cohesion: 0.29
 Nodes (6): _digits, format, _groupUnits, _readThreeDigits, toWords, VietnameseCurrencyTextFormatter
 
 ### Community 554 - "_AccountingWebWorkstationScreenState"
-Cohesion: 0.43
-Nodes (7): accountingWorkstationAvailablePeriodsProvider, accountingWorkstationFilterProvider, accountingWorkstationRowsProvider, accountingWorkstationSummaryProvider, AccountingWebWorkstationScreen, _AccountingWebWorkstationScreenState, build
+Cohesion: 0.29
+Nodes (10): accountingWorkstationAvailablePeriodsProvider, accountingWorkstationFilterProvider, accountingWorkstationRowsProvider, accountingWorkstationSummaryProvider, selectedInvoiceIdsProvider, AccountingWebWorkstationScreen, _AccountingWebWorkstationScreenState, build (+2 more)
+
+### Community 555 - "2. Thiết Kế Chi Tiết"
+Cohesion: 0.20
+Nodes (9): 1.1. Vấn đề 1: Thiếu quy trình kiểm thử và tích hợp liên tục tự động (CI/CD), 1.2. Vấn đề 2: Tồn tại dữ liệu demo nhạy cảm trong Core Migration CSDL, 1. Bối Cảnh & Vấn Đề Cần Khắc Phục, 2.1. Quy Trình CI/CD GitHub Actions (`.github/workflows/ci.yml`), 2.2. Migration Làm Sạch Dữ Liệu Production (`20261104_02_production_clean_seed_separation.sql`), 2.3. Tách Mock Seed Data ra `supabase/seed.sql`, 2. Thiết Kế Chi Tiết, 3. Kế Hoạch Kiểm Thử (+1 more)
 
 ### Community 556 - "ResidentLifecycleRepository"
 Cohesion: 0.40
 Nodes (5): ResidentLifecycleRepository, FakeResidentLifecycleRepository, FakeLifecycleRepo, FakeAcceptRepo, MockLifecycleRepo
 
+### Community 557 - "theme_mode_provider.dart"
+Cohesion: 0.20
+Nodes (5): kThemeModeKey, _loadFromPreferences, setThemeMode, ThemeModeNotifier, main
+
+### Community 558 - "building_repository.dart"
+Cohesion: 0.20
+Nodes (7): BuildingRepository, _customClient, getAllActiveBuildings, getBuildingById, getUserAssignedBuildings, kDefaultCanonicalBuildingId, kDefaultCanonicalOrgId
+
+### Community 559 - "document_lookup_screen_test.dart"
+Cohesion: 0.20
+Nodes (4): main, cannedResponses, main, verifyLookupCode
+
+### Community 560 - "page_transitions.dart"
+Cohesion: 0.22
+Nodes (7): AppPageTransitions, _defaultDuration, fade, _fastDuration, scaleFade, slideFromRight, slideUp
+
+### Community 561 - "20261024_04_pending_requests_correction_and_reschedule.sql"
+Cohesion: 0.22
+Nodes (5): public.cancel_pending_vehicle(), public.check_vehicle_limits(), public.update_pending_meter_reading(), public.update_pending_vehicle(), trg_check_vehicle_limits
+
+### Community 562 - "utility_fee_calculator.dart"
+Cohesion: 0.25
+Nodes (6): calculateElectricityEVN6Tiers, calculateLatePaymentPenalty, calculateProratedVehicleFee, calculateWaterQuota, defaultElectricityTiers, UtilityFeeCalculator
+
+### Community 563 - "package:pka_home/data/models/visitor_parking_ticket_model.dart"
+Cohesion: 0.29
+Nodes (3): main, main, main
+
+### Community 564 - "visitor_pass_qr_sheet.dart"
+Cohesion: 0.29
+Nodes (5): VisitorPassModel, build, _buildInfoRow, pass, VisitorPassQrSheet
+
+### Community 565 - "fee_policy_repository_test.dart"
+Cohesion: 0.29
+Nodes (6): FeeTierPolicyModel, LatePenaltyResultModel, ProratedFeeResultModel, main, MockSupabaseClient, _result
+
+### Community 566 - "Danh Sách Các Bước Thực Thi (Tasks)"
+Cohesion: 0.33
+Nodes (5): Danh Sách Các Bước Thực Thi (Tasks), Kế Hoạch Thực Thi: Gói 3 - Hạ Tầng CI/CD & Làm Sạch Dữ Liệu Demo (INF-01, INF-02), Task 1: Xây Dựng Tự Động Hóa CI/CD GitHub Actions (`.github/workflows/ci.yml`), Task 2: Migration CSDL Làm Sạch Dữ Liệu Production & Tách Seed Data Ra `supabase/seed.sql`, Task 3: Nghiệm Thu Gói 3, Phân Tích Tĩnh Toàn Dự Án, Cập Nhật Roadmap & Hoàn Tất Giai Đoạn 0
+
+### Community 567 - "20260929_03_fix_business_logic_and_amenities.sql"
+Cohesion: 0.50
+Nodes (4): public.check_amenity_booking_update(), public.get_amenity_bookings(), trg_check_amenity_booking_update, uq_vehicles_plate_number
+
 ## Knowledge Gaps
-- **3664 isolated node(s):** `RFC-6455`, `XCTest`, `AppConstants`, `kMotorbikeFee`, `kCarFee` (+3659 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6443 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **51 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **3666 isolated node(s):** `RFC-6455`, `XCTest`, `AppConstants`, `kMotorbikeFee`, `kCarFee` (+3661 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6470 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **53 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SelectedApartmentNotifier` connect `core/supabase_config.dart` to `StateNotifier`, `amenity_maintenance_model.dart`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **Why does `FrontDeskStatsModel` connect `front_desk_stats_model.dart` to `front_desk_repository.dart`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **What connects `RFC-6455`, `XCTest`, `AppConstants` to the rest of the system?**
-  _3664 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _3666 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package:flutter_test/flutter_test.dart` be split into smaller, more focused modules?**
-  _Cohesion score 0.014068249044080513 - nodes in this community are weakly interconnected._
-- **Why does `authProvider` connect `ConsumerState` to `resident_visitor_parcel_screen.dart`, `register_screen.dart`, `link_request_screen.dart`, `audit_trail_screen.dart`, `resident_meter_reading_screen.dart`, `amenity_booking_screen.dart`, `resident_management_screen.dart`, `issue_rating_bottom_sheet.dart`, `managementRepositoryProvider`, `ConsumerWidget`, `auth_provider.dart`, `_ManagementHomeScreenState`, `resident_home_screen.dart`, `issue_detail_screen.dart`, `management_home_screen.dart`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
+  _Cohesion score 0.014140393910973234 - nodes in this community are weakly interconnected._
 - **Should `amenity_management_checkin_test.dart` be split into smaller, more focused modules?**
-  _Cohesion score 0.027522935779816515 - nodes in this community are weakly interconnected._
-- **Why does `BatchImportRepository` connect `batch_import_repository.dart` to `batch_import_provider.dart`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
+  _Cohesion score 0.028021978021978023 - nodes in this community are weakly interconnected._
 - **Should `package:flutter_riverpod/flutter_riverpod.dart` be split into smaller, more focused modules?**
-  _Cohesion score 0.031446540880503145 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03232323232323232 - nodes in this community are weakly interconnected._
+- **Should `resolve_issue_materials_sheet.dart` be split into smaller, more focused modules?**
+  _Cohesion score 0.06685633001422475 - nodes in this community are weakly interconnected._
+- **Should `package:pka_home/data/models/apartment_model.dart` be split into smaller, more focused modules?**
+  _Cohesion score 0.03517215845982969 - nodes in this community are weakly interconnected._

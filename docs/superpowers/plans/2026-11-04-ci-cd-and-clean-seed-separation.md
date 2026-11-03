@@ -19,10 +19,10 @@
 **Interfaces:**
 - Produces: GitHub Actions Workflow với các bước `actions/checkout@v4`, `actions/setup-java@v4`, `subosito/flutter-action@v2`, `flutter pub get`, `dart analyze --fatal-infos`, `flutter test`.
 
-- [ ] **Step 1: Viết test kiểm tra workflow CI/CD** (`test/ci/github_actions_workflow_test.dart`)
-- [ ] **Step 2: Tạo `.github/workflows/ci.yml`**
-- [ ] **Step 3: Chạy test xác minh**
-- [ ] **Step 4: Commit trực tiếp vào `main`**
+- [x] **Step 1: Viết test kiểm tra workflow CI/CD** (`test/ci/github_actions_workflow_test.dart`) (3/3 tests pass)
+- [x] **Step 2: Tạo `.github/workflows/ci.yml`**
+- [x] **Step 3: Chạy test xác minh**
+- [x] **Step 4: Commit trực tiếp vào `main`**: `b3ff0ae`
 
 ---
 
@@ -39,11 +39,11 @@
   - RPC `onboard_building_commercial_config` ghi log vào `audit_logs`.
   - File `supabase/seed.sql` độc lập phục vụ local dev / demo.
 
-- [ ] **Step 1: Viết test kiểm tra migration clean seed và file seed.sql** (`test/database/seed_separation_migration_test.dart`)
-- [ ] **Step 2: Viết migration `20261104_02_production_clean_seed_separation.sql`**
-- [ ] **Step 3: Tạo file `supabase/seed.sql` độc lập**
-- [ ] **Step 4: Chạy test xác minh**
-- [ ] **Step 5: Commit trực tiếp vào `main`**
+- [x] **Step 1: Viết test kiểm tra migration clean seed và file seed.sql** (`test/database/seed_separation_migration_test.dart`) (4/4 tests pass)
+- [x] **Step 2: Viết migration `20261104_02_production_clean_seed_separation.sql`**
+- [x] **Step 3: Tạo file `supabase/seed.sql` độc lập**
+- [x] **Step 4: Chạy test xác minh**
+- [x] **Step 5: Commit trực tiếp vào `main`**: `f032fae`
 
 ---
 
@@ -53,8 +53,8 @@
 - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md`
 - Knowledge Graph: `graphify-out/`
 
-- [ ] **Step 1: Chạy toàn bộ test suite Gói 3**
-- [ ] **Step 2: Chạy `dart analyze lib test` (0 lỗi, 0 cảnh báo, 0 info)**
-- [ ] **Step 3: Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu hoàn tất Gói 3 và Giai đoạn 0**
-- [ ] **Step 4: Cập nhật Knowledge Graph `python -m graphify update .`**
-- [ ] **Step 5: Commit nghiệm thu vào `main`**
+- [x] **Step 1: Chạy toàn bộ test suite Gói 3** (7/7 tests pass)
+- [x] **Step 2: Chạy `dart analyze lib test` (0 lỗi, 0 cảnh báo, 0 info)**
+- [x] **Step 3: Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu hoàn tất Gói 3 và Giai đoạn 0**
+- [x] **Step 4: Cập nhật Knowledge Graph `python -m graphify update .`**
+- [x] **Step 5: Commit nghiệm thu vào `main`**
