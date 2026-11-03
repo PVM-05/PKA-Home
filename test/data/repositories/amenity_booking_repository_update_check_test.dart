@@ -77,8 +77,9 @@ void main() {
       );
     });
 
-    test('cancelBooking phải ném Exception khi không có bản ghi nào được cập nhật (0 rows affected)', () async {
-      when(() => mockClient.from('amenity_bookings')).thenAnswer((_) => FakeQueryBuilder(<Map<String, dynamic>>[]));
+    test('cancelBooking phải ném Exception khi RPC báo lỗi hoặc không thành công (Fail-Closed)', () async {
+      when(() => mockClient.rpc('cancel_amenity_booking', params: any(named: 'params')))
+          .thenAnswer((_) => FakeFilterBuilder({'success': false, 'message': 'Không tìm thấy lượt đặt chỗ hoặc bạn không có quyền hủy.'}));
 
       expect(
         () => repository.cancelBooking('non-existent-id'),

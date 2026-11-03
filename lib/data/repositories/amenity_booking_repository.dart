@@ -98,6 +98,7 @@ class AmenityBookingRepository {
   }
 
   /// Hủy đặt lịch tiện ích nguyên tử qua RPC (hủy transaction PENDING và đôn người trong Waitlist)
+  /// Tuân thủ nghiêm ngặt nguyên tắc Fail-Closed (OPS-FIX): Tuyệt đối không fallback cập nhật ngầm nếu RPC thất bại.
   Future<Map<String, dynamic>> cancelBooking(String bookingId) async {
     try {
       final response = await _client.rpc('cancel_amenity_booking', params: {
@@ -109,16 +110,8 @@ class AmenityBookingRepository {
       }
       return resMap;
     } catch (e) {
-      // Fallback: nếu RPC gặp lỗi hoặc quyền hạn, cập nhật trực tiếp
-      final response = await _client
-          .from('amenity_bookings')
-          .update({'status': 'cancelled', 'updated_at': DateTime.now().toIso8601String()})
-          .eq('id', bookingId)
-          .select('id');
-      if ((response as List).isEmpty) {
-        throw Exception('Không tìm thấy lượt đặt chỗ hoặc bạn không có quyền hủy.');
-      }
-      return {'success': true, 'booking_id': bookingId};
+      if (e is Exception) rethrow;
+      throw Exception('Không thể hủy lịch đặt chỗ: $e');
     }
   }
 
