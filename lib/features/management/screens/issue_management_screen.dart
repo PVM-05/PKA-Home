@@ -12,6 +12,7 @@ import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
+import '../../../data/repositories/issue_repository.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
@@ -98,6 +99,34 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cập nhật trạng thái thành công'), backgroundColor: AppTheme.success),
       );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+      );
+    }
+  }
+
+  void _autoAssignWithAi(IssueModel issue) async {
+    try {
+      final res = await ref.read(issueRepositoryProvider).autoAssignIssue(issue.id, autoAssign: true);
+      if (!mounted) return;
+      if (res['success'] == true) {
+        ref.invalidate(allIssuesProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã gán kỹ thuật viên theo phân loại AI và cân bằng tải!'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message']?.toString() ?? 'Không thể tự động gán lúc này'),
+            backgroundColor: AppTheme.warning,
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -474,6 +503,24 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                             ),
                                             child: const Text('MỚI', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                                           )
+                                        ],
+                                        if (issue.isHazardous) ...[
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.error,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.warning_amber_rounded, size: 10, color: Colors.white),
+                                                SizedBox(width: 2),
+                                                Text('NGUY HIỂM', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                              ],
+                                            ),
+                                          )
                                         ]
                                       ],
                                     ),
@@ -509,6 +556,26 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                       ],
                                     ),
                                   ),
+                                  if (issue.hasAiTriage)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.purple.withValues(alpha: 0.08),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.auto_awesome, size: 12, color: Colors.purple),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'AI: ${issue.aiSuggestedCategoryDisplayName} (${(issue.aiCategoryConfidence * 100).toInt()}%)',
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.purple),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   if (issue.slaDeadline != null)
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -673,13 +740,32 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                               const SizedBox(height: 16),
                               
                               if (issue.status == 'pending')
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () => _showAssignStaffDialog(issue),
-                                    icon: const Icon(Icons.person_add_outlined, size: 18),
-                                    label: const Text('Tiếp nhận & Phân công'),
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: () => _autoAssignWithAi(issue),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.purple.shade700,
+                                          side: BorderSide(color: Colors.purple.shade300),
+                                          visualDensity: VisualDensity.compact,
+                                        ),
+                                        icon: const Icon(Icons.auto_awesome, size: 16),
+                                        label: const Text('Gán theo AI', style: TextStyle(fontSize: 12)),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: ElevatedButton.icon(
+                                        onPressed: () => _showAssignStaffDialog(issue),
+                                        style: ElevatedButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
+                                        ),
+                                        icon: const Icon(Icons.person_add_outlined, size: 16),
+                                        label: const Text('Phân công', style: TextStyle(fontSize: 12)),
+                                      ),
+                                    ),
+                                  ],
                                 )
                               else if (issue.status == 'in_progress')
                                 SizedBox(

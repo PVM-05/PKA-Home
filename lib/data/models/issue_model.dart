@@ -175,6 +175,50 @@ class IssueModel {
     }
   }
 
+  /// Trạng thái SLA thời gian thực
+  bool get isSlaBreached {
+    if (slaStatus == 'breached') return true;
+    if (status != 'resolved' && slaDeadline != null) {
+      return DateTime.now().isAfter(slaDeadline!);
+    }
+    if (resolvedAt != null && slaDeadline != null) {
+      return resolvedAt!.isAfter(slaDeadline!);
+    }
+    return false;
+  }
+
+  bool get isSlaWarning {
+    if (status == 'resolved' || isSlaBreached || slaDeadline == null) return false;
+    final remaining = slaDeadline!.difference(DateTime.now());
+    return remaining.inMinutes > 0 && remaining.inMinutes <= 120; // Còn dưới 2 giờ
+  }
+
+  /// Định dạng thời gian SLA còn lại hoặc trễ hạn
+  String get slaRemainingFormatted {
+    if (slaDeadline == null) return 'Chưa có SLA';
+    final now = DateTime.now();
+
+    if (status == 'resolved') {
+      if (resolvedAt != null && resolvedAt!.isAfter(slaDeadline!)) {
+        final diff = resolvedAt!.difference(slaDeadline!);
+        return 'Hoàn thành trễ (${diff.inHours}h ${diff.inMinutes % 60}p)';
+      }
+      return 'Đã hoàn thành đúng hạn';
+    }
+
+    if (now.isAfter(slaDeadline!)) {
+      final diff = now.difference(slaDeadline!);
+      if (diff.inDays > 0) return 'Trễ hạn ${diff.inDays} ngày';
+      if (diff.inHours > 0) return 'Trễ hạn ${diff.inHours}h ${diff.inMinutes % 60}p';
+      return 'Trễ hạn ${diff.inMinutes} phút';
+    }
+
+    final diff = slaDeadline!.difference(now);
+    if (diff.inDays > 0) return 'Còn ${diff.inDays} ngày';
+    if (diff.inHours > 0) return 'Còn ${diff.inHours}h ${diff.inMinutes % 60}p';
+    return 'Còn ${diff.inMinutes} phút';
+  }
+
   /// Trạng thái sự cố tiếng Việt
   String get statusDisplayName {
     switch (status.toLowerCase()) {
