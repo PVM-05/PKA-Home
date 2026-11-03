@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pka_home/data/models/meter_reading_submission_model.dart';
@@ -28,7 +28,7 @@ class FakeMeterReadingRepository implements MeterReadingRepository {
     required double waterReading,
     String? electricImageUrl,
     String? waterImageUrl,
-    String? note,
+    double ocrConfidence = 0.95,
   }) async {
     submitCalled = true;
     return MeterReadingSubmissionModel(
@@ -180,3 +180,4 @@ void main() {
     expect(fakeRepo.submitCalled, isFalse);
   });
 }
+

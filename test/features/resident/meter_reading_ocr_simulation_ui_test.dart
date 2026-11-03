@@ -30,7 +30,7 @@ class FakeMeterReadingRepo implements MeterReadingRepository {
     required double waterReading,
     String? electricImageUrl,
     String? waterImageUrl,
-    String? note,
+    double ocrConfidence = 0.95,
   }) async {
     submitCalled = true;
     submittedElectricImageUrl = electricImageUrl;
