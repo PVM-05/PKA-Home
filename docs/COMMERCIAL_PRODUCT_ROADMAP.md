@@ -11,11 +11,12 @@
 2. **Minh bạch:** Cư dân và khách thuê thấy rõ tiền của mình đi đâu (biên lai điện tử, quỹ bảo trì), sự cố kỹ thuật được xử lý tới đâu (timeline minh bạch).
 3. **Giảm việc thủ công cho BQL:** Hóa đơn tự động, nhắc nợ thông minh đa tầng, sổ sách và đối soát ngân hàng tự động.
 
-### Phạm Vi Pháp Lý Việt Nam Bắt Buộc Tuân Thủ:
-- **Nghị định 13/2023/NĐ-CP:** Bảo vệ dữ liệu cá nhân (CCCD, SĐT, tài khoản ngân hàng).
-- **Luật Nhà ở 2023:** Quản lý Quỹ bảo trì 2% tách biệt tài khoản, công bố thu chi, hội nghị nhà chung cư online.
-- **Nghị định 123/2020/NĐ-CP:** Quy chuẩn hóa đơn điện tử và chứng từ thu chi.
-- **Quy định PCCC:** Quản lý an toàn phòng cháy chữa cháy, thông báo khẩn cấp và bảo trì thiết bị định kỳ.
+### Phạm Vi Pháp Lý Việt Nam Bắt Buộc Tuân Thủ (Cập Nhật Thực Tế 2026):
+- **Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 & Nghị định 356/2025/NĐ-CP (Hiệu lực 01/01/2026):** Bảo mật tuyệt đối dữ liệu định danh cư dân (CCCD, SĐT, tài khoản ngân hàng, biển số xe, ảnh giấy tờ), bắt buộc phân quyền theo vai trò (RBAC) và cách ly đa tenant (Tenant Isolation).
+- **Luật Nhà ở 27/2023/QH15 & Văn bản hướng dẫn thi hành:** Quản lý Quỹ bảo trì 2% tách biệt tài khoản ngân hàng, công bố thu chi minh bạch công khai, số hóa hội nghị nhà chung cư và biểu quyết điện tử có giá trị pháp lý theo diện tích sở hữu m2.
+- **Nghị định 254/2026/NĐ-CP (Hiệu lực 01/07/2026):** Quy chuẩn hóa đơn điện tử, biên lai thu tiền điện tử và chứng từ thu chi minh bạch có mã tra cứu lookup code và mã QR đối soát.
+- **Quy chuẩn An Toàn PCCC Hiện Hành:** Quản lý an toàn phòng cháy chữa cháy số, cam kết phản ứng sự cố theo SLA khẩn cấp, cảnh báo tự động và hồ sơ kiểm định thiết bị định kỳ.
+- **Chế Độ Kế Toán & Quản Lý Quỹ:** Phân tách dòng tiền vận hành và quỹ bảo trì, nguyên tắc bất biến chứng từ đã chốt kỳ, sổ cái kế toán Append-Only và đối soát ngân hàng tự động.
 
 ---
 
@@ -23,6 +24,7 @@
 
 ```mermaid
 graph TD
+    Phase0["GIAI ĐOẠN 0: Product Hardening & Real Commercial SaaS (Gói 1-3)"]
     PhaseA["GIAI ĐOẠN A: Dọn Móng Kỹ Thuật (Foundation)"]
     PhaseB["GIAI ĐOẠN B: Đa Tenant & Nền Tảng SaaS (B1, B2)"]
     PhaseC["GIAI ĐOẠN C: Lõi Tài Chính Thương Mại (C1, C2, C3)"]
@@ -31,6 +33,7 @@ graph TD
     Pilot["PILOT THỰC TẾ (1-2 Tòa Nhà / Chuỗi Trọ Thật)"]
     PhaseE["GIAI ĐOẠN E: Tính Năng Thông Minh (AI, OCR, IoT)"]
 
+    Phase0 --> PhaseA
     PhaseA --> PhaseB
     PhaseB --> PhaseC
     PhaseC --> PhaseD
@@ -39,6 +42,46 @@ graph TD
     PhaseF --> Pilot
     Pilot --> PhaseE
 ```
+
+---
+
+### GIAI ĐOẠN 0: Product Hardening & Real Commercial SaaS (Củng Cố Sản Phẩm Thực Tế)
+
+> **Mục tiêu tối thượng:** Khắc phục triệt để các rủi ro vận hành P0/P1 trước khi đưa ứng dụng vào chung cư thực tế. Tuyệt đối không đánh đồng bản mô phỏng demo với hệ thống thương mại sản xuất.
+
+#### Gói 1: Bảo Mật & Cách Ly Đa Tenant (SEC-01, SEC-02, SaaS-01) - [HOÀN THÀNH 100%]
+- [x] **SEC-01. Cách ly Tenant triệt để ở cấp CSDL (PostgreSQL RLS):**
+  - Xóa bỏ hoàn toàn các chính sách RLS lỏng lẻo `USING (true)` trên `organizations`, `buildings`, `apartments`, `building_staff`, `maintenance_funds`, `maintenance_fund_transactions`.
+  - Thiết lập các hàm bảo mật: `get_user_accessible_organizations()`, `get_user_accessible_buildings()`, `has_building_role()`.
+  - Phân quyền theo ngữ cảnh: Cư dân chỉ đọc dữ liệu căn hộ của mình; Nhân viên chỉ thao tác trên tòa nhà được phân công hợp lệ; Không cho phép công ty A xem dữ liệu công ty B.
+- [x] **SaaS-01. Mô hình Membership đa tầng (`organization_memberships` & `building_memberships`):**
+  - Bổ sung 2 bảng membership đa tầng độc lập với `users.role` toàn cục.
+  - Cho phép 1 tài khoản có nhiều vai trò khác nhau tại nhiều tòa nhà (VD: Cư dân ở Tòa 1 nhưng là Kế toán ở Tòa 2).
+  - Tự động di chuyển dữ liệu cũ từ `building_staff` và `residents_apartments` sang `building_memberships`.
+- [x] **SEC-02. Context-Aware RBAC & RoleGuard tại tầng ứng dụng:**
+  - Nâng cấp `PermissionItem.allows(role, buildingRoles: ...)` kiểm tra quyền theo `building_id`.
+  - Nâng cấp `RoleGuard(buildingId: ...)` tự động nạp membership qua Riverpod để bảo vệ màn hình quản trị.
+  - Đầy đủ test suite: 17/17 tests tự động pass 100%, Static Analysis 0 issues.
+
+#### Gói 2: Tính Toàn Vẹn Tài Chính & Thanh Toán Thật (FIN-01, FIN-02, FIN-03, SEC-04, SEC-05, OPS-FIX) - [ĐANG TRIỂN KHAI]
+- [ ] **FIN-01. Khai tử thanh toán giả lập `simulate_unified_payment`:**
+  - Vô hiệu hóa RPC giả lập trong production migration.
+  - `PaymentService.pay()` chỉ tạo giao dịch chờ thanh toán (`status = 'pending'`), xuất mã VietQR động Napas 247.
+  - Tuyệt đối không tự động chuyển hóa đơn sang `paid` từ phía client.
+- [ ] **FIN-02. Củng cố Webhook gạch nợ ngân hàng (`process_bank_payment_webhook`):**
+  - Khóa bản ghi `FOR UPDATE`, kiểm tra Idempotency Key chống replay attack.
+  - Chỉ gạch nợ khi số tiền thực nhận khớp hoặc thừa, xử lý an toàn giao dịch thiếu/thừa/trùng.
+- [ ] **SEC-04. Bảo mật Sổ Quỹ Bảo Trì 2% (`record_maintenance_fund_transaction`):**
+  - Tự động lấy `created_by = auth.uid()`, xác minh quyền kế toán của đúng tòa nhà (`has_building_role`).
+  - Thay thế cơ chế sinh số chứng từ `COUNT(*) + 1` bằng PostgreSQL Sequence an toàn chống race condition.
+- [ ] **OPS-FIX. Khắc phục Fail-Closed khi hủy tiện ích (`AmenityBookingRepository.cancelBooking`):**
+  - Loại bỏ fallback âm thầm cập nhật `cancelled` khi RPC thất bại, đảm bảo giao dịch fail-closed an toàn.
+
+#### Gói 3: Hạ Tầng CI/CD & Làm Sạch Dữ Liệu (INF-01, INF-02) - [CHỜ TRIỂN KHAI]
+- [ ] **INF-01. Tự động hóa CI/CD GitHub Actions:**
+  - Thiết lập `.github/workflows/ci.yml` tự động chạy `flutter test` và `dart analyze` trên mỗi commit push lên `main`.
+- [ ] **INF-02. Tách bạch Seed Data Demo khỏi Production:**
+  - Chuyển dữ liệu mẫu (2.45 tỷ đồng, STK demo) ra file `supabase/seed.sql` độc lập, không hardcode vào migration cốt lõi.
 
 ---
 
