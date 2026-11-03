@@ -6,8 +6,36 @@ class MockMeterReadingRepository implements MeterReadingRepository {
   bool submitCalled = false;
   bool approveCalled = false;
   bool rejectCalled = false;
+  bool detectAnomalyCalled = false;
 
   final List<MeterReadingSubmissionModel> _items = [];
+
+  @override
+  Future<Map<String, dynamic>> detectAnomaly({
+    required String apartmentId,
+    required double electricReading,
+    required double waterReading,
+    String? period,
+  }) async {
+    detectAnomalyCalled = true;
+    final isDanger = electricReading < 1000.0 || waterReading < 50.0;
+    return {
+      'is_anomaly': isDanger,
+      'anomaly_severity': isDanger ? 'danger' : 'normal',
+      'anomaly_reason': isDanger ? 'Chỉ số mới nhỏ hơn chỉ số kỳ trước.' : null,
+      'previous_electric_reading': 1000.0,
+      'previous_water_reading': 50.0,
+      'avg_electric_usage': 120.0,
+      'avg_water_usage': 12.0,
+    };
+  }
+
+  @override
+  Future<MeterReadingSubmissionModel?> getLatestApprovedReading(String apartmentId) async {
+    final approved = _items.where((i) => i.apartmentId == apartmentId && i.isApproved).toList();
+    if (approved.isEmpty) return null;
+    return approved.last;
+  }
 
   @override
   Future<MeterReadingSubmissionModel> submitReading({
@@ -18,6 +46,7 @@ class MockMeterReadingRepository implements MeterReadingRepository {
     required double waterReading,
     String? electricImageUrl,
     String? waterImageUrl,
+    double ocrConfidence = 0.95,
   }) async {
     submitCalled = true;
     final item = MeterReadingSubmissionModel(
@@ -30,6 +59,7 @@ class MockMeterReadingRepository implements MeterReadingRepository {
       waterReading: waterReading,
       electricImageUrl: electricImageUrl,
       waterImageUrl: waterImageUrl,
+      ocrConfidence: ocrConfidence,
       status: 'pending',
       createdAt: DateTime.now(),
     );
@@ -43,11 +73,18 @@ class MockMeterReadingRepository implements MeterReadingRepository {
   }
 
   @override
-  Future<List<MeterReadingSubmissionModel>> getAllSubmissions({String? status}) async {
+  Future<List<MeterReadingSubmissionModel>> getAllSubmissions({
+    String? status,
+    bool? isAnomaly,
+  }) async {
+    var result = List<MeterReadingSubmissionModel>.from(_items);
     if (status != null) {
-      return _items.where((i) => i.status == status).toList();
+      result = result.where((i) => i.status == status).toList();
     }
-    return _items;
+    if (isAnomaly != null) {
+      result = result.where((i) => i.isAnomaly == isAnomaly).toList();
+    }
+    return result;
   }
 
   @override
@@ -107,7 +144,6 @@ class MockMeterReadingRepository implements MeterReadingRepository {
   }
 }
 
-
 void main() {
   group('MeterReadingRepository Tests', () {
     late MockMeterReadingRepository repo;
@@ -116,7 +152,7 @@ void main() {
       repo = MockMeterReadingRepository();
     });
 
-    test('submitReading thêm bản ghi mới ở trạng thái pending', () async {
+    test('submitReading thêm bản ghi mới kèm độ tin cậy ocrConfidence', () async {
       final res = await repo.submitReading(
         apartmentId: 'apt-1',
         userId: 'user-1',
@@ -125,15 +161,30 @@ void main() {
         waterReading: 91.0,
         electricImageUrl: 'https://img.electric.jpg',
         waterImageUrl: 'https://img.water.jpg',
+        ocrConfidence: 0.97,
       );
 
       expect(repo.submitCalled, isTrue);
       expect(res.status, 'pending');
       expect(res.electricReading, 1390.0);
       expect(res.waterReading, 91.0);
+      expect(res.ocrConfidence, 0.97);
 
       final mySubmissions = await repo.getMySubmissions('apt-1');
       expect(mySubmissions.length, 1);
+    });
+
+    test('detectAnomaly gọi và trả về kết quả phân tích bất thường', () async {
+      final analysis = await repo.detectAnomaly(
+        apartmentId: 'apt-1',
+        electricReading: 800.0,
+        waterReading: 40.0,
+      );
+
+      expect(repo.detectAnomalyCalled, isTrue);
+      expect(analysis['is_anomaly'], isTrue);
+      expect(analysis['anomaly_severity'], 'danger');
+      expect(analysis['anomaly_reason'], contains('nhỏ hơn chỉ số kỳ trước'));
     });
 
     test('approveReading chuyển trạng thái bản ghi sang approved', () async {

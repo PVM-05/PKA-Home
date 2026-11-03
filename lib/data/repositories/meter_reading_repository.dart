@@ -8,7 +8,39 @@ class MeterReadingRepository {
   MeterReadingRepository([SupabaseClient? client])
       : _client = client ?? SupabaseConfig.client;
 
-  /// Cư dân gửi khai báo chỉ số điện nước mới
+  /// Phân tích và phát hiện bất thường từ RPC PostgreSQL
+  Future<Map<String, dynamic>> detectAnomaly({
+    required String apartmentId,
+    required double electricReading,
+    required double waterReading,
+    String? period,
+  }) async {
+    final response = await _client.rpc('detect_meter_reading_anomaly', params: {
+      'p_apartment_id': apartmentId,
+      'p_electric_reading': electricReading,
+      'p_water_reading': waterReading,
+      'p_period': ?period,
+    });
+
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  /// Lấy bản ghi chỉ số đã duyệt gần nhất của căn hộ (để lấy chỉ số cũ đối chiếu)
+  Future<MeterReadingSubmissionModel?> getLatestApprovedReading(String apartmentId) async {
+    final response = await _client
+        .from('meter_reading_submissions')
+        .select('*, apartments(code), users:users!meter_reading_submissions_submitted_by_fkey(full_name)')
+        .eq('apartment_id', apartmentId)
+        .eq('status', 'approved')
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return MeterReadingSubmissionModel.fromJson(response);
+  }
+
+  /// Cư dân gửi khai báo chỉ số điện nước mới (kèm độ tin cậy OCR)
   Future<MeterReadingSubmissionModel> submitReading({
     required String apartmentId,
     required String userId,
@@ -17,6 +49,7 @@ class MeterReadingRepository {
     required double waterReading,
     String? electricImageUrl,
     String? waterImageUrl,
+    double ocrConfidence = 0.95,
   }) async {
     final response = await _client
         .from('meter_reading_submissions')
@@ -28,6 +61,7 @@ class MeterReadingRepository {
           'water_reading': waterReading,
           'electric_image_url': ?electricImageUrl,
           'water_image_url': ?waterImageUrl,
+          'ocr_confidence': ocrConfidence,
           'status': 'pending',
         })
         .select('*, apartments(code), users:users!meter_reading_submissions_submitted_by_fkey(full_name)')
@@ -49,14 +83,21 @@ class MeterReadingRepository {
         .toList();
   }
 
-  /// Ban quản lý lấy toàn bộ danh sách chỉ số (lọc theo status nếu có)
-  Future<List<MeterReadingSubmissionModel>> getAllSubmissions({String? status}) async {
+  /// Ban quản lý lấy danh sách chỉ số (hỗ trợ lọc status và is_anomaly)
+  Future<List<MeterReadingSubmissionModel>> getAllSubmissions({
+    String? status,
+    bool? isAnomaly,
+  }) async {
     var query = _client
         .from('meter_reading_submissions')
         .select('*, apartments(code), users:users!meter_reading_submissions_submitted_by_fkey(full_name)');
 
     if (status != null && status.isNotEmpty) {
       query = query.eq('status', status);
+    }
+
+    if (isAnomaly != null) {
+      query = query.eq('is_anomaly', isAnomaly);
     }
 
     final response = await query.order('created_at', ascending: false);
@@ -134,4 +175,3 @@ class MeterReadingRepository {
     }
   }
 }
-
