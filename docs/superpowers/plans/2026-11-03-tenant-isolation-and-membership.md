@@ -8,8 +8,8 @@
 
 ## Danh Sách Các Bước Thực Thi (Tasks)
 
-- [ ] **Task 1: Migration CSDL Cách Ly Tenant & Bảng Memberships (`20261103_05_tenant_isolation_and_memberships.sql`)**
-  - Viết test kiểm tra migration SQL: `test/database/tenant_isolation_migration_test.dart`
+- [x] **Task 1: Migration CSDL Cách Ly Tenant & Bảng Memberships (`20261103_05_tenant_isolation_and_memberships.sql`)**
+  - Viết test kiểm tra migration SQL: `test/database/tenant_isolation_migration_test.dart` (4/4 tests pass)
   - Viết migration: `supabase/migrations/20261103_05_tenant_isolation_and_memberships.sql`
     - Tạo bảng `organization_memberships` và `building_memberships`
     - Cài đặt 3 hàm bảo mật: `get_user_accessible_organizations`, `get_user_accessible_buildings`, `has_building_role`
@@ -17,18 +17,18 @@
     - Thiết lập các chính sách RLS siết chặt theo `building_id` và quyền thành viên
     - Tự động di chuyển dữ liệu cũ từ `building_staff` và `residents_apartments` sang `building_memberships`
   - Chạy test pass 100%
-  - Commit trực tiếp vào `main`
+  - Commit trực tiếp vào `main`: `a8c2398`
 
-- [ ] **Task 2: Data Models Dart (`OrganizationMembershipModel`, `BuildingMembershipModel`)**
-  - Viết unit test: `test/data/models/membership_model_test.dart`
+- [x] **Task 2: Data Models Dart (`OrganizationMembershipModel`, `BuildingMembershipModel`)**
+  - Viết unit test: `test/data/models/membership_model_test.dart` (3/3 tests pass)
   - Tạo model `lib/data/models/organization_membership_model.dart`
   - Tạo model `lib/data/models/building_membership_model.dart`
   - Đảm bảo đầy đủ `fromJson`, `toJson`, `copyWith`, kiểm tra hạn dùng ủy quyền `isExpired`
   - Chạy test pass 100%
-  - Commit trực tiếp vào `main`
+  - Commit trực tiếp vào `main`: `09f7b0f`
 
-- [ ] **Task 3: Tầng Dữ Liệu Membership Repository (`MembershipRepository`)**
-  - Viết unit test repository: `test/data/repositories/membership_repository_test.dart`
+- [x] **Task 3: Tầng Dữ Liệu Membership Repository (`MembershipRepository`)**
+  - Viết unit test repository: `test/data/repositories/membership_repository_test.dart` (7/7 tests pass)
   - Tạo repository: `lib/data/repositories/membership_repository.dart`
     - `fetchUserBuildingMemberships(String userId)`
     - `fetchBuildingMembers(String buildingId)`
@@ -36,17 +36,18 @@
     - `revokeBuildingMembership(String membershipId)`
   - Đăng ký Provider Riverpod: `membershipRepositoryProvider`, `userBuildingMembershipsProvider`
   - Chạy test pass 100%
-  - Commit trực tiếp vào `main`
+  - Commit trực tiếp vào `main`: `c066265`
 
-- [ ] **Task 4: Tích Hợp Kiểm Tra Quyền Theo Tòa Nhà Trong Tầng Quản Trị**
+- [x] **Task 4: Tích Hợp Kiểm Tra Quyền Theo Tòa Nhà Trong Tầng Quản Trị**
   - Cập nhật logic phân quyền trong tầng ứng dụng: kiểm tra quyền theo `building_id` thay vì dựa vào trường `users.role` toàn cục
-  - Viết test xác nhận: `test/features/management/tenant_isolation_guard_test.dart`
+  - Nâng cấp `PermissionItem.allows(role, buildingRoles: ...)` và `RoleGuard(buildingId: ...)`
+  - Viết test xác nhận: `test/features/management/tenant_isolation_guard_test.dart` (3/3 tests pass)
   - Chạy test pass 100%
-  - Commit trực tiếp vào `main`
+  - Commit trực tiếp vào `main`: `a969832`
 
-- [ ] **Task 5: Nghiệm Thu Gói 1, Cập Nhật Roadmap & Quality Gate**
+- [x] **Task 5: Nghiệm Thu Gói 1, Cập Nhật Roadmap & Quality Gate**
   - Kiểm tra toàn bộ mã nguồn: `dart analyze lib test` (0 lỗi, 0 cảnh báo, 0 info)
-  - Chạy toàn bộ test suite Gói 1
+  - Chạy toàn bộ test suite Gói 1 (17/17 tests pass)
   - Cập nhật Knowledge Graph: `python -m graphify update .`
   - Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md`
   - Commit nghiệm thu vào `main`

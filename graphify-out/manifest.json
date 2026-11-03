@@ -228,9 +228,9 @@
     "semantic_hash": ""
   },
   "lib/core/constants/permissions.dart": {
-    "mtime": 1791645901.8753893,
-    "seen": 1793342452.1356795,
-    "ast_hash": "3b693b84b916b74cf4b898c9986c8454",
+    "mtime": 1793724204.3850567,
+    "seen": 1793724622.6033359,
+    "ast_hash": "c930f6f14334ee47dd2f32829ee20fbc",
     "semantic_hash": ""
   },
   "lib/core/errors/app_exception.dart": {
@@ -438,9 +438,9 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/role_guard.dart": {
-    "mtime": 1790433481.7161877,
-    "seen": 1793342452.1356795,
-    "ast_hash": "fde22acd5f3c8af46a999d2388dab899",
+    "mtime": 1793724221.6541545,
+    "seen": 1793724622.6033359,
+    "ast_hash": "95630742618f687314f060285c088e31",
     "semantic_hash": ""
   },
   "lib/core/widgets/shimmer_loading.dart": {
@@ -582,8 +582,8 @@
     "semantic_hash": ""
   },
   "lib/data/models/issue_model.dart": {
-    "mtime": 1793689762.0979478,
-    "seen": 1793690076.4830112,
+    "mtime": 1793690129.0110242,
+    "seen": 1793724622.6033359,
     "ast_hash": "d7d6671b690949ddf510cace34b73573",
     "semantic_hash": ""
   },
@@ -1206,8 +1206,8 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/create_issue_screen.dart": {
-    "mtime": 1793689594.059935,
-    "seen": 1793690076.4830112,
+    "mtime": 1793690129.0696783,
+    "seen": 1793724622.6043346,
     "ast_hash": "14ac1897251eed1ca34fb327911ad3a9",
     "semantic_hash": ""
   },
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793690012.6616983,
-    "seen": 1793690076.4840121,
-    "ast_hash": "83fc671fa8a1a3478334adcc4253bad6",
+    "mtime": 1793724571.1044412,
+    "seen": 1793724622.6053345,
+    "ast_hash": "d15e54b2f251db21fb9d8f73b5d4794e",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -5718,9 +5718,9 @@
     "semantic_hash": ""
   },
   "supabase/migrations/20261103_04_issue_smart_triage_and_auto_assign.sql": {
-    "mtime": 1793689034.979583,
-    "seen": 1793690076.4830112,
-    "ast_hash": "9b0cac2b0acb42c2532d412b54c1f8b3",
+    "mtime": 1793724426.3937502,
+    "seen": 1793724622.6043346,
+    "ast_hash": "90e7ade62441f870c6a27d2d43a09ef0",
     "semantic_hash": ""
   },
   "test/core/utils/issue_smart_triage_engine_test.dart": {
@@ -5730,26 +5730,26 @@
     "semantic_hash": ""
   },
   "test/data/models/issue_model_smart_triage_test.dart": {
-    "mtime": 1793689069.304001,
-    "seen": 1793690076.4830112,
-    "ast_hash": "4994139ee7245552699ccb11e8c3027a",
+    "mtime": 1793724426.39575,
+    "seen": 1793724622.6043346,
+    "ast_hash": "4d46d4710e55763965e4583b952c3a6f",
     "semantic_hash": ""
   },
   "test/data/repositories/issue_smart_triage_repository_test.dart": {
-    "mtime": 1793689375.4224865,
-    "seen": 1793690076.4840121,
+    "mtime": 1793690129.2193778,
+    "seen": 1793724622.6043346,
     "ast_hash": "7ae38431ba353f9ebdb0fb8d80d09154",
     "semantic_hash": ""
   },
   "test/database/issue_smart_triage_migration_test.dart": {
-    "mtime": 1793689015.7073598,
-    "seen": 1793690076.4840121,
-    "ast_hash": "97476d36dead586569eb802b38b397b0",
+    "mtime": 1793724426.3972692,
+    "seen": 1793724622.6043346,
+    "ast_hash": "3d1b6c1048828d8f71e12589aef3ab34",
     "semantic_hash": ""
   },
   "test/features/issue/issue_smart_triage_ui_test.dart": {
-    "mtime": 1793689885.5919344,
-    "seen": 1793690076.4840121,
+    "mtime": 1793690129.3214314,
+    "seen": 1793724622.6043346,
     "ast_hash": "edb966134000b090ce49eb272094212c",
     "semantic_hash": ""
   },
@@ -5763,6 +5763,66 @@
     "mtime": 1793688863.6695924,
     "seen": 1793690076.4850132,
     "ast_hash": "06ced4451246e81cacab940531966f5e",
+    "semantic_hash": ""
+  },
+  "lib/data/models/building_membership_model.dart": {
+    "mtime": 1793723837.419065,
+    "seen": 1793724622.6033359,
+    "ast_hash": "8b01f42b67b018ab368f538f2e91cad8",
+    "semantic_hash": ""
+  },
+  "lib/data/models/organization_membership_model.dart": {
+    "mtime": 1793723818.6708517,
+    "seen": 1793724622.6033359,
+    "ast_hash": "6b8e0afcbb1d6e972fcb0396559cdf8b",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/membership_repository.dart": {
+    "mtime": 1793724086.0347812,
+    "seen": 1793724622.6033359,
+    "ast_hash": "4e451838b2370d1bdef12b89dde255af",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261103_05_tenant_isolation_and_memberships.sql": {
+    "mtime": 1793723719.398188,
+    "seen": 1793724622.6043346,
+    "ast_hash": "76ee0dc2e821490fbd2f2ca001955695",
+    "semantic_hash": ""
+  },
+  "test/data/models/membership_model_test.dart": {
+    "mtime": 1793723810.2280703,
+    "seen": 1793724622.6043346,
+    "ast_hash": "eea180f8891cecd6fa8fbd6eb8f823e2",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/membership_repository_test.dart": {
+    "mtime": 1793724018.3561978,
+    "seen": 1793724622.6043346,
+    "ast_hash": "d72b160470db78f55403bbbf27662de5",
+    "semantic_hash": ""
+  },
+  "test/database/tenant_isolation_migration_test.dart": {
+    "mtime": 1793723683.712605,
+    "seen": 1793724622.6043346,
+    "ast_hash": "f6c44c4dee1307ff1e201354a108b4eb",
+    "semantic_hash": ""
+  },
+  "test/features/management/tenant_isolation_guard_test.dart": {
+    "mtime": 1793724265.7422569,
+    "seen": 1793724622.6043346,
+    "ast_hash": "bec2f86c4ca782383bb3148eaadc9523",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-03-tenant-isolation-and-membership.md": {
+    "mtime": 1793724368.3136477,
+    "seen": 1793724622.6053345,
+    "ast_hash": "1950323f8254db34f3fe2371152f2ef8",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-03-tenant-isolation-and-membership-design.md": {
+    "mtime": 1793723652.4028308,
+    "seen": 1793724622.6053345,
+    "ast_hash": "d73e85de27f868b5a7e758c964a87e02",
     "semantic_hash": ""
   }
 }
