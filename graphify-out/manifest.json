@@ -240,9 +240,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/app_router.dart": {
-    "mtime": 1793683570.8181343,
-    "seen": 1793684001.5810473,
-    "ast_hash": "32b42ed2d1c8d2d6f6fb7d12081c3b74",
+    "mtime": 1793685861.1940503,
+    "seen": 1793686214.3939004,
+    "ast_hash": "bca11f2f90818a91ebd6b362dd708c3a",
     "semantic_hash": ""
   },
   "lib/core/router/page_transitions.dart": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/route_names.dart": {
-    "mtime": 1793683514.7723556,
-    "seen": 1793684001.5810473,
-    "ast_hash": "ead6c2153bc8bf266c2b17ef34fb219f",
+    "mtime": 1793685838.3240547,
+    "seen": 1793686214.3939004,
+    "ast_hash": "5be3a862f983aa9b70b5d5f3b15efdb5",
     "semantic_hash": ""
   },
   "lib/core/services/push_notification_service.dart": {
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_home_screen.dart": {
-    "mtime": 1793683654.400256,
-    "seen": 1793684001.581584,
-    "ast_hash": "836b3ff699f892c34cefa1fbb625a760",
+    "mtime": 1793685878.5848393,
+    "seen": 1793686214.3939004,
+    "ast_hash": "625d071b453ab7d18113c56cf3626061",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
@@ -1254,9 +1254,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_home_screen.dart": {
-    "mtime": 1793683668.111295,
-    "seen": 1793684001.581584,
-    "ast_hash": "e115f77f15f8ae7a1564c42a4358fa0c",
+    "mtime": 1793685897.4669845,
+    "seen": 1793686214.3939004,
+    "ast_hash": "9b1fd586473f57626d86948d204ddeba",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_detail_screen.dart": {
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793635291.3211641,
-    "seen": 1793684001.5820916,
-    "ast_hash": "5d9d84ab0c2dde04b44699e406870440",
+    "mtime": 1793684984.5275419,
+    "seen": 1793686214.3949003,
+    "ast_hash": "e6cf8eeece1e8ac103b899cd6e7ec9ef",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -5418,8 +5418,8 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/front_desk_repository.dart": {
-    "mtime": 1793682883.1810849,
-    "seen": 1793684001.581584,
+    "mtime": 1793684984.073943,
+    "seen": 1793686214.3939004,
     "ast_hash": "8d5694d25850c56f1e97bf8f3c0994ab",
     "semantic_hash": ""
   },
@@ -5496,8 +5496,8 @@
     "semantic_hash": ""
   },
   "test/features/resident/screens/resident_visitor_parcel_screen_test.dart": {
-    "mtime": 1793683784.8547862,
-    "seen": 1793684001.5820916,
+    "mtime": 1793684984.3637114,
+    "seen": 1793686214.3949003,
     "ast_hash": "e5a62031ba7823686254d0eea59a4152",
     "semantic_hash": ""
   },
@@ -5514,15 +5514,147 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-03-visitor-and-parcel-hub.md": {
-    "mtime": 1793682530.8447952,
-    "seen": 1793684001.5820916,
-    "ast_hash": "24af468512b439932244c531d9a44dd0",
+    "mtime": 1793684023.3888192,
+    "seen": 1793686214.3958995,
+    "ast_hash": "e7e63be5662ff3a52fbc8da4b1be64bc",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-03-visitor-and-parcel-hub-design.md": {
     "mtime": 1793682530.9062552,
     "seen": 1793684001.5820916,
     "ast_hash": "c2978f8afc4ac8dcd07a2a804f39d45e",
+    "semantic_hash": ""
+  },
+  "lib/data/models/petition_model.dart": {
+    "mtime": 1793685371.5996919,
+    "seen": 1793686214.3939004,
+    "ast_hash": "c5166b569a666e448b180adce3e1d8cb",
+    "semantic_hash": ""
+  },
+  "lib/data/models/poll_model.dart": {
+    "mtime": 1793685371.6850348,
+    "seen": 1793686214.3939004,
+    "ast_hash": "97e57574fa0704e62a30ef1e7cfa00b8",
+    "semantic_hash": ""
+  },
+  "lib/data/models/poll_result_model.dart": {
+    "mtime": 1793685371.7866325,
+    "seen": 1793686214.3939004,
+    "ast_hash": "2e29f1f50397d0bf76b034d6c24ff6db",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/community_provider.dart": {
+    "mtime": 1793685688.5256424,
+    "seen": 1793686214.3939004,
+    "ast_hash": "e7e34dfda65a7e57a5efcce965eb117b",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/community_repository.dart": {
+    "mtime": 1793685688.7630005,
+    "seen": 1793686214.3939004,
+    "ast_hash": "f28a17e66f015a6abc85178766a30089",
+    "semantic_hash": ""
+  },
+  "lib/features/management/screens/community_management_screen.dart": {
+    "mtime": 1793685721.3349528,
+    "seen": 1793686214.3939004,
+    "ast_hash": "e3594ab2c5cb1ab324cf80d0c8c26e7b",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/create_poll_sheet.dart": {
+    "mtime": 1793685725.2531207,
+    "seen": 1793686214.3939004,
+    "ast_hash": "19e03b737eb3e6aef33efc48bcb2b3d7",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/poll_result_dialog.dart": {
+    "mtime": 1793685689.5069797,
+    "seen": 1793686214.3939004,
+    "ast_hash": "5e0afdddf43ee0f426e1c370949da612",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/respond_petition_dialog.dart": {
+    "mtime": 1793685689.5838363,
+    "seen": 1793686214.3939004,
+    "ast_hash": "3e29ad83a464268d89f5bd0ee99f695e",
+    "semantic_hash": ""
+  },
+  "lib/features/resident/screens/resident_community_screen.dart": {
+    "mtime": 1793685978.3755593,
+    "seen": 1793686214.3939004,
+    "ast_hash": "667608bffd442f32ba8fc7eaeb9d037c",
+    "semantic_hash": ""
+  },
+  "lib/features/resident/widgets/create_petition_sheet.dart": {
+    "mtime": 1793685978.8238833,
+    "seen": 1793686214.3939004,
+    "ast_hash": "3336b48dd11e87893a7b6acd1add110a",
+    "semantic_hash": ""
+  },
+  "lib/features/resident/widgets/vote_poll_sheet.dart": {
+    "mtime": 1793685979.303884,
+    "seen": 1793686214.3939004,
+    "ast_hash": "f0a2853258cb23b1373cae9626895fec",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261103_02_digital_voting_and_petitions.sql": {
+    "mtime": 1793685372.0770378,
+    "seen": 1793686214.3939004,
+    "ast_hash": "d2e5fef59dd81c69c35303c79638b7fc",
+    "semantic_hash": ""
+  },
+  "test/data/models/petition_model_test.dart": {
+    "mtime": 1793685372.1929235,
+    "seen": 1793686214.3949003,
+    "ast_hash": "942e2c0784bc7e52d0371762eed092b5",
+    "semantic_hash": ""
+  },
+  "test/data/models/poll_model_test.dart": {
+    "mtime": 1793685372.3035555,
+    "seen": 1793686214.3949003,
+    "ast_hash": "2598d55f6b2c7cfc43268c994dddd0ac",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/community_repository_test.dart": {
+    "mtime": 1793685689.8895173,
+    "seen": 1793686214.3949003,
+    "ast_hash": "117f298d89822c3640349381f593a93c",
+    "semantic_hash": ""
+  },
+  "test/features/management/screens/community_management_screen_test.dart": {
+    "mtime": 1793685690.3771229,
+    "seen": 1793686214.3949003,
+    "ast_hash": "2c8fd1d2957130dc95ade52406610433",
+    "semantic_hash": ""
+  },
+  "test/features/resident/screens/resident_community_screen_test.dart": {
+    "mtime": 1793685979.7961485,
+    "seen": 1793686214.3949003,
+    "ast_hash": "9a556f385dac251a67b81ce06801ce0c",
+    "semantic_hash": ""
+  },
+  "test/integration/digital_voting_and_petitions_migration_test.dart": {
+    "mtime": 1793685154.8162963,
+    "seen": 1793686214.3949003,
+    "ast_hash": "3a6aeff82e810cce4d35fdaf7eaac96e",
+    "semantic_hash": ""
+  },
+  "test/integration/digital_voting_and_petitions_workflow_integration_test.dart": {
+    "mtime": 1793685979.8844156,
+    "seen": 1793686214.3949003,
+    "ast_hash": "bc7af506ce30f29e7656498e8136ff77",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-03-digital-voting-and-petitions.md": {
+    "mtime": 1793686202.267528,
+    "seen": 1793686214.3958995,
+    "ast_hash": "814e562815380f4ffaf6a5accd55a7de",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-03-digital-voting-and-petitions-design.md": {
+    "mtime": 1793685154.7608445,
+    "seen": 1793686214.3958995,
+    "ast_hash": "2e9e23abdf1c61f5dd29d096e72ff380",
     "semantic_hash": ""
   }
 }

@@ -131,3 +131,4 @@
 - Tab 2 - Tiếp nhận & Trả lời Kiến Nghị:
   - Lọc kiến nghị theo trạng thái (`Chờ tiếp nhận`, `Đang xử lý`, `Đã giải quyết`).
   - Nút "Xử lý & Phản hồi" (`RespondPetitionDialog`): Nhập nội dung giải trình, đổi trạng thái, gửi thông báo đến cư dân.
+

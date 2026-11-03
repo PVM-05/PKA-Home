@@ -178,7 +178,30 @@ graph TD
     - 22/22 unit & integration tests tự động pass 100%.
     - Phân tích tĩnh `dart analyze` toàn bộ dự án đạt 0 issues.
     - Đồng bộ Knowledge Graph (8.881 nodes, 12.518 edges).
-- [ ] **D7. Biểu quyết & Cộng đồng:** Khảo sát online, kiến nghị cư dân.
+- [x] **D7. Biểu Quyết Điện Tử & Kiến Nghị Cộng Đồng (Digital Voting, AGM & Resident Petitions):**
+  - Cơ sở dữ liệu & Migration (`20261103_02_digital_voting_and_petitions.sql`):
+    - Bảng `polls`: Mã đợt `POLL-YYYYMM-XXXXX`, tiêu đề, mô tả, phân loại chuyên mục (Hội nghị chung cư, Tài chính, Bảo trì, Nội quy, Chung), hình thức tính quyền biểu quyết (`per_apartment` - "1 Căn hộ = 1 Phiếu", `by_area` - "Theo diện tích sở hữu m²" theo Điều 102 Luật Nhà ở 2023), hình thức lựa chọn (`single_choice`, `multiple_choice`, `yes_no_abstain`), tỷ lệ tham gia tối thiểu (`min_participation_rate`), tỷ lệ tán thành để thông qua (`required_approval_rate`), thời hạn bắt đầu/kết thúc.
+    - Bảng `poll_options`: Danh sách các phương án biểu quyết, thứ tự hiển thị.
+    - Bảng `poll_votes`: Phiếu bầu bất biến của từng căn hộ (`UNIQUE(poll_id, apartment_id)`), trọng số biểu quyết tính theo diện tích $m^2$ hoặc 1.0, trigger DB ngăn chặn sửa/xóa phiếu khi cuộc biểu quyết đã kết thúc.
+    - Bảng `resident_petitions`: Mã kiến nghị `PET-YYYYMM-XXXXX`, tiêu đề, nội dung, phân loại (An ninh, Vệ sinh, Tiện ích, Tiếng ồn, Chung), số lượng căn hộ đồng thuận (`endorsement_count`), trạng thái (`pending`, `acknowledged`, `in_progress`, `resolved`, `rejected`), phản hồi chính thức của BQL (`official_response`).
+    - Bảng `petition_endorsements`: Lượt bấm đồng thuận của các căn hộ (`UNIQUE(petition_id, apartment_id)`).
+    - 4 RPCs PostgreSQL: `submit_poll_vote` (ghi nhận phiếu biểu quyết), `get_poll_results` (thống kê tỷ lệ tham gia %, tỷ lệ từng option %, kiểm tra đạt túc số theo luật), `endorse_petition` (ghi nhận căn hộ đồng thuận), `update_petition_response` (BQL phản hồi chính thức và cập nhật tiến độ).
+  - Tầng Dữ liệu & Fallback Engine:
+    - 3 Data models Dart strongly-typed: `PollModel`, `PollResultModel`, `PetitionModel`.
+    - `CommunityRepository` tích hợp Offline Fallback Engine với bộ dữ liệu mẫu đa dạng và các Riverpod providers: `communityRepositoryProvider`, `pollsProvider`, `pollResultsProvider`, `petitionsProvider`, `communityStatsProvider`.
+  - Giao diện Ban Quản Lý (`CommunityManagementScreen`):
+    - Dải KPI cộng đồng thời gian thực: Biểu quyết đang mở, Tổng cuộc biểu quyết, Kiến nghị chờ xử lý, Kiến nghị đã giải quyết.
+    - Tab 1 - Quản lý Biểu Quyết: Danh sách các cuộc biểu quyết, nút tạo biểu quyết mới (`CreatePollSheet`), xem báo cáo kết quả chi tiết từng phương án kèm thanh tiến trình % trực quan (`PollResultDialog`).
+    - Tab 2 - Xử lý Kiến Nghị: Lọc trạng thái, xem nội dung kiến nghị và số lượng căn hộ ủng hộ, nút "Phản hồi & Xử lý" (`RespondPetitionDialog`) cập nhật phản hồi chính thức.
+    - Lối tắt điều hướng "Cộng đồng" trên Dashboard BQL và menu "Tất cả thao tác quản trị".
+  - Giao diện Cư Dân (`ResidentCommunityScreen`):
+    - Tab 1 - Biểu quyết & Khảo sát: Danh sách các cuộc biểu quyết, tham gia bỏ phiếu điện tử (`VotePollSheet`), xem kết quả phân bổ % trực quan.
+    - Tab 2 - Ý kiến & Kiến nghị: Danh sách kiến nghị của cộng đồng cư dân, nút bấm "Đồng thuận" (`👍 28 đồng thuận`), nút "Gửi kiến nghị mới" (`CreatePetitionSheet`).
+    - Thẻ dịch vụ "Biểu quyết & Ý kiến" trên màn hình chính cư dân (`ResidentHomeScreen`).
+  - Chất lượng & Kiểm thử:
+    - 20/20 unit & integration tests tự động pass 100%.
+    - Phân tích tĩnh `dart analyze` toàn bộ dự án đạt 0 issues.
+    - Đồng bộ Knowledge Graph (9.167 nodes, 13.084 edges).
 - [x] **D8. Phân quyền chi tiết & Ủy quyền vai trò:** Ủy quyền có thời hạn (`role_delegations`), RPC `get_effective_user_role` kiểm tra quyền động.
 
 ---

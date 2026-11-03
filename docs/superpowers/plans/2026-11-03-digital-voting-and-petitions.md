@@ -25,11 +25,11 @@
   - Test: `test/integration/digital_voting_and_petitions_migration_test.dart`
 - **Interfaces:**
   - Produces: Migration SQL hợp lệ và các RPCs phục vụ kiểm toán biểu quyết & kiến nghị cộng đồng.
-- [ ] **Step 1:** Viết failing test `test/integration/digital_voting_and_petitions_migration_test.dart`.
-- [ ] **Step 2:** Chạy test để xác nhận test fail.
-- [ ] **Step 3:** Tạo migration `supabase/migrations/20261103_02_digital_voting_and_petitions.sql`.
-- [ ] **Step 4:** Chạy test xác minh 100% test pass.
-- [ ] **Step 5:** Commit: `feat(db): migration sql bieu quyet dien tu va kien nghi cong dong D7`.
+- [x] **Step 1:** Viết failing test `test/integration/digital_voting_and_petitions_migration_test.dart`.
+- [x] **Step 2:** Chạy test để xác nhận test fail.
+- [x] **Step 3:** Tạo migration `supabase/migrations/20261103_02_digital_voting_and_petitions.sql`.
+- [x] **Step 4:** Chạy test xác minh 100% test pass.
+- [x] **Step 5:** Commit: `feat(db): migration sql bieu quyet dien tu va kien nghi cong dong D7`.
 
 ---
 
@@ -44,11 +44,11 @@
 - **Interfaces:**
   - Consumes: JSON từ Supabase tables `polls`, `poll_votes`, `resident_petitions`.
   - Produces: `PollModel`, `PollResultModel`, `PetitionModel` với đầy đủ getters logic hiển thị tiếng Việt.
-- [ ] **Step 1:** Viết failing unit tests cho các models.
-- [ ] **Step 2:** Chạy tests để xác nhận fail.
-- [ ] **Step 3:** Cài đặt các models.
-- [ ] **Step 4:** Chạy unit tests xác minh 100% pass.
-- [ ] **Step 5:** Commit: `feat(data): them models bieu quyet va kien nghi cong dong D7`.
+- [x] **Step 1:** Viết failing unit tests cho các models.
+- [x] **Step 2:** Chạy tests để xác nhận fail.
+- [x] **Step 3:** Cài đặt các models.
+- [x] **Step 4:** Chạy unit tests xác minh 100% pass.
+- [x] **Step 5:** Commit: `feat(data): them models bieu quyet va kien nghi cong dong D7`.
 
 ---
 
@@ -61,11 +61,11 @@
 - **Interfaces:**
   - Consumes: Models từ Task 2.
   - Produces: `CommunityRepository` với các hàm lấy danh sách polls, bỏ phiếu, tính kết quả, lấy kiến nghị, bấm đồng thuận, phản hồi BQL.
-- [ ] **Step 1:** Viết failing test `community_repository_test.dart`.
-- [ ] **Step 2:** Chạy test để xác nhận fail.
-- [ ] **Step 3:** Cài đặt `community_repository.dart` và `community_provider.dart`.
-- [ ] **Step 4:** Chạy test xác minh 100% pass.
-- [ ] **Step 5:** Commit: `feat(data): them repository va provider quan ly cong dong D7`.
+- [x] **Step 1:** Viết failing test `community_repository_test.dart`.
+- [x] **Step 2:** Chạy test để xác nhận fail.
+- [x] **Step 3:** Cài đặt `community_repository.dart` và `community_provider.dart`.
+- [x] **Step 4:** Chạy test xác minh 100% pass.
+- [x] **Step 5:** Commit: `feat(data): them repository va provider quan ly cong dong D7`.
 
 ---
 
@@ -74,16 +74,17 @@
 - **Files:**
   - Create: `lib/features/management/screens/community_management_screen.dart`
   - Create: `lib/features/management/widgets/create_poll_sheet.dart`
+  - Create: `lib/features/management/widgets/poll_result_dialog.dart`
   - Create: `lib/features/management/widgets/respond_petition_dialog.dart`
   - Test: `test/features/management/screens/community_management_screen_test.dart`
 - **Interfaces:**
   - Consumes: `CommunityRepository`, `community_provider.dart`.
   - Produces: Màn hình trạm làm việc BQL giám sát biểu quyết và xử lý kiến nghị.
-- [ ] **Step 1:** Viết widget test `community_management_screen_test.dart`.
-- [ ] **Step 2:** Chạy test để xác nhận fail.
-- [ ] **Step 3:** Cài đặt các màn hình và widgets BQL.
-- [ ] **Step 4:** Chạy widget test xác minh pass.
-- [ ] **Step 5:** Commit: `feat(ui): man hinh quan ly bieu quyet va kien nghi cu dan D7`.
+- [x] **Step 1:** Viết widget test `community_management_screen_test.dart`.
+- [x] **Step 2:** Chạy test để xác nhận fail.
+- [x] **Step 3:** Cài đặt các màn hình và widgets BQL.
+- [x] **Step 4:** Chạy widget test xác minh pass.
+- [x] **Step 5:** Commit: `feat(ui): man hinh quan ly bieu quyet va kien nghi cu dan D7`.
 
 ---
 
@@ -102,10 +103,10 @@
 - **Interfaces:**
   - Consumes: Mọi tính năng từ Task 1-4.
   - Produces: Luồng khép kín từ BQL tạo biểu quyết -> Cư dân bỏ phiếu -> BQL xem kết quả; Cư dân gửi kiến nghị -> Cư dân khác đồng thuận -> BQL phản hồi chính thức.
-- [ ] **Step 1:** Cài đặt màn hình cư dân, routes và lối tắt Dashboard.
-- [ ] **Step 2:** Viết integration test luồng toàn diện.
-- [ ] **Step 3:** Chạy test xác minh 100% pass.
-- [ ] **Step 4:** Commit: `feat(management): tich hop bieu quyet va kien nghi vao ung dung D7`.
+- [x] **Step 1:** Cài đặt màn hình cư dân, routes và lối tắt Dashboard.
+- [x] **Step 2:** Viết integration test luồng toàn diện.
+- [x] **Step 3:** Chạy test xác minh 100% pass.
+- [x] **Step 4:** Commit: `feat(management): tich hop bieu quyet va kien nghi vao ung dung D7`.
 
 ---
 
@@ -114,8 +115,8 @@
 - **Files:**
   - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md`
   - Modify: `docs/superpowers/plans/2026-11-03-digital-voting-and-petitions.md`
-- [ ] **Step 1:** Chạy `dart analyze` toàn dự án (đạt 0 issue).
-- [ ] **Step 2:** Chạy toàn bộ test suite D7 (100% pass).
-- [ ] **Step 3:** Chạy `python -m graphify update .` đồng bộ Knowledge Graph.
-- [ ] **Step 4:** Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu `[x] D7`.
-- [ ] **Step 5:** Commit: `feat: hoan tat D7 bieu quyet dien tu va kien nghi cong dong`.
+- [x] **Step 1:** Chạy `dart analyze` toàn dự án (đạt 0 issue).
+- [x] **Step 2:** Chạy toàn bộ test suite D7 (100% pass: 20/20 tests).
+- [x] **Step 3:** Chạy `python -m graphify update .` đồng bộ Knowledge Graph (9.167 nodes, 13.084 edges).
+- [x] **Step 4:** Cập nhật `COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu `[x] D7`.
+- [x] **Step 5:** Commit: `feat: hoan tat D7 bieu quyet dien tu va kien nghi cong dong`.
