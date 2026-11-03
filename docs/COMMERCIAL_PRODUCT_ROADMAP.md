@@ -45,7 +45,7 @@ graph TD
 
 ---
 
-### GIAI ĐOẠN 0: Product Hardening & Real Commercial SaaS (Củng Cố Sản Phẩm Thực Tế)
+### GIAI ĐOẠN 0: Product Hardening & Real Commercial SaaS (Củng Cố Sản Phẩm Thực Tế) - [HOÀN THÀNH 100%]
 
 > **Mục tiêu tối thượng:** Khắc phục triệt để các rủi ro vận hành P0/P1 trước khi đưa ứng dụng vào chung cư thực tế. Tuyệt đối không đánh đồng bản mô phỏng demo với hệ thống thương mại sản xuất.
 
@@ -77,11 +77,12 @@ graph TD
 - [x] **OPS-FIX. Khắc phục Fail-Closed khi hủy tiện ích (`AmenityBookingRepository.cancelBooking`):**
   - Loại bỏ hoàn toàn fallback âm thầm cập nhật `cancelled` khi RPC thất bại, đảm bảo giao dịch fail-closed an toàn 100%.
 
-#### Gói 3: Hạ Tầng CI/CD & Làm Sạch Dữ Liệu (INF-01, INF-02) - [CHỜ TRIỂN KHAI]
-- [ ] **INF-01. Tự động hóa CI/CD GitHub Actions:**
-  - Thiết lập `.github/workflows/ci.yml` tự động chạy `flutter test` và `dart analyze` trên mỗi commit push lên `main`.
-- [ ] **INF-02. Tách bạch Seed Data Demo khỏi Production:**
-  - Chuyển dữ liệu mẫu (2.45 tỷ đồng, STK demo) ra file `supabase/seed.sql` độc lập, không hardcode vào migration cốt lõi.
+#### Gói 3: Hạ Tầng CI/CD & Làm Sạch Dữ Liệu (INF-01, INF-02) - [HOÀN THÀNH 100%]
+- [x] **INF-01. Tự động hóa CI/CD GitHub Actions:**
+  - Thiết lập `.github/workflows/ci.yml` tự động chạy `flutter test` và `dart analyze --fatal-infos` trên mỗi commit push lên `main`.
+- [x] **INF-02. Tách bạch Seed Data Demo khỏi Production:**
+  - Chuyển toàn bộ dữ liệu mẫu (2.45 tỷ đồng, STK demo BIDV) ra file `supabase/seed.sql` độc lập.
+  - Ban hành migration `20261104_02_production_clean_seed_separation.sql` gỡ bỏ default hardcode và tạo RPC `onboard_building_commercial_config` có xác thực quyền quản trị và ghi vết `audit_logs`.
 
 ---
 
