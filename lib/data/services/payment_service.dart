@@ -44,6 +44,7 @@ class PaymentResult {
 
     final txCode = (json['receipt_number'] as String?) ??
         (json['transaction_code'] as String?) ??
+        (json['reference_code'] as String?) ??
         '';
 
     return PaymentResult(
@@ -67,27 +68,41 @@ class PaymentResult {
 class PaymentService {
   const PaymentService();
 
-  Future<PaymentResult> pay({
+  /// Khởi tạo ý định thanh toán thực tế (Payment Intent)
+  /// Trả về trạng thái PENDING, mã VietQR và mã đối soát ngân hàng
+  Future<PaymentResult> createPaymentIntent({
     required PaymentType type,
     required String referenceId,
     String paymentMethod = 'bank_transfer',
-    String outcome = 'SUCCESS',
-    String? failureReason,
   }) async {
     final typeString = type == PaymentType.invoice ? 'INVOICE' : 'SERVICE';
 
     final res = await SupabaseConfig.client.rpc(
-      'simulate_unified_payment',
+      'create_payment_intent',
       params: {
         'p_reference_id': referenceId,
         'p_payment_type': typeString,
         'p_payment_method': paymentMethod,
-        'p_outcome': outcome,
-        'p_failure_reason': ?failureReason,
       },
     );
 
     return PaymentResult.fromJson(Map<String, dynamic>.from(res as Map));
+  }
+
+  /// Gửi yêu cầu thanh toán (Mặc định khởi tạo Payment Intent PENDING an toàn)
+  /// Thay thế hoàn toàn cơ chế simulate_unified_payment cũ
+  Future<PaymentResult> pay({
+    required PaymentType type,
+    required String referenceId,
+    String paymentMethod = 'bank_transfer',
+    String outcome = 'PENDING',
+    String? failureReason,
+  }) async {
+    return createPaymentIntent(
+      type: type,
+      referenceId: referenceId,
+      paymentMethod: paymentMethod,
+    );
   }
 
   /// Xử lý Webhook biến động số dư từ cổng ngân hàng / VietQR (Napas 247)

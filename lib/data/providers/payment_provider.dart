@@ -22,7 +22,7 @@ class PaymentController {
     required PaymentType type,
     required String referenceId,
     String paymentMethod = 'bank_transfer',
-    String outcome = 'SUCCESS',
+    String outcome = 'PENDING',
   }) async {
     final result = await _service.pay(
       type: type,
