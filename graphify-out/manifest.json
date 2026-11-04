@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793729707.2973795,
-    "seen": 1793729750.243793,
-    "ast_hash": "55e295804e70c37846d6bcb06130ec4c",
+    "mtime": 1793802797.633535,
+    "seen": 1793802844.4991057,
+    "ast_hash": "8bb0be2230a8b72f0375298a770dada5",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -4812,8 +4812,8 @@
     "semantic_hash": ""
   },
   "supabase/seed.sql": {
-    "mtime": 1793729576.622014,
-    "seen": 1793729750.243793,
+    "mtime": 1793729803.7420688,
+    "seen": 1793802844.4981027,
     "ast_hash": "d889a1ed1c25d4af7f2f2d21c08b8eed",
     "semantic_hash": ""
   },
@@ -4830,9 +4830,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/financial_report_screen.dart": {
-    "mtime": 1793344335.1028607,
-    "seen": 1793344822.264285,
-    "ast_hash": "0d0a481fd7deed697ea9d6e17d5f6ae3",
+    "mtime": 1793802555.3097036,
+    "seen": 1793802844.497102,
+    "ast_hash": "0d08d0cbe6c74b462caa137888c298a8",
     "semantic_hash": ""
   },
   "supabase/migrations/20261030_01_financial_aging_report_rpc.sql": {
@@ -5862,39 +5862,117 @@
     "semantic_hash": ""
   },
   ".github/workflows/ci.yml": {
-    "mtime": 1793729496.3550966,
-    "seen": 1793729750.242739,
-    "ast_hash": "330c657cfb3a3fbedc7f87a71af76d6d",
+    "mtime": 1793780559.1331184,
+    "seen": 1793802844.496101,
+    "ast_hash": "d0f08ae2b87952a5db9ca1fd1177fe14",
     "semantic_hash": ""
   },
   "supabase/migrations/20261104_02_production_clean_seed_separation.sql": {
-    "mtime": 1793729563.070998,
-    "seen": 1793729750.243793,
-    "ast_hash": "3286dff104ca5bb2950936fe589add4c",
+    "mtime": 1793780559.140157,
+    "seen": 1793802844.4981027,
+    "ast_hash": "18a6d1a547bdd2cee3e4b990cc32a31f",
     "semantic_hash": ""
   },
   "test/ci/github_actions_workflow_test.dart": {
-    "mtime": 1793729476.968182,
-    "seen": 1793729750.243793,
-    "ast_hash": "1084097b6d5b8f4025d563b3a1f0e785",
+    "mtime": 1793780559.1411567,
+    "seen": 1793802844.4981027,
+    "ast_hash": "e09e7bed879e171154b87df7847d6487",
     "semantic_hash": ""
   },
   "test/database/seed_separation_migration_test.dart": {
-    "mtime": 1793729532.8488984,
-    "seen": 1793729750.243793,
-    "ast_hash": "a38acf0952425f9a05fe89a3a4d396d5",
+    "mtime": 1793780559.142177,
+    "seen": 1793802844.4981027,
+    "ast_hash": "8e00ae49891a8e8684b312308d3dcfe7",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-04-ci-cd-and-clean-seed-separation.md": {
-    "mtime": 1793729684.8714936,
-    "seen": 1793729750.2452977,
+    "mtime": 1793729803.38062,
+    "seen": 1793802844.5001001,
     "ast_hash": "c0ab827c43bc6e31b5c5d78d19af1dd1",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-04-ci-cd-and-clean-seed-separation-design.md": {
-    "mtime": 1793729445.8962288,
-    "seen": 1793729750.2452977,
-    "ast_hash": "5e3c4cf80d6a356c9c2a2082aa9b76a1",
+    "mtime": 1793780559.1361566,
+    "seen": 1793802844.5001001,
+    "ast_hash": "2f66a1d60e013c459a565ec7594965e7",
+    "semantic_hash": ""
+  },
+  "lib/data/models/debt_risk_score_model.dart": {
+    "mtime": 1793780810.9700933,
+    "seen": 1793802844.497102,
+    "ast_hash": "c9cf4b250694b1f66be667e430a71bf9",
+    "semantic_hash": ""
+  },
+  "lib/data/models/dunning_action_model.dart": {
+    "mtime": 1793780817.5592883,
+    "seen": 1793802844.497102,
+    "ast_hash": "d89d4e533696d2212cd6a95cdc7925a6",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/debt_prediction_provider.dart": {
+    "mtime": 1793780865.9750252,
+    "seen": 1793802844.497102,
+    "ast_hash": "f31b452629bb64985ec2be6b17d47f1b",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/debt_prediction_repository.dart": {
+    "mtime": 1793780854.8518233,
+    "seen": 1793802844.497102,
+    "ast_hash": "8827c8684ccc80b0a526de299990a017",
+    "semantic_hash": ""
+  },
+  "lib/data/services/debt_prediction_engine.dart": {
+    "mtime": 1793780830.2364233,
+    "seen": 1793802844.497102,
+    "ast_hash": "6a63e0c6afe05151e3ac55d663560426",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/debt_risk_radar_tab.dart": {
+    "mtime": 1793802620.845753,
+    "seen": 1793802844.497102,
+    "ast_hash": "0f2231778137473e90c7a387c9219b0e",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/execute_dunning_dialog.dart": {
+    "mtime": 1793780937.845851,
+    "seen": 1793802844.497102,
+    "ast_hash": "8faf98a05c180fdb40b8569aad2a931c",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261104_03_debt_prediction_and_dunning.sql": {
+    "mtime": 1793780723.7972093,
+    "seen": 1793802844.4981027,
+    "ast_hash": "6fb78be793eaced3be41941d96634752",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/debt_prediction_repository_test.dart": {
+    "mtime": 1793780882.3000348,
+    "seen": 1793802844.4981027,
+    "ast_hash": "0a94854604e497c31f05ae7d6115a338",
+    "semantic_hash": ""
+  },
+  "test/database/debt_prediction_migration_test.dart": {
+    "mtime": 1793780738.5662818,
+    "seen": 1793802844.4981027,
+    "ast_hash": "3e8b03e91891515d858f979b24b7ffd0",
+    "semantic_hash": ""
+  },
+  "test/features/management/debt_risk_radar_test.dart": {
+    "mtime": 1793802776.9943497,
+    "seen": 1793802844.4991057,
+    "ast_hash": "d757533ada1def22b61e714cc80426b4",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-04-smart-debt-prediction-and-dunning.md": {
+    "mtime": 1793780667.7207847,
+    "seen": 1793802844.5001001,
+    "ast_hash": "d088d3c84e810c2e43a847a7090b5647",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-04-smart-debt-prediction-and-dunning-design.md": {
+    "mtime": 1793780652.5407538,
+    "seen": 1793802844.5001001,
+    "ast_hash": "0c8a75eff654d247f9366f66ee44181f",
     "semantic_hash": ""
   }
 }
