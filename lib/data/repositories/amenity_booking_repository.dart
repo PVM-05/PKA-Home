@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
 import '../../core/utils/app_logger.dart';
+import '../contracts/contracts.dart';
 import '../models/amenity_booking_model.dart';
 import '../models/amenity_maintenance_model.dart';
 
@@ -60,22 +61,23 @@ class AmenityBookingRepository {
     final dateStr = _formatDate(date);
 
     try {
-      final response = await _client.rpc('book_amenity_slot', params: {
-        'p_amenity_id': amenityId,
-        'p_apartment_id': apartmentId,
-        'p_booking_date': dateStr,
-        'p_time_slot': timeSlot,
-        'p_guests_count': guestsCount,
-        'p_allow_waitlist': allowWaitlist,
-        'p_notes': ?notes,
-      });
+      final reqDto = BookAmenitySlotRequestDto(
+        amenityId: amenityId,
+        apartmentId: apartmentId,
+        bookingDate: dateStr,
+        timeSlot: timeSlot,
+        guestsCount: guestsCount,
+        allowWaitlist: allowWaitlist,
+        notes: notes,
+      );
+      final response = await _client.rpc('book_amenity_slot', params: reqDto.toRpcParams());
 
-      final resMap = response as Map<String, dynamic>;
-      if (resMap['success'] != true) {
-        throw Exception(resMap['message'] ?? 'Đặt lịch thất bại.');
+      final resDto = BookAmenitySlotResponseDto.fromRpc(response);
+      if (!resDto.success || resDto.bookingId == null) {
+        throw Exception(resDto.message.isNotEmpty ? resDto.message : 'Đặt lịch thất bại.');
       }
 
-      final bookingId = resMap['booking_id'] as String;
+      final bookingId = resDto.bookingId!;
       final bookingData = await _client
           .from('amenity_bookings')
           .select('*, building_amenities(name), apartments(code), payment_transactions(*)')
@@ -97,18 +99,27 @@ class AmenityBookingRepository {
     }
   }
 
+  /// Hủy đặt lịch tiện ích nguyên tử qua RPC với DTO Contract
+  Future<CancelAmenityBookingResponseDto> cancelBookingContract(CancelAmenityBookingRequestDto request) async {
+    final response = await _client.rpc('cancel_amenity_booking', params: request.toRpcParams());
+    return CancelAmenityBookingResponseDto.fromRpc(response);
+  }
+
   /// Hủy đặt lịch tiện ích nguyên tử qua RPC (hủy transaction PENDING và đôn người trong Waitlist)
   /// Tuân thủ nghiêm ngặt nguyên tắc Fail-Closed (OPS-FIX): Tuyệt đối không fallback cập nhật ngầm nếu RPC thất bại.
   Future<Map<String, dynamic>> cancelBooking(String bookingId) async {
     try {
-      final response = await _client.rpc('cancel_amenity_booking', params: {
-        'p_booking_id': bookingId,
-      });
-      final resMap = Map<String, dynamic>.from(response as Map);
-      if (resMap['success'] != true) {
-        throw Exception(resMap['message'] ?? 'Không thể hủy lịch đặt chỗ.');
+      final reqDto = CancelAmenityBookingRequestDto(bookingId: bookingId);
+      final resDto = await cancelBookingContract(reqDto);
+      if (!resDto.success) {
+        throw Exception(resDto.message.isNotEmpty ? resDto.message : 'Không thể hủy lịch đặt chỗ.');
       }
-      return resMap;
+      return {
+        'success': resDto.success,
+        'booking_id': resDto.bookingId,
+        'status': resDto.status,
+        'message': resDto.message,
+      };
     } catch (e) {
       if (e is Exception) rethrow;
       throw Exception('Không thể hủy lịch đặt chỗ: $e');

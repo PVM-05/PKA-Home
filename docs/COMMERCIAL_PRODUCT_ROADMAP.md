@@ -88,7 +88,19 @@ graph TD
 
 ### GIAI ĐOẠN A: Dọn Móng Kỹ Thuật (Foundation Hardening)
 - [x] **A1. Hợp nhất Database:** Rút gọn còn 8 migration chuẩn tiến lên (từ `20261027_01` đến `20261028_03`). Mỗi RPC có một định nghĩa duy nhất.
-- [ ] **A2. Hợp đồng Client ↔ Server chặt chẽ:** DTO có kiểu strongly-typed, contract test cho mọi RPC, loại bỏ `Map<String, dynamic>` lỏng lẻo.
+- [x] **A2. Hợp đồng Client ↔ Server chặt chẽ (Strongly-Typed RPC DTOs & Contract Tests):**
+  - Hệ thống DTOs theo Domain (`lib/data/contracts/`):
+    - `finance_rpc_contracts.dart`: Quỹ bảo trì (`RecordMaintenanceTransactionDto`), Webhook gạch nợ (`ProcessBankPaymentWebhookDto`), Onboarding cấu hình thương mại (`OnboardBuildingCommercialConfigDto`), Dự báo rủi ro nợ xấu (`CalculateApartmentDebtRiskDto`), Thi hành đôn đốc đa tầng (`ExecuteDunningActionDto`).
+    - `booking_rpc_contracts.dart`: Đặt chỗ tiện ích (`BookAmenitySlotDto`), Hủy lịch fail-closed (`CancelAmenityBookingDto`), Check-in tiện ích (`CheckInAmenityBookingDto`), Tình trạng khung giờ (`GetSlotAvailabilityDto`).
+    - `operations_rpc_contracts.dart`: AI triage phân công sự cố (`TriageIssueReportDto`), Check-in / check-out khách (`VisitorPassActionDto`), Bưu kiện (`CollectParcelDto`), Phát hiện bất thường công tơ (`DetectMeterAnomalyDto`).
+    - `community_rpc_contracts.dart`: Bỏ phiếu biểu quyết số hóa (`SubmitPollVoteDto`), Đồng thuận kiến nghị (`EndorsePetitionDto`).
+  - Tiện ích Type-Safe Wrapper & Chuẩn Hóa Lỗi:
+    - `RpcContractClient` tự động serialize params có tiền tố `p_*`, parse kết quả strongly-typed, bọc ngoại lệ `RpcContractException` chuẩn mực tiếng Việt.
+  - Tích hợp Repositories:
+    - Nâng cấp `MaintenanceFundRepository`, `AmenityBookingRepository`, `DebtPredictionRepository` sử dụng DTO Contracts loại bỏ hoàn toàn `Map<String, dynamic>` lỏng lẻo.
+  - Chất lượng & Kiểm thử:
+    - 18/18 Contract tests tự động kiểm thử 100% schema và serialization hai chiều (`test/contracts/rpc_contracts_test.dart`).
+    - Phân tích tĩnh `dart analyze lib test` đạt 0 issues trên toàn bộ dự án.
 - [x] **A3. Bảng cấu hình tiền tệ:** `building_fee_configs` theo thời gian, chống hardcode giá.
 - [ ] **A4. Bảo mật nền:** Xoay key, thống nhất bucket private + signed URL ngắn hạn, rate limit đăng nhập/OTP, MFA cho BQL/Kế toán.
 - [x] **A5. Chất lượng:** 489 tests tự động, RLS security test, Static Analysis 0 issues.

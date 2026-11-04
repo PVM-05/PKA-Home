@@ -828,9 +828,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/amenity_booking_repository.dart": {
-    "mtime": 1793728701.4311361,
-    "seen": 1793729204.509792,
-    "ast_hash": "58e05062f7f395b705768b60efbf5fa5",
+    "mtime": 1793807034.2270105,
+    "seen": 1793807410.599448,
+    "ast_hash": "608dbaf69d85ae51f9b6a0f86344387f",
     "semantic_hash": ""
   },
   "lib/data/repositories/announcement_repository.dart": {
@@ -888,9 +888,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/maintenance_fund_repository.dart": {
-    "mtime": 1793119543.8799956,
-    "seen": 1793342452.1356795,
-    "ast_hash": "68b3aad85fdf6a1dbcf03c22f5de59f3",
+    "mtime": 1793806848.4729168,
+    "seen": 1793807410.599448,
+    "ast_hash": "252093b153882cb449deb922106e751b",
     "semantic_hash": ""
   },
   "lib/data/repositories/management_repository.dart": {
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793804786.882958,
-    "seen": 1793804833.418714,
-    "ast_hash": "43cba31aebf8691d62f9168ef5c2b8ac",
+    "mtime": 1793807370.841777,
+    "seen": 1793807410.6020572,
+    "ast_hash": "dc0951d5feb284c35dfaa55670f24709",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -5916,9 +5916,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/debt_prediction_repository.dart": {
-    "mtime": 1793780854.8518233,
-    "seen": 1793802844.497102,
-    "ast_hash": "8827c8684ccc80b0a526de299990a017",
+    "mtime": 1793807209.7948635,
+    "seen": 1793807410.599448,
+    "ast_hash": "ad2a810dfb7a7639d439a8c4a846f603",
     "semantic_hash": ""
   },
   "lib/data/services/debt_prediction_engine.dart": {
@@ -5976,63 +5976,117 @@
     "semantic_hash": ""
   },
   "lib/core/sync/offline_sync_manager.dart": {
-    "mtime": 1793804738.349354,
-    "seen": 1793804833.4166963,
+    "mtime": 1793805291.029831,
+    "seen": 1793807410.599448,
     "ast_hash": "24ab6c425a8cfba1238fcdb63e5e067a",
     "semantic_hash": ""
   },
   "lib/core/sync/offline_sync_queue_storage.dart": {
-    "mtime": 1793804734.614426,
-    "seen": 1793804833.4166963,
+    "mtime": 1793805291.104386,
+    "seen": 1793807410.599448,
     "ast_hash": "193f797d1a5df9098c35290568627a06",
     "semantic_hash": ""
   },
   "lib/core/sync/sync_action_model.dart": {
-    "mtime": 1793803698.9712837,
-    "seen": 1793804833.4166963,
-    "ast_hash": "8b3f074f63531c9bab904e6f2cffeb13",
+    "mtime": 1793804907.9946616,
+    "seen": 1793807410.599448,
+    "ast_hash": "2af21fd4a60f8a5252ab21ea54d9ca78",
     "semantic_hash": ""
   },
   "lib/core/sync/sync_providers.dart": {
-    "mtime": 1793803816.083976,
-    "seen": 1793804833.4166963,
-    "ast_hash": "35a05daa027af02436030853ef88eebe",
+    "mtime": 1793804908.049523,
+    "seen": 1793807410.599448,
+    "ast_hash": "e2c0d6ce8d7c5e6bcaf46664b6853d22",
     "semantic_hash": ""
   },
   "lib/core/widgets/sync_status_bar.dart": {
-    "mtime": 1793804263.7967494,
-    "seen": 1793804833.417695,
+    "mtime": 1793805291.1877491,
+    "seen": 1793807410.599448,
     "ast_hash": "2192f62dec309b2eb16c4260cd77a6fb",
     "semantic_hash": ""
   },
   "test/core/sync/offline_sync_manager_test.dart": {
-    "mtime": 1793804270.2319248,
-    "seen": 1793804833.417695,
+    "mtime": 1793805291.2513301,
+    "seen": 1793807410.601038,
     "ast_hash": "08446e4244050d2334e65853c53adde5",
     "semantic_hash": ""
   },
   "test/core/sync/offline_sync_queue_storage_test.dart": {
-    "mtime": 1793803725.2602417,
-    "seen": 1793804833.417695,
-    "ast_hash": "c1259d4a6d855e9a3e402da10fbbb33e",
+    "mtime": 1793804909.9516943,
+    "seen": 1793807410.601038,
+    "ast_hash": "8572397b1af17709819ecaca46dfe982",
     "semantic_hash": ""
   },
   "test/core/widgets/sync_status_bar_test.dart": {
-    "mtime": 1793804014.081749,
-    "seen": 1793804833.418714,
-    "ast_hash": "fff96873fdc734e4441f109c6744e790",
+    "mtime": 1793804911.1045833,
+    "seen": 1793807410.601038,
+    "ast_hash": "1afc63e219f11a07088ad200e338924e",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-04-offline-first-resilience-and-sync-queue.md": {
-    "mtime": 1793803682.245083,
-    "seen": 1793804833.418714,
-    "ast_hash": "441ed3588ff3a78b2d39156e7fd8e92f",
+    "mtime": 1793804907.5798604,
+    "seen": 1793807410.6020572,
+    "ast_hash": "c49dee81f01ea52972f66748a2a807d3",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-04-offline-first-resilience-and-sync-queue-design.md": {
-    "mtime": 1793803666.0672944,
-    "seen": 1793804833.418714,
-    "ast_hash": "0be3ba8566a5d206741178d33594bd8e",
+    "mtime": 1793804907.7307823,
+    "seen": 1793807410.6020572,
+    "ast_hash": "ffdb6871d7711a85b9131ab1785f4c37",
+    "semantic_hash": ""
+  },
+  "lib/data/contracts/booking_rpc_contracts.dart": {
+    "mtime": 1793806652.8857224,
+    "seen": 1793807410.599448,
+    "ast_hash": "58c10e465a732052cfb071a068e3de45",
+    "semantic_hash": ""
+  },
+  "lib/data/contracts/community_rpc_contracts.dart": {
+    "mtime": 1793806657.1432502,
+    "seen": 1793807410.599448,
+    "ast_hash": "c74be447526fb3193e8303d60177db50",
+    "semantic_hash": ""
+  },
+  "lib/data/contracts/contracts.dart": {
+    "mtime": 1793806604.4148617,
+    "seen": 1793807410.599448,
+    "ast_hash": "1b982b3fbabaeb12f58e84a94978ff3d",
+    "semantic_hash": ""
+  },
+  "lib/data/contracts/finance_rpc_contracts.dart": {
+    "mtime": 1793807177.832501,
+    "seen": 1793807410.599448,
+    "ast_hash": "102ab15243f76022bd5e8112873a338e",
+    "semantic_hash": ""
+  },
+  "lib/data/contracts/operations_rpc_contracts.dart": {
+    "mtime": 1793806662.3824666,
+    "seen": 1793807410.599448,
+    "ast_hash": "f1a6e9b8a9dd6fb484ce831ab9c0ae61",
+    "semantic_hash": ""
+  },
+  "lib/data/contracts/rpc_contract_client.dart": {
+    "mtime": 1793806393.855832,
+    "seen": 1793807410.599448,
+    "ast_hash": "32b6aa66918e41be9c2b76ac954722da",
+    "semantic_hash": ""
+  },
+  "test/contracts/rpc_contracts_test.dart": {
+    "mtime": 1793807231.2248917,
+    "seen": 1793807410.601038,
+    "ast_hash": "124685d9d701ac2c50bd77287b5e679f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-04-client-server-contract-dto.md": {
+    "mtime": 1793806378.6113436,
+    "seen": 1793807410.6020572,
+    "ast_hash": "56ca370749c791111672d25fa09ef2fd",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-04-client-server-contract-dto-design.md": {
+    "mtime": 1793806343.964018,
+    "seen": 1793807410.6020572,
+    "ast_hash": "e1c2670a087ba06725803ec6e2a55a7e",
     "semantic_hash": ""
   }
 }
