@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/core/sync/offline_sync_manager.dart';
 import 'package:pka_home/core/sync/offline_sync_queue_storage.dart';
-import 'package:pka_home/core/sync/sync_action_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

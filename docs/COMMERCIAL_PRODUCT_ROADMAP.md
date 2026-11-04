@@ -292,4 +292,19 @@ graph TD
 ### GIAI ĐOẠN F: Hạ Tầng, Tuân Thủ & Vận Hành
 - [ ] **Hạ tầng môi trường tách bạch:** Dev / Staging / Production. Giám sát uptime, cảnh báo lỗi qua Telegram/Slack.
 - [x] **Tuân thủ pháp lý & Bảo mật:** Nhật ký kiểm toán bất biến (`audit_logs` Append-Only, tự động ghi log qua Triggers hóa đơn/thẻ xe/ủy quyền).
-- [ ] **Offline-First & Resilience:** Hoàn thiện hàng đợi đồng bộ khi mất sóng.
+- [x] **F3. Offline-First & Hàng Đợi Đồng Bộ Bền Vững (Persistent Sync Queue & Resilience):**
+  - Lưu trữ bền vững (`OfflineSyncQueueStorage`):
+    - Hàng đợi mutation bất đồng bộ lưu qua `SharedPreferences`, bảo toàn trạng thái khi ứng dụng bị tắt hoặc khởi động lại.
+    - Cơ chế chống lặp tác vụ (`idempotencyKey`), FIFO ordering đảm bảo toàn vẹn nghiệp vụ.
+  - Quản lý đồng bộ & Phục hồi lỗi mạng (`OfflineSyncManager`):
+    - Quản lý trạng thái mạng (`SyncState`: `isOnline`, `isSyncing`, `pendingCount`, `lastSyncAt`).
+    - Tự động kích hoạt đồng bộ khi có kết nối trở lại (`setOnlineStatus`).
+    - Cơ chế Exponential Backoff & Retry giới hạn 3 lần khi gặp sự cố ngắt quãng mạng, tự động fail-closed tạm dừng hàng đợi tránh nghẽn.
+    - Riverpod Providers (`syncQueueStorageProvider`, `offlineSyncManagerProvider`, `syncStateStreamProvider`).
+  - Trải nghiệm giao diện (`SyncStatusBar`):
+    - Thanh thông báo trạng thái đồng bộ thông minh, tự động ẩn khi online và không còn tác vụ chờ.
+    - 3 trạng thái trực quan: Ngoại tuyến (Offline cảnh báo màu cam kèm số tác vụ đang chờ và nút "Đồng bộ ngay"), Đang đồng bộ (Syncing màu xanh dương kèm spinner quay và thông báo đang gửi dữ liệu), Thành công (Success xanh lá cây thông báo dữ liệu đã lưu).
+    - Tích hợp trực tiếp trên đỉnh giao diện Dashboard Ban Quản Lý (`ManagementHomeScreen`) và Cư Dân (`ResidentHomeScreen`).
+  - Chất lượng & Kiểm thử:
+    - 11/11 unit và widget tests tự động pass 100% (`offline_sync_queue_storage_test.dart`, `offline_sync_manager_test.dart`, `sync_status_bar_test.dart`).
+    - Phân tích tĩnh `dart analyze lib test` đạt 0 issues trên toàn bộ dự án.
