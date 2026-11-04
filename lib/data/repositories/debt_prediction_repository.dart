@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/debt_risk_score_model.dart';
+import '../contracts/contracts.dart';
 import '../models/dunning_action_model.dart';
 import '../services/debt_prediction_engine.dart';
 
@@ -101,12 +102,13 @@ class DebtPredictionRepository {
     required String apartmentId,
   }) async {
     try {
+      final reqDto = CalculateApartmentDebtRiskRequestDto(
+        buildingId: buildingId,
+        apartmentId: apartmentId,
+      );
       final res = await _client.rpc(
         'calculate_apartment_debt_risk',
-        params: {
-          'p_building_id': buildingId,
-          'p_apartment_id': apartmentId,
-        },
+        params: reqDto.toRpcParams(),
       );
 
       if (res != null && res is Map) {
@@ -164,15 +166,16 @@ class DebtPredictionRepository {
     required String content,
   }) async {
     try {
+      final reqDto = ExecuteDunningActionRequestDto(
+        buildingId: buildingId,
+        apartmentId: apartmentId,
+        tier: tier.dbValue,
+        title: title,
+        content: content,
+      );
       final res = await _client.rpc(
         'execute_dunning_action',
-        params: {
-          'p_building_id': buildingId,
-          'p_apartment_id': apartmentId,
-          'p_tier': tier.dbValue,
-          'p_title': title,
-          'p_content': content,
-        },
+        params: reqDto.toRpcParams(),
       );
 
       if (res != null && res is Map && res['action_id'] != null) {

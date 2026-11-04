@@ -64,3 +64,4 @@ class SyncActionModel {
 1. **Kiểm thử Storage:** `test/core/sync/offline_sync_queue_storage_test.dart` xác minh serialize/deserialize, enqueue, dequeue, update và persistence.
 2. **Kiểm thử Engine:** `test/core/sync/offline_sync_manager_test.dart` xác minh cơ chế FIFO, tự động đồng bộ khi online, retry backoff khi mất mạng, xử lý idempotent.
 3. **Kiểm thử Giao diện:** `test/core/widgets/sync_status_bar_test.dart` xác minh hiển thị đúng 3 trạng thái (offline, syncing, success) và kích hoạt hành động "Đồng bộ ngay".
+

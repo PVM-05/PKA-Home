@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
+import '../contracts/contracts.dart';
 import '../models/maintenance_fund_model.dart';
 import '../models/maintenance_fund_transaction_model.dart';
 
@@ -58,6 +59,32 @@ class MaintenanceFundRepository {
     }
   }
 
+  /// Ghi sổ quỹ bảo trì sử dụng hợp đồng Strongly-Typed DTO
+  Future<RecordMaintenanceTransactionResponseDto> recordTransactionContract(
+    RecordMaintenanceTransactionRequestDto request,
+  ) async {
+    final client = _client;
+    if (client == null) {
+      return const RecordMaintenanceTransactionResponseDto(
+        success: false,
+        message: 'Chưa cấu hình Supabase Client.',
+      );
+    }
+
+    try {
+      final res = await client.rpc(
+        'record_maintenance_fund_transaction',
+        params: request.toRpcParams(),
+      );
+      return RecordMaintenanceTransactionResponseDto.fromRpc(res);
+    } catch (e) {
+      return RecordMaintenanceTransactionResponseDto(
+        success: false,
+        message: 'Lỗi ghi sổ quỹ bảo trì: $e',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>?> recordTransaction({
     required String buildingId,
     required String transactionType,
@@ -68,29 +95,28 @@ class MaintenanceFundRepository {
     String? referenceType,
     String? referenceId,
   }) async {
-    final client = _client;
-    if (client == null) return null;
+    final req = RecordMaintenanceTransactionRequestDto(
+      buildingId: buildingId,
+      transactionType: transactionType,
+      amount: amount,
+      category: category,
+      description: description,
+      receiptUrl: null,
+      referenceId: referenceId,
+      createdBy: null,
+    );
 
-    try {
-      final params = <String, dynamic>{
-        'p_building_id': buildingId,
-        'p_transaction_type': transactionType,
-        'p_category': category,
-        'p_amount': amount,
-        'p_description': description,
-        'p_recipient_or_payer': recipientOrPayer,
-      };
-      if (referenceType != null) {
-        params['p_reference_type'] = referenceType;
-      }
-      if (referenceId != null) {
-        params['p_reference_id'] = referenceId;
-      }
-
-      final res = await client.rpc('record_maintenance_fund_transaction', params: params);
-      return res as Map<String, dynamic>?;
-    } catch (_) {
+    final resDto = await recordTransactionContract(req);
+    if (!resDto.success && resDto.message.contains('Chưa cấu hình')) {
       return null;
     }
+
+    return {
+      'success': resDto.success,
+      'transaction_id': resDto.transactionId,
+      'voucher_number': resDto.voucherNumber,
+      'new_balance': resDto.newBalance,
+      'message': resDto.message,
+    };
   }
 }
