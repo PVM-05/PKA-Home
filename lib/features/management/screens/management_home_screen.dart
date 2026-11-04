@@ -1,3 +1,4 @@
+import '../../../core/widgets/sync_status_bar.dart';
 import '../../../core/widgets/adaptive_management_scaffold.dart';
 import 'accounting_web_workstation_screen.dart';
 import 'package:flutter/material.dart';
@@ -581,9 +582,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ),
         ),
       ),
-      body: IndexedStack(
-        index: currentIndex,
-        children: tabs.map((t) => t.screen).toList(),
+      body: Column(
+        children: [
+          const SyncStatusBar(),
+          Expanded(
+            child: IndexedStack(
+              index: currentIndex,
+              children: tabs.map((t) => t.screen).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

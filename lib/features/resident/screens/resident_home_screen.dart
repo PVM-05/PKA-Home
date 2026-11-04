@@ -1,3 +1,4 @@
+import '../../../core/widgets/sync_status_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -253,13 +254,20 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     });
 
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: Column(
         children: [
-          _buildDashboard(),
-          const ResidentInvoiceScreen(),
-          const ResidentIssueScreen(),
-          const ResidentProfileScreen(),
+          const SyncStatusBar(),
+          Expanded(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: [
+                _buildDashboard(),
+                const ResidentInvoiceScreen(),
+                const ResidentIssueScreen(),
+                const ResidentProfileScreen(),
+              ],
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
