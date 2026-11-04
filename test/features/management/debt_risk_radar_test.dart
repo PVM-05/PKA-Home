@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pka_home/data/models/debt_risk_score_model.dart';
-import 'package:pka_home/data/models/dunning_action_model.dart';
 import 'package:pka_home/data/providers/debt_prediction_provider.dart';
 import 'package:pka_home/data/repositories/debt_prediction_repository.dart';
 import 'package:pka_home/features/management/widgets/debt_risk_radar_tab.dart';

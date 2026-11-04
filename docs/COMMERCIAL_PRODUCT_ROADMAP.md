@@ -266,7 +266,26 @@ graph TD
   - Chất lượng & Kiểm thử:
     - 17/17 unit & widget tests E2 tự động pass 100%.
     - Phân tích tĩnh `dart analyze` toàn bộ dự án đạt 0 issues.
-- [ ] **Dự báo nợ xấu & Nhắc nợ thông minh:** Dự đoán căn hộ có rủi ro trễ hạn để BQL chủ động chăm sóc.
+- [x] **E3. Dự Báo Nợ Xấu & Nhắc Nợ Thông Minh (Smart Debt Prediction & Multi-Tier Dunning Strategy):**
+  - Cơ sở dữ liệu & Phân tích định lượng (`20261104_03_debt_prediction_and_dunning.sql`):
+    - Bảng `debt_risk_scores`: Điểm rủi ro nợ xấu từ 0 đến 100 điểm, phân cấp rủi ro (`low`, `medium`, `high`), số ngày quá hạn, số tiền nợ, lịch sử nộp chậm, tầng đôn đốc đề xuất (`tier_1`, `tier_2`, `tier_3`), các yếu tố rủi ro JSONB (`risk_factors`), thiết lập RLS cách ly tenant theo `building_memberships`.
+    - Bảng nhật ký `dunning_actions`: Lưu vết toàn bộ lịch sử đôn đốc nợ đa tầng của tòa nhà kèm người thực hiện, thời gian và trạng thái.
+    - 3 RPCs PostgreSQL:
+      - `calculate_apartment_debt_risk`: Thuật toán định lượng rủi ro nợ xấu 3 trọng số (Số ngày quá hạn: 40%, Tỷ lệ nợ / Phí trung bình: 35%, Lịch sử thanh toán muộn: 25%), tự động gán tầng đôn đốc và cảnh báo quá hạn nặng > 45 ngày.
+      - `get_building_debt_radar`: Radar thời gian thực toàn bộ căn hộ trong tòa nhà kèm dải KPI tổng hợp (Căn hộ rủi ro cao, nợ quá hạn, nợ khó đòi).
+      - `execute_dunning_action`: Ghi nhật ký đôn đốc và tự động bắn thông báo tức thời tới cư dân căn hộ.
+  - Tầng Dữ liệu & Offline-First Fallback Engine:
+    - 3 Data models Dart strongly-typed: `DebtRiskScoreModel`, `DebtRadarKpiModel`, `DunningActionModel`.
+    - `DebtPredictionEngine`: Logic định lượng rủi ro nợ xấu thuần Dart (zero-network dependency) hỗ trợ tính toán tức thời khi mất kết nối.
+    - `DebtPredictionRepository`: Tích hợp Supabase RPC và Fallback Engine với bộ dữ liệu mẫu đa dạng khi offline.
+    - Riverpod Providers: `debtPredictionRepositoryProvider`, `buildingDebtRadarProvider(buildingId)`, `debtRiskFilterProvider`, `filteredDebtRiskApartmentsProvider`.
+  - Giao diện Ban Quản Lý (Web Workstation & Mobile App):
+    - Màn hình Báo cáo tài chính (`FinancialReportScreen`): Nâng cấp thanh điều hướng TabBar 2 tab ("Tuổi nợ & Dòng tiền" và "Radar Rủi ro nợ AI").
+    - Tab "Radar Rủi Ro Nợ AI" (`DebtRiskRadarTab`): Dải KPI rủi ro nợ xấu thời gian thực, thanh tìm kiếm đa năng & chip bộ lọc cấp độ rủi ro, thẻ căn hộ hiển thị điểm số rủi ro AI đổi màu ngữ nghĩa, chip yếu tố rủi ro và nút hành động đôn đốc.
+    - Hộp thoại đôn đốc đa tầng (`ExecuteDunningDialog`): Tự động chọn tầng theo đề xuất AI, cung cấp sẵn 3 mẫu văn bản tiếng Việt chuẩn mực theo nấc (Nhắc nhở lịch sự / Cảnh báo tài chính & tính lãi phạt / Tạm ngừng dịch vụ tiện ích bổ sung & chuyển Ban Quản Trị xử lý).
+  - Chất lượng & Kiểm thử:
+    - 16/16 unit, integration & widget tests E3 tự động pass 100%.
+    - Phân tích tĩnh `dart analyze lib test` toàn bộ dự án đạt 0 issues.
 
 ---
 
