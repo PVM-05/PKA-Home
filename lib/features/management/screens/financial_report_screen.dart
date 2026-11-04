@@ -6,6 +6,9 @@ import '../../../core/utils/excel_export_helper.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/financial_aging_report_model.dart';
 import '../../../data/providers/financial_report_provider.dart';
+import '../../../data/models/debt_risk_score_model.dart';
+import '../widgets/debt_risk_radar_tab.dart';
+import '../widgets/execute_dunning_dialog.dart';
 import 'apartment_ledger_screen.dart';
 
 class FinancialReportScreen extends ConsumerStatefulWidget {
@@ -71,65 +74,24 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     }
   }
 
-  void _showReminderDialog(DebtorApartmentModel debtor) {
+  void _showReminderDialog(DebtorApartmentModel debtor, [String? buildingId]) {
+    final overdueDays = debtor.maxDaysOverdue;
+    final recommendedTier = overdueDays > 45
+        ? DunningTier.tier3
+        : (overdueDays > 15 ? DunningTier.tier2 : DunningTier.tier1);
+    final riskScore = (overdueDays * 2).clamp(0, 100);
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Gửi Nhắc Nợ'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Xác nhận gửi thông báo nhắc nợ đến căn hộ ${debtor.apartmentCode} (${debtor.ownerName})?',
-              style: const TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppTheme.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tổng tiền nợ: ${_moneyFormat.format(debtor.totalDebt)} đ',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.error),
-                  ),
-                  const SizedBox(height: 4),
-                  Text('Số ngày quá hạn: ${debtor.maxDaysOverdue} ngày'),
-                  Text('Số hóa đơn chưa đóng: ${debtor.unpaidInvoicesCount} hóa đơn'),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Đã gửi thông báo đôn đốc công nợ tới căn hộ ${debtor.apartmentCode} thành công!'),
-                  backgroundColor: AppTheme.success,
-                ),
-              );
-            },
-            icon: const Icon(Icons.send_rounded, size: 16),
-            label: const Text('Xác nhận gửi'),
-          ),
-        ],
+      builder: (ctx) => ExecuteDunningDialog(
+        buildingId: buildingId ?? 'bld-default',
+        apartmentId: debtor.apartmentId,
+        apartmentCode: debtor.apartmentCode,
+        ownerName: debtor.ownerName,
+        unpaidAmount: debtor.totalDebt,
+        overdueDays: overdueDays,
+        riskScore: riskScore,
+        initialTier: recommendedTier,
       ),
     );
   }
@@ -140,12 +102,20 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     final filter = ref.watch(financialReportFilterProvider);
     final debtors = ref.watch(filteredDebtorsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Báo cáo Tài chính & Tuổi nợ',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Báo cáo Tài chính & Tuổi nợ',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.analytics_outlined), text: 'Tuổi nợ & Dòng tiền'),
+              Tab(icon: Icon(Icons.radar_rounded), text: 'Radar Rủi ro nợ AI'),
+            ],
+          ),
         actions: [
           reportAsync.when(
             data: (report) => IconButton(
@@ -169,7 +139,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
           ),
         ],
       ),
-      body: reportAsync.when(
+      body: TabBarView(
+        children: [
+          reportAsync.when(
         data: (report) => RefreshIndicator(
           onRefresh: () async => ref.refresh(financialAgingReportProvider),
           child: ListView(
@@ -233,8 +205,17 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
           ),
         ),
       ),
-    );
-  }
+          DebtRiskRadarTab(
+            buildingId: reportAsync.maybeWhen(
+              data: (r) => r.filterBuildingId ?? 'bld-default',
+              orElse: () => 'bld-default',
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   Widget _buildFilterSection(FinancialReportFilter filter) {
     return AppCard(
@@ -755,7 +736,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             minimumSize: Size.zero,
                           ),
-                          onPressed: () => _showReminderDialog(debtor),
+                          onPressed: () => _showReminderDialog(debtor, buildingId),
                           icon: const Icon(Icons.notifications_active_outlined, size: 14),
                           label: const Text('Nhắc nợ', style: TextStyle(fontSize: 12)),
                         ),
