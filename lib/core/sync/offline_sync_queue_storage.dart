@@ -7,7 +7,7 @@ class OfflineSyncQueueStorage {
   static const String _storageKey = 'pka_home_offline_sync_queue';
   final SharedPreferences? _prefs;
 
-  OfflineSyncQueueStorage({SharedPreferences? prefs}) : _prefs = prefs;
+  OfflineSyncQueueStorage({this._prefs});
 
   Future<SharedPreferences> _getPrefs() async {
     return _prefs ?? await SharedPreferences.getInstance();

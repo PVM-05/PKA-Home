@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_home_screen.dart": {
-    "mtime": 1793685878.5848393,
-    "seen": 1793686214.3939004,
-    "ast_hash": "625d071b453ab7d18113c56cf3626061",
+    "mtime": 1793804004.6764777,
+    "seen": 1793804833.417695,
+    "ast_hash": "0eeb9ada1bef4909215d1ac6e7391acf",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
@@ -1254,9 +1254,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_home_screen.dart": {
-    "mtime": 1793685897.4669845,
-    "seen": 1793686214.3939004,
-    "ast_hash": "9b1fd586473f57626d86948d204ddeba",
+    "mtime": 1793804004.678476,
+    "seen": 1793804833.417695,
+    "ast_hash": "b83567dab945127d729dde4e6dd540fa",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_detail_screen.dart": {
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793802797.633535,
-    "seen": 1793802844.4991057,
-    "ast_hash": "8bb0be2230a8b72f0375298a770dada5",
+    "mtime": 1793804786.882958,
+    "seen": 1793804833.418714,
+    "ast_hash": "43cba31aebf8691d62f9168ef5c2b8ac",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -5928,8 +5928,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/widgets/debt_risk_radar_tab.dart": {
-    "mtime": 1793802620.845753,
-    "seen": 1793802844.497102,
+    "mtime": 1793803596.184447,
+    "seen": 1793804833.417695,
     "ast_hash": "0f2231778137473e90c7a387c9219b0e",
     "semantic_hash": ""
   },
@@ -5958,8 +5958,8 @@
     "semantic_hash": ""
   },
   "test/features/management/debt_risk_radar_test.dart": {
-    "mtime": 1793802776.9943497,
-    "seen": 1793802844.4991057,
+    "mtime": 1793803596.2789595,
+    "seen": 1793804833.418714,
     "ast_hash": "d757533ada1def22b61e714cc80426b4",
     "semantic_hash": ""
   },
@@ -5973,6 +5973,66 @@
     "mtime": 1793780652.5407538,
     "seen": 1793802844.5001001,
     "ast_hash": "0c8a75eff654d247f9366f66ee44181f",
+    "semantic_hash": ""
+  },
+  "lib/core/sync/offline_sync_manager.dart": {
+    "mtime": 1793804738.349354,
+    "seen": 1793804833.4166963,
+    "ast_hash": "24ab6c425a8cfba1238fcdb63e5e067a",
+    "semantic_hash": ""
+  },
+  "lib/core/sync/offline_sync_queue_storage.dart": {
+    "mtime": 1793804734.614426,
+    "seen": 1793804833.4166963,
+    "ast_hash": "193f797d1a5df9098c35290568627a06",
+    "semantic_hash": ""
+  },
+  "lib/core/sync/sync_action_model.dart": {
+    "mtime": 1793803698.9712837,
+    "seen": 1793804833.4166963,
+    "ast_hash": "8b3f074f63531c9bab904e6f2cffeb13",
+    "semantic_hash": ""
+  },
+  "lib/core/sync/sync_providers.dart": {
+    "mtime": 1793803816.083976,
+    "seen": 1793804833.4166963,
+    "ast_hash": "35a05daa027af02436030853ef88eebe",
+    "semantic_hash": ""
+  },
+  "lib/core/widgets/sync_status_bar.dart": {
+    "mtime": 1793804263.7967494,
+    "seen": 1793804833.417695,
+    "ast_hash": "2192f62dec309b2eb16c4260cd77a6fb",
+    "semantic_hash": ""
+  },
+  "test/core/sync/offline_sync_manager_test.dart": {
+    "mtime": 1793804270.2319248,
+    "seen": 1793804833.417695,
+    "ast_hash": "08446e4244050d2334e65853c53adde5",
+    "semantic_hash": ""
+  },
+  "test/core/sync/offline_sync_queue_storage_test.dart": {
+    "mtime": 1793803725.2602417,
+    "seen": 1793804833.417695,
+    "ast_hash": "c1259d4a6d855e9a3e402da10fbbb33e",
+    "semantic_hash": ""
+  },
+  "test/core/widgets/sync_status_bar_test.dart": {
+    "mtime": 1793804014.081749,
+    "seen": 1793804833.418714,
+    "ast_hash": "fff96873fdc734e4441f109c6744e790",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-04-offline-first-resilience-and-sync-queue.md": {
+    "mtime": 1793803682.245083,
+    "seen": 1793804833.418714,
+    "ast_hash": "441ed3588ff3a78b2d39156e7fd8e92f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-04-offline-first-resilience-and-sync-queue-design.md": {
+    "mtime": 1793803666.0672944,
+    "seen": 1793804833.418714,
+    "ast_hash": "0be3ba8566a5d206741178d33594bd8e",
     "semantic_hash": ""
   }
 }

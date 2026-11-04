@@ -63,9 +63,8 @@ class OfflineSyncManager {
 
   OfflineSyncManager({
     OfflineSyncQueueStorage? storage,
-    SupabaseClient? client,
-  })  : _storage = storage ?? OfflineSyncQueueStorage(),
-        _client = client;
+    this._client,
+  })  : _storage = storage ?? OfflineSyncQueueStorage();
 
   bool get isOnline => _isOnline;
   bool get isSyncing => _isSyncing;
