@@ -70,18 +70,26 @@ class TriageIssueReportResponseDto {
 // -------------------------------------------------------------
 class VisitorPassCheckInRequestDto {
   final String passCode;
-  final String guardId;
+  final String? guardId;
+  final String? qrPayload;
 
   const VisitorPassCheckInRequestDto({
     required this.passCode,
-    required this.guardId,
+    this.guardId,
+    this.qrPayload,
   });
 
   Map<String, dynamic> toRpcParams() {
-    return {
+    final map = <String, dynamic>{
       'p_pass_code': passCode,
-      'p_guard_id': guardId,
     };
+    if (guardId != null && guardId!.isNotEmpty) {
+      map['p_guard_id'] = guardId;
+    }
+    if (qrPayload != null && qrPayload!.isNotEmpty) {
+      map['p_qr_payload'] = qrPayload;
+    }
+    return map;
   }
 }
 
@@ -126,18 +134,21 @@ class VisitorPassCheckInResponseDto {
 // -------------------------------------------------------------
 class VisitorPassCheckOutRequestDto {
   final String passCode;
-  final String guardId;
+  final String? guardId;
 
   const VisitorPassCheckOutRequestDto({
     required this.passCode,
-    required this.guardId,
+    this.guardId,
   });
 
   Map<String, dynamic> toRpcParams() {
-    return {
+    final map = <String, dynamic>{
       'p_pass_code': passCode,
-      'p_guard_id': guardId,
     };
+    if (guardId != null && guardId!.isNotEmpty) {
+      map['p_guard_id'] = guardId;
+    }
+    return map;
   }
 }
 
@@ -183,23 +194,26 @@ class VisitorPassCheckOutResponseDto {
 class CollectParcelRequestDto {
   final String parcelId;
   final String pickupPin;
-  final String staffId;
+  final String? staffId;
   final String collectedBy;
 
   const CollectParcelRequestDto({
     required this.parcelId,
     required this.pickupPin,
-    required this.staffId,
+    this.staffId,
     this.collectedBy = 'Cư dân',
   });
 
   Map<String, dynamic> toRpcParams() {
-    return {
+    final map = <String, dynamic>{
       'p_parcel_id': parcelId,
       'p_pickup_pin': pickupPin,
-      'p_staff_id': staffId,
       'p_collected_by': collectedBy,
     };
+    if (staffId != null && staffId!.isNotEmpty) {
+      map['p_staff_id'] = staffId;
+    }
+    return map;
   }
 }
 

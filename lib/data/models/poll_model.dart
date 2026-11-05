@@ -19,7 +19,9 @@ class PollOptionModel {
       pollId: (json['poll_id'] as String?) ?? '',
       optionText: (json['option_text'] as String?) ?? '',
       optionOrder: (json['option_order'] as int?) ?? 0,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
     );
   }
 
@@ -41,6 +43,7 @@ class PollModel {
   final String title;
   final String? description;
   final String category; // general, agm, finance, maintenance, rule
+  final String pollType; // official_assembly, survey
   final String voteWeightType; // per_apartment, by_area
   final String choiceType; // single_choice, multiple_choice, yes_no_abstain
   final double minParticipationRate;
@@ -61,6 +64,7 @@ class PollModel {
     required this.title,
     this.description,
     this.category = 'general',
+    this.pollType = 'survey',
     this.voteWeightType = 'per_apartment',
     this.choiceType = 'single_choice',
     this.minParticipationRate = 50.0,
@@ -75,9 +79,12 @@ class PollModel {
     this.hasVoted = false,
   });
 
+  bool get isOfficialAssembly => pollType.toLowerCase() == 'official_assembly';
   bool get isByArea => voteWeightType.toLowerCase() == 'by_area';
-  bool get isActive => status.toLowerCase() == 'active' && DateTime.now().isBefore(endTime);
-  bool get isClosed => status.toLowerCase() == 'closed' || DateTime.now().isAfter(endTime);
+  bool get isActive =>
+      status.toLowerCase() == 'active' && DateTime.now().isBefore(endTime);
+  bool get isClosed =>
+      status.toLowerCase() == 'closed' || DateTime.now().isAfter(endTime);
 
   String get categoryDisplayName {
     switch (category.toLowerCase()) {
@@ -122,10 +129,11 @@ class PollModel {
     var rawOptions = json['poll_options'] ?? json['options'];
     List<PollOptionModel> parsedOptions = [];
     if (rawOptions is List) {
-      parsedOptions = rawOptions
-          .map((o) => PollOptionModel.fromJson(o as Map<String, dynamic>))
-          .toList()
-        ..sort((a, b) => a.optionOrder.compareTo(b.optionOrder));
+      parsedOptions =
+          rawOptions
+              .map((o) => PollOptionModel.fromJson(o as Map<String, dynamic>))
+              .toList()
+            ..sort((a, b) => a.optionOrder.compareTo(b.optionOrder));
     }
 
     return PollModel(
@@ -135,16 +143,27 @@ class PollModel {
       title: (json['title'] as String?) ?? '',
       description: json['description'] as String?,
       category: (json['category'] as String?) ?? 'general',
+      pollType:
+          (json['poll_type'] as String?) ??
+          ((json['category'] == 'agm') ? 'official_assembly' : 'survey'),
       voteWeightType: (json['vote_weight_type'] as String?) ?? 'per_apartment',
       choiceType: (json['choice_type'] as String?) ?? 'single_choice',
-      minParticipationRate: ((json['min_participation_rate'] as num?) ?? 50.0).toDouble(),
-      requiredApprovalRate: ((json['required_approval_rate'] as num?) ?? 50.0).toDouble(),
-      startTime: DateTime.tryParse(json['start_time'].toString()) ?? DateTime.now(),
-      endTime: DateTime.tryParse(json['end_time'].toString()) ?? DateTime.now().add(const Duration(days: 7)),
+      minParticipationRate: ((json['min_participation_rate'] as num?) ?? 50.0)
+          .toDouble(),
+      requiredApprovalRate: ((json['required_approval_rate'] as num?) ?? 50.0)
+          .toDouble(),
+      startTime:
+          DateTime.tryParse(json['start_time'].toString()) ?? DateTime.now(),
+      endTime:
+          DateTime.tryParse(json['end_time'].toString()) ??
+          DateTime.now().add(const Duration(days: 7)),
       status: (json['status'] as String?) ?? 'active',
       createdBy: json['created_by'] as String?,
-      createdAt: DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now(),
-      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
+      createdAt:
+          DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'].toString())
+          : null,
       options: parsedOptions,
       hasVoted: (json['has_voted'] as bool?) ?? false,
     );
@@ -158,6 +177,7 @@ class PollModel {
       'title': title,
       'description': description,
       'category': category,
+      'poll_type': pollType,
       'vote_weight_type': voteWeightType,
       'choice_type': choiceType,
       'min_participation_rate': minParticipationRate,
@@ -180,6 +200,7 @@ class PollModel {
     String? title,
     String? description,
     String? category,
+    String? pollType,
     String? voteWeightType,
     String? choiceType,
     double? minParticipationRate,
@@ -200,6 +221,7 @@ class PollModel {
       title: title ?? this.title,
       description: description ?? this.description,
       category: category ?? this.category,
+      pollType: pollType ?? this.pollType,
       voteWeightType: voteWeightType ?? this.voteWeightType,
       choiceType: choiceType ?? this.choiceType,
       minParticipationRate: minParticipationRate ?? this.minParticipationRate,
@@ -215,4 +237,3 @@ class PollModel {
     );
   }
 }
-

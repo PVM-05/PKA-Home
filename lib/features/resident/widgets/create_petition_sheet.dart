@@ -16,7 +16,8 @@ class CreatePetitionSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CreatePetitionSheet> createState() => _CreatePetitionSheetState();
+  ConsumerState<CreatePetitionSheet> createState() =>
+      _CreatePetitionSheetState();
 }
 
 class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
@@ -37,7 +38,18 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
     if (!_formKey.currentState!.validate()) return;
 
     final authUser = ref.read(authProvider).valueOrNull;
-    final authorUserId = authUser?.id ?? 'usr-resident';
+    if (authUser == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vui lòng đăng nhập để gửi kiến nghị'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+      return;
+    }
+    final authorUserId = authUser.id;
 
     setState(() => _isLoading = true);
     try {
@@ -50,7 +62,13 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
         category: _category,
       );
 
-      ref.invalidate(petitionsProvider((status: null, category: null, apartmentId: widget.apartmentId)));
+      ref.invalidate(
+        petitionsProvider((
+          status: null,
+          category: null,
+          apartmentId: widget.apartmentId,
+        )),
+      );
       ref.invalidate(communityStatsProvider);
 
       if (mounted) {
@@ -58,7 +76,9 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
         widget.onPetitionCreated?.call(newPet);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Kiến nghị của bạn đã được gửi tới Ban Quản Lý thành công'),
+            content: Text(
+              'Kiến nghị của bạn đã được gửi tới Ban Quản Lý thành công',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -113,13 +133,19 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                       color: AppTheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.rate_review_outlined, color: AppTheme.primary),
+                    child: const Icon(
+                      Icons.rate_review_outlined,
+                      color: AppTheme.primary,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
                       'Gửi Ý Kiến & Kiến Nghị Mới',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -153,13 +179,29 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                   border: OutlineInputBorder(),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'general', child: Text('Góp ý chung')),
-                  DropdownMenuItem(value: 'security', child: Text('An ninh & Trật tự')),
-                  DropdownMenuItem(value: 'hygiene', child: Text('Vệ sinh & Môi trường')),
-                  DropdownMenuItem(value: 'amenity', child: Text('Tiện ích & Cảnh quan')),
-                  DropdownMenuItem(value: 'noise', child: Text('Tiếng ồn sinh hoạt')),
+                  DropdownMenuItem(
+                    value: 'general',
+                    child: Text('Góp ý chung'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'security',
+                    child: Text('An ninh & Trật tự'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'hygiene',
+                    child: Text('Vệ sinh & Môi trường'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'amenity',
+                    child: Text('Tiện ích & Cảnh quan'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'noise',
+                    child: Text('Tiếng ồn sinh hoạt'),
+                  ),
                 ],
-                onChanged: (val) => setState(() => _category = val ?? 'general'),
+                onChanged: (val) =>
+                    setState(() => _category = val ?? 'general'),
               ),
               const SizedBox(height: 12),
 
@@ -169,7 +211,8 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                 maxLines: 4,
                 decoration: const InputDecoration(
                   labelText: 'Nội dung kiến nghị / Đề xuất giải pháp *',
-                  hintText: 'Mô tả chi tiết vấn đề và nguyện vọng để Ban Quản Lý và các cư dân khác cùng nắm bắt...',
+                  hintText:
+                      'Mô tả chi tiết vấn đề và nguyện vọng để Ban Quản Lý và các cư dân khác cùng nắm bắt...',
                   border: OutlineInputBorder(),
                 ),
                 validator: (val) {
@@ -189,7 +232,11 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.lightbulb_outline, size: 18, color: Colors.blue),
+                    const Icon(
+                      Icons.lightbulb_outline,
+                      size: 18,
+                      color: Colors.blue,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -209,14 +256,26 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 icon: _isLoading
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : const Icon(Icons.send_rounded),
                 label: Text(
                   _isLoading ? 'Đang gửi...' : 'Gửi Kiến Nghị Tới Ban Quản Lý',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -226,4 +285,3 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
     );
   }
 }
-

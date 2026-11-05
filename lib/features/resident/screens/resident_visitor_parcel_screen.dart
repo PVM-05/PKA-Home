@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_state_view.dart';
 import '../../../data/models/parcel_model.dart';
 import '../../../data/models/visitor_pass_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -15,10 +16,12 @@ class ResidentVisitorParcelScreen extends ConsumerStatefulWidget {
   const ResidentVisitorParcelScreen({super.key});
 
   @override
-  ConsumerState<ResidentVisitorParcelScreen> createState() => _ResidentVisitorParcelScreenState();
+  ConsumerState<ResidentVisitorParcelScreen> createState() =>
+      _ResidentVisitorParcelScreenState();
 }
 
-class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorParcelScreen>
+class _ResidentVisitorParcelScreenState
+    extends ConsumerState<ResidentVisitorParcelScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -35,7 +38,7 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
     super.dispose();
   }
 
-  String _getEffectiveApartmentId() {
+  String? _getEffectiveApartmentId() {
     final selectedId = ref.watch(selectedApartmentIdProvider);
     if (selectedId != null && selectedId.isNotEmpty) {
       return selectedId;
@@ -43,9 +46,13 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
     final apartmentsAsync = ref.watch(residentApartmentsProvider);
     final list = apartmentsAsync.valueOrNull ?? [];
     if (list.isNotEmpty) {
-      return (list.first['id'] as String?) ?? 'apt-01';
+      final first = list.first;
+      final id =
+          (first['apartment_id'] as String?) ??
+          ((first['apartments'] as Map?)?['id'] as String?);
+      if (id != null && id.isNotEmpty) return id;
     }
-    return 'apt-01';
+    return null;
   }
 
   void _openCreateVisitorSheet(String apartmentId, String hostUserId) {
@@ -76,7 +83,25 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
   Widget build(BuildContext context) {
     final apartmentId = _getEffectiveApartmentId();
     final authUser = ref.watch(authProvider).valueOrNull;
-    final hostUserId = authUser?.id ?? 'usr-resident';
+
+    if (apartmentId == null || authUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Đón Khách & Bưu Kiện')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: AppStateView.emptyContent(
+              icon: Icons.apartment_outlined,
+              title: 'Chưa có thông tin căn hộ',
+              message:
+                  'Tài khoản của bạn chưa liên kết với căn hộ nào để quản lý đón khách và bưu kiện.',
+            ),
+          ),
+        ),
+      );
+    }
+
+    final hostUserId = authUser.id;
 
     return Scaffold(
       appBar: AppBar(
@@ -87,12 +112,12 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
           indicatorWeight: 3,
           labelColor: AppTheme.primary,
           unselectedLabelColor: Colors.grey,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
           tabs: const [
-            Tab(
-              icon: Icon(Icons.badge_outlined),
-              text: 'Khách Viếng Thăm',
-            ),
+            Tab(icon: Icon(Icons.badge_outlined), text: 'Khách Viếng Thăm'),
             Tab(
               icon: Icon(Icons.inventory_2_outlined),
               text: 'Bưu Kiện Của Tôi',
@@ -135,12 +160,21 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+                const Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: AppTheme.error,
+                ),
                 const SizedBox(height: 12),
-                Text('Lỗi khi tải danh sách khách: $err', textAlign: TextAlign.center),
+                Text(
+                  'Lỗi khi tải danh sách khách: $err',
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => ref.invalidate(residentVisitorPassesProvider(apartmentId)),
+                  onPressed: () => ref.invalidate(
+                    residentVisitorPassesProvider(apartmentId),
+                  ),
                   child: const Text('Thử lại'),
                 ),
               ],
@@ -155,11 +189,18 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                 Center(
                   child: Column(
                     children: [
-                      Icon(Icons.badge_outlined, size: 64, color: Colors.grey[400]),
+                      Icon(
+                        Icons.badge_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
                       const SizedBox(height: 16),
                       const Text(
                         'Chưa có đăng ký đón khách nào',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -169,13 +210,17 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
-                        onPressed: () => _openCreateVisitorSheet(apartmentId, hostUserId),
+                        onPressed: () =>
+                            _openCreateVisitorSheet(apartmentId, hostUserId),
                         icon: const Icon(Icons.add_rounded),
                         label: const Text('Tạo Thẻ Khách Đầu Tiên'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ],
@@ -237,12 +282,19 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                   Expanded(
                     child: Row(
                       children: [
-                        const Icon(Icons.person, color: AppTheme.primary, size: 20),
+                        const Icon(
+                          Icons.person,
+                          color: AppTheme.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             pass.visitorName,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -250,11 +302,16 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: statusColor.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Text(
                       pass.statusDisplayName,
@@ -271,7 +328,10 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(6),
@@ -294,12 +354,20 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                 ],
               ),
               const SizedBox(height: 8),
-              if (pass.licensePlate != null && pass.licensePlate!.isNotEmpty) ...[
+              if (pass.licensePlate != null &&
+                  pass.licensePlate!.isNotEmpty) ...[
                 Row(
                   children: [
-                    const Icon(Icons.directions_car_outlined, size: 16, color: Colors.grey),
+                    const Icon(
+                      Icons.directions_car_outlined,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 6),
-                    Text('Biển số: ${pass.licensePlate!}', style: const TextStyle(fontSize: 13)),
+                    Text(
+                      'Biển số: ${pass.licensePlate!}',
+                      style: const TextStyle(fontSize: 13),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -322,7 +390,9 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                     onPressed: () => _showQrDialog(pass),
                     icon: const Icon(Icons.qr_code_2_rounded, size: 18),
                     label: const Text('Xem Mã QR'),
-                    style: TextButton.styleFrom(foregroundColor: AppTheme.primary),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppTheme.primary,
+                    ),
                   ),
                 ],
               ),
@@ -349,12 +419,20 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+                const Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: AppTheme.error,
+                ),
                 const SizedBox(height: 12),
-                Text('Lỗi khi tải danh sách bưu kiện: $err', textAlign: TextAlign.center),
+                Text(
+                  'Lỗi khi tải danh sách bưu kiện: $err',
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => ref.invalidate(residentParcelsProvider(apartmentId)),
+                  onPressed: () =>
+                      ref.invalidate(residentParcelsProvider(apartmentId)),
                   child: const Text('Thử lại'),
                 ),
               ],
@@ -369,11 +447,18 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                 Center(
                   child: Column(
                     children: [
-                      Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
                       const SizedBox(height: 16),
                       const Text(
                         'Không có bưu kiện nào tại lễ tân',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -424,7 +509,11 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.local_shipping_outlined, color: AppTheme.primary, size: 20),
+                      child: const Icon(
+                        Icons.local_shipping_outlined,
+                        color: AppTheme.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Column(
@@ -432,19 +521,28 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                       children: [
                         Text(
                           parcel.carrierDisplayName,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                         if (parcel.trackingNumber != null)
                           Text(
                             'Vận đơn: ${parcel.trackingNumber}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
                           ),
                       ],
                     ),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isArrived
                         ? Colors.amber.withValues(alpha: 0.15)
@@ -484,7 +582,10 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                   Expanded(
                     child: Text(
                       'Vị trí: ${parcel.shelfLocation}',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                   Text(
@@ -503,14 +604,21 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3), width: 1.5),
+                  border: Border.all(
+                    color: AppTheme.primary.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
                 ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.lock_outline, size: 18, color: AppTheme.primary),
+                        const Icon(
+                          Icons.lock_outline,
+                          size: 18,
+                          color: AppTheme.primary,
+                        ),
                         const SizedBox(width: 6),
                         const Text(
                           'MÃ PIN NHẬN HÀNG BẢO MẬT',
@@ -540,9 +648,15 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
                         const SizedBox(width: 8),
                         IconButton(
                           tooltip: 'Sao chép mã PIN',
-                          icon: const Icon(Icons.copy_rounded, size: 18, color: AppTheme.primary),
+                          icon: const Icon(
+                            Icons.copy_rounded,
+                            size: 18,
+                            color: AppTheme.primary,
+                          ),
                           onPressed: () {
-                            Clipboard.setData(ClipboardData(text: parcel.pickupPin));
+                            Clipboard.setData(
+                              ClipboardData(text: parcel.pickupPin),
+                            );
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Đã sao chép mã PIN nhận hàng'),
@@ -566,7 +680,11 @@ class _ResidentVisitorParcelScreenState extends ConsumerState<ResidentVisitorPar
               const SizedBox(height: 10),
               Row(
                 children: [
-                  const Icon(Icons.check_circle_outline, size: 16, color: Colors.green),
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 16,
+                    color: Colors.green,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Đã bàn giao lúc: ${parcel.collectedAt != null ? _dateFormat.format(parcel.collectedAt!) : 'Không rõ'}',

@@ -25,16 +25,16 @@
 **Files:**
 - Create: `supabase/migrations/20261105_01_server_authoritative_identity_and_rpc_hardening.sql`
 
-- [ ] **Bước 2.1.1:** Tạo migration SQL bổ sung cột `poll_type` trong bảng `polls`, cột `pickup_pin_hash` trong bảng `parcels`.
-- [ ] **Bước 2.1.2:** Viết trigger tự động băm SHA-256 mã PIN `fn_generate_parcel_code_and_pin()`.
-- [ ] **Bước 2.1.3:** Cập nhật các hàm RPC để ưu tiên `auth.uid()` thay vì client ID:
+- [x] **Bước 2.1.1:** Tạo migration SQL bổ sung cột `poll_type` trong bảng `polls`, cột `pickup_pin_hash` trong bảng `parcels`.
+- [x] **Bước 2.1.2:** Viết trigger tự động băm SHA-256 mã PIN `fn_generate_parcel_code_and_pin()`.
+- [x] **Bước 2.1.3:** Cập nhật các hàm RPC để ưu tiên `auth.uid()` thay vì client ID:
   - `check_in_visitor_pass`: Kiểm tra trạng thái đã check-in / check-out / hết hạn chống replay attack, gán `check_in_guard_id = COALESCE(auth.uid(), p_guard_id)`.
   - `check_out_visitor_pass`: Gán `check_out_guard_id = COALESCE(auth.uid(), p_guard_id)`.
   - `collect_parcel`: So sánh hash `p_pickup_pin` với `pickup_pin_hash`, gán `handover_staff_id = COALESCE(auth.uid(), p_staff_id)`.
   - `submit_poll_vote`: Kiểm tra quyền biểu quyết theo Điều 102 Luật Nhà ở 2023 (chỉ `owner` cho `official_assembly`), tự động lấy voter từ `auth.uid()`.
   - `endorse_petition`: Tự động lấy user từ `auth.uid()`.
   - `update_petition_response`: Tự động lấy staff từ `auth.uid()`.
-- [ ] **Bước 2.1.4:** Commit migration SQL lên nhánh `main`.
+- [x] **Bước 2.1.4:** Commit migration SQL lên nhánh `main`.
 
 ---
 
@@ -43,14 +43,14 @@
 - Create: `lib/core/security/visitor_pass_token_service.dart`
 - Create: `test/core/security/visitor_pass_token_service_test.dart`
 
-- [ ] **Bước 2.2.1 (TDD):** Viết unit test cho `VisitorPassTokenService`:
+- [x] **Bước 2.2.1 (TDD):** Viết unit test cho `VisitorPassTokenService`:
   - Ký và xác thực token QR hợp lệ.
   - Từ chối token bị sửa đổi dữ liệu (tampered signature).
   - Từ chối token đã quá hạn sử dụng (`isExpired`).
   - Phân tích và tương thích an toàn với định dạng legacy `PKAPASS:pass_code:random`.
-- [ ] **Bước 2.2.2:** Cài đặt `VisitorPassTokenService` sử dụng HMAC-SHA256 với secret key của hệ thống.
-- [ ] **Bước 2.2.3:** Chạy test xác thực toàn bộ test cases pass.
-- [ ] **Bước 2.2.4:** Commit: `feat(security): them visitor pass token service voi hmac sha256 va chong replay p0`.
+- [x] **Bước 2.2.2:** Cài đặt `VisitorPassTokenService` sử dụng HMAC-SHA256 với secret key của hệ thống.
+- [x] **Bước 2.2.3:** Chạy test xác thực toàn bộ test cases pass.
+- [x] **Bước 2.2.4:** Commit: `feat(security): them visitor pass token service voi hmac sha256 va chong replay p0`.
 
 ---
 
@@ -62,11 +62,11 @@
 - Modify: `lib/data/repositories/community_repository.dart`
 - Create: `test/data/repositories/front_desk_security_test.dart`
 
-- [ ] **Bước 2.3.1 (TDD):** Viết unit test kiểm tra contract RPC không còn bắt buộc `p_guard_id`, `p_staff_id`, `p_voter_user_id`, `p_user_id`.
-- [ ] **Bước 2.3.2:** Cập nhật `operations_rpc_contracts.dart` và `community_rpc_contracts.dart` loại bỏ các tham số client tự khai bắt buộc.
-- [ ] **Bước 2.3.3:** Cập nhật `FrontDeskRepository` và `CommunityRepository` gọi RPC server-authoritative.
-- [ ] **Bước 2.3.4:** Đảm bảo `fetchParcels` cho màn hình lễ tân không hiển thị trực tiếp `pickup_pin` của cư dân.
-- [ ] **Bước 2.3.5:** Commit: `fix(repo): loai bo tham so client tu khai tren rpc va an ma pin buu kien p0`.
+- [x] **Bước 2.3.1 (TDD):** Viết unit test kiểm tra contract RPC không còn bắt buộc `p_guard_id`, `p_staff_id`, `p_voter_user_id`, `p_user_id`.
+- [x] **Bước 2.3.2:** Cập nhật `operations_rpc_contracts.dart` và `community_rpc_contracts.dart` loại bỏ các tham số client tự khai bắt buộc.
+- [x] **Bước 2.3.3:** Cập nhật `FrontDeskRepository` và `CommunityRepository` gọi RPC server-authoritative.
+- [x] **Bước 2.3.4:** Đảm bảo `fetchParcels` cho màn hình lễ tân không hiển thị trực tiếp `pickup_pin` của cư dân.
+- [x] **Bước 2.3.5:** Commit: `fix(repo): loai bo tham so client tu khai tren rpc va an ma pin buu kien p0`.
 
 ---
 
@@ -79,18 +79,18 @@
 - Modify: `lib/features/resident/widgets/create_petition_sheet.dart`
 - Create: `test/features/resident/community_voting_law_test.dart`
 
-- [ ] **Bước 2.4.1 (TDD):** Viết test kiểm tra:
+- [x] **Bước 2.4.1 (TDD):** Viết test kiểm tra:
   - Căn hộ chưa chọn hoặc không có thì hiển thị empty state, không gửi fallback `'apt-01'` hay `'usr-resident'`.
   - Phân quyền biểu quyết: `tenant` bị vô hiệu hóa bỏ phiếu ở cuộc biểu quyết chính thức `official_assembly` kèm thông báo Luật Nhà ở 2023.
-- [ ] **Bước 2.4.2:** Cập nhật `PollModel` thêm `pollType` (`official_assembly` / `survey`).
-- [ ] **Bước 2.4.3:** Sửa `resident_visitor_parcel_screen.dart`:
+- [x] **Bước 2.4.2:** Cập nhật `PollModel` thêm `pollType` (`official_assembly` / `survey`).
+- [x] **Bước 2.4.3:** Sửa `resident_visitor_parcel_screen.dart`:
   - Sửa lỗi truy vấn key căn hộ: Dùng `selectedApartmentIdProvider` hoặc `(list.first['apartment_id'] as String?)`.
   - Xóa bỏ fallback `'apt-01'` và `'usr-resident'`. Hiển thị màn hình thông báo khi chưa có căn hộ hoặc chưa đăng nhập.
-- [ ] **Bước 2.4.4:** Sửa `resident_community_screen.dart`:
+- [x] **Bước 2.4.4:** Sửa `resident_community_screen.dart`:
   - Xóa bỏ fallback `'apt-01'` và `'usr-resident'`.
   - Hiển thị nhãn phân biệt rõ: "Nghị quyết chính thức (Hội nghị nhà chung cư)" vs "Khảo sát ý kiến".
   - Kiểm tra `relation_role` của cư dân trong căn hộ hiện tại: Nếu là `tenant` đối với cuộc họp chính thức, hiển thị cảnh báo không có quyền biểu quyết.
-- [ ] **Bước 2.4.5:** Commit: `feat(community): tuan thu bieu quyet luat nha o 2023 va loai bo fallback apt-01 p0`.
+- [x] **Bước 2.4.5:** Commit: `feat(community): tuan thu bieu quyet luat nha o 2023 va loai bo fallback apt-01 p0`.
 
 ---
 
@@ -98,7 +98,7 @@
 **Files:**
 - Modify: `docs/COMMERCIAL_PRODUCT_ROADMAP.md`
 
-- [ ] **Bước 2.5.1:** Chạy `dart analyze lib test` đảm bảo 0 errors, 0 warnings.
-- [ ] **Bước 2.5.2:** Chạy toàn bộ test suite Đợt 1 và Đợt 2.
-- [ ] **Bước 2.5.3:** Cập nhật `docs/COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu các mục Đợt 2 hoàn tất.
-- [ ] **Bước 2.5.4:** Push toàn bộ commits trực tiếp lên `origin/main`.
+- [x] **Bước 2.5.1:** Chạy `dart analyze lib test` đảm bảo 0 errors, 0 warnings.
+- [x] **Bước 2.5.2:** Chạy toàn bộ test suite Đợt 1 và Đợt 2.
+- [x] **Bước 2.5.3:** Cập nhật `docs/COMMERCIAL_PRODUCT_ROADMAP.md` đánh dấu các mục Đợt 2 hoàn tất.
+- [x] **Bước 2.5.4:** Push toàn bộ commits trực tiếp lên `origin/main`.

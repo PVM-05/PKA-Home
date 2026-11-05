@@ -13,6 +13,48 @@ class AppStateView<T> extends StatelessWidget {
   final WidgetBuilder? skeletonBuilder;
   final Widget? actionButton;
 
+  static Widget emptyContent({
+    required IconData icon,
+    required String title,
+    required String message,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 48, color: AppTheme.primary),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   const AppStateView({
     super.key,
     required this.asyncValue,
@@ -63,9 +105,9 @@ class AppStateView<T> extends StatelessWidget {
             Text(
               'Đang tải dữ liệu...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -87,21 +129,17 @@ class AppStateView<T> extends StatelessWidget {
                 color: AppTheme.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                emptyIcon,
-                size: 48,
-                color: AppTheme.primary,
-              ),
+              child: Icon(emptyIcon, size: 48, color: AppTheme.primary),
             ),
             const SizedBox(height: 20),
             Text(
               emptyMessage,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                    fontSize: 15,
-                    height: 1.4,
-                  ),
+                color: AppTheme.textSecondary,
+                fontSize: 15,
+                height: 1.4,
+              ),
             ),
             if (actionButton != null) ...[
               const SizedBox(height: 20),
@@ -112,14 +150,19 @@ class AppStateView<T> extends StatelessWidget {
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppTheme.primary),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh, size: 18),
                 label: Text(retryLabel ?? 'Tải lại'),
               ),
-            ]
+            ],
           ],
         ),
       ),
@@ -152,19 +195,19 @@ class AppStateView<T> extends StatelessWidget {
             Text(
               'Không thể tải dữ liệu',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.error,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: AppTheme.error,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               cleanError,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                    fontSize: 14,
-                    height: 1.4,
-                  ),
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+                height: 1.4,
+              ),
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 24),
@@ -172,14 +215,19 @@ class AppStateView<T> extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh, size: 18),
                 label: Text(retryLabel ?? 'Thử lại'),
               ),
-            ]
+            ],
           ],
         ),
       ),

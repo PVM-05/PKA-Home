@@ -6,23 +6,26 @@
 class SubmitPollVoteRequestDto {
   final String pollId;
   final String apartmentId;
-  final String voterUserId;
+  final String? voterUserId;
   final List<String> optionIds;
 
   const SubmitPollVoteRequestDto({
     required this.pollId,
     required this.apartmentId,
-    required this.voterUserId,
+    this.voterUserId,
     required this.optionIds,
   });
 
   Map<String, dynamic> toRpcParams() {
-    return {
+    final map = <String, dynamic>{
       'p_poll_id': pollId,
       'p_apartment_id': apartmentId,
-      'p_voter_user_id': voterUserId,
       'p_option_ids': optionIds,
     };
+    if (voterUserId != null && voterUserId!.isNotEmpty) {
+      map['p_voter_user_id'] = voterUserId;
+    }
+    return map;
   }
 }
 
@@ -62,20 +65,23 @@ class SubmitPollVoteResponseDto {
 class EndorsePetitionRequestDto {
   final String petitionId;
   final String apartmentId;
-  final String userId;
+  final String? userId;
 
   const EndorsePetitionRequestDto({
     required this.petitionId,
     required this.apartmentId,
-    required this.userId,
+    this.userId,
   });
 
   Map<String, dynamic> toRpcParams() {
-    return {
+    final map = <String, dynamic>{
       'p_petition_id': petitionId,
       'p_apartment_id': apartmentId,
-      'p_user_id': userId,
     };
+    if (userId != null && userId!.isNotEmpty) {
+      map['p_user_id'] = userId;
+    }
+    return map;
   }
 }
 
