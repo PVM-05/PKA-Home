@@ -1,613 +1,1245 @@
+import 'dart:math';
 import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../core/supabase_config.dart';
+
 import '../../../data/models/apartment_model.dart';
+
 import '../../../data/models/resident_model.dart';
+
 import '../../../data/models/invoice_model.dart';
+
 import '../../../data/models/issue_model.dart';
+
 import '../../../data/models/role_delegation_model.dart';
+
 import '../../../data/models/audit_log_model.dart';
+
 import '../../../data/models/issue_rating_model.dart';
+
 import '../../../data/models/bulk_invoice_validation_model.dart';
 
+
+
 class ManagementRepository {
+
   final SupabaseClient _client;
+
+
 
   ManagementRepository([SupabaseClient? client]) : _client = client ?? SupabaseConfig.client;
 
+
+
   Future<List<ResidentModel>> fetchResidents({String? role}) async {
+
     var query = _client
+
         .from('users')
+
         .select('*, residents_apartments(*, apartments(*))');
+
     
+
     if (role != null) {
+
       query = query.eq('role', role);
+
     }
+
+
 
     final response = await query.order('created_at', ascending: false);
+
     return (response as List).map((e) => ResidentModel.fromJson(e)).toList();
+
   }
+
+
 
   Future<void> updateUserRole(String userId, String newRole) async {
+
     await _client.from('users').update({
+
       'role': newRole,
+
       'updated_at': DateTime.now().toIso8601String(),
+
     }).eq('id', userId);
+
   }
+
+
 
   Future<List<ApartmentModel>> fetchApartments() async {
+
     final response = await _client
+
         .from('apartments')
+
         .select()
+
         .order('code');
 
+
+
     return (response as List).map((e) => ApartmentModel.fromJson(e)).toList();
+
   }
+
+
 
   Future<void> createApartment(
+
     String code,
+
     double area, {
+
     String? buildingCode,
+
     int? floorNumber,
+
   }) async {
+
     final normalizedCode = code.trim().toUpperCase();
+
     final building = buildingCode ?? (normalizedCode.isNotEmpty ? normalizedCode[0] : 'A');
+
     final floor = floorNumber ?? (normalizedCode.length >= 3 ? int.tryParse(normalizedCode.substring(1, 3)) ?? 1 : 1);
+
     await _client.from('apartments').insert({
+
       'code': normalizedCode,
+
       'area': area,
+
       'building_code': building,
+
       'floor_number': floor,
+
       'is_empty': true,
+
     });
+
   }
+
+
 
   Future<void> updateApartment(
+
     String id,
+
     String code,
+
     double area, {
+
     String? buildingCode,
+
     int? floorNumber,
+
   }) async {
+
     final normalizedCode = code.trim().toUpperCase();
+
     final building = buildingCode ?? (normalizedCode.isNotEmpty ? normalizedCode[0] : 'A');
+
     final floor = floorNumber ?? (normalizedCode.length >= 3 ? int.tryParse(normalizedCode.substring(1, 3)) ?? 1 : 1);
+
     await _client.from('apartments').update({
+
       'code': normalizedCode,
+
       'area': area,
+
       'building_code': building,
+
       'floor_number': floor,
+
     }).eq('id', id);
+
   }
+
+
 
   Future<void> deleteApartment(String id) async {
+
     try {
+
       await _client.from('apartments').delete().eq('id', id);
+
     } on PostgrestException catch (e) {
+
       if (e.code == '23503') {
+
         throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+
       }
+
       throw Exception(e.message);
+
     }
+
   }
+
+
 
   Future<void> assignResidentToApartment(String userId, String apartmentId, {String relationRole = 'owner'}) async {
+
     // 1. Thêm hoặc cập nhật liên kết giữa cư dân và căn hộ này (bảo toàn các căn hộ khác của cư dân)
+
     await _client.from('residents_apartments').upsert({
+
       'user_id': userId,
+
       'apartment_id': apartmentId,
+
       'relation_role': relationRole,
+
     }, onConflict: 'user_id,apartment_id');
+
     
+
     // 2. Đánh dấu căn hộ mới là có người ở
+
     await _client.from('apartments').update({'is_empty': false}).eq('id', apartmentId);
+
   }
+
+
 
   Future<void> unlinkResidentFromApartment(String userId, String apartmentId) async {
+
     // Xóa liên kết
+
     await _client.from('residents_apartments').delete().eq('user_id', userId).eq('apartment_id', apartmentId);
+
     
+
     // Kiểm tra xem căn hộ còn ai ở không, nếu không thì set is_empty = true
+
     final remaining = await _client.from('residents_apartments').select('id').eq('apartment_id', apartmentId);
+
     if ((remaining as List).isEmpty) {
+
       await _client.from('apartments').update({'is_empty': true}).eq('id', apartmentId);
+
     }
+
   }
+
+
 
   // Realtime Streams
+
   Stream<List<Map<String, dynamic>>> watchPendingIssues() {
+
     return _client
+
         .from('issue_reports')
+
         .stream(primaryKey: ['id'])
+
         .eq('status', 'pending');
+
   }
+
+
 
   Stream<List<Map<String, dynamic>>> watchUnpaidInvoices() {
+
     return _client
+
         .from('invoices')
+
         .stream(primaryKey: ['id'])
+
         .eq('status', 'unpaid');
+
   }
+
+
 
   // Invoices Management
+
   Future<List<InvoiceModel>> fetchInvoices() async {
+
     final response = await _client
+
         .from('invoices')
+
         .select('*, apartments(*)')
+
         .order('created_at', ascending: false);
+
     return (response as List).map((e) => InvoiceModel.fromJson(e)).toList();
+
   }
+
+
 
   Future<void> updateInvoiceStatus(String id, String status) async {
+
     await _client.from('invoices').update({'status': status}).eq('id', id);
+
   }
+
+
 
   Future<void> createInvoice(String apartmentId, String period, DateTime dueDate, List<Map<String, dynamic>> items) async {
+
     await _client.rpc('create_invoice_with_items', params: {
+
       'p_apartment_id': apartmentId,
+
       'p_period': period,
+
       'p_due_date': dueDate.toIso8601String().split('T')[0],
+
       'p_items': items,
+
     });
+
   }
+
+
 
   Future<void> deleteInvoice(String invoiceId) async {
+
     try {
+
       await _client.from('invoices').delete().eq('id', invoiceId);
+
     } on PostgrestException catch (e) {
+
       if (e.code == '23503') {
+
         throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+
       }
+
       throw Exception(e.message);
+
     }
+
   }
+
+
 
   Future<void> updateInvoice({
+
     required String invoiceId,
+
     required String period,
+
     required DateTime dueDate,
+
     required List<Map<String, dynamic>> items,
+
     String? apartmentId,
+
     String? status,
+
   }) async {
+
     try {
+
       final rpcParams = <String, dynamic>{
+
         'p_invoice_id': invoiceId,
+
         'p_period': period,
+
         'p_due_date': dueDate.toIso8601String().split('T')[0],
+
         'p_items': items,
+
       };
+
       if (apartmentId != null) rpcParams['p_apartment_id'] = apartmentId;
+
       if (status != null) rpcParams['p_status'] = status;
+
       await _client.rpc('update_invoice_with_items', params: rpcParams);
+
     } on PostgrestException catch (e) {
+
       throw Exception(e.message);
+
     } catch (e) {
+
       if (e is Exception) rethrow;
+
       throw Exception('Không thể cập nhật hóa đơn: $e');
+
     }
+
   }
+
+
 
   // Issues Management
+
   Stream<List<Map<String, dynamic>>> watchRawIssues() {
+
     return _client.from('issue_reports').stream(primaryKey: ['id']);
+
   }
+
+
 
   Future<List<IssueModel>> fetchIssues() async {
+
     final response = await _client
+
         .from('issue_reports')
+
         .select('*, apartments(*), users!issue_reports_reporter_id_fkey(*), assigned_staff:users!issue_reports_assigned_staff_id_fkey(*), issue_images(image_url, image_role)')
+
         .order('created_at', ascending: false);
+
     return (response as List).map((e) => IssueModel.fromJson(e)).toList();
+
   }
+
+
 
   Future<void> updateIssueStatus(String id, String status, {String? assignedStaffId}) async {
+
     final data = <String, dynamic>{'status': status};
+
     if (assignedStaffId != null) {
+
       data['assigned_staff_id'] = assignedStaffId;
+
     }
+
     await _client.from('issue_reports').update(data).eq('id', id);
+
   }
 
+
+
   /// Kỹ thuật viên hoàn thành sự cố kèm tải ảnh minh chứng nghiệm thu
+
   Future<void> resolveIssueWithProof({
+
     required String issueId,
+
     required String staffId,
+
     required List<File> proofFiles,
+
   }) async {
+
     for (int i = 0; i < proofFiles.length; i++) {
+
       final file = proofFiles[i];
+
       final fileExt = file.path.split('.').last;
+
       final fileName = '$staffId/$issueId/proof_${DateTime.now().millisecondsSinceEpoch}_$i.$fileExt';
+
+
 
       await _client.storage.from('issue-images').upload(fileName, file);
 
+
+
       // Lưu trực tiếp object path vào cơ sở dữ liệu
+
       await _client.from('issue_images').insert({
+
         'issue_report_id': issueId,
+
         'image_url': fileName,
+
         'image_role': 'resolution_proof',
+
       });
+
     }
+
+
 
     await updateIssueStatus(issueId, 'resolved', assignedStaffId: staffId);
+
   }
+
+
 
   /// Trích xuất object path và sinh Signed URL mới cho ảnh sự cố
+
   Future<String> getSignedImageUrl(String urlOrPath, {int expiresIn = 60 * 60 * 24 * 30}) async {
+
     try {
+
       if (urlOrPath.isEmpty) return '';
+
       String objectPath = urlOrPath;
+
       if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+
         final uri = Uri.parse(urlOrPath);
+
         final segments = uri.pathSegments;
+
         final bucketIndex = segments.indexOf('issue-images');
+
         if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
+
           objectPath = segments.sublist(bucketIndex + 1).join('/');
+
         } else {
+
           return urlOrPath;
+
         }
+
       }
+
       return await _client.storage.from('issue-images').createSignedUrl(objectPath, expiresIn);
+
     } catch (_) {
+
       return urlOrPath;
+
     }
+
   }
+
+
 
   Future<void> deleteIssue(String issueId, {List<String> imageUrls = const []}) async {
+
     try {
+
       // 1. Xóa bản ghi trong bảng issue_reports (issue_images tự động cascade)
+
       await _client.from('issue_reports').delete().eq('id', issueId);
+
     } on PostgrestException catch (e) {
+
       if (e.code == '23503') {
+
         throw Exception('Không thể xóa dữ liệu này vì đang được liên kết với dữ liệu khác.');
+
       }
+
       throw Exception(e.message);
+
     }
+
+
 
     // 2. Xóa các file ảnh đính kèm trong Supabase Storage nếu có
+
     if (imageUrls.isNotEmpty) {
+
       try {
+
         final filePaths = imageUrls.map((url) {
+
           final uri = Uri.parse(url);
+
           final segments = uri.pathSegments;
+
           final bucketIndex = segments.indexOf('issue-images');
+
           if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
+
             return segments.sublist(bucketIndex + 1).join('/');
+
           }
+
           return segments.last;
+
         }).toList();
 
+
+
         await _client.storage.from('issue-images').remove(filePaths);
+
       } catch (_) {
+
         // Không block tiến trình nếu xóa ảnh storage thất bại
+
       }
+
     }
+
   }
 
+
+
   // ============================================================================
+
   // ROLE DELEGATIONS (ỦY QUYỀN TẠM THỜI)
+
   // ============================================================================
+
+
 
   Future<List<RoleDelegationModel>> fetchDelegations() async {
+
     final response = await _client
+
         .from('role_delegations')
+
         .select('*, delegator:delegator_id(full_name), delegate:delegate_id(full_name)')
+
         .order('created_at', ascending: false);
 
+
+
     return (response as List).map((e) => RoleDelegationModel.fromJson(e)).toList();
+
   }
+
+
 
   Future<List<RoleDelegationModel>> fetchMyActiveDelegations() async {
+
     final currentUserId = _client.auth.currentUser?.id;
+
     if (currentUserId == null) return [];
 
+
+
     final nowIso = DateTime.now().toUtc().toIso8601String();
+
     final response = await _client
+
         .from('role_delegations')
+
         .select('*, delegator:delegator_id(full_name), delegate:delegate_id(full_name)')
+
         .eq('delegate_id', currentUserId)
+
         .lte('starts_at', nowIso)
+
         .gte('ends_at', nowIso);
 
+
+
     return (response as List).map((e) => RoleDelegationModel.fromJson(e)).toList();
+
   }
+
+
 
   Future<void> createDelegation({
+
     required String delegateId,
+
     required String delegatedRole,
+
     required DateTime startsAt,
+
     required DateTime endsAt,
+
     String? note,
+
   }) async {
+
     final currentUserId = _client.auth.currentUser?.id;
+
     if (currentUserId == null) throw Exception('Người dùng chưa đăng nhập');
 
+
+
     await _client.from('role_delegations').insert({
+
       'delegator_id': currentUserId,
+
       'delegate_id': delegateId,
+
       'delegated_role': delegatedRole,
+
       'starts_at': startsAt.toUtc().toIso8601String(),
+
       'ends_at': endsAt.toUtc().toIso8601String(),
+
       'note': note,
+
     });
+
   }
+
+
 
   Future<void> revokeDelegation(String id) async {
+
     await _client.from('role_delegations').update({
+
       'is_revoked': true,
+
       'ends_at': DateTime.now().toUtc().toIso8601String(),
+
     }).eq('id', id);
+
   }
+
+
 
   /// Lấy danh sách nhật ký kiểm toán bất biến (Audit Logs)
+
   Future<List<AuditLogModel>> fetchAuditLogs({
+
     String? buildingId,
+
     String? entityName,
+
     int limit = 50,
+
   }) async {
+
     var query = _client
+
         .from('audit_logs')
+
         .select('*, actor:actor_id(full_name)');
 
+
+
     if (buildingId != null) {
+
       query = query.eq('building_id', buildingId);
+
     }
+
     if (entityName != null && entityName.isNotEmpty && entityName != 'all') {
+
       query = query.eq('entity_name', entityName);
+
     }
+
+
 
     final response = await query.order('created_at', ascending: false).limit(limit);
+
     return (response as List).map((e) => AuditLogModel.fromJson(e)).toList();
+
   }
+
+
 
   /// Lấy toàn bộ danh sách đánh giá dịch vụ sự cố cho Ban Quản Lý
+
   Future<List<IssueRatingModel>> fetchAllRatings() async {
+
     final response = await _client
+
         .from('issue_ratings')
+
         .select('*, users:reporter_id(full_name)')
+
         .order('created_at', ascending: false);
 
+
+
     return (response as List).map((e) => IssueRatingModel.fromJson(e)).toList();
+
   }
+
+
 
   /// Khóa hoặc mở khóa tài khoản người dùng
+
   Future<void> toggleUserLock(String userId, bool isLocked) async {
+
     await toggleUserStatus(
+
       userId: userId,
+
       action: isLocked ? 'lock' : 'unlock',
+
     );
+
   }
+
+
 
   /// Admin tạo người dùng mới
+
   Future<String> createUser({
+
     required String email,
+
     required String fullName,
+
     String? password,
+
     String? phone,
+
     String role = 'resident',
+
     String? apartmentId,
+
     String relationRole = 'owner',
+
   }) async {
+
+    final effectivePassword = (password != null && password.trim().isNotEmpty)
+
+        ? password.trim()
+
+        : _generateSecureTemporaryPassword();
+
+
+
     final response = await _client.rpc('admin_create_user', params: {
+
       'p_email': email.trim().toLowerCase(),
-      'p_password': password ?? 'PkaHome@2026',
+
+      'p_password': effectivePassword,
+
       'p_full_name': fullName.trim(),
+
       'p_phone': phone?.trim(),
+
       'p_role': role,
+
       'p_apartment_id': apartmentId,
+
       'p_relation_role': relationRole,
+
     });
+
     final res = response as Map<String, dynamic>;
+
     if (res['success'] != true) {
+
       throw Exception(res['message'] ?? 'Tạo người dùng thất bại');
+
     }
+
     return res['user_id'] as String;
+
   }
+
+
 
   /// Admin chỉnh sửa hồ sơ người dùng
+
   Future<void> updateUserProfile({
+
     required String userId,
+
     required String fullName,
+
     String? phone,
+
     String? role,
+
   }) async {
+
     final response = await _client.rpc('admin_update_user_profile', params: {
+
       'p_target_user_id': userId,
+
       'p_full_name': fullName.trim(),
+
       'p_phone': phone?.trim(),
+
       'p_role': ?role,
+
     });
+
     final res = response as Map<String, dynamic>;
+
     if (res['success'] != true) {
+
       throw Exception(res['message'] ?? 'Cập nhật hồ sơ thất bại');
+
     }
+
   }
+
+
 
   /// Thay đổi trạng thái tài khoản: 'lock', 'unlock', 'deactivate', 'activate'
+
   Future<void> toggleUserStatus({
+
     required String userId,
+
     required String action,
+
     String? reason,
+
   }) async {
+
     final response = await _client.rpc('admin_toggle_user_status', params: {
+
       'p_target_user_id': userId,
+
       'p_action': action,
+
       'p_reason': ?reason,
+
     });
+
     final res = response as Map<String, dynamic>;
+
     if (res['success'] != true) {
+
       throw Exception(res['message'] ?? 'Thay đổi trạng thái thất bại');
+
     }
+
   }
+
+
 
   /// Admin gửi email đặt lại mật khẩu cho người dùng
+
   Future<void> sendAdminPasswordReset(String email) async {
+
     await _client.auth.resetPasswordForEmail(
+
       email.trim().toLowerCase(),
+
     );
+
   }
+
+
 
   /// Admin gỡ liên kết một căn hộ cụ thể cho cư dân
+
   Future<void> unlinkApartment({
+
     required String userId,
+
     required String apartmentId,
+
   }) async {
+
     final response = await _client.rpc('admin_unlink_apartment', params: {
+
       'p_user_id': userId,
+
       'p_apartment_id': apartmentId,
+
     });
+
     final res = response as Map<String, dynamic>;
+
     if (res['success'] != true) {
+
       throw Exception(res['message'] ?? 'Gỡ liên kết căn hộ thất bại');
+
     }
+
   }
+
+
 
   /// Tạo hóa đơn hàng loạt theo tháng cho toàn bộ căn hộ đang có người ở
+
   Future<Map<String, dynamic>> generateMonthlyBulkInvoices({
+
     required String period,
+
     required DateTime dueDate,
+
     double mgmtRate = 10000,
+
     double electricRate = 3000,
+
     double waterRate = 15000,
+
   }) async {
+
     final response = await _client.rpc('generate_monthly_bulk_invoices', params: {
+
       'p_period': period,
+
       'p_due_date': dueDate.toIso8601String(),
+
       'p_mgmt_rate': mgmtRate,
+
       'p_electric_rate': electricRate,
+
       'p_water_rate': waterRate,
+
     });
+
     return Map<String, dynamic>.from(response as Map);
+
   }
+
+
 
   /// Cập nhật chỉ số điện nước tháng cho căn hộ
+
   Future<void> updateApartmentReadings({
+
     required String apartmentId,
+
     required double electricReading,
+
     required double waterReading,
+
   }) async {
+
     await _client.from('apartments').update({
+
       'electric_reading': electricReading,
+
       'water_reading': waterReading,
+
       'updated_at': DateTime.now().toIso8601String(),
+
     }).eq('id', apartmentId);
+
   }
+
+
 
   /// Chạy tiền kiểm tra dữ liệu hóa đơn hàng loạt (Dry-Run, không ghi database)
+
   Future<BulkInvoiceValidationModel> validateMonthlyBulkInvoices({
+
     required String period,
+
     double mgmtRate = 10000,
+
     double electricRate = 3500,
+
     double waterRate = 18000,
+
   }) async {
+
     final response = await _client.rpc('validate_monthly_bulk_invoices', params: {
+
       'p_period': period,
+
       'p_mgmt_rate': mgmtRate,
+
       'p_electric_rate': electricRate,
+
       'p_water_rate': waterRate,
+
     });
+
     return BulkInvoiceValidationModel.fromJson(Map<String, dynamic>.from(response as Map));
+
   }
+
+
 
   /// Tạo hóa đơn hàng loạt cho danh sách căn hộ hợp lệ
+
   Future<Map<String, dynamic>> generateValidBulkInvoices({
+
     required String period,
+
     required DateTime dueDate,
+
     double mgmtRate = 10000,
+
     double electricRate = 3500,
+
     double waterRate = 18000,
+
     List<String>? targetApartmentIds,
+
   }) async {
+
     final response = await _client.rpc('generate_valid_bulk_invoices', params: {
+
       'p_period': period,
+
       'p_due_date': dueDate.toIso8601String().split('T')[0],
+
       'p_mgmt_rate': mgmtRate,
+
       'p_electric_rate': electricRate,
+
       'p_water_rate': waterRate,
+
       'p_target_apartment_ids': ?targetApartmentIds,
+
     });
+
     return Map<String, dynamic>.from(response as Map);
+
   }
+
+
 
   /// Xác nhận thu tiền nguyên tử (Atomic Payment Confirmation)
+
   Future<Map<String, dynamic>> recordManualPayment({
+
     required String invoiceId,
+
     String paymentMethod = 'CASH',
+
     String? notes,
+
   }) async {
+
     final response = await _client.rpc('record_manual_payment', params: {
+
       'p_invoice_id': invoiceId,
+
       'p_payment_method': paymentMethod,
+
       'p_notes': notes,
+
     });
+
     return Map<String, dynamic>.from(response as Map);
+
   }
+
+
 
   /// Lấy danh sách phương tiện theo apartment_id
+
   Future<List<Map<String, dynamic>>> fetchResidentVehicles(String? apartmentId) async {
+
     if (apartmentId == null) return [];
+
     try {
+
       final res = await _client.from('vehicles').select().eq('apartment_id', apartmentId).order('created_at', ascending: false);
+
       return List<Map<String, dynamic>>.from(res as List);
+
     } catch (_) {
+
       return [];
+
     }
+
   }
+
+
 
   /// Lấy danh sách hóa đơn theo apartment_id
+
   Future<List<InvoiceModel>> fetchResidentInvoices(String? apartmentId) async {
+
     if (apartmentId == null) return [];
+
     try {
+
       final res = await _client.from('invoices').select('*, apartments(*)').eq('apartment_id', apartmentId).order('created_at', ascending: false);
+
       return (res as List).map((e) => InvoiceModel.fromJson(e)).toList();
+
     } catch (_) {
+
       return [];
+
     }
+
   }
+
+
 
   /// Lấy danh sách lịch đặt tiện ích theo user_id
+
   Future<List<Map<String, dynamic>>> fetchResidentBookings(String userId) async {
+
     try {
+
       final res = await _client.from('amenity_bookings').select('*, building_amenities(name)').eq('booked_by', userId).order('booking_date', ascending: false);
+
       return List<Map<String, dynamic>>.from(res as List);
+
     } catch (_) {
+
       return [];
+
     }
+
   }
+
+
 
   /// Ghi nhận giao dịch thanh toán (tiền mặt / chuyển khoản thủ công)
+
   Future<void> recordPaymentTransaction({
+
     required String invoiceId,
+
     String? apartmentId,
+
     required double amount,
+
     required String paymentMethod,
+
     String status = 'SUCCESS',
+
     String? title,
+
   }) async {
+
     final prefix = paymentMethod.toUpperCase().contains('CASH') ? 'CASH' : 'BANK';
+
     final txnCode = 'TXN-$prefix-${DateTime.now().millisecondsSinceEpoch}';
+
     await _client.from('payment_transactions').insert({
+
       'transaction_code': txnCode,
+
       'user_id': _client.auth.currentUser?.id,
+
       'apartment_id': apartmentId,
+
       'amount': amount,
+
       'payment_method': paymentMethod,
+
       'type': 'INVOICE',
+
       'invoice_id': invoiceId,
+
       'status': status,
+
       'title': ?title,
+
     });
+
   }
+
+
 
   /// Xử lý Webhook biến động số dư từ cổng ngân hàng (VietQR Napas 247)
-  Future<Map<String, dynamic>> processBankPaymentWebhook(Map<String, dynamic> payload) async {
-    final res = await _client.rpc(
-      'process_bank_payment_webhook',
-      params: {'p_payload': payload},
-    );
-    return Map<String, dynamic>.from(res as Map);
-  }
-}
 
+  Future<Map<String, dynamic>> processBankPaymentWebhook(Map<String, dynamic> payload) async {
+
+    final res = await _client.rpc(
+
+      'process_bank_payment_webhook',
+
+      params: {'p_payload': payload},
+
+    );
+
+    return Map<String, dynamic>.from(res as Map);
+
+  }
+
+
+
+  /// Sinh mật khẩu tạm thời ngẫu nhiên có độ phức tạp cao thay vì mật khẩu mặc định cố định
+
+  static String _generateSecureTemporaryPassword() {
+
+    final rand = Random.secure();
+
+    const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#%&*';
+
+    return List.generate(12, (_) => chars[rand.nextInt(chars.length)]).join();
+
+  }
+
+}
 
