@@ -95,25 +95,22 @@ class SystemHealthStatus {
 
 /// Dịch vụ gửi cảnh báo sự cố vận hành và giám sát uptime
 class OperationalAlertService {
-  final AppEnvironment _environment;
-  final http.Client _httpClient;
-  final SupabaseClient? _supabaseClient;
-  final Future<bool> Function()? _pingFunction;
-  final Duration _cooldownDuration;
+  final AppEnvironment environment;
+  final http.Client httpClient;
+  final SupabaseClient? supabaseClient;
+  final Future<bool> Function()? pingFunction;
+  final Duration cooldownDuration;
 
   final Map<String, DateTime> _lastAlertTimes = {};
 
   OperationalAlertService({
     AppEnvironment? environment,
     http.Client? httpClient,
-    SupabaseClient? supabaseClient,
-    Future<bool> Function()? pingFunction,
-    Duration cooldownDuration = const Duration(seconds: 60),
-  })  : _environment = environment ?? AppEnvironment.current,
-        _httpClient = httpClient ?? http.Client(),
-        _supabaseClient = supabaseClient,
-        _pingFunction = pingFunction,
-        _cooldownDuration = cooldownDuration;
+    this.supabaseClient,
+    this.pingFunction,
+    this.cooldownDuration = const Duration(seconds: 60),
+  })  : environment = environment ?? AppEnvironment.current,
+        httpClient = httpClient ?? http.Client();
 
   /// Xóa bộ đệm throttling phục vụ kiểm thử
   void clearThrottlingCache() {
@@ -124,7 +121,7 @@ class OperationalAlertService {
   String formatTelegramHtml(OperationalAlert alert) {
     final buffer = StringBuffer();
     buffer.writeln('<b>[PKA-HOME] CẢNH BÁO: ${alert.severity.label}</b>');
-    buffer.writeln('<b>Môi trường:</b> ${_environment.displayName}');
+    buffer.writeln('<b>Môi trường:</b> ${environment.displayName}');
     if (alert.errorCode != null && alert.errorCode!.isNotEmpty) {
       buffer.writeln('<b>Mã lỗi:</b> ${alert.errorCode}');
     }
@@ -162,7 +159,7 @@ class OperationalAlertService {
           'fields': [
             {
               'type': 'mrkdwn',
-              'text': '*Môi trường:*\n${_environment.displayName}',
+              'text': '*Môi trường:*\n${environment.displayName}',
             },
             {
               'type': 'mrkdwn',
@@ -206,8 +203,8 @@ class OperationalAlertService {
     if (_lastAlertTimes.containsKey(key)) {
       final lastSent = _lastAlertTimes[key]!;
       final elapsed = now.difference(lastSent);
-      if (elapsed < _cooldownDuration) {
-        final remainingSeconds = _cooldownDuration.inSeconds - elapsed.inSeconds;
+      if (elapsed < cooldownDuration) {
+        final remainingSeconds = cooldownDuration.inSeconds - elapsed.inSeconds;
         return AlertDispatchResult.throttled(
           errorMessage: 'Cảnh báo "$key" đang bị khóa lặp trong $remainingSeconds giây để chống bão tin nhắn.',
         );
@@ -217,16 +214,16 @@ class OperationalAlertService {
     final channelResults = <AlertDispatchChannel, bool>{};
 
     // 2. Gửi Telegram nếu có cấu hình
-    if (_environment.telegramBotToken.isNotEmpty && _environment.telegramChatId.isNotEmpty) {
+    if (environment.telegramBotToken.isNotEmpty && environment.telegramChatId.isNotEmpty) {
       try {
         final url = Uri.parse(
-          'https://api.telegram.org/bot${_environment.telegramBotToken}/sendMessage',
+          'https://api.telegram.org/bot${environment.telegramBotToken}/sendMessage',
         );
-        final response = await _httpClient.post(
+        final response = await httpClient.post(
           url,
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            'chat_id': _environment.telegramChatId,
+            'chat_id': environment.telegramChatId,
             'text': formatTelegramHtml(alert),
             'parse_mode': 'HTML',
           }),
@@ -239,10 +236,10 @@ class OperationalAlertService {
     }
 
     // 3. Gửi Slack Webhook nếu có cấu hình
-    if (_environment.slackWebhookUrl.isNotEmpty) {
+    if (environment.slackWebhookUrl.isNotEmpty) {
       try {
-        final url = Uri.parse(_environment.slackWebhookUrl);
-        final response = await _httpClient.post(
+        final url = Uri.parse(environment.slackWebhookUrl);
+        final response = await httpClient.post(
           url,
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(formatSlackPayload(alert)),
@@ -260,7 +257,7 @@ class OperationalAlertService {
 
     // Nếu không cấu hình kênh nào thì log môi trường dev và báo thành công
     if (channelResults.isEmpty) {
-      if (_environment.enableDebugLogging) {
+      if (environment.enableDebugLogging) {
         debugPrint('[CẢNH BÁO GIẢ LẬP]: [${alert.severity.label}] ${alert.title}: ${alert.message}');
       }
       return const AlertDispatchResult.success();
@@ -281,8 +278,9 @@ class OperationalAlertService {
   Future<SystemHealthStatus> checkHealthStatus() async {
     final stopwatch = Stopwatch()..start();
     try {
-      if (_pingFunction != null) {
-        final ok = await _pingFunction!();
+      final ping = pingFunction;
+      if (ping != null) {
+        final ok = await ping();
         stopwatch.stop();
         if (ok) {
           return SystemHealthStatus(
@@ -299,7 +297,7 @@ class OperationalAlertService {
         }
       }
 
-      final client = _supabaseClient ?? (SupabaseConfig.isConfigured ? SupabaseConfig.client : null);
+      final client = supabaseClient ?? (SupabaseConfig.isConfigured ? SupabaseConfig.client : null);
       if (client == null) {
         stopwatch.stop();
         return SystemHealthStatus(
