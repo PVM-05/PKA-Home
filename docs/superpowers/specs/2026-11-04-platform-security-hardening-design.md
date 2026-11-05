@@ -106,3 +106,4 @@ test/
 - [ ] `dart analyze lib test` đạt 0 issues (No issues found!).
 - [ ] Cập nhật Roadmap `COMMERCIAL_PRODUCT_ROADMAP.md` (mục A4) và đồ thị tri thức `graphify`.
 - [ ] Commit trực tiếp trên `main` và push lên GitHub remote.
+
