@@ -23,6 +23,7 @@ Future<PaymentResult?> showUnifiedPaymentSheet({
   required String title,
   required String referenceCode,
   required double amount,
+  String? buildingId,
   List<Map<String, dynamic>>? feeBreakdown,
 }) {
   return showModalBottomSheet<PaymentResult>(
@@ -35,6 +36,7 @@ Future<PaymentResult?> showUnifiedPaymentSheet({
       title: title,
       referenceCode: referenceCode,
       amount: amount,
+      buildingId: buildingId,
       feeBreakdown: feeBreakdown,
     ),
   );
@@ -46,6 +48,7 @@ class UnifiedPaymentSheet extends ConsumerStatefulWidget {
   final String title;
   final String referenceCode;
   final double amount;
+  final String? buildingId;
   final List<Map<String, dynamic>>? feeBreakdown;
 
   const UnifiedPaymentSheet({
@@ -55,6 +58,7 @@ class UnifiedPaymentSheet extends ConsumerStatefulWidget {
     required this.title,
     required this.referenceCode,
     required this.amount,
+    this.buildingId,
     this.feeBreakdown,
   });
 
@@ -199,19 +203,35 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
 
   Widget _buildConfirmationStep(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeBuilding = ref.watch(activeBuildingProvider).value;
-    final bankBin = activeBuilding?.bankBin ?? '970418';
-    final bankName = activeBuilding?.bankName ?? 'BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam';
-    final bankAccountNumber = activeBuilding?.bankAccountNumber ?? '1234567890';
-    final bankAccountName = activeBuilding?.bankAccountName ?? 'BQL PKA LANDMARK';
+    
+    // Ưu tiên 1: Tòa nhà truyền trực tiếp qua widget
+    // Ưu tiên 2: Tòa nhà của căn hộ cư dân đang chọn (residentBuildingProvider)
+    // Ưu tiên 3: Tòa nhà đang chọn của Ban Quản Lý (activeBuildingProvider)
+    final building = widget.buildingId != null && widget.buildingId!.isNotEmpty
+        ? ref.watch(buildingByIdProvider(widget.buildingId!)).value
+        : (ref.watch(residentBuildingProvider).value ?? ref.watch(activeBuildingProvider).value);
 
-    final vietQrString = VietQrGenerator.generate(
-      bankBin: bankBin,
-      bankAccount: bankAccountNumber,
-      amount: widget.amount,
-      memo: widget.referenceCode,
-      accountName: bankAccountName,
-    );
+    final hasBankConfig = building != null && building.hasValidBankAccount;
+    final bankBin = building?.bankBin ?? '';
+    final bankName = building?.bankName ?? '';
+    final bankAccountNumber = building?.bankAccountNumber ?? '';
+    final bankAccountName = building?.bankAccountName ?? '';
+
+    // Chuẩn hóa memo chữ-số thuần túy (loại bỏ #, -, ký tự đặc biệt)
+    final cleanMemo = widget.referenceCode.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+
+    final String vietQrString;
+    if (hasBankConfig) {
+      vietQrString = VietQrGenerator.generate(
+        bankBin: bankBin,
+        bankAccount: bankAccountNumber,
+        amount: widget.amount,
+        memo: cleanMemo,
+        accountName: bankAccountName,
+      );
+    } else {
+      vietQrString = '';
+    }
 
     return Column(
       key: const ValueKey('step_confirmation'),
@@ -401,120 +421,143 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
 
         // Thông tin VietQR nếu chọn chuyển khoản
         if (_selectedMethod == 'bank_transfer') ...[
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+          if (!hasBankConfig) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.amber.shade900.withValues(alpha: 0.2) : Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.amber.shade400),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800, size: 28),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Ban Quản Lý chưa cấu hình tài khoản nhận tiền cho tòa nhà này. Vui lòng liên hệ trực tiếp BQL để được hướng dẫn thanh toán.',
+                      style: TextStyle(fontSize: 13, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: QrImageView(
+                          key: ValueKey('vietqr_' + vietQrString),
+                          data: vietQrString,
+                          version: QrVersions.auto,
+                          size: 110.0,
+                        ),
                       ),
-                      child: QrImageView(
-                        key: ValueKey('vietqr_$vietQrString'),
-                        data: vietQrString,
-                        version: QrVersions.auto,
-                        size: 110.0,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              bankName,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'STK: ' + bankAccountNumber,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              'Tên: ' + bankAccountName,
+                              style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Nội dung: ' + cleanMemo,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue.shade700),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            bankName,
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'STK: $bankAccountNumber',
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Tên: $bankAccountName',
-                            style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Nội dung: ${widget.referenceCode}',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue.shade700),
-                          ),
-                        ],
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ActionChip(
+                        avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                        label: const Text('Sao chép STK', style: TextStyle(fontSize: 11)),
+                        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                        side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: bankAccountNumber));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Đã sao chép số tài khoản vào bộ nhớ tạm'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ActionChip(
-                      avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
-                      label: const Text('Sao chép STK', style: TextStyle(fontSize: 11)),
-                      backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-                      side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: bankAccountNumber));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Đã sao chép số tài khoản vào bộ nhớ tạm'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                    ),
-                    ActionChip(
-                      avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
-                      label: const Text('Sao chép Nội dung', style: TextStyle(fontSize: 11)),
-                      backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-                      side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: widget.referenceCode));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Đã sao chép nội dung chuyển khoản vào bộ nhớ tạm'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                    ),
-                    ActionChip(
-                      avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
-                      label: const Text('Sao chép Số tiền', style: TextStyle(fontSize: 11)),
-                      backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-                      side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: widget.amount.toInt().toString()));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Đã sao chép số tiền vào bộ nhớ tạm'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '💡 Quét mã QR bằng ứng dụng ngân hàng bất kỳ để chuyển tiền nhanh 24/7.',
-                  style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
-                ),
-              ],
+                      ActionChip(
+                        avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                        label: const Text('Sao chép Nội dung', style: TextStyle(fontSize: 11)),
+                        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                        side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: cleanMemo));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Đã sao chép nội dung chuyển khoản vào bộ nhớ tạm'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                      ActionChip(
+                        avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                        label: const Text('Sao chép Số tiền', style: TextStyle(fontSize: 11)),
+                        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                        side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: widget.amount.toInt().toString()));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Đã sao chép số tiền vào bộ nhớ tạm'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Quét mã QR bằng ứng dụng ngân hàng bất kỳ để chuyển tiền nhanh 24/7.',
+                    style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: 10),
         ],
 
@@ -575,7 +618,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             elevation: 2,
           ),
-          onPressed: _isSubmitting ? null : _startPayment,
+          onPressed: _isSubmitting || (_selectedMethod == 'bank_transfer' && !hasBankConfig) ? null : _startPayment,
           child: _isSubmitting
               ? const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -596,7 +639,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                   ],
                 )
               : const Text(
-                  'GỬI THÔNG BÁO THANH TOÁN',
+                  (_selectedMethod == 'bank_transfer' && !hasBankConfig) ? 'BQL CHƯA CẤU HÌNH TÀI KHOẢN' : 'GỬI THÔNG BÁO THANH TOÁN',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
         ),

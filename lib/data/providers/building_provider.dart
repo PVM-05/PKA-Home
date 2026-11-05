@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/supabase_config.dart';
 import '../models/building_model.dart';
 import '../repositories/building_repository.dart';
+import 'resident_apartment_provider.dart';
 
 final buildingRepositoryProvider = Provider<BuildingRepository>((ref) {
   return BuildingRepository();
@@ -50,4 +51,19 @@ final activeBuildingProvider = FutureProvider<BuildingModel?>((ref) async {
   final activeId = ref.watch(activeBuildingIdProvider);
   final repo = ref.watch(buildingRepositoryProvider);
   return repo.getBuildingById(activeId);
+});
+
+/// Thông tin chi tiết tòa nhà của căn hộ cư dân đang chọn
+final residentBuildingProvider = FutureProvider<BuildingModel?>((ref) async {
+  final buildingId = ref.watch(residentBuildingIdProvider);
+  if (buildingId == null || buildingId.isEmpty) return null;
+  final repo = ref.watch(buildingRepositoryProvider);
+  return repo.getBuildingById(buildingId);
+});
+
+/// Provider tìm kiếm thông tin tòa nhà theo ID
+final buildingByIdProvider = FutureProvider.family<BuildingModel?, String>((ref, buildingId) async {
+  if (buildingId.isEmpty) return null;
+  final repo = ref.watch(buildingRepositoryProvider);
+  return repo.getBuildingById(buildingId);
 });

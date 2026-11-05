@@ -37,15 +37,7 @@ class InvoiceModel {
     this.paymentCode,
   });
 
-  String get effectivePaymentCode {
-    if (paymentCode != null && paymentCode!.isNotEmpty) {
-      return paymentCode!;
-    }
-    final cleanPeriod = period.replaceAll(RegExp(r'[^0-9]'), '');
-    final suffix = id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
-    final shortId = suffix.length >= 6 ? suffix.substring(0, 6) : suffix.padRight(6, '0');
-    return 'INV$cleanPeriod${shortId.toUpperCase()}';
-  }
+  String get effectivePaymentCode => paymentCode ?? '';
 
   String get displayReceiptNumber {
     if (receiptNumber != null && receiptNumber!.isNotEmpty) {

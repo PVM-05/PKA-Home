@@ -674,6 +674,15 @@ class _ResidentInvoiceDetailScreenState extends ConsumerState<ResidentInvoiceDet
 
   Future<void> _handlePayment(BuildContext context, List<Map<String, dynamic>> items) async {
     if (_isOpeningPayment) return;
+    if (_invoice.effectivePaymentCode.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hóa đơn chưa được cấp mã thanh toán từ máy chủ. Vui lòng liên hệ Ban Quản Lý.'),
+          backgroundColor: AppTheme.warning,
+        ),
+      );
+      return;
+    }
     _isOpeningPayment = true;
 
     try {
