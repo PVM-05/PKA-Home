@@ -21,7 +21,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     IF NEW.payment_code IS NULL OR NEW.payment_code = '' THEN
-        NEW.payment_code := 'INV' || to_char(COALESCE(NEW.period, CURRENT_DATE), 'YYMM') || upper(substring(NEW.id::text, 1, 6));
+        NEW.payment_code := 'INV' || COALESCE(replace(substring(NEW.period from 3), '-', ''), to_char(CURRENT_DATE, 'YYMM')) || upper(substring(NEW.id::text, 1, 6));
     END IF;
     RETURN NEW;
 END;
@@ -35,7 +35,7 @@ CREATE TRIGGER trg_generate_invoice_payment_code
 
 -- Nạp mã payment_code cho các hóa đơn cũ chưa có
 UPDATE public.invoices
-SET payment_code = 'INV' || to_char(COALESCE(period, CURRENT_DATE), 'YYMM') || upper(substring(id::text, 1, 6))
+SET payment_code = 'INV' || COALESCE(replace(substring(period from 3), '-', ''), to_char(CURRENT_DATE, 'YYMM')) || upper(substring(id::text, 1, 6))
 WHERE payment_code IS NULL;
 
 

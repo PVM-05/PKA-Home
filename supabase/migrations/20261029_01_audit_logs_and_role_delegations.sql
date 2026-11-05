@@ -45,6 +45,8 @@ CREATE POLICY "role_delegations_manage" ON public.role_delegations
 -- 2. NÂNG CẤP BẢNG NHẬT KÝ KIỂM TOÁN (AUDIT LOGS) BẤT BIẾN (APPEND-ONLY)
 ALTER TABLE public.audit_logs
     ADD COLUMN IF NOT EXISTS building_id UUID REFERENCES public.buildings(id) ON DELETE CASCADE,
+    ADD COLUMN IF NOT EXISTS entity_name VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS entity_id UUID,
     ADD COLUMN IF NOT EXISTS old_values JSONB DEFAULT '{}'::jsonb,
     ADD COLUMN IF NOT EXISTS new_values JSONB DEFAULT '{}'::jsonb;
 
