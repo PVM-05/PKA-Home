@@ -13,7 +13,8 @@ class ResidentHandbookScreen extends ConsumerStatefulWidget {
   const ResidentHandbookScreen({super.key, this.initialTabIndex = 0});
 
   @override
-  ConsumerState<ResidentHandbookScreen> createState() => _ResidentHandbookScreenState();
+  ConsumerState<ResidentHandbookScreen> createState() =>
+      _ResidentHandbookScreenState();
 }
 
 class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
@@ -42,24 +43,27 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
 
   Future<void> _makePhoneCall(String phoneNumber) async {
     final cleanNumber = phoneNumber.replaceAll(RegExp(r'\s+'), '');
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: cleanNumber,
-    );
+    final Uri launchUri = Uri(scheme: 'tel', path: cleanNumber);
     try {
       if (await canLaunchUrl(launchUri)) {
         await launchUrl(launchUri);
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Không thể thực hiện cuộc gọi đến $phoneNumber')),
+            SnackBar(
+              content: Text('Không thể thực hiện cuộc gọi đến $phoneNumber'),
+            ),
           );
         }
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể mở ứng dụng điện thoại cho số: $phoneNumber')),
+          SnackBar(
+            content: Text(
+              'Không thể mở ứng dụng điện thoại cho số: $phoneNumber',
+            ),
+          ),
         );
       }
     }
@@ -144,10 +148,14 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         data: (contacts) {
           final filteredContacts = _searchQuery.isEmpty
               ? contacts
-              : contacts.where((c) =>
-                  c.name.toLowerCase().contains(_searchQuery) ||
-                  c.phone.contains(_searchQuery) ||
-                  c.contactType.toLowerCase().contains(_searchQuery)).toList();
+              : contacts
+                    .where(
+                      (c) =>
+                          c.name.toLowerCase().contains(_searchQuery) ||
+                          c.phone.contains(_searchQuery) ||
+                          c.contactType.toLowerCase().contains(_searchQuery),
+                    )
+                    .toList();
 
           if (filteredContacts.isEmpty) {
             return Center(
@@ -234,7 +242,10 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: typeColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
@@ -272,12 +283,20 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppStatusColors.paid,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () => _makePhoneCall(contact.phone),
               icon: const Icon(Icons.phone, size: 16),
-              label: const Text('Gọi ngay', style: TextStyle(fontWeight: FontWeight.bold)),
+              label: const Text(
+                'Gọi ngay',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -297,9 +316,13 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         data: (rules) {
           final filteredRules = _searchQuery.isEmpty
               ? rules
-              : rules.where((r) =>
-                  r.title.toLowerCase().contains(_searchQuery) ||
-                  r.content.toLowerCase().contains(_searchQuery)).toList();
+              : rules
+                    .where(
+                      (r) =>
+                          r.title.toLowerCase().contains(_searchQuery) ||
+                          r.content.toLowerCase().contains(_searchQuery),
+                    )
+                    .toList();
 
           if (filteredRules.isEmpty) {
             return Center(
@@ -330,7 +353,9 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                   side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: Theme(
-                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  data: Theme.of(
+                    context,
+                  ).copyWith(dividerColor: Colors.transparent),
                   child: ExpansionTile(
                     leading: Container(
                       width: 32,
@@ -350,7 +375,10 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                     ),
                     title: Text(
                       rule.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                     children: [
                       Padding(
@@ -388,7 +416,9 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
       child: amenitiesAsync.when(
         data: (amenities) {
           if (amenities.isEmpty) {
-            return const Center(child: Text('Chưa có tiện ích nào được cập nhật.'));
+            return const Center(
+              child: Text('Chưa có tiện ích nào được cập nhật.'),
+            );
           }
 
           return ListView.builder(
@@ -422,17 +452,27 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                               ),
                             ),
                           ),
-                          if (amenity.openHours != null && amenity.openHours!.isNotEmpty)
+                          if (amenity.openHours != null &&
+                              amenity.openHours!.isNotEmpty)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppStatusColors.paid.withValues(alpha: 0.1),
+                                color: AppStatusColors.paid.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.access_time, size: 14, color: AppStatusColors.paid),
+                                  const Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: AppStatusColors.paid,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     amenity.openHours!,
@@ -447,7 +487,8 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                             ),
                         ],
                       ),
-                      if (amenity.description != null && amenity.description!.isNotEmpty) ...[
+                      if (amenity.description != null &&
+                          amenity.description!.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Text(
                           amenity.description!,
@@ -465,16 +506,31 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          icon: const Icon(Icons.calendar_month_outlined, size: 16),
-                          label: const Text('Đặt lịch sử dụng', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          icon: const Icon(
+                            Icons.calendar_month_outlined,
+                            size: 16,
+                          ),
+                          label: const Text(
+                            'Đặt lịch sử dụng',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => AmenityBookingScreen(amenity: amenity),
+                                builder: (_) =>
+                                    AmenityBookingScreen(amenity: amenity),
                               ),
                             );
                           },
@@ -503,9 +559,9 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         Text(
           'Biểu Phí Quản Lý & Vận Hành',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primary,
-              ),
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primary,
+          ),
         ),
         const SizedBox(height: 8),
         Card(
@@ -556,9 +612,9 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         Text(
           'Câu Hỏi Thường Gặp',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primary,
-              ),
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primary,
+          ),
         ),
         const SizedBox(height: 8),
         _buildFaqItem(
@@ -594,7 +650,10 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
             children: [
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 2),
               Text(

@@ -25,104 +25,143 @@ class LinkRequestManagementScreen extends ConsumerWidget {
           ),
         ),
 
-      body: AppStateView<List<Map<String, dynamic>>>(
-        asyncValue: requestsState,
-        emptyMessage: 'Không có yêu cầu nào đang chờ duyệt',
-        emptyIcon: Icons.check_circle_outline,
-        onRetry: () => ref.invalidate(linkRequestManagementProvider),
-        dataBuilder: (requests) {
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: requests.length,
-            itemBuilder: (context, index) {
-              final req = requests[index];
-              final user = req['users'];
-              final apartment = req['apartments'];
-              final roleLabel = req['requested_relation_role'] == 'owner' ? 'Chủ hộ' : 'Khách thuê';
+        body: AppStateView<List<Map<String, dynamic>>>(
+          asyncValue: requestsState,
+          emptyMessage: 'Không có yêu cầu nào đang chờ duyệt',
+          emptyIcon: Icons.check_circle_outline,
+          onRetry: () => ref.invalidate(linkRequestManagementProvider),
+          dataBuilder: (requests) {
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: requests.length,
+              itemBuilder: (context, index) {
+                final req = requests[index];
+                final user = req['users'];
+                final apartment = req['apartments'];
+                final roleLabel = req['requested_relation_role'] == 'owner'
+                    ? 'Chủ hộ'
+                    : 'Khách thuê';
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.shade200),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              user['full_name'] ?? 'Cư dân',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              roleLabel,
-                              style: const TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.apartment_outlined, size: 16, color: AppTheme.textSecondary),
-                          const SizedBox(width: 8),
-                          Text('Căn hộ: ${apartment['code']}', style: const TextStyle(color: AppTheme.textSecondary)),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Wrap(
-                        alignment: WrapAlignment.end,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 8,
-                        children: [
-                          TextButton.icon(
-                            icon: const Icon(Icons.close, color: AppTheme.error),
-                            label: const Text('Từ chối', style: TextStyle(color: AppTheme.error)),
-                            onPressed: () => _handleReject(context, ref, req['id']),
-                          ),
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.check),
-                            label: const Text('Phê duyệt'),
-                            onPressed: () => _handleApprove(context, ref, req['id']),
-                          ),
-                        ],
-                      )
-                    ],
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.grey.shade200),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                user['full_name'] ?? 'Cư dân',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                roleLabel,
+                                style: const TextStyle(
+                                  color: AppTheme.primary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.apartment_outlined,
+                              size: 16,
+                              color: AppTheme.textSecondary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Căn hộ: ${apartment['code']}',
+                              style: const TextStyle(
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          children: [
+                            TextButton.icon(
+                              icon: const Icon(
+                                Icons.close,
+                                color: AppTheme.error,
+                              ),
+                              label: const Text(
+                                'Từ chối',
+                                style: TextStyle(color: AppTheme.error),
+                              ),
+                              onPressed: () =>
+                                  _handleReject(context, ref, req['id']),
+                            ),
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.check),
+                              label: const Text('Phê duyệt'),
+                              onPressed: () =>
+                                  _handleApprove(context, ref, req['id']),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
-    ));
+    );
   }
-
 
   void _handleApprove(BuildContext context, WidgetRef ref, String id) async {
     try {
       await ref.read(linkRequestManagementProvider.notifier).approveRequest(id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã duyệt yêu cầu'), backgroundColor: AppTheme.success));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã duyệt yêu cầu'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
       }
     }
   }
@@ -131,11 +170,18 @@ class LinkRequestManagementScreen extends ConsumerWidget {
     try {
       await ref.read(linkRequestManagementProvider.notifier).rejectRequest(id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã từ chối yêu cầu')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Đã từ chối yêu cầu')));
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
       }
     }
   }

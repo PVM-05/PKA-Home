@@ -29,17 +29,25 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
     final validationError = validateApartmentCode(code);
     if (validationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validationError), backgroundColor: AppTheme.warning),
+        SnackBar(
+          content: Text(validationError),
+          backgroundColor: AppTheme.warning,
+        ),
       );
       return;
     }
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(residentLinkProvider.notifier).submitRequest(code, _relationRole);
+      await ref
+          .read(residentLinkProvider.notifier)
+          .submitRequest(code, _relationRole);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã gửi yêu cầu liên kết thành công!'), backgroundColor: AppTheme.success),
+          const SnackBar(
+            content: Text('Đã gửi yêu cầu liên kết thành công!'),
+            backgroundColor: AppTheme.success,
+          ),
         );
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop(true);
@@ -48,7 +56,10 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
         );
       }
     } finally {
@@ -68,7 +79,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
             IconButton(
               icon: const Icon(Icons.logout_outlined),
               onPressed: () => ref.read(authProvider.notifier).logout(),
-            )
+            ),
         ],
       ),
       body: SafeArea(
@@ -111,7 +122,9 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         const SizedBox(height: 24),
         Text(
           'Đang chờ phê duyệt',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppTheme.primary),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(color: AppTheme.primary),
         ),
         const SizedBox(height: 16),
         Text(
@@ -126,7 +139,9 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
             foregroundColor: AppTheme.error,
             side: const BorderSide(color: AppTheme.error),
           ),
-          onPressed: _isSubmitting ? null : () => _confirmCancelLinkRequest(linkState.requestId),
+          onPressed: _isSubmitting
+              ? null
+              : () => _confirmCancelLinkRequest(linkState.requestId),
           icon: const Icon(Icons.cancel_outlined),
           label: const Text('Hủy yêu cầu này'),
         ),
@@ -164,7 +179,9 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
               Navigator.pop(dialogCtx);
               setState(() => _isSubmitting = true);
               try {
-                await ref.read(residentLinkProvider.notifier).cancelPendingRequest(requestId);
+                await ref
+                    .read(residentLinkProvider.notifier)
+                    .cancelPendingRequest(requestId);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -200,7 +217,9 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         const SizedBox(height: 24),
         Text(
           'Yêu cầu bị từ chối',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppTheme.error),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(color: AppTheme.error),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -209,7 +228,8 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         ),
         const SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () => ref.read(residentLinkProvider.notifier).resetToForm(),
+          onPressed: () =>
+              ref.read(residentLinkProvider.notifier).resetToForm(),
           child: const Text('Gửi lại yêu cầu'),
         ),
       ],
@@ -223,7 +243,11 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.apartment_outlined, size: 60, color: AppTheme.primary),
+            const Icon(
+              Icons.apartment_outlined,
+              size: 60,
+              color: AppTheme.primary,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Liên kết căn hộ của bạn',
@@ -231,35 +255,290 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            ref.watch(availableApartmentsProvider).when(
-              data: (apartments) {
-                if (apartments.isEmpty) {
-                  return Column(
+            ref
+                .watch(availableApartmentsProvider)
+                .when(
+                  data: (apartments) {
+                    if (apartments.isEmpty) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Card(
+                            elevation: 0,
+                            color: AppTheme.warningBackground,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppTheme.radiusMd,
+                              side: const BorderSide(
+                                color: AppTheme.warningBorder,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(AppTheme.spacingMd),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline,
+                                    color: AppTheme.warningText,
+                                    size: 28,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Expanded(
+                                    child: Text(
+                                      'Chưa tải được danh mục căn hộ tự động. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
+                                      style: TextStyle(
+                                        color: AppTheme.warningText,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.refresh,
+                                      color: AppTheme.warningText,
+                                    ),
+                                    tooltip: 'Tải lại danh mục',
+                                    onPressed: () => ref.invalidate(
+                                      availableApartmentsProvider,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _codeController,
+                            decoration: const InputDecoration(
+                              labelText: 'Mã căn hộ (VD: A0110)',
+                              prefixIcon: Icon(Icons.tag),
+                            ),
+                            textCapitalization: TextCapitalization.characters,
+                            textInputAction: TextInputAction.done,
+                            validator: validateApartmentCode,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                          ),
+                        ],
+                      );
+                    }
+
+                    if (_manualInputMode) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _codeController,
+                            decoration: const InputDecoration(
+                              labelText: 'Mã căn hộ (VD: A0110)',
+                              prefixIcon: Icon(Icons.tag),
+                            ),
+                            textCapitalization: TextCapitalization.characters,
+                            textInputAction: TextInputAction.done,
+                            validator: validateApartmentCode,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _manualInputMode = false;
+                                  _codeController.clear();
+                                });
+                              },
+                              icon: const Icon(Icons.list_alt, size: 16),
+                              label: const Text('Chọn theo Tòa - Tầng - Phòng'),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    final buildings =
+                        apartments.map((e) => e.building).toSet().toList()
+                          ..sort();
+                    final floors =
+                        _selectedBuilding == null
+                              ? <String>[]
+                              : apartments
+                                    .where(
+                                      (e) => e.building == _selectedBuilding,
+                                    )
+                                    .map((e) => e.floor)
+                                    .toSet()
+                                    .toList()
+                          ..sort();
+                    final rooms =
+                        _selectedFloor == null
+                              ? <ParsedApartment>[]
+                              : apartments
+                                    .where(
+                                      (e) =>
+                                          e.building == _selectedBuilding &&
+                                          e.floor == _selectedFloor,
+                                    )
+                                    .toList()
+                          ..sort((a, b) => a.room.compareTo(b.room));
+
+                    return Column(
+                      children: [
+                        InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Tòa nhà',
+                            prefixIcon: Icon(Icons.domain),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: _selectedBuilding,
+                              items: buildings
+                                  .map(
+                                    (b) => DropdownMenuItem(
+                                      value: b,
+                                      child: Text(b),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (val) {
+                                setState(() {
+                                  _selectedBuilding = val;
+                                  _selectedFloor = null;
+                                  _selectedRoom = null;
+                                  _codeController.clear();
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Tầng',
+                            prefixIcon: Icon(Icons.layers_outlined),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: _selectedFloor,
+                              items: floors
+                                  .map(
+                                    (f) => DropdownMenuItem(
+                                      value: f,
+                                      child: Text(f),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: _selectedBuilding == null
+                                  ? null
+                                  : (val) {
+                                      setState(() {
+                                        _selectedFloor = val;
+                                        _selectedRoom = null;
+                                        _codeController.clear();
+                                      });
+                                    },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Phòng',
+                            prefixIcon: Icon(Icons.home_outlined),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: _selectedRoom,
+                              items: rooms
+                                  .map(
+                                    (r) => DropdownMenuItem(
+                                      value: r.code,
+                                      child: Text(r.room),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: _selectedFloor == null
+                                  ? null
+                                  : (val) {
+                                      setState(() {
+                                        _selectedRoom = val;
+                                        if (val != null)
+                                          _codeController.text = val;
+                                      });
+                                    },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _manualInputMode = true;
+                              });
+                            },
+                            icon: const Icon(Icons.edit_outlined, size: 16),
+                            label: const Text('Nhập mã trực tiếp'),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (err, st) => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Card(
                         elevation: 0,
-                        color: AppTheme.warningBackground,
+                        color: AppTheme.error.withValues(alpha: 0.1),
                         shape: RoundedRectangleBorder(
                           borderRadius: AppTheme.radiusMd,
-                          side: const BorderSide(color: AppTheme.warningBorder),
+                          side: const BorderSide(color: AppTheme.error),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(AppTheme.spacingMd),
                           child: Row(
                             children: [
-                              const Icon(Icons.info_outline, color: AppTheme.warningText, size: 28),
+                              const Icon(
+                                Icons.error_outline,
+                                color: AppTheme.error,
+                                size: 28,
+                              ),
                               const SizedBox(width: 12),
                               const Expanded(
                                 child: Text(
-                                  'Chưa tải được danh mục căn hộ tự động. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
-                                  style: TextStyle(color: AppTheme.warningText, fontSize: 13),
+                                  'Không thể tải danh mục căn hộ. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ ở ô bên dưới.',
+                                  style: TextStyle(
+                                    color: AppTheme.error,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.refresh, color: AppTheme.warningText),
+                                icon: const Icon(
+                                  Icons.refresh,
+                                  color: AppTheme.error,
+                                ),
                                 tooltip: 'Tải lại danh mục',
-                                onPressed: () => ref.invalidate(availableApartmentsProvider),
+                                onPressed: () =>
+                                    ref.invalidate(availableApartmentsProvider),
                               ),
                             ],
                           ),
@@ -278,180 +557,8 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                       ),
                     ],
-                  );
-                }
-
-                if (_manualInputMode) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextFormField(
-                        controller: _codeController,
-                        decoration: const InputDecoration(
-                          labelText: 'Mã căn hộ (VD: A0110)',
-                          prefixIcon: Icon(Icons.tag),
-                        ),
-                        textCapitalization: TextCapitalization.characters,
-                        textInputAction: TextInputAction.done,
-                        validator: validateApartmentCode,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _manualInputMode = false;
-                              _codeController.clear();
-                            });
-                          },
-                          icon: const Icon(Icons.list_alt, size: 16),
-                          label: const Text('Chọn theo Tòa - Tầng - Phòng'),
-                        ),
-                      ),
-                    ],
-                  );
-                }
-
-                final buildings = apartments.map((e) => e.building).toSet().toList()..sort();
-                final floors = _selectedBuilding == null 
-                  ? <String>[] 
-                  : apartments.where((e) => e.building == _selectedBuilding).map((e) => e.floor).toSet().toList()..sort();
-                final rooms = _selectedFloor == null 
-                  ? <ParsedApartment>[] 
-                  : apartments.where((e) => e.building == _selectedBuilding && e.floor == _selectedFloor).toList()..sort((a,b) => a.room.compareTo(b.room));
-
-                return Column(
-                  children: [
-                    InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Tòa nhà',
-                        prefixIcon: Icon(Icons.domain),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedBuilding,
-                          items: buildings.map((b) => DropdownMenuItem(value: b, child: Text(b))).toList(),
-                          onChanged: (val) {
-                            setState(() {
-                              _selectedBuilding = val;
-                              _selectedFloor = null;
-                              _selectedRoom = null;
-                              _codeController.clear();
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Tầng',
-                        prefixIcon: Icon(Icons.layers_outlined),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedFloor,
-                          items: floors.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
-                          onChanged: _selectedBuilding == null ? null : (val) {
-                            setState(() {
-                              _selectedFloor = val;
-                              _selectedRoom = null;
-                              _codeController.clear();
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Phòng',
-                        prefixIcon: Icon(Icons.home_outlined),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedRoom,
-                          items: rooms.map((r) => DropdownMenuItem(value: r.code, child: Text(r.room))).toList(),
-                          onChanged: _selectedFloor == null ? null : (val) {
-                            setState(() {
-                              _selectedRoom = val;
-                              if (val != null) _codeController.text = val;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _manualInputMode = true;
-                          });
-                        },
-                        icon: const Icon(Icons.edit_outlined, size: 16),
-                        label: const Text('Nhập mã trực tiếp'),
-                      ),
-                    ),
-                  ],
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, st) => Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Card(
-                    elevation: 0,
-                    color: AppTheme.error.withValues(alpha: 0.1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: AppTheme.radiusMd,
-                      side: const BorderSide(color: AppTheme.error),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppTheme.spacingMd),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: AppTheme.error, size: 28),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Text(
-                              'Không thể tải danh mục căn hộ. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ ở ô bên dưới.',
-                              style: TextStyle(color: AppTheme.error, fontSize: 13),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh, color: AppTheme.error),
-                            tooltip: 'Tải lại danh mục',
-                            onPressed: () => ref.invalidate(availableApartmentsProvider),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _codeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Mã căn hộ (VD: A0110)',
-                      prefixIcon: Icon(Icons.tag),
-                    ),
-                    textCapitalization: TextCapitalization.characters,
-                    textInputAction: TextInputAction.done,
-                    validator: validateApartmentCode,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ],
-              ),
-            ),
+                ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
               initialValue: _relationRole,
@@ -474,7 +581,10 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Text('Gửi yêu cầu'),
             ),
@@ -484,7 +594,13 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                 Expanded(child: Divider()),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('HOẶC', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  child: Text(
+                    'HOẶC',
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
                 Expanded(child: Divider()),
               ],

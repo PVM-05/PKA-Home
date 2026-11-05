@@ -19,7 +19,11 @@ import '../../../core/widgets/app_card.dart';
 class ResidentProfileScreen extends ConsumerWidget {
   const ResidentProfileScreen({super.key});
 
-  void _showEditProfileDialog(BuildContext context, WidgetRef ref, UserModel user) {
+  void _showEditProfileDialog(
+    BuildContext context,
+    WidgetRef ref,
+    UserModel user,
+  ) {
     final nameController = TextEditingController(text: user.fullName);
     final phoneController = TextEditingController(text: user.phone ?? '');
     final formKey = GlobalKey<FormState>();
@@ -40,8 +44,9 @@ class ResidentProfileScreen extends ConsumerWidget {
                   labelText: 'Họ và tên *',
                   prefixIcon: Icon(Icons.person_outline),
                 ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ tên' : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Vui lòng nhập họ tên'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -66,7 +71,9 @@ class ResidentProfileScreen extends ConsumerWidget {
               if (formKey.currentState?.validate() ?? false) {
                 Navigator.pop(ctx);
                 try {
-                  final updatedUser = await ref.read(userRepositoryProvider).updateProfile(
+                  final updatedUser = await ref
+                      .read(userRepositoryProvider)
+                      .updateProfile(
                         userId: user.id,
                         fullName: nameController.text.trim(),
                         phone: phoneController.text.trim(),
@@ -74,13 +81,18 @@ class ResidentProfileScreen extends ConsumerWidget {
                   ref.read(authProvider.notifier).updateUser(updatedUser);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Cập nhật thông tin thành công!')),
+                      const SnackBar(
+                        content: Text('Cập nhật thông tin thành công!'),
+                      ),
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                      SnackBar(
+                        content: Text(formatErrorMessage(e)),
+                        backgroundColor: AppTheme.error,
+                      ),
                     );
                   }
                 }
@@ -112,27 +124,33 @@ class ResidentProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 const SizedBox(height: 16),
-                AppAvatar(
-                  name: user.fullName,
-                  size: 92,
-                  fontSize: 34,
-                ),
+                AppAvatar(name: user.fullName, size: 92, fontSize: 34),
                 const SizedBox(height: 14),
                 Text(
                   user.fullName,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.phone_outlined, size: 16, color: AppTheme.textSecondary),
+                    const Icon(
+                      Icons.phone_outlined,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       user.phone != null && user.phone!.isNotEmpty
                           ? user.phone!
                           : 'Chưa cập nhật SĐT',
-                      style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -142,8 +160,13 @@ class ResidentProfileScreen extends ConsumerWidget {
                   icon: const Icon(Icons.edit_outlined, size: 16),
                   label: const Text('Chỉnh sửa thông tin'),
                   style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -154,11 +177,16 @@ class ResidentProfileScreen extends ConsumerWidget {
                   children: [
                     const Text(
                       'Căn hộ của bạn',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     TextButton.icon(
                       onPressed: () async {
-                        final result = await context.push<bool>(AppRoutes.residentLinkRequest);
+                        final result = await context.push<bool>(
+                          AppRoutes.residentLinkRequest,
+                        );
                         if (result == true) {
                           ref.invalidate(residentApartmentsProvider);
                         }
@@ -177,7 +205,11 @@ class ResidentProfileScreen extends ConsumerWidget {
                         padding: const EdgeInsets.all(24.0),
                         child: Column(
                           children: [
-                            const Icon(Icons.apartment_outlined, size: 48, color: AppTheme.textSecondary),
+                            const Icon(
+                              Icons.apartment_outlined,
+                              size: 48,
+                              color: AppTheme.textSecondary,
+                            ),
                             const SizedBox(height: 16),
                             const Text(
                               'Bạn chưa được liên kết với căn hộ nào.',
@@ -187,7 +219,9 @@ class ResidentProfileScreen extends ConsumerWidget {
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () async {
-                                final result = await context.push<bool>(AppRoutes.residentLinkRequest);
+                                final result = await context.push<bool>(
+                                  AppRoutes.residentLinkRequest,
+                                );
                                 if (result == true) {
                                   ref.invalidate(residentApartmentsProvider);
                                 }
@@ -205,8 +239,12 @@ class ResidentProfileScreen extends ConsumerWidget {
                       }).toList(),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text(formatErrorMessage(e), style: const TextStyle(color: AppTheme.error)),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Text(
+                    formatErrorMessage(e),
+                    style: const TextStyle(color: AppTheme.error),
+                  ),
                 ),
 
                 const SizedBox(height: 20),
@@ -229,10 +267,18 @@ class ResidentProfileScreen extends ConsumerWidget {
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.two_wheeler_outlined, color: AppTheme.primary),
+                      child: const Icon(
+                        Icons.two_wheeler_outlined,
+                        color: AppTheme.primary,
+                      ),
                     ),
-                    title: const Text('Phương tiện đã đăng ký', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: const Text('Quản lý danh sách xe máy, ô tô của căn hộ'),
+                    title: const Text(
+                      'Phương tiện đã đăng ký',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: const Text(
+                      'Quản lý danh sách xe máy, ô tô của căn hộ',
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       context.push(AppRoutes.residentVehicles);
@@ -260,10 +306,18 @@ class ResidentProfileScreen extends ConsumerWidget {
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.receipt_long_outlined, color: AppTheme.primary),
+                      child: const Icon(
+                        Icons.receipt_long_outlined,
+                        color: AppTheme.primary,
+                      ),
                     ),
-                    title: const Text('Lịch sử thanh toán', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: const Text('Xem tất cả giao dịch hóa đơn và dịch vụ tiện ích'),
+                    title: const Text(
+                      'Lịch sử thanh toán',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: const Text(
+                      'Xem tất cả giao dịch hóa đơn và dịch vụ tiện ích',
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       context.push(AppRoutes.residentPaymentHistory);
@@ -287,7 +341,10 @@ class ResidentProfileScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.lock_outline, color: AppTheme.primary),
+                        leading: const Icon(
+                          Icons.lock_outline,
+                          color: AppTheme.primary,
+                        ),
                         title: const Text('Đổi mật khẩu'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
@@ -296,10 +353,15 @@ class ResidentProfileScreen extends ConsumerWidget {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(Icons.format_size_outlined, color: AppTheme.primary),
+                        leading: const Icon(
+                          Icons.format_size_outlined,
+                          color: AppTheme.primary,
+                        ),
                         title: const Text('Cỡ chữ hiển thị'),
                         subtitle: Text(
-                          FontSizeOption.fromScale(ref.watch(fontSizeScaleProvider)).label,
+                          FontSizeOption.fromScale(
+                            ref.watch(fontSizeScaleProvider),
+                          ).label,
                           style: const TextStyle(fontSize: 12),
                         ),
                         trailing: const Icon(Icons.chevron_right),
@@ -311,8 +373,8 @@ class ResidentProfileScreen extends ConsumerWidget {
                           ref.watch(themeModeProvider) == ThemeMode.dark
                               ? Icons.dark_mode
                               : ref.watch(themeModeProvider) == ThemeMode.light
-                                  ? Icons.light_mode
-                                  : Icons.brightness_auto,
+                              ? Icons.light_mode
+                              : Icons.brightness_auto,
                           color: AppTheme.primary,
                         ),
                         title: const Text('Giao diện'),
@@ -325,18 +387,28 @@ class ResidentProfileScreen extends ConsumerWidget {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(Icons.logout_outlined, color: AppTheme.error),
+                        leading: const Icon(
+                          Icons.logout_outlined,
+                          color: AppTheme.error,
+                        ),
                         title: const Text(
                           'Đăng xuất',
-                          style: TextStyle(color: AppTheme.error, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: AppTheme.error,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         onTap: () {
                           showDialog(
                             context: context,
                             builder: (ctx) => AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                               title: const Text('Xác nhận đăng xuất'),
-                              content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?'),
+                              content: const Text(
+                                'Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng không?',
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx),
@@ -366,7 +438,12 @@ class ResidentProfileScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(formatErrorMessage(e), style: const TextStyle(color: AppTheme.error))),
+        error: (e, _) => Center(
+          child: Text(
+            formatErrorMessage(e),
+            style: const TextStyle(color: AppTheme.error),
+          ),
+        ),
       ),
     );
   }
@@ -394,12 +471,19 @@ void _showThemeModeSheet(BuildContext context, WidgetRef ref) {
         builder: (context, ref, _) {
           final currentMode = ref.watch(themeModeProvider);
           final entries = [
-            (ThemeMode.system, 'Theo hệ thống', Icons.brightness_auto,
-                'Tự động theo cài đặt thiết bị'),
-            (ThemeMode.light, 'Sáng', Icons.light_mode,
-                'Luôn dùng giao diện sáng'),
-            (ThemeMode.dark, 'Tối', Icons.dark_mode,
-                'Luôn dùng giao diện tối'),
+            (
+              ThemeMode.system,
+              'Theo hệ thống',
+              Icons.brightness_auto,
+              'Tự động theo cài đặt thiết bị',
+            ),
+            (
+              ThemeMode.light,
+              'Sáng',
+              Icons.light_mode,
+              'Luôn dùng giao diện sáng',
+            ),
+            (ThemeMode.dark, 'Tối', Icons.dark_mode, 'Luôn dùng giao diện tối'),
           ];
 
           return SafeArea(
@@ -425,29 +509,31 @@ void _showThemeModeSheet(BuildContext context, WidgetRef ref) {
                   (entry) =>
                       // ignore: deprecated_member_use
                       RadioListTile<ThemeMode>(
-                    value: entry.$1,
-                    // ignore: deprecated_member_use
-                    groupValue: currentMode,
-                    // ignore: deprecated_member_use
-                    onChanged: (mode) {
-                      if (mode != null) {
-                        ref
-                            .read(themeModeProvider.notifier)
-                            .setThemeMode(mode);
-                        Navigator.pop(ctx);
-                      }
-                    },
-                    title: Row(
-                      children: [
-                        Icon(entry.$3, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(entry.$2)),
-                      ],
-                    ),
-                    subtitle: Text(entry.$4,
-                        style: const TextStyle(fontSize: 12)),
-                    activeColor: AppTheme.primary,
-                  ),
+                        value: entry.$1,
+                        // ignore: deprecated_member_use
+                        groupValue: currentMode,
+                        // ignore: deprecated_member_use
+                        onChanged: (mode) {
+                          if (mode != null) {
+                            ref
+                                .read(themeModeProvider.notifier)
+                                .setThemeMode(mode);
+                            Navigator.pop(ctx);
+                          }
+                        },
+                        title: Row(
+                          children: [
+                            Icon(entry.$3, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(entry.$2)),
+                          ],
+                        ),
+                        subtitle: Text(
+                          entry.$4,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        activeColor: AppTheme.primary,
+                      ),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -467,7 +553,8 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final apartment = aptData['apartments'];
-    final apartmentId = aptData['apartment_id'] as String? ?? apartment?['id'] as String? ?? '';
+    final apartmentId =
+        aptData['apartment_id'] as String? ?? apartment?['id'] as String? ?? '';
     final role = aptData['relation_role'] == 'owner' ? 'Chủ hộ' : 'Người thuê';
     final coResidentsAsync = ref.watch(coResidentsProvider(apartmentId));
 
@@ -485,7 +572,11 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                   color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.apartment_outlined, color: AppTheme.primary, size: 24),
+                child: const Icon(
+                  Icons.apartment_outlined,
+                  color: AppTheme.primary,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -494,18 +585,27 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                   children: [
                     Text(
                       'Căn hộ ${apartment?['code'] ?? 'N/A'}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Diện tích: ${apartment?['area'] ?? 'N/A'} m²',
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -524,7 +624,11 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
           const Divider(height: 24),
           Row(
             children: const [
-              Icon(Icons.people_outline, size: 16, color: AppTheme.textSecondary),
+              Icon(
+                Icons.people_outline,
+                size: 16,
+                color: AppTheme.textSecondary,
+              ),
               SizedBox(width: 6),
               Text(
                 'Thành viên cùng căn hộ:',
@@ -544,7 +648,10 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                   padding: EdgeInsets.symmetric(vertical: 4),
                   child: Text(
                     'Chưa có thành viên khác.',
-                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 );
               }
@@ -554,31 +661,47 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                   final userData = m['users'] as Map<String, dynamic>?;
                   final memberName = userData?['full_name'] ?? 'Cư dân';
                   final memberPhone = userData?['phone'] ?? '';
-                  final memberRole = m['relation_role'] == 'owner' ? 'Chủ hộ' : 'Người thuê';
+                  final memberRole = m['relation_role'] == 'owner'
+                      ? 'Chủ hộ'
+                      : 'Người thuê';
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Row(
                       children: [
-                        const Icon(Icons.person_outline, size: 16, color: AppTheme.textSecondary),
+                        const Icon(
+                          Icons.person_outline,
+                          size: 16,
+                          color: AppTheme.textSecondary,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             memberName,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                         if (memberPhone.isNotEmpty) ...[
                           Text(
                             memberPhone,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                           const SizedBox(width: 8),
                         ],
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).brightness == Brightness.dark
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
                                 ? Colors.white12
                                 : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
@@ -587,7 +710,9 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                             memberRole,
                             style: TextStyle(
                               fontSize: 11,
-                              color: Theme.of(context).brightness == Brightness.dark
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
                                   ? Colors.grey.shade300
                                   : Colors.grey.shade700,
                             ),

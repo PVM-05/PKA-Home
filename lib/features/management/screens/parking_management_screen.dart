@@ -12,10 +12,12 @@ class ParkingManagementScreen extends ConsumerStatefulWidget {
   const ParkingManagementScreen({super.key});
 
   @override
-  ConsumerState<ParkingManagementScreen> createState() => _ParkingManagementScreenState();
+  ConsumerState<ParkingManagementScreen> createState() =>
+      _ParkingManagementScreenState();
 }
 
-class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScreen>
+class _ParkingManagementScreenState
+    extends ConsumerState<ParkingManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
@@ -64,7 +66,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Loại phương tiện:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                const Text(
+                  'Loại phương tiện:',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -80,7 +85,8 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                         ),
                         selected: selectedType == 'motorcycle',
                         onSelected: (val) {
-                          if (val) setDialogState(() => selectedType = 'motorcycle');
+                          if (val)
+                            setDialogState(() => selectedType = 'motorcycle');
                         },
                       ),
                     ),
@@ -136,8 +142,11 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 if (mounted) {
                   ref.invalidate(activeVisitorTicketsProvider);
                   ref.invalidate(parkingCapacityStatsProvider);
-                  if (res['success'] == true && res['ticket'] is VisitorParkingTicketModel) {
-                    _showTicketDetailModal(res['ticket'] as VisitorParkingTicketModel);
+                  if (res['success'] == true &&
+                      res['ticket'] is VisitorParkingTicketModel) {
+                    _showTicketDetailModal(
+                      res['ticket'] as VisitorParkingTicketModel,
+                    );
                   }
                 }
               },
@@ -167,7 +176,11 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
             const SizedBox(height: 8),
             Text(
               'Biển số: ${ticket.licensePlate} (${ticket.displayVehicleType})',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.primary),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primary,
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -182,7 +195,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
             const SizedBox(height: 12),
             Text(
               'Giờ vào: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
-              style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppTheme.textSecondary,
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -220,7 +236,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Biển số: ${ticket.licensePlate}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(
+              'Biển số: ${ticket.licensePlate}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 6),
             Text('Loại xe: ${ticket.displayVehicleType}'),
             Text('Thời gian đã đỗ: $hours giờ'),
@@ -228,8 +247,18 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Tổng tiền thu:', style: TextStyle(fontWeight: FontWeight.w600)),
-                Text(formattedFee, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                const Text(
+                  'Tổng tiền thu:',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  formattedFee,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
               ],
             ),
           ],
@@ -242,7 +271,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
           OutlinedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await repo.checkoutVisitorTicket(ticketId: ticket.id, paymentMethod: 'cash');
+              await repo.checkoutVisitorTicket(
+                ticketId: ticket.id,
+                paymentMethod: 'cash',
+              );
               ref.invalidate(activeVisitorTicketsProvider);
               ref.invalidate(parkingCapacityStatsProvider);
             },
@@ -251,7 +283,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await repo.checkoutVisitorTicket(ticketId: ticket.id, paymentMethod: 'vietqr');
+              await repo.checkoutVisitorTicket(
+                ticketId: ticket.id,
+                paymentMethod: 'vietqr',
+              );
               ref.invalidate(activeVisitorTicketsProvider);
               ref.invalidate(parkingCapacityStatsProvider);
             },
@@ -333,7 +368,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
           controller: _tabController,
           tabs: const [
             Tab(icon: Icon(Icons.grid_view_rounded), text: 'Sơ đồ Ô đỗ'),
-            Tab(icon: Icon(Icons.local_parking_rounded), text: 'Trạm soát vé cổng'),
+            Tab(
+              icon: Icon(Icons.local_parking_rounded),
+              text: 'Trạm soát vé cổng',
+            ),
           ],
         ),
       ),
@@ -378,7 +416,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 ],
               ),
             ),
-            loading: () => const SizedBox(height: 70, child: Center(child: CircularProgressIndicator())),
+            loading: () => const SizedBox(
+              height: 70,
+              child: Center(child: CircularProgressIndicator()),
+            ),
             error: (_, _) => const SizedBox.shrink(),
           ),
 
@@ -386,10 +427,7 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildSlotsTab(),
-                _buildGateWorkstationTab(),
-              ],
+              children: [_buildSlotsTab(), _buildGateWorkstationTab()],
             ),
           ),
         ],
@@ -418,12 +456,28 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
             children: [
               Icon(icon, size: 16, color: color),
               const SizedBox(width: 4),
-              Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
-          Text(subtext, style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(
+            subtext,
+            style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+          ),
         ],
       ),
     );
@@ -446,10 +500,14 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                   decoration: const InputDecoration(
                     hintText: 'Tìm số ô, biển số, mã căn...',
                     prefixIcon: Icon(Icons.search),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                   onChanged: (val) {
-                    ref.read(parkingFilterProvider.notifier).state = filter.copyWith(searchQuery: val);
+                    ref.read(parkingFilterProvider.notifier).state = filter
+                        .copyWith(searchQuery: val);
                   },
                 ),
               ),
@@ -467,7 +525,8 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 label: const Text('Tất cả'),
                 selected: filter.zone == null && filter.type == null,
                 onSelected: (_) {
-                  ref.read(parkingFilterProvider.notifier).state = const ParkingFilter();
+                  ref.read(parkingFilterProvider.notifier).state =
+                      const ParkingFilter();
                 },
               ),
               const SizedBox(width: 6),
@@ -475,7 +534,8 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 label: const Text('Tầng B1'),
                 selected: filter.zone == 'B1',
                 onSelected: (val) {
-                  ref.read(parkingFilterProvider.notifier).state = filter.copyWith(zone: val ? 'B1' : null);
+                  ref.read(parkingFilterProvider.notifier).state = filter
+                      .copyWith(zone: val ? 'B1' : null);
                 },
               ),
               const SizedBox(width: 6),
@@ -483,7 +543,8 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 label: const Text('Tầng B2'),
                 selected: filter.zone == 'B2',
                 onSelected: (val) {
-                  ref.read(parkingFilterProvider.notifier).state = filter.copyWith(zone: val ? 'B2' : null);
+                  ref.read(parkingFilterProvider.notifier).state = filter
+                      .copyWith(zone: val ? 'B2' : null);
                 },
               ),
               const SizedBox(width: 6),
@@ -491,7 +552,8 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 label: const Text('Ô tô'),
                 selected: filter.type == 'car',
                 onSelected: (val) {
-                  ref.read(parkingFilterProvider.notifier).state = filter.copyWith(type: val ? 'car' : null);
+                  ref.read(parkingFilterProvider.notifier).state = filter
+                      .copyWith(type: val ? 'car' : null);
                 },
               ),
               const SizedBox(width: 6),
@@ -499,7 +561,8 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 label: const Text('Xe máy'),
                 selected: filter.type == 'motorcycle',
                 onSelected: (val) {
-                  ref.read(parkingFilterProvider.notifier).state = filter.copyWith(type: val ? 'motorcycle' : null);
+                  ref.read(parkingFilterProvider.notifier).state = filter
+                      .copyWith(type: val ? 'motorcycle' : null);
                 },
               ),
             ],
@@ -513,7 +576,9 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
             error: (err, _) => Center(child: Text('Lỗi: $err')),
             data: (slots) {
               if (slots.isEmpty) {
-                return const Center(child: Text('Không có ô đỗ nào phù hợp tiêu chí tìm kiếm'));
+                return const Center(
+                  child: Text('Không có ô đỗ nào phù hợp tiêu chí tìm kiếm'),
+                );
               }
 
               return GridView.builder(
@@ -568,7 +633,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
             children: [
               Text(
                 slot.slotNumber,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
               ),
               Icon(
                 slot.isCar ? Icons.directions_car : Icons.two_wheeler,
@@ -580,7 +648,11 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
           if (slot.isOccupied) ...[
             Text(
               slot.licensePlate ?? 'Đã có xe',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: AppTheme.primary,
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -588,7 +660,10 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                 Expanded(
                   child: Text(
                     slot.apartmentCode ?? 'Căn hộ',
-                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -602,7 +677,11 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                   },
                   child: const Text(
                     'Giải phóng',
-                    style: TextStyle(fontSize: 11, color: AppTheme.error, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.error,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -613,14 +692,23 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: slot.isAvailable ? Colors.green.shade700 : Colors.orange.shade700,
+                color: slot.isAvailable
+                    ? Colors.green.shade700
+                    : Colors.orange.shade700,
               ),
             ),
             Align(
               alignment: Alignment.centerRight,
               child: InkWell(
                 onTap: () => _showAssignSlotDialog(slot),
-                child: const Text('Gán xe', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Gán xe',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -661,12 +749,17 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
             data: (tickets) {
               if (tickets.isEmpty) {
                 return const Center(
-                  child: Text('Hiện không có xe vãng lai nào đang gửi trong bãi'),
+                  child: Text(
+                    'Hiện không có xe vãng lai nào đang gửi trong bãi',
+                  ),
                 );
               }
 
               return ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 itemCount: tickets.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
@@ -682,25 +775,37 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                             Row(
                               children: [
                                 Icon(
-                                  ticket.isCar ? Icons.directions_car : Icons.two_wheeler,
+                                  ticket.isCar
+                                      ? Icons.directions_car
+                                      : Icons.two_wheeler,
                                   color: AppTheme.primary,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   ticket.licensePlate,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ],
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.orange.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 ticket.displayStatus,
-                                style: const TextStyle(fontSize: 11, color: Colors.orange, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -710,23 +815,38 @@ class _ParkingManagementScreenState extends ConsumerState<ParkingManagementScree
                           children: [
                             Text(
                               'Loại xe: ${ticket.displayVehicleType}',
-                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
                             const SizedBox(width: 16),
                             Text(
                               'Mã vé: ${ticket.ticketCode}',
-                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Vào lúc: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
-                          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                         if (ticket.note != null && ticket.note!.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          Text('Ghi chú: ${ticket.note}', style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                          Text(
+                            'Ghi chú: ${ticket.note}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                         ],
                         const Divider(height: 20),
                         Wrap(

@@ -31,13 +31,17 @@ class _EditableFeeItem {
     required double unitPrice,
     required double quantity,
     required VoidCallback onChanged,
-  })  : feeTypeController = TextEditingController(text: feeType),
-        unitPriceController = TextEditingController(
-          text: unitPrice % 1 == 0 ? unitPrice.toInt().toString() : unitPrice.toString(),
-        ),
-        quantityController = TextEditingController(
-          text: quantity % 1 == 0 ? quantity.toInt().toString() : quantity.toString(),
-        ) {
+  }) : feeTypeController = TextEditingController(text: feeType),
+       unitPriceController = TextEditingController(
+         text: unitPrice % 1 == 0
+             ? unitPrice.toInt().toString()
+             : unitPrice.toString(),
+       ),
+       quantityController = TextEditingController(
+         text: quantity % 1 == 0
+             ? quantity.toInt().toString()
+             : quantity.toString(),
+       ) {
     feeTypeController.addListener(onChanged);
     unitPriceController.addListener(onChanged);
     quantityController.addListener(onChanged);
@@ -56,7 +60,10 @@ class _EditableFeeItem {
 
 class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   final _formKey = GlobalKey<FormState>();
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+  );
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
 
   late TextEditingController _periodController;
@@ -94,24 +101,28 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
       final feeType = InvoiceFeeHelper.getFeeName(raw['fee_type'] as String?);
       final unitPrice = (raw['unit_price'] as num?)?.toDouble() ?? 0.0;
       final quantity = (raw['quantity'] as num?)?.toDouble() ?? 1.0;
-      _items.add(_EditableFeeItem(
-        feeType: feeType,
-        unitPrice: unitPrice,
-        quantity: quantity,
-        onChanged: _onItemChanged,
-      ));
+      _items.add(
+        _EditableFeeItem(
+          feeType: feeType,
+          unitPrice: unitPrice,
+          quantity: quantity,
+          onChanged: _onItemChanged,
+        ),
+      );
     }
     _isItemsInitialized = true;
   }
 
   void _addNewItem() {
     setState(() {
-      _items.add(_EditableFeeItem(
-        feeType: 'Phí khác',
-        unitPrice: 0.0,
-        quantity: 1.0,
-        onChanged: _onItemChanged,
-      ));
+      _items.add(
+        _EditableFeeItem(
+          feeType: 'Phí khác',
+          unitPrice: 0.0,
+          quantity: 1.0,
+          onChanged: _onItemChanged,
+        ),
+      );
     });
   }
 
@@ -187,7 +198,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(managementRepositoryProvider).updateInvoice(
+      await ref
+          .read(managementRepositoryProvider)
+          .updateInvoice(
             invoiceId: widget.invoice.id,
             period: _periodController.text.trim(),
             dueDate: _dueDate,
@@ -209,31 +222,29 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
       }
     } on PostgrestException catch (pe) {
       if (mounted) {
-        final isDuplicate = pe.code == '23505' ||
+        final isDuplicate =
+            pe.code == '23505' ||
             pe.message.contains('uq_invoice_apartment_period') ||
-            (pe.details?.toString().contains('uq_invoice_apartment_period') ?? false);
+            (pe.details?.toString().contains('uq_invoice_apartment_period') ??
+                false);
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(pe);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorText),
-            backgroundColor: AppTheme.error,
-          ),
+          SnackBar(content: Text(errorText), backgroundColor: AppTheme.error),
         );
       }
     } catch (e) {
       if (mounted) {
         final errorStr = e.toString();
-        final isDuplicate = errorStr.contains('23505') || errorStr.contains('uq_invoice_apartment_period');
+        final isDuplicate =
+            errorStr.contains('23505') ||
+            errorStr.contains('uq_invoice_apartment_period');
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(e);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorText),
-            backgroundColor: AppTheme.error,
-          ),
+          SnackBar(content: Text(errorText), backgroundColor: AppTheme.error),
         );
       }
     } finally {
@@ -248,68 +259,71 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
     return RoleGuard(
       permission: AppPermissions.invoiceManagement,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Sửa Hóa đơn ${widget.invoice.period}'),
-        ),
+        appBar: AppBar(title: Text('Sửa Hóa đơn ${widget.invoice.period}')),
 
-      body: SafeArea(
-        child: detailAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(
-            child: Text(
-              'Lỗi tải chi tiết: ${formatErrorMessage(err)}',
-              style: const TextStyle(color: AppTheme.error),
-            ),
-          ),
-          data: (rawItems) {
-            _initializeItems(rawItems);
-
-            return Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildGeneralInfoCard(),
-                    const SizedBox(height: 16),
-                    _buildFeeItemsCard(),
-                    const SizedBox(height: 16),
-                    _buildTotalCard(),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: AppTheme.primary,
-                        shape: RoundedRectangleBorder(borderRadius: AppTheme.radiusMd),
-                      ),
-                      onPressed: _isSubmitting ? null : _submit,
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Text(
-                              'LƯU THAY ĐỔI',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+        body: SafeArea(
+          child: detailAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(
+              child: Text(
+                'Lỗi tải chi tiết: ${formatErrorMessage(err)}',
+                style: const TextStyle(color: AppTheme.error),
               ),
-            );
-          },
+            ),
+            data: (rawItems) {
+              _initializeItems(rawItems);
+
+              return Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildGeneralInfoCard(),
+                      const SizedBox(height: 16),
+                      _buildFeeItemsCard(),
+                      const SizedBox(height: 16),
+                      _buildTotalCard(),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: AppTheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppTheme.radiusMd,
+                          ),
+                        ),
+                        onPressed: _isSubmitting ? null : _submit,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'LƯU THAY ĐỔI',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
-    ));
+    );
   }
-
 
   Widget _buildGeneralInfoCard() {
     return Card(
@@ -320,7 +334,11 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
           children: [
             const Text(
               'Thông tin chung',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primary,
+              ),
             ),
             const SizedBox(height: 12),
             Container(
@@ -332,7 +350,11 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.apartment_rounded, color: AppTheme.primary, size: 20),
+                  const Icon(
+                    Icons.apartment_rounded,
+                    color: AppTheme.primary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Căn hộ: ${widget.invoice.apartment?.code ?? 'N/A'}',
@@ -342,7 +364,10 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                     const Spacer(),
                     Text(
                       '${widget.invoice.apartment!.area} m²',
-                      style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ],
@@ -386,8 +411,14 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
               ),
               initialValue: _status,
               items: const [
-                DropdownMenuItem(value: 'unpaid', child: Text('Chưa thanh toán')),
-                DropdownMenuItem(value: 'pending_confirmation', child: Text('Chờ xác nhận')),
+                DropdownMenuItem(
+                  value: 'unpaid',
+                  child: Text('Chưa thanh toán'),
+                ),
+                DropdownMenuItem(
+                  value: 'pending_confirmation',
+                  child: Text('Chờ xác nhận'),
+                ),
                 DropdownMenuItem(value: 'paid', child: Text('Đã thanh toán')),
               ],
               onChanged: (val) {
@@ -412,13 +443,19 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
               children: [
                 const Text(
                   'Chi tiết các khoản phí',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
                 ),
                 TextButton.icon(
                   onPressed: _addNewItem,
                   icon: const Icon(Icons.add_circle_outline, size: 18),
                   label: const Text('Thêm phí'),
-                  style: TextButton.styleFrom(foregroundColor: AppTheme.primary),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.primary,
+                  ),
                 ),
               ],
             ),
@@ -444,13 +481,23 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                             decoration: const InputDecoration(
                               labelText: 'Tên loại phí',
                               isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
                             ),
-                            validator: (val) => (val == null || val.trim().isEmpty) ? 'Nhập tên loại phí' : null,
+                            validator: (val) =>
+                                (val == null || val.trim().isEmpty)
+                                ? 'Nhập tên loại phí'
+                                : null,
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: AppTheme.error,
+                            size: 20,
+                          ),
                           tooltip: 'Xóa khoản phí',
                           onPressed: () => _removeItem(idx),
                         ),
@@ -467,10 +514,15 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                             decoration: const InputDecoration(
                               labelText: 'Đơn giá (đ)',
                               isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
                             ),
-                            validator: (val) => validatePositiveNumber(val, 'Đơn giá', true),
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            validator: (val) =>
+                                validatePositiveNumber(val, 'Đơn giá', true),
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -478,14 +530,24 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           flex: 2,
                           child: TextFormField(
                             controller: item.quantityController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             decoration: const InputDecoration(
                               labelText: 'Số lượng',
                               isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
                             ),
-                            validator: (val) => validateNonNegativeNumber(val, 'Số lượng', true),
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            validator: (val) => validateNonNegativeNumber(
+                              val,
+                              'Số lượng',
+                              true,
+                            ),
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -494,10 +556,20 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text('Thành tiền', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                              const Text(
+                                'Thành tiền',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
                               Text(
                                 _currencyFormat.format(item.subtotal),
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimary),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: AppTheme.textPrimary,
+                                ),
                               ),
                             ],
                           ),
@@ -527,14 +599,22 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
         children: [
           const Text(
             'TỔNG CỘNG MỚI:',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: AppTheme.primary,
+            ),
           ),
           Flexible(
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 _currencyFormat.format(_totalAmount),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.primary),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: AppTheme.primary,
+                ),
               ),
             ),
           ),

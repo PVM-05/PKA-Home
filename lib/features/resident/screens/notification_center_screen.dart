@@ -14,10 +14,12 @@ class NotificationCenterScreen extends ConsumerStatefulWidget {
   const NotificationCenterScreen({super.key});
 
   @override
-  ConsumerState<NotificationCenterScreen> createState() => _NotificationCenterScreenState();
+  ConsumerState<NotificationCenterScreen> createState() =>
+      _NotificationCenterScreenState();
 }
 
-class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScreen> {
+class _NotificationCenterScreenState
+    extends ConsumerState<NotificationCenterScreen> {
   @override
   void initState() {
     super.initState();
@@ -44,11 +46,15 @@ class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScr
             onPressed: user == null
                 ? null
                 : () async {
-                    await ref.read(notificationRepositoryProvider).markAllAsRead(user.id);
+                    await ref
+                        .read(notificationRepositoryProvider)
+                        .markAllAsRead(user.id);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Đã đánh dấu tất cả thông báo là đã đọc'),
+                          content: Text(
+                            'Đã đánh dấu tất cả thông báo là đã đọc',
+                          ),
                           backgroundColor: AppStatusColors.paid,
                           duration: Duration(seconds: 2),
                         ),
@@ -89,13 +95,21 @@ class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScr
                           const SizedBox(height: 20),
                           const Text(
                             'Chưa có thông báo nào',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textPrimary,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           const Text(
                             'Bạn sẽ nhận được thông báo tự động khi có hóa đơn mới, lịch nhắc hạn thanh toán hoặc thông báo khẩn cấp từ Ban Quản Lý.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.textSecondary,
+                              height: 1.4,
+                            ),
                           ),
                         ],
                       ),
@@ -109,7 +123,10 @@ class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScr
                       padding: EdgeInsets.all(32.0),
                       child: Text(
                         'Không có thông báo nào phù hợp với bộ lọc đã chọn',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   );
@@ -182,7 +199,8 @@ class _NotificationCenterScreenState extends ConsumerState<NotificationCenterScr
             ),
             onSelected: (selected) {
               if (selected) {
-                ref.read(notificationFilterTypeProvider.notifier).state = filter['key']!;
+                ref.read(notificationFilterTypeProvider.notifier).state =
+                    filter['key']!;
               }
             },
           );
@@ -259,27 +277,30 @@ class _NotificationCard extends ConsumerWidget {
 
     final cardBgColor = isUnread
         ? (isDark ? theme.colorScheme.surface : Colors.white)
-        : (isDark ? theme.colorScheme.surface.withValues(alpha: 0.6) : Colors.grey.shade50);
+        : (isDark
+              ? theme.colorScheme.surface.withValues(alpha: 0.6)
+              : Colors.grey.shade50);
 
     final borderColor = isUnread
         ? iconColor.withValues(alpha: 0.5)
-        : (isDark ? theme.dividerColor.withValues(alpha: 0.2) : Colors.grey.shade200);
+        : (isDark
+              ? theme.dividerColor.withValues(alpha: 0.2)
+              : Colors.grey.shade200);
 
     return Card(
       elevation: 0,
       color: cardBgColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: borderColor,
-          width: isUnread ? 1.5 : 1.0,
-        ),
+        side: BorderSide(color: borderColor, width: isUnread ? 1.5 : 1.0),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () async {
           if (isUnread) {
-            await ref.read(notificationRepositoryProvider).markAsRead(notification.id);
+            await ref
+                .read(notificationRepositoryProvider)
+                .markAsRead(notification.id);
           }
           if (!context.mounted) return;
 
@@ -321,9 +342,13 @@ class _NotificationCard extends ConsumerWidget {
                             notification.title,
                             style: TextStyle(
                               fontSize: 15,
-                              fontWeight: isUnread ? FontWeight.bold : FontWeight.w600,
+                              fontWeight: isUnread
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
                               color: isUnread
-                                  ? (isDark ? Colors.white : AppTheme.textPrimary)
+                                  ? (isDark
+                                        ? Colors.white
+                                        : AppTheme.textPrimary)
                                   : (isDark ? Colors.white70 : Colors.black87),
                             ),
                           ),
@@ -331,15 +356,24 @@ class _NotificationCard extends ConsumerWidget {
                         if (badgeText != null) ...[
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: iconColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: iconColor.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: iconColor.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Text(
                               badgeText,
-                              style: TextStyle(color: iconColor, fontSize: 10, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: iconColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -361,7 +395,11 @@ class _NotificationCard extends ConsumerWidget {
                       notification.body,
                       style: TextStyle(
                         fontSize: 13,
-                        color: isDark ? Colors.white60 : (isUnread ? AppTheme.textSecondary : Colors.grey.shade600),
+                        color: isDark
+                            ? Colors.white60
+                            : (isUnread
+                                  ? AppTheme.textSecondary
+                                  : Colors.grey.shade600),
                         height: 1.4,
                       ),
                     ),

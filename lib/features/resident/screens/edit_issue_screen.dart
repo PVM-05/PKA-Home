@@ -13,10 +13,7 @@ import '../../../data/repositories/issue_repository.dart';
 class EditIssueScreen extends ConsumerStatefulWidget {
   final IssueModel issue;
 
-  const EditIssueScreen({
-    super.key,
-    required this.issue,
-  });
+  const EditIssueScreen({super.key, required this.issue});
 
   @override
   ConsumerState<EditIssueScreen> createState() => _EditIssueScreenState();
@@ -33,7 +30,9 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
   @override
   void initState() {
     super.initState();
-    _descriptionController = TextEditingController(text: widget.issue.description);
+    _descriptionController = TextEditingController(
+      text: widget.issue.description,
+    );
     _existingImages = List.from(widget.issue.imageUrls);
   }
 
@@ -50,7 +49,10 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
     if (remaining <= 0) return;
 
     if (source == ImageSource.camera) {
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
       if (image != null) {
         setState(() {
           _newImageFiles.add(File(image.path));
@@ -58,14 +60,20 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
       }
     } else {
       if (remaining == 1) {
-        final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+        final XFile? image = await _picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 80,
+        );
         if (image != null) {
           setState(() {
             _newImageFiles.add(File(image.path));
           });
         }
       } else {
-        final List<XFile> images = await _picker.pickMultiImage(limit: remaining, imageQuality: 80);
+        final List<XFile> images = await _picker.pickMultiImage(
+          limit: remaining,
+          imageQuality: 80,
+        );
         if (images.isNotEmpty) {
           setState(() {
             for (final img in images.take(remaining)) {
@@ -101,11 +109,18 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
             children: [
               const Text(
                 'Chọn nguồn ảnh',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
               ),
               const SizedBox(height: 12),
               ListTile(
-                leading: const Icon(Icons.camera_alt_outlined, color: AppTheme.primary),
+                leading: const Icon(
+                  Icons.camera_alt_outlined,
+                  color: AppTheme.primary,
+                ),
                 title: const Text('Chụp ảnh mới'),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -113,7 +128,10 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library_outlined, color: AppTheme.primary),
+                leading: const Icon(
+                  Icons.photo_library_outlined,
+                  color: AppTheme.primary,
+                ),
                 title: const Text('Chọn từ Thư viện ảnh'),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -131,7 +149,10 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
     final description = _descriptionController.text.trim();
     if (description.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập mô tả sự cố'), backgroundColor: AppTheme.warning),
+        const SnackBar(
+          content: Text('Vui lòng nhập mô tả sự cố'),
+          backgroundColor: AppTheme.warning,
+        ),
       );
       return;
     }
@@ -149,7 +170,9 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
         issueId: widget.issue.id,
         reporterId: user.id,
         description: description,
-        removedImageUrls: _removedImageUrls.isNotEmpty ? _removedImageUrls : null,
+        removedImageUrls: _removedImageUrls.isNotEmpty
+            ? _removedImageUrls
+            : null,
         newImageFiles: _newImageFiles.isNotEmpty ? _newImageFiles : null,
       );
 
@@ -167,7 +190,10 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
         );
       }
     } finally {
@@ -182,9 +208,7 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chỉnh sửa phản ánh'),
-      ),
+      appBar: AppBar(title: const Text('Chỉnh sửa phản ánh')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -215,7 +239,9 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                   '$_totalImageCount/3 ảnh',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _totalImageCount >= 3 ? AppTheme.warning : AppTheme.textSecondary,
+                    color: _totalImageCount >= 3
+                        ? AppTheme.warning
+                        : AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -255,7 +281,11 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                            child: const Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -291,7 +321,11 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                            child: const Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -308,18 +342,29 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppTheme.primary, style: BorderStyle.solid),
+                        border: Border.all(
+                          color: AppTheme.primary,
+                          style: BorderStyle.solid,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                         color: AppTheme.primary.withValues(alpha: 0.05),
                       ),
                       child: const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_a_photo_outlined, color: AppTheme.primary, size: 28),
+                          Icon(
+                            Icons.add_a_photo_outlined,
+                            color: AppTheme.primary,
+                            size: 28,
+                          ),
                           SizedBox(height: 4),
                           Text(
                             'Thêm ảnh',
-                            style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -333,13 +378,18 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
               onPressed: _isLoading ? null : _submitUpdate,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: _isLoading
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Text('Lưu thay đổi', style: TextStyle(fontSize: 16)),
             ),

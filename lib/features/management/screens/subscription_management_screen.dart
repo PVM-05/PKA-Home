@@ -107,9 +107,7 @@ class _SubscriptionManagementScreenState
             ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -147,10 +145,7 @@ class _SubscriptionManagementScreenState
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           gradient: LinearGradient(
-            colors: [
-              AppTheme.primary,
-              AppTheme.secondary,
-            ],
+            colors: [AppTheme.primary, AppTheme.secondary],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -187,8 +182,10 @@ class _SubscriptionManagementScreenState
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -212,8 +209,11 @@ class _SubscriptionManagementScreenState
             const SizedBox(height: 14),
             Row(
               children: [
-                const Icon(Icons.event_available,
-                    color: Colors.white70, size: 16),
+                const Icon(
+                  Icons.event_available,
+                  color: Colors.white70,
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Hạn dùng: $expiresStr',
@@ -221,8 +221,10 @@ class _SubscriptionManagementScreenState
                 ),
                 const Spacer(),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
@@ -267,8 +269,11 @@ class _SubscriptionManagementScreenState
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.warning_amber_rounded,
-              color: AppTheme.warning, size: 22),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: AppTheme.warning,
+            size: 22,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -311,8 +316,11 @@ class _SubscriptionManagementScreenState
           children: [
             const Row(
               children: [
-                Icon(Icons.pie_chart_outline,
-                    color: AppTheme.primary, size: 20),
+                Icon(
+                  Icons.pie_chart_outline,
+                  color: AppTheme.primary,
+                  size: 20,
+                ),
                 SizedBox(width: 8),
                 Text(
                   'Hạn Mức Sử Dụng Thực Tế',
@@ -480,7 +488,9 @@ class _SubscriptionManagementScreenState
                     if (isCurrent)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
@@ -514,11 +524,17 @@ class _SubscriptionManagementScreenState
                 _buildBenefitItem('Tối đa: ${plan.displayMaxBuildings}'),
                 _buildBenefitItem('Nhân sự: ${plan.displayMaxStaff}'),
                 if (plan.code == 'pro' || plan.code == 'enterprise') ...[
-                  _buildBenefitItem('Đối soát & Cổng thanh toán VietQR tự động'),
-                  _buildBenefitItem('Báo cáo phân tích tài chính & tuổi nợ chuyên sâu'),
+                  _buildBenefitItem(
+                    'Đối soát & Cổng thanh toán VietQR tự động',
+                  ),
+                  _buildBenefitItem(
+                    'Báo cáo phân tích tài chính & tuổi nợ chuyên sâu',
+                  ),
                 ],
                 if (plan.code == 'enterprise') ...[
-                  _buildBenefitItem('Hóa đơn điện tử & kết nối phần mềm kế toán'),
+                  _buildBenefitItem(
+                    'Hóa đơn điện tử & kết nối phần mềm kế toán',
+                  ),
                   _buildBenefitItem('Hỗ trợ kỹ thuật ưu tiên 24/7'),
                 ],
 
@@ -527,10 +543,12 @@ class _SubscriptionManagementScreenState
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isCurrent ? Colors.grey.shade200 : AppTheme.primary,
-                      foregroundColor:
-                          isCurrent ? AppTheme.textSecondary : Colors.white,
+                      backgroundColor: isCurrent
+                          ? Colors.grey.shade200
+                          : AppTheme.primary,
+                      foregroundColor: isCurrent
+                          ? AppTheme.textSecondary
+                          : Colors.white,
                       elevation: isCurrent ? 0 : 1,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -652,8 +670,10 @@ class _SubscriptionManagementScreenState
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(result['message']?.toString() ??
-                        'Đã gửi yêu cầu thành công'),
+                    content: Text(
+                      result['message']?.toString() ??
+                          'Đã gửi yêu cầu thành công',
+                    ),
                     backgroundColor: AppTheme.success,
                   ),
                 );

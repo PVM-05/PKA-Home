@@ -18,21 +18,27 @@ class AmenityManagementScreen extends ConsumerStatefulWidget {
   const AmenityManagementScreen({super.key});
 
   @override
-  ConsumerState<AmenityManagementScreen> createState() => _AmenityManagementScreenState();
+  ConsumerState<AmenityManagementScreen> createState() =>
+      _AmenityManagementScreenState();
 }
 
-class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScreen>
+class _AmenityManagementScreenState
+    extends ConsumerState<AmenityManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _selectedAmenityId;
   DateTime _selectedDate = DateTime.now();
-  String _statusFilter = 'all'; // 'all', 'pending', 'confirmed', 'completed', 'cancelled'
+  String _statusFilter =
+      'all'; // 'all', 'pending', 'confirmed', 'completed', 'cancelled'
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   final DateFormat _timeFormat = DateFormat('HH:mm');
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+  );
 
   @override
   void initState() {
@@ -60,22 +66,41 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
   }
 
   void _showAddMaintenanceDialog(String amenityId) {
-    DateTime start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 8, 0);
-    DateTime end = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 12, 0);
-    final reasonController = TextEditingController(text: 'Vệ sinh và bảo trì định kỳ');
+    DateTime start = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      8,
+      0,
+    );
+    DateTime end = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      12,
+      0,
+    );
+    final reasonController = TextEditingController(
+      text: 'Vệ sinh và bảo trì định kỳ',
+    );
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Thêm Lịch Bảo Trì'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Ngày: ${_dateFormat.format(_selectedDate)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Ngày: ${_dateFormat.format(_selectedDate)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -84,11 +109,20 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                       onPressed: () async {
                         final t = await showTimePicker(
                           context: context,
-                          initialTime: TimeOfDay(hour: start.hour, minute: start.minute),
+                          initialTime: TimeOfDay(
+                            hour: start.hour,
+                            minute: start.minute,
+                          ),
                         );
                         if (t != null) {
                           setDialogState(() {
-                            start = DateTime(start.year, start.month, start.day, t.hour, t.minute);
+                            start = DateTime(
+                              start.year,
+                              start.month,
+                              start.day,
+                              t.hour,
+                              t.minute,
+                            );
                           });
                         }
                       },
@@ -103,11 +137,20 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                       onPressed: () async {
                         final t = await showTimePicker(
                           context: context,
-                          initialTime: TimeOfDay(hour: end.hour, minute: end.minute),
+                          initialTime: TimeOfDay(
+                            hour: end.hour,
+                            minute: end.minute,
+                          ),
                         );
                         if (t != null) {
                           setDialogState(() {
-                            end = DateTime(end.year, end.month, end.day, t.hour, t.minute);
+                            end = DateTime(
+                              end.year,
+                              end.month,
+                              end.day,
+                              t.hour,
+                              t.minute,
+                            );
                           });
                         }
                       },
@@ -132,27 +175,39 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               child: const Text('Hủy'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+              ),
               onPressed: () async {
                 if (end.isBefore(start) || end.isAtSameMomentAs(start)) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Giờ kết thúc phải sau giờ bắt đầu.')),
+                    const SnackBar(
+                      content: Text('Giờ kết thúc phải sau giờ bắt đầu.'),
+                    ),
                   );
                   return;
                 }
                 Navigator.pop(ctx);
                 final user = ref.read(authProvider).valueOrNull;
                 try {
-                  await ref.read(amenityBookingRepositoryProvider).createMaintenanceWindow(
+                  await ref
+                      .read(amenityBookingRepositoryProvider)
+                      .createMaintenanceWindow(
                         amenityId: amenityId,
                         startTime: start,
                         endTime: end,
                         reason: reasonController.text.trim(),
                         createdBy: user?.id,
                       );
-                  ref.invalidate(amenityMaintenanceForDateProvider(
-                    AmenityDateQuery(amenityId: amenityId, date: _selectedDate),
-                  ));
+                  ref.invalidate(
+                    amenityMaintenanceForDateProvider(
+                      AmenityDateQuery(
+                        amenityId: amenityId,
+                        date: _selectedDate,
+                      ),
+                    ),
+                  );
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -164,7 +219,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                      SnackBar(
+                        content: Text(formatErrorMessage(e)),
+                        backgroundColor: AppTheme.error,
+                      ),
                     );
                   }
                 }
@@ -179,35 +237,65 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
 
   void _showDepositDialog(AmenityBookingModel booking) {
     String currentStatus = booking.depositStatus;
-    final notesController = TextEditingController(text: booking.depositNotes ?? '');
+    final notesController = TextEditingController(
+      text: booking.depositNotes ?? '',
+    );
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Quản Lý Tiền Đặt Cọc'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Căn hộ: ${booking.apartmentCode ?? "***"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Căn hộ: ${booking.apartmentCode ?? "***"}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text('Người đặt: ${booking.bookerName ?? "***"}'),
                 const SizedBox(height: 6),
-                Text('Số tiền cọc: ${_currencyFormat.format(booking.depositAmount)}',
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.warning)),
+                Text(
+                  'Số tiền cọc: ${_currencyFormat.format(booking.depositAmount)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.warning,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                const Text('Trạng thái cọc:', style: TextStyle(fontWeight: FontWeight.w500)),
+                const Text(
+                  'Trạng thái cọc:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
                 DropdownButton<String>(
                   value: currentStatus,
                   isExpanded: true,
                   items: const [
-                    DropdownMenuItem(value: 'none', child: Text('Không yêu cầu cọc')),
-                    DropdownMenuItem(value: 'pending', child: Text('Chưa nộp tiền cọc (Chờ thu)')),
-                    DropdownMenuItem(value: 'received', child: Text('Đã nhận đủ tiền cọc')),
-                    DropdownMenuItem(value: 'refunded', child: Text('Đã hoàn trả cọc cho cư dân')),
-                    DropdownMenuItem(value: 'forfeited', child: Text('Tịch thu cọc (Vi phạm/Hư hỏng)')),
+                    DropdownMenuItem(
+                      value: 'none',
+                      child: Text('Không yêu cầu cọc'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'pending',
+                      child: Text('Chưa nộp tiền cọc (Chờ thu)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'received',
+                      child: Text('Đã nhận đủ tiền cọc'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'refunded',
+                      child: Text('Đã hoàn trả cọc cho cư dân'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'forfeited',
+                      child: Text('Tịch thu cọc (Vi phạm/Hư hỏng)'),
+                    ),
                   ],
                   onChanged: (val) {
                     if (val != null) setDialogState(() => currentStatus = val);
@@ -231,18 +319,28 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               child: const Text('Đóng'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+              ),
               onPressed: () async {
                 Navigator.pop(ctx);
                 try {
-                  await ref.read(amenityBookingRepositoryProvider).updateDepositStatus(
+                  await ref
+                      .read(amenityBookingRepositoryProvider)
+                      .updateDepositStatus(
                         booking.id,
                         currentStatus,
                         notes: notesController.text.trim(),
                       );
-                  ref.invalidate(amenityBookingsForDateProvider(
-                    AmenityDateQuery(amenityId: booking.amenityId, date: booking.bookingDate),
-                  ));
+                  ref.invalidate(
+                    amenityBookingsForDateProvider(
+                      AmenityDateQuery(
+                        amenityId: booking.amenityId,
+                        date: booking.bookingDate,
+                      ),
+                    ),
+                  );
                   ref.invalidate(allAmenityBookingsProvider);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -255,7 +353,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                      SnackBar(
+                        content: Text(formatErrorMessage(e)),
+                        backgroundColor: AppTheme.error,
+                      ),
                     );
                   }
                 }
@@ -326,19 +427,24 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     .read(amenityBookingRepositoryProvider)
                     .checkInBooking(code);
                 if (_selectedAmenityId != null) {
-                  ref.invalidate(amenityBookingsForDateProvider(
-                    AmenityDateQuery(
-                      amenityId: _selectedAmenityId!,
-                      date: _selectedDate,
+                  ref.invalidate(
+                    amenityBookingsForDateProvider(
+                      AmenityDateQuery(
+                        amenityId: _selectedAmenityId!,
+                        date: _selectedDate,
+                      ),
                     ),
-                  ));
+                  );
                 }
                 ref.invalidate(allAmenityBookingsProvider);
 
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(result['message']?.toString() ?? 'Xác nhận Check-in thành công!'),
+                      content: Text(
+                        result['message']?.toString() ??
+                            'Xác nhận Check-in thành công!',
+                      ),
                       backgroundColor: AppStatusColors.paid,
                     ),
                   );
@@ -371,9 +477,11 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(b.isWaitlist
-                ? 'Hủy lượt đặt trong danh sách chờ của căn hộ ${b.apartmentCode ?? "***"} (${b.timeSlot})?'
-                : 'Hủy lịch đặt của căn hộ ${b.apartmentCode ?? "***"} (${b.timeSlot})?'),
+            Text(
+              b.isWaitlist
+                  ? 'Hủy lượt đặt trong danh sách chờ của căn hộ ${b.apartmentCode ?? "***"} (${b.timeSlot})?'
+                  : 'Hủy lịch đặt của căn hộ ${b.apartmentCode ?? "***"} (${b.timeSlot})?',
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
@@ -399,20 +507,34 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
             onPressed: () async {
               Navigator.pop(ctx);
               try {
-                await ref.read(amenityBookingRepositoryProvider).cancelBooking(b.id);
+                await ref
+                    .read(amenityBookingRepositoryProvider)
+                    .cancelBooking(b.id);
                 ref.invalidate(allAmenityBookingsProvider);
                 if (_selectedAmenityId != null) {
-                  ref.invalidate(amenityBookingsForDateProvider(
-                    AmenityDateQuery(amenityId: _selectedAmenityId!, date: _selectedDate),
-                  ));
+                  ref.invalidate(
+                    amenityBookingsForDateProvider(
+                      AmenityDateQuery(
+                        amenityId: _selectedAmenityId!,
+                        date: _selectedDate,
+                      ),
+                    ),
+                  );
                 }
-                ref.invalidate(amenityBookingsForDateProvider(
-                  AmenityDateQuery(amenityId: b.amenityId, date: b.bookingDate),
-                ));
+                ref.invalidate(
+                  amenityBookingsForDateProvider(
+                    AmenityDateQuery(
+                      amenityId: b.amenityId,
+                      date: b.bookingDate,
+                    ),
+                  ),
+                );
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Đã từ chối / hủy lịch đặt chỗ thành công.'),
+                      content: Text(
+                        'Đã từ chối / hủy lịch đặt chỗ thành công.',
+                      ),
                       backgroundColor: AppStatusColors.paid,
                     ),
                   );
@@ -420,12 +542,17 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                    SnackBar(
+                      content: Text(formatErrorMessage(e)),
+                      backgroundColor: AppTheme.error,
+                    ),
                   );
                 }
               }
             },
-            child: Text(b.isWaitlist ? 'Xác nhận hủy hàng chờ' : 'Xác nhận từ chối / hủy'),
+            child: Text(
+              b.isWaitlist ? 'Xác nhận hủy hàng chờ' : 'Xác nhận từ chối / hủy',
+            ),
           ),
         ],
       ),
@@ -440,7 +567,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Row(
             children: [
               Icon(Icons.check_circle_outline, color: AppTheme.success),
@@ -458,27 +587,50 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('• Căn hộ: ${b.apartmentCode ?? "Chưa rõ"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        '• Căn hộ: ${b.apartmentCode ?? "Chưa rõ"}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(height: 4),
-                      Text('• Tiện ích: ${b.amenityName ?? "Dịch vụ"} (${b.timeSlot})'),
+                      Text(
+                        '• Tiện ích: ${b.amenityName ?? "Dịch vụ"} (${b.timeSlot})',
+                      ),
                       const SizedBox(height: 4),
-                      Text('• Tổng thu: ${_currencyFormat.format(totalFee)}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                      Text(
+                        '• Tổng thu: ${_currencyFormat.format(totalFee)}',
+                        style: const TextStyle(
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Text('Hình thức thanh toán thực thu:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                const Text(
+                  'Hình thức thanh toán thực thu:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
                 const SizedBox(height: 8),
                 SegmentedButton<String>(
                   segments: const [
-                    ButtonSegment(value: 'CASH', label: Text('Tiền mặt'), icon: Icon(Icons.payments_outlined)),
-                    ButtonSegment(value: 'BANK_TRANSFER', label: Text('Chuyển khoản'), icon: Icon(Icons.account_balance_outlined)),
+                    ButtonSegment(
+                      value: 'CASH',
+                      label: Text('Tiền mặt'),
+                      icon: Icon(Icons.payments_outlined),
+                    ),
+                    ButtonSegment(
+                      value: 'BANK_TRANSFER',
+                      label: Text('Chuyển khoản'),
+                      icon: Icon(Icons.account_balance_outlined),
+                    ),
                   ],
                   selected: {selectedMethod},
                   onSelectionChanged: (newSelection) {
@@ -509,22 +661,34 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
     if (confirmed != true || !mounted) return;
 
     try {
-      final methodTitle = selectedMethod == 'CASH' ? 'Tiền mặt' : 'Chuyển khoản';
-      await ref.read(amenityBookingRepositoryProvider).recordManualAmenityPayment(
-        bookingId: b.id,
-        paymentMethod: selectedMethod,
-        notes: 'Thu phí dịch vụ tiện ích ${b.amenityName ?? ""} ($methodTitle)',
-      );
+      final methodTitle = selectedMethod == 'CASH'
+          ? 'Tiền mặt'
+          : 'Chuyển khoản';
+      await ref
+          .read(amenityBookingRepositoryProvider)
+          .recordManualAmenityPayment(
+            bookingId: b.id,
+            paymentMethod: selectedMethod,
+            notes:
+                'Thu phí dịch vụ tiện ích ${b.amenityName ?? ""} ($methodTitle)',
+          );
       ref.invalidate(allAmenityBookingsProvider);
       if (_selectedAmenityId != null) {
-        ref.invalidate(amenityBookingsForDateProvider(
-          AmenityDateQuery(amenityId: _selectedAmenityId!, date: _selectedDate),
-        ));
+        ref.invalidate(
+          amenityBookingsForDateProvider(
+            AmenityDateQuery(
+              amenityId: _selectedAmenityId!,
+              date: _selectedDate,
+            ),
+          ),
+        );
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Xác nhận thu phí ($methodTitle) thành công cho căn hộ ${b.apartmentCode ?? ""}!'),
+            content: Text(
+              'Xác nhận thu phí ($methodTitle) thành công cho căn hộ ${b.apartmentCode ?? ""}!',
+            ),
             backgroundColor: AppTheme.success,
             action: SnackBarAction(
               label: 'Biên nhận',
@@ -549,13 +713,27 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
   void _showEditAmenityDialog({BuildingAmenityModel? amenity}) {
     final isEditing = amenity != null;
     final nameController = TextEditingController(text: amenity?.name ?? '');
-    final hoursController = TextEditingController(text: amenity?.openHours ?? '06:00 - 22:00');
-    final descController = TextEditingController(text: amenity?.description ?? '');
-    final capacityController = TextEditingController(text: (amenity?.maxCapacity ?? 1).toString());
-    final durationController = TextEditingController(text: (amenity?.slotDurationMinutes ?? 90).toString());
-    final feeController = TextEditingController(text: (amenity?.feeAmount ?? 0.0).toStringAsFixed(0));
-    final depositController = TextEditingController(text: (amenity?.depositAmount ?? 0.0).toStringAsFixed(0));
-    final orderController = TextEditingController(text: (amenity?.displayOrder ?? 0).toString());
+    final hoursController = TextEditingController(
+      text: amenity?.openHours ?? '06:00 - 22:00',
+    );
+    final descController = TextEditingController(
+      text: amenity?.description ?? '',
+    );
+    final capacityController = TextEditingController(
+      text: (amenity?.maxCapacity ?? 1).toString(),
+    );
+    final durationController = TextEditingController(
+      text: (amenity?.slotDurationMinutes ?? 90).toString(),
+    );
+    final feeController = TextEditingController(
+      text: (amenity?.feeAmount ?? 0.0).toStringAsFixed(0),
+    );
+    final depositController = TextEditingController(
+      text: (amenity?.depositAmount ?? 0.0).toStringAsFixed(0),
+    );
+    final orderController = TextEditingController(
+      text: (amenity?.displayOrder ?? 0).toString(),
+    );
 
     String bookingType = amenity?.bookingType ?? 'shared';
     bool requiresDeposit = amenity?.requiresDeposit ?? false;
@@ -565,8 +743,12 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(isEditing ? 'Chỉnh Sửa Tiện Ích & Sức Chứa' : 'Thêm Tiện Ích Mới'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            isEditing ? 'Chỉnh Sửa Tiện Ích & Sức Chứa' : 'Thêm Tiện Ích Mới',
+          ),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -576,16 +758,30 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 children: [
                   TextFormField(
                     controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Tên tiện ích *', border: OutlineInputBorder()),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên tiện ích' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Tên tiện ích *',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Vui lòng nhập tên tiện ích'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: bookingType,
-                    decoration: const InputDecoration(labelText: 'Hình thức đặt chỗ *', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Hình thức đặt chỗ *',
+                      border: OutlineInputBorder(),
+                    ),
                     items: const [
-                      DropdownMenuItem(value: 'shared', child: Text('Dùng chung (Nhiều người/slot)')),
-                      DropdownMenuItem(value: 'exclusive', child: Text('Trọn gói (1 căn hộ/slot)')),
+                      DropdownMenuItem(
+                        value: 'shared',
+                        child: Text('Dùng chung (Nhiều người/slot)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'exclusive',
+                        child: Text('Trọn gói (1 căn hộ/slot)'),
+                      ),
                     ],
                     onChanged: (val) {
                       if (val != null) setDialogState(() => bookingType = val);
@@ -658,7 +854,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Yêu cầu đặt cọc trước'),
                     value: requiresDeposit,
-                    onChanged: (val) => setDialogState(() => requiresDeposit = val),
+                    onChanged: (val) =>
+                        setDialogState(() => requiresDeposit = val),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -696,15 +893,20 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               child: const Text('Hủy'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+              ),
               onPressed: () async {
                 if (!(formKey.currentState?.validate() ?? false)) return;
                 Navigator.pop(ctx);
 
                 final cap = int.tryParse(capacityController.text.trim()) ?? 1;
-                final duration = int.tryParse(durationController.text.trim()) ?? 90;
+                final duration =
+                    int.tryParse(durationController.text.trim()) ?? 90;
                 final fee = double.tryParse(feeController.text.trim()) ?? 0.0;
-                final deposit = double.tryParse(depositController.text.trim()) ?? 0.0;
+                final deposit =
+                    double.tryParse(depositController.text.trim()) ?? 0.0;
                 final order = int.tryParse(orderController.text.trim()) ?? 0;
                 final repo = ref.read(handbookRepositoryProvider);
 
@@ -742,7 +944,11 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(isEditing ? 'Đã cập nhật cấu hình tiện ích!' : 'Đã thêm tiện ích mới!'),
+                        content: Text(
+                          isEditing
+                              ? 'Đã cập nhật cấu hình tiện ích!'
+                              : 'Đã thêm tiện ích mới!',
+                        ),
                         backgroundColor: AppTheme.success,
                       ),
                     );
@@ -750,7 +956,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                      SnackBar(
+                        content: Text(formatErrorMessage(e)),
+                        backgroundColor: AppTheme.error,
+                      ),
                     );
                   }
                 }
@@ -786,7 +995,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
             indicatorColor: AppTheme.primary,
             unselectedLabelColor: AppTheme.textSecondary,
             tabs: const [
-              Tab(icon: Icon(Icons.fact_check_outlined), text: 'Duyệt Lịch Đặt Chỗ'),
+              Tab(
+                icon: Icon(Icons.fact_check_outlined),
+                text: 'Duyệt Lịch Đặt Chỗ',
+              ),
               Tab(icon: Icon(Icons.tune_outlined), text: 'Tiện Ích & Sức Chứa'),
               Tab(icon: Icon(Icons.build_outlined), text: 'Lịch Bảo Trì'),
             ],
@@ -829,10 +1041,16 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Tìm theo căn hộ (VD: A0110) hoặc tên người đặt...',
+                    hintText:
+                        'Tìm theo căn hộ (VD: A0110) hoặc tên người đặt...',
                     prefixIcon: const Icon(Icons.search),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear),
@@ -845,7 +1063,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                           )
                         : null,
                   ),
-                  onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
+                  onChanged: (val) =>
+                      setState(() => _searchQuery = val.trim().toLowerCase()),
                 ),
                 const SizedBox(height: 8),
                 SingleChildScrollView(
@@ -877,13 +1096,15 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   if (_searchQuery.isNotEmpty) {
                     final code = (b.apartmentCode ?? '').toLowerCase();
                     final name = (b.bookerName ?? '').toLowerCase();
-                    if (!code.contains(_searchQuery) && !name.contains(_searchQuery)) {
+                    if (!code.contains(_searchQuery) &&
+                        !name.contains(_searchQuery)) {
                       return false;
                     }
                   }
                   // Lọc theo status chip
                   if (_statusFilter == 'pending') {
-                    return b.isPendingPayment || (!b.isConfirmed && !b.isCancelled && !b.isCompleted);
+                    return b.isPendingPayment ||
+                        (!b.isConfirmed && !b.isCancelled && !b.isCompleted);
                   } else if (_statusFilter == 'confirmed') {
                     return b.isConfirmed;
                   } else if (_statusFilter == 'completed') {
@@ -899,7 +1120,11 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.inbox_outlined, size: 56, color: Colors.grey.shade300),
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 56,
+                          color: Colors.grey.shade300,
+                        ),
                         const SizedBox(height: 10),
                         const Text('Không có lịch đặt nào phù hợp với bộ lọc.'),
                       ],
@@ -973,19 +1198,29 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               Expanded(
                 child: Text(
                   'Căn hộ: ${b.apartmentCode ?? "***"} — ${b.amenityName ?? "Tiện ích"}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   statusLabel,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
                 ),
               ),
             ],
@@ -998,9 +1233,16 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 4),
-                  Text(_dateFormat.format(b.bookingDate), style: const TextStyle(fontSize: 13)),
+                  Text(
+                    _dateFormat.format(b.bookingDate),
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ],
               ),
               Row(
@@ -1008,24 +1250,47 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 children: [
                   Icon(Icons.schedule, size: 14, color: Colors.grey.shade600),
                   const SizedBox(width: 4),
-                  Text(b.timeSlot, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text(
+                    b.timeSlot,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.person_outline, size: 14, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.person_outline,
+                    size: 14,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 4),
-                  Text(b.bookerName ?? 'Cư dân', style: const TextStyle(fontSize: 13)),
+                  Text(
+                    b.bookerName ?? 'Cư dân',
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ],
               ),
               if (b.guestsCount > 1)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.groups_outlined, size: 14, color: Colors.grey.shade600),
+                    Icon(
+                      Icons.groups_outlined,
+                      size: 14,
+                      color: Colors.grey.shade600,
+                    ),
                     const SizedBox(width: 4),
-                    Text('${b.guestsCount} người', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(
+                      '${b.guestsCount} người',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
             ],
@@ -1038,13 +1303,19 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               children: [
                 if (b.feeAmount > 0)
                   Chip(
-                    label: Text('Phí: ${_currencyFormat.format(b.feeAmount)} ${b.isPendingPayment ? "(Chưa thu)" : "(Đã thu)"}', style: const TextStyle(fontSize: 11)),
+                    label: Text(
+                      'Phí: ${_currencyFormat.format(b.feeAmount)} ${b.isPendingPayment ? "(Chưa thu)" : "(Đã thu)"}',
+                      style: const TextStyle(fontSize: 11),
+                    ),
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                   ),
                 if (b.depositAmount > 0)
                   Chip(
-                    label: Text('Cọc: ${_currencyFormat.format(b.depositAmount)} (${b.depositStatus})', style: const TextStyle(fontSize: 11)),
+                    label: Text(
+                      'Cọc: ${_currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
+                      style: const TextStyle(fontSize: 11),
+                    ),
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -1060,15 +1331,27 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
             alignment: WrapAlignment.end,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              if (b.isPendingPayment || (!b.isConfirmed && !b.isCancelled && !b.isWaitlist && (b.feeAmount > 0 || b.depositAmount > 0))) ...[
+              if (b.isPendingPayment ||
+                  (!b.isConfirmed &&
+                      !b.isCancelled &&
+                      !b.isWaitlist &&
+                      (b.feeAmount > 0 || b.depositAmount > 0))) ...[
                 ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success, foregroundColor: Colors.white, visualDensity: VisualDensity.compact),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.success,
+                    foregroundColor: Colors.white,
+                    visualDensity: VisualDensity.compact,
+                  ),
                   icon: const Icon(Icons.payments_outlined, size: 15),
                   label: const Text('Thu phí & Cọc'),
                   onPressed: () => _showConfirmAmenityPaymentDialog(b),
                 ),
                 OutlinedButton.icon(
-                  style: ElevatedButton.styleFrom(foregroundColor: AppTheme.error, side: const BorderSide(color: AppTheme.error), visualDensity: VisualDensity.compact),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppTheme.error,
+                    side: const BorderSide(color: AppTheme.error),
+                    visualDensity: VisualDensity.compact,
+                  ),
                   icon: const Icon(Icons.close, size: 15),
                   label: const Text('Từ chối lịch'),
                   onPressed: () => _showRejectBookingDialog(b),
@@ -1076,21 +1359,36 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               ],
               if (b.isConfirmed) ...[
                 ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppStatusColors.paid, foregroundColor: Colors.white, visualDensity: VisualDensity.compact),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppStatusColors.paid,
+                    foregroundColor: Colors.white,
+                    visualDensity: VisualDensity.compact,
+                  ),
                   icon: const Icon(Icons.qr_code_scanner, size: 15),
                   label: const Text('Check-in'),
                   onPressed: () async {
-                    await ref.read(amenityBookingRepositoryProvider).checkInBooking(b.id);
+                    await ref
+                        .read(amenityBookingRepositoryProvider)
+                        .checkInBooking(b.id);
                     ref.invalidate(allAmenityBookingsProvider);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Check-in thành công cho căn hộ ${b.apartmentCode ?? ""}!'), backgroundColor: AppStatusColors.paid),
+                        SnackBar(
+                          content: Text(
+                            'Check-in thành công cho căn hộ ${b.apartmentCode ?? ""}!',
+                          ),
+                          backgroundColor: AppStatusColors.paid,
+                        ),
                       );
                     }
                   },
                 ),
                 OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(foregroundColor: AppTheme.error, side: const BorderSide(color: AppTheme.error), visualDensity: VisualDensity.compact),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.error,
+                    side: const BorderSide(color: AppTheme.error),
+                    visualDensity: VisualDensity.compact,
+                  ),
                   icon: const Icon(Icons.cancel_outlined, size: 15),
                   label: const Text('Hủy lịch'),
                   onPressed: () => _showRejectBookingDialog(b),
@@ -1110,12 +1408,16 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
               ],
               if (b.depositAmount > 0)
                 TextButton.icon(
-                  style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                  ),
                   icon: const Icon(Icons.shield_outlined, size: 15),
                   label: const Text('Quản lý cọc'),
                   onPressed: () => _showDepositDialog(b),
                 ),
-              if (b.hasFee || b.transactionCode != null || b.totalPaymentAmount > 0)
+              if (b.hasFee ||
+                  b.transactionCode != null ||
+                  b.totalPaymentAmount > 0)
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primary,
@@ -1135,8 +1437,11 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
 
   void _showAmenityReceiptBottomSheet(AmenityBookingModel booking) {
     final isPaid = booking.isConfirmed && !booking.isPendingPayment;
-    final receiptCode = 'REC-SVC-${booking.id.length > 8 ? booking.id.substring(0, 8).toUpperCase() : booking.id.toUpperCase()}';
-    final txCode = booking.transactionCode ?? 'SVC${booking.id.length > 8 ? booking.id.substring(0, 8).toUpperCase() : booking.id.toUpperCase()}';
+    final receiptCode =
+        'REC-SVC-${booking.id.length > 8 ? booking.id.substring(0, 8).toUpperCase() : booking.id.toUpperCase()}';
+    final txCode =
+        booking.transactionCode ??
+        'SVC${booking.id.length > 8 ? booking.id.substring(0, 8).toUpperCase() : booking.id.toUpperCase()}';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final paidTime = booking.paidAt ?? booking.updatedAt ?? booking.createdAt;
 
@@ -1167,7 +1472,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: (isPaid ? AppTheme.success : AppTheme.warning).withValues(alpha: 0.12),
+                      color: (isPaid ? AppTheme.success : AppTheme.warning)
+                          .withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -1179,7 +1485,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   const SizedBox(width: 10),
                   Text(
                     isPaid ? 'BIÊN NHẬN ĐIỆN TỬ BQL' : 'GIAO DỊCH CHỜ ĐỐI SOÁT',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
                 ],
               ),
@@ -1188,16 +1497,23 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 isPaid
                     ? 'Giao dịch thanh toán dịch vụ tiện ích đã được Ban Quản Lý xác thực'
                     : 'Yêu cầu thanh toán đang chờ Ban Quản Lý đối soát hoặc thu tiền',
-                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? Theme.of(context).colorScheme.surface : const Color(0xFFF9FAFB),
+                  color: isDark
+                      ? Theme.of(context).colorScheme.surface
+                      : const Color(0xFFF9FAFB),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
+                  border: Border.all(
+                    color: isDark ? Colors.white12 : Colors.grey.shade200,
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -1224,7 +1540,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     const Divider(height: 16),
                     _buildReceiptRow(
                       label: 'Thời gian sử dụng',
-                      value: '${_dateFormat.format(booking.bookingDate)} (${booking.timeSlot})',
+                      value:
+                          '${_dateFormat.format(booking.bookingDate)} (${booking.timeSlot})',
                     ),
                     if (booking.guestsCount > 1) ...[
                       const Divider(height: 16),
@@ -1250,7 +1567,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                       const Divider(height: 16),
                       _buildReceiptRow(
                         label: 'Tiền đặt cọc',
-                        value: '${_currencyFormat.format(booking.depositAmount)} (${booking.depositStatus})',
+                        value:
+                            '${_currencyFormat.format(booking.depositAmount)} (${booking.depositStatus})',
                       ),
                     ],
                     const Divider(height: 16),
@@ -1259,10 +1577,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                       value: booking.paymentMethod == 'CASH'
                           ? 'Tiền mặt tại BQL'
                           : (booking.paymentMethod == 'DEMO'
-                              ? 'Demo Payment (Cổng điện tử)'
-                              : (booking.paymentMethod == 'BANK_TRANSFER'
-                                  ? 'Chuyển khoản (VietQR Mô Phỏng)'
-                                  : 'Chuyển khoản ngân hàng')),
+                                ? 'Demo Payment (Cổng điện tử)'
+                                : (booking.paymentMethod == 'BANK_TRANSFER'
+                                      ? 'Chuyển khoản (VietQR Mô Phỏng)'
+                                      : 'Chuyển khoản ngân hàng')),
                     ),
                     const Divider(height: 16),
                     _buildReceiptRow(
@@ -1273,7 +1591,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     const Divider(height: 16),
                     _buildReceiptRow(
                       label: 'Thời gian ghi nhận',
-                      value: DateFormat('dd/MM/yyyy HH:mm').format(paidTime.toLocal()),
+                      value: DateFormat(
+                        'dd/MM/yyyy HH:mm',
+                      ).format(paidTime.toLocal()),
                     ),
                   ],
                 ),
@@ -1284,15 +1604,21 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   backgroundColor: AppTheme.primary,
                   minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 icon: const Icon(Icons.copy, color: Colors.white, size: 18),
                 label: const Text(
                   'Sao chép thông tin biên nhận',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onPressed: () {
-                  final summary = 'BIÊN NHẬN ĐIỆN TỬ BQL - TIỆN ÍCH PKA-HOME\n'
+                  final summary =
+                      'BIÊN NHẬN ĐIỆN TỬ BQL - TIỆN ÍCH PKA-HOME\n'
                       'Mã biên nhận: $receiptCode\n'
                       'Căn hộ: ${booking.apartmentCode ?? "N/A"}\n'
                       'Người đặt: ${booking.bookerName ?? "Cư dân"}\n'
@@ -1403,13 +1729,21 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                     Expanded(
                       child: Text(
                         a.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: isShared ? Colors.blue.shade50 : Colors.purple.shade50,
+                        color: isShared
+                            ? Colors.blue.shade50
+                            : Colors.purple.shade50,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -1417,7 +1751,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: isShared ? Colors.blue.shade800 : Colors.purple.shade800,
+                          color: isShared
+                              ? Colors.blue.shade800
+                              : Colors.purple.shade800,
                         ),
                       ),
                     ),
@@ -1425,7 +1761,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 ),
                 if (a.description != null && a.description!.isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Text(a.description!, style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                  Text(
+                    a.description!,
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                  ),
                 ],
                 const SizedBox(height: 10),
                 Wrap(
@@ -1434,26 +1773,41 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   children: [
                     Chip(
                       avatar: const Icon(Icons.groups, size: 16),
-                      label: Text('Sức chứa: ${a.maxCapacity} người', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      label: Text(
+                        'Sức chứa: ${a.maxCapacity} người',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       backgroundColor: Colors.blue.shade50,
                       visualDensity: VisualDensity.compact,
                     ),
                     Chip(
                       avatar: const Icon(Icons.timer_outlined, size: 16),
-                      label: Text('${a.slotDurationMinutes} phút/slot', style: const TextStyle(fontSize: 12)),
+                      label: Text(
+                        '${a.slotDurationMinutes} phút/slot',
+                        style: const TextStyle(fontSize: 12),
+                      ),
                       backgroundColor: Colors.grey.shade100,
                       visualDensity: VisualDensity.compact,
                     ),
                     Chip(
                       avatar: const Icon(Icons.payments_outlined, size: 16),
-                      label: Text('Phí: ${_currencyFormat.format(a.feeAmount)}', style: const TextStyle(fontSize: 12)),
+                      label: Text(
+                        'Phí: ${_currencyFormat.format(a.feeAmount)}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
                       backgroundColor: Colors.grey.shade100,
                       visualDensity: VisualDensity.compact,
                     ),
                     if (a.depositAmount > 0)
                       Chip(
                         avatar: const Icon(Icons.shield_outlined, size: 16),
-                        label: Text('Cọc: ${_currencyFormat.format(a.depositAmount)}', style: const TextStyle(fontSize: 12)),
+                        label: Text(
+                          'Cọc: ${_currencyFormat.format(a.depositAmount)}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
                         backgroundColor: Colors.amber.shade50,
                         visualDensity: VisualDensity.compact,
                       ),
@@ -1462,12 +1816,19 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+                    Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: Colors.grey.shade600,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         'Giờ mở cửa: ${a.openHours ?? "06:00 - 22:00"}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade700,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -1477,7 +1838,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 Align(
                   alignment: Alignment.centerRight,
                   child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(foregroundColor: AppTheme.primary, visualDensity: VisualDensity.compact),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primary,
+                      visualDensity: VisualDensity.compact,
+                    ),
                     icon: const Icon(Icons.edit_outlined, size: 16),
                     label: const Text('Sửa cấu hình'),
                     onPressed: () => _showEditAmenityDialog(amenity: a),
@@ -1494,12 +1858,15 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
   // ===========================================================================
   // Tab 3: Lịch Bảo Trì (với bộ chọn tiện ích & ngày)
   // ===========================================================================
-  Widget _buildMaintenanceTabWithSelector(List<BuildingAmenityModel> amenities) {
+  Widget _buildMaintenanceTabWithSelector(
+    List<BuildingAmenityModel> amenities,
+  ) {
     if (amenities.isEmpty) {
       return const Center(child: Text('Chưa có tiện ích nào.'));
     }
 
-    if (_selectedAmenityId == null || !amenities.any((a) => a.id == _selectedAmenityId)) {
+    if (_selectedAmenityId == null ||
+        !amenities.any((a) => a.id == _selectedAmenityId)) {
       _selectedAmenityId = amenities.first.id;
     }
     final selectedAmenity = amenities.firstWhere(
@@ -1522,7 +1889,10 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Chọn tiện ích',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     border: OutlineInputBorder(),
                   ),
                   items: amenities.map((a) {
@@ -1542,7 +1912,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   icon: const Icon(Icons.calendar_today, size: 16),
                   label: Text(
@@ -1565,7 +1937,9 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
 
   Widget _buildMaintenanceTab(BuildingAmenityModel amenity) {
     final query = AmenityDateQuery(amenityId: amenity.id, date: _selectedDate);
-    final maintenanceAsync = ref.watch(amenityMaintenanceForDateProvider(query));
+    final maintenanceAsync = ref.watch(
+      amenityMaintenanceForDateProvider(query),
+    );
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -1576,7 +1950,8 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
         onPressed: () => _showAddMaintenanceDialog(amenity.id),
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(amenityMaintenanceForDateProvider(query)),
+        onRefresh: () async =>
+            ref.invalidate(amenityMaintenanceForDateProvider(query)),
         child: maintenanceAsync.when(
           data: (windows) {
             if (windows.isEmpty) {
@@ -1584,9 +1959,15 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_circle_outline, size: 48, color: Colors.green.shade300),
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 48,
+                      color: Colors.green.shade300,
+                    ),
                     const SizedBox(height: 8),
-                    Text('Tiện ích hoạt động bình thường trong ngày ${_dateFormat.format(_selectedDate)}'),
+                    Text(
+                      'Tiện ích hoạt động bình thường trong ngày ${_dateFormat.format(_selectedDate)}',
+                    ),
                   ],
                 ),
               );
@@ -1607,7 +1988,11 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                           color: Colors.orange.shade50,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.build, color: Colors.orange, size: 24),
+                        child: const Icon(
+                          Icons.build,
+                          color: Colors.orange,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -1616,25 +2001,42 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
                           children: [
                             Text(
                               '${_timeFormat.format(w.startTime)} - ${_timeFormat.format(w.endTime)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                             const SizedBox(height: 4),
-                            Text(w.reason, style: TextStyle(color: Colors.grey.shade700)),
+                            Text(
+                              w.reason,
+                              style: TextStyle(color: Colors.grey.shade700),
+                            ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: AppTheme.error),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: AppTheme.error,
+                        ),
                         onPressed: () async {
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder: (ctx) => AlertDialog(
                               title: const Text('Xóa lịch bảo trì'),
-                              content: const Text('Bạn có chắc muốn mở lại tiện ích trong khung giờ này không?'),
+                              content: const Text(
+                                'Bạn có chắc muốn mở lại tiện ích trong khung giờ này không?',
+                              ),
                               actions: [
-                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Hủy')),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Hủy'),
+                                ),
                                 ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error, foregroundColor: Colors.white),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.error,
+                                    foregroundColor: Colors.white,
+                                  ),
                                   onPressed: () => Navigator.pop(ctx, true),
                                   child: const Text('Xóa'),
                                 ),
@@ -1644,17 +2046,27 @@ class _AmenityManagementScreenState extends ConsumerState<AmenityManagementScree
 
                           if (confirm == true) {
                             try {
-                              await ref.read(amenityBookingRepositoryProvider).deleteMaintenanceWindow(w.id);
-                              ref.invalidate(amenityMaintenanceForDateProvider(query));
+                              await ref
+                                  .read(amenityBookingRepositoryProvider)
+                                  .deleteMaintenanceWindow(w.id);
+                              ref.invalidate(
+                                amenityMaintenanceForDateProvider(query),
+                              );
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Đã gỡ bỏ lịch bảo trì!'), backgroundColor: AppStatusColors.paid),
+                                  const SnackBar(
+                                    content: Text('Đã gỡ bỏ lịch bảo trì!'),
+                                    backgroundColor: AppStatusColors.paid,
+                                  ),
                                 );
                               }
                             } catch (e) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                                  SnackBar(
+                                    content: Text(formatErrorMessage(e)),
+                                    backgroundColor: AppTheme.error,
+                                  ),
                                 );
                               }
                             }

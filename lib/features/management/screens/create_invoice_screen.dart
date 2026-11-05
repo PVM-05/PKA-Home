@@ -18,12 +18,16 @@ class CreateInvoiceScreen extends ConsumerStatefulWidget {
   const CreateInvoiceScreen({super.key});
 
   @override
-  ConsumerState<CreateInvoiceScreen> createState() => _CreateInvoiceScreenState();
+  ConsumerState<CreateInvoiceScreen> createState() =>
+      _CreateInvoiceScreenState();
 }
 
 class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   final _formKey = GlobalKey<FormState>();
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+  );
 
   ApartmentModel? _selectedApartment;
   String? _selectedBuilding;
@@ -32,7 +36,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
   // Tiền quản lý
   final _managementPriceController = TextEditingController(text: '16500');
-  
+
   // Tiền điện
   final _elecQtyController = TextEditingController();
   final _elecPriceController = TextEditingController(text: '3500');
@@ -56,8 +60,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _periodController.text = '${now.month.toString().padLeft(2, '0')}/${now.year}';
-    
+    _periodController.text =
+        '${now.month.toString().padLeft(2, '0')}/${now.year}';
+
     // Thêm listener để tự động tính lại tổng khi có thay đổi
     _managementPriceController.addListener(_updateState);
     _elecQtyController.addListener(_updateState);
@@ -67,7 +72,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     _motorbikeQtyController.addListener(_updateState);
     _carQtyController.addListener(_updateState);
   }
-  
+
   void _updateState() {
     setState(() {});
   }
@@ -155,7 +160,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedApartment == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn căn hộ'), backgroundColor: AppTheme.warning),
+        const SnackBar(
+          content: Text('Vui lòng chọn căn hộ'),
+          backgroundColor: AppTheme.warning,
+        ),
       );
       return;
     }
@@ -163,7 +171,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     setState(() => _isSubmitting = true);
     try {
       final items = <Map<String, dynamic>>[];
-      
+
       // Phí quản lý / Tiền thuê phòng
       if (_getManagementTotal() > 0) {
         items.add({
@@ -174,7 +182,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           'quantity': _isFixedRent ? 1.0 : (_selectedApartment!.area ?? 0),
         });
       }
-      
+
       // Phí điện
       final elecQty = double.tryParse(_elecQtyController.text) ?? 0;
       if (elecQty > 0) {
@@ -217,32 +225,42 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
       if (items.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Hóa đơn phải có ít nhất 1 loại phí > 0'), backgroundColor: AppTheme.warning),
+          const SnackBar(
+            content: Text('Hóa đơn phải có ít nhất 1 loại phí > 0'),
+            backgroundColor: AppTheme.warning,
+          ),
         );
         setState(() => _isSubmitting = false);
         return;
       }
 
-      await ref.read(managementRepositoryProvider).createInvoice(
-        _selectedApartment!.id,
-        _periodController.text.trim(),
-        _dueDate,
-        items,
-      );
-      
+      await ref
+          .read(managementRepositoryProvider)
+          .createInvoice(
+            _selectedApartment!.id,
+            _periodController.text.trim(),
+            _dueDate,
+            items,
+          );
+
       ref.invalidate(invoicesProvider); // Làm mới danh sách hóa đơn
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lập hóa đơn thành công!'), backgroundColor: AppTheme.success),
+          const SnackBar(
+            content: Text('Lập hóa đơn thành công!'),
+            backgroundColor: AppTheme.success,
+          ),
         );
         Navigator.of(context).pop();
       }
     } on PostgrestException catch (pe) {
       if (mounted) {
-        final isDuplicate = pe.code == '23505' ||
+        final isDuplicate =
+            pe.code == '23505' ||
             pe.message.contains('uq_invoice_apartment_period') ||
-            (pe.details?.toString().contains('uq_invoice_apartment_period') ?? false);
+            (pe.details?.toString().contains('uq_invoice_apartment_period') ??
+                false);
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(pe);
@@ -253,7 +271,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     } catch (e) {
       if (mounted) {
         final errorStr = e.toString();
-        final isDuplicate = errorStr.contains('23505') || errorStr.contains('uq_invoice_apartment_period');
+        final isDuplicate =
+            errorStr.contains('23505') ||
+            errorStr.contains('uq_invoice_apartment_period');
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(e);
@@ -268,7 +288,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<Map<String, double>>>(feeScheduleMapProvider, (prev, next) {
+    ref.listen<AsyncValue<Map<String, double>>>(feeScheduleMapProvider, (
+      prev,
+      next,
+    ) {
       next.whenData((rates) {
         if (!_hasLoadedRates) {
           _hasLoadedRates = true;
@@ -278,516 +301,740 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     });
 
     final feeRatesAsync = ref.watch(feeScheduleMapProvider);
-    if (!_hasLoadedRates && feeRatesAsync.hasValue && feeRatesAsync.value != null) {
+    if (!_hasLoadedRates &&
+        feeRatesAsync.hasValue &&
+        feeRatesAsync.value != null) {
       _hasLoadedRates = true;
       _applyFeeRates(feeRatesAsync.value!);
     }
 
     final apartmentsAsync = ref.watch(apartmentsProvider);
-    final total = _getManagementTotal() + _getElecTotal() + _getWaterTotal() + _getParkingTotal();
+    final total =
+        _getManagementTotal() +
+        _getElecTotal() +
+        _getWaterTotal() +
+        _getParkingTotal();
 
     return RoleGuard(
       permission: AppPermissions.invoiceManagement,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Lập hóa đơn mới'),
-        ),
+        appBar: AppBar(title: const Text('Lập hóa đơn mới')),
 
-      body: SafeArea(
-        child: apartmentsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(
-            child: AppErrorCard(
-              error: err,
-              onRetry: () => ref.invalidate(apartmentsProvider),
+        body: SafeArea(
+          child: apartmentsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(
+              child: AppErrorCard(
+                error: err,
+                onRetry: () => ref.invalidate(apartmentsProvider),
+              ),
             ),
-          ),
-          data: (apartments) {
-            final occupiedApartments = apartments.where((a) => !a.isEmpty).toList();
-            final buildings = occupiedApartments
-                .map((a) => a.buildingCode.toUpperCase())
-                .where((b) => b.isNotEmpty)
-                .toSet()
-                .toList()
-              ..sort();
+            data: (apartments) {
+              final occupiedApartments = apartments
+                  .where((a) => !a.isEmpty)
+                  .toList();
+              final buildings =
+                  occupiedApartments
+                      .map((a) => a.buildingCode.toUpperCase())
+                      .where((b) => b.isNotEmpty)
+                      .toSet()
+                      .toList()
+                    ..sort();
 
-            if (_selectedBuilding == null && buildings.isNotEmpty) {
-              _selectedBuilding = buildings.first;
-            }
+              if (_selectedBuilding == null && buildings.isNotEmpty) {
+                _selectedBuilding = buildings.first;
+              }
 
-            final displayedApartments = occupiedApartments
-                .where((a) => _selectedBuilding == null || a.buildingCode.toUpperCase() == _selectedBuilding)
-                .toList()
-              ..sort((a, b) => a.code.compareTo(b.code));
+              final displayedApartments =
+                  occupiedApartments
+                      .where(
+                        (a) =>
+                            _selectedBuilding == null ||
+                            a.buildingCode.toUpperCase() == _selectedBuilding,
+                      )
+                      .toList()
+                    ..sort((a, b) => a.code.compareTo(b.code));
 
-            final currentSelectedApartment = displayedApartments.contains(_selectedApartment) ? _selectedApartment : null;
+              final currentSelectedApartment =
+                  displayedApartments.contains(_selectedApartment)
+                  ? _selectedApartment
+                  : null;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Thông tin chung', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
-                            const SizedBox(height: 16),
-                            if (occupiedApartments.isEmpty)
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.warningBackground,
-                                  borderRadius: AppTheme.radiusSm,
-                                  border: Border.all(color: AppTheme.warningBorder),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Thông tin chung',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primary,
                                 ),
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.warning_amber_rounded, color: AppTheme.warningText, size: 20),
-                                    SizedBox(width: 8),
-                                    Expanded(
+                              ),
+                              const SizedBox(height: 16),
+                              if (occupiedApartments.isEmpty)
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.warningBackground,
+                                    borderRadius: AppTheme.radiusSm,
+                                    border: Border.all(
+                                      color: AppTheme.warningBorder,
+                                    ),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: AppTheme.warningText,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Không có căn hộ nào đang có người ở. Vui lòng kiểm tra lại danh sách cư dân.',
+                                          style: TextStyle(
+                                            color: AppTheme.warningText,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else ...[
+                                if (buildings.isNotEmpty) ...[
+                                  const Text(
+                                    'Chọn Tòa nhà:',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: buildings.map((b) {
+                                        final isSelected =
+                                            _selectedBuilding == b;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 8.0,
+                                          ),
+                                          child: ChoiceChip(
+                                            label: Text(
+                                              'Tòa $b',
+                                              style: TextStyle(
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : AppTheme.textPrimary,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.normal,
+                                              ),
+                                            ),
+                                            selected: isSelected,
+                                            selectedColor: AppTheme.primary,
+                                            backgroundColor:
+                                                AppTheme.background,
+                                            onSelected: (selected) {
+                                              if (selected &&
+                                                  _selectedBuilding != b) {
+                                                setState(() {
+                                                  _selectedBuilding = b;
+                                                  _selectedApartment = null;
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                DropdownButtonFormField<ApartmentModel>(
+                                  key: ValueKey(_selectedBuilding),
+                                  decoration: const InputDecoration(
+                                    labelText: 'Chọn Căn hộ (có người ở)',
+                                    prefixIcon: Icon(Icons.apartment_outlined),
+                                  ),
+                                  initialValue: currentSelectedApartment,
+                                  items: displayedApartments.map((apt) {
+                                    return DropdownMenuItem(
+                                      value: apt,
                                       child: Text(
-                                        'Không có căn hộ nào đang có người ở. Vui lòng kiểm tra lại danh sách cư dân.',
-                                        style: TextStyle(color: AppTheme.warningText, fontSize: 13, fontWeight: FontWeight.w500),
+                                        '${apt.code} (${apt.area ?? 0} m²)',
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) async {
+                                    setState(() {
+                                      _selectedApartment = val;
+                                      if (val != null &&
+                                          val.rentPrice != null &&
+                                          val.rentPrice! > 0) {
+                                        _isFixedRent = true;
+                                        _managementPriceController.text = val
+                                            .rentPrice!
+                                            .toInt()
+                                            .toString();
+                                      }
+                                    });
+                                    if (val != null) {
+                                      try {
+                                        final counts = await ref
+                                            .read(vehicleRepositoryProvider)
+                                            .getVehicleCounts(val.id);
+                                        final motorbikes =
+                                            counts['motorbike'] ?? 0;
+                                        final cars = counts['car'] ?? 0;
+                                        _motorbikeQtyController.text =
+                                            motorbikes > 0
+                                            ? motorbikes.toString()
+                                            : '';
+                                        _carQtyController.text = cars > 0
+                                            ? cars.toString()
+                                            : '';
+                                        if (mounted) setState(() {});
+                                      } catch (_) {}
+                                    }
+                                  },
+                                  validator: (val) => val == null
+                                      ? 'Vui lòng chọn căn hộ'
+                                      : null,
+                                ),
+                              ],
+                              if (_selectedApartment != null &&
+                                  !_isFixedRent &&
+                                  (_selectedApartment!.area == null ||
+                                      _selectedApartment!.area! <= 0)) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.warningBackground,
+                                    borderRadius: AppTheme.radiusSm,
+                                    border: Border.all(
+                                      color: AppTheme.warningBorder,
+                                    ),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: AppTheme.warningText,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Căn hộ này chưa có diện tích (0 m²). Tiền phí quản lý sẽ bằng 0 đ.',
+                                          style: TextStyle(
+                                            color: AppTheme.warningText,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _periodController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Kỳ hóa đơn',
+                                        prefixIcon: Icon(
+                                          Icons.calendar_today_outlined,
+                                        ),
+                                        hintText: 'MM/yyyy (VD: 09/2026)',
+                                      ),
+                                      validator: validateInvoicePeriod,
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () => _selectDueDate(context),
+                                      child: InputDecorator(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Hạn thanh toán',
+                                          prefixIcon: Icon(
+                                            Icons.event_outlined,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          DateFormat(
+                                            'dd/MM/yyyy',
+                                          ).format(_dueDate),
+                                        ),
                                       ),
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Phí quản lý
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _isFixedRent
+                                        ? 'Tiền thuê phòng'
+                                        : 'Phí quản lý',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      _currencyFormat.format(
+                                        _getManagementTotal(),
+                                      ),
+                                      textAlign: TextAlign.end,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  ChoiceChip(
+                                    label: const Text('Theo diện tích m²'),
+                                    selected: !_isFixedRent,
+                                    onSelected: (selected) {
+                                      if (selected) {
+                                        setState(() {
+                                          _isFixedRent = false;
+                                          _managementPriceController.text =
+                                              '16500';
+                                        });
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ChoiceChip(
+                                    label: const Text('Tiền phòng cố định'),
+                                    selected: _isFixedRent,
+                                    onSelected: (selected) {
+                                      if (selected) {
+                                        setState(() {
+                                          _isFixedRent = true;
+                                          if (_selectedApartment?.rentPrice !=
+                                                  null &&
+                                              _selectedApartment!.rentPrice! >
+                                                  0) {
+                                            _managementPriceController.text =
+                                                _selectedApartment!.rentPrice!
+                                                    .toInt()
+                                                    .toString();
+                                          }
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      initialValue: _isFixedRent
+                                          ? '1 phòng'
+                                          : (_selectedApartment?.area
+                                                    ?.toString() ??
+                                                '0'),
+                                      readOnly: true,
+                                      key: ValueKey(
+                                        '${_selectedApartment?.id}_$_isFixedRent',
+                                      ),
+                                      decoration: InputDecoration(
+                                        labelText: _isFixedRent
+                                            ? 'Số lượng'
+                                            : 'Diện tích (m²)',
+                                        filled: true,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _managementPriceController,
+                                      decoration: InputDecoration(
+                                        labelText: _isFixedRent
+                                            ? 'Tiền thuê (đ/tháng)'
+                                            : 'Đơn giá (đ/m²)',
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) => validatePositiveNumber(
+                                        v,
+                                        _isFixedRent
+                                            ? 'Tiền thuê phòng'
+                                            : 'Đơn giá quản lý',
+                                        true,
+                                      ),
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Tiền điện
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Tiền điện',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      _currencyFormat.format(_getElecTotal()),
+                                      textAlign: TextAlign.end,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _elecQtyController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Số điện tiêu thụ (kWh)',
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) =>
+                                          validateNonNegativeNumber(
+                                            v,
+                                            'Số điện',
+                                          ),
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _elecPriceController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Đơn giá (đ/kWh)',
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) => validatePositiveNumber(
+                                        v,
+                                        'Đơn giá điện',
+                                        true,
+                                      ),
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Tiền nước
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Tiền nước',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      _currencyFormat.format(_getWaterTotal()),
+                                      textAlign: TextAlign.end,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _waterQtyController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Số khối nước (m³)',
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) =>
+                                          validateNonNegativeNumber(
+                                            v,
+                                            'Số khối nước',
+                                          ),
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _waterPriceController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Đơn giá (đ/m³)',
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) => validatePositiveNumber(
+                                        v,
+                                        'Đơn giá nước',
+                                        true,
+                                      ),
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Phí gửi xe
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Phí gửi xe',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      _currencyFormat.format(
+                                        _getParkingTotal(),
+                                      ),
+                                      textAlign: TextAlign.end,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _motorbikeQtyController,
+                                      decoration: InputDecoration(
+                                        labelText:
+                                            'Số xe máy (${_currencyFormat.format(_motorbikeFee)}/xe)',
+                                        prefixIcon: const Icon(
+                                          Icons.two_wheeler_outlined,
+                                        ),
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) => validateNonNegativeInt(
+                                        v,
+                                        'Số xe máy',
+                                      ),
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _carQtyController,
+                                      decoration: InputDecoration(
+                                        labelText:
+                                            'Số ô tô (${_currencyFormat.format(_carFee)}/xe)',
+                                        prefixIcon: const Icon(
+                                          Icons.directions_car_outlined,
+                                        ),
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) =>
+                                          validateNonNegativeInt(v, 'Số ô tô'),
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Hệ thống tự động điền số xe theo dữ liệu đăng ký phương tiện của căn hộ.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Tổng cộng
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.primary.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'TỔNG CỘNG',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  _currencyFormat.format(total),
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        onPressed: _isSubmitting ? null : _submit,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
                                 ),
                               )
-                            else ...[
-                              if (buildings.isNotEmpty) ...[
-                                const Text(
-                                  'Chọn Tòa nhà:',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
-                                ),
-                                const SizedBox(height: 8),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: buildings.map((b) {
-                                      final isSelected = _selectedBuilding == b;
-                                      return Padding(
-                                        padding: const EdgeInsets.only(right: 8.0),
-                                        child: ChoiceChip(
-                                          label: Text(
-                                            'Tòa $b',
-                                            style: TextStyle(
-                                              color: isSelected ? Colors.white : AppTheme.textPrimary,
-                                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                            ),
-                                          ),
-                                          selected: isSelected,
-                                          selectedColor: AppTheme.primary,
-                                          backgroundColor: AppTheme.background,
-                                          onSelected: (selected) {
-                                            if (selected && _selectedBuilding != b) {
-                                              setState(() {
-                                                _selectedBuilding = b;
-                                                _selectedApartment = null;
-                                              });
-                                            }
-                                          },
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-                              DropdownButtonFormField<ApartmentModel>(
-                                key: ValueKey(_selectedBuilding),
-                                decoration: const InputDecoration(
-                                  labelText: 'Chọn Căn hộ (có người ở)',
-                                  prefixIcon: Icon(Icons.apartment_outlined),
-                                ),
-                                initialValue: currentSelectedApartment,
-                                items: displayedApartments.map((apt) {
-                                  return DropdownMenuItem(
-                                    value: apt,
-                                    child: Text('${apt.code} (${apt.area ?? 0} m²)'),
-                                  );
-                                }).toList(),
-                                onChanged: (val) async {
-                                  setState(() {
-                                    _selectedApartment = val;
-                                    if (val != null && val.rentPrice != null && val.rentPrice! > 0) {
-                                      _isFixedRent = true;
-                                      _managementPriceController.text = val.rentPrice!.toInt().toString();
-                                    }
-                                  });
-                                  if (val != null) {
-                                    try {
-                                      final counts = await ref.read(vehicleRepositoryProvider).getVehicleCounts(val.id);
-                                      final motorbikes = counts['motorbike'] ?? 0;
-                                      final cars = counts['car'] ?? 0;
-                                      _motorbikeQtyController.text = motorbikes > 0 ? motorbikes.toString() : '';
-                                      _carQtyController.text = cars > 0 ? cars.toString() : '';
-                                      if (mounted) setState(() {});
-                                    } catch (_) {}
-                                  }
-                                },
-                                validator: (val) => val == null ? 'Vui lòng chọn căn hộ' : null,
-                              ),
-                            ],
-                            if (_selectedApartment != null && !_isFixedRent && (_selectedApartment!.area == null || _selectedApartment!.area! <= 0)) ...[
-                              const SizedBox(height: 12),
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.warningBackground,
-                                  borderRadius: AppTheme.radiusSm,
-                                  border: Border.all(color: AppTheme.warningBorder),
-                                ),
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.warning_amber_rounded, color: AppTheme.warningText, size: 20),
-                                    SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        'Căn hộ này chưa có diện tích (0 m²). Tiền phí quản lý sẽ bằng 0 đ.',
-                                        style: TextStyle(color: AppTheme.warningText, fontSize: 13, fontWeight: FontWeight.w500),
-                                      ),
-                                    ),
-                                  ],
+                            : const Text(
+                                'XÁC NHẬN LẬP HÓA ĐƠN',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ],
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _periodController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Kỳ hóa đơn',
-                                      prefixIcon: Icon(Icons.calendar_today_outlined),
-                                      hintText: 'MM/yyyy (VD: 09/2026)',
-                                    ),
-                                    validator: validateInvoicePeriod,
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () => _selectDueDate(context),
-                                    child: InputDecorator(
-                                      decoration: const InputDecoration(labelText: 'Hạn thanh toán', prefixIcon: Icon(Icons.event_outlined)),
-                                      child: Text(DateFormat('dd/MM/yyyy').format(_dueDate)),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Phí quản lý
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(_isFixedRent ? 'Tiền thuê phòng' : 'Phí quản lý', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    _currencyFormat.format(_getManagementTotal()),
-                                    textAlign: TextAlign.end,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                ChoiceChip(
-                                  label: const Text('Theo diện tích m²'),
-                                  selected: !_isFixedRent,
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() {
-                                        _isFixedRent = false;
-                                        _managementPriceController.text = '16500';
-                                      });
-                                    }
-                                  },
-                                ),
-                                const SizedBox(width: 8),
-                                ChoiceChip(
-                                  label: const Text('Tiền phòng cố định'),
-                                  selected: _isFixedRent,
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() {
-                                        _isFixedRent = true;
-                                        if (_selectedApartment?.rentPrice != null && _selectedApartment!.rentPrice! > 0) {
-                                          _managementPriceController.text = _selectedApartment!.rentPrice!.toInt().toString();
-                                        }
-                                      });
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    initialValue: _isFixedRent ? '1 phòng' : (_selectedApartment?.area?.toString() ?? '0'),
-                                    readOnly: true,
-                                    key: ValueKey('${_selectedApartment?.id}_$_isFixedRent'),
-                                    decoration: InputDecoration(
-                                      labelText: _isFixedRent ? 'Số lượng' : 'Diện tích (m²)',
-                                      filled: true,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _managementPriceController,
-                                    decoration: InputDecoration(
-                                      labelText: _isFixedRent ? 'Tiền thuê (đ/tháng)' : 'Đơn giá (đ/m²)',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => validatePositiveNumber(
-                                      v,
-                                      _isFixedRent ? 'Tiền thuê phòng' : 'Đơn giá quản lý',
-                                      true,
-                                    ),
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Tiền điện
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Tiền điện', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    _currencyFormat.format(_getElecTotal()),
-                                    textAlign: TextAlign.end,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _elecQtyController,
-                                    decoration: const InputDecoration(labelText: 'Số điện tiêu thụ (kWh)'),
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => validateNonNegativeNumber(v, 'Số điện'),
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _elecPriceController,
-                                    decoration: const InputDecoration(labelText: 'Đơn giá (đ/kWh)'),
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => validatePositiveNumber(v, 'Đơn giá điện', true),
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Tiền nước
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Tiền nước', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    _currencyFormat.format(_getWaterTotal()),
-                                    textAlign: TextAlign.end,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _waterQtyController,
-                                    decoration: const InputDecoration(labelText: 'Số khối nước (m³)'),
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => validateNonNegativeNumber(v, 'Số khối nước'),
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _waterPriceController,
-                                    decoration: const InputDecoration(labelText: 'Đơn giá (đ/m³)'),
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => validatePositiveNumber(v, 'Đơn giá nước', true),
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Phí gửi xe
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Phí gửi xe', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    _currencyFormat.format(_getParkingTotal()),
-                                    textAlign: TextAlign.end,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _motorbikeQtyController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Số xe máy (${_currencyFormat.format(_motorbikeFee)}/xe)',
-                                      prefixIcon: const Icon(Icons.two_wheeler_outlined),
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => validateNonNegativeInt(v, 'Số xe máy'),
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _carQtyController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Số ô tô (${_currencyFormat.format(_carFee)}/xe)',
-                                      prefixIcon: const Icon(Icons.directions_car_outlined),
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => validateNonNegativeInt(v, 'Số ô tô'),
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Hệ thống tự động điền số xe theo dữ liệu đăng ký phương tiện của căn hộ.',
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Tổng cộng
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('TỔNG CỘNG', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                _currencyFormat.format(total),
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      onPressed: _isSubmitting ? null : _submit,
-                      child: _isSubmitting 
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text('XÁC NHẬN LẬP HÓA ĐƠN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
-    ));
+    );
   }
 }

@@ -9,10 +9,12 @@ class MaintenanceMaterialsScreen extends ConsumerStatefulWidget {
   const MaintenanceMaterialsScreen({super.key});
 
   @override
-  ConsumerState<MaintenanceMaterialsScreen> createState() => _MaintenanceMaterialsScreenState();
+  ConsumerState<MaintenanceMaterialsScreen> createState() =>
+      _MaintenanceMaterialsScreenState();
 }
 
-class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterialsScreen> {
+class _MaintenanceMaterialsScreenState
+    extends ConsumerState<MaintenanceMaterialsScreen> {
   String _selectedCategory = 'all';
   final TextEditingController _searchCtrl = TextEditingController();
   String _searchQuery = '';
@@ -38,15 +40,26 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                 children: [
                   Text('Hiện có: ${material.stockQuantity} ${material.unit}'),
                   const SizedBox(height: 12),
-                  const Text('Số lượng nhập thêm:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const Text(
+                    'Số lượng nhập thêm:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: adjustQuantity > 1 ? () => setDialogState(() => adjustQuantity--) : null,
+                        onPressed: adjustQuantity > 1
+                            ? () => setDialogState(() => adjustQuantity--)
+                            : null,
                       ),
-                      Text('$adjustQuantity ${material.unit}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text(
+                        '$adjustQuantity ${material.unit}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
                       IconButton(
                         icon: const Icon(Icons.add_circle_outline),
                         onPressed: () => setDialogState(() => adjustQuantity++),
@@ -56,7 +69,11 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                   const SizedBox(height: 8),
                   Text(
                     'Tồn kho sau khi nhập: ${material.stockQuantity + adjustQuantity} ${material.unit}',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.success, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.success,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -77,7 +94,9 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Đã nhập thêm $adjustQuantity ${material.unit} cho ${material.name}'),
+                          content: Text(
+                            'Đã nhập thêm $adjustQuantity ${material.unit} cho ${material.name}',
+                          ),
                           backgroundColor: AppTheme.success,
                         ),
                       );
@@ -94,7 +113,9 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
   }
 
   void _showCreateMaterialDialog() {
-    final codeCtrl = TextEditingController(text: 'MAT-${DateTime.now().millisecondsSinceEpoch % 10000}');
+    final codeCtrl = TextEditingController(
+      text: 'MAT-${DateTime.now().millisecondsSinceEpoch % 10000}',
+    );
     final nameCtrl = TextEditingController();
     final unitCtrl = TextEditingController(text: 'cái');
     final priceCtrl = TextEditingController(text: '50000');
@@ -113,19 +134,46 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(controller: codeCtrl, decoration: const InputDecoration(labelText: 'Mã vật tư *')),
+                    TextField(
+                      controller: codeCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Mã vật tư *',
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Tên vật tư *')),
+                    TextField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Tên vật tư *',
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       initialValue: category,
-                      decoration: const InputDecoration(labelText: 'Chuyên môn / Phân loại'),
+                      decoration: const InputDecoration(
+                        labelText: 'Chuyên môn / Phân loại',
+                      ),
                       items: const [
-                        DropdownMenuItem(value: 'electrical', child: Text('Điện')),
-                        DropdownMenuItem(value: 'plumbing', child: Text('Nước')),
-                        DropdownMenuItem(value: 'construction', child: Text('Xây dựng / Nội thất')),
-                        DropdownMenuItem(value: 'elevator', child: Text('Thang máy')),
-                        DropdownMenuItem(value: 'fire_safety', child: Text('PCCC & An toàn')),
+                        DropdownMenuItem(
+                          value: 'electrical',
+                          child: Text('Điện'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'plumbing',
+                          child: Text('Nước'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'construction',
+                          child: Text('Xây dựng / Nội thất'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'elevator',
+                          child: Text('Thang máy'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'fire_safety',
+                          child: Text('PCCC & An toàn'),
+                        ),
                         DropdownMenuItem(value: 'other', child: Text('Khác')),
                       ],
                       onChanged: (val) {
@@ -135,24 +183,58 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Expanded(child: TextField(controller: unitCtrl, decoration: const InputDecoration(labelText: 'Đơn vị tính'))),
+                        Expanded(
+                          child: TextField(
+                            controller: unitCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'Đơn vị tính',
+                            ),
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Expanded(child: TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Đơn giá (đ)'))),
+                        Expanded(
+                          child: TextField(
+                            controller: priceCtrl,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Đơn giá (đ)',
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Expanded(child: TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Tồn ban đầu'))),
+                        Expanded(
+                          child: TextField(
+                            controller: stockCtrl,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Tồn ban đầu',
+                            ),
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Expanded(child: TextField(controller: minStockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Mức cảnh báo'))),
+                        Expanded(
+                          child: TextField(
+                            controller: minStockCtrl,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Mức cảnh báo',
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Hủy'),
+                ),
                 ElevatedButton(
                   onPressed: () async {
                     if (nameCtrl.text.trim().isEmpty) return;
@@ -164,7 +246,9 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                         code: codeCtrl.text.trim(),
                         name: nameCtrl.text.trim(),
                         category: category,
-                        unit: unitCtrl.text.trim().isNotEmpty ? unitCtrl.text.trim() : 'cái',
+                        unit: unitCtrl.text.trim().isNotEmpty
+                            ? unitCtrl.text.trim()
+                            : 'cái',
                         unitPrice: double.tryParse(priceCtrl.text) ?? 0.0,
                         stockQuantity: int.tryParse(stockCtrl.text) ?? 0,
                         minStockAlert: int.tryParse(minStockCtrl.text) ?? 5,
@@ -206,12 +290,20 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
 
           var filtered = allMaterials;
           if (_selectedCategory != 'all') {
-            filtered = filtered.where((m) => m.category == _selectedCategory).toList();
+            filtered = filtered
+                .where((m) => m.category == _selectedCategory)
+                .toList();
           }
           if (_searchQuery.isNotEmpty) {
-            filtered = filtered.where((m) =>
-                m.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                m.code.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+            filtered = filtered
+                .where(
+                  (m) =>
+                      m.name.toLowerCase().contains(
+                        _searchQuery.toLowerCase(),
+                      ) ||
+                      m.code.toLowerCase().contains(_searchQuery.toLowerCase()),
+                )
+                .toList();
           }
 
           return Column(
@@ -227,14 +319,29 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                         decoration: BoxDecoration(
                           color: AppTheme.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                          border: Border.all(
+                            color: AppTheme.primary.withValues(alpha: 0.2),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Tổng loại vật tư', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                            const Text(
+                              'Tổng loại vật tư',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text('${allMaterials.length} mã hàng', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                            Text(
+                              '${allMaterials.length} mã hàng',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primary,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -244,16 +351,37 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: lowStockCount > 0 ? AppTheme.warning.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
+                          color: lowStockCount > 0
+                              ? AppTheme.warning.withValues(alpha: 0.1)
+                              : Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: lowStockCount > 0 ? AppTheme.warning.withValues(alpha: 0.3) : Colors.green.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: lowStockCount > 0
+                                ? AppTheme.warning.withValues(alpha: 0.3)
+                                : Colors.green.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Cảnh báo sắp hết', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                            const Text(
+                              'Cảnh báo sắp hết',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text('$lowStockCount mã cần nhập', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: lowStockCount > 0 ? Colors.orange.shade800 : Colors.green)),
+                            Text(
+                              '$lowStockCount mã cần nhập',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: lowStockCount > 0
+                                    ? Colors.orange.shade800
+                                    : Colors.green,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -271,10 +399,18 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                     hintText: 'Tìm kiếm vật tư theo tên hoặc mã...',
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(icon: const Icon(Icons.clear), onPressed: () => setState(() { _searchCtrl.clear(); _searchQuery = ''; }))
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () => setState(() {
+                              _searchCtrl.clear();
+                              _searchQuery = '';
+                            }),
+                          )
                         : null,
                     isDense: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   onChanged: (val) => setState(() => _searchQuery = val.trim()),
                 ),
@@ -300,7 +436,9 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
               // Danh sách vật tư
               Expanded(
                 child: filtered.isEmpty
-                    ? const Center(child: Text('Không tìm thấy vật tư phù hợp trong kho'))
+                    ? const Center(
+                        child: Text('Không tìm thấy vật tư phù hợp trong kho'),
+                      )
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
                         itemCount: filtered.length,
@@ -315,41 +453,76 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
                                     color: mat.isLowStock
-                                        ? AppTheme.warning.withValues(alpha: 0.15)
-                                        : AppTheme.primary.withValues(alpha: 0.1),
+                                        ? AppTheme.warning.withValues(
+                                            alpha: 0.15,
+                                          )
+                                        : AppTheme.primary.withValues(
+                                            alpha: 0.1,
+                                          ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Icon(
-                                    mat.isLowStock ? Icons.warning_amber_rounded : Icons.build_outlined,
-                                    color: mat.isLowStock ? Colors.orange.shade800 : AppTheme.primary,
+                                    mat.isLowStock
+                                        ? Icons.warning_amber_rounded
+                                        : Icons.build_outlined,
+                                    color: mat.isLowStock
+                                        ? Colors.orange.shade800
+                                        : AppTheme.primary,
                                     size: 24,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: Colors.grey.shade200,
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
-                                            child: Text(mat.code, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                                            child: Text(
+                                              mat.code,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                           ),
                                           const SizedBox(width: 6),
-                                          Text(mat.categoryDisplayName, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                                          Text(
+                                            mat.categoryDisplayName,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: AppTheme.textSecondary,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(mat.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                      Text(
+                                        mat.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'Đơn giá: ${mat.priceFormatted}/${mat.unit}',
-                                        style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -358,11 +531,18 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: mat.isLowStock
-                                            ? AppTheme.error.withValues(alpha: 0.1)
-                                            : Colors.green.withValues(alpha: 0.1),
+                                            ? AppTheme.error.withValues(
+                                                alpha: 0.1,
+                                              )
+                                            : Colors.green.withValues(
+                                                alpha: 0.1,
+                                              ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -370,7 +550,9 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
-                                          color: mat.isLowStock ? AppTheme.error : Colors.green.shade700,
+                                          color: mat.isLowStock
+                                              ? AppTheme.error
+                                              : Colors.green.shade700,
                                         ),
                                       ),
                                     ),
@@ -379,7 +561,11 @@ class _MaintenanceMaterialsScreenState extends ConsumerState<MaintenanceMaterial
                                       onTap: () => _showAdjustStockDialog(mat),
                                       child: const Text(
                                         '+ Nhập kho',
-                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primary,
+                                        ),
                                       ),
                                     ),
                                   ],

@@ -15,7 +15,8 @@ class FinancialReportScreen extends ConsumerStatefulWidget {
   const FinancialReportScreen({super.key});
 
   @override
-  ConsumerState<FinancialReportScreen> createState() => _FinancialReportScreenState();
+  ConsumerState<FinancialReportScreen> createState() =>
+      _FinancialReportScreenState();
 }
 
 class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
@@ -37,7 +38,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
       if (filePath != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã xuất báo cáo thành công: ${filePath.split('/').last}'),
+            content: Text(
+              'Đã xuất báo cáo thành công: ${filePath.split('/').last}',
+            ),
             backgroundColor: AppTheme.success,
             action: SnackBarAction(
               label: 'Chia sẻ',
@@ -55,7 +58,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Không thể tạo file Excel báo cáo. Vui lòng thử lại.'),
+            content: Text(
+              'Không thể tạo file Excel báo cáo. Vui lòng thử lại.',
+            ),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -112,119 +117,147 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
           ),
           bottom: const TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.analytics_outlined), text: 'Tuổi nợ & Dòng tiền'),
+              Tab(
+                icon: Icon(Icons.analytics_outlined),
+                text: 'Tuổi nợ & Dòng tiền',
+              ),
               Tab(icon: Icon(Icons.radar_rounded), text: 'Radar Rủi ro nợ AI'),
             ],
           ),
-        actions: [
-          reportAsync.when(
-            data: (report) => IconButton(
-              icon: _isExporting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Icon(Icons.file_download_outlined),
-              tooltip: 'Xuất file Excel đối soát',
-              onPressed: _isExporting ? null : () => _handleExportExcel(report),
+          actions: [
+            reportAsync.when(
+              data: (report) => IconButton(
+                icon: _isExporting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.file_download_outlined),
+                tooltip: 'Xuất file Excel đối soát',
+                onPressed: _isExporting
+                    ? null
+                    : () => _handleExportExcel(report),
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Làm mới dữ liệu',
-            onPressed: () => ref.refresh(financialAgingReportProvider),
-          ),
-        ],
-      ),
-      body: TabBarView(
-        children: [
-          reportAsync.when(
-        data: (report) => RefreshIndicator(
-          onRefresh: () async => ref.refresh(financialAgingReportProvider),
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // 1. Bộ lọc Kỳ thu
-              _buildFilterSection(filter),
-              const SizedBox(height: 16),
-
-              // 2. Thẻ KPI Dòng tiền & Tỷ lệ thu
-              _buildKpiSection(report.summary),
-              const SizedBox(height: 20),
-
-              // 3. Phân tích 4 xô tuổi nợ (Aging Buckets)
-              _buildAgingBucketsSection(report.agingBuckets, filter.bucketFilter),
-              const SizedBox(height: 20),
-
-              // 4. Thống kê theo Block
-              if (report.collectionByBlock.isNotEmpty) ...[
-                _buildBlockCollectionSection(report.collectionByBlock),
-                const SizedBox(height: 20),
-              ],
-
-              // 5. Danh sách căn hộ nợ đọng
-              _buildDebtorsSection(report.filterBuildingId ?? '', debtors, filter.bucketFilter),
-              const SizedBox(height: 32),
-            ],
-          ),
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: 'Làm mới dữ liệu',
+              onPressed: () => ref.refresh(financialAgingReportProvider),
+            ),
+          ],
         ),
-        loading: () => const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Đang tổng hợp báo cáo tài chính...'),
-            ],
-          ),
-        ),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
-                const SizedBox(height: 16),
-                Text(
-                  'Không thể tải báo cáo: $err',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppTheme.textPrimary),
+        body: TabBarView(
+          children: [
+            reportAsync.when(
+              data: (report) => RefreshIndicator(
+                onRefresh: () async =>
+                    ref.refresh(financialAgingReportProvider),
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // 1. Bộ lọc Kỳ thu
+                    _buildFilterSection(filter),
+                    const SizedBox(height: 16),
+
+                    // 2. Thẻ KPI Dòng tiền & Tỷ lệ thu
+                    _buildKpiSection(report.summary),
+                    const SizedBox(height: 20),
+
+                    // 3. Phân tích 4 xô tuổi nợ (Aging Buckets)
+                    _buildAgingBucketsSection(
+                      report.agingBuckets,
+                      filter.bucketFilter,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 4. Thống kê theo Block
+                    if (report.collectionByBlock.isNotEmpty) ...[
+                      _buildBlockCollectionSection(report.collectionByBlock),
+                      const SizedBox(height: 20),
+                    ],
+
+                    // 5. Danh sách căn hộ nợ đọng
+                    _buildDebtorsSection(
+                      report.filterBuildingId ?? '',
+                      debtors,
+                      filter.bucketFilter,
+                    ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () => ref.refresh(financialAgingReportProvider),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Thử lại'),
+              ),
+              loading: () => const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Đang tổng hợp báo cáo tài chính...'),
+                  ],
                 ),
-              ],
+              ),
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: AppTheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Không thể tải báo cáo: $err',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            ref.refresh(financialAgingReportProvider),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Thử lại'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
+            DebtRiskRadarTab(
+              buildingId: reportAsync.maybeWhen(
+                data: (r) => r.filterBuildingId ?? 'bld-default',
+                orElse: () => 'bld-default',
+              ),
+            ),
+          ],
         ),
       ),
-          DebtRiskRadarTab(
-            buildingId: reportAsync.maybeWhen(
-              data: (r) => r.filterBuildingId ?? 'bld-default',
-              orElse: () => 'bld-default',
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildFilterSection(FinancialReportFilter filter) {
     return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          const Icon(Icons.filter_alt_outlined, color: AppTheme.primary, size: 20),
+          const Icon(
+            Icons.filter_alt_outlined,
+            color: AppTheme.primary,
+            size: 20,
+          ),
           const SizedBox(width: 8),
-          const Text('Kỳ đối soát:', style: TextStyle(fontWeight: FontWeight.w600)),
+          const Text(
+            'Kỳ đối soát:',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonHideUnderline(
@@ -245,9 +278,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                     ),
                 ],
                 onChanged: (val) {
-                  ref.read(financialReportFilterProvider.notifier).update(
-                        (state) => state.copyWith(period: val),
-                      );
+                  ref
+                      .read(financialReportFilterProvider.notifier)
+                      .update((state) => state.copyWith(period: val));
                 },
               ),
             ),
@@ -331,7 +364,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
               ),
               Icon(icon, size: 18, color: color),
             ],
@@ -355,7 +391,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     );
   }
 
-  Widget _buildAgingBucketsSection(DebtAgingBucketModel buckets, String? activeBucket) {
+  Widget _buildAgingBucketsSection(
+    DebtAgingBucketModel buckets,
+    String? activeBucket,
+  ) {
     final totalDebt = buckets.totalDebt > 0 ? buckets.totalDebt : 1.0;
 
     return AppCard(
@@ -377,7 +416,11 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
               ),
               Text(
                 'Tổng nợ: ${_moneyFormat.format(buckets.totalDebt)} đ',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.error),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.error,
+                ),
               ),
             ],
           ),
@@ -391,19 +434,27 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    flex: ((buckets.amount0To30 / totalDebt) * 100).round().clamp(1, 100),
+                    flex: ((buckets.amount0To30 / totalDebt) * 100)
+                        .round()
+                        .clamp(1, 100),
                     child: Container(color: Colors.green),
                   ),
                   Expanded(
-                    flex: ((buckets.amount31To60 / totalDebt) * 100).round().clamp(1, 100),
+                    flex: ((buckets.amount31To60 / totalDebt) * 100)
+                        .round()
+                        .clamp(1, 100),
                     child: Container(color: Colors.amber),
                   ),
                   Expanded(
-                    flex: ((buckets.amount61To90 / totalDebt) * 100).round().clamp(1, 100),
+                    flex: ((buckets.amount61To90 / totalDebt) * 100)
+                        .round()
+                        .clamp(1, 100),
                     child: Container(color: Colors.orange),
                   ),
                   Expanded(
-                    flex: ((buckets.amountOver90 / totalDebt) * 100).round().clamp(1, 100),
+                    flex: ((buckets.amountOver90 / totalDebt) * 100)
+                        .round()
+                        .clamp(1, 100),
                     child: Container(color: Colors.red),
                   ),
                 ],
@@ -469,14 +520,19 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: () {
-        ref.read(financialReportFilterProvider.notifier).update(
-              (state) => state.copyWith(bucketFilter: isSelected ? null : bucketKey),
+        ref
+            .read(financialReportFilterProvider.notifier)
+            .update(
+              (state) =>
+                  state.copyWith(bucketFilter: isSelected ? null : bucketKey),
             );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.08) : Colors.transparent,
+          color: isSelected
+              ? color.withValues(alpha: 0.08)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: isSelected ? Border.all(color: color, width: 1.5) : null,
         ),
@@ -502,7 +558,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                   ),
                   Text(
                     description,
-                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -520,7 +579,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                 ),
                 Text(
                   '$count hóa đơn',
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -555,7 +617,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                     width: 70,
                     child: Text(
                       'Block ${block.blockName}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -565,7 +630,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                         value: block.collectionRate / 100,
                         backgroundColor: AppTheme.surface,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          block.collectionRate >= 80 ? AppTheme.success : AppTheme.warning,
+                          block.collectionRate >= 80
+                              ? AppTheme.success
+                              : AppTheme.warning,
                         ),
                         minHeight: 8,
                       ),
@@ -580,7 +647,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
-                        color: block.collectionRate >= 80 ? AppTheme.success : AppTheme.warning,
+                        color: block.collectionRate >= 80
+                            ? AppTheme.success
+                            : AppTheme.warning,
                       ),
                     ),
                   ),
@@ -593,7 +662,11 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     );
   }
 
-  Widget _buildDebtorsSection(String buildingId, List<DebtorApartmentModel> debtors, String? activeBucket) {
+  Widget _buildDebtorsSection(
+    String buildingId,
+    List<DebtorApartmentModel> debtors,
+    String? activeBucket,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -612,9 +685,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             if (activeBucket != null)
               TextButton(
                 onPressed: () {
-                  ref.read(financialReportFilterProvider.notifier).update(
-                        (state) => state.copyWith(bucketFilter: null),
-                      );
+                  ref
+                      .read(financialReportFilterProvider.notifier)
+                      .update((state) => state.copyWith(bucketFilter: null));
                 },
                 child: const Text('Bỏ lọc xô'),
               ),
@@ -627,7 +700,11 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.check_circle_outline, size: 40, color: AppTheme.success),
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 40,
+                    color: AppTheme.success,
+                  ),
                   SizedBox(height: 8),
                   Text('Không có căn hộ nào nợ đọng trong bộ lọc này'),
                 ],
@@ -655,23 +732,33 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: isOver90 ? AppTheme.error.withValues(alpha: 0.12) : AppTheme.primary.withValues(alpha: 0.1),
+                                color: isOver90
+                                    ? AppTheme.error.withValues(alpha: 0.12)
+                                    : AppTheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 debtor.apartmentCode,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: isOver90 ? AppTheme.error : AppTheme.primary,
+                                  color: isOver90
+                                      ? AppTheme.error
+                                      : AppTheme.primary,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               debtor.ownerName,
-                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -680,7 +767,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color: isOver90 ? AppTheme.error : AppTheme.textPrimary,
+                            color: isOver90
+                                ? AppTheme.error
+                                : AppTheme.textPrimary,
                           ),
                         ),
                       ],
@@ -693,14 +782,21 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                           'Quá hạn: ${debtor.maxDaysOverdue} ngày (${debtor.unpaidInvoicesCount} hóa đơn)',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isOver90 ? AppTheme.error : AppTheme.textSecondary,
-                            fontWeight: isOver90 ? FontWeight.w600 : FontWeight.normal,
+                            color: isOver90
+                                ? AppTheme.error
+                                : AppTheme.textSecondary,
+                            fontWeight: isOver90
+                                ? FontWeight.w600
+                                : FontWeight.normal,
                           ),
                         ),
                         if (debtor.ownerPhone.isNotEmpty)
                           Text(
                             debtor.ownerPhone,
-                            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                       ],
                     ),
@@ -710,7 +806,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                       children: [
                         OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             minimumSize: Size.zero,
                           ),
                           onPressed: () {
@@ -725,20 +824,38 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.account_balance_wallet_outlined, size: 14),
-                          label: const Text('Sổ cái', style: TextStyle(fontSize: 12)),
+                          icon: const Icon(
+                            Icons.account_balance_wallet_outlined,
+                            size: 14,
+                          ),
+                          label: const Text(
+                            'Sổ cái',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isOver90 ? AppTheme.error : AppTheme.primary,
+                            backgroundColor: isOver90
+                                ? AppTheme.error
+                                : AppTheme.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             minimumSize: Size.zero,
                           ),
-                          onPressed: () => _showReminderDialog(debtor, buildingId),
-                          icon: const Icon(Icons.notifications_active_outlined, size: 14),
-                          label: const Text('Nhắc nợ', style: TextStyle(fontSize: 12)),
+                          onPressed: () =>
+                              _showReminderDialog(debtor, buildingId),
+                          icon: const Icon(
+                            Icons.notifications_active_outlined,
+                            size: 14,
+                          ),
+                          label: const Text(
+                            'Nhắc nợ',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
                       ],
                     ),
@@ -751,4 +868,3 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     );
   }
 }
-

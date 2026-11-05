@@ -45,8 +45,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   Text(
                     'Chưa có thông báo nào',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -93,46 +93,87 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                   children: [
                                     if (announcement.isUrgent)
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.error.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
+                                          color: AppTheme.error.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          border: Border.all(
+                                            color: AppTheme.error.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                          ),
                                         ),
                                         child: const Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
+                                            Icon(
+                                              Icons.warning_amber_rounded,
+                                              size: 14,
+                                              color: AppTheme.error,
+                                            ),
                                             SizedBox(width: 4),
                                             Text(
                                               'Khẩn cấp',
-                                              style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold),
+                                              style: TextStyle(
+                                                color: AppTheme.error,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ],
                                         ),
                                       ),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.primary.withValues(alpha: 0.1),
+                                        color: AppTheme.primary.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                                        border: Border.all(
+                                          color: AppTheme.primary.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                        ),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(Icons.group_outlined, size: 13, color: AppTheme.primary),
+                                          const Icon(
+                                            Icons.group_outlined,
+                                            size: 13,
+                                            color: AppTheme.primary,
+                                          ),
                                           const SizedBox(width: 4),
                                           Text(
                                             announcement.targetDisplayName,
-                                            style: const TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600),
+                                            style: const TextStyle(
+                                              color: AppTheme.primary,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     Text(
-                                      DateFormat('dd/MM/yyyy HH:mm').format(announcement.createdAt),
-                                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                      DateFormat(
+                                        'dd/MM/yyyy HH:mm',
+                                      ).format(announcement.createdAt),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textSecondary,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -141,19 +182,42 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
+                                    icon: const Icon(
+                                      Icons.edit_outlined,
+                                      color: AppTheme.primary,
+                                      size: 20,
+                                    ),
                                     tooltip: 'Chỉnh sửa',
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                    onPressed: () => _showEditDialog(context, ref, announcement),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 32,
+                                      minHeight: 32,
+                                    ),
+                                    onPressed: () => _showEditDialog(
+                                      context,
+                                      ref,
+                                      announcement,
+                                    ),
                                   ),
                                   const SizedBox(width: 4),
                                   IconButton(
-                                    icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: AppTheme.error,
+                                      size: 20,
+                                    ),
                                     tooltip: 'Xóa thông báo',
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                    onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 32,
+                                      minHeight: 32,
+                                    ),
+                                    onPressed: () => _confirmDelete(
+                                      context,
+                                      ref,
+                                      announcement.id,
+                                      announcement.title,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -167,7 +231,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
+                              color: announcement.isUrgent
+                                  ? AppTheme.error
+                                  : AppTheme.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -177,7 +243,10 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             announcement.content,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: AppTheme.textSecondary, height: 1.4),
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              height: 1.4,
+                            ),
                           ),
                         ],
                       ),
@@ -207,13 +276,15 @@ class AnnouncementManagementScreen extends ConsumerWidget {
   void _triggerRemindersScan(BuildContext context, WidgetRef ref) async {
     try {
       final activeBuilding = ref.read(activeBuildingProvider).value;
-      final count = await ref.read(notificationRepositoryProvider).triggerInvoiceRemindersScan(
-        buildingId: activeBuilding?.id,
-      );
+      final count = await ref
+          .read(notificationRepositoryProvider)
+          .triggerInvoiceRemindersScan(buildingId: activeBuilding?.id);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã quét và phát sinh $count thông báo nhắc nợ thành công.'),
+            content: Text(
+              'Đã quét và phát sinh $count thông báo nhắc nợ thành công.',
+            ),
             backgroundColor: AppTheme.success,
           ),
         );
@@ -230,7 +301,12 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     }
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, String id, String title) {
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+    String title,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -294,7 +370,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               title: const Text('Tạo thông báo mới'),
               content: SingleChildScrollView(
                 child: Form(
@@ -356,7 +434,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             prefixIcon: Icon(Icons.apartment_outlined),
                           ),
                           validator: (v) {
-                            if (targetType == 'block' && (v == null || v.trim().isEmpty)) {
+                            if (targetType == 'block' &&
+                                (v == null || v.trim().isEmpty)) {
                               return 'Vui lòng nhập mã Block';
                             }
                             return null;
@@ -375,7 +454,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           ),
                           keyboardType: TextInputType.number,
                           validator: (v) {
-                            if (targetType == 'floor' && (v == null || v.trim().isEmpty)) {
+                            if (targetType == 'floor' &&
+                                (v == null || v.trim().isEmpty)) {
                               return 'Vui lòng nhập số tầng';
                             }
                             return null;
@@ -392,7 +472,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             hintText: 'VD: A0110',
                             prefixIcon: Icon(Icons.door_front_door_outlined),
                           ),
-                          validator: (v) => targetType == 'apartment' ? validateApartmentCode(v) : null,
+                          validator: (v) => targetType == 'apartment'
+                              ? validateApartmentCode(v)
+                              : null,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                         ),
                       ],
@@ -439,14 +521,19 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   onPressed: isSubmitting
                       ? null
                       : () async {
-                          if (!(formKey.currentState?.validate() ?? false)) return;
+                          if (!(formKey.currentState?.validate() ?? false))
+                            return;
 
                           setState(() => isSubmitting = true);
                           try {
-                            final repo = ref.read(announcementRepositoryProvider);
+                            final repo = ref.read(
+                              announcementRepositoryProvider,
+                            );
                             final targetVal = targetType == 'apartment'
                                 ? apartmentController.text.trim().toUpperCase()
-                                : (targetType == 'all' ? null : targetValueController.text.trim());
+                                : (targetType == 'all'
+                                      ? null
+                                      : targetValueController.text.trim());
 
                             await repo.createAnnouncement(
                               title: titleController.text.trim(),
@@ -454,7 +541,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               isUrgent: isUrgent,
                               targetType: targetType,
                               targetValue: targetVal,
-                              targetApartment: targetType == 'apartment' ? targetVal : null,
+                              targetApartment: targetType == 'apartment'
+                                  ? targetVal
+                                  : null,
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
@@ -479,8 +568,12 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                         },
                   child: isSubmitting
                       ? const SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text('Đăng'),
                 ),
@@ -505,18 +598,34 @@ class AnnouncementManagementScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppTheme.error.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.error),
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 14,
+                        color: AppTheme.error,
+                      ),
                       SizedBox(width: 4),
-                      Text('Khẩn cấp', style: TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.bold)),
+                      Text(
+                        'Khẩn cấp',
+                        style: TextStyle(
+                          color: AppTheme.error,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -534,18 +643,29 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.group_outlined, size: 16, color: AppTheme.primary),
+                  const Icon(
+                    Icons.group_outlined,
+                    size: 16,
+                    color: AppTheme.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Đối tượng nhận: ${announcement.targetDisplayName}',
-                    style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 'Ngày đăng: ${DateFormat('dd/MM/yyyy HH:mm').format(announcement.createdAt)}',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -565,11 +685,19 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditDialog(BuildContext context, WidgetRef ref, AnnouncementModel announcement) {
+  void _showEditDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AnnouncementModel announcement,
+  ) {
     final titleController = TextEditingController(text: announcement.title);
     final contentController = TextEditingController(text: announcement.content);
-    final targetValueController = TextEditingController(text: announcement.targetValue ?? '');
-    final apartmentController = TextEditingController(text: announcement.targetApartment ?? announcement.targetValue ?? '');
+    final targetValueController = TextEditingController(
+      text: announcement.targetValue ?? '',
+    );
+    final apartmentController = TextEditingController(
+      text: announcement.targetApartment ?? announcement.targetValue ?? '',
+    );
     final formKey = GlobalKey<FormState>();
     String targetType = announcement.targetType;
     bool isUrgent = announcement.isUrgent;
@@ -581,7 +709,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               title: const Text('Chỉnh sửa thông báo'),
               content: Form(
                 key: formKey,
@@ -592,7 +722,10 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                       TextFormField(
                         controller: titleController,
                         decoration: const InputDecoration(labelText: 'Tiêu đề'),
-                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập tiêu đề' : null,
+                        validator: (value) =>
+                            value == null || value.trim().isEmpty
+                            ? 'Vui lòng nhập tiêu đề'
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -646,7 +779,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             prefixIcon: Icon(Icons.apartment_outlined),
                           ),
                           validator: (v) {
-                            if (targetType == 'block' && (v == null || v.trim().isEmpty)) {
+                            if (targetType == 'block' &&
+                                (v == null || v.trim().isEmpty)) {
                               return 'Vui lòng nhập mã Block';
                             }
                             return null;
@@ -664,7 +798,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           ),
                           keyboardType: TextInputType.number,
                           validator: (v) {
-                            if (targetType == 'floor' && (v == null || v.trim().isEmpty)) {
+                            if (targetType == 'floor' &&
+                                (v == null || v.trim().isEmpty)) {
                               return 'Vui lòng nhập số tầng';
                             }
                             return null;
@@ -680,21 +815,29 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             hintText: 'VD: A0110',
                             prefixIcon: Icon(Icons.door_front_door_outlined),
                           ),
-                          validator: (v) => targetType == 'apartment' ? validateApartmentCode(v) : null,
+                          validator: (v) => targetType == 'apartment'
+                              ? validateApartmentCode(v)
+                              : null,
                         ),
                       ],
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: contentController,
-                        decoration: const InputDecoration(labelText: 'Nội dung'),
+                        decoration: const InputDecoration(
+                          labelText: 'Nội dung',
+                        ),
                         maxLines: 4,
-                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập nội dung' : null,
+                        validator: (value) =>
+                            value == null || value.trim().isEmpty
+                            ? 'Vui lòng nhập nội dung'
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       CheckboxListTile(
                         title: const Text('Khẩn cấp'),
                         value: isUrgent,
-                        onChanged: (val) => setState(() => isUrgent = val ?? false),
+                        onChanged: (val) =>
+                            setState(() => isUrgent = val ?? false),
                         contentPadding: EdgeInsets.zero,
                         controlAffinity: ListTileControlAffinity.leading,
                       ),
@@ -711,14 +854,19 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   onPressed: isSubmitting
                       ? null
                       : () async {
-                          if (!(formKey.currentState?.validate() ?? false)) return;
+                          if (!(formKey.currentState?.validate() ?? false))
+                            return;
 
                           setState(() => isSubmitting = true);
                           try {
-                            final repo = ref.read(announcementRepositoryProvider);
+                            final repo = ref.read(
+                              announcementRepositoryProvider,
+                            );
                             final targetVal = targetType == 'apartment'
                                 ? apartmentController.text.trim().toUpperCase()
-                                : (targetType == 'all' ? null : targetValueController.text.trim());
+                                : (targetType == 'all'
+                                      ? null
+                                      : targetValueController.text.trim());
 
                             await repo.updateAnnouncement(
                               id: announcement.id,
@@ -727,13 +875,17 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               isUrgent: isUrgent,
                               targetType: targetType,
                               targetValue: targetVal,
-                              targetApartment: targetType == 'apartment' ? targetVal : null,
+                              targetApartment: targetType == 'apartment'
+                                  ? targetVal
+                                  : null,
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Cập nhật thông báo thành công!'),
+                                  content: Text(
+                                    'Cập nhật thông báo thành công!',
+                                  ),
                                   backgroundColor: AppTheme.success,
                                 ),
                               );
@@ -752,8 +904,12 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                         },
                   child: isSubmitting
                       ? const SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text('Lưu'),
                 ),

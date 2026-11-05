@@ -13,10 +13,7 @@ final NumberFormat _vnCurrency = NumberFormat('#,##0 đ', 'vi_VN');
 class FeePolicyManagementScreen extends ConsumerWidget {
   final String? buildingId;
 
-  const FeePolicyManagementScreen({
-    super.key,
-    this.buildingId,
-  });
+  const FeePolicyManagementScreen({super.key, this.buildingId});
 
   static final List<FeeTierPolicyModel> _defaultPolicies = [
     FeeTierPolicyModel(
@@ -34,9 +31,27 @@ class FeePolicyManagementScreen extends ConsumerWidget {
       name: 'Nước sinh hoạt định mức (4 m³/người/tháng)',
       calculationMethod: FeeCalculationMethod.perCapitaQuota,
       tiers: [
-        {'tier': 1, 'name': 'Trong định mức (0 - 16 m³)', 'from': 0, 'to': 16, 'rate': 8500},
-        {'tier': 2, 'name': 'Vượt định mức cấp 1 (16 - 24 m³)', 'from': 16, 'to': 24, 'rate': 12000},
-        {'tier': 3, 'name': 'Vượt định mức cấp 2 (> 24 m³)', 'from': 24, 'to': null, 'rate': 18000},
+        {
+          'tier': 1,
+          'name': 'Trong định mức (0 - 16 m³)',
+          'from': 0,
+          'to': 16,
+          'rate': 8500,
+        },
+        {
+          'tier': 2,
+          'name': 'Vượt định mức cấp 1 (16 - 24 m³)',
+          'from': 16,
+          'to': 24,
+          'rate': 12000,
+        },
+        {
+          'tier': 3,
+          'name': 'Vượt định mức cấp 2 (> 24 m³)',
+          'from': 24,
+          'to': null,
+          'rate': 18000,
+        },
       ],
       effectiveFrom: DateTime(2024, 1, 1),
       isActive: true,
@@ -101,12 +116,15 @@ class FeePolicyManagementScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.refresh(feePoliciesProvider(buildingId).future),
+        onRefresh: () async =>
+            ref.refresh(feePoliciesProvider(buildingId).future),
         child: policiesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => _buildContent(context, _defaultPolicies),
           data: (serverPolicies) {
-            final policies = serverPolicies.isNotEmpty ? serverPolicies : _defaultPolicies;
+            final policies = serverPolicies.isNotEmpty
+                ? serverPolicies
+                : _defaultPolicies;
             return _buildContent(context, policies);
           },
         ),
@@ -114,7 +132,10 @@ class FeePolicyManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, List<FeeTierPolicyModel> policies) {
+  Widget _buildContent(
+    BuildContext context,
+    List<FeeTierPolicyModel> policies,
+  ) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
       children: [
@@ -141,7 +162,11 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                   color: AppTheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.receipt_long, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.receipt_long,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 14),
               const Expanded(
@@ -250,10 +275,14 @@ class FeePolicyManagementScreen extends ConsumerWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: policy.isActive ? Colors.green.shade50 : Colors.grey.shade200,
+            color: policy.isActive
+                ? Colors.green.shade50
+                : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: policy.isActive ? Colors.green.shade400 : Colors.grey.shade400,
+              color: policy.isActive
+                  ? Colors.green.shade400
+                  : Colors.grey.shade400,
             ),
           ),
           child: Text(
@@ -261,7 +290,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: policy.isActive ? Colors.green.shade700 : Colors.grey.shade700,
+              color: policy.isActive
+                  ? Colors.green.shade700
+                  : Colors.grey.shade700,
             ),
           ),
         ),
@@ -276,7 +307,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
             child: TextButton.icon(
               onPressed: () => _openQuickCalculator(context, calculatorTab),
               icon: const Icon(Icons.calculate, size: 18),
-              label: Text('Thử tính nhanh ${policy.policyTypeVietnamese.toLowerCase()}'),
+              label: Text(
+                'Thử tính nhanh ${policy.policyTypeVietnamese.toLowerCase()}',
+              ),
               style: TextButton.styleFrom(
                 foregroundColor: AppTheme.primary,
                 textStyle: const TextStyle(fontWeight: FontWeight.bold),
@@ -290,7 +323,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
 
   Widget _buildPolicyDetailContent(FeeTierPolicyModel policy) {
     if (policy.policyType == FeePolicyType.electricityTier) {
-      final tiersList = policy.tiers is List ? (policy.tiers as List) : UtilityFeeCalculator.defaultElectricityTiers;
+      final tiersList = policy.tiers is List
+          ? (policy.tiers as List)
+          : UtilityFeeCalculator.defaultElectricityTiers;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -300,7 +335,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           ...tiersList.map((tier) {
-            final m = tier is Map<String, dynamic> ? tier : Map<String, dynamic>.from(tier as Map);
+            final m = tier is Map<String, dynamic>
+                ? tier
+                : Map<String, dynamic>.from(tier as Map);
             final name = m['name'] as String? ?? 'Bậc ${m['tier']}';
             final rate = (m['rate'] as num?)?.toDouble() ?? 0.0;
             return Padding(
@@ -308,10 +345,20 @@ class FeePolicyManagementScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(name, style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary)),
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
                   Text(
                     '${_vnCurrency.format(rate)}/kWh',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
                   ),
                 ],
               ),
@@ -333,7 +380,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           if (tiersList.isNotEmpty)
             ...tiersList.map((tier) {
-              final m = tier is Map<String, dynamic> ? tier : Map<String, dynamic>.from(tier as Map);
+              final m = tier is Map<String, dynamic>
+                  ? tier
+                  : Map<String, dynamic>.from(tier as Map);
               final name = m['name'] as String? ?? 'Bậc ${m['tier']}';
               final rate = (m['rate'] as num?)?.toDouble() ?? 0.0;
               return Padding(
@@ -341,10 +390,20 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(name, style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary)),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
                     Text(
                       '${_vnCurrency.format(rate)}/m³',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -377,7 +436,11 @@ class FeePolicyManagementScreen extends ConsumerWidget {
             SizedBox(height: 4),
             Text(
               'Số tiền = (Đơn giá tháng × Số ngày sử dụng thực tế) / Tổng số ngày trong tháng',
-              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.textPrimary),
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: AppTheme.textPrimary,
+              ),
             ),
             SizedBox(height: 6),
             Text(
@@ -402,7 +465,11 @@ class FeePolicyManagementScreen extends ConsumerWidget {
           children: [
             Text(
               'Quy định xử lý quá hạn thanh toán:',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.error),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.error,
+              ),
             ),
             SizedBox(height: 6),
             Row(
@@ -420,7 +487,11 @@ class FeePolicyManagementScreen extends ConsumerWidget {
             SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.error),
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 16,
+                  color: AppTheme.error,
+                ),
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(

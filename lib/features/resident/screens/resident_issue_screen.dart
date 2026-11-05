@@ -22,9 +22,7 @@ class ResidentIssueScreen extends ConsumerWidget {
     final issueState = ref.watch(residentIssueProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Phản ánh sự cố'),
-      ),
+      appBar: AppBar(title: const Text('Phản ánh sự cố')),
       body: issueState.when(
         data: (issues) {
           if (issues.isEmpty) {
@@ -111,9 +109,9 @@ class ResidentIssueScreen extends ConsumerWidget {
             Text(
               'Bạn chưa gửi phản ánh nào',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -139,7 +137,11 @@ class ResidentIssueScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmDeleteIssue(BuildContext context, WidgetRef ref, IssueModel issue) async {
+  Future<void> _confirmDeleteIssue(
+    BuildContext context,
+    WidgetRef ref,
+    IssueModel issue,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -202,7 +204,11 @@ class ResidentIssueScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildIssueCard(BuildContext context, WidgetRef ref, IssueModel issue) {
+  Widget _buildIssueCard(
+    BuildContext context,
+    WidgetRef ref,
+    IssueModel issue,
+  ) {
     final formatDate = DateFormat('dd/MM/yyyy HH:mm');
 
     Color statusColor;
@@ -240,266 +246,320 @@ class ResidentIssueScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: () => context.push(AppRoutes.residentIssueDetail, extra: issue),
       child: Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: AppTheme.textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      formatDate.format(issue.createdAt),
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 16,
+                        color: AppTheme.textSecondary,
                       ),
-                      child: Text(
-                        statusText,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    if (issue.status == 'pending') ...[
                       const SizedBox(width: 4),
-                      PopupMenuButton<String>(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            context.push(
-                              AppRoutes.residentEditIssue,
-                              extra: issue,
-                            );
-                          } else if (value == 'delete') {
-                            _confirmDeleteIssue(context, ref, issue);
-                          }
-                        },
-                        itemBuilder: (ctx) => [
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
-                                SizedBox(width: 8),
-                                Text('Chỉnh sửa'),
-                              ],
-                            ),
-                          ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete_outline, size: 18, color: AppTheme.error),
-                                SizedBox(width: 8),
-                                Text('Xóa phản ánh', style: TextStyle(color: AppTheme.error)),
-                              ],
-                            ),
-                          ),
-                        ],
+                      Text(
+                        formatDate.format(issue.createdAt),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
                     ],
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              issue.description,
-              style: const TextStyle(fontSize: 14),
-            ),
-            
-            if (issue.reportImages.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Stack(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => PhotoViewerScreen(
-                              imageUrls: issue.reportImages,
-                              initialIndex: 0,
-                            ),
-                          ),
-                        );
-                      },
-                      child: AppStorageImage(
-                        imageUrl: issue.reportImages.first,
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(6),
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text(
-                          'Ảnh lúc báo cáo',
-                          style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    if (issue.reportImages.length > 1)
-                      Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.photo_library_outlined, color: Colors.white, size: 14),
-                              const SizedBox(width: 4),
-                              Text(
-                                '+${issue.reportImages.length - 1} ảnh',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-
-            if (issue.resolutionProofImages.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppStatusColors.paid.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppStatusColors.paid.withValues(alpha: 0.3)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.verified, size: 16, color: AppStatusColors.paid),
-                        SizedBox(width: 6),
-                        Text(
-                          'Ảnh minh chứng đã khắc phục (Sau khi sửa)',
+                        child: Text(
+                          statusText,
                           style: TextStyle(
+                            color: statusColor,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: AppStatusColors.paid,
                           ),
+                        ),
+                      ),
+                      if (issue.status == 'pending') ...[
+                        const SizedBox(width: 4),
+                        PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(
+                            Icons.more_vert,
+                            size: 20,
+                            color: AppTheme.textSecondary,
+                          ),
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              context.push(
+                                AppRoutes.residentEditIssue,
+                                extra: issue,
+                              );
+                            } else if (value == 'delete') {
+                              _confirmDeleteIssue(context, ref, issue);
+                            }
+                          },
+                          itemBuilder: (ctx) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.edit_outlined,
+                                    size: 18,
+                                    color: AppTheme.primary,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text('Chỉnh sửa'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete_outline,
+                                    size: 18,
+                                    color: AppTheme.error,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Xóa phản ánh',
+                                    style: TextStyle(color: AppTheme.error),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: issue.resolutionProofImages.length,
-                        itemBuilder: (ctx, i) {
-                          return Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => PhotoViewerScreen(
-                                        imageUrls: issue.resolutionProofImages,
-                                        initialIndex: i,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: AppStorageImage(
-                                  imageUrl: issue.resolutionProofImages[i],
-                                  width: 120,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(issue.description, style: const TextStyle(fontSize: 14)),
+
+              if (issue.reportImages.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Stack(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => PhotoViewerScreen(
+                                imageUrls: issue.reportImages,
+                                initialIndex: 0,
                               ),
                             ),
                           );
                         },
+                        child: AppStorageImage(
+                          imageUrl: issue.reportImages.first,
+                          height: 140,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Text(
-                  'Mức độ: ',
-                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                ),
-                Text(
-                  priorityText,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: priorityColor,
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'Ảnh lúc báo cáo',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (issue.reportImages.length > 1)
+                        Positioned(
+                          bottom: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.7),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.photo_library_outlined,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '+${issue.reportImages.length - 1} ảnh',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                const Spacer(),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.forum_outlined, size: 14, color: AppTheme.primary.withValues(alpha: 0.7)),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Xem chi tiết & trao đổi',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.primary.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.w500,
-                      ),
+              ],
+
+              if (issue.resolutionProofImages.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppStatusColors.paid.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppStatusColors.paid.withValues(alpha: 0.3),
                     ),
-                    const SizedBox(width: 2),
-                    Icon(Icons.chevron_right, size: 16, color: AppTheme.primary.withValues(alpha: 0.7)),
-                  ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.verified,
+                            size: 16,
+                            color: AppStatusColors.paid,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            'Ảnh minh chứng đã khắc phục (Sau khi sửa)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: AppStatusColors.paid,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 100,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: issue.resolutionProofImages.length,
+                          itemBuilder: (ctx, i) {
+                            return Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => PhotoViewerScreen(
+                                          imageUrls:
+                                              issue.resolutionProofImages,
+                                          initialIndex: i,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: AppStorageImage(
+                                    imageUrl: issue.resolutionProofImages[i],
+                                    width: 120,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ],
+
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Text(
+                    'Mức độ: ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    priorityText,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: priorityColor,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.forum_outlined,
+                        size: 14,
+                        color: AppTheme.primary.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Xem chi tiết & trao đổi',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.primary.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 16,
+                        color: AppTheme.primary.withValues(alpha: 0.7),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
