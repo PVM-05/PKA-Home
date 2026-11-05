@@ -111,3 +111,4 @@
 - [ ] **Bước 1.7.1:** Chạy toàn bộ test suites và `dart analyze lib test`.
 - [ ] **Bước 1.7.2:** Cập nhật `docs/COMMERCIAL_PRODUCT_ROADMAP.md`: Điều chỉnh các mục có mock data hoặc unwired sang trạng thái đang hoàn thiện Production.
 - [ ] **Bước 1.7.3:** Push toàn bộ commits lên `origin/main`.
+
