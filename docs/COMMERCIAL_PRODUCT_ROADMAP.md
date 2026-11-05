@@ -319,7 +319,20 @@ graph TD
 ---
 
 ### GIAI ĐOẠN F: Hạ Tầng, Tuân Thủ & Vận Hành
-- [ ] **Hạ tầng môi trường tách bạch:** Dev / Staging / Production. Giám sát uptime, cảnh báo lỗi qua Telegram/Slack.
+- [x] **F1. Hạ tầng môi trường tách bạch & Giám sát vận hành thời gian thực (Dev / Staging / Production & Alerting):**
+  - Cấu hình đa môi trường chuẩn 12-Factor (AppEnvironment):
+    - Hỗ trợ 3 môi trường phân tách tuyệt đối: dev, staging, prod cùng các file mẫu chuẩn .env.development.example, .env.staging.example, .env.production.example.
+    - Cơ chế nạp đa tầng: Ưu tiên cờ biên dịch compile-time --dart-define=APP_ENV=..., kết hợp flutter_dotenv và tự động fallback.
+    - Phân quyền tính năng theo môi trường: Tự động tắt verbose debug logging trên Production, bảo vệ chống rò rỉ dữ liệu nhạy cảm.
+  - Dịch vụ Cảnh báo Vận hành & Giám sát Uptime (OperationalAlertService):
+    - Tích hợp 2 kênh thông báo sự cố tức thời: Telegram Bot API (HTML message) và Slack/Discord Incoming Webhook (Rich JSON blocks).
+    - Phân cấp sự cố nghiêm ngặt (AlertSeverity): INFO, WARNING, CRITICAL (P0: Lỗi quỹ bảo trì, Lỗi cổng thanh toán ngân hàng, Tấn công Brute-force).
+    - Cơ chế chống bão cảnh báo (Throttling / Debouncing): Khóa lặp tối thiểu 60s cho các lỗi trùng cụm, bảo vệ kênh liên lạc không bị nghẽn tin nhắn.
+    - Đo độ trễ & Kiểm tra sức khỏe kết nối CSDL Supabase (checkHealthStatus).
+    - Riverpod Provider: operationalAlertServiceProvider.
+  - Chất lượng & Kiểm thử:
+    - 13/13 unit tests tự động pass 100% (app_environment_test.dart, operational_alert_service_test.dart).
+    - Phân tích tĩnh dart analyze lib test đạt 0 issues trên toàn bộ dự án.
 - [x] **Tuân thủ pháp lý & Bảo mật:** Nhật ký kiểm toán bất biến (`audit_logs` Append-Only, tự động ghi log qua Triggers hóa đơn/thẻ xe/ủy quyền).
 - [x] **F3. Offline-First & Hàng Đợi Đồng Bộ Bền Vững (Persistent Sync Queue & Resilience):**
   - Lưu trữ bền vững (`OfflineSyncQueueStorage`):

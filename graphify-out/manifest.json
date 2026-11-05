@@ -1338,9 +1338,9 @@
     "semantic_hash": ""
   },
   "pubspec.yaml": {
-    "mtime": 1793348806.079082,
-    "seen": 1793349369.2049654,
-    "ast_hash": "cdfef28ebd1a9e72d852507c51afe273",
+    "mtime": 1793860686.6294188,
+    "seen": 1793861069.5970416,
+    "ast_hash": "807a18876963818c796e3950ddceec55",
     "semantic_hash": ""
   },
   "supabase/functions/send-fcm-notification/index.ts": {
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793860189.7184258,
-    "seen": 1793860214.0346677,
-    "ast_hash": "a16e18fc83d2fe57e957d041ac40bd55",
+    "mtime": 1793861017.939301,
+    "seen": 1793861069.5995557,
+    "ast_hash": "d6ad33ed6141c0bf380180193220d745",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -5988,15 +5988,15 @@
     "semantic_hash": ""
   },
   "lib/core/sync/sync_action_model.dart": {
-    "mtime": 1793804907.9946616,
-    "seen": 1793807410.599448,
-    "ast_hash": "2af21fd4a60f8a5252ab21ea54d9ca78",
+    "mtime": 1793860435.6754684,
+    "seen": 1793861069.5970416,
+    "ast_hash": "30c0de910b1cb770d5642b3a84196100",
     "semantic_hash": ""
   },
   "lib/core/sync/sync_providers.dart": {
-    "mtime": 1793804908.049523,
-    "seen": 1793807410.599448,
-    "ast_hash": "e2c0d6ce8d7c5e6bcaf46664b6853d22",
+    "mtime": 1793860435.6764708,
+    "seen": 1793861069.5970416,
+    "ast_hash": "639f80345d00ec6600cce98f054c66fc",
     "semantic_hash": ""
   },
   "lib/core/widgets/sync_status_bar.dart": {
@@ -6012,15 +6012,15 @@
     "semantic_hash": ""
   },
   "test/core/sync/offline_sync_queue_storage_test.dart": {
-    "mtime": 1793804909.9516943,
-    "seen": 1793807410.601038,
-    "ast_hash": "8572397b1af17709819ecaca46dfe982",
+    "mtime": 1793860435.68049,
+    "seen": 1793861069.598549,
+    "ast_hash": "b4c1bf4b3c65b0bbb3aee3391311c54b",
     "semantic_hash": ""
   },
   "test/core/widgets/sync_status_bar_test.dart": {
-    "mtime": 1793804911.1045833,
-    "seen": 1793807410.601038,
-    "ast_hash": "1afc63e219f11a07088ad200e338924e",
+    "mtime": 1793860435.6814907,
+    "seen": 1793861069.598549,
+    "ast_hash": "7d8983ddc7159734615ddb8f34670673",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-04-offline-first-resilience-and-sync-queue.md": {
@@ -6048,9 +6048,9 @@
     "semantic_hash": ""
   },
   "lib/data/contracts/contracts.dart": {
-    "mtime": 1793807469.7891903,
-    "seen": 1793860214.03316,
-    "ast_hash": "0c32b027b05dbc5fed9640a868f524cc",
+    "mtime": 1793860435.677483,
+    "seen": 1793861069.5970416,
+    "ast_hash": "d25a3e336914a0841c2cabaa77773057",
     "semantic_hash": ""
   },
   "lib/data/contracts/finance_rpc_contracts.dart": {
@@ -6066,9 +6066,9 @@
     "semantic_hash": ""
   },
   "lib/data/contracts/rpc_contract_client.dart": {
-    "mtime": 1793807470.1679435,
-    "seen": 1793860214.03316,
-    "ast_hash": "162c02677b6ceea3d0fd6bdc4ae65b52",
+    "mtime": 1793860435.677483,
+    "seen": 1793861069.5970416,
+    "ast_hash": "eedd96149d340060a3473106b4e60c48",
     "semantic_hash": ""
   },
   "test/contracts/rpc_contracts_test.dart": {
@@ -6096,8 +6096,8 @@
     "semantic_hash": ""
   },
   "lib/core/security/mfa_service.dart": {
-    "mtime": 1793860157.5273483,
-    "seen": 1793860214.03316,
+    "mtime": 1793860322.8437283,
+    "seen": 1793861069.5970416,
     "ast_hash": "7815f673fa6c6b5a504e4ee548373da3",
     "semantic_hash": ""
   },
@@ -6108,14 +6108,14 @@
     "semantic_hash": ""
   },
   "lib/features/auth/widgets/mfa_setup_dialog.dart": {
-    "mtime": 1793859897.4226017,
-    "seen": 1793860214.03316,
+    "mtime": 1793860322.9189079,
+    "seen": 1793861069.5970416,
     "ast_hash": "a5405102d731e8a38b509f020eb22ae7",
     "semantic_hash": ""
   },
   "lib/features/auth/widgets/mfa_verification_dialog.dart": {
-    "mtime": 1793859897.4215927,
-    "seen": 1793860214.03316,
+    "mtime": 1793860322.9683516,
+    "seen": 1793861069.5970416,
     "ast_hash": "8f4a06c93fd3a6222ced042b5231051e",
     "semantic_hash": ""
   },
@@ -6126,9 +6126,9 @@
     "semantic_hash": ""
   },
   "test/core/security/mfa_service_test.dart": {
-    "mtime": 1793859790.5710166,
-    "seen": 1793860214.03316,
-    "ast_hash": "d741010dba29c71682f82640936fb3a9",
+    "mtime": 1793860435.68049,
+    "seen": 1793861069.598549,
+    "ast_hash": "2a6cfe5ca50c0a2c57cff6ffd0fd549f",
     "semantic_hash": ""
   },
   "test/core/security/secure_storage_service_test.dart": {
@@ -6138,9 +6138,9 @@
     "semantic_hash": ""
   },
   "test/features/auth/mfa_dialog_test.dart": {
-    "mtime": 1793859870.649729,
-    "seen": 1793860214.034165,
-    "ast_hash": "def155b39de1741c8089ea15b11a7da3",
+    "mtime": 1793860435.6834931,
+    "seen": 1793861069.598549,
+    "ast_hash": "36d02a962e81bab5cc74eea34fb3d57e",
     "semantic_hash": ""
   },
   "docs/security/SUPABASE_KEY_ROTATION.md": {
@@ -6159,6 +6159,42 @@
     "mtime": 1793859674.746075,
     "seen": 1793860214.0346677,
     "ast_hash": "3f0cdfa5e4a744273501bbcb351f30e9",
+    "semantic_hash": ""
+  },
+  "lib/core/config/app_environment.dart": {
+    "mtime": 1793860582.7018514,
+    "seen": 1793861069.5970416,
+    "ast_hash": "cde63f3b871f2b86a58a5f84f06aaed6",
+    "semantic_hash": ""
+  },
+  "lib/core/services/operational_alert_service.dart": {
+    "mtime": 1793860933.5442793,
+    "seen": 1793861069.5970416,
+    "ast_hash": "4b223ac46d2d2401e93a00128e3e75de",
+    "semantic_hash": ""
+  },
+  "test/core/config/app_environment_test.dart": {
+    "mtime": 1793860560.6515453,
+    "seen": 1793861069.598549,
+    "ast_hash": "cebe8e3a35b08accebaced13bf5bdb6b",
+    "semantic_hash": ""
+  },
+  "test/core/services/operational_alert_service_test.dart": {
+    "mtime": 1793860941.5440183,
+    "seen": 1793861069.598549,
+    "ast_hash": "404829444681812ff09baf55cc221875",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-05-multi-environment-and-operational-alerting.md": {
+    "mtime": 1793860534.399835,
+    "seen": 1793861069.5995557,
+    "ast_hash": "ca715351e1bece024d81c17487dce69b",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-05-multi-environment-and-operational-alerting-design.md": {
+    "mtime": 1793860509.9079309,
+    "seen": 1793861069.600059,
+    "ast_hash": "5c4fc1da61c3eba32d7baa643f07fffd",
     "semantic_hash": ""
   }
 }
