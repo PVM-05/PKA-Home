@@ -24,16 +24,22 @@ class BuildingModel {
     this.totalFloors = 20,
     this.totalUnits = 200,
     this.isActive = true,
-    this.bankBin = '970418',
-    this.bankName = 'BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',
-    this.bankAccountNumber = '1234567890',
-    this.bankAccountName = 'BQL PKA LANDMARK',
+    this.bankBin = '',
+    this.bankName = '',
+    this.bankAccountNumber = '',
+    this.bankAccountName = '',
     this.propertyType = 'apartment',
     this.createdAt,
     this.updatedAt,
   });
 
   bool get isBoardingHouse => propertyType == 'boarding_house';
+
+  /// Kiểm tra tòa nhà đã cấu hình tài khoản ngân hàng hợp lệ để nhận tiền chưa
+  bool get hasValidBankAccount =>
+      bankBin.trim().isNotEmpty &&
+      bankAccountNumber.trim().isNotEmpty &&
+      bankAccountName.trim().isNotEmpty;
 
   factory BuildingModel.fromJson(Map<String, dynamic> json) {
     return BuildingModel(
@@ -45,10 +51,10 @@ class BuildingModel {
       totalFloors: (json['total_floors'] as num?)?.toInt() ?? 20,
       totalUnits: (json['total_units'] as num?)?.toInt() ?? 200,
       isActive: json['is_active'] as bool? ?? true,
-      bankBin: json['bank_bin'] as String? ?? '970418',
-      bankName: json['bank_name'] as String? ?? 'BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',
-      bankAccountNumber: json['bank_account_number'] as String? ?? '1234567890',
-      bankAccountName: json['bank_account_name'] as String? ?? 'BQL PKA LANDMARK',
+      bankBin: json['bank_bin'] as String? ?? '',
+      bankName: json['bank_name'] as String? ?? '',
+      bankAccountNumber: json['bank_account_number'] as String? ?? '',
+      bankAccountName: json['bank_account_name'] as String? ?? '',
       propertyType: json['property_type'] as String? ?? 'apartment',
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at'] as String) : null,

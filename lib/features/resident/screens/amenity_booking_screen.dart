@@ -227,7 +227,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                             type: PaymentType.service,
                             referenceId: result.id,
                             title: 'Đăng ký ${widget.amenity.name}',
-                            referenceCode: '#BK-${DateFormat('yyyyMMdd').format(_selectedDate)}-$codeSuffix',
+                            referenceCode: 'BK${DateFormat('yyyyMMdd').format(_selectedDate)}$codeSuffix',
                             amount: totalFee,
                             feeBreakdown: feeItems,
                           );
@@ -1098,7 +1098,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                                   type: PaymentType.service,
                                   referenceId: b.id,
                                   title: 'Thanh toán ${b.amenityName ?? widget.amenity.name}',
-                                  referenceCode: '#BK-${DateFormat('yyyyMMdd').format(b.bookingDate)}-$codeSuffix',
+                                  referenceCode: 'BK${DateFormat('yyyyMMdd').format(b.bookingDate)}$codeSuffix',
                                   amount: totalFee,
                                   feeBreakdown: feeItems,
                                 );

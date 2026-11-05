@@ -10,7 +10,7 @@ final residentApartmentsProvider =
 
   final response = await SupabaseConfig.client
       .from('residents_apartments')
-      .select('relation_role, apartment_id, apartments(id, code, area, building_code, floor_number)')
+      .select('relation_role, apartment_id, apartments(id, code, area, building_code, floor_number, building_id)')
       .eq('user_id', user.id);
 
   return List<Map<String, dynamic>>.from(response);
@@ -64,4 +64,12 @@ final currentSelectedApartmentProvider = Provider<Map<String, dynamic>?>((ref) {
     (a) => a['apartment_id'] == selectedId,
     orElse: () => apts.first,
   );
+});
+
+/// Provider ID tòa nhà gắn với căn hộ cư dân đang chọn
+final residentBuildingIdProvider = Provider<String?>((ref) {
+  final apt = ref.watch(currentSelectedApartmentProvider);
+  if (apt == null) return null;
+  final aptMap = apt['apartments'] as Map<String, dynamic>?;
+  return (aptMap?['building_id'] as String?) ?? (apt['building_id'] as String?);
 });
