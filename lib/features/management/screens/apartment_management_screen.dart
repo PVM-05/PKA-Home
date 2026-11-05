@@ -1057,8 +1057,9 @@ class _ApartmentManagementScreenState
                               ),
                               keyboardType: TextInputType.number,
                               validator: (v) {
-                                if (v == null || v.trim().isEmpty)
+                                if (v == null || v.trim().isEmpty) {
                                   return 'Bắt buộc';
+                                }
                                 final n = int.tryParse(v.trim());
                                 if (n == null || n <= 0) return 'Số hợp lệ';
                                 return null;
@@ -1091,8 +1092,9 @@ class _ApartmentManagementScreenState
                   onPressed: isSaving
                       ? null
                       : () async {
-                          if (!(formKey.currentState?.validate() ?? false))
+                          if (!(formKey.currentState?.validate() ?? false)) {
                             return;
+                          }
 
                           setDialogState(() => isSaving = true);
                           final code = codeController.text.trim().toUpperCase();

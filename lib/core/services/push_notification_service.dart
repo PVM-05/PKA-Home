@@ -42,9 +42,12 @@ class PushNotificationService {
   PushNotificationService(this._notificationRepo);
 
   bool _isLocalNotificationsInitialized = false;
+  void Function(String route)? _onSelectRouteCallback;
+  DateTime _sessionStartTime = DateTime.now();
 
   StreamSubscription<String>? _tokenRefreshSub;
   StreamSubscription<RemoteMessage>? _onMessageSub;
+  StreamSubscription<RemoteMessage>? _onMessageOpenedAppSub;
   StreamSubscription<List<NotificationModel>>? _realtimeNotifSub;
   final Set<String> _seenNotificationIds = {};
 
@@ -56,6 +59,7 @@ class PushNotificationService {
     required String userId,
     String? buildingId,
   }) {
+    _sessionStartTime = DateTime.now();
     _realtimeNotifSub?.cancel();
     _realtimeNotifSub = _notificationRepo
         .streamUserNotifications(userId, buildingId: buildingId)
@@ -63,9 +67,9 @@ class PushNotificationService {
       for (final notif in notifications) {
         if (!notif.isRead && !_seenNotificationIds.contains(notif.id)) {
           _seenNotificationIds.add(notif.id);
-          // Nếu thông báo mới phát sinh trong vòng 5 phút gần đây -> hiển thị heads-up
-          final diff = DateTime.now().difference(notif.createdAt);
-          if (diff.inMinutes < 5) {
+          // CHỈ hiển thị thông báo heads-up nếu thông báo phát sinh sau thời điểm mở ứng dụng
+          // Tránh bắn chuông hàng loạt cho các thông báo cũ khi người dùng mở app
+          if (notif.createdAt.isAfter(_sessionStartTime)) {
             showSystemNotification(
               id: notif.id.hashCode,
               title: notif.title,
@@ -95,8 +99,11 @@ class PushNotificationService {
   Future<void> ensureLocalNotificationsInitialized([
     void Function(String route)? onSelectNotificationRoute,
   ]) async {
+    if (onSelectNotificationRoute != null) {
+      _onSelectRouteCallback = onSelectNotificationRoute;
+    }
     if (_isLocalNotificationsInitialized) return;
-    await _setupLocalNotifications(onSelectNotificationRoute);
+    await _setupLocalNotifications();
     _isLocalNotificationsInitialized = true;
   }
 
@@ -109,6 +116,8 @@ class PushNotificationService {
     _tokenRefreshSub = null;
     _onMessageSub?.cancel();
     _onMessageSub = null;
+    _onMessageOpenedAppSub?.cancel();
+    _onMessageOpenedAppSub = null;
     stopRealtimeNotificationListener();
   }
 
@@ -119,11 +128,17 @@ class PushNotificationService {
     void Function(String route)? onSelectNotificationRoute,
   }) async {
     try {
+      if (onSelectNotificationRoute != null) {
+        _onSelectRouteCallback = onSelectNotificationRoute;
+      }
+
       // Hủy các subscription cũ trước khi tạo mới để tránh cộng dồn listener
       await _tokenRefreshSub?.cancel();
       _tokenRefreshSub = null;
       await _onMessageSub?.cancel();
       _onMessageSub = null;
+      await _onMessageOpenedAppSub?.cancel();
+      _onMessageOpenedAppSub = null;
 
       // 1. Khởi tạo Android Notification Channel và Local Notifications cho hiển thị Heads-up & Âm thanh
       await ensureLocalNotificationsInitialized(onSelectNotificationRoute);
@@ -179,6 +194,22 @@ class PushNotificationService {
         _onMessageSub = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           _showForegroundSystemNotification(message);
         });
+
+        // 7. Lắng nghe sự kiện click thông báo khi app ở background
+        _onMessageOpenedAppSub = FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+          debugPrint('🔔 [FCM onMessageOpenedApp] Click thông báo từ background: ${message.data}');
+          final route = resolveRouteFromNotification(message.data);
+          _onSelectRouteCallback?.call(route);
+        });
+
+        // 8. Xử lý click thông báo khi app ở trạng thái terminated (khởi động app từ notification)
+        fcm.getInitialMessage().then((RemoteMessage? initialMessage) {
+          if (initialMessage != null) {
+            debugPrint('🔔 [FCM getInitialMessage] Mở app từ terminated: ${initialMessage.data}');
+            final route = resolveRouteFromNotification(initialMessage.data);
+            _onSelectRouteCallback?.call(route);
+          }
+        });
       } else {
         debugPrint('Người dùng từ chối quyền nhận thông báo.');
       }
@@ -188,12 +219,16 @@ class PushNotificationService {
   }
 
   /// Cấu hình Local Notifications và Android Channel
-  Future<void> _setupLocalNotifications(
+  Future<void> _setupLocalNotifications([
     void Function(String route)? onSelectNotificationRoute,
-  ) async {
+  ]) async {
     try {
       if (kIsWeb) return;
       if (!Platform.isAndroid && !Platform.isIOS) return;
+
+      if (onSelectNotificationRoute != null) {
+        _onSelectRouteCallback = onSelectNotificationRoute;
+      }
 
       const androidInit = AndroidInitializationSettings('@drawable/ic_notification');
       const iosInit = DarwinInitializationSettings(
@@ -210,7 +245,7 @@ class PushNotificationService {
             try {
               final Map<String, dynamic> data = jsonDecode(details.payload!);
               final route = resolveRouteFromNotification(data);
-              onSelectNotificationRoute?.call(route);
+              _onSelectRouteCallback?.call(route);
             } catch (_) {}
           }
         },

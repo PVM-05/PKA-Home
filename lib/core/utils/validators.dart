@@ -9,7 +9,10 @@
 /// lẫn định dạng phòng trọ linh hoạt (VD: P101, 101, Phòng 3, P-201, T2-05).
 ///
 /// Nếu [strictApartmentFormat] là `true`, bắt buộc tuân theo định dạng chung cư `A0110`.
-String? validateApartmentCode(String? value, {bool strictApartmentFormat = false}) {
+String? validateApartmentCode(
+  String? value, {
+  bool strictApartmentFormat = false,
+}) {
   if (value == null || value.trim().isEmpty) {
     return 'Vui lòng nhập mã căn hộ';
   }
@@ -110,7 +113,11 @@ String? validatePhoneOptional(String? value) {
 }
 
 /// Validate số thực không âm (>= 0), ví dụ sản lượng điện, nước tiêu thụ.
-String? validateNonNegativeNumber(String? value, [String fieldName = 'Số lượng', bool isRequired = false]) {
+String? validateNonNegativeNumber(
+  String? value, [
+  String fieldName = 'Số lượng',
+  bool isRequired = false,
+]) {
   if (value == null || value.trim().isEmpty) {
     if (isRequired) return '$fieldName không được để trống';
     return null;
@@ -129,7 +136,11 @@ String? validateNonNegativeNumber(String? value, [String fieldName = 'Số lư�
 }
 
 /// Validate số thực dương (> 0), ví dụ đơn giá tiền điện, nước, quản lý.
-String? validatePositiveNumber(String? value, [String fieldName = 'Đơn giá', bool isRequired = true]) {
+String? validatePositiveNumber(
+  String? value, [
+  String fieldName = 'Đơn giá',
+  bool isRequired = true,
+]) {
   if (value == null || value.trim().isEmpty) {
     if (isRequired) return '$fieldName không được để trống';
     return null;
@@ -148,7 +159,11 @@ String? validatePositiveNumber(String? value, [String fieldName = 'Đơn giá', 
 }
 
 /// Validate số nguyên không âm (>= 0), ví dụ số lượng xe máy, ô tô.
-String? validateNonNegativeInt(String? value, [String fieldName = 'Số lượng', bool isRequired = false]) {
+String? validateNonNegativeInt(
+  String? value, [
+  String fieldName = 'Số lượng',
+  bool isRequired = false,
+]) {
   if (value == null || value.trim().isEmpty) {
     if (isRequired) return '$fieldName không được để trống';
     return null;

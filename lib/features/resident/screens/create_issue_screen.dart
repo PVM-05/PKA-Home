@@ -59,16 +59,16 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
     }
   }
 
-  Future<void> _callHotline() async {
-    final uri = Uri.parse('tel:02439998888');
+  Future<void> _callNumber(String phoneNumber, String label) async {
+    final uri = Uri.parse('tel:$phoneNumber');
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Hotline Ban Quản Lý: 024.3999.8888 (24/7)'),
+            SnackBar(
+              content: Text('$label: $phoneNumber'),
               backgroundColor: AppTheme.primary,
             ),
           );
@@ -77,14 +77,18 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hotline Ban Quản Lý: 024.3999.8888 (24/7)'),
+          SnackBar(
+            content: Text('$label: $phoneNumber'),
             backgroundColor: AppTheme.primary,
           ),
         );
       }
     }
   }
+
+  Future<void> _callHotline() => _callNumber('02439998888', 'Hotline Ban Quản Lý (24/7)');
+  Future<void> _callFireEmergency() => _callNumber('114', 'Cứu hỏa & Cứu nạn PCCC');
+  Future<void> _callMedicalEmergency() => _callNumber('115', 'Cấp cứu y tế');
 
   Future<void> _pickImage(ImageSource source) async {
     final remaining = 3 - _imageFiles.length;
@@ -450,26 +454,122 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          key: const Key('call_hotline_emergency_button'),
-                          onPressed: _callHotline,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.error,
-                            foregroundColor: Colors.white,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          icon: const Icon(Icons.phone_in_talk, size: 16),
-                          label: const Text(
-                            'GỌI HOTLINE KHẨN CẤP BQL (24/7): 024.3999.8888',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                      if (_triageResult!.isFireHazard) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                key: const Key('call_114_button'),
+                                onPressed: _callFireEmergency,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.error,
+                                  foregroundColor: Colors.white,
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                icon: const Icon(Icons.local_fire_department, size: 16),
+                                label: const Text(
+                                  'GỌI 114 (CỨU HỎA)',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                key: const Key('call_hotline_emergency_button'),
+                                onPressed: _callHotline,
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppTheme.error,
+                                  side: const BorderSide(color: AppTheme.error),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                icon: const Icon(Icons.phone_in_talk, size: 16),
+                                label: const Text(
+                                  'GỌI TRỰC BAN BQL',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else if (_triageResult!.isTrappedPersonHazard) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                key: const Key('call_114_rescue_button'),
+                                onPressed: _callFireEmergency,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.error,
+                                  foregroundColor: Colors.white,
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                icon: const Icon(Icons.emergency, size: 16),
+                                label: const Text(
+                                  'GỌI 114 (CỨU NẠN)',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                key: const Key('call_115_button'),
+                                onPressed: _callMedicalEmergency,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.teal.shade700,
+                                  foregroundColor: Colors.white,
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                icon: const Icon(Icons.medical_services, size: 16),
+                                label: const Text(
+                                  'GỌI 115 (CẤP CỨU)',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            key: const Key('call_hotline_emergency_button'),
+                            onPressed: _callHotline,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppTheme.error,
+                              side: const BorderSide(color: AppTheme.error),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(Icons.phone_in_talk, size: 16),
+                            label: const Text(
+                              'GỌI TRỰC BAN BQL: 024.3999.8888',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                             ),
                           ),
                         ),
-                      ),
+                      ] else ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            key: const Key('call_hotline_emergency_button'),
+                            onPressed: _callHotline,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.error,
+                              foregroundColor: Colors.white,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(Icons.phone_in_talk, size: 16),
+                            label: const Text(
+                              'GỌI HOTLINE KHẨN CẤP BQL (24/7): 024.3999.8888',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 )
@@ -521,7 +621,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                    'Đã tự động áp dụng phân loại và mức ưu tiên theo AI!',
+                                    'Đã tự động áp dụng phân loại và mức ưu tiên gợi ý!',
                                   ),
                                   duration: Duration(seconds: 2),
                                   backgroundColor: AppTheme.primary,

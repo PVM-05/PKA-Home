@@ -153,10 +153,12 @@ class _ResidentManagementScreenState
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty)
+                        if (v == null || v.trim().isEmpty) {
                           return 'Vui lòng nhập email';
-                        if (!v.contains('@') || !v.contains('.'))
+                        }
+                        if (!v.contains('@') || !v.contains('.')) {
                           return 'Email không hợp lệ';
+                        }
                         return null;
                       },
                     ),
@@ -266,8 +268,9 @@ class _ResidentManagementScreenState
                             ),
                           ],
                           onChanged: (val) {
-                            if (val != null)
+                            if (val != null) {
                               setDialogState(() => relationRole = val);
+                            }
                           },
                         ),
                       ],
@@ -1061,10 +1064,12 @@ class _ResidentManagementScreenState
 
       if (_selectedApartmentFilter != 'all') {
         final hasApartment = r.apartments.isNotEmpty || r.apartment != null;
-        if (_selectedApartmentFilter == 'assigned' && !hasApartment)
+        if (_selectedApartmentFilter == 'assigned' && !hasApartment) {
           return false;
-        if (_selectedApartmentFilter == 'unassigned' && hasApartment)
+        }
+        if (_selectedApartmentFilter == 'unassigned' && hasApartment) {
           return false;
+        }
       }
 
       if (_searchQuery.isEmpty) return true;

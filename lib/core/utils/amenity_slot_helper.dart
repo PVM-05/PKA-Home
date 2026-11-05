@@ -13,7 +13,10 @@ class AmenitySlotHelper {
   ];
 
   /// Sinh danh sách khung giờ dựa trên giờ hoạt động (HH:mm - HH:mm) và độ dài mỗi slot (phút)
-  static List<String> generateSlots(String? openHours, int slotDurationMinutes) {
+  static List<String> generateSlots(
+    String? openHours,
+    int slotDurationMinutes,
+  ) {
     if (openHours == null || !openHours.contains(' - ')) {
       return defaultSlots;
     }
@@ -132,7 +135,8 @@ class AmenitySlotHelper {
       );
 
       for (final maint in maintenanceWindows) {
-        if (slotStart.isBefore(maint.endTime) && slotEnd.isAfter(maint.startTime)) {
+        if (slotStart.isBefore(maint.endTime) &&
+            slotEnd.isAfter(maint.startTime)) {
           return true;
         }
       }

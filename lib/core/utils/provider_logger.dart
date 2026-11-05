@@ -8,7 +8,9 @@ class ProviderLogger extends ProviderObserver {
     Object? value,
     ProviderContainer container,
   ) {
-    AppLogger.d('Provider added: ${provider.name ?? provider.runtimeType} | value: $value');
+    AppLogger.d(
+      'Provider added: ${provider.name ?? provider.runtimeType} | value: $value',
+    );
   }
 
   @override
@@ -18,16 +20,15 @@ class ProviderLogger extends ProviderObserver {
     Object? newValue,
     ProviderContainer container,
   ) {
-    AppLogger.i('Provider updated: ${provider.name ?? provider.runtimeType}\n'
-        '  Previous: $previousValue\n'
-        '  New: $newValue');
+    AppLogger.i(
+      'Provider updated: ${provider.name ?? provider.runtimeType}\n'
+      '  Previous: $previousValue\n'
+      '  New: $newValue',
+    );
   }
 
   @override
-  void didDisposeProvider(
-    ProviderBase provider,
-    ProviderContainer container,
-  ) {
+  void didDisposeProvider(ProviderBase provider, ProviderContainer container) {
     AppLogger.d('Provider disposed: ${provider.name ?? provider.runtimeType}');
   }
 
@@ -38,6 +39,10 @@ class ProviderLogger extends ProviderObserver {
     StackTrace stackTrace,
     ProviderContainer container,
   ) {
-    AppLogger.e('Provider failed: ${provider.name ?? provider.runtimeType}', error, stackTrace);
+    AppLogger.e(
+      'Provider failed: ${provider.name ?? provider.runtimeType}',
+      error,
+      stackTrace,
+    );
   }
 }

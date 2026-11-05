@@ -477,8 +477,9 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                                   : (val) {
                                       setState(() {
                                         _selectedRoom = val;
-                                        if (val != null)
+                                        if (val != null) {
                                           _codeController.text = val;
+                                        }
                                       });
                                     },
                             ),

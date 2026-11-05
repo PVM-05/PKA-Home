@@ -1321,8 +1321,9 @@ class _VehicleManagementScreenState
                                                                   .toUpperCase()),
                                                 )
                                                 .firstOrNull;
-                                            if (assignedSlot == null)
+                                            if (assignedSlot == null) {
                                               return const SizedBox.shrink();
+                                            }
                                             return Padding(
                                               padding: const EdgeInsets.only(
                                                 top: 6,

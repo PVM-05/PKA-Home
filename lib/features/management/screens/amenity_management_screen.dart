@@ -1577,9 +1577,9 @@ class _AmenityManagementScreenState
                       value: booking.paymentMethod == 'CASH'
                           ? 'Tiền mặt tại BQL'
                           : (booking.paymentMethod == 'DEMO'
-                                ? 'Demo Payment (Cổng điện tử)'
+                                ? 'Cổng thanh toán điện tử'
                                 : (booking.paymentMethod == 'BANK_TRANSFER'
-                                      ? 'Chuyển khoản (VietQR Mô Phỏng)'
+                                      ? 'Chuyển khoản VietQR'
                                       : 'Chuyển khoản ngân hàng')),
                     ),
                     const Divider(height: 16),

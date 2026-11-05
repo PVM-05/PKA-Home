@@ -1,11 +1,6 @@
 import 'meter_ocr_simulator.dart';
 
-enum AnomalySeverity {
-  normal,
-  info,
-  warning,
-  danger,
-}
+enum AnomalySeverity { normal, info, warning, danger }
 
 class AnomalyAnalysisResult {
   final bool isAnomaly;
@@ -88,11 +83,13 @@ class UtilityAnomalyDetector {
 
     // 3. Phân tích so sánh với mức tiêu thụ trung bình các kỳ trước (nếu có dữ liệu)
     if (averageUsage != null && averageUsage > 0.0) {
-      final percentChange = ((deltaUsage - averageUsage) / averageUsage) * 100.0;
+      final percentChange =
+          ((deltaUsage - averageUsage) / averageUsage) * 100.0;
       final minDeltaThreshold = meterType == MeterType.electric ? 30.0 : 4.0;
 
       // 3.1. Tiêu thụ tăng cực đại (gấp >= 2.5 lần và vượt ngưỡng sai số tối thiểu)
-      if (deltaUsage >= averageUsage * 2.5 && (deltaUsage - averageUsage) >= minDeltaThreshold) {
+      if (deltaUsage >= averageUsage * 2.5 &&
+          (deltaUsage - averageUsage) >= minDeltaThreshold) {
         return AnomalyAnalysisResult(
           isAnomaly: true,
           severity: AnomalySeverity.danger,
@@ -104,7 +101,8 @@ class UtilityAnomalyDetector {
       }
 
       // 3.2. Tiêu thụ tăng cao (tăng >= 50% so với trung bình và vượt ngưỡng tối thiểu)
-      if (deltaUsage >= averageUsage * 1.5 && (deltaUsage - averageUsage) >= (minDeltaThreshold / 2)) {
+      if (deltaUsage >= averageUsage * 1.5 &&
+          (deltaUsage - averageUsage) >= (minDeltaThreshold / 2)) {
         return AnomalyAnalysisResult(
           isAnomaly: true,
           severity: AnomalySeverity.warning,
@@ -119,4 +117,3 @@ class UtilityAnomalyDetector {
     return AnomalyAnalysisResult.normal(deltaUsage: deltaUsage);
   }
 }
-

@@ -133,46 +133,56 @@ class ExcelImportHelper {
 
       // Thẩm định Mã căn hộ
       if (rawCode.isEmpty) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Mã Căn Hộ',
-          invalidValue: rawCode,
-          errorMessage: 'Mã căn hộ không được để trống',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Mã Căn Hộ',
+            invalidValue: rawCode,
+            errorMessage: 'Mã căn hộ không được để trống',
+          ),
+        );
         rowHasError = true;
       } else if (!apartmentCodeRegex.hasMatch(rawCode)) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Mã Căn Hộ',
-          invalidValue: rawCode,
-          errorMessage: 'Mã căn hộ không đúng định dạng chuẩn (VD: A0110, B0205)',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Mã Căn Hộ',
+            invalidValue: rawCode,
+            errorMessage:
+                'Mã căn hộ không đúng định dạng chuẩn (VD: A0110, B0205)',
+          ),
+        );
         rowHasError = true;
       }
 
       // Thẩm định Diện tích
       if (areaVal == null || areaVal <= 0) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Diện Tích',
-          invalidValue: _cellToString(row.elementAtOrNull(1)),
-          errorMessage: 'Diện tích phải là số lớn hơn 0 m²',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Diện Tích',
+            invalidValue: _cellToString(row.elementAtOrNull(1)),
+            errorMessage: 'Diện tích phải là số lớn hơn 0 m²',
+          ),
+        );
         rowHasError = true;
       }
 
       if (!rowHasError) {
-        final isEmptyApartment = rawEmpty.isEmpty ||
+        final isEmptyApartment =
+            rawEmpty.isEmpty ||
             rawEmpty == 'có' ||
             rawEmpty == 'co' ||
             rawEmpty == 'true' ||
             rawEmpty == '1';
 
-        validItems.add(ApartmentImportItem(
-          code: rawCode,
-          area: areaVal!,
-          isEmpty: isEmptyApartment,
-        ));
+        validItems.add(
+          ApartmentImportItem(
+            code: rawCode,
+            area: areaVal!,
+            isEmpty: isEmptyApartment,
+          ),
+        );
       }
     }
 
@@ -212,69 +222,84 @@ class ExcelImportHelper {
 
       final rawCode = _cellToString(row.elementAtOrNull(0)).toUpperCase();
       final rawName = _cellToString(row.elementAtOrNull(1));
-      final rawPhone = _cellToString(row.elementAtOrNull(2)).replaceAll(' ', '').replaceAll('.', '');
+      final rawPhone = _cellToString(
+        row.elementAtOrNull(2),
+      ).replaceAll(' ', '').replaceAll('.', '');
       final rawRole = _cellToString(row.elementAtOrNull(3));
       final rawEmail = _cellToString(row.elementAtOrNull(4));
 
       // Thẩm định Mã căn hộ
       if (rawCode.isEmpty) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Mã Căn Hộ',
-          invalidValue: rawCode,
-          errorMessage: 'Mã căn hộ không được để trống',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Mã Căn Hộ',
+            invalidValue: rawCode,
+            errorMessage: 'Mã căn hộ không được để trống',
+          ),
+        );
         rowHasError = true;
       } else if (existingApartmentCodes != null &&
           !existingApartmentCodes.contains(rawCode)) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Mã Căn Hộ',
-          invalidValue: rawCode,
-          errorMessage: 'Căn hộ "$rawCode" không tồn tại trong hệ thống',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Mã Căn Hộ',
+            invalidValue: rawCode,
+            errorMessage: 'Căn hộ "$rawCode" không tồn tại trong hệ thống',
+          ),
+        );
         rowHasError = true;
       }
 
       // Thẩm định Họ và tên
       if (rawName.isEmpty) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Họ Và Tên',
-          invalidValue: rawName,
-          errorMessage: 'Họ và tên không được để trống',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Họ Và Tên',
+            invalidValue: rawName,
+            errorMessage: 'Họ và tên không được để trống',
+          ),
+        );
         rowHasError = true;
       }
 
       // Thẩm định Số điện thoại
       if (rawPhone.isEmpty) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Số Điện Thoại',
-          invalidValue: rawPhone,
-          errorMessage: 'Số điện thoại không được để trống',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Số Điện Thoại',
+            invalidValue: rawPhone,
+            errorMessage: 'Số điện thoại không được để trống',
+          ),
+        );
         rowHasError = true;
       } else if (!phoneRegex.hasMatch(rawPhone)) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Số Điện Thoại',
-          invalidValue: rawPhone,
-          errorMessage: 'Số điện thoại phải gồm 10 chữ số đúng định dạng Việt Nam (VD: 0901234567)',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Số Điện Thoại',
+            invalidValue: rawPhone,
+            errorMessage:
+                'Số điện thoại phải gồm 10 chữ số đúng định dạng Việt Nam (VD: 0901234567)',
+          ),
+        );
         rowHasError = true;
       }
 
       if (!rowHasError) {
         final normalizedRole = _normalizeRelationRole(rawRole);
-        validItems.add(ResidentImportItem(
-          apartmentCode: rawCode,
-          fullName: rawName,
-          phone: rawPhone,
-          relationRole: normalizedRole,
-          email: rawEmail.isNotEmpty ? rawEmail : null,
-        ));
+        validItems.add(
+          ResidentImportItem(
+            apartmentCode: rawCode,
+            fullName: rawName,
+            phone: rawPhone,
+            relationRole: normalizedRole,
+            email: rawEmail.isNotEmpty ? rawEmail : null,
+          ),
+        );
       }
     }
 
@@ -286,7 +311,8 @@ class ExcelImportHelper {
   }
 
   /// Phân tích và thẩm định dữ liệu Chỉ số điện nước từ bytes Excel
-  static BatchImportResultModel<MeterReadingImportItem> parseAndValidateMeterReadings(
+  static BatchImportResultModel<MeterReadingImportItem>
+  parseAndValidateMeterReadings(
     Uint8List bytes, {
     Set<String>? existingApartmentCodes,
   }) {
@@ -319,53 +345,63 @@ class ExcelImportHelper {
 
       // Thẩm định Mã căn hộ
       if (rawCode.isEmpty) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Mã Căn Hộ',
-          invalidValue: rawCode,
-          errorMessage: 'Mã căn hộ không được để trống',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Mã Căn Hộ',
+            invalidValue: rawCode,
+            errorMessage: 'Mã căn hộ không được để trống',
+          ),
+        );
         rowHasError = true;
       } else if (existingApartmentCodes != null &&
           !existingApartmentCodes.contains(rawCode)) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Mã Căn Hộ',
-          invalidValue: rawCode,
-          errorMessage: 'Căn hộ "$rawCode" không tồn tại trong hệ thống',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Mã Căn Hộ',
+            invalidValue: rawCode,
+            errorMessage: 'Căn hộ "$rawCode" không tồn tại trong hệ thống',
+          ),
+        );
         rowHasError = true;
       }
 
       // Thẩm định Chỉ số điện
       if (electricVal == null || electricVal < 0) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Chỉ Số Điện',
-          invalidValue: _cellToString(row.elementAtOrNull(1)),
-          errorMessage: 'Chỉ số điện phải là số không âm (≥ 0)',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Chỉ Số Điện',
+            invalidValue: _cellToString(row.elementAtOrNull(1)),
+            errorMessage: 'Chỉ số điện phải là số không âm (≥ 0)',
+          ),
+        );
         rowHasError = true;
       }
 
       // Thẩm định Chỉ số nước
       if (waterVal == null || waterVal < 0) {
-        rowErrors.add(BatchRowErrorModel(
-          rowNumber: rowNumber,
-          columnName: 'Chỉ Số Nước',
-          invalidValue: _cellToString(row.elementAtOrNull(2)),
-          errorMessage: 'Chỉ số nước phải là số không âm (≥ 0)',
-        ));
+        rowErrors.add(
+          BatchRowErrorModel(
+            rowNumber: rowNumber,
+            columnName: 'Chỉ Số Nước',
+            invalidValue: _cellToString(row.elementAtOrNull(2)),
+            errorMessage: 'Chỉ số nước phải là số không âm (≥ 0)',
+          ),
+        );
         rowHasError = true;
       }
 
       if (!rowHasError) {
-        validItems.add(MeterReadingImportItem(
-          apartmentCode: rawCode,
-          electricReading: electricVal!,
-          waterReading: waterVal!,
-          period: rawPeriod.isNotEmpty ? rawPeriod : null,
-        ));
+        validItems.add(
+          MeterReadingImportItem(
+            apartmentCode: rawCode,
+            electricReading: electricVal!,
+            waterReading: waterVal!,
+            period: rawPeriod.isNotEmpty ? rawPeriod : null,
+          ),
+        );
       }
     }
 
@@ -406,7 +442,9 @@ class ExcelImportHelper {
   static bool _isRowEmpty(List<Data?> row) {
     if (row.isEmpty) return true;
     for (final cell in row) {
-      if (cell != null && cell.value != null && _cellToString(cell).isNotEmpty) {
+      if (cell != null &&
+          cell.value != null &&
+          _cellToString(cell).isNotEmpty) {
         return false;
       }
     }
@@ -421,7 +459,9 @@ class ExcelImportHelper {
     }
     if (val is IntCellValue) return val.value.toString().trim();
     if (val is DoubleCellValue) return val.value.toString().trim();
-    if (val is DateCellValue || val is DateTimeCellValue) return val.toString().trim();
+    if (val is DateCellValue || val is DateTimeCellValue) {
+      return val.toString().trim();
+    }
     if (val is BoolCellValue) return val.value ? 'true' : 'false';
     return val.toString().trim();
   }
@@ -437,10 +477,14 @@ class ExcelImportHelper {
 
   static String _normalizeRelationRole(String rawRole) {
     final lower = rawRole.toLowerCase().trim();
-    if (lower.contains('chủ hộ') || lower.contains('chu ho') || lower == 'owner') {
+    if (lower.contains('chủ hộ') ||
+        lower.contains('chu ho') ||
+        lower == 'owner') {
       return 'owner';
     }
-    if (lower.contains('người thuê') || lower.contains('nguoi thue') || lower == 'tenant') {
+    if (lower.contains('người thuê') ||
+        lower.contains('nguoi thue') ||
+        lower == 'tenant') {
       return 'tenant';
     }
     if (lower.contains('thành viên') ||

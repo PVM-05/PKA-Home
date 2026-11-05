@@ -28,7 +28,8 @@ class MeterOcrParsedResult {
       unit: unit,
       confidence: 0.2,
       rawText: rawText,
-      errorMessage: errorMessage ?? 'Không tìm thấy số đo hợp lệ trên mặt công tơ.',
+      errorMessage:
+          errorMessage ?? 'Không tìm thấy số đo hợp lệ trên mặt công tơ.',
     );
   }
 }
@@ -60,14 +61,22 @@ class UtilityMeterOcrEngine {
 
     // Loại bỏ lưu lượng tức thời dòng chảy Qn, Q3 m³/h để tránh nhầm với chỉ số tích lũy
     final cleaned = normalized
-        .replaceAll(RegExp(r'Q[n3]?\s*\d+[\.,]?\d*\s*m[³3]/h', caseSensitive: false), '')
+        .replaceAll(
+          RegExp(r'Q[n3]?\s*\d+[\.,]?\d*\s*m[³3]/h', caseSensitive: false),
+          '',
+        )
         .replaceAll(RegExp(r'\d+[\.,]?\d*\s*m[³3]/h', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\d+[\.,]?\d*\s*rev/kWh', caseSensitive: false), '');
+        .replaceAll(
+          RegExp(r'\d+[\.,]?\d*\s*rev/kWh', caseSensitive: false),
+          '',
+        );
 
     // 1. Tìm kiếm cụm số đi liền ngay trước đơn vị đo (kWh hoặc m³ đứng riêng không có /h)
     final unitKeyword = meterType == MeterType.electric ? 'kWh' : 'm³';
     final patternWithUnit = RegExp(
-      r'(\d{1,7}(?:[\.,]\d{1,3})?)\s*' + RegExp.escape(unitKeyword) + r'(?!\s*/)',
+      r'(\d{1,7}(?:[\.,]\d{1,3})?)\s*' +
+          RegExp.escape(unitKeyword) +
+          r'(?!\s*/)',
       caseSensitive: false,
     );
 
@@ -128,9 +137,6 @@ class UtilityMeterOcrEngine {
     }
 
     // Không tìm thấy số hợp lệ
-    return MeterOcrParsedResult.invalid(
-      rawText: rawText,
-      unit: defaultUnit,
-    );
+    return MeterOcrParsedResult.invalid(rawText: rawText, unit: defaultUnit);
   }
 }

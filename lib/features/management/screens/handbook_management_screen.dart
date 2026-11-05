@@ -831,8 +831,9 @@ class _HandbookManagementScreenState
                     ),
                     validator: (v) {
                       final parsed = int.tryParse(v?.trim() ?? '');
-                      if (parsed == null || parsed <= 0)
+                      if (parsed == null || parsed <= 0) {
                         return 'Vui lòng nhập số người hợp lệ (> 0)';
+                      }
                       return null;
                     },
                   ),
@@ -845,8 +846,9 @@ class _HandbookManagementScreenState
                     ),
                     validator: (v) {
                       final parsed = int.tryParse(v?.trim() ?? '');
-                      if (parsed == null || parsed <= 0)
+                      if (parsed == null || parsed <= 0) {
                         return 'Vui lòng nhập thời lượng (> 0)';
+                      }
                       return null;
                     },
                   ),
@@ -898,8 +900,9 @@ class _HandbookManagementScreenState
                       ),
                       validator: (v) {
                         final parsed = double.tryParse(v?.trim() ?? '');
-                        if (parsed == null || parsed < 0)
+                        if (parsed == null || parsed < 0) {
                           return 'Số tiền cọc không hợp lệ';
+                        }
                         return null;
                       },
                     ),

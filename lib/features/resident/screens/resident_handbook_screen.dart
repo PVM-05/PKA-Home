@@ -620,7 +620,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         _buildFaqItem(
           question: 'Tôi thanh toán hóa đơn bằng cách nào?',
           answer:
-              'Tại màn hình Hóa đơn, nhấn "Xem chi tiết" -> "Thanh toán". Ứng dụng cung cấp Cổng thanh toán tiện lợi (Demo Payment) hỗ trợ thanh toán trực tuyến tức thì hoặc Cư dân có thể thanh toán trực tiếp tại văn phòng Ban Quản Lý.',
+              'Tại màn hình Hóa đơn, nhấn "Xem chi tiết" -> "Thanh toán". Ứng dụng cung cấp Cổng thanh toán trực tuyến tiện lợi hỗ trợ thanh toán tức thì hoặc Cư dân có thể thanh toán trực tiếp tại văn phòng Ban Quản Lý.',
         ),
         _buildFaqItem(
           question: 'Khi gặp sự cố trong căn hộ thì xử lý thế nào?',

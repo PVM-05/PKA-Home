@@ -9,7 +9,10 @@ class NetworkErrorHandler {
   const NetworkErrorHandler._();
 
   /// Chuyển đổi ngoại lệ thành thông điệp tiếng Việt thân thiện
-  static String getMessage(Object? error, {String fallback = 'Đã xảy ra lỗi. Vui lòng thử lại.'}) {
+  static String getMessage(
+    Object? error, {
+    String fallback = 'Đã xảy ra lỗi. Vui lòng thử lại.',
+  }) {
     if (error == null) return fallback;
 
     if (error is AppException) {
@@ -43,7 +46,8 @@ class NetworkErrorHandler {
       }
 
       final msg = error.message.toLowerCase();
-      if (msg.contains('violates row-level security policy') || msg.contains('permission denied')) {
+      if (msg.contains('violates row-level security policy') ||
+          msg.contains('permission denied')) {
         return 'Bạn không có quyền thực hiện thao tác này.';
       }
       if (msg.contains('foreign key constraint')) {
@@ -51,7 +55,10 @@ class NetworkErrorHandler {
       }
 
       // Nếu là thông báo tiếng Việt có chủ đích từ RAISE EXCEPTION trong trigger/RPC
-      final isVietnamese = RegExp(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', caseSensitive: false).hasMatch(error.message);
+      final isVietnamese = RegExp(
+        r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]',
+        caseSensitive: false,
+      ).hasMatch(error.message);
       if (isVietnamese &&
           !msg.contains('syntax') &&
           !msg.contains('relation') &&
@@ -65,10 +72,12 @@ class NetworkErrorHandler {
 
     if (error is AuthException) {
       final msg = error.message.toLowerCase();
-      if (msg.contains('invalid login credentials') || msg.contains('invalid_credentials')) {
+      if (msg.contains('invalid login credentials') ||
+          msg.contains('invalid_credentials')) {
         return 'Email hoặc mật khẩu không chính xác.';
       }
-      if (msg.contains('user already registered') || msg.contains('user_already_exists')) {
+      if (msg.contains('user already registered') ||
+          msg.contains('user_already_exists')) {
         return 'Email này đã được đăng ký tài khoản.';
       }
       if (msg.contains('email not confirmed')) {
@@ -77,10 +86,12 @@ class NetworkErrorHandler {
       if (msg.contains('password should be at least')) {
         return 'Mật khẩu phải có độ dài tối thiểu 6 ký tự.';
       }
-      if (msg.contains('database error') || msg.contains('unexpected_failure')) {
+      if (msg.contains('database error') ||
+          msg.contains('unexpected_failure')) {
         return 'Không thể tạo tài khoản trên hệ thống. Vui lòng liên hệ Ban Quản Lý.';
       }
-      if (msg.contains('over_email_send_rate_limit') || msg.contains('rate limit')) {
+      if (msg.contains('over_email_send_rate_limit') ||
+          msg.contains('rate limit')) {
         return 'Bạn đã gửi yêu cầu quá nhiều lần. Vui lòng thử lại sau.';
       }
       if (error.message.isNotEmpty &&
@@ -92,15 +103,20 @@ class NetworkErrorHandler {
       return 'Lỗi xác thực: Vui lòng kiểm tra lại thông tin đăng nhập.';
     }
 
-    final rawMsg = error.toString().replaceFirst(RegExp(r'^Exception:\s*'), '').trim();
+    final rawMsg = error
+        .toString()
+        .replaceFirst(RegExp(r'^Exception:\s*'), '')
+        .trim();
     final errStr = error.toString().toLowerCase();
 
     // Bắt trường hợp lỗi trả về chuỗi JSON thô dạng {"code":"...", "message":"..."}
     if (rawMsg.startsWith('{') && rawMsg.endsWith('}')) {
-      if (errStr.contains('database error saving new user') || errStr.contains('unexpected_failure')) {
+      if (errStr.contains('database error saving new user') ||
+          errStr.contains('unexpected_failure')) {
         return 'Không thể tạo tài khoản trên hệ thống. Vui lòng liên hệ Ban Quản Lý.';
       }
-      if (errStr.contains('user already registered') || errStr.contains('user_already_exists')) {
+      if (errStr.contains('user already registered') ||
+          errStr.contains('user_already_exists')) {
         return 'Email này đã được đăng ký tài khoản.';
       }
     }
@@ -126,7 +142,10 @@ class NetworkErrorHandler {
     }
 
     // Nếu là Exception mang thông báo tiếng Việt có chủ đích
-    final isVietnamese = RegExp(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', caseSensitive: false).hasMatch(rawMsg);
+    final isVietnamese = RegExp(
+      r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]',
+      caseSensitive: false,
+    ).hasMatch(rawMsg);
     if (isVietnamese &&
         !errStr.contains('syntax') &&
         !errStr.contains('relation') &&

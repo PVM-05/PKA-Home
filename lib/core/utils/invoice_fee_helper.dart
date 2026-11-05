@@ -14,9 +14,13 @@ class InvoiceFeeHelper {
       return 'Tiền điện';
     } else if (lower == 'water' || lower == 'tiền nước') {
       return 'Tiền nước';
-    } else if (lower == 'parking_motorbike' || lower == 'phí gửi xe máy' || lower.contains('xe_may')) {
+    } else if (lower == 'parking_motorbike' ||
+        lower == 'phí gửi xe máy' ||
+        lower.contains('xe_may')) {
       return 'Phí gửi xe máy';
-    } else if (lower == 'parking_car' || lower == 'phí gửi ô tô' || lower == 'parking') {
+    } else if (lower == 'parking_car' ||
+        lower == 'phí gửi ô tô' ||
+        lower == 'parking') {
       return 'Phí gửi ô tô';
     } else if (lower == 'internet') {
       return 'Phí Internet';
@@ -48,9 +52,14 @@ class InvoiceFeeHelper {
       return Icons.electric_bolt_rounded;
     } else if (lower == 'water' || lower.contains('nước')) {
       return Icons.water_drop_rounded;
-    } else if (lower == 'parking_motorbike' || lower.contains('xe máy') || lower.contains('xe_may')) {
+    } else if (lower == 'parking_motorbike' ||
+        lower.contains('xe máy') ||
+        lower.contains('xe_may')) {
       return Icons.two_wheeler_rounded;
-    } else if (lower == 'parking_car' || lower.contains('ô tô') || lower.contains('o to') || lower == 'parking') {
+    } else if (lower == 'parking_car' ||
+        lower.contains('ô tô') ||
+        lower.contains('o to') ||
+        lower == 'parking') {
       return Icons.directions_car_rounded;
     }
     return Icons.receipt_long_rounded;
@@ -65,9 +74,14 @@ class InvoiceFeeHelper {
       return const Color(0xFFE65100); // Deep Orange
     } else if (lower == 'water' || lower.contains('nước')) {
       return const Color(0xFF0288D1); // Light Blue
-    } else if (lower == 'parking_motorbike' || lower.contains('xe máy') || lower.contains('xe_may')) {
+    } else if (lower == 'parking_motorbike' ||
+        lower.contains('xe máy') ||
+        lower.contains('xe_may')) {
       return const Color(0xFF00897B); // Teal
-    } else if (lower == 'parking_car' || lower.contains('ô tô') || lower.contains('o to') || lower == 'parking') {
+    } else if (lower == 'parking_car' ||
+        lower.contains('ô tô') ||
+        lower.contains('o to') ||
+        lower == 'parking') {
       return const Color(0xFF5E35B1); // Deep Purple
     }
     return AppTheme.primary;
