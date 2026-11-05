@@ -19,7 +19,8 @@ class ApartmentLedgerScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ApartmentLedgerScreen> createState() => _ApartmentLedgerScreenState();
+  ConsumerState<ApartmentLedgerScreen> createState() =>
+      _ApartmentLedgerScreenState();
 }
 
 class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
@@ -27,8 +28,12 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final balanceAsync = ref.watch(apartmentBalanceProvider(widget.apartmentId));
-    final entriesAsync = ref.watch(apartmentLedgerEntriesProvider(widget.apartmentId));
+    final balanceAsync = ref.watch(
+      apartmentBalanceProvider(widget.apartmentId),
+    );
+    final entriesAsync = ref.watch(
+      apartmentLedgerEntriesProvider(widget.apartmentId),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +44,9 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
             tooltip: 'Làm mới',
             onPressed: () {
               ref.invalidate(apartmentBalanceProvider(widget.apartmentId));
-              ref.invalidate(apartmentLedgerEntriesProvider(widget.apartmentId));
+              ref.invalidate(
+                apartmentLedgerEntriesProvider(widget.apartmentId),
+              );
             },
           ),
         ],
@@ -62,12 +69,18 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                     const SizedBox(width: 8),
                     Text(
                       'Căn hộ: ${widget.apartmentCode}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blueGrey.shade50,
                     borderRadius: BorderRadius.circular(16),
@@ -75,7 +88,11 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                   ),
                   child: const Text(
                     'Sổ Phụ Công Nợ',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blueGrey,
+                    ),
                   ),
                 ),
               ],
@@ -85,12 +102,20 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
             // Card Tổng quan số dư công nợ
             balanceAsync.when(
               data: (balance) => _buildBalanceCard(context, balance),
-              loading: () => const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
               error: (err, stack) => Card(
                 color: Colors.red.shade50,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('Lỗi tải số dư: $err', style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    'Lỗi tải số dư: $err',
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ),
             ),
@@ -123,8 +148,14 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    icon: const Icon(Icons.lock_clock_outlined, color: Colors.orange),
-                    label: const Text('Khóa sổ kỳ kế toán', style: TextStyle(color: Colors.orange)),
+                    icon: const Icon(
+                      Icons.lock_clock_outlined,
+                      color: Colors.orange,
+                    ),
+                    label: const Text(
+                      'Khóa sổ kỳ kế toán',
+                      style: TextStyle(color: Colors.orange),
+                    ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.orange),
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -168,15 +199,25 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                 }
 
                 return Column(
-                  children: entries.map((entry) => _buildLedgerItemCard(context, entry)).toList(),
+                  children: entries
+                      .map((entry) => _buildLedgerItemCard(context, entry))
+                      .toList(),
                 );
               },
-              loading: () => const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator())),
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
               error: (err, stack) => Card(
                 color: Colors.red.shade50,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('Lỗi tải danh sách bút toán: $err', style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    'Lỗi tải danh sách bút toán: $err',
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ),
             ),
@@ -205,7 +246,10 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
       statusIcon = Icons.savings_outlined;
     }
 
-    final formattedMoney = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(balance.abs());
+    final formattedMoney = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: 'đ',
+    ).format(balance.abs());
 
     return Card(
       elevation: 2,
@@ -220,14 +264,23 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
               children: [
                 const Text(
                   'Số dư công nợ hiện tại',
-                  style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.5)),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.5),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -236,7 +289,11 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                       const SizedBox(width: 4),
                       Text(
                         statusText,
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
                       ),
                     ],
                   ),
@@ -258,7 +315,10 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
     );
   }
 
-  Widget _buildLedgerItemCard(BuildContext context, ApartmentLedgerEntryModel entry) {
+  Widget _buildLedgerItemCard(
+    BuildContext context,
+    ApartmentLedgerEntryModel entry,
+  ) {
     final isDebit = entry.isDebit;
     final prefix = isDebit ? '+' : '-';
     final amountColor = isDebit ? Colors.deepOrange : Colors.green;
@@ -277,7 +337,11 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
               children: [
                 Text(
                   entry.entryCode,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.blueGrey),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Colors.blueGrey,
+                  ),
                 ),
                 Text(
                   entry.formattedCreatedAtWithTime,
@@ -290,19 +354,30 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     entry.entryTypeVietnamese,
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: amountColor),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: amountColor,
+                    ),
                   ),
                 ),
                 Text(
                   '$prefix${entry.formattedAmount}',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: amountColor),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: amountColor,
+                  ),
                 ),
               ],
             ),
@@ -321,7 +396,11 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                 ),
                 Text(
                   'Dư nợ sau GD: ${entry.formattedBalanceAfter}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blueGrey,
+                  ),
                 ),
               ],
             ),

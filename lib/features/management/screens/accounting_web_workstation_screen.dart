@@ -76,7 +76,11 @@ class _AccountingWebWorkstationScreenState
           children: [
             Row(
               children: [
-                Icon(Icons.table_chart_rounded, color: AppTheme.primary, size: 28),
+                Icon(
+                  Icons.table_chart_rounded,
+                  color: AppTheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
@@ -109,7 +113,10 @@ class _AccountingWebWorkstationScreenState
               label: const Text('Làm mới'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.textPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -129,7 +136,10 @@ class _AccountingWebWorkstationScreenState
               label: const Text('Xuất Excel'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppTheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -138,11 +148,7 @@ class _AccountingWebWorkstationScreenState
         if (isCompact) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              titleContent,
-              const SizedBox(height: 12),
-              actionButtons,
-            ],
+            children: [titleContent, const SizedBox(height: 12), actionButtons],
           );
         }
 
@@ -206,10 +212,12 @@ class _AccountingWebWorkstationScreenState
         if (crossAxisCount == 1) {
           return Column(
             children: cards
-                .map((card) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: card,
-                    ))
+                .map(
+                  (card) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: card,
+                  ),
+                )
                 .toList(),
           );
         }
@@ -319,7 +327,10 @@ class _AccountingWebWorkstationScreenState
     );
   }
 
-  Widget _buildFilterBar(AccountingWorkstationFilter filter, List<String> periods) {
+  Widget _buildFilterBar(
+    AccountingWorkstationFilter filter,
+    List<String> periods,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -343,11 +354,16 @@ class _AccountingWebWorkstationScreenState
                         _searchController.clear();
                         ref
                             .read(accountingWorkstationFilterProvider.notifier)
-                            .state = filter.copyWith(searchQuery: '');
+                            .state = filter.copyWith(
+                          searchQuery: '',
+                        );
                       },
                     )
                   : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppTheme.border),
@@ -355,9 +371,8 @@ class _AccountingWebWorkstationScreenState
               isDense: true,
             ),
             onChanged: (val) {
-              ref
-                  .read(accountingWorkstationFilterProvider.notifier)
-                  .state = filter.copyWith(searchQuery: val);
+              ref.read(accountingWorkstationFilterProvider.notifier).state =
+                  filter.copyWith(searchQuery: val);
             },
           );
 
@@ -366,7 +381,10 @@ class _AccountingWebWorkstationScreenState
             initialValue: filter.period,
             decoration: InputDecoration(
               labelText: 'Kỳ thu',
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppTheme.border),
@@ -378,15 +396,14 @@ class _AccountingWebWorkstationScreenState
                 value: null,
                 child: Text('Tất cả kỳ'),
               ),
-              ...periods.map((p) => DropdownMenuItem<String?>(
-                    value: p,
-                    child: Text('Kỳ $p'),
-                  )),
+              ...periods.map(
+                (p) =>
+                    DropdownMenuItem<String?>(value: p, child: Text('Kỳ $p')),
+              ),
             ],
             onChanged: (val) {
-              ref
-                  .read(accountingWorkstationFilterProvider.notifier)
-                  .state = filter.copyWith(period: val);
+              ref.read(accountingWorkstationFilterProvider.notifier).state =
+                  filter.copyWith(period: val);
             },
           );
 
@@ -395,7 +412,10 @@ class _AccountingWebWorkstationScreenState
             initialValue: filter.status,
             decoration: InputDecoration(
               labelText: 'Trạng thái',
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppTheme.border),
@@ -425,9 +445,8 @@ class _AccountingWebWorkstationScreenState
               ),
             ],
             onChanged: (val) {
-              ref
-                  .read(accountingWorkstationFilterProvider.notifier)
-                  .state = filter.copyWith(status: val);
+              ref.read(accountingWorkstationFilterProvider.notifier).state =
+                  filter.copyWith(status: val);
             },
           );
 
@@ -485,7 +504,9 @@ class _AccountingWebWorkstationScreenState
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Đã gửi thông báo nhắc nợ tới $selectedCount căn hộ được chọn.'),
+                  content: Text(
+                    'Đã gửi thông báo nhắc nợ tới $selectedCount căn hộ được chọn.',
+                  ),
                   backgroundColor: AppTheme.primary,
                 ),
               );
@@ -543,7 +564,11 @@ class _AccountingWebWorkstationScreenState
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.inbox_outlined, size: 48, color: AppTheme.textSecondary),
+                    Icon(
+                      Icons.inbox_outlined,
+                      size: 48,
+                      color: AppTheme.textSecondary,
+                    ),
                     SizedBox(height: 12),
                     Text(
                       'Không tìm thấy hóa đơn phù hợp với bộ lọc.',
@@ -554,7 +579,6 @@ class _AccountingWebWorkstationScreenState
               ),
             );
           }
-
 
           return ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -577,14 +601,54 @@ class _AccountingWebWorkstationScreenState
                     }
                   },
                   columns: const [
-                    DataColumn(label: Text('Căn Hộ', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Cư Dân', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Kỳ Thu', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Tổng Tiền', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Trạng Thái', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Mã VietQR', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Hạn Nộp', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Ngày Nộp / Thu', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(
+                      label: Text(
+                        'Căn Hộ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Cư Dân',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Kỳ Thu',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Tổng Tiền',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Trạng Thái',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Mã VietQR',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Hạn Nộp',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Ngày Nộp / Thu',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                   rows: rows.map((row) {
                     final isRowSelected = selectedIds.contains(row.id);
@@ -592,13 +656,18 @@ class _AccountingWebWorkstationScreenState
                     return DataRow(
                       selected: isRowSelected,
                       onSelectChanged: (val) {
-                        ref.read(selectedInvoiceIdsProvider.notifier).toggle(row.id);
+                        ref
+                            .read(selectedInvoiceIdsProvider.notifier)
+                            .toggle(row.id);
                       },
                       cells: [
                         DataCell(
                           Text(
                             row.apartmentCode,
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
                           ),
                         ),
                         DataCell(Text(row.residentName)),
@@ -609,10 +678,15 @@ class _AccountingWebWorkstationScreenState
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
-                        DataCell(_buildStatusChip(row.status, row.displayStatus)),
+                        DataCell(
+                          _buildStatusChip(row.status, row.displayStatus),
+                        ),
                         DataCell(
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.background,
                               borderRadius: BorderRadius.circular(6),
@@ -673,11 +747,7 @@ class _AccountingWebWorkstationScreenState
       ),
       child: Text(
         displayStatus,
-        style: TextStyle(
-          color: fg,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600),
       ),
     );
   }

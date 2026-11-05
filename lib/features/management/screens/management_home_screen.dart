@@ -38,7 +38,8 @@ class ManagementHomeScreen extends ConsumerStatefulWidget {
   const ManagementHomeScreen({super.key});
 
   @override
-  ConsumerState<ManagementHomeScreen> createState() => _ManagementHomeScreenState();
+  ConsumerState<ManagementHomeScreen> createState() =>
+      _ManagementHomeScreenState();
 }
 
 class _ManagementTab {
@@ -152,15 +153,24 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
   @override
   Widget build(BuildContext context) {
     // 1. Lắng nghe phản ánh sự cố mới thời gian thực từ Cư dân
-    ref.listen<AsyncValue<List<Map<String, dynamic>>>>(rawIssuesStreamProvider, (previous, next) {
+    ref.listen<
+      AsyncValue<List<Map<String, dynamic>>>
+    >(rawIssuesStreamProvider, (previous, next) {
       if (previous?.hasValue == true && next.hasValue) {
         final prevIds = previous!.value!.map((i) => i['id'] as String).toSet();
-        final newlyAdded = next.value!.where((i) => !prevIds.contains(i['id'])).toList();
+        final newlyAdded = next.value!
+            .where((i) => !prevIds.contains(i['id']))
+            .toList();
         for (final issue in newlyAdded) {
-          final desc = (issue['description'] as String?) ?? 'Phản ánh sự cố mới từ cư dân';
-          final isUrgent = issue['priority'] == 'high' || issue['priority'] == 'urgent';
+          final desc =
+              (issue['description'] as String?) ??
+              'Phản ánh sự cố mới từ cư dân';
+          final isUrgent =
+              issue['priority'] == 'high' || issue['priority'] == 'urgent';
 
-          debugPrint('🔔 [ManagementHome] Phát hiện phản ánh mới từ Cư dân: "$desc" (priority: ${issue['priority']})');
+          debugPrint(
+            '🔔 [ManagementHome] Phát hiện phản ánh mới từ Cư dân: "$desc" (priority: ${issue['priority']})',
+          );
           _showNotificationToast(
             icon: isUrgent ? Icons.warning_amber_rounded : Icons.report_problem,
             message: isUrgent ? 'SỰ CỐ KHẨN: $desc' : 'Sự cố mới: $desc',
@@ -172,67 +182,95 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     });
 
     // 2. Lắng nghe xác nhận chuyển khoản thanh toán hóa đơn mới từ Cư dân
-    ref.listen<AsyncValue<int>>(pendingConfirmationInvoicesProvider, (previous, next) {
+    ref.listen<AsyncValue<int>>(pendingConfirmationInvoicesProvider, (
+      previous,
+      next,
+    ) {
       if (previous?.hasValue == true && next.hasValue) {
         final prevCount = previous!.value!;
         final nextCount = next.value!;
         if (nextCount > prevCount) {
-          debugPrint('🔔 [ManagementHome] Cư dân vừa gửi xác nhận thanh toán (Tổng chờ đối soát: $nextCount)');
+          debugPrint(
+            '🔔 [ManagementHome] Cư dân vừa gửi xác nhận thanh toán (Tổng chờ đối soát: $nextCount)',
+          );
           _showNotificationToast(
             icon: Icons.payments,
-            message: 'Cư dân vừa gửi xác nhận chuyển khoản! Đang chờ BQL đối soát.',
+            message:
+                'Cư dân vừa gửi xác nhận chuyển khoản! Đang chờ BQL đối soát.',
             backgroundColor: AppTheme.success,
           );
-          ref.read(pushNotificationServiceProvider).showSystemNotification(
-            id: 'payment_confirm_${DateTime.now().millisecondsSinceEpoch}'.hashCode,
-            title: 'Xác nhận thanh toán mới',
-            body: 'Có cư dân vừa hoàn tất chuyển khoản hóa đơn và gửi xác nhận. Vui lòng kiểm tra đối soát.',
-            payload: {'type': 'new_invoice'},
-          );
+          ref
+              .read(pushNotificationServiceProvider)
+              .showSystemNotification(
+                id: 'payment_confirm_${DateTime.now().millisecondsSinceEpoch}'
+                    .hashCode,
+                title: 'Xác nhận thanh toán mới',
+                body:
+                    'Có cư dân vừa hoàn tất chuyển khoản hóa đơn và gửi xác nhận. Vui lòng kiểm tra đối soát.',
+                payload: {'type': 'new_invoice'},
+              );
         }
       }
     });
 
     // 3. Lắng nghe yêu cầu liên kết căn hộ mới từ Cư dân
-    ref.listen<AsyncValue<int>>(pendingLinkRequestsCountProvider, (previous, next) {
+    ref.listen<AsyncValue<int>>(pendingLinkRequestsCountProvider, (
+      previous,
+      next,
+    ) {
       if (previous?.hasValue == true && next.hasValue) {
         final prevCount = previous!.value!;
         final nextCount = next.value!;
         if (nextCount > prevCount) {
-          debugPrint('🔔 [ManagementHome] Có yêu cầu liên kết căn hộ mới (Tổng chờ duyệt: $nextCount)');
+          debugPrint(
+            '🔔 [ManagementHome] Có yêu cầu liên kết căn hộ mới (Tổng chờ duyệt: $nextCount)',
+          );
           _showNotificationToast(
             icon: Icons.person_add_alt_1,
-            message: 'Có yêu cầu liên kết căn hộ mới từ cư dân đang chờ phê duyệt.',
+            message:
+                'Có yêu cầu liên kết căn hộ mới từ cư dân đang chờ phê duyệt.',
             backgroundColor: AppTheme.primary,
           );
-          ref.read(pushNotificationServiceProvider).showSystemNotification(
-            id: 'link_request_${DateTime.now().millisecondsSinceEpoch}'.hashCode,
-            title: 'Yêu cầu liên kết căn hộ mới',
-            body: 'Có cư dân vừa gửi yêu cầu liên kết căn hộ. Vui lòng vào duyệt.',
-            payload: {'type': 'link_request'},
-          );
+          ref
+              .read(pushNotificationServiceProvider)
+              .showSystemNotification(
+                id: 'link_request_${DateTime.now().millisecondsSinceEpoch}'
+                    .hashCode,
+                title: 'Yêu cầu liên kết căn hộ mới',
+                body:
+                    'Có cư dân vừa gửi yêu cầu liên kết căn hộ. Vui lòng vào duyệt.',
+                payload: {'type': 'link_request'},
+              );
         }
       }
     });
 
     // 4. Lắng nghe thông báo hệ thống định danh cho tài khoản quản trị
-    ref.listen<AsyncValue<List<NotificationModel>>>(notificationsStreamProvider, (previous, next) {
-      if (previous?.hasValue == true && next.hasValue) {
-        final prevIds = previous!.value!.map((n) => n.id).toSet();
-        final newNotifs = next.value!.where((n) => !prevIds.contains(n.id) && !n.isRead);
-        for (final notif in newNotifs) {
-          ref.read(pushNotificationServiceProvider).showSystemNotification(
-            id: notif.id.hashCode,
-            title: notif.title,
-            body: notif.body,
-            payload: notif.toJson(),
+    ref.listen<AsyncValue<List<NotificationModel>>>(
+      notificationsStreamProvider,
+      (previous, next) {
+        if (previous?.hasValue == true && next.hasValue) {
+          final prevIds = previous!.value!.map((n) => n.id).toSet();
+          final newNotifs = next.value!.where(
+            (n) => !prevIds.contains(n.id) && !n.isRead,
           );
+          for (final notif in newNotifs) {
+            ref
+                .read(pushNotificationServiceProvider)
+                .showSystemNotification(
+                  id: notif.id.hashCode,
+                  title: notif.title,
+                  body: notif.body,
+                  payload: notif.toJson(),
+                );
+          }
         }
-      }
-    });
+      },
+    );
 
     final currentUser = ref.watch(authProvider).value;
-    final activeDelegations = ref.watch(activeDelegationsProvider).valueOrNull ?? [];
+    final activeDelegations =
+        ref.watch(activeDelegationsProvider).valueOrNull ?? [];
     final isAdmin = currentUser?.isAdmin ?? false;
     final canManageInvoices = AppPermissions.invoiceManagement.allows(
       currentUser?.role,
@@ -262,10 +300,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       currentUser?.role,
       activeDelegations: activeDelegations,
     );
-    final canViewPaymentTransactions = AppPermissions.paymentTransactions.allows(
-      currentUser?.role,
-      activeDelegations: activeDelegations,
-    );
+    final canViewPaymentTransactions = AppPermissions.paymentTransactions
+        .allows(currentUser?.role, activeDelegations: activeDelegations);
     final canViewAuditTrail = AppPermissions.auditTrail.allows(
       currentUser?.role,
       activeDelegations: activeDelegations,
@@ -278,7 +314,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final pendingInvoicesAsync = ref.watch(pendingConfirmationInvoicesProvider);
     final pendingIssuesAsync = ref.watch(pendingIssuesCountProvider);
-    
+
     int linkCount = pendingLinkReqAsync.value ?? 0;
     int invoiceCount = pendingInvoicesAsync.value ?? 0;
     int issueCount = pendingIssuesAsync.value ?? 0;
@@ -366,174 +402,219 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
       destinations: tabs.map((t) => t.adaptiveItem).toList(),
       appBar: currentIndex == 0
           ? AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Flexible(
-              child: Text(
-                'Ban Quản Lý',
-                overflow: TextOverflow.ellipsis,
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Flexible(
+                    child: Text('Ban Quản Lý', overflow: TextOverflow.ellipsis),
+                  ),
+                  if (currentUser != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getRoleBadgeColor(
+                          currentUser.role,
+                        ).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _getRoleBadgeColor(
+                            currentUser.role,
+                          ).withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Text(
+                        currentUser.roleDisplayName,
+                        style: TextStyle(
+                          color: _getRoleBadgeColor(currentUser.role),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ),
-            if (currentUser != null) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: _getRoleBadgeColor(currentUser.role).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _getRoleBadgeColor(currentUser.role).withValues(alpha: 0.5)),
-                ),
-                child: Text(
-                  currentUser.roleDisplayName,
-                  style: TextStyle(
-                    color: _getRoleBadgeColor(currentUser.role),
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+              actions: [
+                const BuildingSwitcherDropdown(),
+                if (canViewAuditTrail)
+                  IconButton(
+                    icon: const Icon(Icons.history),
+                    onPressed: () {
+                      context.push(AppRoutes.managementAuditTrail);
+                    },
+                    tooltip: 'Lịch sử hoạt động',
                   ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          const BuildingSwitcherDropdown(),
-          if (canViewAuditTrail)
-            IconButton(
-              icon: const Icon(Icons.history),
-              onPressed: () {
-                context.push(AppRoutes.managementAuditTrail);
-              },
-              tooltip: 'Lịch sử hoạt động',
-            ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.account_circle_outlined),
-            onSelected: (value) {
-              if (value == 'password') {
-                context.push(AppRoutes.changePassword);
-              } else if (value == 'delegation') {
-                context.push(AppRoutes.managementRoleDelegation);
-              } else if (value == 'matrix') {
-                context.push(AppRoutes.managementPermissionMatrix);
-              } else if (value == 'equipment') {
-                context.push(AppRoutes.managementEquipment);
-              } else if (value == 'serviceRatings') {
-                context.push(AppRoutes.managementServiceRatings);
-              } else if (value == 'meterReadings') {
-                context.push(AppRoutes.managementMeterReading);
-              } else if (value == 'fontSize') {
-                showFontSizeBottomSheet(context, ref);
-              } else if (value == 'theme') {
-                _showManagementThemeModeSheet(context, ref);
-              } else if (value == 'logout') {
-                _showLogoutDialog(context);
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              if (isAdmin)
-                const PopupMenuItem(
-                  value: 'delegation',
-                  child: Row(
-                    children: [
-                      Icon(Icons.vpn_key_outlined, size: 20, color: Colors.purple),
-                      SizedBox(width: 8),
-                      Text('Quản lý ủy quyền'),
-                    ],
-                  ),
-                ),
-              if (canManageMeterReadings)
-                const PopupMenuItem(
-                  value: 'meterReadings',
-                  child: Row(
-                    children: [
-                      Icon(Icons.speed_outlined, size: 20, color: Color(0xFFE65100)),
-                      SizedBox(width: 8),
-                      Text('Duyệt số điện nước'),
-                    ],
-                  ),
-                ),
-              if (isAdmin)
-                const PopupMenuItem(
-                  value: 'matrix',
-                  child: Row(
-                    children: [
-                      Icon(Icons.shield_outlined, size: 20, color: AppTheme.primary),
-                      SizedBox(width: 8),
-                      Text('Bảng phân quyền'),
-                    ],
-                  ),
-                ),
-              if (canManageEquipment)
-                const PopupMenuItem(
-                  value: 'equipment',
-                  child: Row(
-                    children: [
-                      Icon(Icons.precision_manufacturing_outlined, size: 20, color: Colors.deepOrange),
-                      SizedBox(width: 8),
-                      Text('Bảo trì thiết bị'),
-                    ],
-                  ),
-                ),
-              if (canManageIssues)
-                const PopupMenuItem(
-                  value: 'serviceRatings',
-                  child: Row(
-                    children: [
-                      Icon(Icons.star_rate_rounded, size: 20, color: Colors.amber),
-                      SizedBox(width: 8),
-                      Text('Đánh giá dịch vụ'),
-                    ],
-                  ),
-                ),
-              const PopupMenuItem(
-                value: 'fontSize',
-                child: Row(
-                  children: [
-                    Icon(Icons.format_size_outlined, size: 20, color: AppTheme.primary),
-                    SizedBox(width: 8),
-                    Text('Cỡ chữ hiển thị'),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.account_circle_outlined),
+                  onSelected: (value) {
+                    if (value == 'password') {
+                      context.push(AppRoutes.changePassword);
+                    } else if (value == 'delegation') {
+                      context.push(AppRoutes.managementRoleDelegation);
+                    } else if (value == 'matrix') {
+                      context.push(AppRoutes.managementPermissionMatrix);
+                    } else if (value == 'equipment') {
+                      context.push(AppRoutes.managementEquipment);
+                    } else if (value == 'serviceRatings') {
+                      context.push(AppRoutes.managementServiceRatings);
+                    } else if (value == 'meterReadings') {
+                      context.push(AppRoutes.managementMeterReading);
+                    } else if (value == 'fontSize') {
+                      showFontSizeBottomSheet(context, ref);
+                    } else if (value == 'theme') {
+                      _showManagementThemeModeSheet(context, ref);
+                    } else if (value == 'logout') {
+                      _showLogoutDialog(context);
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => [
+                    if (isAdmin)
+                      const PopupMenuItem(
+                        value: 'delegation',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.vpn_key_outlined,
+                              size: 20,
+                              color: Colors.purple,
+                            ),
+                            SizedBox(width: 8),
+                            Text('Quản lý ủy quyền'),
+                          ],
+                        ),
+                      ),
+                    if (canManageMeterReadings)
+                      const PopupMenuItem(
+                        value: 'meterReadings',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.speed_outlined,
+                              size: 20,
+                              color: Color(0xFFE65100),
+                            ),
+                            SizedBox(width: 8),
+                            Text('Duyệt số điện nước'),
+                          ],
+                        ),
+                      ),
+                    if (isAdmin)
+                      const PopupMenuItem(
+                        value: 'matrix',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.shield_outlined,
+                              size: 20,
+                              color: AppTheme.primary,
+                            ),
+                            SizedBox(width: 8),
+                            Text('Bảng phân quyền'),
+                          ],
+                        ),
+                      ),
+                    if (canManageEquipment)
+                      const PopupMenuItem(
+                        value: 'equipment',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.precision_manufacturing_outlined,
+                              size: 20,
+                              color: Colors.deepOrange,
+                            ),
+                            SizedBox(width: 8),
+                            Text('Bảo trì thiết bị'),
+                          ],
+                        ),
+                      ),
+                    if (canManageIssues)
+                      const PopupMenuItem(
+                        value: 'serviceRatings',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.star_rate_rounded,
+                              size: 20,
+                              color: Colors.amber,
+                            ),
+                            SizedBox(width: 8),
+                            Text('Đánh giá dịch vụ'),
+                          ],
+                        ),
+                      ),
+                    const PopupMenuItem(
+                      value: 'fontSize',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.format_size_outlined,
+                            size: 20,
+                            color: AppTheme.primary,
+                          ),
+                          SizedBox(width: 8),
+                          Text('Cỡ chữ hiển thị'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'password',
+                      child: Row(
+                        children: [
+                          Icon(Icons.lock_outline, size: 20),
+                          SizedBox(width: 8),
+                          Text('Đổi mật khẩu'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'theme',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.brightness_6_outlined,
+                            size: 20,
+                            color: AppTheme.primary,
+                          ),
+                          SizedBox(width: 8),
+                          Text('Giao diện'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.logout_outlined,
+                            size: 20,
+                            color: AppTheme.error,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Đăng xuất',
+                            style: TextStyle(color: AppTheme.error),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'password',
-                child: Row(
-                  children: [
-                    Icon(Icons.lock_outline, size: 20),
-                    SizedBox(width: 8),
-                    Text('Đổi mật khẩu'),
-                  ],
+                IconButton(
+                  icon: const Icon(
+                    Icons.logout_outlined,
+                    color: AppTheme.error,
+                  ),
+                  tooltip: 'Đăng xuất',
+                  onPressed: () => _showLogoutDialog(context),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'theme',
-                child: Row(
-                  children: [
-                    Icon(Icons.brightness_6_outlined, size: 20, color: AppTheme.primary),
-                    SizedBox(width: 8),
-                    Text('Giao diện'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout_outlined, size: 20, color: AppTheme.error),
-                    SizedBox(width: 8),
-                    Text('Đăng xuất', style: TextStyle(color: AppTheme.error)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout_outlined, color: AppTheme.error),
-            tooltip: 'Đăng xuất',
-            onPressed: () => _showLogoutDialog(context),
-          ),
-        ],
-      ) : null,
+              ],
+            )
+          : null,
       sidebarHeader: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Row(
@@ -544,7 +625,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.apartment_rounded, color: AppTheme.primary, size: 24),
+              child: const Icon(
+                Icons.apartment_rounded,
+                color: AppTheme.primary,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -575,7 +660,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         child: OutlinedButton.icon(
           onPressed: () => _showLogoutDialog(context),
           icon: const Icon(Icons.logout, size: 18, color: AppTheme.error),
-          label: const Text('Đăng xuất', style: TextStyle(color: AppTheme.error)),
+          label: const Text(
+            'Đăng xuất',
+            style: TextStyle(color: AppTheme.error),
+          ),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: AppTheme.error),
             minimumSize: const Size.fromHeight(40),
@@ -614,179 +702,217 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     final pendingIssuesAsync = ref.watch(pendingIssuesCountProvider);
     final pendingLinkReqAsync = ref.watch(pendingLinkRequestsCountProvider);
     final allIssuesAsync = ref.watch(allIssuesProvider);
-    final pendingMeterReadingsAsync = ref.watch(pendingMeterReadingsCountProvider);
-    final pendingConfirmationAsync = ref.watch(pendingConfirmationInvoicesProvider);
+    final pendingMeterReadingsAsync = ref.watch(
+      pendingMeterReadingsCountProvider,
+    );
+    final pendingConfirmationAsync = ref.watch(
+      pendingConfirmationInvoicesProvider,
+    );
 
     final List<Widget> quickActionItems = [];
     if (isAdmin) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.person_add,
-        label: 'Duyệt liên kết',
-        color: AppTheme.primary,
-        onTap: () async {
-          await context.push(AppRoutes.managementLinkRequests);
-          ref.invalidate(pendingLinkRequestsCountProvider);
-          ref.invalidate(residentsProvider);
-        },
-        badgeCount: pendingLinkReqAsync.valueOrNull ?? 0,
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.person_add,
+          label: 'Duyệt liên kết',
+          color: AppTheme.primary,
+          onTap: () async {
+            await context.push(AppRoutes.managementLinkRequests);
+            ref.invalidate(pendingLinkRequestsCountProvider);
+            ref.invalidate(residentsProvider);
+          },
+          badgeCount: pendingLinkReqAsync.valueOrNull ?? 0,
+        ),
+      );
     }
     if (isAdmin) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.upload_file_outlined,
-        label: 'Nhập Excel',
-        color: Colors.teal,
-        onTap: () => context.push(AppRoutes.managementBatchImport),
-      ));
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.card_membership_outlined,
-        label: 'Gói cước',
-        color: Colors.purple,
-        onTap: () => context.push(AppRoutes.managementSubscription),
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.upload_file_outlined,
+          label: 'Nhập Excel',
+          color: Colors.teal,
+          onTap: () => context.push(AppRoutes.managementBatchImport),
+        ),
+      );
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.card_membership_outlined,
+          label: 'Gói cước',
+          color: Colors.purple,
+          onTap: () => context.push(AppRoutes.managementSubscription),
+        ),
+      );
     }
     if (canManageInvoices) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.analytics_outlined,
-        label: 'Báo cáo TC',
-        color: Colors.indigo,
-        onTap: () => context.push(AppRoutes.managementFinancialReport),
-      ));
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.table_chart_rounded,
-        label: 'Bàn kế toán',
-        color: Colors.blueGrey,
-        onTap: () => context.push(AppRoutes.managementAccountingWorkstation),
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.analytics_outlined,
+          label: 'Báo cáo TC',
+          color: Colors.indigo,
+          onTap: () => context.push(AppRoutes.managementFinancialReport),
+        ),
+      );
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.table_chart_rounded,
+          label: 'Bàn kế toán',
+          color: Colors.blueGrey,
+          onTap: () => context.push(AppRoutes.managementAccountingWorkstation),
+        ),
+      );
     }
     if (canManageInvoices) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.receipt_long,
-        label: 'Lập hóa đơn',
-        color: AppTheme.secondary,
-        onTap: () => context.push(AppRoutes.managementCreateInvoice),
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.receipt_long,
+          label: 'Lập hóa đơn',
+          color: AppTheme.secondary,
+          onTap: () => context.push(AppRoutes.managementCreateInvoice),
+        ),
+      );
     }
     if (canManageIssues) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.report_problem_outlined,
-        label: 'Xử lý sự cố',
-        color: Colors.orange,
-        onTap: () => context.push(AppRoutes.managementIssues),
-        badgeCount: pendingIssuesAsync.valueOrNull ?? 0,
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.report_problem_outlined,
+          label: 'Xử lý sự cố',
+          color: Colors.orange,
+          onTap: () => context.push(AppRoutes.managementIssues),
+          badgeCount: pendingIssuesAsync.valueOrNull ?? 0,
+        ),
+      );
     }
     if (canManageMeterReadings) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.speed_outlined,
-        label: 'Duyệt điện nước',
-        color: const Color(0xFFE65100),
-        onTap: () async {
-          await context.push(AppRoutes.managementMeterReading);
-          ref.invalidate(pendingMeterReadingsCountProvider);
-        },
-        badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.speed_outlined,
+          label: 'Duyệt điện nước',
+          color: const Color(0xFFE65100),
+          onTap: () async {
+            await context.push(AppRoutes.managementMeterReading);
+            ref.invalidate(pendingMeterReadingsCountProvider);
+          },
+          badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
+        ),
+      );
     }
     if (canManageEquipment) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.precision_manufacturing_outlined,
-        label: 'Bảo trì TB',
-        color: Colors.deepOrange,
-        onTap: () => context.push(AppRoutes.managementEquipment),
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.precision_manufacturing_outlined,
+          label: 'Bảo trì TB',
+          color: Colors.deepOrange,
+          onTap: () => context.push(AppRoutes.managementEquipment),
+        ),
+      );
     }
     if (canApproveVehicles) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.two_wheeler_outlined,
-        label: 'Duyệt xe',
-        color: Colors.blueGrey,
-        onTap: () => context.push(AppRoutes.managementVehicleApproval),
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.two_wheeler_outlined,
+          label: 'Duyệt xe',
+          color: Colors.blueGrey,
+          onTap: () => context.push(AppRoutes.managementVehicleApproval),
+        ),
+      );
     }
-    quickActionItems.add(_buildQuickAction(
-      context,
-      icon: Icons.local_parking_rounded,
-      label: 'Bãi xe',
-      color: Colors.indigo,
-      onTap: () => context.push(AppRoutes.managementParking),
-    ));
-    quickActionItems.add(_buildQuickAction(
-      context,
-      icon: Icons.desk_outlined,
-      label: 'Lễ tân',
-      color: Colors.deepOrange,
-      onTap: () => context.push(AppRoutes.managementFrontDesk),
-    ));
-    quickActionItems.add(_buildQuickAction(
-      context,
-      icon: Icons.how_to_vote_outlined,
-      label: 'Cộng đồng',
-      color: Colors.blueGrey,
-      onTap: () => context.push(AppRoutes.managementCommunity),
-    ));
-    if (canManageIssues) {
-      quickActionItems.add(_buildQuickAction(
+    quickActionItems.add(
+      _buildQuickAction(
         context,
-        icon: Icons.inventory_2_outlined,
-        label: 'Kho vật tư',
-        color: Colors.teal,
-        onTap: () => context.push(AppRoutes.managementMaterials),
-      ));
+        icon: Icons.local_parking_rounded,
+        label: 'Bãi xe',
+        color: Colors.indigo,
+        onTap: () => context.push(AppRoutes.managementParking),
+      ),
+    );
+    quickActionItems.add(
+      _buildQuickAction(
+        context,
+        icon: Icons.desk_outlined,
+        label: 'Lễ tân',
+        color: Colors.deepOrange,
+        onTap: () => context.push(AppRoutes.managementFrontDesk),
+      ),
+    );
+    quickActionItems.add(
+      _buildQuickAction(
+        context,
+        icon: Icons.how_to_vote_outlined,
+        label: 'Cộng đồng',
+        color: Colors.blueGrey,
+        onTap: () => context.push(AppRoutes.managementCommunity),
+      ),
+    );
+    if (canManageIssues) {
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.inventory_2_outlined,
+          label: 'Kho vật tư',
+          color: Colors.teal,
+          onTap: () => context.push(AppRoutes.managementMaterials),
+        ),
+      );
     }
     if (canViewPaymentTransactions) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.receipt_long_outlined,
-        label: 'Giao dịch',
-        color: Colors.deepPurple,
-        onTap: () => context.push(AppRoutes.managementPaymentTransactions),
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.receipt_long_outlined,
+          label: 'Giao dịch',
+          color: Colors.deepPurple,
+          onTap: () => context.push(AppRoutes.managementPaymentTransactions),
+        ),
+      );
     }
     if (isAdmin) {
-      quickActionItems.add(_buildQuickAction(
-        context,
-        icon: Icons.domain,
-        label: 'Căn hộ',
-        color: Colors.teal,
-        onTap: () => context.push(AppRoutes.managementApartments),
-      ));
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.domain,
+          label: 'Căn hộ',
+          color: Colors.teal,
+          onTap: () => context.push(AppRoutes.managementApartments),
+        ),
+      );
     }
     // Nút mở Tất cả thao tác
-    quickActionItems.add(_buildQuickAction(
-      context,
-      icon: Icons.apps_rounded,
-      label: 'Xem tất cả',
-      color: AppTheme.primary,
-      onTap: () => _showAllQuickActionsSheet(
+    quickActionItems.add(
+      _buildQuickAction(
         context,
-        isAdmin: isAdmin,
-        canManageInvoices: canManageInvoices,
-        canManageIssues: canManageIssues,
-        canManageMeterReadings: canManageMeterReadings,
-        canManageHandbook: canManageHandbook,
-        canManageAmenities: canManageAmenities,
-        canManageEquipment: canManageEquipment,
-        canApproveVehicles: canApproveVehicles,
-        canViewPaymentTransactions: canViewPaymentTransactions,
-        canManageRoleDelegations: isAdmin,
-        canManagePermissions: isAdmin,
-        canViewAuditLogs: canViewAuditTrail,
-        pendingLinkCount: pendingLinkReqAsync.valueOrNull ?? 0,
-        pendingIssuesCount: pendingIssuesAsync.valueOrNull ?? 0,
-        pendingMeterCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
+        icon: Icons.apps_rounded,
+        label: 'Xem tất cả',
+        color: AppTheme.primary,
+        onTap: () => _showAllQuickActionsSheet(
+          context,
+          isAdmin: isAdmin,
+          canManageInvoices: canManageInvoices,
+          canManageIssues: canManageIssues,
+          canManageMeterReadings: canManageMeterReadings,
+          canManageHandbook: canManageHandbook,
+          canManageAmenities: canManageAmenities,
+          canManageEquipment: canManageEquipment,
+          canApproveVehicles: canApproveVehicles,
+          canViewPaymentTransactions: canViewPaymentTransactions,
+          canManageRoleDelegations: isAdmin,
+          canManagePermissions: isAdmin,
+          canViewAuditLogs: canViewAuditTrail,
+          pendingLinkCount: pendingLinkReqAsync.valueOrNull ?? 0,
+          pendingIssuesCount: pendingIssuesAsync.valueOrNull ?? 0,
+          pendingMeterCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
+        ),
       ),
-    ));
+    );
 
     return RefreshIndicator(
       color: AppTheme.primary,
@@ -816,7 +942,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 Expanded(
                   child: Text(
                     'Thao tác nhanh',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -837,7 +965,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     canViewAuditLogs: canViewAuditTrail,
                     pendingLinkCount: pendingLinkReqAsync.valueOrNull ?? 0,
                     pendingIssuesCount: pendingIssuesAsync.valueOrNull ?? 0,
-                    pendingMeterCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
+                    pendingMeterCount:
+                        pendingMeterReadingsAsync.valueOrNull ?? 0,
                   ),
                   child: const Text('Xem tất cả'),
                 ),
@@ -874,12 +1003,24 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             const SizedBox(height: 12),
             allIssuesAsync.when(
               data: (issues) {
-                final urgentIssues = issues.where((issue) => issue.priority == 'high' && issue.status == 'pending').toList();
-                final pendingConfirmationCount = pendingConfirmationAsync.valueOrNull ?? 0;
-                final pendingLinkCount = (isAdmin ? pendingLinkReqAsync.valueOrNull : 0) ?? 0;
-                final pendingMeterCount = (canManageMeterReadings ? pendingMeterReadingsAsync.valueOrNull : 0) ?? 0;
+                final urgentIssues = issues
+                    .where(
+                      (issue) =>
+                          issue.priority == 'high' && issue.status == 'pending',
+                    )
+                    .toList();
+                final pendingConfirmationCount =
+                    pendingConfirmationAsync.valueOrNull ?? 0;
+                final pendingLinkCount =
+                    (isAdmin ? pendingLinkReqAsync.valueOrNull : 0) ?? 0;
+                final pendingMeterCount =
+                    (canManageMeterReadings
+                        ? pendingMeterReadingsAsync.valueOrNull
+                        : 0) ??
+                    0;
 
-                final hasUrgentWork = urgentIssues.isNotEmpty ||
+                final hasUrgentWork =
+                    urgentIssues.isNotEmpty ||
                     (pendingConfirmationCount > 0 && canManageInvoices) ||
                     (pendingLinkCount > 0 && isAdmin) ||
                     (pendingMeterCount > 0 && canManageMeterReadings);
@@ -889,13 +1030,18 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle_outline, color: AppStatusColors.paid),
+                        const Icon(
+                          Icons.check_circle_outline,
+                          color: AppStatusColors.paid,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Không có sự cố khẩn cấp nào cần xử lý.',
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -912,17 +1058,36 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         padding: EdgeInsets.zero,
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: const Icon(Icons.warning, color: AppStatusColors.priorityHigh),
-                          title: Text('Phản ánh sự cố — Căn ${issue.apartment?.code ?? 'N/A'}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppStatusColors.priorityHigh)),
-                          subtitle: Text(issue.description, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          leading: const Icon(
+                            Icons.warning,
+                            color: AppStatusColors.priorityHigh,
+                          ),
+                          title: Text(
+                            'Phản ánh sự cố — Căn ${issue.apartment?.code ?? 'N/A'}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppStatusColors.priorityHigh,
+                            ),
+                          ),
+                          subtitle: Text(
+                            issue.description,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           trailing: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppStatusColors.priorityHigh,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                             ),
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const IssueManagementScreen()));
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const IssueManagementScreen(),
+                                ),
+                              );
                             },
                             child: const Text('Xem ngay'),
                           ),
@@ -933,16 +1098,32 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         padding: EdgeInsets.zero,
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: const Icon(Icons.receipt_long, color: Colors.purple),
-                          title: Text('Hóa đơn chờ đối soát ($pendingConfirmationCount)', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.purple)),
-                          subtitle: const Text('Cư dân đã gửi minh chứng thanh toán', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          leading: const Icon(
+                            Icons.receipt_long,
+                            color: Colors.purple,
+                          ),
+                          title: Text(
+                            'Hóa đơn chờ đối soát ($pendingConfirmationCount)',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.purple,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Cư dân đã gửi minh chứng thanh toán',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           trailing: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.purple,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                             ),
-                            onPressed: () => context.push(AppRoutes.managementInvoices),
+                            onPressed: () =>
+                                context.push(AppRoutes.managementInvoices),
                             child: const Text('Đối soát'),
                           ),
                         ),
@@ -952,17 +1133,34 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         padding: EdgeInsets.zero,
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: const Icon(Icons.person_add, color: AppTheme.primary),
-                          title: Text('Yêu cầu liên kết căn hộ ($pendingLinkCount)', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
-                          subtitle: const Text('Cư dân đăng ký thông tin căn hộ chờ duyệt', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          leading: const Icon(
+                            Icons.person_add,
+                            color: AppTheme.primary,
+                          ),
+                          title: Text(
+                            'Yêu cầu liên kết căn hộ ($pendingLinkCount)',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Cư dân đăng ký thông tin căn hộ chờ duyệt',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           trailing: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primary,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                             ),
                             onPressed: () async {
-                              await context.push(AppRoutes.managementLinkRequests);
+                              await context.push(
+                                AppRoutes.managementLinkRequests,
+                              );
                               ref.invalidate(pendingLinkRequestsCountProvider);
                               ref.invalidate(residentsProvider);
                             },
@@ -975,17 +1173,34 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         padding: EdgeInsets.zero,
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: const Icon(Icons.speed_outlined, color: Color(0xFFE65100)),
-                          title: Text('Chỉ số điện nước chờ duyệt ($pendingMeterCount)', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFE65100))),
-                          subtitle: const Text('Cần xác nhận chỉ số để chốt kỳ thanh toán', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          leading: const Icon(
+                            Icons.speed_outlined,
+                            color: Color(0xFFE65100),
+                          ),
+                          title: Text(
+                            'Chỉ số điện nước chờ duyệt ($pendingMeterCount)',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFE65100),
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Cần xác nhận chỉ số để chốt kỳ thanh toán',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           trailing: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE65100),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                             ),
                             onPressed: () async {
-                              await context.push(AppRoutes.managementMeterReading);
+                              await context.push(
+                                AppRoutes.managementMeterReading,
+                              );
                               ref.invalidate(pendingMeterReadingsCountProvider);
                             },
                             child: const Text('Duyệt ngay'),
@@ -996,12 +1211,20 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => const Text('Lỗi tải dữ liệu', style: TextStyle(color: AppTheme.error)),
+              error: (e, _) => const Text(
+                'Lỗi tải dữ liệu',
+                style: TextStyle(color: AppTheme.error),
+              ),
             ),
             const SizedBox(height: 24),
 
             // 3. CƯ DÂN & CĂN HỘ (A2)
-            Text('Cư dân & Căn hộ — Tổng quan trạng thái', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'Cư dân & Căn hộ — Tổng quan trạng thái',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             GridView.count(
               shrinkWrap: true,
@@ -1015,11 +1238,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     ? const StatCardSkeleton()
                     : StatCard(
                         title: 'Tổng số Căn hộ',
-                        value: ref.watch(totalApartmentsProvider).when(
-                          data: (count) => '$count',
-                          loading: () => '...',
-                          error: (_, _) => 'Lỗi',
-                        ),
+                        value: ref
+                            .watch(totalApartmentsProvider)
+                            .when(
+                              data: (count) => '$count',
+                              loading: () => '...',
+                              error: (_, _) => 'Lỗi',
+                            ),
                         icon: Icons.domain,
                         color: AppTheme.primary,
                       ),
@@ -1027,11 +1252,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     ? const StatCardSkeleton()
                     : StatCard(
                         title: 'Tổng Cư dân',
-                        value: ref.watch(totalResidentsProvider).when(
-                          data: (count) => '$count',
-                          loading: () => '...',
-                          error: (_, _) => 'Lỗi',
-                        ),
+                        value: ref
+                            .watch(totalResidentsProvider)
+                            .when(
+                              data: (count) => '$count',
+                              loading: () => '...',
+                              error: (_, _) => 'Lỗi',
+                            ),
                         icon: Icons.groups,
                         color: AppStatusColors.paid,
                       ),
@@ -1039,11 +1266,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     ? const StatCardSkeleton()
                     : StatCard(
                         title: 'Tỷ lệ lấp đầy',
-                        value: ref.watch(occupancyRateProvider).when(
-                          data: (rate) => '${(rate * 100).toStringAsFixed(1)}%',
-                          loading: () => '...',
-                          error: (_, _) => 'Lỗi',
-                        ),
+                        value: ref
+                            .watch(occupancyRateProvider)
+                            .when(
+                              data: (rate) =>
+                                  '${(rate * 100).toStringAsFixed(1)}%',
+                              loading: () => '...',
+                              error: (_, _) => 'Lỗi',
+                            ),
                         icon: Icons.pie_chart_outline,
                         color: AppTheme.secondary,
                       ),
@@ -1065,11 +1295,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                       ? const StatCardSkeleton()
                       : StatCard(
                           title: 'Căn hộ trống',
-                          value: ref.watch(emptyApartmentsProvider).when(
-                            data: (count) => '$count',
-                            loading: () => '...',
-                            error: (_, _) => 'Lỗi',
-                          ),
+                          value: ref
+                              .watch(emptyApartmentsProvider)
+                              .when(
+                                data: (count) => '$count',
+                                loading: () => '...',
+                                error: (_, _) => 'Lỗi',
+                              ),
                           icon: Icons.meeting_room_outlined,
                           color: Colors.amber.shade700,
                         ),
@@ -1079,7 +1311,12 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
 
             // 4. TÀI CHÍNH & THU PHÍ (A2)
             if (!isTechnician || canManageInvoices) ...[
-              Text('Tài chính & Thu phí', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                'Tài chính & Thu phí',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               _buildFinancialProgressCard(),
               const SizedBox(height: 16),
@@ -1093,7 +1330,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   Expanded(
                     child: Text(
                       'Thanh toán gần đây',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -1111,7 +1350,12 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             ],
 
             // 5. VẬN HÀNH & KỸ THUẬT (A2)
-            Text('Vận hành & Kỹ thuật', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'Vận hành & Kỹ thuật',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             GridView.count(
               shrinkWrap: true,
@@ -1138,7 +1382,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     : StatCard(
                         title: 'Sự cố đang xử lý',
                         value: allIssuesAsync.when(
-                          data: (issues) => '${issues.where((i) => i.status == 'in_progress').length}',
+                          data: (issues) =>
+                              '${issues.where((i) => i.status == 'in_progress').length}',
                           loading: () => '...',
                           error: (_, _) => 'Lỗi',
                         ),
@@ -1163,7 +1408,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           return const AppCard(
             padding: EdgeInsets.all(16),
             child: Center(
-              child: Text('Chưa có giao dịch thanh toán nào.', style: TextStyle(color: AppTheme.textSecondary)),
+              child: Text(
+                'Chưa có giao dịch thanh toán nào.',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
             ),
           );
         }
@@ -1185,16 +1433,33 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     color: AppStatusColors.paid.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.check_circle_outline, color: AppStatusColors.paid, size: 20),
+                  child: const Icon(
+                    Icons.check_circle_outline,
+                    color: AppStatusColors.paid,
+                    size: 20,
+                  ),
                 ),
-                title: Text(tx.title ?? 'Giao dịch thanh toán', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                title: Text(
+                  tx.title ?? 'Giao dịch thanh toán',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
                 subtitle: Text(
                   '${tx.transactionCode} • ${DateFormat('dd/MM HH:mm').format(tx.createdAt)}',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
                 trailing: Text(
                   formatCurrency.format(tx.amount),
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                    fontSize: 14,
+                  ),
                 ),
               );
             },
@@ -1221,153 +1486,189 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
 
         return AppCard(
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: const [
+                        Icon(
+                          Icons.pie_chart_outline,
+                          color: AppTheme.primary,
+                          size: 20,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Tiến độ thu phí tòa nhà',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppStatusColors.paid.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$percent% Đã thu',
+                      style: const TextStyle(
+                        color: AppStatusColors.paid,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: chartHeight,
+                child: Row(
                   children: [
                     Expanded(
-                      child: Row(
-                        children: const [
-                          Icon(Icons.pie_chart_outline, color: AppTheme.primary, size: 20),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Tiến độ thu phí tòa nhà',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                      flex: 1,
+                      child: PieChart(
+                        PieChartData(
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 30,
+                          sections: [
+                            PieChartSectionData(
+                              color: AppStatusColors.paid,
+                              value: stats.paidTotal,
+                              title: '',
+                              radius: 25,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppStatusColors.paid.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$percent% Đã thu',
-                        style: const TextStyle(
-                          color: AppStatusColors.paid,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: chartHeight,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: PieChart(
-                          PieChartData(
-                            sectionsSpace: 2,
-                            centerSpaceRadius: 30,
-                            sections: [
-                              PieChartSectionData(
-                                color: AppStatusColors.paid,
-                                value: stats.paidTotal,
-                                title: '',
-                                radius: 25,
-                              ),
-                              PieChartSectionData(
-                                color: AppStatusColors.unpaid,
-                                value: stats.unpaidTotal,
-                                title: '',
-                                radius: 25,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLegendItem(color: AppStatusColors.paid, label: 'Đã thu: ${formatCurrency.format(stats.paidTotal)}'),
-                            const SizedBox(height: 8),
-                            _buildLegendItem(color: AppStatusColors.unpaid, label: 'Còn nợ: ${formatCurrency.format(stats.unpaidTotal)}'),
+                            PieChartSectionData(
+                              color: AppStatusColors.unpaid,
+                              value: stats.unpaidTotal,
+                              title: '',
+                              radius: 25,
+                            ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
+                    ),
+                    const SizedBox(width: 16),
                     Expanded(
+                      flex: 2,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Đã thu', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                          const SizedBox(height: 4),
-                          Text(
-                            formatCurrency.format(stats.paidTotal),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppStatusColors.paid,
-                            ),
+                          _buildLegendItem(
+                            color: AppStatusColors.paid,
+                            label:
+                                'Đã thu: ${formatCurrency.format(stats.paidTotal)}',
                           ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Text('Còn nợ', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                          const SizedBox(height: 4),
-                          Text(
-                            formatCurrency.format(stats.unpaidTotal),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppStatusColors.unpaid,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text('Căn đã đóng', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${stats.paidCount}/${stats.paidCount + stats.unpaidCount}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                          const SizedBox(height: 8),
+                          _buildLegendItem(
+                            color: AppStatusColors.unpaid,
+                            label:
+                                'Còn nợ: ${formatCurrency.format(stats.unpaidTotal)}',
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Đã thu',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          formatCurrency.format(stats.paidTotal),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppStatusColors.paid,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Còn nợ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          formatCurrency.format(stats.unpaidTotal),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppStatusColors.unpaid,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Căn đã đóng',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${stats.paidCount}/${stats.paidCount + stats.unpaidCount}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -1396,7 +1697,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           decoration: BoxDecoration(
             color: color.withValues(alpha: isDark ? 0.15 : 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withValues(alpha: isDark ? 0.35 : 0.2)),
+            border: Border.all(
+              color: color.withValues(alpha: isDark ? 0.35 : 0.2),
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1410,12 +1713,18 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                       right: -8,
                       top: -8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 2,
+                        ),
                         decoration: const BoxDecoration(
                           color: AppStatusColors.priorityHigh,
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
-                        constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
                         child: Text(
                           '$badgeCount',
                           textAlign: TextAlign.center,
@@ -1493,7 +1802,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -1502,15 +1814,18 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.apps_rounded, color: AppTheme.primary, size: 22),
+                        child: const Icon(
+                          Icons.apps_rounded,
+                          color: AppTheme.primary,
+                          size: 22,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Tất cả thao tác quản trị',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       IconButton(
@@ -1524,20 +1839,30 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 Expanded(
                   child: ListView(
                     controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     children: [
                       // Nhóm 1: Cư dân & Căn hộ
-                      _buildSheetSectionHeader(context, 'Cư dân & Căn hộ', Icons.groups_outlined),
+                      _buildSheetSectionHeader(
+                        context,
+                        'Cư dân & Căn hộ',
+                        Icons.groups_outlined,
+                      ),
                       if (isAdmin)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.person_add_outlined,
                           title: 'Duyệt liên kết',
-                          subtitle: 'Phê duyệt tài khoản cư dân liên kết căn hộ',
+                          subtitle:
+                              'Phê duyệt tài khoản cư dân liên kết căn hộ',
                           color: AppTheme.primary,
                           badgeCount: pendingLinkCount,
                           onTap: () async {
-                            await context.push(AppRoutes.managementLinkRequests);
+                            await context.push(
+                              AppRoutes.managementLinkRequests,
+                            );
                             ref.invalidate(pendingLinkRequestsCountProvider);
                             ref.invalidate(residentsProvider);
                           },
@@ -1549,7 +1874,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           title: 'Quản lý căn hộ',
                           subtitle: 'Danh sách và thông tin sơ đồ căn hộ',
                           color: Colors.teal,
-                          onTap: () => context.push(AppRoutes.managementApartments),
+                          onTap: () =>
+                              context.push(AppRoutes.managementApartments),
                         ),
                       if (canManageHandbook)
                         _buildSheetActionItem(
@@ -1558,31 +1884,41 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           title: 'Cẩm nang cư dân',
                           subtitle: 'Quy định, hướng dẫn và nội quy tòa nhà',
                           color: Colors.indigo,
-                          onTap: () => context.push(AppRoutes.managementHandbook),
+                          onTap: () =>
+                              context.push(AppRoutes.managementHandbook),
                         ),
 
                       const SizedBox(height: 12),
                       // Nhóm 2: Tài chính & Thu phí
-                      _buildSheetSectionHeader(context, 'Tài chính & Thu phí', Icons.account_balance_wallet_outlined),
+                      _buildSheetSectionHeader(
+                        context,
+                        'Tài chính & Thu phí',
+                        Icons.account_balance_wallet_outlined,
+                      ),
                       if (canManageInvoices)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.receipt_long,
                           title: 'Lập hóa đơn',
-                          subtitle: 'Tạo phiếu thu phí quản lý, điện, nước hàng tháng',
+                          subtitle:
+                              'Tạo phiếu thu phí quản lý, điện, nước hàng tháng',
                           color: AppTheme.secondary,
-                          onTap: () => context.push(AppRoutes.managementCreateInvoice),
+                          onTap: () =>
+                              context.push(AppRoutes.managementCreateInvoice),
                         ),
                       if (canManageMeterReadings)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.speed_outlined,
                           title: 'Duyệt chỉ số điện nước',
-                          subtitle: 'Kiểm tra và phê duyệt số điện nước công tơ',
+                          subtitle:
+                              'Kiểm tra và phê duyệt số điện nước công tơ',
                           color: const Color(0xFFE65100),
                           badgeCount: pendingMeterCount,
                           onTap: () async {
-                            await context.push(AppRoutes.managementMeterReading);
+                            await context.push(
+                              AppRoutes.managementMeterReading,
+                            );
                             ref.invalidate(pendingMeterReadingsCountProvider);
                           },
                         ),
@@ -1591,20 +1927,28 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           context: context,
                           icon: Icons.receipt_long_outlined,
                           title: 'Lịch sử giao dịch',
-                          subtitle: 'Theo dõi dòng tiền và đối soát chuyển khoản VietQR',
+                          subtitle:
+                              'Theo dõi dòng tiền và đối soát chuyển khoản VietQR',
                           color: Colors.deepPurple,
-                          onTap: () => context.push(AppRoutes.managementPaymentTransactions),
+                          onTap: () => context.push(
+                            AppRoutes.managementPaymentTransactions,
+                          ),
                         ),
 
                       const SizedBox(height: 12),
                       // Nhóm 3: Vận hành & Kỹ thuật
-                      _buildSheetSectionHeader(context, 'Vận hành & Kỹ thuật', Icons.build_circle_outlined),
+                      _buildSheetSectionHeader(
+                        context,
+                        'Vận hành & Kỹ thuật',
+                        Icons.build_circle_outlined,
+                      ),
                       if (canManageIssues)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.report_problem_outlined,
                           title: 'Xử lý sự cố',
-                          subtitle: 'Tiếp nhận, phân công và khắc phục phản ánh cư dân',
+                          subtitle:
+                              'Tiếp nhận, phân công và khắc phục phản ánh cư dân',
                           color: Colors.orange,
                           badgeCount: pendingIssuesCount,
                           onTap: () => context.push(AppRoutes.managementIssues),
@@ -1614,33 +1958,40 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           context: context,
                           icon: Icons.pool_outlined,
                           title: 'Tiện ích chung',
-                          subtitle: 'Hồ bơi, sân tennis, BBQ và kiểm soát lượt đặt chỗ',
+                          subtitle:
+                              'Hồ bơi, sân tennis, BBQ và kiểm soát lượt đặt chỗ',
                           color: Colors.teal.shade700,
-                          onTap: () => context.push(AppRoutes.managementAmenities),
+                          onTap: () =>
+                              context.push(AppRoutes.managementAmenities),
                         ),
                       if (canManageEquipment)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.precision_manufacturing_outlined,
                           title: 'Bảo trì thiết bị',
-                          subtitle: 'Lập lịch và theo dõi bảo dưỡng thang máy, máy phát điện',
+                          subtitle:
+                              'Lập lịch và theo dõi bảo dưỡng thang máy, máy phát điện',
                           color: Colors.deepOrange,
-                          onTap: () => context.push(AppRoutes.managementEquipment),
+                          onTap: () =>
+                              context.push(AppRoutes.managementEquipment),
                         ),
                       if (canApproveVehicles)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.two_wheeler_outlined,
                           title: 'Duyệt phương tiện',
-                          subtitle: 'Xét duyệt hồ sơ gửi xe máy, ô tô của cư dân',
+                          subtitle:
+                              'Xét duyệt hồ sơ gửi xe máy, ô tô của cư dân',
                           color: Colors.blueGrey,
-                          onTap: () => context.push(AppRoutes.managementVehicleApproval),
+                          onTap: () =>
+                              context.push(AppRoutes.managementVehicleApproval),
                         ),
                       _buildSheetActionItem(
                         context: context,
                         icon: Icons.local_parking_rounded,
                         title: 'Bãi xe & Ô đỗ',
-                        subtitle: 'Sơ đồ ô đỗ hầm, kiểm soát sức chứa và trạm soát vé',
+                        subtitle:
+                            'Sơ đồ ô đỗ hầm, kiểm soát sức chứa và trạm soát vé',
                         color: Colors.blue.shade700,
                         onTap: () => context.push(AppRoutes.managementParking),
                       ),
@@ -1648,35 +1999,43 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         context: context,
                         icon: Icons.desk_outlined,
                         title: 'Lễ tân & An ninh sảnh',
-                        subtitle: 'Quét QR đón khách, tiếp nhận bưu kiện shipper và tra cứu mã PIN',
+                        subtitle:
+                            'Quét QR đón khách, tiếp nhận bưu kiện shipper và tra cứu mã PIN',
                         color: Colors.deepOrange,
-                        onTap: () => context.push(AppRoutes.managementFrontDesk),
+                        onTap: () =>
+                            context.push(AppRoutes.managementFrontDesk),
                       ),
                       _buildSheetActionItem(
                         context: context,
                         icon: Icons.how_to_vote_outlined,
                         title: 'Cộng đồng & Biểu quyết',
-                        subtitle: 'Tổ chức biểu quyết điện tử Luật Nhà ở 2023 & Xử lý kiến nghị cư dân',
+                        subtitle:
+                            'Tổ chức biểu quyết điện tử Luật Nhà ở 2023 & Xử lý kiến nghị cư dân',
                         color: Colors.blueGrey,
-                        onTap: () => context.push(AppRoutes.managementCommunity),
+                        onTap: () =>
+                            context.push(AppRoutes.managementCommunity),
                       ),
                       if (canManageIssues)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.inventory_2_outlined,
                           title: 'Kho vật tư kỹ thuật',
-                          subtitle: 'Định mức tồn, xuất kho bảo trì & trừ kho theo sự cố',
+                          subtitle:
+                              'Định mức tồn, xuất kho bảo trì & trừ kho theo sự cố',
                           color: Colors.teal,
-                          onTap: () => context.push(AppRoutes.managementMaterials),
+                          onTap: () =>
+                              context.push(AppRoutes.managementMaterials),
                         ),
                       if (canManageIssues)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.star_rate_rounded,
                           title: 'Đánh giá dịch vụ',
-                          subtitle: 'Khảo sát độ hài lòng của cư dân về dịch vụ tòa nhà',
+                          subtitle:
+                              'Khảo sát độ hài lòng của cư dân về dịch vụ tòa nhà',
                           color: Colors.amber.shade700,
-                          onTap: () => context.push(AppRoutes.managementServiceRatings),
+                          onTap: () =>
+                              context.push(AppRoutes.managementServiceRatings),
                         ),
                       if (canManageRoleDelegations)
                         _buildSheetActionItem(
@@ -1685,7 +2044,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           title: 'Ủy quyền công việc',
                           subtitle: 'Phân quyền tạm thời cho nhân sự cấp phó',
                           color: Colors.purple,
-                          onTap: () => context.push(AppRoutes.managementRoleDelegation),
+                          onTap: () =>
+                              context.push(AppRoutes.managementRoleDelegation),
                         ),
                       if (canManagePermissions)
                         _buildSheetActionItem(
@@ -1694,16 +2054,20 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           title: 'Ma trận phân quyền',
                           subtitle: 'Cấu hình chi tiết quyền hạn từng vai trò',
                           color: Colors.indigoAccent,
-                          onTap: () => context.push(AppRoutes.managementPermissionMatrix),
+                          onTap: () => context.push(
+                            AppRoutes.managementPermissionMatrix,
+                          ),
                         ),
                       if (canViewAuditLogs)
                         _buildSheetActionItem(
                           context: context,
                           icon: Icons.history_edu_outlined,
                           title: 'Nhật ký kiểm toán',
-                          subtitle: 'Ghi vết bảo mật và hoạt động thay đổi hệ thống',
+                          subtitle:
+                              'Ghi vết bảo mật và hoạt động thay đổi hệ thống',
                           color: Colors.blueGrey,
-                          onTap: () => context.push(AppRoutes.managementAuditTrail),
+                          onTap: () =>
+                              context.push(AppRoutes.managementAuditTrail),
                         ),
                       const SizedBox(height: 24),
                     ],
@@ -1717,7 +2081,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     );
   }
 
-  Widget _buildSheetSectionHeader(BuildContext context, String title, IconData icon) {
+  Widget _buildSheetSectionHeader(
+    BuildContext context,
+    String title,
+    IconData icon,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 6),
       child: Row(
@@ -1748,7 +2116,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 6),
-      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
         dense: true,
@@ -1768,22 +2138,41 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 right: -4,
                 top: -4,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
                   decoration: const BoxDecoration(
                     color: AppStatusColors.priorityHigh,
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                   child: Text(
                     '$badgeCount',
-                    style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
           ],
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-        trailing: const Icon(Icons.chevron_right, size: 18, color: AppTheme.textSecondary),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
+        subtitle: Text(
+          subtitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right,
+          size: 18,
+          color: AppTheme.textSecondary,
+        ),
         onTap: () {
           Navigator.of(context).pop();
           onTap();
@@ -1798,10 +2187,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -1828,12 +2214,19 @@ void _showManagementThemeModeSheet(BuildContext context, WidgetRef ref) {
         builder: (context, ref, _) {
           final currentMode = ref.watch(themeModeProvider);
           final entries = [
-            (ThemeMode.system, 'Theo hệ thống', Icons.brightness_auto,
-                'Tự động theo cài đặt thiết bị'),
-            (ThemeMode.light, 'Sáng', Icons.light_mode,
-                'Luôn dùng giao diện sáng'),
-            (ThemeMode.dark, 'Tối', Icons.dark_mode,
-                'Luôn dùng giao diện tối'),
+            (
+              ThemeMode.system,
+              'Theo hệ thống',
+              Icons.brightness_auto,
+              'Tự động theo cài đặt thiết bị',
+            ),
+            (
+              ThemeMode.light,
+              'Sáng',
+              Icons.light_mode,
+              'Luôn dùng giao diện sáng',
+            ),
+            (ThemeMode.dark, 'Tối', Icons.dark_mode, 'Luôn dùng giao diện tối'),
           ];
 
           return SafeArea(
@@ -1859,29 +2252,31 @@ void _showManagementThemeModeSheet(BuildContext context, WidgetRef ref) {
                   (entry) =>
                       // ignore: deprecated_member_use
                       RadioListTile<ThemeMode>(
-                    value: entry.$1,
-                    // ignore: deprecated_member_use
-                    groupValue: currentMode,
-                    // ignore: deprecated_member_use
-                    onChanged: (mode) {
-                      if (mode != null) {
-                        ref
-                            .read(themeModeProvider.notifier)
-                            .setThemeMode(mode);
-                        Navigator.pop(ctx);
-                      }
-                    },
-                    title: Row(
-                      children: [
-                        Icon(entry.$3, size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(entry.$2)),
-                      ],
-                    ),
-                    subtitle: Text(entry.$4,
-                        style: const TextStyle(fontSize: 12)),
-                    activeColor: AppTheme.primary,
-                  ),
+                        value: entry.$1,
+                        // ignore: deprecated_member_use
+                        groupValue: currentMode,
+                        // ignore: deprecated_member_use
+                        onChanged: (mode) {
+                          if (mode != null) {
+                            ref
+                                .read(themeModeProvider.notifier)
+                                .setThemeMode(mode);
+                            Navigator.pop(ctx);
+                          }
+                        },
+                        title: Row(
+                          children: [
+                            Icon(entry.$3, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(entry.$2)),
+                          ],
+                        ),
+                        subtitle: Text(
+                          entry.$4,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        activeColor: AppTheme.primary,
+                      ),
                 ),
                 const SizedBox(height: 16),
               ],

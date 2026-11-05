@@ -13,10 +13,12 @@ class CommunityManagementScreen extends ConsumerStatefulWidget {
   const CommunityManagementScreen({super.key});
 
   @override
-  ConsumerState<CommunityManagementScreen> createState() => _CommunityManagementScreenState();
+  ConsumerState<CommunityManagementScreen> createState() =>
+      _CommunityManagementScreenState();
 }
 
-class _CommunityManagementScreenState extends ConsumerState<CommunityManagementScreen>
+class _CommunityManagementScreenState
+    extends ConsumerState<CommunityManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -67,7 +69,10 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
           indicatorWeight: 3,
           labelColor: AppTheme.primary,
           unselectedLabelColor: Colors.grey,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
           tabs: const [
             Tab(icon: Icon(Icons.how_to_vote_outlined), text: 'Biểu Quyết'),
             Tab(icon: Icon(Icons.feedback_outlined), text: 'Kiến Nghị Cư Dân'),
@@ -80,10 +85,7 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildPollsTab(),
-                _buildPetitionsTab(),
-              ],
+              children: [_buildPollsTab(), _buildPetitionsTab()],
             ),
           ),
         ],
@@ -111,7 +113,10 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
         border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
       ),
       child: statsAsync.when(
-        loading: () => const SizedBox(height: 50, child: Center(child: LinearProgressIndicator())),
+        loading: () => const SizedBox(
+          height: 50,
+          child: Center(child: LinearProgressIndicator()),
+        ),
         error: (_, _) => const SizedBox.shrink(),
         data: (stats) {
           return Row(
@@ -177,7 +182,11 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
               const SizedBox(width: 4),
               Text(
                 value,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -194,7 +203,9 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
 
   // ─── TAB 1: BIỂU QUYẾT & KHẢO SÁT ───
   Widget _buildPollsTab() {
-    final pollsAsync = ref.watch(pollsProvider((status: null, apartmentId: null)));
+    final pollsAsync = ref.watch(
+      pollsProvider((status: null, apartmentId: null)),
+    );
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -238,7 +249,10 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(6),
@@ -254,15 +268,24 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     poll.statusDisplayName,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
                   ),
                 ),
               ],
@@ -290,11 +313,18 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.balance_rounded, size: 16, color: AppTheme.primary),
+                  const Icon(
+                    Icons.balance_rounded,
+                    size: 16,
+                    color: AppTheme.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Quyền biểu quyết: ${poll.voteWeightDisplayName}',
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
                   const Spacer(),
                   Text(
@@ -317,7 +347,9 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   icon: const Icon(Icons.bar_chart_rounded, size: 18),
                   label: const Text('Xem Kết Quả'),
@@ -332,11 +364,15 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
 
   // ─── TAB 2: KIẾN NGHỊ CƯ DÂN ───
   Widget _buildPetitionsTab() {
-    final petitionsAsync = ref.watch(petitionsProvider((status: null, category: null, apartmentId: null)));
+    final petitionsAsync = ref.watch(
+      petitionsProvider((status: null, category: null, apartmentId: null)),
+    );
 
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(petitionsProvider((status: null, category: null, apartmentId: null)));
+        ref.invalidate(
+          petitionsProvider((status: null, category: null, apartmentId: null)),
+        );
         ref.invalidate(communityStatsProvider);
       },
       child: petitionsAsync.when(
@@ -344,7 +380,9 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
         error: (err, _) => Center(child: Text('Lỗi: $err')),
         data: (petitions) {
           if (petitions.isEmpty) {
-            return const Center(child: Text('Không có kiến nghị nào từ cư dân'));
+            return const Center(
+              child: Text('Không có kiến nghị nào từ cư dân'),
+            );
           }
 
           return ListView.separated(
@@ -396,7 +434,10 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(6),
@@ -413,28 +454,44 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         petition.apartmentCode ?? 'Căn hộ',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.primary),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: AppTheme.primary,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     petition.statusDisplayName,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
                   ),
                 ),
               ],
@@ -455,18 +512,29 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.thumb_up_alt_outlined, size: 14, color: Colors.blue),
+                      const Icon(
+                        Icons.thumb_up_alt_outlined,
+                        size: 14,
+                        color: Colors.blue,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${petition.endorsementCount} đồng thuận',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.blue),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.blue,
+                        ),
                       ),
                     ],
                   ),
@@ -480,25 +548,36 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
             ),
 
             // Phản hồi của BQL (nếu có)
-            if (petition.officialResponse != null && petition.officialResponse!.isNotEmpty) ...[
+            if (petition.officialResponse != null &&
+                petition.officialResponse!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.green.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: Colors.green.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.verified_outlined, size: 16, color: Colors.green),
+                        const Icon(
+                          Icons.verified_outlined,
+                          size: 16,
+                          color: Colors.green,
+                        ),
                         const SizedBox(width: 6),
                         const Text(
                           'Phản hồi chính thức từ Ban Quản Lý:',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.green),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Colors.green,
+                          ),
                         ),
                       ],
                     ),
@@ -523,7 +602,9 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
                   label: const Text('Phản Hồi & Xử Lý'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ],
@@ -534,4 +615,3 @@ class _CommunityManagementScreenState extends ConsumerState<CommunityManagementS
     );
   }
 }
-

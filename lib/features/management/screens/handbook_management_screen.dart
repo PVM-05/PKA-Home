@@ -14,10 +14,12 @@ class HandbookManagementScreen extends ConsumerStatefulWidget {
   const HandbookManagementScreen({super.key});
 
   @override
-  ConsumerState<HandbookManagementScreen> createState() => _HandbookManagementScreenState();
+  ConsumerState<HandbookManagementScreen> createState() =>
+      _HandbookManagementScreenState();
 }
 
-class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScreen>
+class _HandbookManagementScreenState
+    extends ConsumerState<HandbookManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -40,46 +42,46 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Quản Lý Cẩm Nang Tòa Nhà'),
-        bottom: TabBar(
+          bottom: TabBar(
+            controller: _tabController,
+            labelColor: AppTheme.primary,
+            unselectedLabelColor: AppTheme.textSecondary,
+            indicatorColor: AppTheme.primary,
+            tabs: const [
+              Tab(icon: Icon(Icons.emergency_outlined), text: 'Đường dây nóng'),
+              Tab(icon: Icon(Icons.gavel_outlined), text: 'Nội quy'),
+              Tab(icon: Icon(Icons.pool_outlined), text: 'Tiện ích'),
+            ],
+          ),
+        ),
+        body: TabBarView(
           controller: _tabController,
-          labelColor: AppTheme.primary,
-          unselectedLabelColor: AppTheme.textSecondary,
-          indicatorColor: AppTheme.primary,
-          tabs: const [
-            Tab(icon: Icon(Icons.emergency_outlined), text: 'Đường dây nóng'),
-            Tab(icon: Icon(Icons.gavel_outlined), text: 'Nội quy'),
-            Tab(icon: Icon(Icons.pool_outlined), text: 'Tiện ích'),
+          children: [
+            _buildEmergencyContactsTab(),
+            _buildBuildingRulesTab(),
+            _buildBuildingAmenitiesTab(),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'handbook_management_fab',
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
+          onPressed: () {
+            final currentTab = _tabController.index;
+            if (currentTab == 0) {
+              _showContactDialog();
+            } else if (currentTab == 1) {
+              _showRuleDialog();
+            } else {
+              _showAmenityDialog();
+            }
+          },
+          tooltip: 'Thêm mới',
+          child: const Icon(Icons.add),
+        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildEmergencyContactsTab(),
-          _buildBuildingRulesTab(),
-          _buildBuildingAmenitiesTab(),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'handbook_management_fab',
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          final currentTab = _tabController.index;
-          if (currentTab == 0) {
-            _showContactDialog();
-          } else if (currentTab == 1) {
-            _showRuleDialog();
-          } else {
-            _showAmenityDialog();
-          }
-        },
-        tooltip: 'Thêm mới',
-        child: const Icon(Icons.add),
-      ),
-    ));
+    );
   }
-
 
   // ===========================================================================
   // Tab 1: Đường Dây Nóng
@@ -92,7 +94,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
       child: contactsAsync.when(
         data: (contacts) {
           if (contacts.isEmpty) {
-            return const Center(child: Text('Chưa có thông tin đường dây nóng. Bấm + để thêm mới.'));
+            return const Center(
+              child: Text(
+                'Chưa có thông tin đường dây nóng. Bấm + để thêm mới.',
+              ),
+            );
           }
 
           return ListView.builder(
@@ -109,32 +115,52 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: AppTheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.phone_in_talk, color: AppTheme.primary),
+                    child: const Icon(
+                      Icons.phone_in_talk,
+                      color: AppTheme.primary,
+                    ),
                   ),
-                  title: Text(contact.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('SĐT: ${contact.phone} • Loại: ${contact.contactTypeDisplayName} • Thứ tự: ${contact.displayOrder}'),
+                  title: Text(
+                    contact.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'SĐT: ${contact.phone} • Loại: ${contact.contactTypeDisplayName} • Thứ tự: ${contact.displayOrder}',
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit_outlined, color: AppTheme.primary),
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          color: AppTheme.primary,
+                        ),
                         onPressed: () => _showContactDialog(contact: contact),
                         tooltip: 'Chỉnh sửa',
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: AppTheme.error),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: AppTheme.error,
+                        ),
                         onPressed: () => _confirmDelete(
                           title: 'Xóa đường dây nóng',
-                          message: 'Bạn có chắc chắn muốn xóa "${contact.name}" không?',
+                          message:
+                              'Bạn có chắc chắn muốn xóa "${contact.name}" không?',
                           onConfirm: () async {
-                            await ref.read(handbookRepositoryProvider).deleteEmergencyContact(contact.id);
+                            await ref
+                                .read(handbookRepositoryProvider)
+                                .deleteEmergencyContact(contact.id);
                             ref.invalidate(emergencyContactsProvider);
                           },
                         ),
@@ -157,7 +183,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
     final isEditing = contact != null;
     final nameController = TextEditingController(text: contact?.name ?? '');
     final phoneController = TextEditingController(text: contact?.phone ?? '');
-    final orderController = TextEditingController(text: (contact?.displayOrder ?? 0).toString());
+    final orderController = TextEditingController(
+      text: (contact?.displayOrder ?? 0).toString(),
+    );
     String contactType = contact?.contactType ?? 'security';
     final formKey = GlobalKey<FormState>();
 
@@ -165,8 +193,12 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(isEditing ? 'Chỉnh sửa đường dây nóng' : 'Thêm đường dây nóng'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            isEditing ? 'Chỉnh sửa đường dây nóng' : 'Thêm đường dây nóng',
+          ),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -175,25 +207,45 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                 children: [
                   TextFormField(
                     controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Tên đầu mối liên hệ *'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Tên đầu mối liên hệ *',
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Vui lòng nhập tên'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: phoneController,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: 'Số điện thoại *'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số điện thoại' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Số điện thoại *',
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Vui lòng nhập số điện thoại'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: contactType,
                     decoration: const InputDecoration(labelText: 'Phân loại'),
                     items: const [
-                      DropdownMenuItem(value: 'security', child: Text('An ninh / Bảo vệ')),
-                      DropdownMenuItem(value: 'fire', child: Text('PCCC / Cứu hộ')),
-                      DropdownMenuItem(value: 'management', child: Text('Ban Quản Lý')),
-                      DropdownMenuItem(value: 'technical', child: Text('Đội Kỹ Thuật')),
+                      DropdownMenuItem(
+                        value: 'security',
+                        child: Text('An ninh / Bảo vệ'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'fire',
+                        child: Text('PCCC / Cứu hộ'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'management',
+                        child: Text('Ban Quản Lý'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'technical',
+                        child: Text('Đội Kỹ Thuật'),
+                      ),
                     ],
                     onChanged: (val) {
                       if (val != null) setDialogState(() => contactType = val);
@@ -203,14 +255,19 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   TextFormField(
                     controller: orderController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Thứ tự hiển thị (tùy chọn)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Thứ tự hiển thị (tùy chọn)',
+                    ),
                   ),
                 ],
               ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Hủy'),
+            ),
             ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
@@ -239,7 +296,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(isEditing ? 'Đã cập nhật đường dây nóng!' : 'Đã thêm đường dây nóng thành công!'),
+                          content: Text(
+                            isEditing
+                                ? 'Đã cập nhật đường dây nóng!'
+                                : 'Đã thêm đường dây nóng thành công!',
+                          ),
                           backgroundColor: AppTheme.success,
                         ),
                       );
@@ -247,7 +308,10 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   } catch (e) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                        SnackBar(
+                          content: Text(formatErrorMessage(e)),
+                          backgroundColor: AppTheme.error,
+                        ),
                       );
                     }
                   }
@@ -272,7 +336,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
       child: rulesAsync.when(
         data: (rules) {
           if (rules.isEmpty) {
-            return const Center(child: Text('Chưa có nội quy. Bấm + để thêm mới.'));
+            return const Center(
+              child: Text('Chưa có nội quy. Bấm + để thêm mới.'),
+            );
           }
 
           return ListView.builder(
@@ -298,21 +364,35 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                           Expanded(
                             child: Text(
                               '${index + 1}. ${rule.title}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
+                            icon: const Icon(
+                              Icons.edit_outlined,
+                              color: AppTheme.primary,
+                              size: 20,
+                            ),
                             onPressed: () => _showRuleDialog(rule: rule),
                             tooltip: 'Chỉnh sửa',
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: AppTheme.error,
+                              size: 20,
+                            ),
                             onPressed: () => _confirmDelete(
                               title: 'Xóa nội quy',
-                              message: 'Bạn có chắc chắn muốn xóa nội quy "${rule.title}" không?',
+                              message:
+                                  'Bạn có chắc chắn muốn xóa nội quy "${rule.title}" không?',
                               onConfirm: () async {
-                                await ref.read(handbookRepositoryProvider).deleteBuildingRule(rule.id);
+                                await ref
+                                    .read(handbookRepositoryProvider)
+                                    .deleteBuildingRule(rule.id);
                                 ref.invalidate(buildingRulesProvider);
                               },
                             ),
@@ -323,7 +403,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                       const SizedBox(height: 6),
                       Text(
                         rule.content,
-                        style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.4),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                          height: 1.4,
+                        ),
                       ),
                     ],
                   ),
@@ -342,7 +426,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
     final isEditing = rule != null;
     final titleController = TextEditingController(text: rule?.title ?? '');
     final contentController = TextEditingController(text: rule?.content ?? '');
-    final orderController = TextEditingController(text: (rule?.displayOrder ?? 0).toString());
+    final orderController = TextEditingController(
+      text: (rule?.displayOrder ?? 0).toString(),
+    );
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -358,28 +444,41 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
               children: [
                 TextFormField(
                   controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Tiêu đề nội quy *'),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tiêu đề' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Tiêu đề nội quy *',
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Vui lòng nhập tiêu đề'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: contentController,
                   maxLines: 4,
-                  decoration: const InputDecoration(labelText: 'Nội dung chi tiết *'),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập nội dung' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Nội dung chi tiết *',
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Vui lòng nhập nội dung'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: orderController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Thứ tự hiển thị (tùy chọn)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Thứ tự hiển thị (tùy chọn)',
+                  ),
                 ),
               ],
             ),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
           ElevatedButton(
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
@@ -406,7 +505,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(isEditing ? 'Đã cập nhật nội quy!' : 'Đã thêm nội quy thành công!'),
+                        content: Text(
+                          isEditing
+                              ? 'Đã cập nhật nội quy!'
+                              : 'Đã thêm nội quy thành công!',
+                        ),
                         backgroundColor: AppTheme.success,
                       ),
                     );
@@ -414,7 +517,10 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                      SnackBar(
+                        content: Text(formatErrorMessage(e)),
+                        backgroundColor: AppTheme.error,
+                      ),
                     );
                   }
                 }
@@ -438,7 +544,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
       child: amenitiesAsync.when(
         data: (amenities) {
           if (amenities.isEmpty) {
-            return const Center(child: Text('Chưa có tiện ích nào. Bấm + để thêm mới.'));
+            return const Center(
+              child: Text('Chưa có tiện ích nào. Bấm + để thêm mới.'),
+            );
           }
 
           return ListView.builder(
@@ -472,17 +580,29 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
-                            onPressed: () => _showAmenityDialog(amenity: amenity),
+                            icon: const Icon(
+                              Icons.edit_outlined,
+                              color: AppTheme.primary,
+                              size: 20,
+                            ),
+                            onPressed: () =>
+                                _showAmenityDialog(amenity: amenity),
                             tooltip: 'Chỉnh sửa',
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: AppTheme.error,
+                              size: 20,
+                            ),
                             onPressed: () => _confirmDelete(
                               title: 'Xóa tiện ích',
-                              message: 'Bạn có chắc chắn muốn xóa tiện ích "${amenity.name}" không?',
+                              message:
+                                  'Bạn có chắc chắn muốn xóa tiện ích "${amenity.name}" không?',
                               onConfirm: () async {
-                                await ref.read(handbookRepositoryProvider).deleteBuildingAmenity(amenity.id);
+                                await ref
+                                    .read(handbookRepositoryProvider)
+                                    .deleteBuildingAmenity(amenity.id);
                                 ref.invalidate(buildingAmenitiesProvider);
                               },
                             ),
@@ -495,9 +615,13 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                         spacing: 8,
                         runSpacing: 6,
                         children: [
-                          if (amenity.openHours != null && amenity.openHours!.isNotEmpty)
+                          if (amenity.openHours != null &&
+                              amenity.openHours!.isNotEmpty)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppStatusColors.paid.withAlpha(25),
                                 borderRadius: BorderRadius.circular(8),
@@ -505,17 +629,28 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.access_time, size: 14, color: AppStatusColors.paid),
+                                  const Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: AppStatusColors.paid,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     amenity.openHours!,
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppStatusColors.paid),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppStatusColors.paid,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.primary.withAlpha(25),
                               borderRadius: BorderRadius.circular(8),
@@ -523,46 +658,78 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(amenity.isShared ? Icons.groups_outlined : Icons.lock_clock_outlined, size: 14, color: AppTheme.primary),
+                                Icon(
+                                  amenity.isShared
+                                      ? Icons.groups_outlined
+                                      : Icons.lock_clock_outlined,
+                                  size: 14,
+                                  color: AppTheme.primary,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  amenity.isShared ? 'Dùng chung (${amenity.maxCapacity} người)' : 'Bao trọn khung giờ',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                                  amenity.isShared
+                                      ? 'Dùng chung (${amenity.maxCapacity} người)'
+                                      : 'Bao trọn khung giờ',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.primary,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                           if (amenity.feeAmount > 0)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.blue.withAlpha(25),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'Phí: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.feeAmount)}',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blue),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue,
+                                ),
                               ),
                             ),
-                          if (amenity.requiresDeposit && amenity.depositAmount > 0)
+                          if (amenity.requiresDeposit &&
+                              amenity.depositAmount > 0)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.amber.withAlpha(35),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'Cọc: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.depositAmount)}',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.brown),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.brown,
+                                ),
                               ),
                             ),
                         ],
                       ),
-                      if (amenity.description != null && amenity.description!.isNotEmpty) ...[
+                      if (amenity.description != null &&
+                          amenity.description!.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Text(
                           amenity.description!,
-                          style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.4),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                            height: 1.4,
+                          ),
                         ),
                       ],
                     ],
@@ -581,13 +748,27 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
   void _showAmenityDialog({BuildingAmenityModel? amenity}) {
     final isEditing = amenity != null;
     final nameController = TextEditingController(text: amenity?.name ?? '');
-    final hoursController = TextEditingController(text: amenity?.openHours ?? '');
-    final descController = TextEditingController(text: amenity?.description ?? '');
-    final orderController = TextEditingController(text: (amenity?.displayOrder ?? 0).toString());
-    final capacityController = TextEditingController(text: (amenity?.maxCapacity ?? 1).toString());
-    final durationController = TextEditingController(text: (amenity?.slotDurationMinutes ?? 60).toString());
-    final feeController = TextEditingController(text: (amenity?.feeAmount ?? 0).toInt().toString());
-    final depositController = TextEditingController(text: (amenity?.depositAmount ?? 0).toInt().toString());
+    final hoursController = TextEditingController(
+      text: amenity?.openHours ?? '',
+    );
+    final descController = TextEditingController(
+      text: amenity?.description ?? '',
+    );
+    final orderController = TextEditingController(
+      text: (amenity?.displayOrder ?? 0).toString(),
+    );
+    final capacityController = TextEditingController(
+      text: (amenity?.maxCapacity ?? 1).toString(),
+    );
+    final durationController = TextEditingController(
+      text: (amenity?.slotDurationMinutes ?? 60).toString(),
+    );
+    final feeController = TextEditingController(
+      text: (amenity?.feeAmount ?? 0).toInt().toString(),
+    );
+    final depositController = TextEditingController(
+      text: (amenity?.depositAmount ?? 0).toInt().toString(),
+    );
     String bookingType = amenity?.bookingType ?? 'shared';
     bool requiresDeposit = amenity?.requiresDeposit ?? false;
 
@@ -597,7 +778,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(isEditing ? 'Chỉnh sửa tiện ích' : 'Thêm tiện ích mới'),
           content: SingleChildScrollView(
             child: Form(
@@ -608,13 +791,19 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                 children: [
                   TextFormField(
                     controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Tên tiện ích *'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên tiện ích' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Tên tiện ích *',
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Vui lòng nhập tên tiện ích'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: bookingType,
-                    decoration: const InputDecoration(labelText: 'Hình thức đặt chỗ'),
+                    decoration: const InputDecoration(
+                      labelText: 'Hình thức đặt chỗ',
+                    ),
                     items: const [
                       DropdownMenuItem(
                         value: 'shared',
@@ -637,11 +826,13 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       labelText: 'Sức chứa tối đa (người) *',
-                      helperText: 'Số người tối đa cùng lúc trong một khung giờ',
+                      helperText:
+                          'Số người tối đa cùng lúc trong một khung giờ',
                     ),
                     validator: (v) {
                       final parsed = int.tryParse(v?.trim() ?? '');
-                      if (parsed == null || parsed <= 0) return 'Vui lòng nhập số người hợp lệ (> 0)';
+                      if (parsed == null || parsed <= 0)
+                        return 'Vui lòng nhập số người hợp lệ (> 0)';
                       return null;
                     },
                   ),
@@ -649,17 +840,22 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   TextFormField(
                     controller: durationController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Thời lượng khung giờ (phút) *'),
+                    decoration: const InputDecoration(
+                      labelText: 'Thời lượng khung giờ (phút) *',
+                    ),
                     validator: (v) {
                       final parsed = int.tryParse(v?.trim() ?? '');
-                      if (parsed == null || parsed <= 0) return 'Vui lòng nhập thời lượng (> 0)';
+                      if (parsed == null || parsed <= 0)
+                        return 'Vui lòng nhập thời lượng (> 0)';
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: hoursController,
-                    decoration: const InputDecoration(labelText: 'Giờ mở cửa (VD: 06:00 - 21:00)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Giờ mở cửa (VD: 06:00 - 21:00)',
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -668,7 +864,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                         child: TextFormField(
                           controller: feeController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'Phí sử dụng (đ)'),
+                          decoration: const InputDecoration(
+                            labelText: 'Phí sử dụng (đ)',
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -676,7 +874,9 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                         child: TextFormField(
                           controller: orderController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'Thứ tự hiển thị'),
+                          decoration: const InputDecoration(
+                            labelText: 'Thứ tự hiển thị',
+                          ),
                         ),
                       ),
                     ],
@@ -686,16 +886,20 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Yêu cầu đặt cọc trước'),
                     value: requiresDeposit,
-                    onChanged: (val) => setDialogState(() => requiresDeposit = val),
+                    onChanged: (val) =>
+                        setDialogState(() => requiresDeposit = val),
                   ),
                   if (requiresDeposit) ...[
                     TextFormField(
                       controller: depositController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Số tiền đặt cọc (đ) *'),
+                      decoration: const InputDecoration(
+                        labelText: 'Số tiền đặt cọc (đ) *',
+                      ),
                       validator: (v) {
                         final parsed = double.tryParse(v?.trim() ?? '');
-                        if (parsed == null || parsed < 0) return 'Số tiền cọc không hợp lệ';
+                        if (parsed == null || parsed < 0)
+                          return 'Số tiền cọc không hợp lệ';
                         return null;
                       },
                     ),
@@ -704,23 +908,32 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   TextFormField(
                     controller: descController,
                     maxLines: 3,
-                    decoration: const InputDecoration(labelText: 'Mô tả & quy định sử dụng'),
+                    decoration: const InputDecoration(
+                      labelText: 'Mô tả & quy định sử dụng',
+                    ),
                   ),
                 ],
               ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Hủy'),
+            ),
             ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   Navigator.pop(ctx);
                   final order = int.tryParse(orderController.text.trim()) ?? 0;
-                  final capacity = int.tryParse(capacityController.text.trim()) ?? 1;
-                  final duration = int.tryParse(durationController.text.trim()) ?? 60;
+                  final capacity =
+                      int.tryParse(capacityController.text.trim()) ?? 1;
+                  final duration =
+                      int.tryParse(durationController.text.trim()) ?? 60;
                   final fee = double.tryParse(feeController.text.trim()) ?? 0.0;
-                  final deposit = requiresDeposit ? (double.tryParse(depositController.text.trim()) ?? 0.0) : 0.0;
+                  final deposit = requiresDeposit
+                      ? (double.tryParse(depositController.text.trim()) ?? 0.0)
+                      : 0.0;
                   final repo = ref.read(handbookRepositoryProvider);
 
                   try {
@@ -756,7 +969,11 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(isEditing ? 'Đã cập nhật tiện ích!' : 'Đã thêm tiện ích thành công!'),
+                          content: Text(
+                            isEditing
+                                ? 'Đã cập nhật tiện ích!'
+                                : 'Đã thêm tiện ích thành công!',
+                          ),
                           backgroundColor: AppTheme.success,
                         ),
                       );
@@ -764,7 +981,10 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                   } catch (e) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                        SnackBar(
+                          content: Text(formatErrorMessage(e)),
+                          backgroundColor: AppTheme.error,
+                        ),
                       );
                     }
                   }
@@ -791,7 +1011,10 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.error,
@@ -803,13 +1026,19 @@ class _HandbookManagementScreenState extends ConsumerState<HandbookManagementScr
                 await onConfirm();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(successMessage), backgroundColor: AppTheme.success),
+                    SnackBar(
+                      content: Text(successMessage),
+                      backgroundColor: AppTheme.success,
+                    ),
                   );
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+                    SnackBar(
+                      content: Text(formatErrorMessage(e)),
+                      backgroundColor: AppTheme.error,
+                    ),
                   );
                 }
               }

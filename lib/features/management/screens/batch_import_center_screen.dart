@@ -83,7 +83,9 @@ class _BatchImportCenterScreenState
                 onPressed: state.isProcessing
                     ? null
                     : () async {
-                        final path = await notifier.downloadTemplate(state.selectedType);
+                        final path = await notifier.downloadTemplate(
+                          state.selectedType,
+                        );
                         if (path != null && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -114,23 +116,30 @@ class _BatchImportCenterScreenState
                     label: const Text('Chọn file Excel (.xlsx, .xls)'),
                     onPressed: state.isProcessing
                         ? null
-                        : () => notifier.pickAndParseFile(buildingId: buildingId),
+                        : () =>
+                              notifier.pickAndParseFile(buildingId: buildingId),
                   ),
                   if (state.selectedFileName != null) ...[
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: AppTheme.primary.withValues(alpha: 0.2)),
+                          color: AppTheme.primary.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.description,
-                              size: 20, color: AppTheme.primary),
+                          const Icon(
+                            Icons.description,
+                            size: 20,
+                            color: AppTheme.primary,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -216,7 +225,9 @@ class _BatchImportCenterScreenState
   }
 
   Widget _buildTypeSelector(
-      BatchImportState state, BatchImportNotifier notifier) {
+    BatchImportState state,
+    BatchImportNotifier notifier,
+  ) {
     return SegmentedButton<BatchImportType>(
       segments: const [
         ButtonSegment(
@@ -378,7 +389,9 @@ class _BatchImportCenterScreenState
             decoration: BoxDecoration(
               color: AppTheme.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.success.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppTheme.success.withValues(alpha: 0.3),
+              ),
             ),
             child: const Row(
               children: [
@@ -412,8 +425,11 @@ class _BatchImportCenterScreenState
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.warning_amber,
-                        color: AppTheme.error, size: 20),
+                    const Icon(
+                      Icons.warning_amber,
+                      color: AppTheme.error,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -440,7 +456,9 @@ class _BatchImportCenterScreenState
                     if (path != null && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Đã xuất file Excel dòng lỗi thành công'),
+                          content: Text(
+                            'Đã xuất file Excel dòng lỗi thành công',
+                          ),
                           backgroundColor: AppTheme.success,
                         ),
                       );
@@ -458,7 +476,10 @@ class _BatchImportCenterScreenState
               contentPadding: EdgeInsets.zero,
               title: Text(
                 'Chỉ nạp ${validation.validCount} dòng hợp lệ (bỏ qua ${validation.errorCount} dòng lỗi)',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               subtitle: const Text(
                 'Cho phép nạp trước các dòng đạt chuẩn, các dòng lỗi có thể sửa và nạp lại sau',
@@ -482,8 +503,10 @@ class _BatchImportCenterScreenState
               ),
               children: validation.rowErrors.map((err) {
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 4,
+                  ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -556,7 +579,8 @@ class _BatchImportCenterScreenState
     String buildingId,
   ) {
     final validation = state.validationResult;
-    final canExecute = validation != null &&
+    final canExecute =
+        validation != null &&
         validation.hasValidItems &&
         (!validation.hasErrors || state.importOnlyValidRows) &&
         !state.isProcessing;
@@ -589,12 +613,12 @@ class _BatchImportCenterScreenState
       ),
       onPressed: canExecute
           ? () => _confirmAndExecute(
-                context,
-                notifier,
-                buildingId,
-                countToImport,
-                state.selectedType.label,
-              )
+              context,
+              notifier,
+              buildingId,
+              countToImport,
+              state.selectedType.label,
+            )
           : null,
     );
   }

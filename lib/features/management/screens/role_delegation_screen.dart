@@ -14,7 +14,8 @@ class RoleDelegationScreen extends ConsumerStatefulWidget {
   const RoleDelegationScreen({super.key});
 
   @override
-  ConsumerState<RoleDelegationScreen> createState() => _RoleDelegationScreenState();
+  ConsumerState<RoleDelegationScreen> createState() =>
+      _RoleDelegationScreenState();
 }
 
 class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
@@ -23,7 +24,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
   void _showCreateDelegationDialog(BuildContext context) async {
     final residents = await ref.read(residentsProvider.future);
     // Chỉ cho phép ủy quyền cho các nhân viên hoặc cư dân (trừ các tài khoản đã là admin)
-    final eligibleUsers = residents.where((r) => r.role != 'admin' && r.role != 'management').toList();
+    final eligibleUsers = residents
+        .where((r) => r.role != 'admin' && r.role != 'management')
+        .toList();
 
     if (!context.mounted) return;
 
@@ -72,9 +75,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                         Text(
                           'Tạo Ủy Quyền Vai Trò',
                           style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primary,
-                              ),
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
@@ -86,13 +89,19 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                     const SizedBox(height: 12),
 
                     // Chọn nhân sự
-                    const Text('Nhân sự nhận ủy quyền *', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Nhân sự nhận ủy quyền *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       initialValue: selectedUserId,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       items: eligibleUsers.map((u) {
                         return DropdownMenuItem(
@@ -101,26 +110,37 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                         );
                       }).toList(),
                       onChanged: (val) {
-                        if (val != null) setModalState(() => selectedUserId = val);
+                        if (val != null)
+                          setModalState(() => selectedUserId = val);
                       },
                     ),
                     const SizedBox(height: 16),
 
                     // Chọn vai trò tạm thời
-                    const Text('Vai trò ủy quyền tạm thời *', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Vai trò ủy quyền tạm thời *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       initialValue: selectedRole,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       items: const [
                         DropdownMenuItem(
                           value: 'accountant',
                           child: Row(
                             children: [
-                              Icon(Icons.receipt_long, color: Colors.purple, size: 18),
+                              Icon(
+                                Icons.receipt_long,
+                                color: Colors.purple,
+                                size: 18,
+                              ),
                               SizedBox(width: 8),
                               Text('Kế toán (Quản lý hóa đơn)'),
                             ],
@@ -130,7 +150,11 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                           value: 'technician',
                           child: Row(
                             children: [
-                              Icon(Icons.build_circle, color: Colors.orange, size: 18),
+                              Icon(
+                                Icons.build_circle,
+                                color: Colors.orange,
+                                size: 18,
+                              ),
                               SizedBox(width: 8),
                               Text('Kỹ thuật viên (Xử lý sự cố)'),
                             ],
@@ -138,20 +162,27 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                         ),
                       ],
                       onChanged: (val) {
-                        if (val != null) setModalState(() => selectedRole = val);
+                        if (val != null)
+                          setModalState(() => selectedRole = val);
                       },
                     ),
                     const SizedBox(height: 16),
 
                     // Thời hạn ủy quyền
-                    const Text('Thời hạn ủy quyền *', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Thời hạn ủy quyền *',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 6),
                     ListTile(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                         side: BorderSide(color: Colors.grey.shade300),
                       ),
-                      leading: const Icon(Icons.calendar_today, color: AppTheme.primary),
+                      leading: const Icon(
+                        Icons.calendar_today,
+                        color: AppTheme.primary,
+                      ),
                       title: Text(
                         '${DateFormat('dd/MM/yyyy').format(startsAt)} - ${DateFormat('dd/MM/yyyy').format(endsAt)}',
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -160,14 +191,34 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                       onTap: () async {
                         final picked = await showDateRangePicker(
                           context: ctx,
-                          firstDate: DateTime.now().subtract(const Duration(days: 1)),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
-                          initialDateRange: DateTimeRange(start: startsAt, end: endsAt),
+                          firstDate: DateTime.now().subtract(
+                            const Duration(days: 1),
+                          ),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                          initialDateRange: DateTimeRange(
+                            start: startsAt,
+                            end: endsAt,
+                          ),
                         );
                         if (picked != null) {
                           setModalState(() {
-                            startsAt = DateTime(picked.start.year, picked.start.month, picked.start.day, 0, 0);
-                            endsAt = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+                            startsAt = DateTime(
+                              picked.start.year,
+                              picked.start.month,
+                              picked.start.day,
+                              0,
+                              0,
+                            );
+                            endsAt = DateTime(
+                              picked.end.year,
+                              picked.end.month,
+                              picked.end.day,
+                              23,
+                              59,
+                              59,
+                            );
                           });
                         }
                       },
@@ -175,7 +226,10 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                     const SizedBox(height: 16),
 
                     // Ghi chú
-                    const Text('Lý do / Ghi chú ủy quyền', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Lý do / Ghi chú ủy quyền',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: noteController,
@@ -200,19 +254,25 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                             : () async {
                                 setModalState(() => isSubmitting = true);
                                 try {
-                                  await ref.read(managementRepositoryProvider).createDelegation(
+                                  await ref
+                                      .read(managementRepositoryProvider)
+                                      .createDelegation(
                                         delegateId: selectedUserId,
                                         delegatedRole: selectedRole,
                                         startsAt: startsAt,
                                         endsAt: endsAt,
-                                        note: noteController.text.trim().isEmpty ? null : noteController.text.trim(),
+                                        note: noteController.text.trim().isEmpty
+                                            ? null
+                                            : noteController.text.trim(),
                                       );
                                   if (ctx.mounted) Navigator.of(ctx).pop();
                                   ref.invalidate(delegationsListProvider);
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('Tạo ủy quyền vai trò thành công!'),
+                                        content: Text(
+                                          'Tạo ủy quyền vai trò thành công!',
+                                        ),
                                         backgroundColor: AppTheme.success,
                                       ),
                                     );
@@ -233,11 +293,17 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text(
                                 'XÁC NHẬN ỦY QUYỀN',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                       ),
                     ),
@@ -269,7 +335,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
             onPressed: () async {
               Navigator.of(ctx).pop();
               try {
-                await ref.read(managementRepositoryProvider).revokeDelegation(delegation.id);
+                await ref
+                    .read(managementRepositoryProvider)
+                    .revokeDelegation(delegation.id);
                 ref.invalidate(delegationsListProvider);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -336,7 +404,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                     statusText = 'Sắp diễn ra';
                   }
 
-                  final roleColor = item.delegatedRole == 'accountant' ? Colors.purple : Colors.orange;
+                  final roleColor = item.delegatedRole == 'accountant'
+                      ? Colors.purple
+                      : Colors.orange;
 
                   return Card(
                     elevation: 0,
@@ -344,7 +414,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isActive ? statusColor.withValues(alpha: 0.5) : Colors.grey.shade300,
+                        color: isActive
+                            ? statusColor.withValues(alpha: 0.5)
+                            : Colors.grey.shade300,
                       ),
                     ),
                     child: Padding(
@@ -358,7 +430,10 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                               Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: roleColor.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(6),
@@ -374,11 +449,18 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: statusColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+                                      border: Border.all(
+                                        color: statusColor.withValues(
+                                          alpha: 0.4,
+                                        ),
+                                      ),
                                     ),
                                     child: Text(
                                       statusText,
@@ -406,17 +488,27 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                           const SizedBox(height: 12),
                           Text(
                             'Người nhận: ${item.delegateName ?? "N/A"}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Người ủy quyền: ${item.delegatorName ?? "Quản trị viên"}',
-                            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 13,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(Icons.access_time, size: 16, color: AppTheme.textSecondary),
+                              const Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: AppTheme.textSecondary,
+                              ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
@@ -437,7 +529,10 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                               ),
                               child: Text(
                                 'Lý do: ${item.note}',
-                                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                ),
                               ),
                             ),
                           ],

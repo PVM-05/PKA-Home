@@ -30,16 +30,18 @@ class _ServiceRatingOverviewScreenState
     return RoleGuard(
       permission: AppPermissions.issueManagement,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Đánh giá chất lượng dịch vụ'),
-        ),
+        appBar: AppBar(title: const Text('Đánh giá chất lượng dịch vụ')),
         body: ratingsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+                const Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: AppTheme.error,
+                ),
                 const SizedBox(height: 12),
                 Text(formatErrorMessage(err), textAlign: TextAlign.center),
                 const SizedBox(height: 12),
@@ -74,18 +76,19 @@ class _ServiceRatingOverviewScreenState
             final totalRatings = ratings.length;
             final avgOverall =
                 ratings.map((r) => r.overallRating).reduce((a, b) => a + b) /
-                    totalRatings;
+                totalRatings;
             final avgSpeed =
                 ratings.map((r) => r.speedRating).reduce((a, b) => a + b) /
-                    totalRatings;
+                totalRatings;
             final avgAttitude =
                 ratings.map((r) => r.attitudeRating).reduce((a, b) => a + b) /
-                    totalRatings;
+                totalRatings;
             final avgQuality =
                 ratings.map((r) => r.qualityRating).reduce((a, b) => a + b) /
-                    totalRatings;
-            final highSatisfactionCount =
-                ratings.where((r) => r.overallRating >= 4.0).length;
+                totalRatings;
+            final highSatisfactionCount = ratings
+                .where((r) => r.overallRating >= 4.0)
+                .length;
             final satisfactionRate =
                 (highSatisfactionCount / totalRatings * 100).toStringAsFixed(0);
 
@@ -158,7 +161,9 @@ class _ServiceRatingOverviewScreenState
                       ),
                     )
                   else
-                    ...filteredRatings.map((rating) => _buildRatingItemCard(rating, isDark)),
+                    ...filteredRatings.map(
+                      (rating) => _buildRatingItemCard(rating, isDark),
+                    ),
                 ],
               ),
             );
@@ -223,12 +228,19 @@ class _ServiceRatingOverviewScreenState
                 children: [
                   const Text(
                     'Điểm dịch vụ toàn khu',
-                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star_rate_rounded, color: Colors.amber, size: 28),
+                      const Icon(
+                        Icons.star_rate_rounded,
+                        color: Colors.amber,
+                        size: 28,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${avgOverall.toStringAsFixed(1)} / 5.0',
@@ -243,7 +255,10 @@ class _ServiceRatingOverviewScreenState
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -317,9 +332,7 @@ class _ServiceRatingOverviewScreenState
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: isDark ? Colors.white12 : Colors.grey.shade200,
-        ),
+        side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -333,7 +346,10 @@ class _ServiceRatingOverviewScreenState
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -351,7 +367,10 @@ class _ServiceRatingOverviewScreenState
                 ),
                 Text(
                   dateFormat.format(rating.createdAt),
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -361,7 +380,10 @@ class _ServiceRatingOverviewScreenState
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.amber.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
@@ -369,7 +391,11 @@ class _ServiceRatingOverviewScreenState
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star_rate_rounded, size: 16, color: Colors.amber),
+                      const Icon(
+                        Icons.star_rate_rounded,
+                        size: 16,
+                        color: Colors.amber,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${rating.overallRating.toStringAsFixed(1)} / 5.0',
@@ -385,7 +411,10 @@ class _ServiceRatingOverviewScreenState
                 const SizedBox(width: 8),
                 Text(
                   label,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -403,7 +432,8 @@ class _ServiceRatingOverviewScreenState
             ),
 
             // Lời nhận xét
-            if (rating.comment != null && rating.comment!.trim().isNotEmpty) ...[
+            if (rating.comment != null &&
+                rating.comment!.trim().isNotEmpty) ...[
               const SizedBox(height: 10),
               Container(
                 width: double.infinity,
@@ -448,14 +478,18 @@ class _ServiceRatingOverviewScreenState
                 color: Colors.amber.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.star_outline_rounded, size: 56, color: Colors.amber),
+              child: const Icon(
+                Icons.star_outline_rounded,
+                size: 56,
+                color: Colors.amber,
+              ),
             ),
             const SizedBox(height: 20),
             Text(
               'Chưa có lượt đánh giá nào',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(

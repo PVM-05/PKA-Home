@@ -22,12 +22,17 @@ class EquipmentDetailScreen extends ConsumerStatefulWidget {
   const EquipmentDetailScreen({super.key, required this.equipment});
 
   @override
-  ConsumerState<EquipmentDetailScreen> createState() => _EquipmentDetailScreenState();
+  ConsumerState<EquipmentDetailScreen> createState() =>
+      _EquipmentDetailScreenState();
 }
 
 class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
   late BuildingEquipmentModel _equipment;
-  final _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+  final _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+    decimalDigits: 0,
+  );
   final _dateFormat = DateFormat('dd/MM/yyyy');
 
   @override
@@ -42,7 +47,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
       builder: (_) => EquipmentFormDialog(equipment: _equipment),
     );
     if (updated == true) {
-      final refreshed = await ref.read(equipmentRepositoryProvider).getEquipmentById(_equipment.id);
+      final refreshed = await ref
+          .read(equipmentRepositoryProvider)
+          .getEquipmentById(_equipment.id);
       if (mounted) {
         setState(() {
           _equipment = refreshed;
@@ -62,7 +69,8 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
     final activeBuilding = ref.read(activeBuildingProvider).valueOrNull;
     final buildingId = activeBuilding?.id ?? _equipment.building;
     final vendorName = task.vendorName ?? 'Đơn vị bảo trì thiết bị';
-    final desc = 'Nghiệm thu bảo dưỡng ${_equipment.name} (${_equipment.code}): ${task.title}';
+    final desc =
+        'Nghiệm thu bảo dưỡng ${_equipment.name} (${_equipment.code}): ${task.title}';
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -71,22 +79,40 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
           children: [
             Icon(Icons.account_balance_wallet_outlined, color: AppTheme.error),
             SizedBox(width: 8),
-            Expanded(child: Text('Lập phiếu chi Quỹ bảo trì', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+            Expanded(
+              child: Text(
+                'Lập phiếu chi Quỹ bảo trì',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Xác nhận lập phiếu chi từ Quỹ bảo trì 2% cho hạng mục sau:', style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+            const Text(
+              'Xác nhận lập phiếu chi từ Quỹ bảo trì 2% cho hạng mục sau:',
+              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            ),
             const SizedBox(height: 12),
-            Text('Thiết bị: ${_equipment.name} (${_equipment.code})', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Thiết bị: ${_equipment.name} (${_equipment.code})',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
             Text('Công việc: ${task.title}'),
             const SizedBox(height: 4),
             Text('Đơn vị nhận: $vendorName'),
             const SizedBox(height: 8),
-            Text('Số tiền chi: ${_currencyFormat.format(task.cost)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.error, fontSize: 16)),
+            Text(
+              'Số tiền chi: ${_currencyFormat.format(task.cost)}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.error,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -122,7 +148,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
           ref.invalidate(maintenanceFundLedgerProvider);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Đã lập phiếu chi ${res['voucher_number']} thành công!'),
+              content: Text(
+                'Đã lập phiếu chi ${res['voucher_number']} thành công!',
+              ),
               backgroundColor: AppTheme.success,
             ),
           );
@@ -151,7 +179,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Không thể lập phiếu chi. Vui lòng kiểm tra lại số dư Quỹ bảo trì.'),
+              content: Text(
+                'Không thể lập phiếu chi. Vui lòng kiểm tra lại số dư Quỹ bảo trì.',
+              ),
               backgroundColor: AppTheme.error,
             ),
           );
@@ -165,7 +195,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Xác nhận xóa thiết bị'),
-        content: Text('Bạn có chắc chắn muốn xóa "${_equipment.name}" (${_equipment.code}) không? Toàn bộ lịch sử bảo trì liên quan cũng sẽ bị xóa.'),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa "${_equipment.name}" (${_equipment.code}) không? Toàn bộ lịch sử bảo trì liên quan cũng sẽ bị xóa.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -182,7 +214,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
 
     if (confirmed == true) {
       try {
-        await ref.read(equipmentRepositoryProvider).deleteEquipment(_equipment.id);
+        await ref
+            .read(equipmentRepositoryProvider)
+            .deleteEquipment(_equipment.id);
         ref.invalidate(equipmentListProvider);
         ref.invalidate(upcomingMaintenanceEquipmentsProvider);
 
@@ -257,7 +291,10 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
@@ -275,11 +312,17 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                       Expanded(
                         child: Text(
                           _equipment.categoryDisplayName,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: badgeColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
@@ -298,7 +341,10 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                   const Divider(height: 24),
                   _buildInfoRow('Tòa nhà', _equipment.building),
                   _buildInfoRow('Vị trí lắp đặt', _equipment.location),
-                  _buildInfoRow('Chu kỳ bảo dưỡng', '${_equipment.maintenanceIntervalDays} ngày/lần'),
+                  _buildInfoRow(
+                    'Chu kỳ bảo dưỡng',
+                    '${_equipment.maintenanceIntervalDays} ngày/lần',
+                  ),
                   _buildInfoRow(
                     'Lần bảo dưỡng gần nhất',
                     _equipment.lastMaintenanceDate != null
@@ -310,19 +356,29 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                     _equipment.nextMaintenanceDate != null
                         ? _dateFormat.format(_equipment.nextMaintenanceDate!)
                         : 'Chưa có',
-                    isHighlight: _equipment.isUpcomingMaintenance || _equipment.isOverdueMaintenance,
-                    highlightColor: _equipment.isOverdueMaintenance ? AppTheme.error : Colors.purple,
+                    isHighlight:
+                        _equipment.isUpcomingMaintenance ||
+                        _equipment.isOverdueMaintenance,
+                    highlightColor: _equipment.isOverdueMaintenance
+                        ? AppTheme.error
+                        : Colors.purple,
                   ),
                   if (_equipment.specifications != null) ...[
                     const Divider(height: 16),
                     const Text(
                       'Thông số kỹ thuật:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _equipment.specifications!,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ],
@@ -385,7 +441,10 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                         children: [
                           const Text(
                             'Tổng chi phí bảo dưỡng đã hoàn thành:',
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
                           ),
                           Text(
                             _currencyFormat.format(totalCost),
@@ -421,7 +480,10 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+          ),
           Text(
             value,
             style: TextStyle(
@@ -465,11 +527,17 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                 Expanded(
                   child: Text(
                     task.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
@@ -490,12 +558,18 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               children: [
                 Text(
                   '${task.taskTypeDisplayName} • ${dateFormat.format(task.scheduledStart)}',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
                 const Spacer(),
                 Text(
                   _currencyFormat.format(task.cost),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -503,14 +577,20 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               const SizedBox(height: 4),
               Text(
                 'Đơn vị thực hiện: ${task.vendorName} (${task.vendorContact ?? "N/A"})',
-                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
               ),
             ],
             if (task.notes != null) ...[
               const SizedBox(height: 4),
               Text(
                 'Ghi chú: ${task.notes!}',
-                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
             if (task.isCompleted && task.cost > 0) ...[
@@ -521,10 +601,16 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.error,
                     side: const BorderSide(color: AppTheme.error),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                   ),
                   icon: const Icon(Icons.receipt_long_outlined, size: 16),
-                  label: const Text('Chi từ Quỹ bảo trì', style: TextStyle(fontSize: 12)),
+                  label: const Text(
+                    'Chi từ Quỹ bảo trì',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   onPressed: () => _disburseMaintenanceFund(task),
                 ),
               ),

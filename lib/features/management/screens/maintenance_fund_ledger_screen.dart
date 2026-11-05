@@ -13,16 +13,23 @@ class MaintenanceFundLedgerScreen extends ConsumerStatefulWidget {
   const MaintenanceFundLedgerScreen({super.key});
 
   @override
-  ConsumerState<MaintenanceFundLedgerScreen> createState() => _MaintenanceFundLedgerScreenState();
+  ConsumerState<MaintenanceFundLedgerScreen> createState() =>
+      _MaintenanceFundLedgerScreenState();
 }
 
-class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLedgerScreen> {
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+class _MaintenanceFundLedgerScreenState
+    extends ConsumerState<MaintenanceFundLedgerScreen> {
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+  );
 
   void _showCreateVoucherSheet(BuildContext context, String? buildingId) {
     if (buildingId == null || buildingId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn tòa nhà trước khi lập phiếu.')),
+        const SnackBar(
+          content: Text('Vui lòng chọn tòa nhà trước khi lập phiếu.'),
+        ),
       );
       return;
     }
@@ -59,8 +66,13 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          type == 'INCOME' ? 'Lập Phiếu Thu Quỹ' : 'Lập Phiếu Chi Quỹ',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          type == 'INCOME'
+                              ? 'Lập Phiếu Thu Quỹ'
+                              : 'Lập Phiếu Chi Quỹ',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
@@ -72,8 +84,14 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                     // Loại phiếu
                     SegmentedButton<String>(
                       segments: const [
-                        ButtonSegment(value: 'INCOME', label: Text('Thu quỹ (+)')),
-                        ButtonSegment(value: 'EXPENSE', label: Text('Chi quỹ (-)')),
+                        ButtonSegment(
+                          value: 'INCOME',
+                          label: Text('Thu quỹ (+)'),
+                        ),
+                        ButtonSegment(
+                          value: 'EXPENSE',
+                          label: Text('Chi quỹ (-)'),
+                        ),
                       ],
                       selected: {type},
                       onSelectionChanged: (val) {
@@ -97,13 +115,28 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                       ),
                       items: type == 'INCOME'
                           ? const [
-                              DropdownMenuItem(value: 'MAINTENANCE_FEE', child: Text('Thu phí bảo trì')),
-                              DropdownMenuItem(value: 'BANK_INTEREST', child: Text('Lãi tiền gửi ngân hàng')),
-                              DropdownMenuItem(value: 'OTHER', child: Text('Khoản thu khác')),
+                              DropdownMenuItem(
+                                value: 'MAINTENANCE_FEE',
+                                child: Text('Thu phí bảo trì'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'BANK_INTEREST',
+                                child: Text('Lãi tiền gửi ngân hàng'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'OTHER',
+                                child: Text('Khoản thu khác'),
+                              ),
                             ]
                           : const [
-                              DropdownMenuItem(value: 'EQUIPMENT_REPAIR', child: Text('Sửa chữa thiết bị')),
-                              DropdownMenuItem(value: 'OTHER', child: Text('Khoản chi bảo trì khác')),
+                              DropdownMenuItem(
+                                value: 'EQUIPMENT_REPAIR',
+                                child: Text('Sửa chữa thiết bị'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'OTHER',
+                                child: Text('Khoản chi bảo trì khác'),
+                              ),
                             ],
                       onChanged: (val) {
                         if (val != null) setSheetState(() => category = val);
@@ -125,7 +158,9 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                     TextField(
                       controller: personController,
                       decoration: InputDecoration(
-                        labelText: type == 'INCOME' ? 'Họ tên người nộp tiền' : 'Họ tên đơn vị / người nhận tiền',
+                        labelText: type == 'INCOME'
+                            ? 'Họ tên người nộp tiền'
+                            : 'Họ tên đơn vị / người nhận tiền',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.person_outline),
                       ),
@@ -144,38 +179,58 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                     const SizedBox(height: 20),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: type == 'INCOME' ? AppTheme.primary : AppTheme.error,
+                        backgroundColor: type == 'INCOME'
+                            ? AppTheme.primary
+                            : AppTheme.error,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: isSubmitting
                           ? null
                           : () async {
-                              final rawAmount = double.tryParse(amountController.text.trim()) ?? 0.0;
+                              final rawAmount =
+                                  double.tryParse(
+                                    amountController.text.trim(),
+                                  ) ??
+                                  0.0;
                               final person = personController.text.trim();
                               final desc = descController.text.trim();
 
                               if (rawAmount <= 0) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Vui lòng nhập số tiền hợp lệ.')),
+                                  const SnackBar(
+                                    content: Text(
+                                      'Vui lòng nhập số tiền hợp lệ.',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
                               if (person.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Vui lòng nhập họ tên người nộp/nhận.')),
+                                  const SnackBar(
+                                    content: Text(
+                                      'Vui lòng nhập họ tên người nộp/nhận.',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
 
                               setSheetState(() => isSubmitting = true);
-                              final repo = ref.read(maintenanceFundRepositoryProvider);
+                              final repo = ref.read(
+                                maintenanceFundRepositoryProvider,
+                              );
                               final result = await repo.recordTransaction(
                                 buildingId: buildingId,
                                 transactionType: type,
                                 category: category,
                                 amount: rawAmount,
-                                description: desc.isNotEmpty ? desc : (type == 'INCOME' ? 'Thu quỹ bảo trì' : 'Chi bảo trì'),
+                                description: desc.isNotEmpty
+                                    ? desc
+                                    : (type == 'INCOME'
+                                          ? 'Thu quỹ bảo trì'
+                                          : 'Chi bảo trì'),
                                 recipientOrPayer: person,
                                 referenceType: 'MANUAL',
                               );
@@ -188,13 +243,19 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                                 ref.invalidate(maintenanceFundLedgerProvider);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Lập chứng từ ${result['voucher_number']} thành công!'),
+                                    content: Text(
+                                      'Lập chứng từ ${result['voucher_number']} thành công!',
+                                    ),
                                     backgroundColor: AppTheme.success,
                                   ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Không thể ghi sổ quỹ. Vui lòng kiểm tra số dư.')),
+                                  const SnackBar(
+                                    content: Text(
+                                      'Không thể ghi sổ quỹ. Vui lòng kiểm tra số dư.',
+                                    ),
+                                  ),
                                 );
                               }
                             },
@@ -202,9 +263,16 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             )
-                          : Text(type == 'INCOME' ? 'Xác nhận thu quỹ' : 'Xác nhận chi quỹ'),
+                          : Text(
+                              type == 'INCOME'
+                                  ? 'Xác nhận thu quỹ'
+                                  : 'Xác nhận chi quỹ',
+                            ),
                     ),
                   ],
                 ),
@@ -264,17 +332,28 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                         children: [
                           const Text(
                             'Số dư quỹ khả dụng',
-                            style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               activeBuilding?.name ?? 'Toàn tòa nhà',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primary,
+                              ),
                             ),
                           ),
                         ],
@@ -282,17 +361,29 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                       const SizedBox(height: 6),
                       Text(
                         _currencyFormat.format(balance),
-                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.trending_up, color: AppTheme.success, size: 16),
+                          const Icon(
+                            Icons.trending_up,
+                            color: AppTheme.success,
+                            size: 16,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               'Lãi tiền gửi ($interestRate%/năm): +${_currencyFormat.format(interestEarned)}',
-                              style: const TextStyle(fontSize: 12, color: AppTheme.success, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.success,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -312,19 +403,37 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                 FilterChip(
                   label: const Text('Tất cả'),
                   selected: currentFilter == 'ALL',
-                  onSelected: (_) => ref.read(maintenanceFundLedgerFilterProvider.notifier).state = 'ALL',
+                  onSelected: (_) =>
+                      ref
+                              .read(
+                                maintenanceFundLedgerFilterProvider.notifier,
+                              )
+                              .state =
+                          'ALL',
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
                   label: const Text('Thu quỹ'),
                   selected: currentFilter == 'INCOME',
-                  onSelected: (_) => ref.read(maintenanceFundLedgerFilterProvider.notifier).state = 'INCOME',
+                  onSelected: (_) =>
+                      ref
+                              .read(
+                                maintenanceFundLedgerFilterProvider.notifier,
+                              )
+                              .state =
+                          'INCOME',
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
                   label: const Text('Chi quỹ'),
                   selected: currentFilter == 'EXPENSE',
-                  onSelected: (_) => ref.read(maintenanceFundLedgerFilterProvider.notifier).state = 'EXPENSE',
+                  onSelected: (_) =>
+                      ref
+                              .read(
+                                maintenanceFundLedgerFilterProvider.notifier,
+                              )
+                              .state =
+                          'EXPENSE',
                 ),
               ],
             ),
@@ -333,7 +442,9 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
             // Danh sách nhật ký sổ cái
             Text(
               'Nhật ký giao dịch chứng từ',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
 
@@ -345,7 +456,11 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                     alignment: Alignment.center,
                     child: Column(
                       children: [
-                        Icon(Icons.menu_book_outlined, size: 48, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.menu_book_outlined,
+                          size: 48,
+                          color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                        ),
                         const SizedBox(height: 12),
                         const Text(
                           'Chưa có giao dịch chứng từ nào.',
@@ -372,7 +487,8 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                           AccountingVoucherDialog.show(
                             context,
                             transaction: tx,
-                            buildingName: activeBuilding?.name ?? 'Tòa nhà PKA-Home',
+                            buildingName:
+                                activeBuilding?.name ?? 'Tòa nhà PKA-Home',
                           );
                         },
                         child: Row(
@@ -380,12 +496,20 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: (isIncome ? AppTheme.success : AppTheme.error).withValues(alpha: 0.1),
+                                color:
+                                    (isIncome
+                                            ? AppTheme.success
+                                            : AppTheme.error)
+                                        .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Icon(
-                                isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-                                color: isIncome ? AppTheme.success : AppTheme.error,
+                                isIncome
+                                    ? Icons.arrow_downward
+                                    : Icons.arrow_upward,
+                                color: isIncome
+                                    ? AppTheme.success
+                                    : AppTheme.error,
                                 size: 22,
                               ),
                             ),
@@ -395,18 +519,24 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         tx.voucherNumber,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                       Text(
                                         '${isIncome ? '+' : '-'}${_currencyFormat.format(tx.amount)}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
-                                          color: isIncome ? AppTheme.success : AppTheme.error,
+                                          color: isIncome
+                                              ? AppTheme.success
+                                              : AppTheme.error,
                                         ),
                                       ),
                                     ],
@@ -417,27 +547,42 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: isIncome ? AppTheme.primary : AppTheme.error,
+                                      color: isIncome
+                                          ? AppTheme.primary
+                                          : AppTheme.error,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     tx.description,
-                                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary,
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        DateFormat('dd/MM/yyyy HH:mm').format(tx.createdAt),
-                                        style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                        DateFormat(
+                                          'dd/MM/yyyy HH:mm',
+                                        ).format(tx.createdAt),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppTheme.textSecondary,
+                                        ),
                                       ),
                                       Text(
                                         'Số dư sau GD: ${_currencyFormat.format(tx.balanceAfter)}',
-                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppTheme.textSecondary),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppTheme.textSecondary,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -451,7 +596,12 @@ class _MaintenanceFundLedgerScreenState extends ConsumerState<MaintenanceFundLed
                   },
                 );
               },
-              loading: () => const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator())),
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
               error: (err, _) => AppErrorCard(error: err),
             ),
           ],

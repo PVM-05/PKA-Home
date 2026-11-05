@@ -13,14 +13,18 @@ class PaymentHistoryScreen extends ConsumerStatefulWidget {
   const PaymentHistoryScreen({super.key});
 
   @override
-  ConsumerState<PaymentHistoryScreen> createState() => _PaymentHistoryScreenState();
+  ConsumerState<PaymentHistoryScreen> createState() =>
+      _PaymentHistoryScreenState();
 }
 
 class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   _PaymentFilter _currentFilter = _PaymentFilter.all;
 
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +32,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lịch sử thanh toán'),
-      ),
+      appBar: AppBar(title: const Text('Lịch sử thanh toán')),
       body: transactionsAsync.when(
         data: (transactions) {
           final invoiceCount = transactions.where((t) => t.isInvoice).length;
@@ -52,27 +54,35 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
               // Thanh bộ lọc ngang
               Container(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     _buildFilterChip(
                       label: 'Tất cả (${transactions.length})',
                       isSelected: _currentFilter == _PaymentFilter.all,
-                      onTap: () => setState(() => _currentFilter = _PaymentFilter.all),
+                      onTap: () =>
+                          setState(() => _currentFilter = _PaymentFilter.all),
                     ),
                     const SizedBox(width: 8),
                     _buildFilterChip(
                       label: 'Hóa đơn ($invoiceCount)',
                       icon: Icons.home_outlined,
                       isSelected: _currentFilter == _PaymentFilter.invoice,
-                      onTap: () => setState(() => _currentFilter = _PaymentFilter.invoice),
+                      onTap: () => setState(
+                        () => _currentFilter = _PaymentFilter.invoice,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     _buildFilterChip(
                       label: 'Dịch vụ ($serviceCount)',
                       icon: Icons.sports_tennis_outlined,
                       isSelected: _currentFilter == _PaymentFilter.service,
-                      onTap: () => setState(() => _currentFilter = _PaymentFilter.service),
+                      onTap: () => setState(
+                        () => _currentFilter = _PaymentFilter.service,
+                      ),
                     ),
                   ],
                 ),
@@ -102,7 +112,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text(formatErrorMessage(e), style: const TextStyle(color: AppTheme.error)),
+          child: Text(
+            formatErrorMessage(e),
+            style: const TextStyle(color: AppTheme.error),
+          ),
         ),
       ),
     );
@@ -123,8 +136,8 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           color: isSelected
               ? AppTheme.primary
               : (Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.grey.shade100),
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.grey.shade100),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? AppTheme.primary : Colors.transparent,
@@ -155,16 +168,19 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     );
   }
 
-  Widget _buildTransactionCard(BuildContext context, PaymentTransactionModel tx) {
+  Widget _buildTransactionCard(
+    BuildContext context,
+    PaymentTransactionModel tx,
+  ) {
     final isInvoice = tx.isInvoice;
     final iconColor = isInvoice ? AppTheme.primary : Colors.deepOrange;
     final iconData = isInvoice
         ? Icons.receipt_long_rounded
         : (tx.title?.toLowerCase().contains('bơi') ?? false
-            ? Icons.pool_rounded
-            : (tx.title?.toLowerCase().contains('gym') ?? false
-                ? Icons.fitness_center_rounded
-                : Icons.sports_tennis_rounded));
+              ? Icons.pool_rounded
+              : (tx.title?.toLowerCase().contains('gym') ?? false
+                    ? Icons.fitness_center_rounded
+                    : Icons.sports_tennis_rounded));
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -186,8 +202,12 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  tx.title ?? (isInvoice ? 'Hóa đơn định kỳ' : 'Dịch vụ tiện ích'),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  tx.title ??
+                      (isInvoice ? 'Hóa đơn định kỳ' : 'Dịch vụ tiện ích'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -196,7 +216,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 ),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white.withValues(alpha: 0.05)
@@ -205,7 +228,11 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   ),
                   child: Text(
                     tx.transactionCode,
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ],
@@ -217,7 +244,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             children: [
               Text(
                 _currencyFormat.format(tx.amount),
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 6),
               Row(
@@ -258,7 +288,11 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
               color: AppTheme.primary.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.receipt_long_outlined, size: 40, color: AppTheme.primary),
+            child: const Icon(
+              Icons.receipt_long_outlined,
+              size: 40,
+              color: AppTheme.primary,
+            ),
           ),
           const SizedBox(height: 16),
           const Text(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
@@ -15,10 +15,12 @@ class ManagementMeterReadingScreen extends ConsumerStatefulWidget {
   const ManagementMeterReadingScreen({super.key});
 
   @override
-  ConsumerState<ManagementMeterReadingScreen> createState() => _ManagementMeterReadingScreenState();
+  ConsumerState<ManagementMeterReadingScreen> createState() =>
+      _ManagementMeterReadingScreenState();
 }
 
-class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterReadingScreen>
+class _ManagementMeterReadingScreenState
+    extends ConsumerState<ManagementMeterReadingScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -55,15 +57,24 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               title: Row(
                 children: [
-                  const Icon(Icons.check_circle_outline, color: AppStatusColors.paid, size: 28),
+                  const Icon(
+                    Icons.check_circle_outline,
+                    color: AppStatusColors.paid,
+                    size: 28,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Phê Duyệt Chỉ Số - Căn ${item.apartmentCode ?? ''}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -73,7 +84,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Kỳ: ${item.period} • Người gửi: ${item.submitterName ?? 'Cư dân'}'),
+                    Text(
+                      'Kỳ: ${item.period} • Người gửi: ${item.submitterName ?? 'Cư dân'}',
+                    ),
                     const SizedBox(height: 12),
 
                     // Cảnh báo nếu chỉ số có cờ bất thường
@@ -86,7 +99,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                               ? AppTheme.error.withValues(alpha: 0.1)
                               : Colors.orange.withValues(alpha: 0.1),
                           border: Border.all(
-                            color: item.isDangerAnomaly ? AppTheme.error : Colors.orange,
+                            color: item.isDangerAnomaly
+                                ? AppTheme.error
+                                : Colors.orange,
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -94,8 +109,12 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
-                              item.isDangerAnomaly ? Icons.error_outline : Icons.warning_amber_rounded,
-                              color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade800,
+                              item.isDangerAnomaly
+                                  ? Icons.error_outline
+                                  : Icons.warning_amber_rounded,
+                              color: item.isDangerAnomaly
+                                  ? AppTheme.error
+                                  : Colors.orange.shade800,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
@@ -105,7 +124,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade900,
+                                  color: item.isDangerAnomaly
+                                      ? AppTheme.error
+                                      : Colors.orange.shade900,
                                 ),
                               ),
                             ),
@@ -123,9 +144,15 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('• Điện mới: ${item.electricReading} kWh', style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text(
+                            '• Điện mới: ${item.electricReading} kWh',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                           const SizedBox(height: 4),
-                          Text('• Nước mới: ${item.waterReading} m³', style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text(
+                            '• Nước mới: ${item.waterReading} m³',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                         ],
                       ),
                     ),
@@ -134,11 +161,17 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                       contentPadding: EdgeInsets.zero,
                       title: const Text(
                         'Tự động tạo hóa đơn tháng cho căn hộ này',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       subtitle: const Text(
                         'Tính phí điện, nước theo chỉ số mới và phí quản lý',
-                        style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
                       value: generateInvoice,
                       activeColor: AppTheme.primary,
@@ -160,7 +193,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   onPressed: () => Navigator.pop(ctx, true),
                   child: const Text('Xác nhận duyệt'),
@@ -175,7 +210,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
     if (confirmed != true || !mounted) return;
 
     try {
-      final res = await ref.read(meterReadingRepositoryProvider).approveReading(
+      final res = await ref
+          .read(meterReadingRepositoryProvider)
+          .approveReading(
             submissionId: item.id,
             generateInvoice: generateInvoice,
             dueDate: defaultDueDate,
@@ -211,15 +248,24 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
-              const Icon(Icons.cancel_outlined, color: AppTheme.error, size: 28),
+              const Icon(
+                Icons.cancel_outlined,
+                color: AppTheme.error,
+                size: 28,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Từ Chối Chỉ Số - Căn ${item.apartmentCode ?? ''}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -239,7 +285,8 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   controller: reasonController,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    hintText: 'VD: Ảnh chụp đồng hồ nước bị mờ, không rõ 2 số cuối...',
+                    hintText:
+                        'VD: Ảnh chụp đồng hồ nước bị mờ, không rõ 2 số cuối...',
                     border: OutlineInputBorder(),
                   ),
                   validator: (val) {
@@ -261,7 +308,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.error,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               onPressed: () {
                 if (formKey.currentState?.validate() ?? false) {
@@ -278,7 +327,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
     if (confirmed != true || !mounted) return;
 
     try {
-      final res = await ref.read(meterReadingRepositoryProvider).rejectReading(
+      final res = await ref
+          .read(meterReadingRepositoryProvider)
+          .rejectReading(
             submissionId: item.id,
             reason: reasonController.text.trim(),
           );
@@ -310,12 +361,20 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               AppBar(
-                title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                title: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 automaticallyImplyLeading: false,
                 actions: [
                   IconButton(
@@ -325,7 +384,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                 ],
               ),
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(16),
+                ),
                 child: Image.network(
                   imageUrl,
                   fit: BoxFit.contain,
@@ -342,9 +403,16 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.broken_image, size: 48, color: AppTheme.textSecondary),
+                          Icon(
+                            Icons.broken_image,
+                            size: 48,
+                            color: AppTheme.textSecondary,
+                          ),
                           SizedBox(height: 8),
-                          Text('Không thể tải ảnh minh chứng', style: TextStyle(color: AppTheme.textSecondary)),
+                          Text(
+                            'Không thể tải ảnh minh chứng',
+                            style: TextStyle(color: AppTheme.textSecondary),
+                          ),
                         ],
                       ),
                     );
@@ -392,14 +460,21 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                     pendingCountAsync.when(
                       data: (count) => count > 0
                           ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppTheme.error,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
                                 '$count',
-                                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             )
                           : const SizedBox.shrink(),
@@ -418,14 +493,21 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                     pendingAnomalyAsync.when(
                       data: (count) => count > 0
                           ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.orange.shade800,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
                                 '$count',
-                                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             )
                           : const SizedBox.shrink(),
@@ -465,11 +547,18 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.verified_outlined, size: 64, color: AppStatusColors.paid),
+                  Icon(
+                    Icons.verified_outlined,
+                    size: 64,
+                    color: AppStatusColors.paid,
+                  ),
                   SizedBox(height: 16),
                   Text(
                     'Không có chỉ số nào bị gắn cờ bất thường.',
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 15),
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 15,
+                    ),
                   ),
                 ],
               ),
@@ -486,7 +575,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: AppErrorCard(error: e, onRetry: _refreshAll)),
+        error: (e, _) => Center(
+          child: AppErrorCard(error: e, onRetry: _refreshAll),
+        ),
       ),
     );
   }
@@ -500,16 +591,28 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
         data: (items) {
           if (items.isEmpty) {
             String emptyMessage = 'Không có chỉ số nào đang chờ duyệt.';
-            if (status == 'approved') emptyMessage = 'Chưa có chỉ số nào được duyệt.';
-            if (status == 'rejected') emptyMessage = 'Không có chỉ số nào bị từ chối.';
+            if (status == 'approved')
+              emptyMessage = 'Chưa có chỉ số nào được duyệt.';
+            if (status == 'rejected')
+              emptyMessage = 'Không có chỉ số nào bị từ chối.';
 
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle_outline, size: 64, color: AppTheme.textSecondary),
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 64,
+                    color: AppTheme.textSecondary,
+                  ),
                   SizedBox(height: 16),
-                  Text(emptyMessage, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 15)),
+                  Text(
+                    emptyMessage,
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 15,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -525,12 +628,17 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: AppErrorCard(error: e, onRetry: _refreshAll)),
+        error: (e, _) => Center(
+          child: AppErrorCard(error: e, onRetry: _refreshAll),
+        ),
       ),
     );
   }
 
-  Widget _buildSubmissionCard(MeterReadingSubmissionModel item, String currentTabStatus) {
+  Widget _buildSubmissionCard(
+    MeterReadingSubmissionModel item,
+    String currentTabStatus,
+  ) {
     Color statusColor = AppTheme.warning;
     if (item.isApproved) statusColor = AppStatusColors.paid;
     if (item.isRejected) statusColor = AppTheme.error;
@@ -553,7 +661,11 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.apartment, color: AppTheme.primary, size: 20),
+                      child: const Icon(
+                        Icons.apartment,
+                        color: AppTheme.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -562,13 +674,19 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                         children: [
                           Text(
                             'Căn hộ ${item.apartmentCode ?? ''}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             'Kỳ: ${item.period} • Gửi lúc ${_dateFormat.format(item.createdAt)}',
-                            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -580,14 +698,21 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   item.statusDisplayName,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
                 ),
               ),
             ],
@@ -613,9 +738,13 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                   Row(
                     children: [
                       Icon(
-                        item.isDangerAnomaly ? Icons.error_outline : Icons.warning_amber_rounded,
+                        item.isDangerAnomaly
+                            ? Icons.error_outline
+                            : Icons.warning_amber_rounded,
                         size: 16,
-                        color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade800,
+                        color: item.isDangerAnomaly
+                            ? AppTheme.error
+                            : Colors.orange.shade800,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -623,26 +752,35 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade900,
+                          color: item.isDangerAnomaly
+                              ? AppTheme.error
+                              : Colors.orange.shade900,
                         ),
                       ),
                     ],
                   ),
-                  if (item.anomalyReason != null && item.anomalyReason!.isNotEmpty) ...[
+                  if (item.anomalyReason != null &&
+                      item.anomalyReason!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       item.anomalyReason!,
                       style: TextStyle(
                         fontSize: 12,
-                        color: item.isDangerAnomaly ? AppTheme.error : Colors.orange.shade900,
+                        color: item.isDangerAnomaly
+                            ? AppTheme.error
+                            : Colors.orange.shade900,
                       ),
                     ),
                   ],
-                  if (item.previousElectricReading != null || item.previousWaterReading != null) ...[
+                  if (item.previousElectricReading != null ||
+                      item.previousWaterReading != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       '• Đối chiếu cũ: Điện ${item.previousElectricReading ?? '—'} kWh (TB: ${item.avgElectricUsage ?? '—'}) | Nước ${item.previousWaterReading ?? '—'} m³ (TB: ${item.avgWaterUsage ?? '—'})',
-                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ],
@@ -670,12 +808,19 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.bolt, color: Colors.amber.shade800, size: 18),
+                          Icon(
+                            Icons.bolt,
+                            color: Colors.amber.shade800,
+                            size: 18,
+                          ),
                           const SizedBox(width: 4),
                           const Expanded(
                             child: Text(
                               'Điện (kWh)',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -684,18 +829,36 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                       const SizedBox(height: 6),
                       Text(
                         '${item.electricReading} kWh',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.amber.shade900),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade900,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (item.electricImageUrl != null) ...[
                         const SizedBox(height: 6),
                         GestureDetector(
-                          onTap: () => _showImageDialog('Ảnh công tơ điện - Căn ${item.apartmentCode}', item.electricImageUrl!),
+                          onTap: () => _showImageDialog(
+                            'Ảnh công tơ điện - Căn ${item.apartmentCode}',
+                            item.electricImageUrl!,
+                          ),
                           child: const Row(
                             children: [
-                              Icon(Icons.image, size: 14, color: AppTheme.primary),
+                              Icon(
+                                Icons.image,
+                                size: 14,
+                                color: AppTheme.primary,
+                              ),
                               SizedBox(width: 4),
-                              Text('Xem ảnh', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.w600)),
+                              Text(
+                                'Xem ảnh',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -718,12 +881,19 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.water_drop, color: Colors.blue.shade800, size: 18),
+                          Icon(
+                            Icons.water_drop,
+                            color: Colors.blue.shade800,
+                            size: 18,
+                          ),
                           const SizedBox(width: 4),
                           const Expanded(
                             child: Text(
                               'Nước (m³)',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -732,18 +902,36 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                       const SizedBox(height: 6),
                       Text(
                         '${item.waterReading} m³',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue.shade900),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade900,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (item.waterImageUrl != null) ...[
                         const SizedBox(height: 6),
                         GestureDetector(
-                          onTap: () => _showImageDialog('Ảnh công tơ nước - Căn ${item.apartmentCode}', item.waterImageUrl!),
+                          onTap: () => _showImageDialog(
+                            'Ảnh công tơ nước - Căn ${item.apartmentCode}',
+                            item.waterImageUrl!,
+                          ),
                           child: const Row(
                             children: [
-                              Icon(Icons.image, size: 14, color: AppTheme.primary),
+                              Icon(
+                                Icons.image,
+                                size: 14,
+                                color: AppTheme.primary,
+                              ),
                               SizedBox(width: 4),
-                              Text('Xem ảnh', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.w600)),
+                              Text(
+                                'Xem ảnh',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -763,13 +951,19 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                 Expanded(
                   child: Text(
                     'Người gửi: ${item.submitterName}',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
                   'Độ tin cậy OCR: ${(item.ocrConfidence * 100).toStringAsFixed(1)}%',
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -785,12 +979,19 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, size: 16, color: AppTheme.error),
+                  const Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: AppTheme.error,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       'Lý do từ chối: ${item.rejectReason}',
-                      style: const TextStyle(fontSize: 13, color: AppTheme.error),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.error,
+                      ),
                     ),
                   ),
                 ],
@@ -808,7 +1009,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.error,
                       side: const BorderSide(color: AppTheme.error),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     icon: const Icon(Icons.close, size: 18),
                     label: const Text('Từ chối'),
@@ -821,7 +1024,9 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     icon: const Icon(Icons.check, size: 18),
                     label: const Text('Phê duyệt'),
@@ -836,4 +1041,3 @@ class _ManagementMeterReadingScreenState extends ConsumerState<ManagementMeterRe
     );
   }
 }
-

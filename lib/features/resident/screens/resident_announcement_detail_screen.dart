@@ -51,7 +51,10 @@ class ResidentAnnouncementDetailScreen extends StatelessWidget {
                 children: [
                   if (announcement.isUrgent) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -59,7 +62,11 @@ class ResidentAnnouncementDetailScreen extends StatelessWidget {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.error),
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: 16,
+                            color: AppTheme.error,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'THÔNG BÁO KHẨN CẤP',
@@ -86,7 +93,11 @@ class ResidentAnnouncementDetailScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.access_time, size: 16, color: AppTheme.textSecondary),
+                      const Icon(
+                        Icons.access_time,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         formattedDate,
@@ -97,7 +108,10 @@ class ResidentAnnouncementDetailScreen extends StatelessWidget {
                       ),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(6),
@@ -139,7 +153,11 @@ class ResidentAnnouncementDetailScreen extends StatelessWidget {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.article_outlined, color: AppTheme.primary, size: 20),
+                      Icon(
+                        Icons.article_outlined,
+                        color: AppTheme.primary,
+                        size: 20,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         'Nội dung chi tiết',

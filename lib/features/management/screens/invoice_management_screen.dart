@@ -22,14 +22,20 @@ class InvoiceManagementScreen extends ConsumerStatefulWidget {
   const InvoiceManagementScreen({super.key});
 
   @override
-  ConsumerState<InvoiceManagementScreen> createState() => _InvoiceManagementScreenState();
+  ConsumerState<InvoiceManagementScreen> createState() =>
+      _InvoiceManagementScreenState();
 }
 
-class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScreen> {
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+class _InvoiceManagementScreenState
+    extends ConsumerState<InvoiceManagementScreen> {
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+  );
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _statusFilter = 'all'; // 'all', 'pending_confirmation', 'unpaid', 'paid'
+  String _statusFilter =
+      'all'; // 'all', 'pending_confirmation', 'unpaid', 'paid'
   bool _isExporting = false;
 
   @override
@@ -51,7 +57,7 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
       period: period,
     );
     setState(() => _isExporting = false);
-    
+
     if (mounted) {
       if (path != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -74,7 +80,8 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
 
   List<InvoiceModel> _filterInvoices(List<InvoiceModel> invoices) {
     return invoices.where((inv) {
-      if (_statusFilter == 'pending_confirmation' && inv.status != 'pending_confirmation') {
+      if (_statusFilter == 'pending_confirmation' &&
+          inv.status != 'pending_confirmation') {
         return false;
       }
       if (_statusFilter == 'unpaid' && inv.status != 'unpaid') {
@@ -100,7 +107,9 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
     final invoicesAsync = ref.watch(invoicesProvider);
     final allInvoices = invoicesAsync.valueOrNull ?? [];
     final allCount = allInvoices.length;
-    final pendingConfirmationCount = allInvoices.where((i) => i.status == 'pending_confirmation').length;
+    final pendingConfirmationCount = allInvoices
+        .where((i) => i.status == 'pending_confirmation')
+        .length;
     final unpaidCount = allInvoices.where((i) => i.status == 'unpaid').length;
     final paidCount = allInvoices.where((i) => i.status == 'paid').length;
 
@@ -114,7 +123,11 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 14),
                 child: Center(
-                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
               )
             else
@@ -133,7 +146,9 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                       _exportExcel(_filterInvoices(invoices));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Không có dữ liệu để xuất Excel.')),
+                        const SnackBar(
+                          content: Text('Không có dữ liệu để xuất Excel.'),
+                        ),
                       );
                     }
                   }
@@ -143,7 +158,11 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
                     value: 'bulk',
                     child: Row(
                       children: [
-                        Icon(Icons.auto_awesome, size: 20, color: AppTheme.primary),
+                        Icon(
+                          Icons.auto_awesome,
+                          size: 20,
+                          color: AppTheme.primary,
+                        ),
                         SizedBox(width: 10),
                         Text('Tạo HĐ hàng loạt'),
                       ],
@@ -164,336 +183,453 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
           ],
         ),
 
-      body: Column(
-        children: [
-          // Thanh tìm kiếm
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Tìm theo căn hộ (VD: A0110, B0502)...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchQuery = '');
-                        },
-                      )
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              onChanged: (val) {
-                setState(() => _searchQuery = val.trim());
-              },
-            ),
-          ),
-
-          // Hàng FilterChips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Row(
-              children: [
-                _buildFilterChip('all', 'Tất cả ($allCount)', null),
-                const SizedBox(width: 8),
-                _buildFilterChip(
-                  'pending_confirmation',
-                  'Chờ xác nhận ($pendingConfirmationCount)',
-                  AppStatusColors.pendingConfirmation,
-                  hasBadge: pendingConfirmationCount > 0,
+        body: Column(
+          children: [
+            // Thanh tìm kiếm
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Tìm theo căn hộ (VD: A0110, B0502)...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                _buildFilterChip('unpaid', 'Đang nợ ($unpaidCount)', AppStatusColors.unpaid),
-                const SizedBox(width: 8),
-                _buildFilterChip('paid', 'Đã thanh toán ($paidCount)', AppStatusColors.paid),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          
-          Expanded(
-            child: AppStateView<List<InvoiceModel>>(
-              asyncValue: invoicesAsync,
-              emptyMessage: 'Chưa có hóa đơn nào được tạo.',
-              emptyIcon: Icons.receipt_long_outlined,
-              actionButton: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()),
-                  );
+                onChanged: (val) {
+                  setState(() => _searchQuery = val.trim());
                 },
-                icon: const Icon(Icons.add),
-                label: const Text('Lập hóa đơn mới'),
               ),
-              skeletonBuilder: (_) => ListView(
-                padding: const EdgeInsets.all(16),
-                children: const [
-                  InvoiceCardSkeleton(),
-                  InvoiceCardSkeleton(),
-                  InvoiceCardSkeleton(),
+            ),
+
+            // Hàng FilterChips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  _buildFilterChip('all', 'Tất cả ($allCount)', null),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    'pending_confirmation',
+                    'Chờ xác nhận ($pendingConfirmationCount)',
+                    AppStatusColors.pendingConfirmation,
+                    hasBadge: pendingConfirmationCount > 0,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    'unpaid',
+                    'Đang nợ ($unpaidCount)',
+                    AppStatusColors.unpaid,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildFilterChip(
+                    'paid',
+                    'Đã thanh toán ($paidCount)',
+                    AppStatusColors.paid,
+                  ),
                 ],
               ),
-              onRetry: () => ref.invalidate(invoicesProvider),
-              dataBuilder: (invoices) {
-                final filtered = _filterInvoices(invoices);
+            ),
+            const SizedBox(height: 8),
 
-                if (filtered.isEmpty) {
+            Expanded(
+              child: AppStateView<List<InvoiceModel>>(
+                asyncValue: invoicesAsync,
+                emptyMessage: 'Chưa có hóa đơn nào được tạo.',
+                emptyIcon: Icons.receipt_long_outlined,
+                actionButton: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const CreateInvoiceScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Lập hóa đơn mới'),
+                ),
+                skeletonBuilder: (_) => ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: const [
+                    InvoiceCardSkeleton(),
+                    InvoiceCardSkeleton(),
+                    InvoiceCardSkeleton(),
+                  ],
+                ),
+                onRetry: () => ref.invalidate(invoicesProvider),
+                dataBuilder: (invoices) {
+                  final filtered = _filterInvoices(invoices);
+
+                  if (filtered.isEmpty) {
+                    return RefreshIndicator(
+                      color: AppTheme.primary,
+                      onRefresh: () async {
+                        HapticFeedback.lightImpact();
+                        ref.invalidate(invoicesProvider);
+                      },
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.4,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primary.withValues(
+                                        alpha: 0.08,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.receipt_long_outlined,
+                                      size: 48,
+                                      color: AppTheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Không có hóa đơn nào phù hợp với bộ lọc.',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: AppTheme.textSecondary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return RefreshIndicator(
                     color: AppTheme.primary,
                     onRefresh: () async {
                       HapticFeedback.lightImpact();
                       ref.invalidate(invoicesProvider);
                     },
-                    child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primary.withValues(alpha: 0.08),
-                                    shape: BoxShape.circle,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final invoice = filtered[index];
+                        final isNew =
+                            DateTime.now()
+                                .difference(invoice.createdAt)
+                                .inMinutes <
+                            15;
+
+                        final isPendingConfirmation =
+                            invoice.status == 'pending_confirmation';
+
+                        return Card(
+                          clipBehavior: Clip.antiAlias,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: isPendingConfirmation
+                                ? BorderSide(
+                                    color: AppStatusColors.pendingConfirmation,
+                                    width: 1.5,
+                                  )
+                                : BorderSide(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
                                   ),
-                                  child: const Icon(Icons.receipt_long_outlined, size: 48, color: AppTheme.primary),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Không có hóa đơn nào phù hợp với bộ lọc.',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  color: AppTheme.primary,
-                  onRefresh: () async {
-                    HapticFeedback.lightImpact();
-                    ref.invalidate(invoicesProvider);
-                  },
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final invoice = filtered[index];
-                      final isNew = DateTime.now().difference(invoice.createdAt).inMinutes < 15;
-                      
-                      final isPendingConfirmation = invoice.status == 'pending_confirmation';
-
-                      return Card(
-                        clipBehavior: Clip.antiAlias,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: isPendingConfirmation
-                              ? BorderSide(color: AppStatusColors.pendingConfirmation, width: 1.5)
-                              : BorderSide(color: Colors.grey.shade200, width: 1),
-                        ),
-                        color: isPendingConfirmation
-                            ? AppStatusColors.pendingConfirmation.withValues(alpha: 0.04)
-                            : Colors.white,
-                        elevation: isPendingConfirmation ? 2 : 1,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ManagementInvoiceDetailScreen(invoice: invoice),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.domain,
-                                            color: isPendingConfirmation ? AppStatusColors.pendingConfirmation : AppTheme.primary,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Flexible(
-                                            child: Text(
-                                              'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                color: isPendingConfirmation ? AppStatusColors.pendingConfirmation : null,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          if (isNew) ...[
-                                            const SizedBox(width: 6),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: AppStatusColors.paid,
-                                                borderRadius: BorderRadius.circular(4),
-                                              ),
-                                              child: const Text('MỚI', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuButton<String>(
-                                      icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                      onSelected: (value) {
-                                        if (value == 'edit') {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => EditInvoiceScreen(invoice: invoice),
-                                            ),
-                                          );
-                                        } else if (value == 'delete') {
-                                          _confirmDeleteInvoice(invoice);
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        const PopupMenuItem(
-                                          value: 'edit',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.edit, size: 18),
-                                              SizedBox(width: 8),
-                                              Text('Chỉnh sửa'),
-                                            ],
-                                          ),
-                                        ),
-                                        const PopupMenuItem(
-                                          value: 'delete',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.delete, color: AppTheme.error, size: 18),
-                                              SizedBox(width: 8),
-                                              Text('Xóa', style: TextStyle(color: AppTheme.error)),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                          color: isPendingConfirmation
+                              ? AppStatusColors.pendingConfirmation.withValues(
+                                  alpha: 0.04,
+                                )
+                              : Colors.white,
+                          elevation: isPendingConfirmation ? 2 : 1,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ManagementInvoiceDetailScreen(
+                                    invoice: invoice,
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Flexible(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: _getStatusColor(invoice.status).withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(4),
-                                          border: isPendingConfirmation
-                                              ? Border.all(color: AppStatusColors.pendingConfirmation.withValues(alpha: 0.4))
-                                              : null,
-                                        ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
                                         child: Row(
-                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            if (isPendingConfirmation) ...[
-                                              const Icon(Icons.rate_review_outlined, size: 12, color: AppStatusColors.pendingConfirmation),
-                                              const SizedBox(width: 4),
-                                            ],
+                                            Icon(
+                                              Icons.domain,
+                                              color: isPendingConfirmation
+                                                  ? AppStatusColors
+                                                        .pendingConfirmation
+                                                  : AppTheme.primary,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 8),
                                             Flexible(
                                               child: Text(
-                                                _getStatusText(invoice.status),
+                                                'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
                                                 style: TextStyle(
-                                                  color: _getStatusColor(invoice.status),
-                                                  fontSize: 12,
                                                   fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: isPendingConfirmation
+                                                      ? AppStatusColors
+                                                            .pendingConfirmation
+                                                      : null,
                                                 ),
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
+                                            if (isNew) ...[
+                                              const SizedBox(width: 6),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: AppStatusColors.paid,
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: const Text(
+                                                  'MỚI',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        'Kỳ: ${invoice.period}',
-                                        style: Theme.of(context).textTheme.bodyMedium,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}', 
-                                        style: const TextStyle(
-                                          color: AppTheme.error, 
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(
+                                          Icons.more_vert,
+                                          size: 20,
+                                          color: AppTheme.textSecondary,
                                         ),
-                                        overflow: TextOverflow.ellipsis,
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        onSelected: (value) {
+                                          if (value == 'edit') {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    EditInvoiceScreen(
+                                                      invoice: invoice,
+                                                    ),
+                                              ),
+                                            );
+                                          } else if (value == 'delete') {
+                                            _confirmDeleteInvoice(invoice);
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 'edit',
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.edit, size: 18),
+                                                SizedBox(width: 8),
+                                                Text('Chỉnh sửa'),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.delete,
+                                                  color: AppTheme.error,
+                                                  size: 18,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Xóa',
+                                                  style: TextStyle(
+                                                    color: AppTheme.error,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      isPendingConfirmation ? 'Đối soát & Duyệt →' : 'Xem chi tiết >',
-                                      style: TextStyle(
-                                        color: isPendingConfirmation ? AppStatusColors.pendingConfirmation : AppTheme.primary,
-                                        fontWeight: isPendingConfirmation ? FontWeight.bold : FontWeight.normal,
-                                        fontSize: 12,
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Flexible(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _getStatusColor(
+                                              invoice.status,
+                                            ).withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                            border: isPendingConfirmation
+                                                ? Border.all(
+                                                    color: AppStatusColors
+                                                        .pendingConfirmation
+                                                        .withValues(alpha: 0.4),
+                                                  )
+                                                : null,
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (isPendingConfirmation) ...[
+                                                const Icon(
+                                                  Icons.rate_review_outlined,
+                                                  size: 12,
+                                                  color: AppStatusColors
+                                                      .pendingConfirmation,
+                                                ),
+                                                const SizedBox(width: 4),
+                                              ],
+                                              Flexible(
+                                                child: Text(
+                                                  _getStatusText(
+                                                    invoice.status,
+                                                  ),
+                                                  style: TextStyle(
+                                                    color: _getStatusColor(
+                                                      invoice.status,
+                                                    ),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          'Kỳ: ${invoice.period}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}',
+                                          style: const TextStyle(
+                                            color: AppTheme.error,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        isPendingConfirmation
+                                            ? 'Đối soát & Duyệt →'
+                                            : 'Xem chi tiết >',
+                                        style: TextStyle(
+                                          color: isPendingConfirmation
+                                              ? AppStatusColors
+                                                    .pendingConfirmation
+                                              : AppTheme.primary,
+                                          fontWeight: isPendingConfirmation
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'invoice_management_fab',
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()),
+            );
+          },
+          backgroundColor: AppTheme.primary,
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text(
+            'Lập hóa đơn',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-        ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'invoice_management_fab',
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()));
-        },
-        backgroundColor: AppTheme.primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Lập hóa đơn', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-    ));
+    );
   }
 
-  Widget _buildFilterChip(String filterKey, String label, Color? highlightColor, {bool hasBadge = false}) {
+  Widget _buildFilterChip(
+    String filterKey,
+    String label,
+    Color? highlightColor, {
+    bool hasBadge = false,
+  }) {
     final isSelected = _statusFilter == filterKey;
     final color = highlightColor ?? AppTheme.primary;
 
@@ -539,17 +675,25 @@ class _InvoiceManagementScreenState extends ConsumerState<InvoiceManagementScree
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'paid': return AppStatusColors.paid;
-      case 'pending_confirmation': return AppStatusColors.pendingConfirmation;
-      case 'unpaid': default: return AppStatusColors.unpaid;
+      case 'paid':
+        return AppStatusColors.paid;
+      case 'pending_confirmation':
+        return AppStatusColors.pendingConfirmation;
+      case 'unpaid':
+      default:
+        return AppStatusColors.unpaid;
     }
   }
 
   String _getStatusText(String status) {
     switch (status) {
-      case 'paid': return 'Đã thanh toán';
-      case 'pending_confirmation': return 'Chờ xác nhận';
-      case 'unpaid': default: return 'Đang nợ';
+      case 'paid':
+        return 'Đã thanh toán';
+      case 'pending_confirmation':
+        return 'Chờ xác nhận';
+      case 'unpaid':
+      default:
+        return 'Đang nợ';
     }
   }
 

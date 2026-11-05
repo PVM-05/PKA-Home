@@ -49,7 +49,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     setState(() => _isSending = true);
 
     try {
-      await ref.read(issueRepositoryProvider).addComment(
+      await ref
+          .read(issueRepositoryProvider)
+          .addComment(
             issueReportId: widget.issue.id,
             userId: user.id,
             content: content,
@@ -87,9 +89,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chi tiết phản ánh'),
-      ),
+      appBar: AppBar(title: const Text('Chi tiết phản ánh')),
       body: Column(
         children: [
           // Phần nội dung scrollable
@@ -109,7 +109,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 ],
                 if (widget.issue.resolutionProofImages.isNotEmpty) ...[
                   _buildImageSection(
-                      'Ảnh nghiệm thu', widget.issue.resolutionProofImages),
+                    'Ảnh nghiệm thu',
+                    widget.issue.resolutionProofImages,
+                  ),
                   const SizedBox(height: 12),
                 ],
 
@@ -127,19 +129,26 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 // ─── Khu vực comment ───
                 Row(
                   children: [
-                    const Icon(Icons.forum_outlined,
-                        size: 20, color: AppTheme.primary),
+                    const Icon(
+                      Icons.forum_outlined,
+                      size: 20,
+                      color: AppTheme.primary,
+                    ),
                     const SizedBox(width: 8),
                     const Text(
                       'Trao đổi',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Spacer(),
                     commentsAsync.whenOrNull(
                       data: (comments) => Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -169,19 +178,22 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                         ),
                         child: Column(
                           children: [
-                            Icon(Icons.chat_bubble_outline,
-                                size: 40,
-                                color: isDark
-                                    ? Colors.white38
-                                    : AppTheme.textSecondary),
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              size: 40,
+                              color: isDark
+                                  ? Colors.white38
+                                  : AppTheme.textSecondary,
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               'Chưa có trao đổi nào.\nHãy gửi tin nhắn đầu tiên!',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white60
-                                      : AppTheme.textSecondary),
+                                color: isDark
+                                    ? Colors.white60
+                                    : AppTheme.textSecondary,
+                              ),
                             ),
                           ],
                         ),
@@ -202,8 +214,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   ),
                   error: (e, _) => Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(formatErrorMessage(e),
-                        style: const TextStyle(color: AppTheme.error)),
+                    child: Text(
+                      formatErrorMessage(e),
+                      style: const TextStyle(color: AppTheme.error),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 80), // Padding cho input bar
@@ -228,9 +242,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isDark ? Colors.white12 : Colors.grey.shade200,
-        ),
+        side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -244,19 +256,21 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: statusInfo.color.withValues(alpha: 0.5)),
+                      color: statusInfo.color.withValues(alpha: 0.5),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(statusInfo.icon,
-                          size: 14, color: statusInfo.color),
+                      Icon(statusInfo.icon, size: 14, color: statusInfo.color),
                       const SizedBox(width: 4),
                       Text(
                         statusInfo.label,
@@ -271,8 +285,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: priorityInfo.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -287,19 +303,25 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: AppTheme.primary.withValues(alpha: 0.3)),
+                      color: AppTheme.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.handyman_outlined,
-                          size: 13, color: AppTheme.primary),
+                      const Icon(
+                        Icons.handyman_outlined,
+                        size: 13,
+                        color: AppTheme.primary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         issue.categoryDisplayName,
@@ -314,21 +336,23 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 ),
                 if (issue.slaDeadline != null)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: issue.isSlaBreached
                           ? AppTheme.error.withValues(alpha: 0.1)
                           : (issue.isSlaWarning
-                              ? Colors.orange.withValues(alpha: 0.1)
-                              : Colors.blue.withValues(alpha: 0.08)),
+                                ? Colors.orange.withValues(alpha: 0.1)
+                                : Colors.blue.withValues(alpha: 0.08)),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: issue.isSlaBreached
                             ? AppTheme.error.withValues(alpha: 0.3)
                             : (issue.isSlaWarning
-                                ? Colors.orange.withValues(alpha: 0.3)
-                                : Colors.blue.withValues(alpha: 0.2)),
+                                  ? Colors.orange.withValues(alpha: 0.3)
+                                  : Colors.blue.withValues(alpha: 0.2)),
                       ),
                     ),
                     child: Row(
@@ -338,14 +362,14 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           issue.isSlaBreached
                               ? Icons.timer_off_outlined
                               : (issue.isSlaWarning
-                                  ? Icons.warning_amber_rounded
-                                  : Icons.access_time),
+                                    ? Icons.warning_amber_rounded
+                                    : Icons.access_time),
                           size: 13,
                           color: issue.isSlaBreached
                               ? AppTheme.error
                               : (issue.isSlaWarning
-                                  ? Colors.orange.shade800
-                                  : Colors.blue.shade800),
+                                    ? Colors.orange.shade800
+                                    : Colors.blue.shade800),
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -354,8 +378,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                             color: issue.isSlaBreached
                                 ? AppTheme.error
                                 : (issue.isSlaWarning
-                                    ? Colors.orange.shade800
-                                    : Colors.blue.shade800),
+                                      ? Colors.orange.shade800
+                                      : Colors.blue.shade800),
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -414,8 +438,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         Flexible(
           child: Text(
             text,
-            style:
-                const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -427,11 +450,14 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textSecondary)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textSecondary,
+          ),
+        ),
         const SizedBox(height: 8),
         SizedBox(
           height: 80,
@@ -442,12 +468,14 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => PhotoViewerScreen(
-                      imageUrls: imageUrls,
-                      initialIndex: index,
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => PhotoViewerScreen(
+                        imageUrls: imageUrls,
+                        initialIndex: index,
+                      ),
                     ),
-                  ));
+                  );
                 },
                 child: AppStorageImage(
                   imageUrl: imageUrls[index],
@@ -567,11 +595,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                         if (step.date != null) ...[
                           const SizedBox(height: 2),
                           Text(
-                            DateFormat('dd/MM/yyyy HH:mm')
-                                .format(step.date!),
+                            DateFormat('dd/MM/yyyy HH:mm').format(step.date!),
                             style: const TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.textSecondary),
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         ],
                       ],
@@ -587,7 +615,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
   }
 
   Widget _buildRatingSection(
-      AsyncValue<IssueRatingModel?> ratingAsync, dynamic currentUser, bool isDark) {
+    AsyncValue<IssueRatingModel?> ratingAsync,
+    dynamic currentUser,
+    bool isDark,
+  ) {
     if (widget.issue.status != 'resolved') return const SizedBox.shrink();
 
     final isReporter = currentUser?.id == widget.issue.reporterId;
@@ -608,9 +639,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: Colors.amber.withValues(alpha: 0.4),
-              ),
+              side: BorderSide(color: Colors.amber.withValues(alpha: 0.4)),
             ),
             color: Colors.amber.withValues(alpha: 0.05),
             child: Padding(
@@ -626,8 +655,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           color: Colors.amber.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.star_rate_rounded,
-                            color: Colors.amber, size: 22),
+                        child: const Icon(
+                          Icons.star_rate_rounded,
+                          color: Colors.amber,
+                          size: 22,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       const Expanded(
@@ -637,13 +669,16 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                             Text(
                               'Đánh giá chất lượng dịch vụ',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 15),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
                             ),
                             Text(
                               'Sự cố đã hoàn thành. Hãy chia sẻ cảm nhận của bạn!',
                               style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppTheme.textSecondary),
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
                           ],
                         ),
@@ -658,15 +693,17 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                         backgroundColor: AppTheme.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
                           shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
                           ),
                           builder: (_) => IssueRatingBottomSheet(
                             issueReportId: widget.issue.id,
@@ -685,8 +722,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         }
 
         // Đã có đánh giá
-        final label =
-            IssueRatingModel.getSatisfactionLabel(rating.overallRating);
+        final label = IssueRatingModel.getSatisfactionLabel(
+          rating.overallRating,
+        );
 
         return Card(
           elevation: 0,
@@ -706,28 +744,37 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.verified_outlined,
-                            color: AppTheme.success, size: 20),
+                        Icon(
+                          Icons.verified_outlined,
+                          color: AppTheme.success,
+                          size: 20,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'Đánh giá dịch vụ',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
                     if (isReporter)
                       IconButton(
-                        icon: const Icon(Icons.edit_outlined,
-                            size: 18, color: AppTheme.primary),
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: AppTheme.primary,
+                        ),
                         tooltip: 'Chỉnh sửa đánh giá',
                         onPressed: () {
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
                             shape: const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.vertical(top: Radius.circular(20)),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
                             ),
                             builder: (_) => IssueRatingBottomSheet(
                               issueReportId: widget.issue.id,
@@ -744,7 +791,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.amber.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
@@ -752,8 +801,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star_rate_rounded,
-                              size: 18, color: Colors.amber),
+                          const Icon(
+                            Icons.star_rate_rounded,
+                            size: 18,
+                            color: Colors.amber,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${rating.overallRating.toStringAsFixed(1)} / 5.0',
@@ -770,7 +822,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     Text(
                       label,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -799,8 +853,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                       style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontSize: 13,
-                        color:
-                            isDark ? Colors.white70 : Colors.grey.shade800,
+                        color: isDark ? Colors.white70 : Colors.grey.shade800,
                       ),
                     ),
                   ),
@@ -820,17 +873,20 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         color: isDark ? Colors.white10 : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-            color: isDark ? Colors.white12 : Colors.grey.shade300),
+          color: isDark ? Colors.white12 : Colors.grey.shade300,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('$title: ',
-              style: const TextStyle(
-                  fontSize: 11, color: AppTheme.textSecondary)),
-          Text('$stars',
-              style: const TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.bold)),
+          Text(
+            '$title: ',
+            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+          ),
+          Text(
+            '$stars',
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+          ),
           const Icon(Icons.star_rate_rounded, size: 13, color: Colors.amber),
         ],
       ),
@@ -838,7 +894,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
   }
 
   Widget _buildCommentBubble(
-      IssueCommentModel comment, bool isMe, bool isDark) {
+    IssueCommentModel comment,
+    bool isMe,
+    bool isDark,
+  ) {
     final bubbleColor = isMe
         ? AppTheme.primary.withValues(alpha: 0.1)
         : (isDark ? Colors.white10 : Colors.grey.shade100);
@@ -848,16 +907,13 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isMe) ...[
-            AppAvatar(
-              name: userName,
-              size: 32,
-              fontSize: 12,
-            ),
+            AppAvatar(name: userName, size: 32, fontSize: 12),
             const SizedBox(width: 8),
           ],
           Flexible(
@@ -884,7 +940,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                         const SizedBox(width: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 1),
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
@@ -908,8 +966,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width * 0.72,
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: bubbleColor,
                     borderRadius: BorderRadius.only(
@@ -941,11 +1001,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
           ),
           if (isMe) ...[
             const SizedBox(width: 8),
-            AppAvatar(
-              name: userName,
-              size: 32,
-              fontSize: 12,
-            ),
+            AppAvatar(name: userName, size: 32, fontSize: 12),
           ],
         ],
       ),
@@ -976,11 +1032,14 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
               decoration: InputDecoration(
                 hintText: 'Nhập tin nhắn...',
                 hintStyle: TextStyle(
-                    color: isDark ? Colors.white38 : AppTheme.textSecondary),
+                  color: isDark ? Colors.white38 : AppTheme.textSecondary,
+                ),
                 filled: true,
                 fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
                 contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
@@ -991,8 +1050,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide:
-                      const BorderSide(color: AppTheme.primary, width: 1.5),
+                  borderSide: const BorderSide(
+                    color: AppTheme.primary,
+                    width: 1.5,
+                  ),
                 ),
               ),
               maxLines: 3,
@@ -1036,7 +1097,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         return _StatusInfo('Đang xử lý', Icons.engineering, AppTheme.primary);
       default:
         return _StatusInfo(
-            'Chờ tiếp nhận', Icons.pending_actions, AppTheme.warning);
+          'Chờ tiếp nhận',
+          Icons.pending_actions,
+          AppTheme.warning,
+        );
     }
   }
 
@@ -1051,7 +1115,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     }
   }
 
-Widget _buildMaterialsSection(bool isDark) {
+  Widget _buildMaterialsSection(bool isDark) {
     final materialsAsync = ref.watch(issueMaterialsProvider(widget.issue.id));
     final currencyFormat = NumberFormat('#,###', 'vi_VN');
 
@@ -1070,7 +1134,9 @@ Widget _buildMaterialsSection(bool isDark) {
           margin: const EdgeInsets.only(top: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
+            side: BorderSide(
+              color: isDark ? Colors.white12 : Colors.grey.shade200,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -1079,15 +1145,25 @@ Widget _buildMaterialsSection(bool isDark) {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.inventory_2_outlined, size: 20, color: AppTheme.primary),
+                    const Icon(
+                      Icons.inventory_2_outlined,
+                      size: 20,
+                      color: AppTheme.primary,
+                    ),
                     const SizedBox(width: 8),
                     const Text(
                       'Vật tư kỹ thuật đã sử dụng',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -1109,9 +1185,13 @@ Widget _buildMaterialsSection(bool isDark) {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
+                      border: Border.all(
+                        color: isDark ? Colors.white12 : Colors.grey.shade200,
+                      ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1122,18 +1202,29 @@ Widget _buildMaterialsSection(bool isDark) {
                             children: [
                               Text(
                                 item.materialName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Số lượng: ${item.quantity} ${item.unit} x ${currencyFormat.format(item.unitPrice)} đ',
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary,
+                                ),
                               ),
-                              if (item.note != null && item.note!.isNotEmpty) ...[
+                              if (item.note != null &&
+                                  item.note!.isNotEmpty) ...[
                                 const SizedBox(height: 2),
                                 Text(
                                   'Ghi chú: ${item.note}',
-                                  style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
+                                    color: AppTheme.textSecondary,
+                                  ),
                                 ),
                               ],
                             ],
@@ -1145,11 +1236,18 @@ Widget _buildMaterialsSection(bool isDark) {
                           children: [
                             Text(
                               '${currencyFormat.format(item.totalAmount)} đ',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.primary),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: AppTheme.primary,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: item.isChargeable
                                     ? Colors.orange.withValues(alpha: 0.1)
@@ -1161,7 +1259,9 @@ Widget _buildMaterialsSection(bool isDark) {
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: item.isChargeable ? Colors.orange.shade800 : Colors.green.shade800,
+                                  color: item.isChargeable
+                                      ? Colors.orange.shade800
+                                      : Colors.green.shade800,
                                 ),
                               ),
                             ),
@@ -1178,11 +1278,18 @@ Widget _buildMaterialsSection(bool isDark) {
                     children: [
                       const Text(
                         'Tổng tính vào hóa đơn kỳ tới:',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                       Text(
                         '${currencyFormat.format(chargeableAmount)} đ',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.orange),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.orange,
+                        ),
                       ),
                     ],
                   ),
@@ -1223,5 +1330,4 @@ class _TimelineStep {
     required this.icon,
     required this.color,
   });
-
 }

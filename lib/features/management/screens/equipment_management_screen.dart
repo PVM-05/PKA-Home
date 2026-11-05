@@ -19,13 +19,19 @@ class EquipmentManagementScreen extends ConsumerStatefulWidget {
   const EquipmentManagementScreen({super.key});
 
   @override
-  ConsumerState<EquipmentManagementScreen> createState() => _EquipmentManagementScreenState();
+  ConsumerState<EquipmentManagementScreen> createState() =>
+      _EquipmentManagementScreenState();
 }
 
-class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementScreen>
+class _EquipmentManagementScreenState
+    extends ConsumerState<EquipmentManagementScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  final _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+  final _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+    decimalDigits: 0,
+  );
   final _dateFormat = DateFormat('dd/MM/yyyy');
 
   final _buildings = const ['Tất cả', 'Tòa A', 'Tòa B', 'Tòa C', 'Toàn khu'];
@@ -53,10 +59,7 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
   }
 
   void _openAddEquipmentDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => const EquipmentFormDialog(),
-    );
+    showDialog(context: context, builder: (_) => const EquipmentFormDialog());
   }
 
   void _openCreateTaskDialog(List<BuildingEquipmentModel> equipments) {
@@ -91,10 +94,12 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
               newStatus == 'in_progress'
                   ? 'Đã bắt đầu bảo trì!'
                   : (newStatus == 'completed'
-                      ? 'Nghiệm thu thành công! Chu kỳ bảo dưỡng tiếp theo đã được cập nhật.'
-                      : 'Đã hủy phiếu bảo trì.'),
+                        ? 'Nghiệm thu thành công! Chu kỳ bảo dưỡng tiếp theo đã được cập nhật.'
+                        : 'Đã hủy phiếu bảo trì.'),
             ),
-            backgroundColor: newStatus == 'completed' ? AppTheme.success : AppTheme.primary,
+            backgroundColor: newStatus == 'completed'
+                ? AppTheme.success
+                : AppTheme.primary,
           ),
         );
       }
@@ -114,110 +119,142 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
   Widget build(BuildContext context) {
     final equipmentsAsync = ref.watch(equipmentListProvider);
     final tasksAsync = ref.watch(equipmentTasksProvider(null));
-    final selectedBuilding = ref.watch(equipmentFilterBuildingProvider) ?? 'Tất cả';
-    final selectedCategory = ref.watch(equipmentFilterCategoryProvider) ?? 'Tất cả';
+    final selectedBuilding =
+        ref.watch(equipmentFilterBuildingProvider) ?? 'Tất cả';
+    final selectedCategory =
+        ref.watch(equipmentFilterCategoryProvider) ?? 'Tất cả';
 
     return RoleGuard(
       permission: AppPermissions.equipmentManagement,
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Bảo trì thiết bị tòa nhà'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.precision_manufacturing), text: 'Danh mục thiết bị'),
-            Tab(icon: Icon(Icons.assignment_outlined), text: 'Phiếu & Lịch bảo trì'),
+        appBar: AppBar(
+          title: const Text('Bảo trì thiết bị tòa nhà'),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.precision_manufacturing),
+                text: 'Danh mục thiết bị',
+              ),
+              Tab(
+                icon: Icon(Icons.assignment_outlined),
+                text: 'Phiếu & Lịch bảo trì',
+              ),
+            ],
+          ),
+        ),
+        body: Column(
+          children: [
+            // Bộ lọc Tòa nhà và Phân loại
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: selectedBuilding,
+                        items: _buildings
+                            .map(
+                              (b) => DropdownMenuItem(
+                                value: b,
+                                child: Text('Tòa: $b'),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          ref
+                              .read(equipmentFilterBuildingProvider.notifier)
+                              .state = val == 'Tất cả'
+                              ? null
+                              : val;
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: selectedCategory,
+                        items: _categories
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c['value'],
+                                child: Text(c['label']!),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          ref
+                              .read(equipmentFilterCategoryProvider.notifier)
+                              .state = val == 'Tất cả'
+                              ? null
+                              : val;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Nội dung 2 tab
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // Tab 1: Danh mục thiết bị
+                  equipmentsAsync.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(child: Text(formatErrorMessage(e))),
+                    data: (equipments) => _buildEquipmentsTab(equipments),
+                  ),
+                  // Tab 2: Lịch & Phiếu bảo trì
+                  tasksAsync.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(child: Text(formatErrorMessage(e))),
+                    data: (tasks) => equipmentsAsync.maybeWhen(
+                      data: (equipments) => _buildTasksTab(tasks, equipments),
+                      orElse: () => _buildTasksTab(tasks, []),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          // Bộ lọc Tòa nhà và Phân loại
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              border: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2))),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: selectedBuilding,
-                      items: _buildings
-                          .map((b) => DropdownMenuItem(value: b, child: Text('Tòa: $b')))
-                          .toList(),
-                      onChanged: (val) {
-                        ref.read(equipmentFilterBuildingProvider.notifier).state =
-                            val == 'Tất cả' ? null : val;
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: selectedCategory,
-                      items: _categories
-                          .map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!)))
-                          .toList(),
-                      onChanged: (val) {
-                        ref.read(equipmentFilterCategoryProvider.notifier).state =
-                            val == 'Tất cả' ? null : val;
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            if (_tabController.index == 0) {
+              _openAddEquipmentDialog();
+            } else {
+              equipmentsAsync.whenData((list) => _openCreateTaskDialog(list));
+            }
+          },
+          icon: const Icon(Icons.add),
+          label: Text(
+            _tabController.index == 0 ? 'Thêm thiết bị' : 'Lập phiếu bảo trì',
           ),
-          // Nội dung 2 tab
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Tab 1: Danh mục thiết bị
-                equipmentsAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text(formatErrorMessage(e))),
-                  data: (equipments) => _buildEquipmentsTab(equipments),
-                ),
-                // Tab 2: Lịch & Phiếu bảo trì
-                tasksAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text(formatErrorMessage(e))),
-                  data: (tasks) => equipmentsAsync.maybeWhen(
-                    data: (equipments) => _buildTasksTab(tasks, equipments),
-                    orElse: () => _buildTasksTab(tasks, []),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          if (_tabController.index == 0) {
-            _openAddEquipmentDialog();
-          } else {
-            equipmentsAsync.whenData((list) => _openCreateTaskDialog(list));
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: Text(_tabController.index == 0 ? 'Thêm thiết bị' : 'Lập phiếu bảo trì'),
-      ),
-    ),
     );
   }
 
   Widget _buildEquipmentsTab(List<BuildingEquipmentModel> equipments) {
     final total = equipments.length;
-    final operational = equipments.where((e) => e.status == 'operational').length;
+    final operational = equipments
+        .where((e) => e.status == 'operational')
+        .length;
     final underMaint = equipments.where((e) => e.isUnderMaintenance).length;
     final upcoming = equipments.where((e) => e.isUpcomingMaintenance).length;
 
@@ -262,13 +299,20 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
           children: [
             Text(
               value,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppTheme.textSecondary,
+              ),
             ),
           ],
         ),
@@ -311,7 +355,10 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
@@ -329,11 +376,17 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
                   Expanded(
                     child: Text(
                       eq.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: badgeColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -352,17 +405,27 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.location_on_outlined, size: 16, color: AppTheme.textSecondary),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 16,
+                    color: AppTheme.textSecondary,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       '${eq.location} (${eq.building})',
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ),
                   Text(
                     'Định kỳ: ${eq.maintenanceIntervalDays} ngày',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -375,28 +438,40 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
                       Icon(
                         eq.isOverdueMaintenance
                             ? Icons.warning_amber
-                            : (eq.isUpcomingMaintenance ? Icons.alarm : Icons.event_available),
+                            : (eq.isUpcomingMaintenance
+                                  ? Icons.alarm
+                                  : Icons.event_available),
                         size: 16,
                         color: eq.isOverdueMaintenance
                             ? AppTheme.error
-                            : (eq.isUpcomingMaintenance ? Colors.purple : AppTheme.textSecondary),
+                            : (eq.isUpcomingMaintenance
+                                  ? Colors.purple
+                                  : AppTheme.textSecondary),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Hạn bảo dưỡng: $nextMaintText',
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: (eq.isOverdueMaintenance || eq.isUpcomingMaintenance)
+                          fontWeight:
+                              (eq.isOverdueMaintenance ||
+                                  eq.isUpcomingMaintenance)
                               ? FontWeight.bold
                               : FontWeight.normal,
                           color: eq.isOverdueMaintenance
                               ? AppTheme.error
-                              : (eq.isUpcomingMaintenance ? Colors.purple : AppTheme.textPrimary),
+                              : (eq.isUpcomingMaintenance
+                                    ? Colors.purple
+                                    : AppTheme.textPrimary),
                         ),
                       ),
                     ],
                   ),
-                  const Icon(Icons.chevron_right, size: 18, color: AppTheme.textSecondary),
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: AppTheme.textSecondary,
+                  ),
                 ],
               ),
             ],
@@ -415,7 +490,11 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.assignment_turned_in_outlined, size: 64, color: AppTheme.textSecondary),
+            const Icon(
+              Icons.assignment_turned_in_outlined,
+              size: 64,
+              color: AppTheme.textSecondary,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Chưa có phiếu bảo trì nào được lập.',
@@ -476,11 +555,17 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
                 Expanded(
                   child: Text(
                     task.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
@@ -500,7 +585,11 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
             if (task.equipmentName != null)
               Row(
                 children: [
-                  const Icon(Icons.precision_manufacturing, size: 15, color: AppTheme.primary),
+                  const Icon(
+                    Icons.precision_manufacturing,
+                    size: 15,
+                    color: AppTheme.primary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${task.equipmentCode ?? ""} - ${task.equipmentName}',
@@ -515,16 +604,26 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.schedule, size: 15, color: AppTheme.textSecondary),
+                const Icon(
+                  Icons.schedule,
+                  size: 15,
+                  color: AppTheme.textSecondary,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${dateFormat.format(task.scheduledStart)} - ${dateFormat.format(task.scheduledEnd)}',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
                 const Spacer(),
                 Text(
                   _currencyFormat.format(task.cost),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -532,13 +631,20 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.engineering_outlined, size: 15, color: AppTheme.textSecondary),
+                  const Icon(
+                    Icons.engineering_outlined,
+                    size: 15,
+                    color: AppTheme.textSecondary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     task.vendorName != null
                         ? 'Nhà thầu: ${task.vendorName}'
                         : 'Kỹ thuật: ${task.technicianName}',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -553,12 +659,20 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.warning),
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      size: 14,
+                      color: AppTheme.warning,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        task.serviceInterruptionNote ?? 'Tạm ngưng phục vụ trong thời gian bảo trì',
-                        style: const TextStyle(fontSize: 12, color: AppTheme.warning),
+                        task.serviceInterruptionNote ??
+                            'Tạm ngưng phục vụ trong thời gian bảo trì',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.warning,
+                        ),
                       ),
                     ),
                   ],
@@ -584,7 +698,9 @@ class _EquipmentManagementScreenState extends ConsumerState<EquipmentManagementS
                   ),
                 ] else if (task.status == 'in_progress') ...[
                   ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.success,
+                    ),
                     onPressed: () => _updateTaskStatus(task, 'completed'),
                     icon: const Icon(Icons.check_circle_outline, size: 16),
                     label: const Text('Nghiệm thu hoàn tất'),
