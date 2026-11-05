@@ -264,9 +264,9 @@
     "semantic_hash": ""
   },
   "lib/core/supabase_config.dart": {
-    "mtime": 1792851051.1271932,
-    "seen": 1793342452.1356795,
-    "ast_hash": "0eb39dbea2412f34fcb76e97ec62822e",
+    "mtime": 1793859674.8867366,
+    "seen": 1793860214.03316,
+    "ast_hash": "7e3ffaa65463cab075663b1b1d26d689",
     "semantic_hash": ""
   },
   "lib/core/theme/accessibility_provider.dart": {
@@ -828,8 +828,8 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/amenity_booking_repository.dart": {
-    "mtime": 1793807034.2270105,
-    "seen": 1793807410.599448,
+    "mtime": 1793807564.3325148,
+    "seen": 1793860214.03316,
     "ast_hash": "608dbaf69d85ae51f9b6a0f86344387f",
     "semantic_hash": ""
   },
@@ -840,9 +840,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/auth_repository.dart": {
-    "mtime": 1791114709.3256044,
-    "seen": 1793342452.1356795,
-    "ast_hash": "d2faa7a2fe46142ef2b3c9575bd2cc4b",
+    "mtime": 1793859771.7388668,
+    "seen": 1793860214.03316,
+    "ast_hash": "2a80ff7fc9849e4a8fe0e13052dd9a20",
     "semantic_hash": ""
   },
   "lib/data/repositories/building_repository.dart": {
@@ -888,8 +888,8 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/maintenance_fund_repository.dart": {
-    "mtime": 1793806848.4729168,
-    "seen": 1793807410.599448,
+    "mtime": 1793807564.4095757,
+    "seen": 1793860214.03316,
     "ast_hash": "252093b153882cb449deb922106e751b",
     "semantic_hash": ""
   },
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "docs/COMMERCIAL_PRODUCT_ROADMAP.md": {
-    "mtime": 1793807370.841777,
-    "seen": 1793807410.6020572,
-    "ast_hash": "dc0951d5feb284c35dfaa55670f24709",
+    "mtime": 1793860189.7184258,
+    "seen": 1793860214.0346677,
+    "ast_hash": "a16e18fc83d2fe57e957d041ac40bd55",
     "semantic_hash": ""
   },
   "docs/DATABASE_SCHEMA.md": {
@@ -6036,57 +6036,129 @@
     "semantic_hash": ""
   },
   "lib/data/contracts/booking_rpc_contracts.dart": {
-    "mtime": 1793806652.8857224,
-    "seen": 1793807410.599448,
+    "mtime": 1793807564.0178714,
+    "seen": 1793860214.03316,
     "ast_hash": "58c10e465a732052cfb071a068e3de45",
     "semantic_hash": ""
   },
   "lib/data/contracts/community_rpc_contracts.dart": {
-    "mtime": 1793806657.1432502,
-    "seen": 1793807410.599448,
+    "mtime": 1793807564.0843263,
+    "seen": 1793860214.03316,
     "ast_hash": "c74be447526fb3193e8303d60177db50",
     "semantic_hash": ""
   },
   "lib/data/contracts/contracts.dart": {
-    "mtime": 1793806604.4148617,
-    "seen": 1793807410.599448,
-    "ast_hash": "1b982b3fbabaeb12f58e84a94978ff3d",
+    "mtime": 1793807469.7891903,
+    "seen": 1793860214.03316,
+    "ast_hash": "0c32b027b05dbc5fed9640a868f524cc",
     "semantic_hash": ""
   },
   "lib/data/contracts/finance_rpc_contracts.dart": {
-    "mtime": 1793807177.832501,
-    "seen": 1793807410.599448,
+    "mtime": 1793807564.183193,
+    "seen": 1793860214.03316,
     "ast_hash": "102ab15243f76022bd5e8112873a338e",
     "semantic_hash": ""
   },
   "lib/data/contracts/operations_rpc_contracts.dart": {
-    "mtime": 1793806662.3824666,
-    "seen": 1793807410.599448,
+    "mtime": 1793807564.2342935,
+    "seen": 1793860214.03316,
     "ast_hash": "f1a6e9b8a9dd6fb484ce831ab9c0ae61",
     "semantic_hash": ""
   },
   "lib/data/contracts/rpc_contract_client.dart": {
-    "mtime": 1793806393.855832,
-    "seen": 1793807410.599448,
-    "ast_hash": "32b6aa66918e41be9c2b76ac954722da",
+    "mtime": 1793807470.1679435,
+    "seen": 1793860214.03316,
+    "ast_hash": "162c02677b6ceea3d0fd6bdc4ae65b52",
     "semantic_hash": ""
   },
   "test/contracts/rpc_contracts_test.dart": {
-    "mtime": 1793807231.2248917,
-    "seen": 1793807410.601038,
+    "mtime": 1793807564.459027,
+    "seen": 1793860214.03316,
     "ast_hash": "124685d9d701ac2c50bd77287b5e679f",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-04-client-server-contract-dto.md": {
-    "mtime": 1793806378.6113436,
-    "seen": 1793807410.6020572,
-    "ast_hash": "56ca370749c791111672d25fa09ef2fd",
+    "mtime": 1793807469.5071068,
+    "seen": 1793860214.0346677,
+    "ast_hash": "0ab55f7c2d10fb458352c38d8255acc6",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-04-client-server-contract-dto-design.md": {
-    "mtime": 1793806343.964018,
-    "seen": 1793807410.6020572,
-    "ast_hash": "e1c2670a087ba06725803ec6e2a55a7e",
+    "mtime": 1793807469.5720475,
+    "seen": 1793860214.0346677,
+    "ast_hash": "63309fb44b02d6cc67a4340d17a9d322",
+    "semantic_hash": ""
+  },
+  "lib/core/security/auth_rate_limiter.dart": {
+    "mtime": 1793860063.5120156,
+    "seen": 1793860214.03316,
+    "ast_hash": "ebc44456200c60375361ef1f1694f66e",
+    "semantic_hash": ""
+  },
+  "lib/core/security/mfa_service.dart": {
+    "mtime": 1793860157.5273483,
+    "seen": 1793860214.03316,
+    "ast_hash": "7815f673fa6c6b5a504e4ee548373da3",
+    "semantic_hash": ""
+  },
+  "lib/core/security/secure_storage_service.dart": {
+    "mtime": 1793860157.5283482,
+    "seen": 1793860214.03316,
+    "ast_hash": "057bbdf48d4572b8ddca31d130df2ed6",
+    "semantic_hash": ""
+  },
+  "lib/features/auth/widgets/mfa_setup_dialog.dart": {
+    "mtime": 1793859897.4226017,
+    "seen": 1793860214.03316,
+    "ast_hash": "a5405102d731e8a38b509f020eb22ae7",
+    "semantic_hash": ""
+  },
+  "lib/features/auth/widgets/mfa_verification_dialog.dart": {
+    "mtime": 1793859897.4215927,
+    "seen": 1793860214.03316,
+    "ast_hash": "8f4a06c93fd3a6222ced042b5231051e",
+    "semantic_hash": ""
+  },
+  "test/core/security/auth_rate_limiter_test.dart": {
+    "mtime": 1793859674.9674828,
+    "seen": 1793860214.03316,
+    "ast_hash": "07f575d77988258bb65edd2af6a0a10a",
+    "semantic_hash": ""
+  },
+  "test/core/security/mfa_service_test.dart": {
+    "mtime": 1793859790.5710166,
+    "seen": 1793860214.03316,
+    "ast_hash": "d741010dba29c71682f82640936fb3a9",
+    "semantic_hash": ""
+  },
+  "test/core/security/secure_storage_service_test.dart": {
+    "mtime": 1793859675.0234458,
+    "seen": 1793860214.03316,
+    "ast_hash": "11901ca7a2b2564464ca6b68bf84d6bd",
+    "semantic_hash": ""
+  },
+  "test/features/auth/mfa_dialog_test.dart": {
+    "mtime": 1793859870.649729,
+    "seen": 1793860214.034165,
+    "ast_hash": "def155b39de1741c8089ea15b11a7da3",
+    "semantic_hash": ""
+  },
+  "docs/security/SUPABASE_KEY_ROTATION.md": {
+    "mtime": 1793859674.5679336,
+    "seen": 1793860214.0346677,
+    "ast_hash": "d858407a04d42511a02a3fe082f23d77",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-04-platform-security-hardening.md": {
+    "mtime": 1793859674.6539805,
+    "seen": 1793860214.0346677,
+    "ast_hash": "9a9e52e70008e7f3dcce4d8acde37d95",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-04-platform-security-hardening-design.md": {
+    "mtime": 1793859674.746075,
+    "seen": 1793860214.0346677,
+    "ast_hash": "3f0cdfa5e4a744273501bbcb351f30e9",
     "semantic_hash": ""
   }
 }

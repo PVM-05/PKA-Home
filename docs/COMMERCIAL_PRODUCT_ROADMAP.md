@@ -102,7 +102,24 @@ graph TD
     - 18/18 Contract tests tự động kiểm thử 100% schema và serialization hai chiều (`test/contracts/rpc_contracts_test.dart`).
     - Phân tích tĩnh `dart analyze lib test` đạt 0 issues trên toàn bộ dự án.
 - [x] **A3. Bảng cấu hình tiền tệ:** `building_fee_configs` theo thời gian, chống hardcode giá.
-- [ ] **A4. Bảo mật nền:** Xoay key, thống nhất bucket private + signed URL ngắn hạn, rate limit đăng nhập/OTP, MFA cho BQL/Kế toán.
+- [x] **A4. Bảo mật nền tảng (Platform Security, Key Rotation, Signed URLs, Rate-Limiting & MFA):**
+  - Quy trình xoay khóa 0-downtime (`docs/security/SUPABASE_KEY_ROTATION.md`):
+    - Tài liệu chi tiết 5 bước chuẩn quốc tế xoay JWT Secret và Publishable Key.
+    - Cải tiến [`SupabaseConfig`](lib/core/supabase_config.dart) tự động kiểm tra định dạng JWT / Publishable format và cảnh báo an ninh.
+  - Private Storage Buckets & Temporary Signed URLs (`SecureStorageService`):
+    - Khởi tạo [`SecureStorageService`](lib/core/security/secure_storage_service.dart) với cơ chế bảo vệ 100% hình ảnh sự cố và chứng từ biên lai.
+    - Tạo Signed URLs có thời hạn ngắn (15–60 phút) kèm cơ chế đệm in-memory cache thông minh tự gia hạn, giảm thiểu tối đa số lần gọi API Supabase.
+  - Bộ kiểm soát tốc độ xác thực (`AuthRateLimiter`):
+    - Khởi tạo [`AuthRateLimiter`](lib/core/security/auth_rate_limiter.dart) chống tấn công dò mật khẩu (Brute-Force) và Credential Stuffing (khóa tạm 15 phút sau 5 lần nhập sai).
+    - Kiểm soát giãn cách gửi OTP (cooldown 60s) và giới hạn 3 lần nhập sai mã xác thực.
+    - Tích hợp trực tiếp vào [`AuthRepository`](lib/data/repositories/auth_repository.dart).
+  - Xác thực 2 yếu tố (MFA / TOTP) cho Ban Quản Lý & Kế Toán:
+    - Xây dựng [`MfaService`](lib/core/security/mfa_service.dart) tương thích Supabase MFA API.
+    - Hộp thoại nhập mã TOTP 6 số [`MfaVerificationDialog`](lib/features/auth/widgets/mfa_verification_dialog.dart) khi đăng nhập tài khoản quản trị.
+    - Hộp thoại kích hoạt [`MfaSetupDialog`](lib/features/auth/widgets/mfa_setup_dialog.dart) sao chép khóa bí mật vào Google/Microsoft Authenticator.
+  - Chất lượng & Kiểm thử:
+    - 24/24 unit và widget tests tự động pass 100% (`secure_storage_service_test.dart`, `auth_rate_limiter_test.dart`, `mfa_service_test.dart`, `mfa_dialog_test.dart`, `auth_repository_test.dart`).
+    - Phân tích tĩnh `dart analyze lib test` đạt 0 issues trên toàn bộ dự án.
 - [x] **A5. Chất lượng:** 489 tests tự động, RLS security test, Static Analysis 0 issues.
 
 ---
