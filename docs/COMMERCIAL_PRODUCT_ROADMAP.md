@@ -350,3 +350,15 @@ graph TD
   - Chất lượng & Kiểm thử:
     - 11/11 unit và widget tests tự động pass 100% (`offline_sync_queue_storage_test.dart`, `offline_sync_manager_test.dart`, `sync_status_bar_test.dart`).
     - Phân tích tĩnh `dart analyze lib test` đạt 0 issues trên toàn bộ dự án.
+
+
+---
+
+### BẢNG TIẾN ĐỘ CHUẨN HÓA SẢN PHẨM PRODUCTION (PRODUCTION HARDENING 2026)
+
+| Đợt Triển Khai | Trọng Tâm Nghiệp Vụ & Kỹ Thuật | Trạng Thái | Số Lượng Test | Chất Lượng Code |
+| :--- | :--- | :--- | :--- | :--- |
+| **Đợt 1 (P0: Cốt lõi an toàn & Tính đúng đắn)** | • Luồng thanh toán theo căn hộ thực tế, loại bỏ fallback BIDV.<br>• Mặc định Fail-Closed, ném AppException khi lỗi, cấm mock ngầm.<br>• Gỡ .env khỏi asset bundle, xóa mật khẩu hardcode, xóa STK MB.<br>• Sửa logic quá hạn hóa đơn theo trọn vẹn ngày, hiển thị breakdown thật.<br>• Gỡ bỏ OCR giả lập, bắt buộc ảnh công tơ thật, chuẩn hóa triage từ khóa.<br>• Nối MFA TOTP trực tiếp vào sau đăng nhập màn hình Login. | **HOÀN THÀNH 100%** | 31/31 tests pass | 0 errors, 0 warnings |
+| **Đợt 2 (P0/P1: Backend & RPC Security)** | • Định danh server-authoritative (`auth.uid()`), bỏ param giả mạo.<br>• Bưu kiện: Hash PIN, xác thực qua RPC, bảo vệ quét lặp QR khách.<br>• Biểu quyết & kiến nghị: Phân quyền chủ sở hữu theo Luật Nhà ở 2023. | Đang chuẩn bị | Sắp triển khai | Sắp triển khai |
+| **Đợt 3 (P1/P2: Trải nghiệm & Đồng bộ thông báo)** | • Khắc phục spam toast khi chuyển đổi căn hộ.<br>• Loại bỏ ID fallback 'apt-01' và 'usr-resident' trong màn hình cư dân.<br>• Gom kênh thông báo Realtime/FCM, xử lý deep-link push notification. | Đang chuẩn bị | Sắp triển khai | Sắp triển khai |
+| **Đợt 4 (Nghiệm thu toàn diện & Triển khai thực tế)** | • Test hồi quy End-to-End toàn bộ luồng nghiệp vụ trên production.<br>• Pilot thực nghiệm tại 1 tòa chung cư thật có đối soát ngân hàng. | Đang chuẩn bị | Sắp triển khai | Sắp triển khai |
