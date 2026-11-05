@@ -110,8 +110,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                         );
                       }).toList(),
                       onChanged: (val) {
-                        if (val != null)
+                        if (val != null) {
                           setModalState(() => selectedUserId = val);
+                        }
                       },
                     ),
                     const SizedBox(height: 16),
@@ -162,8 +163,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                         ),
                       ],
                       onChanged: (val) {
-                        if (val != null)
+                        if (val != null) {
                           setModalState(() => selectedRole = val);
+                        }
                       },
                     ),
                     const SizedBox(height: 16),

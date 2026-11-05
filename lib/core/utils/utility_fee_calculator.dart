@@ -64,7 +64,8 @@ class UtilityFeeCalculator {
     final List<TierBreakdownItem> breakdown = [];
 
     for (final tierItem in tiersToUse) {
-      final tierNum = (tierItem['tier'] as num?)?.toInt() ?? (breakdown.length + 1);
+      final tierNum =
+          (tierItem['tier'] as num?)?.toInt() ?? (breakdown.length + 1);
       final tierName = tierItem['name'] as String? ?? 'Bậc $tierNum';
       final from = (tierItem['from'] as num?)?.toDouble() ?? 0.0;
       final to = (tierItem['to'] as num?)?.toDouble();
@@ -149,8 +150,12 @@ class UtilityFeeCalculator {
 
     final totalAmount = tier1Amt + tier2Amt + tier3Amt;
 
-    final quotaStr = quota == quota.truncateToDouble() ? quota.toInt().toString() : quota.toStringAsFixed(1);
-    final limit2Str = limit2 == limit2.truncateToDouble() ? limit2.toInt().toString() : limit2.toStringAsFixed(1);
+    final quotaStr = quota == quota.truncateToDouble()
+        ? quota.toInt().toString()
+        : quota.toStringAsFixed(1);
+    final limit2Str = limit2 == limit2.truncateToDouble()
+        ? limit2.toInt().toString()
+        : limit2.toStringAsFixed(1);
 
     final breakdown = [
       TierBreakdownItem(
@@ -184,7 +189,9 @@ class UtilityFeeCalculator {
 
     return TieredCalculationResultModel(
       policyId: policyId,
-      policyName: policyName ?? 'Nước sinh hoạt định mức ${quotaPerResident.toInt()}m3/người',
+      policyName:
+          policyName ??
+          'Nước sinh hoạt định mức ${quotaPerResident.toInt()}m3/người',
       consumption: effectiveM3,
       totalAmount: totalAmount,
       breakdown: breakdown,
@@ -206,7 +213,9 @@ class UtilityFeeCalculator {
     final month = int.tryParse(parts[1]) ?? DateTime.now().month;
 
     final periodStart = DateTime(year, month, 1);
-    final nextMonth = month == 12 ? DateTime(year + 1, 1, 1) : DateTime(year, month + 1, 1);
+    final nextMonth = month == 12
+        ? DateTime(year + 1, 1, 1)
+        : DateTime(year, month + 1, 1);
     final periodEnd = nextMonth.subtract(const Duration(days: 1));
     final daysInMonth = periodEnd.day;
 
@@ -257,7 +266,11 @@ class UtilityFeeCalculator {
     final checkDate = asOfDate ?? DateTime.now();
 
     final cleanDueDate = DateTime(dueDate.year, dueDate.month, dueDate.day);
-    final cleanCheckDate = DateTime(checkDate.year, checkDate.month, checkDate.day);
+    final cleanCheckDate = DateTime(
+      checkDate.year,
+      checkDate.month,
+      checkDate.day,
+    );
 
     if (isPaid) {
       return LatePenaltyResultModel(

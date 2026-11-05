@@ -1,18 +1,6 @@
-
-
-
-enum MeterType {
-
-  electric,
-
-  water,
-
-}
-
-
+enum MeterType { electric, water }
 
 class MeterOcrResult {
-
   final double detectedReading;
 
   final MeterType meterType;
@@ -23,10 +11,7 @@ class MeterOcrResult {
 
   final String rawText;
 
-
-
   const MeterOcrResult({
-
     required this.detectedReading,
 
     required this.meterType,
@@ -36,23 +21,15 @@ class MeterOcrResult {
     required this.unit,
 
     required this.rawText,
-
   });
-
 }
 
-
-
 class MeterOcrSimulator {
-
   MeterOcrSimulator._();
-
-
 
   /// Giả lập quá trình phân tích thị giác máy tính / OCR để trích xuất số liệu từ ảnh công tơ
 
   static Future<MeterOcrResult> simulateScan({
-
     required MeterType meterType,
 
     double currentReading = 0.0,
@@ -60,16 +37,10 @@ class MeterOcrSimulator {
     int simulatedDelayMs = 1200,
 
     String? imagePath,
-
   }) async {
-
     if (simulatedDelayMs > 0) {
-
       await Future.delayed(Duration(milliseconds: simulatedDelayMs));
-
     }
-
-
 
     final unit = meterType == MeterType.electric ? 'kWh' : 'm³';
 
@@ -77,14 +48,12 @@ class MeterOcrSimulator {
 
     final detectedReading = currentReading;
 
-    final rawText = "ĐỒNG HỒ ${meterType == MeterType.electric ? 'ĐIỆN' : 'NƯỚC'}: ${detectedReading.toStringAsFixed(1)} $unit";
+    final rawText =
+        "ĐỒNG HỒ ${meterType == MeterType.electric ? 'ĐIỆN' : 'NƯỚC'}: ${detectedReading.toStringAsFixed(1)} $unit";
 
     final confidence = 1.0;
 
-
-
     return MeterOcrResult(
-
       detectedReading: detectedReading,
 
       meterType: meterType,
@@ -94,10 +63,6 @@ class MeterOcrSimulator {
       unit: unit,
 
       rawText: rawText,
-
     );
-
   }
-
 }
-

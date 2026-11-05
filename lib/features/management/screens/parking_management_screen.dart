@@ -85,8 +85,9 @@ class _ParkingManagementScreenState
                         ),
                         selected: selectedType == 'motorcycle',
                         onSelected: (val) {
-                          if (val)
+                          if (val) {
                             setDialogState(() => selectedType = 'motorcycle');
+                          }
                         },
                       ),
                     ),

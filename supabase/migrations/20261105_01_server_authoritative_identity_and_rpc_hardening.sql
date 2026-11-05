@@ -469,3 +469,4 @@ BEGIN
     RETURN jsonb_build_object('success', true, 'message', 'Cập nhật phản hồi kiến nghị thành công.');
 END;
 $$;
+

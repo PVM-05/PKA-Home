@@ -63,7 +63,8 @@ class VietQrGenerator {
     required String memo,
     String? accountName,
   }) {
-    final baseUrl = 'https://img.vietqr.io/image/$bankBin-$bankAccount-compact2.png';
+    final baseUrl =
+        'https://img.vietqr.io/image/$bankBin-$bankAccount-compact2.png';
     final query = StringBuffer();
     query.write('amount=${amount.round()}');
     query.write('&addInfo=${Uri.encodeComponent(memo)}');

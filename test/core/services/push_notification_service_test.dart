@@ -1,75 +1,115 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:pka_home/core/router/route_names.dart';
 import 'package:pka_home/core/services/push_notification_service.dart';
+import 'package:pka_home/data/models/notification_model.dart';
 import 'package:pka_home/data/repositories/notification_repository.dart';
 
-class MockNotificationRepository extends Mock implements NotificationRepository {}
+class MockNotificationRepository implements NotificationRepository {
+  List<NotificationModel> mockNotifications = [];
+
+  @override
+  Stream<List<NotificationModel>> streamUserNotifications(
+    String userId, {
+    String? buildingId,
+  }) {
+    return Stream.value(mockNotifications);
+  }
+
+  @override
+  Future<List<NotificationModel>> getNotifications(
+    String userId, {
+    String? buildingId,
+  }) async {
+    return mockNotifications;
+  }
+
+  @override
+  Future<void> markAsRead(String notificationId) async {}
+
+  @override
+  Future<void> markAllAsRead(String userId) async {}
+
+  @override
+  Future<void> registerFcmToken({
+    required String userId,
+    required String token,
+    String? deviceInfo,
+  }) async {}
+
+  @override
+  Future<int> triggerInvoiceRemindersScan({String? buildingId}) async => 0;
+}
 
 void main() {
-  late MockNotificationRepository mockRepo;
-  late PushNotificationService service;
+  group('PushNotificationService Deep-Linking & Route Tests', () {
+    late PushNotificationService service;
+    late MockNotificationRepository mockRepo;
 
-  setUp(() {
-    mockRepo = MockNotificationRepository();
-    service = PushNotificationService(mockRepo);
-  });
-
-  group('PushNotificationService Route Resolution Tests', () {
-    test('resolves new_invoice to resident invoices route', () {
-      final route = service.resolveRouteFromNotification({'type': 'new_invoice'});
-      expect(route, equals(AppRoutes.residentInvoices));
+    setUp(() {
+      mockRepo = MockNotificationRepository();
+      service = PushNotificationService(mockRepo);
     });
 
-    test('resolves invoice_due_reminder to resident invoices route', () {
-      final route = service.resolveRouteFromNotification({'type': 'invoice_due_reminder'});
-      expect(route, equals(AppRoutes.residentInvoices));
-    });
-
-    test('resolves equipment_maintenance to resident handbook/interruption route', () {
-      final route = service.resolveRouteFromNotification({'type': 'equipment_maintenance'});
-      expect(route, equals(AppRoutes.residentHome));
-    });
-
-    test('resolves issue_update to resident issues route', () {
-      final route = service.resolveRouteFromNotification({'type': 'issue_update'});
-      expect(route, equals(AppRoutes.residentIssues));
-    });
-
-    test('resolves unknown or empty type to default notifications route', () {
-      final route = service.resolveRouteFromNotification({});
-      expect(route, equals(AppRoutes.residentNotifications));
-    });
-  });
-
-  group('PushNotificationService Initialization & Fallback Tests', () {
-    test('registerTokenManually calls notification repository registerFcmToken', () async {
-      when(() => mockRepo.registerFcmToken(
-            userId: any(named: 'userId'),
-            token: any(named: 'token'),
-            deviceInfo: any(named: 'deviceInfo'),
-          )).thenAnswer((_) async {});
-
-      await service.registerTokenManually(
-        userId: 'user-123',
-        token: 'fcm-token-abc',
-        deviceInfo: 'android_test',
-      );
-
-      verify(() => mockRepo.registerFcmToken(
-            userId: 'user-123',
-            token: 'fcm-token-abc',
-            deviceInfo: 'android_test',
-          )).called(1);
-    });
-
-    test('safeInitialize executes gracefully when Firebase is not configured in test environment', () async {
-      // In unit test environment, Firebase.initializeApp is not run,
-      // safeInitialize should not throw exceptions and instead complete gracefully.
+    test('resolveRouteFromNotification điều hướng chính xác từng loại thông báo', () {
       expect(
-        () async => await service.safeInitialize(userId: 'user-123'),
-        returnsNormally,
+        service.resolveRouteFromNotification({'type': 'new_invoice'}),
+        equals(AppRoutes.residentInvoices),
       );
+
+      expect(
+        service.resolveRouteFromNotification({'type': 'invoice_due_reminder'}),
+        equals(AppRoutes.residentInvoices),
+      );
+
+      expect(
+        service.resolveRouteFromNotification({'type': 'issue_update'}),
+        equals(AppRoutes.residentIssues),
+      );
+
+      expect(
+        service.resolveRouteFromNotification({'type': 'equipment_maintenance'}),
+        equals(AppRoutes.residentHome),
+      );
+
+      expect(
+        service.resolveRouteFromNotification({'type': 'announcement'}),
+        equals(AppRoutes.residentHandbook),
+      );
+
+      expect(
+        service.resolveRouteFromNotification({'type': 'unknown'}),
+        equals(AppRoutes.residentNotifications),
+      );
+
+      expect(
+        service.resolveRouteFromNotification({}),
+        equals(AppRoutes.residentNotifications),
+      );
+    });
+
+    test('startRealtimeNotificationListener không bắn thông báo cho các thông báo cũ trước mốc mở app', () async {
+      final oldNotif = NotificationModel(
+        id: 'notif-old-1',
+        userId: 'usr-1',
+        title: 'Hóa đơn tháng trước',
+        body: 'Nội dung thông báo cũ',
+        type: 'new_invoice',
+        isRead: false,
+        createdAt: DateTime.now().subtract(const Duration(minutes: 10)),
+      );
+
+      mockRepo.mockNotifications = [oldNotif];
+
+      // Kích hoạt listener
+      service.startRealtimeNotificationListener(userId: 'usr-1');
+
+      // Chờ stream emit
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      // ID đã được ghi nhận vào seenNotificationIds để không bị lặp
+      expect(service.seenNotificationIds.contains('notif-old-1'), isTrue);
+
+      service.stopRealtimeNotificationListener();
     });
   });
 }

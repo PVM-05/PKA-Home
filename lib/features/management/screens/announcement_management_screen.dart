@@ -521,8 +521,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   onPressed: isSubmitting
                       ? null
                       : () async {
-                          if (!(formKey.currentState?.validate() ?? false))
+                          if (!(formKey.currentState?.validate() ?? false)) {
                             return;
+                          }
 
                           setState(() => isSubmitting = true);
                           try {
@@ -854,8 +855,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   onPressed: isSubmitting
                       ? null
                       : () async {
-                          if (!(formKey.currentState?.validate() ?? false))
+                          if (!(formKey.currentState?.validate() ?? false)) {
                             return;
+                          }
 
                           setState(() => isSubmitting = true);
                           try {

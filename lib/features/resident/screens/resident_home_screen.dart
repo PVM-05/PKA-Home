@@ -23,10 +23,9 @@ import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/link_request_provider.dart';
+import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
 import '../../../data/providers/notification_provider.dart';
-import '../../../data/models/notification_model.dart';
-import '../../../core/services/push_notification_service.dart';
 import '../widgets/equipment_interruption_banner.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -39,6 +38,8 @@ class ResidentHomeScreen extends ConsumerStatefulWidget {
 
 class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
   int _selectedIndex = 0;
+  String? _lastNotifiedApartmentId;
+  Set<String> _knownInvoiceIds = {};
 
   void _onItemTapped(int index) {
     setState(() {
@@ -110,70 +111,76 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Lắng nghe cập nhật hóa đơn thời gian thực
+    final currentAptId = ref.watch(selectedApartmentIdProvider);
+    _lastNotifiedApartmentId ??= currentAptId;
+
+    final initialInvoices = ref.watch(residentInvoiceProvider).valueOrNull;
+    if (_knownInvoiceIds.isEmpty && initialInvoices != null) {
+      _knownInvoiceIds = initialInvoices.map((i) => i.id).toSet();
+    }
+
+    // 1. Lắng nghe cập nhật hóa đơn thời gian thực (Toast nội bộ, không spam khi đổi căn hộ)
     ref.listen<AsyncValue<List<InvoiceModel>>>(residentInvoiceProvider, (
       previous,
       next,
     ) {
-      if (previous?.hasValue == true && next.hasValue) {
-        final prevList = previous!.value!;
+      if (next.hasValue) {
+        final liveAptId = ref.read(selectedApartmentIdProvider);
         final nextList = next.value!;
-        final currencyFormat = NumberFormat.currency(
-          locale: 'vi_VN',
-          symbol: 'đ',
-          decimalDigits: 0,
-        );
+        final nextIds = nextList.map((i) => i.id).toSet();
 
-        for (final nextInv in nextList) {
-          final prevInv = prevList.cast<InvoiceModel?>().firstWhere(
-            (p) => p?.id == nextInv.id,
-            orElse: () => null,
+        // Nếu vừa chuyển đổi căn hộ hoặc nạp dữ liệu lần đầu:
+        if (liveAptId != _lastNotifiedApartmentId) {
+          _lastNotifiedApartmentId = liveAptId;
+          _knownInvoiceIds = nextIds;
+          return; // Bỏ qua so sánh hóa đơn mới để không gây spam toast khi đổi căn hộ
+        }
+
+        if (previous?.hasValue == true) {
+          final prevList = previous!.value!;
+          final currencyFormat = NumberFormat.currency(
+            locale: 'vi_VN',
+            symbol: 'đ',
+            decimalDigits: 0,
           );
 
-          // Trường hợp 1: Có hóa đơn mới vừa được tạo cho căn hộ
-          if (prevInv == null) {
-            debugPrint(
-              '🔔 [ResidentHome] Phát hiện hóa đơn mới kỳ: ${nextInv.period}',
-            );
-            _showNotificationToast(
-              icon: Icons.receipt_long,
-              message:
-                  'Hóa đơn mới kỳ ${nextInv.period}: ${currencyFormat.format(nextInv.totalAmount)}',
-              backgroundColor: AppTheme.primary,
-            );
-            ref
-                .read(pushNotificationServiceProvider)
-                .showSystemNotification(
-                  id: nextInv.id.hashCode,
-                  title: 'Hóa đơn mới phát hành',
-                  body:
-                      'Hóa đơn kỳ ${nextInv.period} (${currencyFormat.format(nextInv.totalAmount)}) đã được phát hành.',
-                  payload: {'type': 'new_invoice', 'id': nextInv.id},
+          for (final nextInv in nextList) {
+            final isBrandNew = !_knownInvoiceIds.contains(nextInv.id);
+
+            // Trường hợp 1: Có hóa đơn mới vừa được tạo cho chính căn hộ này
+            if (isBrandNew) {
+              debugPrint(
+                '🔔 [ResidentHome] Phát hiện hóa đơn mới kỳ: ${nextInv.period}',
+              );
+              _showNotificationToast(
+                icon: Icons.receipt_long,
+                message:
+                    'Hóa đơn mới kỳ ${nextInv.period}: ${currencyFormat.format(nextInv.totalAmount)}',
+                backgroundColor: AppTheme.primary,
+              );
+            } else {
+              // Trường hợp 2: Hóa đơn được Ban Quản Lý xác nhận thanh toán thành công
+              final prevInv = prevList.cast<InvoiceModel?>().firstWhere(
+                (p) => p?.id == nextInv.id,
+                orElse: () => null,
+              );
+              if (prevInv != null &&
+                  prevInv.status != nextInv.status &&
+                  nextInv.status == 'paid') {
+                debugPrint(
+                  '🔔 [ResidentHome] Hóa đơn kỳ ${nextInv.period} đã được thanh toán',
                 );
-          }
-          // Trường hợp 2: Hóa đơn được Ban Quản Lý xác nhận thanh toán thành công
-          else if (prevInv.status != nextInv.status &&
-              nextInv.status == 'paid') {
-            debugPrint(
-              '🔔 [ResidentHome] Hóa đơn kỳ ${nextInv.period} đã được thanh toán',
-            );
-            _showNotificationToast(
-              icon: Icons.check_circle,
-              message:
-                  'Hóa đơn kỳ ${nextInv.period} đã được Ban Quản Lý xác nhận thanh toán thành công!',
-              backgroundColor: AppTheme.success,
-            );
-            ref
-                .read(pushNotificationServiceProvider)
-                .showSystemNotification(
-                  id: nextInv.id.hashCode,
-                  title: 'Hóa đơn đã thanh toán thành công',
-                  body:
-                      'Hóa đơn kỳ ${nextInv.period} đã được Ban Quản Lý xác nhận thanh toán!',
-                  payload: {'type': 'new_invoice', 'id': nextInv.id},
+                _showNotificationToast(
+                  icon: Icons.check_circle,
+                  message:
+                      'Hóa đơn kỳ ${nextInv.period} đã được Ban Quản Lý xác nhận thanh toán thành công!',
+                  backgroundColor: AppTheme.success,
                 );
+              }
+            }
           }
         }
+        _knownInvoiceIds = nextIds;
       }
     });
 
@@ -201,15 +208,6 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                     'Phản ánh "${nextIssue.description}" đang được Ban Quản Lý xử lý.',
                 backgroundColor: AppTheme.primary,
               );
-              ref
-                  .read(pushNotificationServiceProvider)
-                  .showSystemNotification(
-                    id: nextIssue.id.hashCode,
-                    title: 'Sự cố đang được xử lý',
-                    body:
-                        'Phản ánh "${nextIssue.description}" đang được Ban Quản Lý xử lý.',
-                    payload: {'type': 'issue_update', 'id': nextIssue.id},
-                  );
             } else if (nextIssue.status == 'resolved') {
               debugPrint(
                 '🔔 [ResidentHome] Cập nhật sự cố đã giải quyết: ${nextIssue.description}',
@@ -220,15 +218,6 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                     'Phản ánh "${nextIssue.description}" đã được giải quyết hoàn tất!',
                 backgroundColor: AppTheme.success,
               );
-              ref
-                  .read(pushNotificationServiceProvider)
-                  .showSystemNotification(
-                    id: nextIssue.id.hashCode,
-                    title: 'Sự cố đã giải quyết hoàn tất',
-                    body:
-                        'Phản ánh "${nextIssue.description}" đã được giải quyết xong. Quý Cư dân vui lòng đánh giá chất lượng dịch vụ.',
-                    payload: {'type': 'issue_update', 'id': nextIssue.id},
-                  );
             }
           }
         }
@@ -260,17 +249,6 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 : AppTheme.primary,
             duration: const Duration(seconds: 5),
           );
-          // Phát âm thanh chuông Android và thả banner thông báo từ mép trên màn hình
-          ref
-              .read(pushNotificationServiceProvider)
-              .showSystemNotification(
-                id: newest.id.hashCode,
-                title: newest.isUrgent
-                    ? 'THÔNG BÁO KHẨN: ${newest.title}'
-                    : 'Thông báo: ${newest.title}',
-                body: newest.content,
-                payload: {'type': 'announcement', 'id': newest.id},
-              );
         }
       }
     });
@@ -285,39 +263,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               'Yêu cầu liên kết căn hộ đã được Ban Quản Lý phê duyệt thành công!',
           backgroundColor: AppTheme.success,
         );
-        ref
-            .read(pushNotificationServiceProvider)
-            .showSystemNotification(
-              id: 'link_approved'.hashCode,
-              title: 'Liên kết căn hộ thành công',
-              body: 'Yêu cầu liên kết căn hộ đã được Ban Quản Lý phê duyệt!',
-              payload: {'type': 'link_request'},
-            );
       }
     });
-
-    // 5. Lắng nghe thông báo mới từ hệ thống để kích hoạt chuông & banner Android
-    ref.listen<AsyncValue<List<NotificationModel>>>(
-      notificationsStreamProvider,
-      (previous, next) {
-        if (previous?.hasValue == true && next.hasValue) {
-          final prevIds = previous!.value!.map((n) => n.id).toSet();
-          final newNotifications = next.value!.where(
-            (n) => !prevIds.contains(n.id) && !n.isRead,
-          );
-          for (final notif in newNotifications) {
-            ref
-                .read(pushNotificationServiceProvider)
-                .showSystemNotification(
-                  id: notif.id.hashCode,
-                  title: notif.title,
-                  body: notif.body,
-                  payload: notif.toJson(),
-                );
-          }
-        }
-      },
-    );
 
     return Scaffold(
       body: Column(

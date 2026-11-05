@@ -591,10 +591,12 @@ class _ManagementMeterReadingScreenState
         data: (items) {
           if (items.isEmpty) {
             String emptyMessage = 'Không có chỉ số nào đang chờ duyệt.';
-            if (status == 'approved')
+            if (status == 'approved') {
               emptyMessage = 'Chưa có chỉ số nào được duyệt.';
-            if (status == 'rejected')
+            }
+            if (status == 'rejected') {
               emptyMessage = 'Không có chỉ số nào bị từ chối.';
+            }
 
             return Center(
               child: Column(

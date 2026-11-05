@@ -308,11 +308,13 @@ class _ResidentMeterReadingScreenState
     if (elecAnalysis.isAnomaly || waterAnalysis.isAnomaly) {
       final reasons = <String>[];
 
-      if (elecAnalysis.isAnomaly && elecAnalysis.reason != null)
+      if (elecAnalysis.isAnomaly && elecAnalysis.reason != null) {
         reasons.add(elecAnalysis.reason!);
+      }
 
-      if (waterAnalysis.isAnomaly && waterAnalysis.reason != null)
+      if (waterAnalysis.isAnomaly && waterAnalysis.reason != null) {
         reasons.add(waterAnalysis.reason!);
+      }
 
       final proceed = await showDialog<bool>(
         context: context,
@@ -1373,8 +1375,9 @@ class _ResidentMeterReadingScreenState
 
                             Color statusColor = AppTheme.warning;
 
-                            if (item.isApproved)
+                            if (item.isApproved) {
                               statusColor = AppStatusColors.paid;
+                            }
 
                             if (item.isRejected) statusColor = AppTheme.error;
 
@@ -1725,13 +1728,15 @@ class _ResidentMeterReadingScreenState
                     ),
 
                     validator: (val) {
-                      if (val == null || val.trim().isEmpty)
+                      if (val == null || val.trim().isEmpty) {
                         return 'Vui lòng nhập chỉ số điện';
+                      }
 
                       final num = double.tryParse(val.trim());
 
-                      if (num == null || num < 0)
+                      if (num == null || num < 0) {
                         return 'Chỉ số điện phải là số không âm';
+                      }
 
                       return null;
                     },
@@ -1755,13 +1760,15 @@ class _ResidentMeterReadingScreenState
                     ),
 
                     validator: (val) {
-                      if (val == null || val.trim().isEmpty)
+                      if (val == null || val.trim().isEmpty) {
                         return 'Vui lòng nhập chỉ số nước';
+                      }
 
                       final num = double.tryParse(val.trim());
 
-                      if (num == null || num < 0)
+                      if (num == null || num < 0) {
                         return 'Chỉ số nước phải là số không âm';
+                      }
 
                       return null;
                     },

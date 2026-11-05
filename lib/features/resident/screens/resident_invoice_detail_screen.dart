@@ -1040,7 +1040,7 @@ class _ResidentInvoiceDetailScreenState
                       context,
                       label: 'Phương thức',
                       value: _invoice.paymentMethod == 'DEMO'
-                          ? 'Demo Payment (Cổng điện tử)'
+                          ? 'Cổng thanh toán điện tử'
                           : (_invoice.paymentMethod ??
                                 'Chuyển khoản trực tuyến'),
                     ),

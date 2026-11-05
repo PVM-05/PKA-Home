@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/router/app_router.dart';
 import '../../core/services/push_notification_service.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
@@ -12,7 +13,10 @@ final fcmTokenSyncProvider = Provider<void>((ref) {
   final pushService = ref.read(pushNotificationServiceProvider);
 
   if (user != null) {
-    pushService.safeInitialize(userId: user.id);
+    pushService.safeInitialize(
+      userId: user.id,
+      onSelectNotificationRoute: navigateToRoute,
+    );
     pushService.startRealtimeNotificationListener(userId: user.id);
   } else {
     pushService.stopRealtimeNotificationListener();

@@ -9,25 +9,26 @@ import '../../data/models/issue_model.dart';
 
 class ExcelExportHelper {
   /// Mở hộp thoại chia sẻ/lưu file qua Share Sheet hệ điều hành
-  static Future<void> shareFile(String filePath, {String? subject, String? text}) async {
+  static Future<void> shareFile(
+    String filePath, {
+    String? subject,
+    String? text,
+  }) async {
     try {
       final xFile = XFile(filePath);
       await SharePlus.instance.share(
-        ShareParams(
-          files: [xFile],
-          subject: subject,
-          text: text,
-        ),
+        ShareParams(files: [xFile], subject: subject, text: text),
       );
     } catch (_) {}
   }
+
   /// Xuất danh sách Hóa đơn ra file .xlsx
   static Future<String?> exportInvoices(List<InvoiceModel> invoices) async {
     try {
       var excel = Excel.createExcel();
       Sheet sheetObject = excel['Danh Sách Hóa Đơn'];
       excel.delete('Sheet1'); // Remove default sheet
-      
+
       // Header
       sheetObject.appendRow([
         TextCellValue('Mã Căn Hộ'),
@@ -41,12 +42,21 @@ class ExcelExportHelper {
 
       for (var invoice in invoices) {
         String statusText = '';
-        switch(invoice.status) {
-          case 'paid': statusText = 'Đã thanh toán'; break;
-          case 'unpaid': statusText = 'Chưa thanh toán'; break;
-          case 'pending_confirmation': statusText = 'Chờ xác nhận'; break;
-          case 'overdue': statusText = 'Quá hạn'; break;
-          default: statusText = invoice.status;
+        switch (invoice.status) {
+          case 'paid':
+            statusText = 'Đã thanh toán';
+            break;
+          case 'unpaid':
+            statusText = 'Chưa thanh toán';
+            break;
+          case 'pending_confirmation':
+            statusText = 'Chờ xác nhận';
+            break;
+          case 'overdue':
+            statusText = 'Quá hạn';
+            break;
+          default:
+            statusText = invoice.status;
         }
 
         sheetObject.appendRow([
@@ -59,16 +69,16 @@ class ExcelExportHelper {
       }
 
       var fileBytes = excel.save();
-      
+
       if (fileBytes != null) {
         final directory = await getApplicationDocumentsDirectory();
         final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
         final filePath = '${directory.path}/HoaDon_$timestamp.xlsx';
-        
+
         File(filePath)
           ..createSync(recursive: true)
           ..writeAsBytesSync(fileBytes);
-          
+
         return filePath;
       }
       return null;
@@ -130,7 +140,9 @@ class ExcelExportHelper {
             priorityText = issue.priority;
         }
 
-        final shortId = issue.id.length > 8 ? issue.id.substring(0, 8).toUpperCase() : issue.id;
+        final shortId = issue.id.length > 8
+            ? issue.id.substring(0, 8).toUpperCase()
+            : issue.id;
 
         sheetObject.appendRow([
           TextCellValue(shortId),
@@ -141,7 +153,11 @@ class ExcelExportHelper {
           TextCellValue(statusText),
           TextCellValue(issue.assignedStaff?.fullName ?? 'Chưa phân công'),
           TextCellValue(dateFormat.format(issue.createdAt.toLocal())),
-          TextCellValue(issue.updatedAt != null ? dateFormat.format(issue.updatedAt!.toLocal()) : '-'),
+          TextCellValue(
+            issue.updatedAt != null
+                ? dateFormat.format(issue.updatedAt!.toLocal())
+                : '-',
+          ),
         ]);
       }
 
@@ -180,7 +196,9 @@ class ExcelExportHelper {
         TextCellValue('BÁO CÁO TÀI CHÍNH VÀ PHÂN TÍCH TUỔI NỢ CÔNG NỢ'),
       ]);
       overviewSheet.appendRow([
-        TextCellValue('Thời gian xuất: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}'),
+        TextCellValue(
+          'Thời gian xuất: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+        ),
       ]);
       overviewSheet.appendRow([
         TextCellValue('Kỳ đối soát: ${report.filterPeriod ?? 'Tất cả các kỳ'}'),
@@ -198,11 +216,15 @@ class ExcelExportHelper {
       ]);
       overviewSheet.appendRow([
         TextCellValue('Doanh thu thực tế đã thu'),
-        TextCellValue('${moneyFormat.format(report.summary.actualCollected)} đ'),
+        TextCellValue(
+          '${moneyFormat.format(report.summary.actualCollected)} đ',
+        ),
       ]);
       overviewSheet.appendRow([
         TextCellValue('Tổng công nợ tồn đọng'),
-        TextCellValue('${moneyFormat.format(report.summary.totalOutstanding)} đ'),
+        TextCellValue(
+          '${moneyFormat.format(report.summary.totalOutstanding)} đ',
+        ),
       ]);
       overviewSheet.appendRow([
         TextCellValue('Tỷ lệ thu hồi công nợ'),
@@ -229,31 +251,49 @@ class ExcelExportHelper {
         TextCellValue('TỶ TRỌNG CÔNG NỢ'),
       ]);
 
-      final totalDebt = report.agingBuckets.totalDebt > 0 ? report.agingBuckets.totalDebt : 1.0;
+      final totalDebt = report.agingBuckets.totalDebt > 0
+          ? report.agingBuckets.totalDebt
+          : 1.0;
 
       overviewSheet.appendRow([
         TextCellValue('0 - 30 ngày (Trong hạn / Mới phát sinh)'),
         IntCellValue(report.agingBuckets.count0To30),
-        TextCellValue('${moneyFormat.format(report.agingBuckets.amount0To30)} đ'),
-        TextCellValue('${((report.agingBuckets.amount0To30 / totalDebt) * 100).toStringAsFixed(1)}%'),
+        TextCellValue(
+          '${moneyFormat.format(report.agingBuckets.amount0To30)} đ',
+        ),
+        TextCellValue(
+          '${((report.agingBuckets.amount0To30 / totalDebt) * 100).toStringAsFixed(1)}%',
+        ),
       ]);
       overviewSheet.appendRow([
         TextCellValue('31 - 60 ngày (Quá hạn mức 1 - Đôn đốc)'),
         IntCellValue(report.agingBuckets.count31To60),
-        TextCellValue('${moneyFormat.format(report.agingBuckets.amount31To60)} đ'),
-        TextCellValue('${((report.agingBuckets.amount31To60 / totalDebt) * 100).toStringAsFixed(1)}%'),
+        TextCellValue(
+          '${moneyFormat.format(report.agingBuckets.amount31To60)} đ',
+        ),
+        TextCellValue(
+          '${((report.agingBuckets.amount31To60 / totalDebt) * 100).toStringAsFixed(1)}%',
+        ),
       ]);
       overviewSheet.appendRow([
         TextCellValue('61 - 90 ngày (Quá hạn mức 2 - Cảnh báo dịch vụ)'),
         IntCellValue(report.agingBuckets.count61To90),
-        TextCellValue('${moneyFormat.format(report.agingBuckets.amount61To90)} đ'),
-        TextCellValue('${((report.agingBuckets.amount61To90 / totalDebt) * 100).toStringAsFixed(1)}%'),
+        TextCellValue(
+          '${moneyFormat.format(report.agingBuckets.amount61To90)} đ',
+        ),
+        TextCellValue(
+          '${((report.agingBuckets.amount61To90 / totalDebt) * 100).toStringAsFixed(1)}%',
+        ),
       ]);
       overviewSheet.appendRow([
         TextCellValue('> 90 ngày (Nợ xấu / Khó đòi)'),
         IntCellValue(report.agingBuckets.countOver90),
-        TextCellValue('${moneyFormat.format(report.agingBuckets.amountOver90)} đ'),
-        TextCellValue('${((report.agingBuckets.amountOver90 / totalDebt) * 100).toStringAsFixed(1)}%'),
+        TextCellValue(
+          '${moneyFormat.format(report.agingBuckets.amountOver90)} đ',
+        ),
+        TextCellValue(
+          '${((report.agingBuckets.amountOver90 / totalDebt) * 100).toStringAsFixed(1)}%',
+        ),
       ]);
 
       // Sheet 2: Danh Sách Căn Hộ Nợ
@@ -278,7 +318,11 @@ class ExcelExportHelper {
           TextCellValue(debtor.ownerName),
           TextCellValue(debtor.ownerPhone),
           IntCellValue(debtor.unpaidInvoicesCount),
-          TextCellValue(debtor.oldestDueDate != null ? dateFormat.format(debtor.oldestDueDate!) : '-'),
+          TextCellValue(
+            debtor.oldestDueDate != null
+                ? dateFormat.format(debtor.oldestDueDate!)
+                : '-',
+          ),
           IntCellValue(debtor.maxDaysOverdue),
           TextCellValue(debtor.riskLevelText),
           DoubleCellValue(debtor.totalDebt),
@@ -302,7 +346,8 @@ class ExcelExportHelper {
         final directory = await getApplicationDocumentsDirectory();
         final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
         final safePeriod = (period ?? 'TatCa').replaceAll('/', '_');
-        final filePath = '${directory.path}/BaoCaoTuoiNo_${safePeriod}_$timestamp.xlsx';
+        final filePath =
+            '${directory.path}/BaoCaoTuoiNo_${safePeriod}_$timestamp.xlsx';
 
         File(filePath)
           ..createSync(recursive: true)

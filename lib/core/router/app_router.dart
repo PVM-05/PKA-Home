@@ -66,9 +66,21 @@ import '../../features/management/screens/maintenance_fund_ledger_screen.dart';
 import 'route_names.dart';
 import 'page_transitions.dart';
 
+/// Khóa điều hướng toàn cục cho ứng dụng (hỗ trợ Deep-linking & Push Notification click)
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
+/// Hàm chuyển hướng toàn cục từ Notification callback hoặc background message
+void navigateToRoute(String route) {
+  final ctx = rootNavigatorKey.currentContext;
+  if (ctx != null) {
+    GoRouter.of(ctx).push(route);
+  }
+}
+
 /// Provider cho GoRouter, lắng nghe auth state để redirect tự động.
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.login,
     debugLogDiagnostics: true,
     refreshListenable: GoRouterAuthNotifier(ref),

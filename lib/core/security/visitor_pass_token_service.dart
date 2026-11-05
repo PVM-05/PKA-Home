@@ -185,3 +185,4 @@ class VisitorPassTokenService {
     return base64UrlEncode(bytes).replaceAll('=', '');
   }
 }
+

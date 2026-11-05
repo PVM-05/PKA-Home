@@ -13,6 +13,15 @@ void main() {
       expect(result.category, equals('plumbing'));
     });
 
+    test('Câu gõ không dấu "bon cau bi tac, nong" không bị gắn cờ nguy hiểm', () {
+      final result = IssueSmartTriageEngine.triage(
+        'bon cau bi tac, nong',
+      );
+
+      expect(result.isHazardous, isFalse,
+          reason: 'Từ không dấu "nong" không được khớp nhầm với từ khóa "no"');
+    });
+
     test('Câu chứa từ "chạy" không bị gắn cờ hỏa hoạn do substring "chay"', () {
       final result = IssueSmartTriageEngine.triage(
         'Máy bơm đang chạy liên tục không ngắt',
