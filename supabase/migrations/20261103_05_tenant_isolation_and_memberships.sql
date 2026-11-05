@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS public.building_memberships (
     building_id UUID NOT NULL REFERENCES public.buildings(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     building_role VARCHAR(30) NOT NULL DEFAULT 'resident', 
+    role VARCHAR(30) GENERATED ALWAYS AS (building_role) STORED,
     -- Các vai trò: 'manager', 'accountant', 'technician', 'security', 'receptionist', 'board_member', 'resident'
     apartment_id UUID REFERENCES public.apartments(id) ON DELETE SET NULL,
     is_active BOOLEAN NOT NULL DEFAULT true,
