@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
+import '../../../core/security/visitor_pass_token_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
@@ -14,10 +15,12 @@ class FrontDeskWorkstationScreen extends ConsumerStatefulWidget {
   const FrontDeskWorkstationScreen({super.key});
 
   @override
-  ConsumerState<FrontDeskWorkstationScreen> createState() => _FrontDeskWorkstationScreenState();
+  ConsumerState<FrontDeskWorkstationScreen> createState() =>
+      _FrontDeskWorkstationScreenState();
 }
 
-class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstationScreen>
+class _FrontDeskWorkstationScreenState
+    extends ConsumerState<FrontDeskWorkstationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _searchVisitorCtrl = TextEditingController();
@@ -70,7 +73,10 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
           ElevatedButton(
             onPressed: () async {
               final code = codeCtrl.text.trim();
@@ -86,16 +92,37 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
   }
 
   Future<void> _processVisitorCode(String rawCode) async {
-    // Nếu quét mã QR dạng PKAPASS:VP-xxx:hash
-    String code = rawCode;
-    if (code.startsWith('PKAPASS:')) {
-      final parts = code.split(':');
-      if (parts.length >= 2) code = parts[1];
+    final trimmed = rawCode.trim();
+    String code = trimmed;
+    String? qrPayload;
+
+    if (trimmed.startsWith('PKAPASS')) {
+      final parseResult = VisitorPassTokenService.verifyAndParseQrPayload(
+        trimmed,
+      );
+      if (!parseResult.isValid) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                parseResult.errorMessage ?? 'Mã QR vé khách không hợp lệ',
+              ),
+              backgroundColor: AppTheme.error,
+            ),
+          );
+        }
+        return;
+      }
+      code = parseResult.passCode ?? trimmed;
+      qrPayload = trimmed;
     }
 
     try {
       final repo = ref.read(frontDeskRepositoryProvider);
-      final res = await repo.checkInVisitor(passCode: code, guardId: 'guard-current');
+      final res = await repo.checkInVisitor(
+        passCode: code,
+        qrPayload: qrPayload,
+      );
 
       ref.invalidate(visitorPassesProvider);
       ref.invalidate(frontDeskStatsProvider);
@@ -104,14 +131,19 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(res['message'] as String? ?? 'Xử lý vé thành công'),
-            backgroundColor: res['success'] == true ? AppTheme.success : AppTheme.error,
+            backgroundColor: res['success'] == true
+                ? AppTheme.success
+                : AppTheme.error,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.error),
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
         );
       }
     }
@@ -132,7 +164,10 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
             labelColor: AppTheme.primary,
             tabs: const [
               Tab(icon: Icon(Icons.badge_outlined), text: 'Khách vào ra'),
-              Tab(icon: Icon(Icons.inventory_2_outlined), text: 'Bưu kiện sảnh'),
+              Tab(
+                icon: Icon(Icons.inventory_2_outlined),
+                text: 'Bưu kiện sảnh',
+              ),
             ],
           ),
         ),
@@ -151,14 +186,29 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                           decoration: BoxDecoration(
                             color: Colors.blue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Colors.blue.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Khách hôm nay', style: TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Khách hôm nay',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text('${stats.expectedVisitorsToday} lượt', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              Text(
+                                '${stats.expectedVisitorsToday} lượt',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -170,14 +220,29 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                           decoration: BoxDecoration(
                             color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Colors.green.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Trong tòa nhà', style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Trong tòa nhà',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text('${stats.visitorsInBuilding} người', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              Text(
+                                '${stats.visitorsInBuilding} người',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -187,17 +252,39 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: stats.overdueParcels > 0 ? AppTheme.error.withValues(alpha: 0.1) : Colors.amber.withValues(alpha: 0.1),
+                            color: stats.overdueParcels > 0
+                                ? AppTheme.error.withValues(alpha: 0.1)
+                                : Colors.amber.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: stats.overdueParcels > 0 ? AppTheme.error.withValues(alpha: 0.3) : Colors.amber.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: stats.overdueParcels > 0
+                                  ? AppTheme.error.withValues(alpha: 0.3)
+                                  : Colors.amber.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(stats.overdueParcels > 0 ? 'Tồn quá 3 ngày' : 'Bưu kiện kệ',
-                                  style: TextStyle(fontSize: 11, color: stats.overdueParcels > 0 ? AppTheme.error : Colors.amber.shade800, fontWeight: FontWeight.bold)),
+                              Text(
+                                stats.overdueParcels > 0
+                                    ? 'Tồn quá 3 ngày'
+                                    : 'Bưu kiện kệ',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: stats.overdueParcels > 0
+                                      ? AppTheme.error
+                                      : Colors.amber.shade800,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text('${stats.pendingParcels} kiện', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              Text(
+                                '${stats.pendingParcels} kiện',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -214,10 +301,7 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [
-                  _buildVisitorsTab(),
-                  _buildParcelsTab(),
-                ],
+                children: [_buildVisitorsTab(), _buildParcelsTab()],
               ),
             ),
           ],
@@ -228,7 +312,9 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
 
   // ─── TAB 1: KHÁCH VÀO RA ───
   Widget _buildVisitorsTab() {
-    final visitorsAsync = ref.watch(visitorPassesProvider((status: null, apartmentId: null)));
+    final visitorsAsync = ref.watch(
+      visitorPassesProvider((status: null, apartmentId: null)),
+    );
     final dateFormat = DateFormat('dd/MM HH:mm');
 
     return Column(
@@ -243,10 +329,16 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                   decoration: InputDecoration(
                     hintText: 'Tìm theo mã vé, tên khách, căn hộ...',
                     prefixIcon: const Icon(Icons.search, size: 20),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  onChanged: (val) => setState(() => _visitorSearch = val.toLowerCase().trim()),
+                  onChanged: (val) =>
+                      setState(() => _visitorSearch = val.toLowerCase().trim()),
                 ),
               ),
               const SizedBox(width: 8),
@@ -257,7 +349,9 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ],
@@ -272,12 +366,16 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                 if (_visitorSearch.isEmpty) return true;
                 return p.passCode.toLowerCase().contains(_visitorSearch) ||
                     p.visitorName.toLowerCase().contains(_visitorSearch) ||
-                    (p.apartmentCode?.toLowerCase().contains(_visitorSearch) ?? false) ||
-                    (p.licensePlate?.toLowerCase().contains(_visitorSearch) ?? false);
+                    (p.apartmentCode?.toLowerCase().contains(_visitorSearch) ??
+                        false) ||
+                    (p.licensePlate?.toLowerCase().contains(_visitorSearch) ??
+                        false);
               }).toList();
 
               if (filtered.isEmpty) {
-                return const Center(child: Text('Không có dữ liệu vé khách viếng thăm'));
+                return const Center(
+                  child: Text('Không có dữ liệu vé khách viếng thăm'),
+                );
               }
 
               return ListView.builder(
@@ -299,14 +397,23 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                           children: [
                             Text(
                               pass.passCode,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: AppTheme.primary,
+                              ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: isCheckedIn
                                     ? Colors.green.withValues(alpha: 0.1)
-                                    : (pass.status == 'pending' ? Colors.blue.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1)),
+                                    : (pass.status == 'pending'
+                                          ? Colors.blue.withValues(alpha: 0.1)
+                                          : Colors.grey.withValues(alpha: 0.1)),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -316,7 +423,9 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                                   fontWeight: FontWeight.bold,
                                   color: isCheckedIn
                                       ? Colors.green.shade800
-                                      : (pass.status == 'pending' ? Colors.blue.shade800 : Colors.grey.shade700),
+                                      : (pass.status == 'pending'
+                                            ? Colors.blue.shade800
+                                            : Colors.grey.shade700),
                                 ),
                               ),
                             ),
@@ -325,55 +434,105 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                         const SizedBox(height: 8),
                         Text(
                           pass.visitorName,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Icon(Icons.apartment, size: 14, color: AppTheme.textSecondary),
+                            const Icon(
+                              Icons.apartment,
+                              size: 14,
+                              color: AppTheme.textSecondary,
+                            ),
                             const SizedBox(width: 4),
-                            Text('Căn hộ ${pass.apartmentCode ?? pass.apartmentId}',
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                            Text(
+                              'Căn hộ ${pass.apartmentCode ?? pass.apartmentId}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             const SizedBox(width: 12),
-                            const Icon(Icons.directions_car_outlined, size: 14, color: AppTheme.textSecondary),
+                            const Icon(
+                              Icons.directions_car_outlined,
+                              size: 14,
+                              color: AppTheme.textSecondary,
+                            ),
                             const SizedBox(width: 4),
-                            Text(pass.vehicleDisplayName, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                            Text(
+                              pass.vehicleDisplayName,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Icon(Icons.access_time, size: 14, color: AppTheme.textSecondary),
+                            const Icon(
+                              Icons.access_time,
+                              size: 14,
+                              color: AppTheme.textSecondary,
+                            ),
                             const SizedBox(width: 4),
-                            Text('Dự kiến: ${dateFormat.format(pass.expectedArrival)}',
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                            Text(
+                              'Dự kiến: ${dateFormat.format(pass.expectedArrival)}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
                             const Spacer(),
                             if (pass.isCheckInAllowed)
                               ElevatedButton(
-                                onPressed: () => _processVisitorCode(pass.passCode),
+                                onPressed: () =>
+                                    _processVisitorCode(pass.passCode),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
                                   minimumSize: const Size(60, 32),
                                 ),
-                                child: const Text('Vào', style: TextStyle(fontSize: 12)),
+                                child: const Text(
+                                  'Vào',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ),
                             if (pass.isCheckOutAllowed)
                               OutlinedButton(
                                 onPressed: () async {
-                                  final repo = ref.read(frontDeskRepositoryProvider);
-                                  await repo.checkOutVisitor(passCode: pass.passCode, guardId: 'guard-current');
+                                  final repo = ref.read(
+                                    frontDeskRepositoryProvider,
+                                  );
+                                  await repo.checkOutVisitor(
+                                    passCode: pass.passCode,
+                                  );
                                   ref.invalidate(visitorPassesProvider);
                                   ref.invalidate(frontDeskStatsProvider);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.orange.shade800,
-                                  side: BorderSide(color: Colors.orange.shade800),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  side: BorderSide(
+                                    color: Colors.orange.shade800,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
                                   minimumSize: const Size(60, 32),
                                 ),
-                                child: const Text('Rời tòa', style: TextStyle(fontSize: 12)),
+                                child: const Text(
+                                  'Rời tòa',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ),
                           ],
                         ),
@@ -391,7 +550,9 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
 
   // ─── TAB 2: BƯU KIỆN SẢNH ───
   Widget _buildParcelsTab() {
-    final parcelsAsync = ref.watch(parcelsProvider((status: null, apartmentId: null)));
+    final parcelsAsync = ref.watch(
+      parcelsProvider((status: null, apartmentId: null)),
+    );
     final dateFormat = DateFormat('dd/MM HH:mm');
 
     return Column(
@@ -406,10 +567,16 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                   decoration: InputDecoration(
                     hintText: 'Tìm kiện hàng, căn hộ, mã vận đơn...',
                     prefixIcon: const Icon(Icons.search, size: 20),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  onChanged: (val) => setState(() => _parcelSearch = val.toLowerCase().trim()),
+                  onChanged: (val) =>
+                      setState(() => _parcelSearch = val.toLowerCase().trim()),
                 ),
               ),
               const SizedBox(width: 8),
@@ -420,7 +587,9 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ],
@@ -434,13 +603,18 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
               final filtered = parcels.where((p) {
                 if (_parcelSearch.isEmpty) return true;
                 return p.parcelCode.toLowerCase().contains(_parcelSearch) ||
-                    (p.apartmentCode?.toLowerCase().contains(_parcelSearch) ?? false) ||
-                    (p.trackingNumber?.toLowerCase().contains(_parcelSearch) ?? false) ||
-                    (p.recipientName?.toLowerCase().contains(_parcelSearch) ?? false);
+                    (p.apartmentCode?.toLowerCase().contains(_parcelSearch) ??
+                        false) ||
+                    (p.trackingNumber?.toLowerCase().contains(_parcelSearch) ??
+                        false) ||
+                    (p.recipientName?.toLowerCase().contains(_parcelSearch) ??
+                        false);
               }).toList();
 
               if (filtered.isEmpty) {
-                return const Center(child: Text('Không có kiện hàng nào tại quầy'));
+                return const Center(
+                  child: Text('Không có kiện hàng nào tại quầy'),
+                );
               }
 
               return ListView.builder(
@@ -454,7 +628,9 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(14),
                     borderRadius: 14,
-                    borderColor: parcel.isOverdueStorage ? AppTheme.error.withValues(alpha: 0.6) : null,
+                    borderColor: parcel.isOverdueStorage
+                        ? AppTheme.error.withValues(alpha: 0.6)
+                        : null,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -463,23 +639,38 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                           children: [
                             Text(
                               parcel.parcelCode,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: AppTheme.primary,
+                              ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: isArrived
-                                    ? (parcel.isOverdueStorage ? AppTheme.error.withValues(alpha: 0.1) : Colors.amber.withValues(alpha: 0.1))
+                                    ? (parcel.isOverdueStorage
+                                          ? AppTheme.error.withValues(
+                                              alpha: 0.1,
+                                            )
+                                          : Colors.amber.withValues(alpha: 0.1))
                                     : Colors.green.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                parcel.isOverdueStorage ? 'Tồn quá 3 ngày' : parcel.statusDisplayName,
+                                parcel.isOverdueStorage
+                                    ? 'Tồn quá 3 ngày'
+                                    : parcel.statusDisplayName,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   color: isArrived
-                                      ? (parcel.isOverdueStorage ? AppTheme.error : Colors.amber.shade900)
+                                      ? (parcel.isOverdueStorage
+                                            ? AppTheme.error
+                                            : Colors.amber.shade900)
                                       : Colors.green.shade800,
                                 ),
                               ),
@@ -496,7 +687,11 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                                 color: Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.local_shipping_outlined, color: AppTheme.primary, size: 24),
+                              child: const Icon(
+                                Icons.local_shipping_outlined,
+                                color: AppTheme.primary,
+                                size: 24,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -505,17 +700,26 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                                 children: [
                                   Text(
                                     parcel.description ?? 'Bưu phẩm tiêu chuẩn',
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Căn hộ: ${parcel.apartmentCode ?? parcel.apartmentId} ${parcel.recipientName != null ? "(${parcel.recipientName})" : ""}',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     '${parcel.carrierDisplayName} - ${parcel.shelfLocation}',
-                                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -528,17 +732,24 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
                           children: [
                             Text(
                               'Đến: ${dateFormat.format(parcel.arrivedAt)}',
-                              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
                             if (isArrived)
                               ElevatedButton.icon(
-                                onPressed: () => HandoverParcelDialog.show(context, parcel),
+                                onPressed: () =>
+                                    HandoverParcelDialog.show(context, parcel),
                                 icon: const Icon(Icons.outbox, size: 16),
                                 label: const Text('Bàn giao'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppTheme.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
                                   minimumSize: const Size(60, 32),
                                 ),
                               ),
@@ -556,4 +767,3 @@ class _FrontDeskWorkstationScreenState extends ConsumerState<FrontDeskWorkstatio
     );
   }
 }
-

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/providers/auth_provider.dart';
+import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../data/providers/community_provider.dart';
 import '../../management/widgets/poll_result_dialog.dart';
 
@@ -46,13 +47,26 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
   Future<void> _submitVote() async {
     if (_selectedOptionIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn ít nhất một phương án để biểu quyết')),
+        const SnackBar(
+          content: Text('Vui lòng chọn ít nhất một phương án để biểu quyết'),
+        ),
       );
       return;
     }
 
     final authUser = ref.read(authProvider).valueOrNull;
-    final voterUserId = authUser?.id ?? 'usr-resident';
+    if (authUser == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vui lòng đăng nhập để tham gia biểu quyết'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+      return;
+    }
+    final voterUserId = authUser.id;
 
     setState(() => _isLoading = true);
     try {
@@ -65,7 +79,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
       );
 
       if (res['success'] == true) {
-        ref.invalidate(pollsProvider((status: null, apartmentId: widget.apartmentId)));
+        ref.invalidate(
+          pollsProvider((status: null, apartmentId: widget.apartmentId)),
+        );
         ref.invalidate(pollResultsProvider(widget.poll.id));
 
         if (mounted) {
@@ -106,6 +122,13 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final currentApartment = ref.watch(currentSelectedApartmentProvider);
+    final relationRole =
+        (currentApartment?['relation_role'] as String?)?.toLowerCase() ??
+        'owner';
+    final isBlockedByHousingLaw =
+        widget.poll.isOfficialAssembly && relationRole != 'owner';
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -141,7 +164,10 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                     color: AppTheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.how_to_vote_rounded, color: AppTheme.primary),
+                  child: const Icon(
+                    Icons.how_to_vote_rounded,
+                    color: AppTheme.primary,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -159,7 +185,10 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                       ),
                       const Text(
                         'Phiếu Biểu Quyết Trực Tuyến',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -173,7 +202,8 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
               widget.poll.title,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            if (widget.poll.description != null && widget.poll.description!.isNotEmpty) ...[
+            if (widget.poll.description != null &&
+                widget.poll.description!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -199,17 +229,58 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, size: 16, color: AppTheme.primary),
+                  const Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: AppTheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Cơ chế tính: ${widget.poll.voteWeightDisplayName} • ${widget.poll.choiceTypeDisplayName}',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primary,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+            if (isBlockedByHousingLaw) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.amber.shade400),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.gavel_rounded,
+                      color: Colors.amber.shade900,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Theo Điều 102 Luật Nhà ở 2023, chỉ Chủ sở hữu căn hộ (owner) mới có quyền biểu quyết tại Hội nghị nhà chung cư. Khách thuê chỉ có thể tham gia các cuộc khảo sát ý kiến cộng đồng.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.amber.shade900,
+                          height: 1.35,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             const Text(
@@ -224,7 +295,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primary.withValues(alpha: 0.08) : Colors.white,
+                  color: isSelected
+                      ? AppTheme.primary.withValues(alpha: 0.08)
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isSelected ? AppTheme.primary : Colors.grey[300]!,
@@ -235,13 +308,20 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                   onTap: () => _toggleOption(opt.id),
                   borderRadius: BorderRadius.circular(10),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
                         Icon(
                           isMultiple
-                              ? (isSelected ? Icons.check_box : Icons.check_box_outline_blank)
-                              : (isSelected ? Icons.radio_button_checked : Icons.radio_button_off),
+                              ? (isSelected
+                                    ? Icons.check_box
+                                    : Icons.check_box_outline_blank)
+                              : (isSelected
+                                    ? Icons.radio_button_checked
+                                    : Icons.radio_button_off),
                           color: isSelected ? AppTheme.primary : Colors.grey,
                         ),
                         const SizedBox(width: 12),
@@ -250,8 +330,12 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                             opt.optionText,
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              color: isSelected ? AppTheme.primary : Colors.black87,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? AppTheme.primary
+                                  : Colors.black87,
                             ),
                           ),
                         ),
@@ -265,19 +349,37 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
 
             // Nút Xác nhận gửi phiếu
             ElevatedButton.icon(
-              onPressed: _isLoading ? null : _submitVote,
+              onPressed: (isBlockedByHousingLaw || _isLoading)
+                  ? null
+                  : _submitVote,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               icon: _isLoading
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
                   : const Icon(Icons.how_to_vote_rounded),
               label: Text(
-                _isLoading ? 'Đang gửi phiếu...' : 'Xác Nhận Bỏ Phiếu Biểu Quyết',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                _isLoading
+                    ? 'Đang gửi phiếu...'
+                    : (isBlockedByHousingLaw
+                          ? 'Chỉ Chủ Hộ Được Biểu Quyết'
+                          : 'Xác Nhận Bỏ Phiếu Biểu Quyết'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -286,4 +388,3 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
     );
   }
 }
-
