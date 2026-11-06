@@ -325,6 +325,32 @@ class ManagementRepository {
     await _client.from('issue_reports').update(data).eq('id', id);
   }
 
+  /// Lấy danh sách nhân sự có thể phân công xử lý sự cố (Kỹ thuật viên, Quản trị viên, Ban Quản lý)
+  Future<List<Map<String, dynamic>>> fetchAssignableStaff() async {
+    try {
+      final response = await _client
+          .from('users')
+          .select('id, full_name, role')
+          .inFilter('role', ['technician', 'admin', 'management'])
+          .order('full_name', ascending: true);
+
+      return (response as List).map((u) {
+        final role = u['role'] as String?;
+        final roleLabel = role == 'technician'
+            ? 'Kỹ thuật viên'
+            : (role == 'admin' ? 'Quản trị viên' : 'Ban Quản lý');
+        final name = (u['full_name'] as String?) ?? 'Nhân viên';
+        return {
+          'id': u['id'] as String,
+          'name': '$name ($roleLabel)',
+          'role': role,
+        };
+      }).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   /// Kỹ thuật viên hoàn thành sự cố kèm tải ảnh minh chứng nghiệm thu
 
   Future<void> resolveIssueWithProof({
