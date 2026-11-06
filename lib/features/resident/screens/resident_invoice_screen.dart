@@ -181,12 +181,18 @@ class ResidentInvoiceScreen extends ConsumerWidget {
     String statusText;
     IconData statusIcon;
 
-    // Kiểm tra quá hạn
-    final isOverdue =
-        invoice.status == 'unpaid' && invoice.dueDate.isBefore(DateTime.now());
-    final overdueDays = isOverdue
-        ? DateTime.now().difference(invoice.dueDate).inDays
-        : 0;
+    // Kiểm tra quá hạn (chỉ tính quá hạn khi đã qua hết ngày đến hạn)
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = DateTime(
+      invoice.dueDate.year,
+      invoice.dueDate.month,
+      invoice.dueDate.day,
+    );
+    final diffDays = today.difference(dueDay).inDays;
+    final isOverdue = invoice.status == 'unpaid' && diffDays > 0;
+    final overdueDays = isOverdue ? diffDays : 0;
+    final isDueToday = invoice.status == 'unpaid' && diffDays == 0;
 
     switch (invoice.status) {
       case 'paid':
@@ -204,6 +210,10 @@ class ResidentInvoiceScreen extends ConsumerWidget {
           statusColor = AppTheme.error;
           statusText = 'Quá hạn $overdueDays ngày';
           statusIcon = Icons.warning_amber_rounded;
+        } else if (isDueToday) {
+          statusColor = Colors.orange.shade800;
+          statusText = 'Đến hạn hôm nay';
+          statusIcon = Icons.access_time_filled;
         } else {
           statusColor = AppStatusColors.unpaid;
           statusText = 'Chưa thanh toán';

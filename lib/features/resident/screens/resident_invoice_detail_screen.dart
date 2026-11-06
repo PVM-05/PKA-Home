@@ -181,6 +181,17 @@ class _ResidentInvoiceDetailScreenState
     String statusText;
     IconData statusIcon;
 
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = DateTime(
+      _invoice.dueDate.year,
+      _invoice.dueDate.month,
+      _invoice.dueDate.day,
+    );
+    final diffDays = today.difference(dueDay).inDays;
+    final isOverdue = _invoice.status == 'unpaid' && diffDays > 0;
+    final isDueToday = _invoice.status == 'unpaid' && diffDays == 0;
+
     switch (_invoice.status) {
       case 'paid':
         statusColor = AppTheme.success;
@@ -193,13 +204,20 @@ class _ResidentInvoiceDetailScreenState
         statusIcon = Icons.hourglass_top;
         break;
       default:
-        statusColor = AppTheme.error;
-        statusText = 'Chưa thanh toán';
-        statusIcon = Icons.error_outline;
+        if (isOverdue) {
+          statusColor = AppTheme.error;
+          statusText = 'Quá hạn $diffDays ngày';
+          statusIcon = Icons.warning_amber_rounded;
+        } else if (isDueToday) {
+          statusColor = Colors.orange.shade800;
+          statusText = 'Đến hạn hôm nay';
+          statusIcon = Icons.access_time_filled;
+        } else {
+          statusColor = AppTheme.error;
+          statusText = 'Chưa thanh toán';
+          statusIcon = Icons.error_outline;
+        }
     }
-
-    final isOverdue =
-        _invoice.status == 'unpaid' && DateTime.now().isAfter(_invoice.dueDate);
     final latePenaltyAsync = isOverdue
         ? ref.watch(calculatedLatePenaltyProvider(_invoice.id))
         : null;

@@ -21,7 +21,7 @@ void main() {
       expect(invoice.effectivePaymentCode, equals('INV2610A0110'));
     });
 
-    test('effectivePaymentCode falls back properly when payment_code is null', () {
+    test('effectivePaymentCode does not fabricate code when payment_code is null (P0 Fail-Closed)', () {
       final json = {
         'id': 'inv-uuid-abcdef12',
         'apartment_id': 'apt-uuid-1',
@@ -35,9 +35,7 @@ void main() {
       final invoice = InvoiceModel.fromJson(json);
 
       expect(invoice.paymentCode, isNull);
-      // Fallback format: 'INV' + clean period (102026) + shortId
-      expect(invoice.effectivePaymentCode, startsWith('INV102026'));
-      expect(invoice.effectivePaymentCode, contains('INVUUI'));
+      expect(invoice.effectivePaymentCode, isEmpty);
     });
 
     test('displayReceiptNumber and displayLookupCode work as expected', () {
