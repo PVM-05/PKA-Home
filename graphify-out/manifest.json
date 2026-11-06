@@ -6298,5 +6298,11 @@
     "seen": 1793967364.3427885,
     "ast_hash": "e445568a4f2951dff3b15e1cdace24ff",
     "semantic_hash": ""
+  },
+  "supabase/migrations/20261106_01_cleanup_dead_tables_and_seed_data.sql": {
+    "mtime": 1793971045.7324185,
+    "seen": 1793971292.9435215,
+    "ast_hash": "4b6869144b5aca0c169e9fc48f5b8c1f",
+    "semantic_hash": ""
   }
 }
