@@ -1,17 +1,17 @@
 # Graph Report - pka_home  (2026-11-06)
 
 ## Corpus Check
-- 971 files · ~739,844 words
+- 972 files · ~740,116 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 39 file(s) not represented in the graph (top: .xml 10, .example 5, (none) 4)
 
 ## Summary
-- 10359 nodes · 14452 edges · 611 communities (557 shown, 54 thin omitted)
+- 10360 nodes · 14452 edges · 612 communities (557 shown, 55 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9a42df1e`
+- Built from commit: `542d7167`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -622,7 +622,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (611 total, 54 thin omitted)
+## Communities (612 total, 55 thin omitted)
 
 ### Community 0 - "package:flutter_test/flutter_test.dart"
 Cohesion: 0.01
@@ -2854,8 +2854,8 @@ Nodes (3): lastPayload, main, processBankPaymentWebhook
 
 ## Knowledge Gaps
 - **4218 isolated node(s):** `RFC-6455`, `XCTest`, `AppEnvironmentType`, `prod`, `type` (+4213 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 7186 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **54 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 7187 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **55 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -2866,11 +2866,11 @@ _Questions this graph is uniquely positioned to answer:_
   _4218 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package:flutter_test/flutter_test.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.012270942408376964 - nodes in this community are weakly interconnected._
-- **Why does `OfflineSyncQueueStorage` connect `sync_providers.dart` to `offline_sync_queue_storage.dart`, `offline_sync_manager.dart`?**
-  _High betweenness centrality (0.001) - this node is a cross-community bridge._
 - **Should `amenity_management_checkin_test.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.028686868686868688 - nodes in this community are weakly interconnected._
-- **Why does `public.parcels` connect `20261103_01_visitor_and_parcel_hub.sql` to `public.users`, `public.apartments`?**
-  _High betweenness centrality (0.001) - this node is a cross-community bridge._
 - **Should `package:flutter_riverpod/flutter_riverpod.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.03109072375127421 - nodes in this community are weakly interconnected._
+- **Should `resolve_issue_materials_sheet.dart` be split into smaller, more focused modules?**
+  _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
+- **Should `ui_responsive_and_accessibility_test.dart` be split into smaller, more focused modules?**
+  _Cohesion score 0.04266510812390415 - nodes in this community are weakly interconnected._
