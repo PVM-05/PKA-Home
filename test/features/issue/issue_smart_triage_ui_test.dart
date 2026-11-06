@@ -47,16 +47,16 @@ void main() {
         ),
       );
 
-      // Nhập sự cố vỡ ống nước
+      // Nhập sự cố rò rỉ nước
       await tester.enterText(
         find.byKey(const Key('issue_description_field')),
-        'Vỡ đường ống nước rò rỉ bồn rửa chén chảy tràn ra bếp',
+        'Rò rỉ nước ở vòi rửa chén và dây cấp nước bồn lavabo',
       );
       await tester.pumpAndSettle();
 
       // Banner gợi ý AI xuất hiện
       expect(find.byKey(const Key('ai_suggestion_banner')), findsOneWidget);
-      expect(find.textContaining('Gợi ý từ trợ lý AI'), findsOneWidget);
+      expect(find.textContaining('Gợi ý phân loại tự động'), findsOneWidget);
       expect(find.byKey(const Key('apply_ai_suggestion_button')), findsOneWidget);
 
       // Bấm nút áp dụng gợi ý
