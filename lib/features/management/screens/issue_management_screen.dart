@@ -9,7 +9,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/shimmer_loading.dart';
-import '../../../core/supabase_config.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/repositories/issue_repository.dart';
@@ -34,6 +34,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedStatus = 'all'; // all, pending, in_progress, resolved
+  bool _onlyAssignedToMe = false;
   bool _isExporting = false;
 
   Future<void> _exportExcel(List<IssueModel> issues) async {
@@ -70,10 +71,15 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
     }
   }
 
-  List<IssueModel> _filterIssues(List<IssueModel> issues) {
+  List<IssueModel> _filterIssues(List<IssueModel> issues, {String? currentUserId}) {
     return issues.where((issue) {
       if (_selectedStatus != 'all' && issue.status != _selectedStatus) {
         return false;
+      }
+      if (_onlyAssignedToMe) {
+        if (currentUserId == null || issue.assignedStaffId != currentUserId) {
+          return false;
+        }
       }
       if (_searchQuery.isNotEmpty) {
         final code = (issue.apartment?.code ?? '').toLowerCase();
@@ -162,23 +168,13 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
 
   void _showAssignStaffDialog(IssueModel issue) async {
     try {
-      final usersResponse = await SupabaseConfig.client
-          .from('users')
-          .select('id, full_name, role')
-          .inFilter('role', ['technician', 'admin', 'management']);
-
-      final staffList = (usersResponse as List).map((u) {
-        final role = u['role'] as String?;
-        final roleLabel = role == 'technician'
-            ? 'Kỹ thuật viên'
-            : (role == 'admin' ? 'Quản trị viên' : 'Ban Quản lý');
-        final name = (u['full_name'] as String?) ?? 'Nhân viên';
-        return {'id': u['id'] as String, 'name': '$name ($roleLabel)'};
-      }).toList();
+      final staffList = await ref
+          .read(managementRepositoryProvider)
+          .fetchAssignableStaff();
 
       String? selectedStaffId =
           issue.assignedStaffId ??
-          (staffList.isNotEmpty ? staffList.first['id'] : null);
+          (staffList.isNotEmpty ? staffList.first['id'] as String? : null);
 
       if (!mounted) return;
 
@@ -259,6 +255,8 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final issuesAsync = ref.watch(allIssuesProvider);
+    final currentUser = ref.watch(authProvider).valueOrNull;
+    final currentUserId = currentUser?.id;
 
     return RoleGuard(
       permission: AppPermissions.issueManagement,
@@ -289,7 +287,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                   tooltip: 'Xuất Excel',
                   onPressed: _isExporting
                       ? null
-                      : () => _exportExcel(_filterIssues(issues)),
+                      : () => _exportExcel(
+                          _filterIssues(issues, currentUserId: currentUserId),
+                        ),
                 );
               },
               loading: () => const SizedBox.shrink(),
@@ -486,6 +486,32 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                     'Đã hoàn thành',
                     AppStatusColors.paid,
                   ),
+                  const SizedBox(width: 8),
+                  FilterChip(
+                    avatar: Icon(
+                      Icons.person_pin_outlined,
+                      size: 16,
+                      color: _onlyAssignedToMe ? Colors.white : AppTheme.primary,
+                    ),
+                    label: Text(
+                      'Giao cho tôi',
+                      style: TextStyle(
+                        color: _onlyAssignedToMe ? Colors.white : AppTheme.textPrimary,
+                        fontWeight: _onlyAssignedToMe ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    selected: _onlyAssignedToMe,
+                    selectedColor: AppTheme.primary,
+                    backgroundColor: Colors.white,
+                    side: BorderSide(
+                      color: _onlyAssignedToMe ? AppTheme.primary : AppTheme.border,
+                    ),
+                    onSelected: (selected) {
+                      setState(() {
+                        _onlyAssignedToMe = selected;
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
@@ -506,7 +532,10 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                 emptyIcon: Icons.report_problem_outlined,
                 onRetry: () => ref.invalidate(allIssuesProvider),
                 dataBuilder: (issues) {
-                  final filtered = _filterIssues(issues);
+                  final filtered = _filterIssues(
+                    issues,
+                    currentUserId: currentUserId,
+                  );
 
                   if (filtered.isEmpty) {
                     return RefreshIndicator(
