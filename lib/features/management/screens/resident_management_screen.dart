@@ -1,3 +1,4 @@
+import 'dart:math';
 import '../../../core/router/route_names.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -96,10 +97,24 @@ class _ResidentManagementScreenState
     BuildContext context,
     List<ApartmentModel> apartments,
   ) {
+    String generateSecurePassword() {
+      final rand = Random.secure();
+      const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+      const lower = 'abcdefghjkmnpqrstuvwxyz';
+      const digits = '23456789';
+      const specials = '@#%&*!';
+      final p1 = List.generate(3, (_) => upper[rand.nextInt(upper.length)]).join();
+      final p2 = List.generate(4, (_) => lower[rand.nextInt(lower.length)]).join();
+      final p3 = List.generate(2, (_) => digits[rand.nextInt(digits.length)]).join();
+      final p4 = specials[rand.nextInt(specials.length)];
+      final list = (p1 + p2 + p3 + p4).split('')..shuffle(rand);
+      return list.join();
+    }
+
     final nameCtrl = TextEditingController();
     final emailCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
-    final passCtrl = TextEditingController(text: 'PkaHome@2026');
+    final passCtrl = TextEditingController(text: generateSecurePassword());
     String role = 'resident';
     String? apartmentId;
     String relationRole = 'owner';
@@ -174,11 +189,20 @@ class _ResidentManagementScreenState
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: passCtrl,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Mật khẩu khởi tạo *',
-                        prefixIcon: Icon(Icons.lock_outline),
+                        prefixIcon: const Icon(Icons.lock_outline),
                         helperText:
-                            'Tối thiểu 6 ký tự. Người dùng có thể đổi sau.',
+                            'Mật khẩu ngẫu nhiên bảo mật. Vui lòng sao chép gửi cho người dùng.',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.refresh, size: 20),
+                          tooltip: 'Tạo mật khẩu ngẫu nhiên khác',
+                          onPressed: () {
+                            setDialogState(() {
+                              passCtrl.text = generateSecurePassword();
+                            });
+                          },
+                        ),
                       ),
                       validator: (v) => (v == null || v.length < 6)
                           ? 'Mật khẩu ít nhất 6 ký tự'

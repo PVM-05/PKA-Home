@@ -21,21 +21,23 @@ import '../../data/services/payment_service.dart';
 import '../../data/providers/payment_provider.dart';
 
 import '../../data/providers/building_provider.dart';
+import '../../data/providers/resident_apartment_provider.dart';
 
 import '../utils/network_error_handler.dart';
 
 import '../utils/vietqr_generator.dart';
 
-
-
-enum _PaymentStep { confirmation, processing, success, pendingConfirmation, failed }
-
-
+enum _PaymentStep {
+  confirmation,
+  processing,
+  success,
+  pendingConfirmation,
+  failed,
+}
 
 /// Hàm tiện ích mở Bottom Sheet Thanh toán dùng chung
 
 Future<PaymentResult?> showUnifiedPaymentSheet({
-
   required BuildContext context,
 
   required PaymentType type,
@@ -51,11 +53,8 @@ Future<PaymentResult?> showUnifiedPaymentSheet({
   String? buildingId,
 
   List<Map<String, dynamic>>? feeBreakdown,
-
 }) {
-
   return showModalBottomSheet<PaymentResult>(
-
     context: context,
 
     isScrollControlled: true,
@@ -63,7 +62,6 @@ Future<PaymentResult?> showUnifiedPaymentSheet({
     backgroundColor: Colors.transparent,
 
     builder: (ctx) => UnifiedPaymentSheet(
-
       type: type,
 
       referenceId: referenceId,
@@ -77,17 +75,11 @@ Future<PaymentResult?> showUnifiedPaymentSheet({
       buildingId: buildingId,
 
       feeBreakdown: feeBreakdown,
-
     ),
-
   );
-
 }
 
-
-
 class UnifiedPaymentSheet extends ConsumerStatefulWidget {
-
   final PaymentType type;
 
   final String referenceId;
@@ -102,10 +94,7 @@ class UnifiedPaymentSheet extends ConsumerStatefulWidget {
 
   final List<Map<String, dynamic>>? feeBreakdown;
 
-
-
   const UnifiedPaymentSheet({
-
     super.key,
 
     required this.type,
@@ -121,21 +110,14 @@ class UnifiedPaymentSheet extends ConsumerStatefulWidget {
     this.buildingId,
 
     this.feeBreakdown,
-
   });
 
-
-
   @override
-
-  ConsumerState<UnifiedPaymentSheet> createState() => _UnifiedPaymentSheetState();
-
+  ConsumerState<UnifiedPaymentSheet> createState() =>
+      _UnifiedPaymentSheetState();
 }
 
-
-
 class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
-
   _PaymentStep _step = _PaymentStep.confirmation;
 
   String _selectedMethod = 'bank_transfer'; // 'bank_transfer' | 'cash'
@@ -144,46 +126,32 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
 
   String? _errorMessage;
 
-
-
-  final NumberFormat _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: 'đ',
+  );
 
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
-
-
   bool _isSubmitting = false;
 
-
-
   Future<void> _startPayment() async {
-
     if (_isSubmitting) return;
 
-
-
     setState(() {
-
       _isSubmitting = true;
 
       _step = _PaymentStep.processing;
-
     });
 
-
-
     try {
-
       // Giả lập độ trễ mạng/gateway 1.2s - 1.5s tạo trải nghiệm thực tế
 
       await Future.delayed(const Duration(milliseconds: 1400));
 
-
-
       final controller = ref.read(paymentControllerProvider);
 
       final res = await controller.pay(
-
         type: widget.type,
 
         referenceId: widget.referenceId,
@@ -191,91 +159,54 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         paymentMethod: _selectedMethod,
 
         outcome: 'PENDING',
-
       );
 
-
-
       if (mounted) {
-
         setState(() {
-
           _result = res;
 
           _errorMessage = res.errorMessage != null
-
               ? NetworkErrorHandler.getMessage(res.errorMessage!)
-
               : null;
 
           if (res.isPending || res.status == 'PENDING') {
-
             _step = _PaymentStep.pendingConfirmation;
-
           } else if (res.success) {
-
             _step = _PaymentStep.success;
-
           } else {
-
             _step = _PaymentStep.failed;
-
           }
-
         });
-
       }
-
     } catch (e) {
-
       if (mounted) {
-
         setState(() {
-
           _errorMessage = NetworkErrorHandler.getMessage(e);
 
           _step = _PaymentStep.failed;
-
         });
-
       }
-
     } finally {
-
       if (mounted) {
-
         setState(() {
-
           _isSubmitting = false;
-
         });
-
       }
-
     }
-
   }
 
-
-
   void _handleInvoiceStatusChange(List<InvoiceModel>? invoices) {
-
     if (invoices == null || _step == _PaymentStep.success) return;
 
     final invoice = invoices.cast<InvoiceModel?>().firstWhere(
-
       (inv) => inv?.id == widget.referenceId,
 
       orElse: () => null,
-
     );
 
     if (invoice != null && invoice.status == 'paid' && mounted) {
-
       setState(() {
-
         _result = PaymentResult(
-
           success: true,
 
           status: 'SUCCESS',
@@ -289,187 +220,121 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
           title: widget.title,
 
           paidAt: invoice.paidAt ?? DateTime.now(),
-
         );
 
         _step = _PaymentStep.success;
-
       });
-
     }
-
   }
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     if (widget.type == PaymentType.invoice) {
-
-      ref.listen<AsyncValue<List<InvoiceModel>>>(residentInvoiceProvider, (previous, next) {
-
+      ref.listen<AsyncValue<List<InvoiceModel>>>(residentInvoiceProvider, (
+        previous,
+        next,
+      ) {
         _handleInvoiceStatusChange(next.valueOrNull);
-
       });
-
     }
-
-
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
 
-
-
     return Container(
-
       decoration: BoxDecoration(
-
         color: bgColor,
 
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
 
         boxShadow: [
-
           BoxShadow(
-
             color: Colors.black.withValues(alpha: 0.15),
 
             blurRadius: 24,
 
             offset: const Offset(0, -4),
-
           ),
-
         ],
-
       ),
 
       child: SafeArea(
-
         top: false,
 
         child: SingleChildScrollView(
-
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
 
           child: AnimatedSwitcher(
-
             duration: const Duration(milliseconds: 300),
 
             child: _buildCurrentStep(context),
-
           ),
-
         ),
-
       ),
-
     );
-
   }
 
-
-
   Widget _buildCurrentStep(BuildContext context) {
-
     switch (_step) {
-
       case _PaymentStep.confirmation:
-
         return _buildConfirmationStep(context);
 
       case _PaymentStep.processing:
-
         return _buildProcessingStep(context);
 
       case _PaymentStep.pendingConfirmation:
-
         return _buildPendingConfirmationStep(context);
 
       case _PaymentStep.success:
-
         return _buildSuccessStep(context);
 
       case _PaymentStep.failed:
-
         return _buildFailedStep(context);
-
     }
-
   }
 
-
-
   Widget _buildConfirmationStep(BuildContext context) {
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    
-
-    // Ưu tiên 1: Tòa nhà truyền trực tiếp qua widget
-
+    // Ưu tiên 1: Tòa nhà truyền trực tiếp qua widget (ví dụ từ chi tiết hóa đơn/đặt chỗ)
     // Ưu tiên 2: Tòa nhà của căn hộ cư dân đang chọn (residentBuildingProvider)
-
-    // Ưu tiên 3: Tòa nhà đang chọn của Ban Quản Lý (activeBuildingProvider)
-
+    // Nếu cư dân đã chọn căn hộ, tuyệt đối không fallback sang activeBuildingProvider để tránh chuyển tiền nhầm tòa nhà khác
+    // Chỉ fallback sang activeBuildingProvider khi không có ngữ cảnh căn hộ cư dân (ví dụ BQL đang thao tác độc lập)
+    final residentBldId = ref.watch(residentBuildingIdProvider);
     final building = widget.buildingId != null && widget.buildingId!.isNotEmpty
-
         ? ref.watch(buildingByIdProvider(widget.buildingId!)).value
-
-        : (ref.watch(residentBuildingProvider).value ?? ref.watch(activeBuildingProvider).value);
-
-
+        : (residentBldId != null
+            ? ref.watch(residentBuildingProvider).value
+            : ref.watch(activeBuildingProvider).value);
 
     final hasBankConfig = building != null && building.hasValidBankAccount;
-
     final bankBin = building?.bankBin ?? '';
-
     final bankName = building?.bankName ?? '';
-
     final bankAccountNumber = building?.bankAccountNumber ?? '';
-
     final bankAccountName = building?.bankAccountName ?? '';
 
-
-
     // Chuẩn hóa memo chữ-số thuần túy (loại bỏ #, -, ký tự đặc biệt)
-
-    final cleanMemo = widget.referenceCode.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
-
-
+    final cleanMemo = widget.referenceCode
+        .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')
+        .toUpperCase();
+    final hasValidMemo = cleanMemo.isNotEmpty;
+    final canUseBankTransfer = hasBankConfig && hasValidMemo;
 
     final String vietQrString;
-
-    if (hasBankConfig) {
-
+    if (canUseBankTransfer) {
       vietQrString = VietQrGenerator.generate(
-
         bankBin: bankBin,
-
         bankAccount: bankAccountNumber,
-
         amount: widget.amount,
-
         memo: cleanMemo,
-
         accountName: bankAccountName,
-
       );
-
     } else {
-
       vietQrString = '';
-
     }
 
-
-
     return Column(
-
       key: const ValueKey('step_confirmation'),
 
       mainAxisSize: MainAxisSize.min,
@@ -477,151 +342,119 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
 
       children: [
-
         Center(
-
           child: Container(
-
             width: 48,
 
             height: 5,
 
             decoration: BoxDecoration(
-
               color: Colors.grey.withValues(alpha: 0.3),
 
               borderRadius: BorderRadius.circular(10),
-
             ),
-
           ),
-
         ),
 
         const SizedBox(height: 16),
 
         Row(
-
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
           children: [
-
             Expanded(
-
               child: Text(
-
                 widget.title,
 
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
 
                 overflow: TextOverflow.ellipsis,
-
               ),
-
             ),
 
             IconButton(
-
               icon: const Icon(Icons.close),
 
               onPressed: () => Navigator.pop(context),
-
             ),
-
           ],
-
         ),
 
         Text(
-
           widget.referenceCode,
 
           style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-
         ),
 
         const SizedBox(height: 12),
 
-
-
         // Huy hiệu đối soát tự động VietQR Napas 247
-
         Container(
-
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
 
           decoration: BoxDecoration(
-
             color: isDark ? const Color(0xFF0F2942) : const Color(0xFFF0FDF4),
 
             borderRadius: BorderRadius.circular(12),
 
-            border: Border.all(color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFBBF7D0)),
-
+            border: Border.all(
+              color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFBBF7D0),
+            ),
           ),
 
           child: Row(
-
             children: [
-
-              Icon(Icons.verified_user_outlined, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF16A34A), size: 20),
+              Icon(
+                Icons.verified_user_outlined,
+                color: isDark
+                    ? const Color(0xFF60A5FA)
+                    : const Color(0xFF16A34A),
+                size: 20,
+              ),
 
               const SizedBox(width: 10),
 
               Expanded(
-
                 child: Text(
-
                   'Thanh toán tự động 24/7 qua VietQR Napas 247. Hệ thống tự động đối soát và gạch nợ tức thì qua Webhook ngân hàng.',
 
                   style: TextStyle(
-
                     fontSize: 12,
 
                     fontWeight: FontWeight.w500,
 
-                    color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF15803D),
-
+                    color: isDark
+                        ? const Color(0xFF93C5FD)
+                        : const Color(0xFF15803D),
                   ),
-
                 ),
-
               ),
-
             ],
-
           ),
-
         ),
-
-
 
         const SizedBox(height: 16),
 
         Container(
-
           padding: const EdgeInsets.all(16),
 
           decoration: BoxDecoration(
-
             color: AppTheme.primary.withValues(alpha: 0.08),
 
             borderRadius: BorderRadius.circular(16),
 
             border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
-
           ),
 
           child: Column(
-
             children: [
-
               Text(
-
                 'TỔNG TIỀN THANH TOÁN',
 
                 style: TextStyle(
-
                   fontSize: 12,
 
                   fontWeight: FontWeight.bold,
@@ -629,305 +462,260 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                   letterSpacing: 1,
 
                   color: AppTheme.primary,
-
                 ),
-
               ),
 
               const SizedBox(height: 6),
 
               Text(
-
                 _currencyFormat.format(widget.amount),
 
                 style: const TextStyle(
-
                   fontSize: 30,
 
                   fontWeight: FontWeight.w900,
 
                   color: AppTheme.primary,
-
                 ),
-
               ),
-
             ],
-
           ),
-
         ),
 
         if (widget.feeBreakdown != null && widget.feeBreakdown!.isNotEmpty) ...[
-
           const SizedBox(height: 16),
 
           const Text(
-
             'Chi tiết các khoản',
 
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-
           ),
 
           const SizedBox(height: 8),
 
           Container(
-
             padding: const EdgeInsets.all(12),
 
             decoration: BoxDecoration(
-
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade50,
 
               borderRadius: BorderRadius.circular(12),
 
-              border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
-
+              border: Border.all(
+                color: isDark ? Colors.white12 : Colors.grey.shade200,
+              ),
             ),
 
             child: Column(
-
               children: widget.feeBreakdown!.map((item) {
-
                 final name = item['name'] as String? ?? '';
 
                 final amount = (item['amount'] as num?)?.toDouble() ?? 0.0;
 
                 return Padding(
-
                   padding: const EdgeInsets.symmetric(vertical: 4),
 
                   child: Row(
-
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
                     children: [
-
                       Text(name, style: const TextStyle(fontSize: 13)),
 
                       Text(
-
                         _currencyFormat.format(amount),
 
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-
                     ],
-
                   ),
-
                 );
-
               }).toList(),
-
             ),
-
           ),
-
         ],
 
         const SizedBox(height: 16),
 
         const Text(
-
           'Chọn hình thức thanh toán',
 
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-
         ),
 
         const SizedBox(height: 8),
 
-
-
         // Lựa chọn 1: Chuyển khoản VietQR
-
         InkWell(
-
           onTap: () {
-
             setState(() {
-
               _selectedMethod = 'bank_transfer';
-
             });
-
           },
 
           borderRadius: BorderRadius.circular(14),
 
           child: Container(
-
             padding: const EdgeInsets.all(14),
 
             decoration: BoxDecoration(
-
               color: _selectedMethod == 'bank_transfer'
-
                   ? AppTheme.primary.withValues(alpha: 0.06)
-
-                  : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50),
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : Colors.grey.shade50),
 
               borderRadius: BorderRadius.circular(14),
 
               border: Border.all(
-
-                color: _selectedMethod == 'bank_transfer' ? AppTheme.primary : (isDark ? Colors.white12 : Colors.grey.shade200),
+                color: _selectedMethod == 'bank_transfer'
+                    ? AppTheme.primary
+                    : (isDark ? Colors.white12 : Colors.grey.shade200),
 
                 width: _selectedMethod == 'bank_transfer' ? 1.5 : 1,
-
               ),
-
             ),
 
             child: Row(
-
               children: [
-
                 Icon(
+                  _selectedMethod == 'bank_transfer'
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
 
-                  _selectedMethod == 'bank_transfer' ? Icons.radio_button_checked : Icons.radio_button_off,
-
-                  color: _selectedMethod == 'bank_transfer' ? AppTheme.primary : Colors.grey,
-
+                  color: _selectedMethod == 'bank_transfer'
+                      ? AppTheme.primary
+                      : Colors.grey,
                 ),
 
                 const SizedBox(width: 12),
 
                 Expanded(
-
                   child: Column(
-
                     crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
-
                       const Text(
-
                         'Chuyển khoản VietQR (Napas 247)',
 
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
 
                       Text(
-
                         'Quét mã chuyển tiền nhanh 24/7 liên ngân hàng',
 
-                        style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-
                     ],
-
                   ),
-
                 ),
 
                 const Icon(Icons.qr_code_2, color: AppTheme.primary, size: 24),
-
               ],
-
             ),
-
           ),
-
         ),
 
         const SizedBox(height: 10),
 
-
-
         // Thông tin VietQR nếu chọn chuyển khoản
-
         if (_selectedMethod == 'bank_transfer') ...[
-
           if (!hasBankConfig) ...[
-
             Container(
-
               padding: const EdgeInsets.all(16),
-
               decoration: BoxDecoration(
-
-                color: isDark ? Colors.amber.shade900.withValues(alpha: 0.2) : Colors.amber.shade50,
-
+                color: isDark
+                    ? Colors.amber.shade900.withValues(alpha: 0.2)
+                    : Colors.amber.shade50,
                 borderRadius: BorderRadius.circular(14),
-
                 border: Border.all(color: Colors.amber.shade400),
-
               ),
-
               child: Row(
-
                 children: [
-
-                  Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800, size: 28),
-
-                  const SizedBox(width: 12),
-
-                  const Expanded(
-
-                    child: Text(
-
-                      'Ban Quản Lý chưa cấu hình tài khoản nhận tiền cho tòa nhà này. Vui lòng liên hệ trực tiếp BQL để được hướng dẫn thanh toán.',
-
-                      style: TextStyle(fontSize: 13, height: 1.4),
-
-                    ),
-
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber.shade800,
+                    size: 28,
                   ),
-
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Ban Quản Lý chưa cấu hình tài khoản nhận tiền cho tòa nhà này. Vui lòng liên hệ trực tiếp BQL để được hướng dẫn thanh toán hoặc chọn phương thức Tiền mặt.',
+                      style: TextStyle(fontSize: 13, height: 1.4),
+                    ),
+                  ),
                 ],
-
               ),
-
             ),
-
-          ] else ...[
-
+          ] else if (!hasValidMemo) ...[
             Container(
-
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.amber.shade900.withValues(alpha: 0.2)
+                    : Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.amber.shade400),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber.shade800,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Khoản phí này chưa có mã thanh toán hợp lệ từ hệ thống máy chủ để đối soát tự động. Vui lòng liên hệ BQL hoặc chọn phương thức Tiền mặt.',
+                      style: TextStyle(fontSize: 13, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            Container(
               padding: const EdgeInsets.all(14),
 
               decoration: BoxDecoration(
-
-                color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFF8FAFC),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : const Color(0xFFF8FAFC),
 
                 borderRadius: BorderRadius.circular(14),
 
                 border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
-
               ),
 
               child: Column(
-
                 children: [
-
                   Row(
-
                     mainAxisAlignment: MainAxisAlignment.center,
 
                     children: [
-
                       Container(
-
                         padding: const EdgeInsets.all(8),
 
                         decoration: BoxDecoration(
-
                           color: Colors.white,
 
                           borderRadius: BorderRadius.circular(12),
 
                           border: Border.all(color: Colors.grey.shade300),
-
                         ),
 
                         child: QrImageView(
-
                           key: ValueKey('vietqr_$vietQrString'),
 
                           data: vietQrString,
@@ -935,463 +723,424 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                           version: QrVersions.auto,
 
                           size: 110.0,
-
                         ),
-
                       ),
 
                       const SizedBox(width: 16),
 
                       Expanded(
-
                         child: Column(
-
                           crossAxisAlignment: CrossAxisAlignment.start,
 
                           children: [
-
                             Text(
-
                               bankName,
 
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary),
-
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primary,
+                              ),
                             ),
 
                             const SizedBox(height: 4),
 
                             Text(
-
                               'STK: $bankAccountNumber',
 
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
 
                             Text(
-
                               'Tên: $bankAccountName',
 
-                              style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
 
                             const SizedBox(height: 6),
 
                             Text(
-
                               'Nội dung: $cleanMemo',
 
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue.shade700),
-
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue.shade700,
+                              ),
                             ),
-
                           ],
-
                         ),
-
                       ),
-
                     ],
-
                   ),
 
                   const SizedBox(height: 12),
 
                   Wrap(
-
                     spacing: 8,
 
                     runSpacing: 8,
 
                     children: [
-
                       ActionChip(
+                        avatar: const Icon(
+                          Icons.copy_rounded,
+                          size: 14,
+                          color: AppTheme.primary,
+                        ),
 
-                        avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                        label: const Text(
+                          'Sao chép STK',
+                          style: TextStyle(fontSize: 11),
+                        ),
 
-                        label: const Text('Sao chép STK', style: TextStyle(fontSize: 11)),
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.white,
 
-                        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-
-                        side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                        side: BorderSide(
+                          color: AppTheme.primary.withValues(alpha: 0.3),
+                        ),
 
                         onPressed: () {
-
-                          Clipboard.setData(ClipboardData(text: bankAccountNumber));
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-
-                            const SnackBar(
-
-                              content: Text('Đã sao chép số tài khoản vào bộ nhớ tạm'),
-
-                              duration: Duration(seconds: 2),
-
-                            ),
-
+                          Clipboard.setData(
+                            ClipboardData(text: bankAccountNumber),
                           );
 
-                        },
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Đã sao chép số tài khoản vào bộ nhớ tạm',
+                              ),
 
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
                       ),
 
                       ActionChip(
+                        avatar: const Icon(
+                          Icons.copy_rounded,
+                          size: 14,
+                          color: AppTheme.primary,
+                        ),
 
-                        avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                        label: const Text(
+                          'Sao chép Nội dung',
+                          style: TextStyle(fontSize: 11),
+                        ),
 
-                        label: const Text('Sao chép Nội dung', style: TextStyle(fontSize: 11)),
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.white,
 
-                        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-
-                        side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                        side: BorderSide(
+                          color: AppTheme.primary.withValues(alpha: 0.3),
+                        ),
 
                         onPressed: () {
-
                           Clipboard.setData(ClipboardData(text: cleanMemo));
 
                           ScaffoldMessenger.of(context).showSnackBar(
-
                             const SnackBar(
-
-                              content: Text('Đã sao chép nội dung chuyển khoản vào bộ nhớ tạm'),
+                              content: Text(
+                                'Đã sao chép nội dung chuyển khoản vào bộ nhớ tạm',
+                              ),
 
                               duration: Duration(seconds: 2),
-
                             ),
-
                           );
-
                         },
-
                       ),
 
                       ActionChip(
+                        avatar: const Icon(
+                          Icons.copy_rounded,
+                          size: 14,
+                          color: AppTheme.primary,
+                        ),
 
-                        avatar: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.primary),
+                        label: const Text(
+                          'Sao chép Số tiền',
+                          style: TextStyle(fontSize: 11),
+                        ),
 
-                        label: const Text('Sao chép Số tiền', style: TextStyle(fontSize: 11)),
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.white,
 
-                        backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-
-                        side: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                        side: BorderSide(
+                          color: AppTheme.primary.withValues(alpha: 0.3),
+                        ),
 
                         onPressed: () {
-
-                          Clipboard.setData(ClipboardData(text: widget.amount.toInt().toString()));
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-
-                            const SnackBar(
-
-                              content: Text('Đã sao chép số tiền vào bộ nhớ tạm'),
-
-                              duration: Duration(seconds: 2),
-
+                          Clipboard.setData(
+                            ClipboardData(
+                              text: widget.amount.toInt().toString(),
                             ),
-
                           );
 
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Đã sao chép số tiền vào bộ nhớ tạm',
+                              ),
+
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
                         },
-
                       ),
-
                     ],
-
                   ),
 
                   const SizedBox(height: 8),
 
                   Text(
-
                     'Quét mã QR bằng ứng dụng ngân hàng bất kỳ để chuyển tiền nhanh 24/7.',
 
-                    style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
-
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
-
                 ],
-
               ),
-
             ),
-
           ],
 
           const SizedBox(height: 10),
-
         ],
 
-
-
         // Lựa chọn 2: Tiền mặt tại quầy
-
         InkWell(
-
           onTap: () {
-
             setState(() {
-
               _selectedMethod = 'cash';
-
             });
-
           },
 
           borderRadius: BorderRadius.circular(14),
 
           child: Container(
-
             padding: const EdgeInsets.all(14),
 
             decoration: BoxDecoration(
-
               color: _selectedMethod == 'cash'
-
                   ? AppTheme.primary.withValues(alpha: 0.06)
-
-                  : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50),
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : Colors.grey.shade50),
 
               borderRadius: BorderRadius.circular(14),
 
               border: Border.all(
-
-                color: _selectedMethod == 'cash' ? AppTheme.primary : (isDark ? Colors.white12 : Colors.grey.shade200),
+                color: _selectedMethod == 'cash'
+                    ? AppTheme.primary
+                    : (isDark ? Colors.white12 : Colors.grey.shade200),
 
                 width: _selectedMethod == 'cash' ? 1.5 : 1,
-
               ),
-
             ),
 
             child: Row(
-
               children: [
-
                 Icon(
+                  _selectedMethod == 'cash'
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
 
-                  _selectedMethod == 'cash' ? Icons.radio_button_checked : Icons.radio_button_off,
-
-                  color: _selectedMethod == 'cash' ? AppTheme.primary : Colors.grey,
-
+                  color: _selectedMethod == 'cash'
+                      ? AppTheme.primary
+                      : Colors.grey,
                 ),
 
                 const SizedBox(width: 12),
 
                 Expanded(
-
                   child: Column(
-
                     crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
-
                       const Text(
-
                         'Tiền mặt tại văn phòng Ban Quản Lý',
 
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
 
                       Text(
-
                         'Đến quầy nộp tiền trực tiếp và nhận biên nhận giấy',
 
-                        style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-
                     ],
-
                   ),
-
                 ),
 
-                const Icon(Icons.payments_outlined, color: AppTheme.primary, size: 24),
-
+                const Icon(
+                  Icons.payments_outlined,
+                  color: AppTheme.primary,
+                  size: 24,
+                ),
               ],
-
             ),
-
           ),
-
         ),
-
-
 
         const SizedBox(height: 24),
 
         ElevatedButton(
-
           style: ElevatedButton.styleFrom(
-
             backgroundColor: AppTheme.primary,
 
             foregroundColor: Colors.white,
 
             padding: const EdgeInsets.symmetric(vertical: 16),
 
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
 
             elevation: 2,
-
           ),
 
-          onPressed: _isSubmitting || (_selectedMethod == 'bank_transfer' && !hasBankConfig) ? null : _startPayment,
+          onPressed:
+              _isSubmitting ||
+                  (_selectedMethod == 'bank_transfer' && !canUseBankTransfer)
+              ? null
+              : _startPayment,
 
           child: _isSubmitting
-
               ? const Row(
-
                   mainAxisAlignment: MainAxisAlignment.center,
 
                   children: [
-
                     SizedBox(
-
                       width: 20,
 
                       height: 20,
 
                       child: CircularProgressIndicator(
-
                         strokeWidth: 2,
 
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-
                       ),
-
                     ),
 
                     SizedBox(width: 12),
 
                     Text(
-
                       'ĐANG GỬI THÔNG BÁO...',
 
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-
                   ],
-
                 )
-
               : Text(
+                  (_selectedMethod == 'bank_transfer' && !canUseBankTransfer)
+                      ? (!hasBankConfig
+                          ? 'BQL CHƯA CẤU HÌNH TÀI KHOẢN'
+                          : 'CHƯA CÓ MÃ THANH TOÁN HỢP LỆ')
+                      : 'GỬI THÔNG BÁO THANH TOÁN',
 
-                  (_selectedMethod == 'bank_transfer' && !hasBankConfig) ? 'BQL CHƯA CẤU HÌNH TÀI KHOẢN' : 'GỬI THÔNG BÁO THANH TOÁN',
-
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-
         ),
 
         const SizedBox(height: 8),
-
       ],
-
     );
-
   }
 
-
-
   Widget _buildProcessingStep(BuildContext context) {
-
     return Padding(
-
       key: const ValueKey('step_processing'),
 
       padding: const EdgeInsets.symmetric(vertical: 40),
 
       child: Column(
-
         mainAxisSize: MainAxisSize.min,
 
         children: [
-
           const SizedBox(
-
             width: 56,
 
             height: 56,
 
             child: CircularProgressIndicator(
-
               strokeWidth: 4,
 
               valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
-
             ),
-
           ),
 
           const SizedBox(height: 24),
 
           const Text(
-
             'Đang gửi thông báo thanh toán...',
 
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-
           ),
 
           const SizedBox(height: 8),
 
           Text(
-
             _currencyFormat.format(widget.amount),
 
             style: const TextStyle(
-
               fontSize: 22,
 
               fontWeight: FontWeight.w900,
 
               color: AppTheme.primary,
-
             ),
-
           ),
 
           const SizedBox(height: 12),
 
           Text(
-
             'Hệ thống đang ghi nhận yêu cầu vào sổ kế toán và chuyển đến BQL',
 
             style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
 
             textAlign: TextAlign.center,
-
           ),
-
         ],
-
       ),
-
     );
-
   }
-
-
 
   /// Bước hiển thị khi yêu cầu ở trạng thái PENDING (Chờ Ban Quản Lý xác nhận)
 
   Widget _buildPendingConfirmationStep(BuildContext context) {
-
     final txCode = _result?.transactionCode ?? 'PENDING-001';
 
     final dateStr = _dateFormat.format(_result?.paidAt ?? DateTime.now());
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-
-
     return Column(
-
       key: const ValueKey('step_pending_confirmation'),
 
       mainAxisSize: MainAxisSize.min,
@@ -1399,121 +1148,99 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
 
       children: [
-
         const SizedBox(height: 16),
 
         Center(
-
           child: Container(
-
             width: 72,
 
             height: 72,
 
             decoration: BoxDecoration(
-
               color: Colors.orange.withValues(alpha: 0.15),
 
               shape: BoxShape.circle,
-
             ),
 
-            child: const Icon(Icons.hourglass_top, color: Colors.orange, size: 48),
-
+            child: const Icon(
+              Icons.hourglass_top,
+              color: Colors.orange,
+              size: 48,
+            ),
           ),
-
         ),
 
         const SizedBox(height: 16),
 
         const Center(
-
           child: Text(
-
             'Đã gửi thông báo thanh toán',
 
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.orange),
-
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange,
+            ),
           ),
-
         ),
 
         const SizedBox(height: 6),
 
         Center(
-
           child: Container(
-
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
 
             decoration: BoxDecoration(
-
               color: Colors.orange.withValues(alpha: 0.1),
 
               borderRadius: BorderRadius.circular(12),
 
               border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-
             ),
 
             child: const Text(
-
               'Chờ Ban Quản Lý xác nhận',
 
               style: TextStyle(
-
                 fontSize: 12,
 
                 fontWeight: FontWeight.bold,
 
                 color: Colors.orange,
-
               ),
-
             ),
-
           ),
-
         ),
 
         const SizedBox(height: 12),
 
         Center(
-
           child: Text(
-
             _currencyFormat.format(widget.amount),
 
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
-
           ),
-
         ),
 
         const SizedBox(height: 20),
 
         Container(
-
           padding: const EdgeInsets.all(16),
 
           decoration: BoxDecoration(
-
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.grey.shade50,
 
             borderRadius: BorderRadius.circular(16),
 
             border: Border.all(
-
               color: isDark ? Colors.white12 : Colors.grey.shade200,
-
             ),
-
           ),
 
           child: Column(
-
             children: [
-
               _buildInfoRow('Mã yêu cầu', txCode, isHighlight: true),
 
               const Divider(height: 16),
@@ -1527,79 +1254,57 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
               const Divider(height: 16),
 
               _buildInfoRow(
-
                 'Hình thức',
 
                 _selectedMethod == 'bank_transfer'
-
                     ? 'Chuyển khoản VietQR (Napas 247)'
-
                     : 'Tiền mặt tại BQL',
-
               ),
 
               const Divider(height: 16),
 
               _buildInfoRow('Trạng thái', 'Chờ Ban Quản Lý đối soát'),
-
             ],
-
           ),
-
         ),
 
         const SizedBox(height: 24),
 
         ElevatedButton(
-
           style: ElevatedButton.styleFrom(
-
             backgroundColor: Colors.orange.shade700,
 
             foregroundColor: Colors.white,
 
             padding: const EdgeInsets.symmetric(vertical: 16),
 
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
 
           onPressed: () {
-
             Navigator.pop(context, _result);
-
           },
 
           child: const Text(
-
             'ĐÃ HIỂU',
 
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-
           ),
-
         ),
 
         const SizedBox(height: 8),
-
       ],
-
     );
-
   }
 
-
-
   Widget _buildSuccessStep(BuildContext context) {
-
     final txCode = _result?.transactionCode ?? 'SUCCESS-001';
 
     final dateStr = _dateFormat.format(_result?.paidAt ?? DateTime.now());
 
-
-
     return Column(
-
       key: const ValueKey('step_success'),
 
       mainAxisSize: MainAxisSize.min,
@@ -1607,87 +1312,73 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
 
       children: [
-
         const SizedBox(height: 16),
 
         Center(
-
           child: Container(
-
             width: 72,
 
             height: 72,
 
             decoration: BoxDecoration(
-
               color: AppTheme.success.withValues(alpha: 0.15),
 
               shape: BoxShape.circle,
-
             ),
 
-            child: const Icon(Icons.check_circle, color: AppTheme.success, size: 54),
-
+            child: const Icon(
+              Icons.check_circle,
+              color: AppTheme.success,
+              size: 54,
+            ),
           ),
-
         ),
 
         const SizedBox(height: 16),
 
         const Center(
-
           child: Text(
-
             'Thanh toán thành công',
 
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.success),
-
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.success,
+            ),
           ),
-
         ),
 
         const SizedBox(height: 6),
 
         Center(
-
           child: Text(
-
             _currencyFormat.format(widget.amount),
 
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
-
           ),
-
         ),
 
         const SizedBox(height: 20),
 
         Container(
-
           padding: const EdgeInsets.all(16),
 
           decoration: BoxDecoration(
-
             color: Theme.of(context).brightness == Brightness.dark
-
                 ? Colors.white.withValues(alpha: 0.05)
-
                 : Colors.grey.shade50,
 
             borderRadius: BorderRadius.circular(16),
 
             border: Border.all(
-
-              color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey.shade200,
-
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white12
+                  : Colors.grey.shade200,
             ),
-
           ),
 
           child: Column(
-
             children: [
-
               _buildInfoRow('Mã giao dịch', txCode, isHighlight: true),
 
               const Divider(height: 16),
@@ -1701,65 +1392,49 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
               const Divider(height: 16),
 
               _buildInfoRow(
-
                 'Phương thức',
 
-                _selectedMethod == 'bank_transfer' ? 'Chuyển khoản VietQR (Napas 247)' : 'Tiền mặt tại BQL',
-
+                _selectedMethod == 'bank_transfer'
+                    ? 'Chuyển khoản VietQR (Napas 247)'
+                    : 'Tiền mặt tại BQL',
               ),
-
             ],
-
           ),
-
         ),
 
         const SizedBox(height: 24),
 
         ElevatedButton(
-
           style: ElevatedButton.styleFrom(
-
             backgroundColor: AppTheme.primary,
 
             foregroundColor: Colors.white,
 
             padding: const EdgeInsets.symmetric(vertical: 16),
 
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
 
           onPressed: () {
-
             Navigator.pop(context, _result);
-
           },
 
           child: const Text(
-
             'HOÀN TẤT',
 
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-
           ),
-
         ),
 
         const SizedBox(height: 8),
-
       ],
-
     );
-
   }
 
-
-
   Widget _buildFailedStep(BuildContext context) {
-
     return Column(
-
       key: const ValueKey('step_failed'),
 
       mainAxisSize: MainAxisSize.min,
@@ -1767,164 +1442,136 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
 
       children: [
-
         const SizedBox(height: 16),
 
         Center(
-
           child: Container(
-
             width: 72,
 
             height: 72,
 
             decoration: BoxDecoration(
-
               color: AppTheme.error.withValues(alpha: 0.15),
 
               shape: BoxShape.circle,
-
             ),
 
-            child: const Icon(Icons.error_outline, color: AppTheme.error, size: 54),
-
+            child: const Icon(
+              Icons.error_outline,
+              color: AppTheme.error,
+              size: 54,
+            ),
           ),
-
         ),
 
         const SizedBox(height: 16),
 
         const Center(
-
           child: Text(
-
             'Giao dịch không thành công',
 
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.error),
-
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.error,
+            ),
           ),
-
         ),
 
         const SizedBox(height: 8),
 
         Center(
-
           child: Text(
-
-            _errorMessage ?? 'Đã xảy ra sự cố trong quá trình gửi thông báo giao dịch.',
+            _errorMessage ??
+                'Đã xảy ra sự cố trong quá trình gửi thông báo giao dịch.',
 
             style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
 
             textAlign: TextAlign.center,
-
           ),
-
         ),
 
         const SizedBox(height: 24),
 
         Row(
-
           children: [
-
             Expanded(
-
               child: OutlinedButton(
-
                 style: OutlinedButton.styleFrom(
-
                   padding: const EdgeInsets.symmetric(vertical: 16),
 
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
 
                 onPressed: () => Navigator.pop(context),
 
-                child: const Text('ĐÓNG', style: TextStyle(fontWeight: FontWeight.bold)),
-
+                child: const Text(
+                  'ĐÓNG',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-
             ),
 
             const SizedBox(width: 12),
 
             Expanded(
-
               child: ElevatedButton(
-
                 style: ElevatedButton.styleFrom(
-
                   backgroundColor: AppTheme.primary,
 
                   foregroundColor: Colors.white,
 
                   padding: const EdgeInsets.symmetric(vertical: 16),
 
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
 
                 onPressed: _isSubmitting ? null : _startPayment,
 
-                child: const Text('THỬ LẠI', style: TextStyle(fontWeight: FontWeight.bold)),
-
+                child: const Text(
+                  'THỬ LẠI',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-
             ),
-
           ],
-
         ),
-
       ],
-
     );
-
   }
 
-
-
   Widget _buildInfoRow(String label, String value, {bool isHighlight = false}) {
-
     return Row(
-
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
       children: [
-
-        Text(label, style: TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+        ),
 
         const SizedBox(width: 8),
 
         Flexible(
-
           child: Text(
-
             value,
 
             textAlign: TextAlign.end,
 
             style: TextStyle(
-
               fontSize: 13,
 
               fontWeight: FontWeight.bold,
 
               color: isHighlight ? AppTheme.primary : null,
-
             ),
-
           ),
-
         ),
-
       ],
-
     );
-
   }
-
 }
-
