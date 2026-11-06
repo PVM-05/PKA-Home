@@ -18,6 +18,7 @@ import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import 'link_request_management_screen.dart';
 import '../widgets/resident_360_detail_sheet.dart';
+import '../widgets/resident_activation_management_sheet.dart';
 
 class ResidentManagementScreen extends ConsumerStatefulWidget {
   const ResidentManagementScreen({super.key});
@@ -1118,6 +1119,11 @@ class _ResidentManagementScreenState
         appBar: AppBar(
           title: const Text('Quản lý Cư dân'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.key_rounded),
+              tooltip: 'Mã kích hoạt & Thư mời cư dân',
+              onPressed: () => ResidentActivationManagementSheet.show(context),
+            ),
             if (isCurrentUserAdmin)
               IconButton(
                 icon: linkCount > 0

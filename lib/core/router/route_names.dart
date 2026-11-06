@@ -6,6 +6,7 @@ class AppRoutes {
   // Auth
   static const String login = '/login';
   static const String register = '/register';
+  static const String residentActivation = '/auth/activate';
   static const String changePassword = '/change-password';
   static const String forgotPassword = '/forgot-password';
   static const String verifyOtp = '/verify-otp';
@@ -57,6 +58,7 @@ class AppRoutes {
   static const String managementFinancialReport = '/management/financial-report';
   static const String managementMaintenanceFundLedger = '/management/maintenance-fund-ledger';
   static const String managementBatchImport = '/management/batch-import';
+  static const String managementActivationList = '/management/activations';
   static const String managementSubscription = '/management/subscription';
   static const String managementAccountingWorkstation = '/management/accounting-workstation';
   static const String managementParking = '/management/parking';

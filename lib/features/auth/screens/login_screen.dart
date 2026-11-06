@@ -310,6 +310,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                         ),
+
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(child: Divider(color: Colors.grey.shade300)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                'HOẶC',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Divider(color: Colors.grey.shade300)),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Nút Kích hoạt tài khoản lần đầu
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            side: const BorderSide(color: AppTheme.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          icon: const Icon(Icons.key_rounded, size: 20),
+                          label: const Text(
+                            'Kích hoạt tài khoản lần đầu',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () =>
+                              context.push(AppRoutes.residentActivation),
+                        ),
                       ],
                     ),
                   ),

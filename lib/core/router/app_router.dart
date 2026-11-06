@@ -20,6 +20,7 @@ import '../../data/models/building_equipment_model.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/change_password_screen.dart';
+import '../../features/auth/screens/resident_activation_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/verify_otp_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
@@ -90,6 +91,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = user != null;
       final isAuthRoute = state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.register ||
+          state.matchedLocation == AppRoutes.residentActivation ||
           state.matchedLocation == AppRoutes.forgotPassword;
       final isRecoveryRoute = state.matchedLocation == AppRoutes.verifyOtp ||
           state.matchedLocation == AppRoutes.resetPassword;
@@ -130,6 +132,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => AppPageTransitions.slideUp(
           state: state,
           child: const RegisterScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.residentActivation,
+        pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
+          state: state,
+          child: const ResidentActivationScreen(),
         ),
       ),
       GoRoute(

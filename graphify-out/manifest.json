@@ -240,9 +240,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/app_router.dart": {
-    "mtime": 1793889481.6075556,
-    "seen": 1793891612.8321867,
-    "ast_hash": "3c52c481d17525ac44a5d4b1c5ed4fbd",
+    "mtime": 1793976848.5538673,
+    "seen": 1793978071.2494173,
+    "ast_hash": "f69752baf19e11ab9257b0690a163581",
     "semantic_hash": ""
   },
   "lib/core/router/page_transitions.dart": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/route_names.dart": {
-    "mtime": 1793886319.7197127,
-    "seen": 1793891612.8321867,
-    "ast_hash": "5be3a862f983aa9b70b5d5f3b15efdb5",
+    "mtime": 1793976778.2838166,
+    "seen": 1793978071.2494173,
+    "ast_hash": "67ab9dce66908487e64648824c2f5ff9",
     "semantic_hash": ""
   },
   "lib/core/services/push_notification_service.dart": {
@@ -948,9 +948,9 @@
     "semantic_hash": ""
   },
   "lib/features/auth/screens/login_screen.dart": {
-    "mtime": 1793966409.057714,
-    "seen": 1793967364.3401477,
-    "ast_hash": "1400cf1f7c0332369496a9c3985dc0e2",
+    "mtime": 1793976866.017268,
+    "seen": 1793978071.2494173,
+    "ast_hash": "2a0153dc4f249daf9a827fca2084eb34",
     "semantic_hash": ""
   },
   "lib/features/auth/screens/register_screen.dart": {
@@ -1008,8 +1008,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/apartment_management_screen.dart": {
-    "mtime": 1793975364.1440043,
-    "seen": 1793975822.9463577,
+    "mtime": 1793975864.8550942,
+    "seen": 1793978071.2494173,
     "ast_hash": "7c788a4b214c67919b7ba5afc883faf4",
     "semantic_hash": ""
   },
@@ -1110,9 +1110,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/resident_management_screen.dart": {
-    "mtime": 1793968080.6342776,
-    "seen": 1793968350.5547857,
-    "ast_hash": "fb9e4cee987718c0d14df4cc0be721bd",
+    "mtime": 1793976985.2402754,
+    "seen": 1793978071.2494173,
+    "ast_hash": "e909527f028981fe280969bc83a5ad20",
     "semantic_hash": ""
   },
   "lib/features/management/screens/role_delegation_screen.dart": {
@@ -4884,8 +4884,8 @@
     "semantic_hash": ""
   },
   "lib/core/utils/excel_import_helper.dart": {
-    "mtime": 1793975250.12271,
-    "seen": 1793975822.9463577,
+    "mtime": 1793975864.6972897,
+    "seen": 1793978071.2494173,
     "ast_hash": "632bed4d775e6ec6146680687bbc416c",
     "semantic_hash": ""
   },
@@ -4896,8 +4896,8 @@
     "semantic_hash": ""
   },
   "lib/data/providers/batch_import_provider.dart": {
-    "mtime": 1793975303.84424,
-    "seen": 1793975822.9463577,
+    "mtime": 1793975864.7649434,
+    "seen": 1793978071.2494173,
     "ast_hash": "1ee315b7e4c3c05643a3f4001fdfb33f",
     "semantic_hash": ""
   },
@@ -4908,8 +4908,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/batch_import_center_screen.dart": {
-    "mtime": 1793975414.189146,
-    "seen": 1793975822.9463577,
+    "mtime": 1793975864.9422004,
+    "seen": 1793978071.2494173,
     "ast_hash": "8f4b5d7d1196587646077540579fb8c3",
     "semantic_hash": ""
   },
@@ -4920,8 +4920,8 @@
     "semantic_hash": ""
   },
   "test/core/utils/excel_import_helper_test.dart": {
-    "mtime": 1793975603.8442218,
-    "seen": 1793975822.9463577,
+    "mtime": 1793975865.0064485,
+    "seen": 1793978071.2504413,
     "ast_hash": "4e6ed73c6e5bd685697553255dd74af3",
     "semantic_hash": ""
   },
@@ -4938,8 +4938,8 @@
     "semantic_hash": ""
   },
   "test/features/management/screens/batch_import_center_screen_test.dart": {
-    "mtime": 1793975541.9131086,
-    "seen": 1793975822.947868,
+    "mtime": 1793975865.2757268,
+    "seen": 1793978071.2504413,
     "ast_hash": "95651e7ed6a9e96ef35f2597cb652c31",
     "semantic_hash": ""
   },
@@ -6306,9 +6306,75 @@
     "semantic_hash": ""
   },
   "test/features/management/screens/apartment_management_onboarding_test.dart": {
-    "mtime": 1793975734.0854325,
-    "seen": 1793975822.947868,
+    "mtime": 1793975865.0730557,
+    "seen": 1793978071.2504413,
     "ast_hash": "99a6fa69aa2d284a1159a7a7d247417e",
+    "semantic_hash": ""
+  },
+  "lib/data/models/resident_activation_model.dart": {
+    "mtime": 1793976693.0297904,
+    "seen": 1793978071.2494173,
+    "ast_hash": "3aca376e76e5f2472e7833be1f2b00c4",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/resident_activation_provider.dart": {
+    "mtime": 1793977955.359451,
+    "seen": 1793978071.2494173,
+    "ast_hash": "3f123e629fd1c3b696ac06d25ff74349",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/resident_activation_repository.dart": {
+    "mtime": 1793977148.7832623,
+    "seen": 1793978071.2494173,
+    "ast_hash": "9cf178bf492090abcee559b81b6aeb72",
+    "semantic_hash": ""
+  },
+  "lib/features/auth/screens/resident_activation_screen.dart": {
+    "mtime": 1793977771.241758,
+    "seen": 1793978071.2494173,
+    "ast_hash": "38e8131a7e5a3e0021382af20ff33470",
+    "semantic_hash": ""
+  },
+  "lib/features/management/widgets/resident_activation_management_sheet.dart": {
+    "mtime": 1793977973.8899055,
+    "seen": 1793978071.2494173,
+    "ast_hash": "77a89d7f0f2ff1fa8ef3901493353740",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261106_02_resident_first_time_activation.sql": {
+    "mtime": 1793976614.284969,
+    "seen": 1793978071.2504413,
+    "ast_hash": "31afe736385e972394452403ac9c6ea5",
+    "semantic_hash": ""
+  },
+  "test/data/models/resident_activation_model_test.dart": {
+    "mtime": 1793976999.6452203,
+    "seen": 1793978071.2504413,
+    "ast_hash": "f8beb5a457887e100905994d2a81a18f",
+    "semantic_hash": ""
+  },
+  "test/data/providers/resident_activation_provider_test.dart": {
+    "mtime": 1793977024.850702,
+    "seen": 1793978071.2504413,
+    "ast_hash": "58a58f719e96e10b16815b00bbee88cc",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/resident_activation_repository_test.dart": {
+    "mtime": 1793977013.4410474,
+    "seen": 1793978071.2504413,
+    "ast_hash": "1ee6d7b67ae3f7df48548cb385d98885",
+    "semantic_hash": ""
+  },
+  "test/features/auth/screens/resident_activation_screen_test.dart": {
+    "mtime": 1793977749.9970894,
+    "seen": 1793978071.2504413,
+    "ast_hash": "8b7abb978571d74564d0b608bedce18d",
+    "semantic_hash": ""
+  },
+  "test/features/management/widgets/resident_activation_management_sheet_test.dart": {
+    "mtime": 1793977363.6516113,
+    "seen": 1793978071.2504413,
+    "ast_hash": "dd8536844dc91671be594599d45fe3d7",
     "semantic_hash": ""
   }
 }
