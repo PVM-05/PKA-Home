@@ -74,27 +74,52 @@ class _BatchImportCenterScreenState
             // Bước 1: Tải file mẫu
             _buildStepCard(
               stepNumber: '1',
-              title: 'Tải File Mẫu Chuẩn Hóa (.xlsx)',
+              title: 'Tải File Mẫu Chuẩn Hóa (.xlsx / .csv)',
               subtitle:
-                  'Tải file mẫu Excel chuẩn để điền dữ liệu theo đúng cấu trúc hệ thống',
-              action: OutlinedButton.icon(
-                icon: const Icon(Icons.download),
-                label: Text('Tải mẫu ${state.selectedType.label}'),
-                onPressed: state.isProcessing
-                    ? null
-                    : () async {
-                        final path = await notifier.downloadTemplate(
-                          state.selectedType,
-                        );
-                        if (path != null && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Đã tạo file mẫu Excel thành công'),
-                              backgroundColor: AppTheme.success,
-                            ),
-                          );
-                        }
-                      },
+                  'Tải file mẫu Excel hoặc CSV chuẩn để điền dữ liệu theo đúng cấu trúc hệ thống',
+              action: Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.table_view),
+                    label: Text('Tải mẫu Excel (.xlsx)'),
+                    onPressed: state.isProcessing
+                        ? null
+                        : () async {
+                            final path = await notifier.downloadTemplate(
+                              state.selectedType,
+                            );
+                            if (path != null && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Đã tạo file mẫu Excel thành công'),
+                                  backgroundColor: AppTheme.success,
+                                ),
+                              );
+                            }
+                          },
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.description),
+                    label: Text('Tải mẫu CSV (.csv)'),
+                    onPressed: state.isProcessing
+                        ? null
+                        : () async {
+                            final path = await notifier.downloadCsvTemplate(
+                              state.selectedType,
+                            );
+                            if (path != null && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Đã tạo file mẫu CSV thành công'),
+                                  backgroundColor: AppTheme.success,
+                                ),
+                              );
+                            }
+                          },
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -102,7 +127,7 @@ class _BatchImportCenterScreenState
             // Bước 2: Chọn file dữ liệu
             _buildStepCard(
               stepNumber: '2',
-              title: 'Chọn File Dữ Liệu Excel',
+              title: 'Chọn File Dữ Liệu Excel hoặc CSV',
               subtitle:
                   'Hệ thống tự động phân tích và thẩm định từng dòng ngay khi bạn chọn file',
               action: Column(
@@ -113,7 +138,7 @@ class _BatchImportCenterScreenState
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     icon: const Icon(Icons.upload_file),
-                    label: const Text('Chọn file Excel (.xlsx, .xls)'),
+                    label: const Text('Chọn file (.xlsx, .xls, .csv)'),
                     onPressed: state.isProcessing
                         ? null
                         : () =>
@@ -444,26 +469,53 @@ class _BatchImportCenterScreenState
                   ],
                 ),
                 const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.error,
-                    side: const BorderSide(color: AppTheme.error),
-                  ),
-                  icon: const Icon(Icons.download_for_offline_outlined),
-                  label: const Text('Xuất file Excel danh sách dòng lỗi'),
-                  onPressed: () async {
-                    final path = await notifier.exportErrorRows();
-                    if (path != null && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Đã xuất file Excel dòng lỗi thành công',
-                          ),
-                          backgroundColor: AppTheme.success,
-                        ),
-                      );
-                    }
-                  },
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.error,
+                        side: const BorderSide(color: AppTheme.error),
+                      ),
+                      icon: const Icon(Icons.table_view_outlined),
+                      label: const Text('Xuất file Excel lỗi'),
+                      onPressed: () async {
+                        final path = await notifier.exportErrorRows();
+                        if (path != null && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Đã xuất file Excel dòng lỗi thành công',
+                              ),
+                              backgroundColor: AppTheme.success,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.error,
+                        side: const BorderSide(color: AppTheme.error),
+                      ),
+                      icon: const Icon(Icons.description_outlined),
+                      label: const Text('Xuất file CSV lỗi'),
+                      onPressed: () async {
+                        final path = await notifier.exportErrorRowsCsv();
+                        if (path != null && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Đã xuất file CSV dòng lỗi thành công',
+                              ),
+                              backgroundColor: AppTheme.success,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -528,8 +580,161 @@ class _BatchImportCenterScreenState
             ),
           ),
         ],
+
+        // Xem trước dữ liệu hợp lệ (Preview Data)
+        if (validation.hasValidItems) ...[
+          const SizedBox(height: 12),
+          _buildPreviewSection(context, state, validation),
+        ],
       ],
     );
+  }
+
+  Widget _buildPreviewSection(
+    BuildContext context,
+    BatchImportState state,
+    BatchImportResultModel validation,
+  ) {
+    final validItems = validation.validItems;
+    final displayItems = validItems.take(20).toList();
+
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        initiallyExpanded: true,
+        tilePadding: EdgeInsets.zero,
+        title: Row(
+          children: [
+            const Icon(Icons.preview_outlined, color: AppTheme.primary, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Xem trước dữ liệu (${validation.validCount} dòng hợp lệ)',
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primary,
+              ),
+            ),
+          ],
+        ),
+        subtitle: validItems.length > 20
+            ? Text(
+                'Hiển thị 20 / ${validItems.length} dòng đầu tiên',
+                style: const TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+              )
+            : null,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade200),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(
+                    AppTheme.primary.withValues(alpha: 0.05),
+                  ),
+                  columnSpacing: 20,
+                  horizontalMargin: 12,
+                  headingRowHeight: 40,
+                  dataRowMinHeight: 36,
+                  dataRowMaxHeight: 44,
+                  columns: _buildTableColumns(state.selectedType),
+                  rows: displayItems.asMap().entries.map((entry) {
+                    final idx = entry.key + 1;
+                    final item = entry.value;
+                    return _buildTableRow(idx, item, state.selectedType);
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<DataColumn> _buildTableColumns(BatchImportType type) {
+    switch (type) {
+      case BatchImportType.apartments:
+        return const [
+          DataColumn(label: Text('STT', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Mã Căn Hộ', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Tòa', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Tầng', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Diện Tích (m²)', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Trạng Thái', style: TextStyle(fontWeight: FontWeight.bold))),
+        ];
+      case BatchImportType.residents:
+        return const [
+          DataColumn(label: Text('STT', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Mã Căn Hộ', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Họ Và Tên', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Số Điện Thoại', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Vai Trò', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+        ];
+      case BatchImportType.meterReadings:
+        return const [
+          DataColumn(label: Text('STT', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Mã Căn Hộ', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Chỉ Số Điện', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Chỉ Số Nước', style: TextStyle(fontWeight: FontWeight.bold))),
+          DataColumn(label: Text('Kỳ Thu', style: TextStyle(fontWeight: FontWeight.bold))),
+        ];
+    }
+  }
+
+  DataRow _buildTableRow(int stt, dynamic item, BatchImportType type) {
+    switch (type) {
+      case BatchImportType.apartments:
+        final apt = item as ApartmentImportItem;
+        return DataRow(
+          cells: [
+            DataCell(Text('$stt')),
+            DataCell(Text(
+              apt.code,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+            )),
+            DataCell(Text(apt.block)),
+            DataCell(Text('${apt.floor}')),
+            DataCell(Text('${apt.area} m²')),
+            DataCell(Text(apt.isEmpty ? 'Còn trống' : 'Đã có chủ')),
+          ],
+        );
+      case BatchImportType.residents:
+        final res = item as ResidentImportItem;
+        return DataRow(
+          cells: [
+            DataCell(Text('$stt')),
+            DataCell(Text(
+              res.apartmentCode,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+            )),
+            DataCell(Text(res.fullName, style: const TextStyle(fontWeight: FontWeight.w600))),
+            DataCell(Text(res.phone)),
+            DataCell(Text(res.relationRoleText)),
+            DataCell(Text(res.email ?? '-')),
+          ],
+        );
+      case BatchImportType.meterReadings:
+        final meter = item as MeterReadingImportItem;
+        return DataRow(
+          cells: [
+            DataCell(Text('$stt')),
+            DataCell(Text(
+              meter.apartmentCode,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+            )),
+            DataCell(Text('${meter.electricReading} kWh')),
+            DataCell(Text('${meter.waterReading} m³')),
+            DataCell(Text(meter.period ?? '-')),
+          ],
+        );
+    }
   }
 
   Widget _buildStatBadge({

@@ -54,12 +54,13 @@ void main() {
       expect(find.text('Điện nước'), findsOneWidget);
 
       // Check step titles
-      expect(find.text('Tải File Mẫu Chuẩn Hóa (.xlsx)'), findsOneWidget);
-      expect(find.text('Chọn File Dữ Liệu Excel'), findsOneWidget);
+      expect(find.text('Tải File Mẫu Chuẩn Hóa (.xlsx / .csv)'), findsOneWidget);
+      expect(find.text('Chọn File Dữ Liệu Excel hoặc CSV'), findsOneWidget);
       expect(find.text('Kết Quả Thẩm Định & Kiểm Tra'), findsOneWidget);
 
-      // Check template button label
-      expect(find.text('Tải mẫu Căn hộ'), findsOneWidget);
+      // Check template buttons
+      expect(find.text('Tải mẫu Excel (.xlsx)'), findsOneWidget);
+      expect(find.text('Tải mẫu CSV (.csv)'), findsOneWidget);
     });
 
     testWidgets('switching tab updates button label and state', (tester) async {
@@ -70,16 +71,17 @@ void main() {
       await tester.tap(find.text('Cư dân'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Tải mẫu Cư dân'), findsOneWidget);
+      expect(find.text('Tải mẫu Excel (.xlsx)'), findsOneWidget);
+      expect(find.text('Tải mẫu CSV (.csv)'), findsOneWidget);
 
       // Tap on 'Điện nước' tab
       await tester.tap(find.text('Điện nước'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Tải mẫu Điện nước'), findsOneWidget);
+      expect(find.text('Tải mẫu Excel (.xlsx)'), findsOneWidget);
     });
 
-    testWidgets('displays validation summary cards when parsed', (tester) async {
+    testWidgets('displays validation summary cards and preview table when parsed', (tester) async {
       final fakeRepo = FakeBatchImportRepository();
       final container = ProviderContainer(
         overrides: [
@@ -98,7 +100,6 @@ void main() {
       await tester.pumpAndSettle();
 
       // Inject validation result via notifier
-      
       container.read(batchImportProvider.notifier).state =
           container.read(batchImportProvider).copyWith(
                 selectedFileName: 'test_can_ho.xlsx',
@@ -113,7 +114,7 @@ void main() {
                       rowNumber: 3,
                       columnName: 'Mã Căn Hộ',
                       invalidValue: 'XYZ',
-                      errorMessage: 'Sai định dạng',
+                      errorMessage: 'Sai định dạng chuẩn',
                     ),
                   ],
                 ),
@@ -125,8 +126,13 @@ void main() {
       expect(find.text('Hợp lệ'), findsOneWidget);
       expect(find.text('Bị lỗi'), findsOneWidget);
       expect(find.text('Phát hiện 1 dòng dữ liệu không hợp lệ'), findsOneWidget);
-      expect(find.text('Xuất file Excel danh sách dòng lỗi'), findsOneWidget);
+      expect(find.text('Xuất file Excel lỗi'), findsOneWidget);
+      expect(find.text('Xuất file CSV lỗi'), findsOneWidget);
       expect(find.textContaining('Chỉ nạp 1 dòng hợp lệ'), findsOneWidget);
+
+      // Check preview section
+      expect(find.textContaining('Xem trước dữ liệu (1 dòng hợp lệ)'), findsOneWidget);
+      expect(find.text('A0110'), findsOneWidget);
     });
   });
 }

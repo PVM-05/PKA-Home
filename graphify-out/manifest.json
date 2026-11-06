@@ -1008,9 +1008,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/apartment_management_screen.dart": {
-    "mtime": 1793888402.0834353,
-    "seen": 1793891612.8332055,
-    "ast_hash": "315d4dfb45c983d0a1eab3218f2a16b2",
+    "mtime": 1793975364.1440043,
+    "seen": 1793975822.9463577,
+    "ast_hash": "7c788a4b214c67919b7ba5afc883faf4",
     "semantic_hash": ""
   },
   "lib/features/management/screens/audit_trail_screen.dart": {
@@ -4884,9 +4884,9 @@
     "semantic_hash": ""
   },
   "lib/core/utils/excel_import_helper.dart": {
-    "mtime": 1793888402.0797012,
-    "seen": 1793891612.8321867,
-    "ast_hash": "1f823af67139baea0368950bbea0b6ce",
+    "mtime": 1793975250.12271,
+    "seen": 1793975822.9463577,
+    "ast_hash": "632bed4d775e6ec6146680687bbc416c",
     "semantic_hash": ""
   },
   "lib/data/models/batch_import_model.dart": {
@@ -4896,9 +4896,9 @@
     "semantic_hash": ""
   },
   "lib/data/providers/batch_import_provider.dart": {
-    "mtime": 1793886319.8391623,
-    "seen": 1793891612.8321867,
-    "ast_hash": "4cb4409689f9b099bdbdd4ce8321cde6",
+    "mtime": 1793975303.84424,
+    "seen": 1793975822.9463577,
+    "ast_hash": "1ee315b7e4c3c05643a3f4001fdfb33f",
     "semantic_hash": ""
   },
   "lib/data/repositories/batch_import_repository.dart": {
@@ -4908,9 +4908,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/batch_import_center_screen.dart": {
-    "mtime": 1793887618.306121,
-    "seen": 1793891612.8332055,
-    "ast_hash": "5611c065ddc5f73f84dab1afb7d068e1",
+    "mtime": 1793975414.189146,
+    "seen": 1793975822.9463577,
+    "ast_hash": "8f4b5d7d1196587646077540579fb8c3",
     "semantic_hash": ""
   },
   "supabase/migrations/20261030_02_residents_apartments_lifecycle_and_batch_import.sql": {
@@ -4920,9 +4920,9 @@
     "semantic_hash": ""
   },
   "test/core/utils/excel_import_helper_test.dart": {
-    "mtime": 1793886320.077809,
-    "seen": 1793891612.8332055,
-    "ast_hash": "aa797c7c1cbeabfbff02de0d43876440",
+    "mtime": 1793975603.8442218,
+    "seen": 1793975822.9463577,
+    "ast_hash": "4e6ed73c6e5bd685697553255dd74af3",
     "semantic_hash": ""
   },
   "test/data/models/batch_import_model_test.dart": {
@@ -4938,9 +4938,9 @@
     "semantic_hash": ""
   },
   "test/features/management/screens/batch_import_center_screen_test.dart": {
-    "mtime": 1793886329.8745794,
-    "seen": 1793891612.8332055,
-    "ast_hash": "6ebede8b5b48cc566fe4edd770f0db16",
+    "mtime": 1793975541.9131086,
+    "seen": 1793975822.947868,
+    "ast_hash": "95651e7ed6a9e96ef35f2597cb652c31",
     "semantic_hash": ""
   },
   "test/integration/batch_import_migration_test.dart": {
@@ -6300,9 +6300,15 @@
     "semantic_hash": ""
   },
   "supabase/migrations/20261106_01_cleanup_dead_tables_and_seed_data.sql": {
-    "mtime": 1793971045.7324185,
-    "seen": 1793971292.9435215,
+    "mtime": 1793972667.514156,
+    "seen": 1793975822.9463577,
     "ast_hash": "4b6869144b5aca0c169e9fc48f5b8c1f",
+    "semantic_hash": ""
+  },
+  "test/features/management/screens/apartment_management_onboarding_test.dart": {
+    "mtime": 1793975734.0854325,
+    "seen": 1793975822.947868,
+    "ast_hash": "99a6fa69aa2d284a1159a7a7d247417e",
     "semantic_hash": ""
   }
 }

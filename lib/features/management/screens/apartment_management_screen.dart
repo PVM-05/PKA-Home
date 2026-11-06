@@ -10,6 +10,8 @@ import '../../../data/models/apartment_model.dart';
 import '../../../core/supabase_config.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../data/models/batch_import_model.dart';
+import '../../../data/providers/batch_import_provider.dart';
 import '../widgets/apartment_contract_sheet.dart';
 import '../widgets/create_apartment_invitation_sheet.dart';
 
@@ -46,9 +48,42 @@ class _ApartmentManagementScreenState
         appBar: AppBar(
           title: const Text('Quản lý Căn hộ'),
           actions: [
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.file_download_outlined),
+              tooltip: 'Tải file mẫu Excel/CSV',
+              onSelected: (value) {
+                if (value == 'excel') {
+                  _downloadApartmentTemplate(context, isCsv: false);
+                } else if (value == 'csv') {
+                  _downloadApartmentTemplate(context, isCsv: true);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'excel',
+                  child: Row(
+                    children: [
+                      Icon(Icons.table_view_outlined, color: AppTheme.primary, size: 20),
+                      SizedBox(width: 8),
+                      Text('Tải file mẫu Excel (.xlsx)'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'csv',
+                  child: Row(
+                    children: [
+                      Icon(Icons.description_outlined, color: AppTheme.secondary, size: 20),
+                      SizedBox(width: 8),
+                      Text('Tải file mẫu CSV (.csv)'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             IconButton(
               icon: const Icon(Icons.upload_file),
-              tooltip: 'Nhập Excel',
+              tooltip: 'Nhập Excel/CSV',
               onPressed: () => context.push(AppRoutes.managementBatchImport),
             ),
             IconButton(
@@ -70,22 +105,61 @@ class _ApartmentManagementScreenState
           data: (allApartments) {
             if (allApartments.isEmpty) {
               return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.apartment_outlined,
-                      size: 64,
-                      color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Chưa có dữ liệu căn hộ trong hệ thống',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppTheme.textSecondary,
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.apartment_outlined,
+                          size: 64,
+                          color: AppTheme.primary,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 20),
+                      Text(
+                        'Chưa có dữ liệu căn hộ trong hệ thống',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Hạ tầng tòa nhà đang trống. Bạn có thể tải file mẫu Excel hoặc CSV để nhập nhanh danh sách căn hộ theo lô.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.download),
+                            label: const Text('Tải mẫu Excel/CSV'),
+                            onPressed: () => _showDownloadTemplateSheet(context),
+                          ),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.upload_file),
+                            label: const Text('Nhập từ Excel/CSV'),
+                            onPressed: () =>
+                                context.push(AppRoutes.managementBatchImport),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
@@ -1217,6 +1291,90 @@ class _ApartmentManagementScreenState
             child: const Text('Xóa căn hộ'),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _downloadApartmentTemplate(
+    BuildContext context, {
+    required bool isCsv,
+  }) async {
+    final notifier = ref.read(batchImportProvider.notifier);
+    final path = isCsv
+        ? await notifier.downloadCsvTemplate(BatchImportType.apartments)
+        : await notifier.downloadTemplate(BatchImportType.apartments);
+
+    if (path != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Đã tạo file mẫu ${isCsv ? "CSV" : "Excel"} thành công',
+          ),
+          backgroundColor: AppTheme.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _showDownloadTemplateSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Chọn định dạng file mẫu',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'File mẫu bao gồm các cột chuẩn hóa: Mã Căn Hộ (*), Diện Tích (m2) (*), Trạng Thái Trống.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.table_view, color: AppTheme.success),
+              ),
+              title: const Text(
+                'File mẫu Excel (.xlsx)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text('Phù hợp cho Microsoft Excel hoặc WPS'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _downloadApartmentTemplate(context, isCsv: false);
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFE3F2FD),
+                child: Icon(Icons.description, color: AppTheme.primary),
+              ),
+              title: const Text(
+                'File mẫu CSV (.csv)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text(
+                'Định dạng văn bản thuần UTF-8, tương thích Google Sheets và hệ thống khác',
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _downloadApartmentTemplate(context, isCsv: true);
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
       ),
     );
   }

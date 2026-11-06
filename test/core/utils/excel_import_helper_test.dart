@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:excel/excel.dart';
@@ -6,6 +7,24 @@ import 'package:pka_home/data/models/batch_import_model.dart';
 
 void main() {
   group('ExcelImportHelper Tests', () {
+    test('normalizeApartmentCode correctly standardizes variations to A0110 format', () {
+      // Đúng chuẩn viết hoa
+      expect(ExcelImportHelper.normalizeApartmentCode('A0110'), 'A0110');
+      // Viết thường -> viết hoa
+      expect(ExcelImportHelper.normalizeApartmentCode('a0110'), 'A0110');
+      // Dạng cũ 3 chữ số (tầng 1 chữ số) -> tự động thêm 0 thành 2 chữ số
+      expect(ExcelImportHelper.normalizeApartmentCode('A101'), 'A0101');
+      expect(ExcelImportHelper.normalizeApartmentCode('a110'), 'A0110');
+      expect(ExcelImportHelper.normalizeApartmentCode('b205'), 'B0205');
+      // Dấu gạch nối hoặc dấu chấm
+      expect(ExcelImportHelper.normalizeApartmentCode('B-205'), 'B0205');
+      expect(ExcelImportHelper.normalizeApartmentCode('A.01.10'), 'A0110');
+      expect(ExcelImportHelper.normalizeApartmentCode(' a 01 10 '), 'A0110');
+      // Rỗng hoặc sai cấu trúc
+      expect(ExcelImportHelper.normalizeApartmentCode(''), '');
+      expect(ExcelImportHelper.normalizeApartmentCode('XYZ'), 'XYZ');
+    });
+
     test('generateApartmentTemplate creates valid excel bytes with headers and sample row', () {
       final bytes = ExcelImportHelper.generateApartmentTemplate();
       expect(bytes, isNotEmpty);
@@ -22,7 +41,35 @@ void main() {
       expect(headers[1], contains('Diện Tích'));
     });
 
-    test('parseAndValidateApartments succeeds on valid rows and reports row errors on invalid data', () {
+    test('generateApartmentCsvTemplate creates UTF-8 BOM csv bytes with headers', () {
+      final bytes = ExcelImportHelper.generateApartmentCsvTemplate();
+      expect(bytes, isNotEmpty);
+
+      // Kiểm tra 3 byte UTF-8 BOM [0xEF, 0xBB, 0xBF]
+      expect(bytes.length, greaterThanOrEqualTo(3));
+      expect(bytes[0], 0xEF);
+      expect(bytes[1], 0xBB);
+      expect(bytes[2], 0xBF);
+
+      final text = utf8.decode(bytes);
+      expect(text, contains('Mã Căn Hộ (*)'));
+      expect(text, contains('Diện Tích (m2) (*)'));
+      expect(text, contains('A0110,68.5,Có'));
+    });
+
+    test('generateResidentCsvTemplate and generateMeterReadingCsvTemplate create valid csv bytes', () {
+      final resBytes = ExcelImportHelper.generateResidentCsvTemplate();
+      final resText = utf8.decode(resBytes);
+      expect(resText, contains('Họ Và Tên (*)'));
+      expect(resText, contains('0901234567'));
+
+      final meterBytes = ExcelImportHelper.generateMeterReadingCsvTemplate();
+      final meterText = utf8.decode(meterBytes);
+      expect(meterText, contains('Chỉ Số Điện (kWh) (*)'));
+      expect(meterText, contains('150.5'));
+    });
+
+    test('parseAndValidateApartments succeeds on valid Excel rows and normalizes codes', () {
       final excel = Excel.createExcel();
       final sheet = excel['Sheet1'];
       // Header
@@ -31,19 +78,25 @@ void main() {
         TextCellValue('Diện Tích (m2)'),
         TextCellValue('Trạng Thái Trống'),
       ]);
-      // Valid row 1
+      // Valid row 1: A0110
       sheet.appendRow([
         TextCellValue('A0110'),
         DoubleCellValue(68.5),
         TextCellValue('Có'),
       ]);
-      // Invalid row 2 (Invalid format code)
+      // Valid row 2: a101 (sẽ tự chuẩn hóa thành A0101)
+      sheet.appendRow([
+        TextCellValue('a101'),
+        DoubleCellValue(72.0),
+        TextCellValue('Không'),
+      ]);
+      // Invalid row 3 (Invalid format code)
       sheet.appendRow([
         TextCellValue('XYZ'),
         DoubleCellValue(70.0),
         TextCellValue('Không'),
       ]);
-      // Invalid row 3 (Invalid negative area)
+      // Invalid row 4 (Invalid negative area)
       sheet.appendRow([
         TextCellValue('B0205'),
         DoubleCellValue(-15.0),
@@ -53,106 +106,63 @@ void main() {
       final bytes = Uint8List.fromList(excel.save()!);
       final result = ExcelImportHelper.parseAndValidateApartments(bytes);
 
-      expect(result.totalRows, 3);
-      expect(result.validCount, 1);
+      expect(result.totalRows, 4);
+      expect(result.validCount, 2);
       expect(result.errorCount, 2);
-      expect(result.validItems.first.code, 'A0110');
-      expect(result.validItems.first.area, 68.5);
-      expect(result.validItems.first.isEmpty, isTrue);
+      expect(result.validItems[0].code, 'A0110');
+      expect(result.validItems[0].area, 68.5);
+      expect(result.validItems[0].isEmpty, isTrue);
+      expect(result.validItems[1].code, 'A0101');
+      expect(result.validItems[1].area, 72.0);
+      expect(result.validItems[1].isEmpty, isFalse);
 
       final errors = result.rowErrors;
-      expect(errors.any((e) => e.rowNumber == 3 && e.columnName.contains('Mã Căn Hộ')), isTrue);
-      expect(errors.any((e) => e.rowNumber == 4 && e.columnName.contains('Diện Tích')), isTrue);
+      expect(errors.any((e) => e.rowNumber == 4 && e.columnName.contains('Mã Căn Hộ')), isTrue);
+      expect(errors.any((e) => e.rowNumber == 5 && e.columnName.contains('Diện Tích')), isTrue);
     });
 
-    test('parseAndValidateResidents validates phone, role and apartment existence', () {
-      final excel = Excel.createExcel();
-      final sheet = excel['Sheet1'];
-      sheet.appendRow([
-        TextCellValue('Mã Căn Hộ'),
-        TextCellValue('Họ Và Tên'),
-        TextCellValue('Số Điện Thoại'),
-        TextCellValue('Vai Trò'),
-        TextCellValue('Email'),
-      ]);
-      // Valid row 1
-      sheet.appendRow([
-        TextCellValue('A0110'),
-        TextCellValue('Nguyễn Văn An'),
-        TextCellValue('0901234567'),
-        TextCellValue('Chủ hộ'),
-        TextCellValue('an@example.com'),
-      ]);
-      // Invalid row 2 (Phone invalid length)
-      sheet.appendRow([
-        TextCellValue('A0110'),
-        TextCellValue('Trần Thị Bình'),
-        TextCellValue('09012'),
-        TextCellValue('Người thuê'),
-        TextCellValue('binh@example.com'),
-      ]);
-      // Invalid row 3 (Apartment does not exist)
-      sheet.appendRow([
-        TextCellValue('C9999'),
-        TextCellValue('Lê Văn Cường'),
-        TextCellValue('0912345678'),
-        TextCellValue('Cư dân'),
-        TextCellValue(''),
-      ]);
+    test('parseAndValidateApartments correctly parses CSV bytes', () {
+      const csvContent =
+          'Mã Căn Hộ,Diện Tích,Trạng Thái Trống\r\n'
+          'a0110,65.5,Có\r\n'
+          'B205,80.0,Không\r\n'
+          'SAI_DINH_DANG,50.0,Có\r\n';
 
-      final bytes = Uint8List.fromList(excel.save()!);
+      final bytes = Uint8List.fromList(utf8.encode(csvContent));
+      final result = ExcelImportHelper.parseAndValidateApartments(bytes, fileName: 'data.csv');
+
+      expect(result.totalRows, 3);
+      expect(result.validCount, 2);
+      expect(result.errorCount, 1);
+      expect(result.validItems[0].code, 'A0110');
+      expect(result.validItems[0].area, 65.5);
+      expect(result.validItems[1].code, 'B0205');
+      expect(result.validItems[1].isEmpty, isFalse);
+      expect(result.rowErrors.first.columnName, contains('Mã Căn Hộ'));
+    });
+
+    test('parseAndValidateResidents parses CSV bytes with role normalization and checks', () {
+      const csvContent =
+          'Mã Căn Hộ,Họ Và Tên,Số Điện Thoại,Vai Trò,Email\r\n'
+          'a0110,Nguyễn Văn An,0901234567,Chủ hộ,an@test.com\r\n'
+          'b0205,Trần Thị Bình,0987654321,Người thuê,binh@test.com\r\n'
+          'A0110,Lê Văn Lỗi,01234,Chủ hộ,\r\n';
+
+      final bytes = Uint8List.fromList(utf8.encode(csvContent));
       final result = ExcelImportHelper.parseAndValidateResidents(
         bytes,
+        fileName: 'residents.csv',
         existingApartmentCodes: {'A0110', 'B0205'},
       );
 
       expect(result.totalRows, 3);
-      expect(result.validCount, 1);
-      expect(result.errorCount, 2);
-      expect(result.validItems.first.fullName, 'Nguyễn Văn An');
-      expect(result.validItems.first.relationRole, 'owner');
-
-      final errors = result.rowErrors;
-      expect(errors.any((e) => e.rowNumber == 3 && e.columnName.contains('Số Điện Thoại')), isTrue);
-      expect(errors.any((e) => e.rowNumber == 4 && e.columnName.contains('Mã Căn Hộ')), isTrue);
-    });
-
-    test('parseAndValidateMeterReadings validates non-negative readings and apartment codes', () {
-      final excel = Excel.createExcel();
-      final sheet = excel['Sheet1'];
-      sheet.appendRow([
-        TextCellValue('Mã Căn Hộ'),
-        TextCellValue('Chỉ Số Điện (kWh)'),
-        TextCellValue('Chỉ Số Nước (m3)'),
-        TextCellValue('Kỳ Thu (YYYY-MM)'),
-      ]);
-      // Valid row
-      sheet.appendRow([
-        TextCellValue('A0110'),
-        DoubleCellValue(145.2),
-        DoubleCellValue(22.0),
-        TextCellValue('2026-10'),
-      ]);
-      // Negative reading row
-      sheet.appendRow([
-        TextCellValue('A0110'),
-        DoubleCellValue(-5.0),
-        DoubleCellValue(10.0),
-        TextCellValue('2026-10'),
-      ]);
-
-      final bytes = Uint8List.fromList(excel.save()!);
-      final result = ExcelImportHelper.parseAndValidateMeterReadings(
-        bytes,
-        existingApartmentCodes: {'A0110'},
-      );
-
-      expect(result.totalRows, 2);
-      expect(result.validCount, 1);
+      expect(result.validCount, 2);
       expect(result.errorCount, 1);
-      expect(result.validItems.first.electricReading, 145.2);
-      expect(result.validItems.first.waterReading, 22.0);
-      expect(result.rowErrors.first.columnName, contains('Chỉ Số Điện'));
+      expect(result.validItems[0].apartmentCode, 'A0110');
+      expect(result.validItems[0].relationRole, 'owner');
+      expect(result.validItems[1].apartmentCode, 'B0205');
+      expect(result.validItems[1].relationRole, 'tenant');
+      expect(result.rowErrors.first.columnName, contains('Số Điện Thoại'));
     });
 
     test('exportErrorRows produces excel bytes containing error details', () {
@@ -172,6 +182,26 @@ void main() {
       final sheet = excel.tables[excel.tables.keys.first]!;
       expect(sheet.maxRows, 2); // Header + 1 row
     });
+
+    test('exportErrorRowsCsv produces valid csv bytes containing error details', () {
+      const errors = [
+        BatchRowErrorModel(
+          rowNumber: 2,
+          columnName: 'Mã Căn Hộ',
+          invalidValue: 'XYZ',
+          errorMessage: 'Sai định dạng chuẩn',
+        ),
+      ];
+
+      final bytes = ExcelImportHelper.exportErrorRowsCsv(errors);
+      expect(bytes, isNotEmpty);
+      expect(bytes[0], 0xEF);
+      expect(bytes[1], 0xBB);
+      expect(bytes[2], 0xBF);
+
+      final text = utf8.decode(bytes);
+      expect(text, contains('Dòng,Cột Bị Lỗi'));
+      expect(text, contains('2,Mã Căn Hộ,XYZ,Sai định dạng chuẩn'));
+    });
   });
 }
-

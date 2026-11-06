@@ -90,12 +90,12 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
     );
   }
 
-  /// Mở hộp thoại chọn file Excel và phân tích thẩm định dữ liệu
+  /// Mở hộp thoại chọn file Excel/CSV và phân tích thẩm định dữ liệu
   Future<void> pickAndParseFile({required String buildingId}) async {
     try {
       final files = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['xlsx', 'xls'],
+        allowedExtensions: ['xlsx', 'xls', 'csv'],
       );
 
       if (files.isEmpty) return;
@@ -105,7 +105,7 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
 
       if (bytes.isEmpty) {
         state = state.copyWith(
-          errorMessage: 'Không thể đọc nội dung file Excel đã chọn',
+          errorMessage: 'Không thể đọc nội dung file đã chọn',
           clearMessages: false,
         );
         return;
@@ -114,7 +114,7 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
       await parseBytes(bytes: bytes, fileName: file.name, buildingId: buildingId);
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Lỗi khi đọc file Excel: $e',
+        errorMessage: 'Lỗi khi đọc file: $e',
       );
     }
   }
@@ -139,17 +139,22 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
       BatchImportResultModel validationResult;
       switch (state.selectedType) {
         case BatchImportType.apartments:
-          validationResult = ExcelImportHelper.parseAndValidateApartments(bytes);
+          validationResult = ExcelImportHelper.parseAndValidateApartments(
+            bytes,
+            fileName: fileName,
+          );
           break;
         case BatchImportType.residents:
           validationResult = ExcelImportHelper.parseAndValidateResidents(
             bytes,
+            fileName: fileName,
             existingApartmentCodes: existingCodes,
           );
           break;
         case BatchImportType.meterReadings:
           validationResult = ExcelImportHelper.parseAndValidateMeterReadings(
             bytes,
+            fileName: fileName,
             existingApartmentCodes: existingCodes,
           );
           break;
@@ -165,7 +170,7 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
     } catch (e) {
       state = state.copyWith(
         isProcessing: false,
-        errorMessage: 'Lỗi khi kiểm tra dữ liệu Excel: $e',
+        errorMessage: 'Lỗi khi kiểm tra dữ liệu: $e',
       );
     }
   }
@@ -275,14 +280,53 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
 
       await ExcelExportHelper.shareFile(
         filePath,
-        subject: 'Mẫu nhập liệu ${type.label}',
+        subject: 'Mẫu nhập liệu ${type.label} (Excel)',
         text: 'File mẫu nhập liệu Excel cho ${type.label}',
       );
 
       return filePath;
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Lỗi khi tạo file mẫu: $e',
+        errorMessage: 'Lỗi khi tạo file mẫu Excel: $e',
+      );
+      return null;
+    }
+  }
+
+  /// Tải file mẫu CSV và chia sẻ
+  Future<String?> downloadCsvTemplate(BatchImportType type) async {
+    try {
+      Uint8List bytes;
+      switch (type) {
+        case BatchImportType.apartments:
+          bytes = ExcelImportHelper.generateApartmentCsvTemplate();
+          break;
+        case BatchImportType.residents:
+          bytes = ExcelImportHelper.generateResidentCsvTemplate();
+          break;
+        case BatchImportType.meterReadings:
+          bytes = ExcelImportHelper.generateMeterReadingCsvTemplate();
+          break;
+      }
+
+      final dir = await getApplicationDocumentsDirectory();
+      final timestamp = DateFormat('yyyyMMdd').format(DateTime.now());
+      final filePath = '${dir.path}/${type.fileNamePrefix}_$timestamp.csv';
+
+      final file = File(filePath);
+      await file.create(recursive: true);
+      await file.writeAsBytes(bytes);
+
+      await ExcelExportHelper.shareFile(
+        filePath,
+        subject: 'Mẫu nhập liệu ${type.label} (CSV)',
+        text: 'File mẫu nhập liệu CSV cho ${type.label}',
+      );
+
+      return filePath;
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Lỗi khi tạo file mẫu CSV: $e',
       );
       return null;
     }
@@ -305,7 +349,7 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
 
       await ExcelExportHelper.shareFile(
         filePath,
-        subject: 'Danh sách dòng lỗi nhập ${state.selectedType.label}',
+        subject: 'Danh sách dòng lỗi nhập ${state.selectedType.label} (Excel)',
         text: 'Tập tin danh sách dòng bị lỗi kèm giải thích nguyên nhân',
       );
 
@@ -313,6 +357,36 @@ class BatchImportNotifier extends StateNotifier<BatchImportState> {
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Lỗi khi xuất file lỗi: $e',
+      );
+      return null;
+    }
+  }
+
+  /// Xuất danh sách dòng lỗi ra file CSV
+  Future<String?> exportErrorRowsCsv() async {
+    final validation = state.validationResult;
+    if (validation == null || !validation.hasErrors) return null;
+
+    try {
+      final bytes = ExcelImportHelper.exportErrorRowsCsv(validation.rowErrors);
+      final dir = await getApplicationDocumentsDirectory();
+      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final filePath = '${dir.path}/Danh_Sach_Loi_Nhap_${state.selectedType.label}_$timestamp.csv';
+
+      final file = File(filePath);
+      await file.create(recursive: true);
+      await file.writeAsBytes(bytes);
+
+      await ExcelExportHelper.shareFile(
+        filePath,
+        subject: 'Danh sách dòng lỗi nhập ${state.selectedType.label} (CSV)',
+        text: 'Tập tin danh sách dòng bị lỗi dạng CSV',
+      );
+
+      return filePath;
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Lỗi khi xuất file lỗi CSV: $e',
       );
       return null;
     }
