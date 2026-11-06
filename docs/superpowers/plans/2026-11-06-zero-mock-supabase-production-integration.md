@@ -82,3 +82,4 @@
   * Chạy kiểm thử tự động toàn diện `flutter test`.
   * Chạy script Python kiểm tra truy vấn đọc/ghi mẫu vào các bảng trên Supabase cloud để xác nhận tính nhất quán và quyền RLS.
   * Commit và push lên nhánh `main`.
+

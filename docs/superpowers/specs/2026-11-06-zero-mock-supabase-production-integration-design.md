@@ -97,3 +97,4 @@ Tuy nhiên, trong mã nguồn Flutter của tầng Repository, 5 module nghiệp
    * Lệnh `dart analyze lib test` đạt 0 issues.
 3. **Tính Toàn vẹn Dữ liệu (Cloud Verification):**
    * Chạy kịch bản kiểm tra đọc/ghi thử nghiệm trên 5 bảng CSDL để xác thực RLS và ràng buộc toàn vẹn.
+

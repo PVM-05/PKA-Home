@@ -59,14 +59,18 @@ BEGIN
                 3, false, true, false
             ) RETURNING id INTO v_room_101_id;
 
-            -- Tạo các biểu phí dịch vụ phòng trọ mẫu
+            -- Tạo biểu phí dịch vụ phòng trọ mẫu
             INSERT INTO public.fee_schedules (building_id, fee_type, name, unit, unit_price, effective_from, is_active)
+            VALUES (v_building_id, 'boarding_house', 'Biểu phí Nhà trọ 2026', 'tháng', 0.00, '2026-01-01', true)
+            RETURNING id INTO v_fee_schedule_id;
+
+            INSERT INTO public.fee_items (fee_schedule_id, fee_type, unit_price, calculation_method, description)
             VALUES 
-                (v_building_id, 'electricity', 'Tiền điện sinh hoạt', 'kWh', 3800.00, '2026-01-01', true),
-                (v_building_id, 'water', 'Tiền nước khoán', 'người/tháng', 30000.00, '2026-01-01', true),
-                (v_building_id, 'trash', 'Phí vệ sinh rác thải', 'phòng/tháng', 30000.00, '2026-01-01', true),
-                (v_building_id, 'internet', 'Internet Wifi', 'phòng/tháng', 100000.00, '2026-01-01', true),
-                (v_building_id, 'parking_motorcycle', 'Phí gửi xe máy', 'xe/tháng', 80000.00, '2026-01-01', true);
+                (v_fee_schedule_id, 'electricity', 3800, 'tiered', 'Tiền điện sinh hoạt (3.800đ/kWh)'),
+                (v_fee_schedule_id, 'water', 30000, 'per_person', 'Tiền nước khoán theo đầu người (30.000đ/người/tháng)'),
+                (v_fee_schedule_id, 'trash', 30000, 'fixed_per_apartment', 'Phí vệ sinh rác thải (30.000đ/phòng/tháng)'),
+                (v_fee_schedule_id, 'internet', 100000, 'fixed_per_apartment', 'Internet Wifi (100.000đ/phòng/tháng)'),
+                (v_fee_schedule_id, 'parking_motorcycle', 80000, 'per_vehicle', 'Phí gửi xe máy (80.000đ/xe/tháng)');
         END IF;
     END IF;
 END $$;

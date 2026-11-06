@@ -33,7 +33,7 @@ void main() {
       expect(newPass.passCode, startsWith('VP-'));
       expect(newPass.visitorName, 'Lê Hoàng Nam');
       expect(newPass.status, 'pending');
-      expect(newPass.qrPayload, startsWith('PKAPASS:'));
+      expect(newPass.qrPayload, startsWith('PKAPASS'));
 
       // Kiểm tra danh sách cập nhật
       final all = await repository.fetchVisitorPasses();

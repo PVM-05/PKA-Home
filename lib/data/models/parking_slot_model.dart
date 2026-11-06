@@ -51,6 +51,15 @@ class ParkingSlotModel {
   }
 
   factory ParkingSlotModel.fromJson(Map<String, dynamic> json) {
+    String? licensePlate = json['license_plate'] as String?;
+    if (licensePlate == null && json['vehicles'] is Map) {
+      licensePlate = (json['vehicles'] as Map)['license_plate'] as String?;
+    }
+    String? apartmentCode = json['apartment_code'] as String?;
+    if (apartmentCode == null && json['apartments'] is Map) {
+      apartmentCode = (json['apartments'] as Map)['code'] as String?;
+    }
+
     return ParkingSlotModel(
       id: json['id'] as String? ?? '',
       buildingId: json['building_id'] as String?,
@@ -60,8 +69,8 @@ class ParkingSlotModel {
       status: json['status'] as String? ?? 'available',
       assignedVehicleId: json['assigned_vehicle_id'] as String?,
       assignedApartmentId: json['assigned_apartment_id'] as String?,
-      licensePlate: json['license_plate'] as String?,
-      apartmentCode: json['apartment_code'] as String?,
+      licensePlate: licensePlate,
+      apartmentCode: apartmentCode,
       note: json['note'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String) ?? DateTime.now()

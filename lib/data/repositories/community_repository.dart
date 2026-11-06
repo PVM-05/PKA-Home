@@ -141,9 +141,11 @@ class CommunityRepository {
     String? status,
     String? apartmentId,
   }) async {
-    final client = _supabase;
-    if (client != null) {
-      try {
+    return FailClosedGuard.guard(
+      operation: 'fetchPolls',
+      call: () async {
+        final client = _supabase;
+        if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         var query = client.from('polls').select('*, poll_options(*)');
         if (status != null && status.isNotEmpty) {
           query = query.eq('status', status);
@@ -167,22 +169,21 @@ class CommunityRepository {
               .toList();
         }
         return list;
-      } catch (_) {
-        // Fallback
-      }
-    }
-
-    var result = List<PollModel>.from(_mockPolls);
-    if (status != null && status.isNotEmpty) {
-      result = result.where((p) => p.status == status).toList();
-    }
-    if (apartmentId != null && apartmentId.isNotEmpty) {
-      result = result.map((p) {
-        final votedSet = _mockVotedApartments[p.id] ?? {};
-        return p.copyWith(hasVoted: votedSet.contains(apartmentId));
-      }).toList();
-    }
-    return result;
+      },
+      mockFallback: () {
+        var result = List<PollModel>.from(_mockPolls);
+        if (status != null && status.isNotEmpty) {
+          result = result.where((p) => p.status == status).toList();
+        }
+        if (apartmentId != null && apartmentId.isNotEmpty) {
+          result = result.map((p) {
+            final votedSet = _mockVotedApartments[p.id] ?? {};
+            return p.copyWith(hasVoted: votedSet.contains(apartmentId));
+          }).toList();
+        }
+        return result;
+      },
+    );
   }
 
   Future<PollModel> createPoll({
@@ -199,9 +200,11 @@ class CommunityRepository {
     required String createdBy,
     String? buildingId,
   }) async {
-    final client = _supabase;
-    if (client != null) {
-      try {
+    return FailClosedGuard.guard(
+      operation: 'createPoll',
+      call: () async {
+        final client = _supabase;
+        if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         final payload = {
           'title': title,
           'description': description,
@@ -242,46 +245,45 @@ class CommunityRepository {
         final completeJson = Map<String, dynamic>.from(pollRes);
         completeJson['poll_options'] = optionsRes;
         return PollModel.fromJson(completeJson);
-      } catch (_) {
-        // Fallback
-      }
-    }
+      },
+      mockFallback: () {
+        final id = 'poll-${DateTime.now().millisecondsSinceEpoch}';
+        final code =
+            'POLL-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPolls.length + 1).toString().padLeft(5, '0')}';
+        final parsedOptions = options
+            .asMap()
+            .entries
+            .map(
+              (e) => PollOptionModel(
+                id: 'opt-$id-${e.key}',
+                pollId: id,
+                optionText: e.value,
+                optionOrder: e.key + 1,
+              ),
+            )
+            .toList();
 
-    final id = 'poll-${DateTime.now().millisecondsSinceEpoch}';
-    final code =
-        'POLL-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPolls.length + 1).toString().padLeft(5, '0')}';
-    final parsedOptions = options
-        .asMap()
-        .entries
-        .map(
-          (e) => PollOptionModel(
-            id: 'opt-$id-${e.key}',
-            pollId: id,
-            optionText: e.value,
-            optionOrder: e.key + 1,
-          ),
-        )
-        .toList();
-
-    final poll = PollModel(
-      id: id,
-      pollCode: code,
-      title: title,
-      description: description,
-      category: category,
-      voteWeightType: voteWeightType,
-      choiceType: choiceType,
-      minParticipationRate: minParticipationRate,
-      requiredApprovalRate: requiredApprovalRate,
-      startTime: startTime,
-      endTime: endTime,
-      status: 'active',
-      createdBy: createdBy,
-      createdAt: DateTime.now(),
-      options: parsedOptions,
+        final poll = PollModel(
+          id: id,
+          pollCode: code,
+          title: title,
+          description: description,
+          category: category,
+          voteWeightType: voteWeightType,
+          choiceType: choiceType,
+          minParticipationRate: minParticipationRate,
+          requiredApprovalRate: requiredApprovalRate,
+          startTime: startTime,
+          endTime: endTime,
+          status: 'active',
+          createdBy: createdBy,
+          createdAt: DateTime.now(),
+          options: parsedOptions,
+        );
+        _mockPolls.insert(0, poll);
+        return poll;
+      },
     );
-    _mockPolls.insert(0, poll);
-    return poll;
   }
 
   Future<Map<String, dynamic>> submitPollVote({
@@ -332,52 +334,53 @@ class CommunityRepository {
   }
 
   Future<PollResultModel> getPollResults(String pollId) async {
-    final client = _supabase;
-    if (client != null) {
-      try {
+    return FailClosedGuard.guard(
+      operation: 'getPollResults',
+      call: () async {
+        final client = _supabase;
+        if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         final res = await client.rpc(
           'get_poll_results',
           params: {'p_poll_id': pollId},
         );
         return PollResultModel.fromJson(Map<String, dynamic>.from(res as Map));
-      } catch (_) {
-        // Fallback
-      }
-    }
+      },
+      mockFallback: () {
+        final poll = _mockPolls.firstWhere(
+          (p) => p.id == pollId,
+          orElse: () => _mockPolls.first,
+        );
+        final votedCount = (_mockVotedApartments[poll.id] ?? {}).length + 35;
+        const totalApts = 50;
+        final rate = (votedCount / totalApts) * 100;
 
-    final poll = _mockPolls.firstWhere(
-      (p) => p.id == pollId,
-      orElse: () => _mockPolls.first,
-    );
-    final votedCount = (_mockVotedApartments[poll.id] ?? {}).length + 35;
-    const totalApts = 50;
-    final rate = (votedCount / totalApts) * 100;
+        final optResults = poll.options.asMap().entries.map((e) {
+          final cnt = e.key == 0 ? 25 : 10;
+          final pct = votedCount > 0 ? (cnt / votedCount) * 100 : 0.0;
+          return PollOptionResultModel(
+            optionId: e.value.id,
+            optionText: e.value.optionText,
+            voteCount: cnt,
+            voteWeightSum: cnt * 75.0,
+            percentOfVotes: double.parse(pct.toStringAsFixed(1)),
+          );
+        }).toList();
 
-    final optResults = poll.options.asMap().entries.map((e) {
-      final cnt = e.key == 0 ? 25 : 10;
-      final pct = votedCount > 0 ? (cnt / votedCount) * 100 : 0.0;
-      return PollOptionResultModel(
-        optionId: e.value.id,
-        optionText: e.value.optionText,
-        voteCount: cnt,
-        voteWeightSum: cnt * 75.0,
-        percentOfVotes: double.parse(pct.toStringAsFixed(1)),
-      );
-    }).toList();
-
-    return PollResultModel(
-      pollId: poll.id,
-      pollCode: poll.pollCode,
-      title: poll.title,
-      status: poll.status,
-      voteWeightType: poll.voteWeightType,
-      totalApartments: totalApts,
-      votedApartments: votedCount,
-      totalArea: totalApts * 75.0,
-      votedArea: votedCount * 75.0,
-      participationRate: double.parse(rate.toStringAsFixed(1)),
-      isQuorumMet: rate >= poll.minParticipationRate,
-      options: optResults,
+        return PollResultModel(
+          pollId: poll.id,
+          pollCode: poll.pollCode,
+          title: poll.title,
+          status: poll.status,
+          voteWeightType: poll.voteWeightType,
+          totalApartments: totalApts,
+          votedApartments: votedCount,
+          totalArea: totalApts * 75.0,
+          votedArea: votedCount * 75.0,
+          participationRate: double.parse(rate.toStringAsFixed(1)),
+          isQuorumMet: rate >= poll.minParticipationRate,
+          options: optResults,
+        );
+      },
     );
   }
 
@@ -387,9 +390,11 @@ class CommunityRepository {
     String? category,
     String? apartmentId,
   }) async {
-    final client = _supabase;
-    if (client != null) {
-      try {
+    return FailClosedGuard.guard(
+      operation: 'fetchPetitions',
+      call: () async {
+        final client = _supabase;
+        if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         var query = client
             .from('resident_petitions')
             .select(
@@ -421,25 +426,24 @@ class CommunityRepository {
               .toList();
         }
         return list;
-      } catch (_) {
-        // Fallback
-      }
-    }
-
-    var result = List<PetitionModel>.from(_mockPetitions);
-    if (status != null && status.isNotEmpty) {
-      result = result.where((p) => p.status == status).toList();
-    }
-    if (category != null && category.isNotEmpty) {
-      result = result.where((p) => p.category == category).toList();
-    }
-    if (apartmentId != null && apartmentId.isNotEmpty) {
-      result = result.map((p) {
-        final endorsedSet = _mockEndorsedApartments[p.id] ?? {};
-        return p.copyWith(isEndorsedByMe: endorsedSet.contains(apartmentId));
-      }).toList();
-    }
-    return result;
+      },
+      mockFallback: () {
+        var result = List<PetitionModel>.from(_mockPetitions);
+        if (status != null && status.isNotEmpty) {
+          result = result.where((p) => p.status == status).toList();
+        }
+        if (category != null && category.isNotEmpty) {
+          result = result.where((p) => p.category == category).toList();
+        }
+        if (apartmentId != null && apartmentId.isNotEmpty) {
+          result = result.map((p) {
+            final endorsedSet = _mockEndorsedApartments[p.id] ?? {};
+            return p.copyWith(isEndorsedByMe: endorsedSet.contains(apartmentId));
+          }).toList();
+        }
+        return result;
+      },
+    );
   }
 
   Future<PetitionModel> createPetition({
@@ -450,9 +454,11 @@ class CommunityRepository {
     String category = 'general',
     List<String> imageUrls = const [],
   }) async {
-    final client = _supabase;
-    if (client != null) {
-      try {
+    return FailClosedGuard.guard(
+      operation: 'createPetition',
+      call: () async {
+        final client = _supabase;
+        if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         final payload = {
           'apartment_id': apartmentId,
           'author_user_id': authorUserId,
@@ -467,31 +473,30 @@ class CommunityRepository {
             .select('*, apartments(code)')
             .single();
         return PetitionModel.fromJson(res);
-      } catch (_) {
-        // Fallback
-      }
-    }
-
-    final id = 'pet-${DateTime.now().millisecondsSinceEpoch}';
-    final code =
-        'PET-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPetitions.length + 1).toString().padLeft(5, '0')}';
-    final pet = PetitionModel(
-      id: id,
-      petitionCode: code,
-      apartmentId: apartmentId,
-      apartmentCode: 'A0110',
-      authorUserId: authorUserId,
-      authorName: 'Cư dân',
-      title: title,
-      content: content,
-      category: category,
-      imageUrls: imageUrls,
-      endorsementCount: 0,
-      status: 'pending',
-      createdAt: DateTime.now(),
+      },
+      mockFallback: () {
+        final id = 'pet-${DateTime.now().millisecondsSinceEpoch}';
+        final code =
+            'PET-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPetitions.length + 1).toString().padLeft(5, '0')}';
+        final pet = PetitionModel(
+          id: id,
+          petitionCode: code,
+          apartmentId: apartmentId,
+          apartmentCode: 'A0110',
+          authorUserId: authorUserId,
+          authorName: 'Cư dân',
+          title: title,
+          content: content,
+          category: category,
+          imageUrls: imageUrls,
+          endorsementCount: 0,
+          status: 'pending',
+          createdAt: DateTime.now(),
+        );
+        _mockPetitions.insert(0, pet);
+        return pet;
+      },
     );
-    _mockPetitions.insert(0, pet);
-    return pet;
   }
 
   Future<Map<String, dynamic>> endorsePetition({
@@ -556,9 +561,11 @@ class CommunityRepository {
     required String officialResponse,
     required String staffId,
   }) async {
-    final client = _supabase;
-    if (client != null) {
-      try {
+    return FailClosedGuard.guard(
+      operation: 'updatePetitionResponse',
+      call: () async {
+        final client = _supabase;
+        if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         final res = await client.rpc(
           'update_petition_response',
           params: {
@@ -569,27 +576,26 @@ class CommunityRepository {
           },
         );
         return Map<String, dynamic>.from(res as Map);
-      } catch (_) {
-        // Fallback
-      }
-    }
+      },
+      mockFallback: () {
+        final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
+        if (idx == -1) {
+          return {'success': false, 'message': 'Không tìm thấy kiến nghị'};
+        }
 
-    final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
-    if (idx == -1) {
-      return {'success': false, 'message': 'Không tìm thấy kiến nghị'};
-    }
+        _mockPetitions[idx] = _mockPetitions[idx].copyWith(
+          status: status,
+          officialResponse: officialResponse,
+          respondedByStaffId: staffId,
+          respondedAt: DateTime.now(),
+        );
 
-    _mockPetitions[idx] = _mockPetitions[idx].copyWith(
-      status: status,
-      officialResponse: officialResponse,
-      respondedByStaffId: staffId,
-      respondedAt: DateTime.now(),
+        return {
+          'success': true,
+          'message': 'Cập nhật phản hồi chính thức thành công',
+          'status': status,
+        };
+      },
     );
-
-    return {
-      'success': true,
-      'message': 'Cập nhật phản hồi chính thức thành công',
-      'status': status,
-    };
   }
 }
