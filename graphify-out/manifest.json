@@ -894,9 +894,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/management_repository.dart": {
-    "mtime": 1793967574.3964777,
-    "seen": 1793968350.5547857,
-    "ast_hash": "83daa692a564b2580fb2154e1a3e3103",
+    "mtime": 1793982711.2381167,
+    "seen": 1793983376.2879057,
+    "ast_hash": "a00fca7ccc5af2ad362fd807c2d82393",
     "semantic_hash": ""
   },
   "lib/data/repositories/meter_reading_repository.dart": {
@@ -1062,9 +1062,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/issue_management_screen.dart": {
-    "mtime": 1793887618.8806322,
-    "seen": 1793891612.8332055,
-    "ast_hash": "ee6d636c2def121996ae1ae2d3184f3a",
+    "mtime": 1793982988.2244112,
+    "seen": 1793983376.2879057,
+    "ast_hash": "9b490ecba575f4f105a658a69cb98946",
     "semantic_hash": ""
   },
   "lib/features/management/screens/link_request_management_screen.dart": {
@@ -5748,9 +5748,9 @@
     "semantic_hash": ""
   },
   "test/features/issue/issue_smart_triage_ui_test.dart": {
-    "mtime": 1793886320.2408397,
-    "seen": 1793891612.8332055,
-    "ast_hash": "edb966134000b090ce49eb272094212c",
+    "mtime": 1793983265.88482,
+    "seen": 1793983376.2889066,
+    "ast_hash": "cb5249196cd050ecea6a634420c514cb",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-03-issue-smart-triage-and-auto-assign.md": {
@@ -6336,8 +6336,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/widgets/resident_activation_management_sheet.dart": {
-    "mtime": 1793980564.3815925,
-    "seen": 1793980800.2532306,
+    "mtime": 1793980866.7282257,
+    "seen": 1793983376.2879057,
     "ast_hash": "b688ab294b2113029a9bda669037f68d",
     "semantic_hash": ""
   },
@@ -6372,8 +6372,8 @@
     "semantic_hash": ""
   },
   "test/features/management/widgets/resident_activation_management_sheet_test.dart": {
-    "mtime": 1793980673.6858919,
-    "seen": 1793980800.2542586,
+    "mtime": 1793980867.139073,
+    "seen": 1793983376.2899063,
     "ast_hash": "29d6f69ff1f42c5081f6ceafda5a9e39",
     "semantic_hash": ""
   },
@@ -6426,8 +6426,8 @@
     "semantic_hash": ""
   },
   "supabase/migrations/20261106_04_resident_activation_hardening.sql": {
-    "mtime": 1793980362.8967538,
-    "seen": 1793980800.2532306,
+    "mtime": 1793980866.883922,
+    "seen": 1793983376.2889066,
     "ast_hash": "b4d0c0ef9909d9952abf123f2cc3173f",
     "semantic_hash": ""
   },
@@ -6435,6 +6435,30 @@
     "mtime": 1793980748.592799,
     "seen": 1793980800.2547636,
     "ast_hash": "20e9fd9936d9cb930cda67c658751a3c",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/management_repository_test.dart": {
+    "mtime": 1793982717.1887946,
+    "seen": 1793983376.2889066,
+    "ast_hash": "eaa401c17734a3eb6a49a082ffb1b3d4",
+    "semantic_hash": ""
+  },
+  "test/features/management/issue_staff_dispatch_test.dart": {
+    "mtime": 1793983048.0322878,
+    "seen": 1793983376.2889066,
+    "ast_hash": "1e21a26847f108b8cb286f1fcff56141",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-06-issue-reporting-and-staff-dispatch.md": {
+    "mtime": 1793982517.0750663,
+    "seen": 1793983376.290907,
+    "ast_hash": "93df1e4feeb6274a816fafb68e537acb",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-06-issue-reporting-and-staff-dispatch-design.md": {
+    "mtime": 1793982490.983572,
+    "seen": 1793983376.290907,
+    "ast_hash": "80e4c908e68ed224a725ac41a41553f0",
     "semantic_hash": ""
   }
 }
