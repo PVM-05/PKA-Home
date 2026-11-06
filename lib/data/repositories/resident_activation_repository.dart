@@ -177,6 +177,62 @@ class ResidentActivationRepository {
     }
   }
 
+  /// BQL cấp lại mã kích hoạt mới cho một cư dân
+  Future<Map<String, dynamic>> regenerateActivationCode({
+    required String userId,
+  }) async {
+    final client = _clientSafe;
+    if (client == null) {
+      return {
+        'success': true,
+        'message': 'Đã cấp lại mã kích hoạt mới thành công (Mock).',
+        'activation_code': 'ACT-888999',
+        'full_name': 'Nguyễn Văn An',
+        'apartment_code': 'A0110',
+        'phone': '0901234567',
+      };
+    }
+
+    try {
+      final response = await client.rpc(
+        'regenerate_resident_activation',
+        params: {'p_user_id': userId},
+      );
+      return Map<String, dynamic>.from(response as Map);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Lỗi máy chủ khi cấp lại mã: $e',
+      };
+    }
+  }
+
+  /// BQL thu hồi mã kích hoạt
+  Future<Map<String, dynamic>> revokeActivation({
+    required String activationId,
+  }) async {
+    final client = _clientSafe;
+    if (client == null) {
+      return {
+        'success': true,
+        'message': 'Đã thu hồi mã kích hoạt thành công (Mock).',
+      };
+    }
+
+    try {
+      final response = await client.rpc(
+        'revoke_resident_activation',
+        params: {'p_activation_id': activationId},
+      );
+      return Map<String, dynamic>.from(response as Map);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Lỗi máy chủ khi thu hồi mã: $e',
+      };
+    }
+  }
+
   /// BQL tra cứu danh sách kích hoạt theo tòa nhà
   Future<List<ResidentActivationModel>> fetchBuildingActivationList(
     String buildingId,
@@ -185,6 +241,7 @@ class ResidentActivationRepository {
     if (client == null) {
       return [
         const ResidentActivationModel(
+          activationId: 'act-mock-1',
           userId: 'user-mock-1',
           fullName: 'Nguyễn Văn An',
           phone: '0901234567',
@@ -193,8 +250,10 @@ class ResidentActivationRepository {
           activationCode: 'ACT-102948',
           status: 'pending',
           isActive: false,
+          codeAttempts: 0,
         ),
         const ResidentActivationModel(
+          activationId: 'act-mock-2',
           userId: 'user-mock-2',
           fullName: 'Trần Thị Bình',
           phone: '0912345678',
@@ -203,6 +262,19 @@ class ResidentActivationRepository {
           activationCode: 'ACT-593821',
           status: 'activated',
           isActive: true,
+          codeAttempts: 0,
+        ),
+        const ResidentActivationModel(
+          activationId: 'act-mock-3',
+          userId: 'user-mock-3',
+          fullName: 'Lê Hoàng Nam',
+          phone: '0988776655',
+          apartmentCode: 'B0205',
+          relationRole: 'tenant',
+          activationCode: 'ACT-776655',
+          status: 'locked',
+          isActive: false,
+          codeAttempts: 5,
         ),
       ];
     }

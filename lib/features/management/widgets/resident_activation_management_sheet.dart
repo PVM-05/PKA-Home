@@ -142,8 +142,19 @@ class _ResidentActivationManagementSheetState
 
                     final activatedCount =
                         activations.where((a) => a.isActive).length;
-                    final pendingCount =
-                        activations.where((a) => !a.isActive).length;
+                    final pendingCount = activations
+                        .where((a) =>
+                            !a.isActive &&
+                            a.activationCode.isNotEmpty &&
+                            !a.isLocked &&
+                            !a.isRevoked)
+                        .length;
+                    final unassignedCount = activations
+                        .where((a) => !a.isActive && a.activationCode.isEmpty)
+                        .length;
+                    final lockedOrRevokedCount = activations
+                        .where((a) => a.isLocked || a.isRevoked)
+                        .length;
 
                     return Column(
                       children: [
@@ -152,7 +163,7 @@ class _ResidentActivationManagementSheetState
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                           child: Column(
                             children: [
-                              // Thống kê nhanh 2 cột
+                              // Thống kê nhanh 4 ô
                               Row(
                                 children: [
                                   _buildStatCard(
@@ -161,13 +172,29 @@ class _ResidentActivationManagementSheetState
                                     AppTheme.success,
                                     Icons.verified,
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 6),
                                   _buildStatCard(
-                                    'Chưa kích hoạt',
+                                    'Chờ kích hoạt',
                                     '$pendingCount',
                                     Colors.orange,
                                     Icons.pending_actions,
                                   ),
+                                  const SizedBox(width: 6),
+                                  _buildStatCard(
+                                    'Chưa cấp mã',
+                                    '$unassignedCount',
+                                    Colors.blue,
+                                    Icons.person_add_outlined,
+                                  ),
+                                  if (lockedOrRevokedCount > 0) ...[
+                                    const SizedBox(width: 6),
+                                    _buildStatCard(
+                                      'Khóa/Thu hồi',
+                                      '$lockedOrRevokedCount',
+                                      AppTheme.error,
+                                      Icons.lock_person_outlined,
+                                    ),
+                                  ],
                                 ],
                               ),
                               const SizedBox(height: 12),
@@ -268,7 +295,7 @@ class _ResidentActivationManagementSheetState
                                       const Divider(height: 16),
                                   itemBuilder: (context, index) {
                                     final item = filtered[index];
-                                    return _buildActivationTile(item);
+                                    return _buildActivationTile(item, buildingId);
                                   },
                                 ),
                         ),
@@ -328,9 +355,29 @@ class _ResidentActivationManagementSheetState
     );
   }
 
-  Widget _buildActivationTile(ResidentActivationModel item) {
+  Widget _buildActivationTile(ResidentActivationModel item, String buildingId) {
     final hasCode = item.activationCode.isNotEmpty;
     final isActivated = item.isActive;
+
+    Color statusBgColor = Colors.blue.withValues(alpha: 0.08);
+    Color statusTextColor = Colors.blue.shade700;
+
+    if (item.isLocked) {
+      statusBgColor = AppTheme.error.withValues(alpha: 0.12);
+      statusTextColor = AppTheme.error;
+    } else if (item.isRevoked) {
+      statusBgColor = Colors.grey.shade200;
+      statusTextColor = Colors.grey.shade700;
+    } else if (isActivated) {
+      statusBgColor = AppTheme.success.withValues(alpha: 0.12);
+      statusTextColor = AppTheme.success;
+    } else if (item.status == 'otp_sent') {
+      statusBgColor = Colors.amber.withValues(alpha: 0.15);
+      statusTextColor = Colors.amber.shade900;
+    } else if (hasCode) {
+      statusBgColor = Colors.orange.withValues(alpha: 0.12);
+      statusTextColor = Colors.orange.shade800;
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,9 +424,7 @@ class _ResidentActivationManagementSheetState
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: isActivated
-                          ? AppTheme.success.withValues(alpha: 0.12)
-                          : Colors.orange.withValues(alpha: 0.12),
+                      color: statusBgColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -387,7 +432,7 @@ class _ResidentActivationManagementSheetState
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.bold,
-                        color: isActivated ? AppTheme.success : Colors.orange,
+                        color: statusTextColor,
                       ),
                     ),
                   ),
@@ -401,7 +446,7 @@ class _ResidentActivationManagementSheetState
                   color: AppTheme.textSecondary,
                 ),
               ),
-              if (hasCode && !isActivated) ...[
+              if (hasCode && !isActivated && !item.isRevoked) ...[
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -409,22 +454,28 @@ class _ResidentActivationManagementSheetState
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: item.isLocked ? Colors.red.shade50 : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(
+                      color: item.isLocked ? Colors.red.shade200 : Colors.grey.shade300,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.key, size: 14, color: AppTheme.primary),
+                      Icon(
+                        item.isLocked ? Icons.lock : Icons.key,
+                        size: 14,
+                        color: item.isLocked ? AppTheme.error : AppTheme.primary,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         item.activationCode,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
-                          color: AppTheme.primary,
+                          color: item.isLocked ? AppTheme.error : AppTheme.primary,
                         ),
                       ),
                     ],
@@ -435,22 +486,186 @@ class _ResidentActivationManagementSheetState
           ),
         ),
 
-        // Action Buttons
-        if (hasCode && !isActivated)
-          IconButton(
-            icon: const Icon(Icons.copy, size: 18, color: AppTheme.primary),
-            tooltip: 'Sao chép mã',
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: item.activationCode));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Đã sao chép mã ${item.activationCode}'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
+        // Action Buttons Menu
+        if (!isActivated) ...[
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
+            tooltip: 'Tùy chọn thao tác',
+            onSelected: (val) {
+              if (val == 'copy_message') {
+                _copyInviteMessage(item);
+              } else if (val == 'regenerate') {
+                _confirmRegenerate(item, buildingId);
+              } else if (val == 'revoke') {
+                _confirmRevoke(item, buildingId);
+              }
             },
+            itemBuilder: (ctx) => [
+              if (hasCode && !item.isRevoked)
+                const PopupMenuItem(
+                  value: 'copy_message',
+                  child: Row(
+                    children: [
+                      Icon(Icons.share, size: 16, color: AppTheme.primary),
+                      SizedBox(width: 8),
+                      Text('Sao chép thư mời Zalo/SMS'),
+                    ],
+                  ),
+                ),
+              const PopupMenuItem(
+                value: 'regenerate',
+                child: Row(
+                  children: [
+                    Icon(Icons.refresh, size: 16, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('Cấp lại mã mới'),
+                  ],
+                ),
+              ),
+              if (hasCode && !item.isRevoked)
+                const PopupMenuItem(
+                  value: 'revoke',
+                  child: Row(
+                    children: [
+                      Icon(Icons.block, size: 16, color: AppTheme.error),
+                      SizedBox(width: 8),
+                      Text('Thu hồi mã'),
+                    ],
+                  ),
+                ),
+            ],
           ),
+        ],
       ],
+    );
+  }
+
+  void _copyInviteMessage(ResidentActivationModel item) {
+    final inviteMsg =
+        '[PKA-Home] Ban Quản Lý trân trọng gửi mã kích hoạt tài khoản căn hộ ${item.apartmentCode} cho cư dân ${item.fullName}:\n'
+        '• Số điện thoại: ${item.phone}\n'
+        '• Mã kích hoạt: ${item.activationCode}\n'
+        'Vui lòng tải ứng dụng PKA-Home và chọn "Kích hoạt tài khoản lần đầu" để đăng nhập và nhận thông báo từ tòa nhà.';
+
+    Clipboard.setData(ClipboardData(text: inviteMsg));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Đã sao chép thư mời kích hoạt cho cư dân ${item.fullName}'),
+        backgroundColor: AppTheme.success,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _confirmRegenerate(ResidentActivationModel item, String buildingId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cấp lại mã kích hoạt'),
+        content: Text(
+          'Hệ thống sẽ hủy mã cũ và cấp mã mới cho cư dân "${item.fullName}" (Căn hộ ${item.apartmentCode}). Bạn có chắc chắn muốn thực hiện?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                final res = await ref
+                    .read(residentActivationRepositoryProvider)
+                    .regenerateActivationCode(userId: item.userId);
+                ref.invalidate(buildingActivationListProvider(buildingId));
+
+                if (mounted) {
+                  final newCode = res['activation_code'] ?? '';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Đã cấp lại mã thành công: $newCode'),
+                      backgroundColor: AppTheme.success,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi cấp lại mã: $e'),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Cấp mã mới'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmRevoke(ResidentActivationModel item, String buildingId) {
+    final actId = item.activationId;
+    if (actId == null || actId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không tìm thấy mã hợp lệ để thu hồi'),
+          backgroundColor: AppTheme.warning,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Thu hồi mã kích hoạt'),
+        content: Text(
+          'Mã kích hoạt của cư dân "${item.fullName}" sẽ bị vô hiệu hóa ngay lập tức. Cư dân sẽ không thể dùng mã này để kích hoạt nữa.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ref
+                    .read(residentActivationRepositoryProvider)
+                    .revokeActivation(activationId: actId);
+                ref.invalidate(buildingActivationListProvider(buildingId));
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Đã thu hồi mã kích hoạt thành công'),
+                      backgroundColor: AppTheme.success,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Lỗi thu hồi mã: $e'),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Thu hồi'),
+          ),
+        ],
+      ),
     );
   }
 

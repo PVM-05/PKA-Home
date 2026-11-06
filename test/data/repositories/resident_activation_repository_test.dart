@@ -68,6 +68,23 @@ void main() {
 
       expect(list, isNotEmpty);
       expect(list.any((a) => a.fullName == 'Nguyễn Văn An'), isTrue);
+      expect(list.any((a) => a.isLocked), isTrue);
+    });
+
+    test('regenerateActivationCode returns new activation code in mock', () async {
+      final repo = ResidentActivationRepository();
+      final res = await repo.regenerateActivationCode(userId: 'user-mock-1');
+
+      expect(res['success'], isTrue);
+      expect(res['activation_code'], startsWith('ACT-'));
+      expect(res['full_name'], 'Nguyễn Văn An');
+    });
+
+    test('revokeActivation returns success in mock', () async {
+      final repo = ResidentActivationRepository();
+      final res = await repo.revokeActivation(activationId: 'act-mock-1');
+
+      expect(res['success'], isTrue);
     });
   });
 }

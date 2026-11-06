@@ -2100,8 +2100,8 @@
     "semantic_hash": ""
   },
   "test/features/management/announcement_targeting_test.dart": {
-    "mtime": 1793979496.7157774,
-    "seen": 1793979706.498728,
+    "mtime": 1793979942.2386534,
+    "seen": 1793980800.2542586,
     "ast_hash": "8b2a3a0cb377b0f7383b723a2a32686b",
     "semantic_hash": ""
   },
@@ -6312,9 +6312,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/resident_activation_model.dart": {
-    "mtime": 1793978112.7469273,
-    "seen": 1793979706.4977064,
-    "ast_hash": "6cc50879e1dcffbad260d34a78cdf467",
+    "mtime": 1793980386.9938993,
+    "seen": 1793980800.252724,
+    "ast_hash": "ffe17f91e466cf46b4ff0a11ccbd6e08",
     "semantic_hash": ""
   },
   "lib/data/providers/resident_activation_provider.dart": {
@@ -6324,9 +6324,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/resident_activation_repository.dart": {
-    "mtime": 1793978207.3022237,
-    "seen": 1793979706.4977064,
-    "ast_hash": "9cf178bf492090abcee559b81b6aeb72",
+    "mtime": 1793980401.1700377,
+    "seen": 1793980800.252724,
+    "ast_hash": "021b0f56145ff321ace6bf711d4b4e0e",
     "semantic_hash": ""
   },
   "lib/features/auth/screens/resident_activation_screen.dart": {
@@ -6336,9 +6336,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/widgets/resident_activation_management_sheet.dart": {
-    "mtime": 1793978207.6674938,
-    "seen": 1793979706.4977064,
-    "ast_hash": "77a89d7f0f2ff1fa8ef3901493353740",
+    "mtime": 1793980564.3815925,
+    "seen": 1793980800.2532306,
+    "ast_hash": "b688ab294b2113029a9bda669037f68d",
     "semantic_hash": ""
   },
   "supabase/migrations/20261106_02_resident_first_time_activation.sql": {
@@ -6348,9 +6348,9 @@
     "semantic_hash": ""
   },
   "test/data/models/resident_activation_model_test.dart": {
-    "mtime": 1793978114.0242307,
-    "seen": 1793979706.49822,
-    "ast_hash": "efba01ffc8fcac778fea3d657403746d",
+    "mtime": 1793980467.45799,
+    "seen": 1793980800.2537363,
+    "ast_hash": "d986e5c950c0c316654cd123d19fc4a1",
     "semantic_hash": ""
   },
   "test/data/providers/resident_activation_provider_test.dart": {
@@ -6360,9 +6360,9 @@
     "semantic_hash": ""
   },
   "test/data/repositories/resident_activation_repository_test.dart": {
-    "mtime": 1793978115.1269464,
-    "seen": 1793979706.498728,
-    "ast_hash": "fe9399e3183e61983062287fb81be21d",
+    "mtime": 1793980438.1548452,
+    "seen": 1793980800.2537363,
+    "ast_hash": "8e83532fb322fc0cdcfedb8ddc1a3435",
     "semantic_hash": ""
   },
   "test/features/auth/screens/resident_activation_screen_test.dart": {
@@ -6372,9 +6372,9 @@
     "semantic_hash": ""
   },
   "test/features/management/widgets/resident_activation_management_sheet_test.dart": {
-    "mtime": 1793978207.9430695,
-    "seen": 1793979706.498728,
-    "ast_hash": "dd8536844dc91671be594599d45fe3d7",
+    "mtime": 1793980673.6858919,
+    "seen": 1793980800.2542586,
+    "ast_hash": "29d6f69ff1f42c5081f6ceafda5a9e39",
     "semantic_hash": ""
   },
   "lib/features/resident/widgets/sticky_emergency_bar.dart": {
@@ -6423,6 +6423,18 @@
     "mtime": 1793979364.6072276,
     "seen": 1793979706.499743,
     "ast_hash": "70667ecdeb187420dbf8821a4e2f5777",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261106_04_resident_activation_hardening.sql": {
+    "mtime": 1793980362.8967538,
+    "seen": 1793980800.2532306,
+    "ast_hash": "b4d0c0ef9909d9952abf123f2cc3173f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-06-resident-first-time-activation-design.md": {
+    "mtime": 1793980748.592799,
+    "seen": 1793980800.2547636,
+    "ast_hash": "20e9fd9936d9cb930cda67c658751a3c",
     "semantic_hash": ""
   }
 }

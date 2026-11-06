@@ -71,10 +71,11 @@ void main() {
 
       expect(find.text('Mã Kích Hoạt & Thư Mời Cư Dân'), findsOneWidget);
       expect(find.text('Đã kích hoạt'), findsNWidgets(2));
-      expect(find.text('Chưa kích hoạt'), findsOneWidget);
+      expect(find.text('Chờ kích hoạt'), findsOneWidget);
+      expect(find.text('Chưa cấp mã'), findsOneWidget);
       expect(find.text('Đã cấp mã (Chưa kích hoạt)'), findsOneWidget);
 
-      // Thống kê đếm: 1 đã kích hoạt, 1 chưa kích hoạt
+      // Thống kê đếm: 1 đã kích hoạt, 1 chờ kích hoạt, 0 chưa cấp mã
       expect(find.text('1'), findsNWidgets(2));
 
       // Hiển thị danh sách cư dân và mã
@@ -85,6 +86,20 @@ void main() {
       // Nút tạo mã và xuất CSV
       expect(find.text('Tạo mã cho cư dân mới'), findsOneWidget);
       expect(find.text('Xuất CSV'), findsOneWidget);
+    });
+
+    testWidgets('filters resident list based on search query', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      final searchField = find.byType(TextField);
+      expect(searchField, findsOneWidget);
+
+      await tester.enterText(searchField, 'Bình');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Trần Thị Bình'), findsOneWidget);
+      expect(find.text('Nguyễn Văn An'), findsNothing);
     });
   });
 }

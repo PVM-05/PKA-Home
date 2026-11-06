@@ -84,6 +84,31 @@ void main() {
       );
       expect(unassigned.relationRoleText, 'Cư dân');
       expect(unassigned.statusText, 'Chưa cấp mã');
+
+      const locked = ResidentActivationModel(
+        userId: 'u5',
+        fullName: 'E',
+        phone: '094',
+        apartmentCode: 'A0110',
+        relationRole: 'resident',
+        status: 'locked',
+        codeAttempts: 5,
+        activationCode: 'ACT-999999',
+      );
+      expect(locked.isLocked, isTrue);
+      expect(locked.statusText, 'Đã bị khóa (Quá 5 lần thử)');
+
+      const revoked = ResidentActivationModel(
+        userId: 'u6',
+        fullName: 'F',
+        phone: '095',
+        apartmentCode: 'A0110',
+        relationRole: 'resident',
+        status: 'revoked',
+        activationCode: 'ACT-000000',
+      );
+      expect(revoked.isRevoked, isTrue);
+      expect(revoked.statusText, 'Đã thu hồi mã');
     });
   });
 }

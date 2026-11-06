@@ -8,7 +8,9 @@ class ResidentActivationModel {
   final String activationCode;
   final String status;
   final bool isActive;
+  final int codeAttempts;
   final DateTime? createdAt;
+  final DateTime? revokedAt;
 
   const ResidentActivationModel({
     this.activationId,
@@ -20,8 +22,13 @@ class ResidentActivationModel {
     this.activationCode = '',
     this.status = 'pending',
     this.isActive = false,
+    this.codeAttempts = 0,
     this.createdAt,
+    this.revokedAt,
   });
+
+  bool get isLocked => status == 'locked' || codeAttempts >= 5;
+  bool get isRevoked => status == 'revoked';
 
   String get relationRoleText {
     switch (relationRole.toLowerCase().trim()) {
@@ -37,6 +44,12 @@ class ResidentActivationModel {
   }
 
   String get statusText {
+    if (isLocked) {
+      return 'Đã bị khóa (Quá 5 lần thử)';
+    }
+    if (isRevoked) {
+      return 'Đã thu hồi mã';
+    }
     if (isActive || status == 'activated') {
       return 'Đã kích hoạt';
     }
@@ -60,8 +73,14 @@ class ResidentActivationModel {
       activationCode: json['activation_code']?.toString() ?? '',
       status: json['status']?.toString() ?? 'pending',
       isActive: json['is_active'] == true,
+      codeAttempts: json['code_attempts'] is int
+          ? json['code_attempts'] as int
+          : (int.tryParse(json['code_attempts']?.toString() ?? '0') ?? 0),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
+          : null,
+      revokedAt: json['revoked_at'] != null
+          ? DateTime.tryParse(json['revoked_at'].toString())
           : null,
     );
   }
@@ -77,7 +96,9 @@ class ResidentActivationModel {
       'activation_code': activationCode,
       'status': status,
       'is_active': isActive,
+      'code_attempts': codeAttempts,
       'created_at': createdAt?.toIso8601String(),
+      'revoked_at': revokedAt?.toIso8601String(),
     };
   }
 }
