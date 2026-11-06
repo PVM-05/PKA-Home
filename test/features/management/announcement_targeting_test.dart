@@ -15,17 +15,24 @@ class MockAnnouncementRepository implements AnnouncementRepository {
   Stream<List<Map<String, dynamic>>> streamAnnouncements() => const Stream.empty();
 
   @override
-  Future<void> createAnnouncement({
+  Future<Map<String, dynamic>> createAnnouncement({
     required String title,
     required String content,
     required bool isUrgent,
     String targetType = 'all',
     String? targetValue,
     String? targetApartment,
+    String category = 'general',
+    DateTime? eventStartAt,
+    DateTime? eventEndAt,
+    bool isPinned = false,
+    String? hotlineContact,
+    bool autoBroadcast = true,
   }) async {
     createCalled = true;
     lastTargetType = targetType;
     lastTargetApartment = targetValue ?? targetApartment;
+    return {'id': 'mock-id', 'message': 'Tạo và phát sóng thông báo thành công!'};
   }
 
   @override
@@ -37,10 +44,28 @@ class MockAnnouncementRepository implements AnnouncementRepository {
     String targetType = 'all',
     String? targetValue,
     String? targetApartment,
+    String category = 'general',
+    DateTime? eventStartAt,
+    DateTime? eventEndAt,
+    bool isPinned = false,
+    String? hotlineContact,
   }) async {}
 
   @override
   Future<void> deleteAnnouncement(String id) async {}
+
+  @override
+  Future<Map<String, dynamic>> broadcastAnnouncement(String announcementId) async {
+    return {'broadcast_count': 10, 'message': 'Đã phát lại'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> markAnnouncementAsRead(
+    String id,
+    String userId,
+  ) async {
+    return {'success': true};
+  }
 }
 
 void main() {
@@ -106,33 +131,37 @@ void main() {
     await tester.tap(fab);
     await tester.pumpAndSettle();
 
-    expect(find.text('Tạo thông báo mới'), findsOneWidget);
+    expect(find.text('Tạo & Phát sóng Thông báo'), findsOneWidget);
     expect(find.text('Đối tượng nhận thông báo'), findsOneWidget);
 
     // 4. Điền tiêu đề, nội dung và chuyển sang chọn Căn hộ cụ thể
-    await tester.enterText(find.widgetWithText(TextFormField, 'Tiêu đề *'), 'Thông báo thử nghiệm');
-    await tester.enterText(find.widgetWithText(TextFormField, 'Nội dung *'), 'Nội dung kiểm tra phân nhóm đối tượng.');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Tiêu đề thông báo *'), 'Thông báo thử nghiệm');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nội dung chi tiết *'), 'Nội dung kiểm tra phân nhóm đối tượng.');
 
     // Chọn Dropdown Đối tượng nhận thông báo
-    await tester.tap(find.text('Tất cả cư dân (Toàn tòa)'));
+    final audienceDropdown = find.text('Tất cả cư dân (Toàn tòa)');
+    await tester.ensureVisible(audienceDropdown);
+    await tester.tap(audienceDropdown);
     await tester.pumpAndSettle();
 
     // Chọn mục "Căn hộ cụ thể"
-    await tester.tap(find.text('Căn hộ cụ thể').last);
+    final aptOption = find.text('Căn hộ cụ thể (VD: A0110)').last;
+    await tester.tap(aptOption);
     await tester.pumpAndSettle();
 
     // Nhập mã căn hộ
     expect(find.text('Mã căn hộ nhận tin *'), findsOneWidget);
+    await tester.ensureVisible(find.text('Mã căn hộ nhận tin *'));
     await tester.enterText(find.widgetWithText(TextFormField, 'Mã căn hộ nhận tin *'), 'A0110');
 
-    // Bấm nút Đăng
-    await tester.tap(find.text('Đăng'));
+    // Bấm nút Phát sóng
+    await tester.tap(find.text('Phát sóng'));
     await tester.pumpAndSettle();
 
     expect(mockRepo.createCalled, isTrue);
     expect(mockRepo.lastTargetType, 'apartment');
     expect(mockRepo.lastTargetApartment, 'A0110');
-    expect(find.text('Tạo thông báo thành công!'), findsOneWidget);
+    expect(find.text('Tạo và phát sóng thông báo thành công!'), findsOneWidget);
   });
 
   testWidgets('Thẻ thông báo hiển thị tiêu đề rộng rãi không bị ép chiều ngang', (tester) async {

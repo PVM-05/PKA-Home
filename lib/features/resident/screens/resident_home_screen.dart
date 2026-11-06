@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../widgets/notification_card.dart';
+import '../widgets/sticky_emergency_bar.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
@@ -456,6 +457,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const StickyEmergencyBar(),
                   // ══════════════════════════════════════════════════════════
                   // 02 · ƯU TIÊN: Tổng quan hóa đơn
                   // ══════════════════════════════════════════════════════════

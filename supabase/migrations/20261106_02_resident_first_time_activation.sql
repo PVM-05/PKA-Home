@@ -404,3 +404,4 @@ BEGIN
     ORDER BY a.code ASC, u.full_name ASC;
 END;
 $function$;
+

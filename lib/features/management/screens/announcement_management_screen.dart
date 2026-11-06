@@ -2,17 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/validators.dart';
+import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/notification_provider.dart';
 import '../../../data/repositories/announcement_repository.dart';
-import '../../../core/utils/error_formatter.dart';
-import '../../../core/utils/validators.dart';
-import '../../../core/widgets/app_error_card.dart';
 
 class AnnouncementManagementScreen extends ConsumerWidget {
   const AnnouncementManagementScreen({super.key});
+
+  static IconData getCategoryIcon(String category) {
+    switch (category) {
+      case 'emergency':
+        return Icons.warning_amber_rounded;
+      case 'elevator_maintenance':
+        return Icons.elevator_outlined;
+      case 'utility_outage':
+        return Icons.power_off_outlined;
+      case 'resident_meeting':
+        return Icons.groups_outlined;
+      case 'general':
+      default:
+        return Icons.campaign_outlined;
+    }
+  }
+
+  static Color getCategoryColor(String category) {
+    switch (category) {
+      case 'emergency':
+        return AppTheme.error;
+      case 'elevator_maintenance':
+        return Colors.orange.shade800;
+      case 'utility_outage':
+        return Colors.deepOrange;
+      case 'resident_meeting':
+        return Colors.purple;
+      case 'general':
+      default:
+        return AppTheme.primary;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,15 +94,21 @@ class AnnouncementManagementScreen extends ConsumerWidget {
               itemCount: announcements.length,
               itemBuilder: (context, index) {
                 final announcement = announcements[index];
+                final catColor = getCategoryColor(announcement.category);
+                final catIcon = getCategoryIcon(announcement.category);
+
                 return Card(
                   elevation: 0,
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                     side: BorderSide(
                       color: announcement.isUrgent
-                          ? AppTheme.error.withValues(alpha: 0.3)
-                          : Colors.grey.shade200,
+                          ? AppTheme.error.withValues(alpha: 0.4)
+                          : (announcement.isPinned
+                              ? AppTheme.primary.withValues(alpha: 0.3)
+                              : Colors.grey.shade200),
+                      width: announcement.isUrgent || announcement.isPinned ? 1.5 : 1,
                     ),
                   ),
                   child: InkWell(
@@ -81,143 +119,123 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Hàng trên: Nhãn đối tượng & Trạng thái (trái) - Nút thao tác (phải)
+                          // Hàng 1: Chip danh mục & Ghim & Đối tượng
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
                                 child: Wrap(
-                                  spacing: 8,
+                                  spacing: 6,
                                   runSpacing: 6,
                                   crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
-                                    if (announcement.isUrgent)
+                                    if (announcement.isPinned)
                                       Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.error.withValues(
-                                            alpha: 0.1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: AppTheme.error.withValues(
-                                              alpha: 0.3,
-                                            ),
-                                          ),
+                                          color: Colors.amber.shade50,
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: Colors.amber.shade400),
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(
-                                              Icons.warning_amber_rounded,
-                                              size: 14,
-                                              color: AppTheme.error,
-                                            ),
-                                            SizedBox(width: 4),
+                                            Icon(Icons.push_pin, size: 12, color: Colors.amber.shade900),
+                                            const SizedBox(width: 3),
                                             Text(
-                                              'Khẩn cấp',
+                                              'Đã ghim',
                                               style: TextStyle(
-                                                color: AppTheme.error,
-                                                fontSize: 11,
+                                                fontSize: 10.5,
                                                 fontWeight: FontWeight.bold,
+                                                color: Colors.amber.shade900,
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
+                                    // Badge Danh mục
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.primary.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: AppTheme.primary.withValues(
-                                            alpha: 0.2,
-                                          ),
-                                        ),
+                                        color: catColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: catColor.withValues(alpha: 0.3)),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(
-                                            Icons.group_outlined,
-                                            size: 13,
-                                            color: AppTheme.primary,
-                                          ),
+                                          Icon(catIcon, size: 13, color: catColor),
                                           const SizedBox(width: 4),
                                           Text(
-                                            announcement.targetDisplayName,
-                                            style: const TextStyle(
-                                              color: AppTheme.primary,
+                                            announcement.categoryDisplayName,
+                                            style: TextStyle(
                                               fontSize: 11,
-                                              fontWeight: FontWeight.w600,
+                                              fontWeight: FontWeight.bold,
+                                              color: catColor,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Text(
-                                      DateFormat(
-                                        'dd/MM/yyyy HH:mm',
-                                      ).format(announcement.createdAt),
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppTheme.textSecondary,
+                                    // Badge Phạm vi
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade100,
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: Colors.grey.shade300),
                                       ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.group_outlined, size: 13, color: AppTheme.textSecondary),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            announcement.targetDisplayName,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppTheme.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Thời gian tạo
+                                    Text(
+                                      DateFormat('dd/MM HH:mm').format(announcement.createdAt),
+                                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                                     ),
                                   ],
                                 ),
                               ),
+                              // Nút thao tác
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(
-                                      Icons.edit_outlined,
-                                      color: AppTheme.primary,
-                                      size: 20,
-                                    ),
-                                    tooltip: 'Chỉnh sửa',
+                                    icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                                    tooltip: 'Phát lại thông báo đẩy (Re-broadcast)',
+                                    color: AppTheme.primary,
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 32,
-                                      minHeight: 32,
-                                    ),
-                                    onPressed: () => _showEditDialog(
-                                      context,
-                                      ref,
-                                      announcement,
-                                    ),
+                                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                    onPressed: () => _handleRebroadcast(context, ref, announcement),
                                   ),
-                                  const SizedBox(width: 4),
                                   IconButton(
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      color: AppTheme.error,
-                                      size: 20,
-                                    ),
-                                    tooltip: 'Xóa thông báo',
+                                    icon: const Icon(Icons.edit_outlined, size: 18),
+                                    tooltip: 'Chỉnh sửa',
+                                    color: AppTheme.primary,
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 32,
-                                      minHeight: 32,
-                                    ),
-                                    onPressed: () => _confirmDelete(
-                                      context,
-                                      ref,
-                                      announcement.id,
-                                      announcement.title,
-                                    ),
+                                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                    onPressed: () => _showEditDialog(context, ref, announcement),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, size: 18),
+                                    tooltip: 'Xóa thông báo',
+                                    color: AppTheme.error,
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                    onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
                                   ),
                                 ],
                               ),
@@ -225,27 +243,120 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 10),
 
-                          // Tiêu đề thông báo chiếm toàn bộ chiều rộng
+                          // Tiêu đề
                           Text(
                             announcement.title,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: announcement.isUrgent
-                                  ? AppTheme.error
-                                  : AppTheme.textPrimary,
+                              fontSize: 15.5,
+                              color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 6),
 
-                          // Nội dung thông báo
+                          // Nội dung
                           Text(
                             announcement.content,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppTheme.textSecondary,
-                              height: 1.4,
+                            style: const TextStyle(color: AppTheme.textSecondary, height: 1.4, fontSize: 13),
+                          ),
+
+                          // Khung giờ sự kiện / bảo trì (nếu có)
+                          if (announcement.eventStartAt != null && announcement.eventEndAt != null) ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: announcement.isOngoing
+                                    ? Colors.orange.shade50
+                                    : Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: announcement.isOngoing
+                                      ? Colors.orange.shade300
+                                      : Colors.blue.shade200,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    announcement.isOngoing
+                                        ? Icons.access_time_filled
+                                        : Icons.event_available,
+                                    size: 15,
+                                    color: announcement.isOngoing
+                                        ? Colors.orange.shade800
+                                        : Colors.blue.shade800,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'Thời gian: ${DateFormat('HH:mm dd/MM').format(announcement.eventStartAt!)} - ${DateFormat('HH:mm dd/MM').format(announcement.eventEndAt!)}${announcement.isOngoing ? " • Đang diễn ra" : ""}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: announcement.isOngoing
+                                            ? Colors.orange.shade900
+                                            : Colors.blue.shade900,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+
+                          const SizedBox(height: 12),
+                          const Divider(height: 1),
+                          const SizedBox(height: 8),
+
+                          // Thống kê tỷ lệ đọc tin
+                          Row(
+                            children: [
+                              Icon(Icons.mark_email_read_outlined, size: 15, color: Colors.grey.shade600),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Đã phát: ${announcement.broadcastCount} • Đã đọc: ${announcement.readCount} (${announcement.readRatioPercentageText})',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                              const Spacer(),
+                              if (announcement.hotlineContact != null && announcement.hotlineContact!.isNotEmpty)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.phone_in_talk, size: 13, color: AppTheme.primary),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      announcement.hotlineContact!,
+                                      style: const TextStyle(
+                                        fontSize: 11.5,
+                                        color: AppTheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: announcement.readRatio,
+                              minHeight: 4,
+                              backgroundColor: Colors.grey.shade200,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                announcement.readRatio > 0.7
+                                    ? AppTheme.success
+                                    : (announcement.readRatio > 0.3
+                                        ? AppTheme.primary
+                                        : Colors.orange),
+                              ),
                             ),
                           ),
                         ],
@@ -265,12 +376,46 @@ class AnnouncementManagementScreen extends ConsumerWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         heroTag: 'announcement_management_fab',
+        icon: const Icon(Icons.campaign),
+        label: const Text('Phát thông báo'),
         onPressed: () => _showCreateDialog(context, ref),
-        child: const Icon(Icons.add),
       ),
     );
+  }
+
+  void _handleRebroadcast(
+    BuildContext context,
+    WidgetRef ref,
+    AnnouncementModel announcement,
+  ) async {
+    try {
+      final res = await ref
+          .read(announcementRepositoryProvider)
+          .broadcastAnnouncement(announcement.id);
+      if (context.mounted) {
+        final count = res['broadcast_count'] ?? 0;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              res['message']?.toString() ??
+                  'Đã phát lại thông báo đẩy tới $count cư dân.',
+            ),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
   }
 
   void _triggerRemindersScan(BuildContext context, WidgetRef ref) async {
@@ -326,12 +471,11 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(ctx);
               try {
-                final repo = ref.read(announcementRepositoryProvider);
-                await repo.deleteAnnouncement(id);
+                await ref.read(announcementRepositoryProvider).deleteAnnouncement(id);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Đã xóa thông báo thành công!'),
+                      content: Text('Đã xóa thông báo thành công'),
                       backgroundColor: AppTheme.success,
                     ),
                   );
@@ -359,10 +503,19 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     final contentController = TextEditingController();
     final targetValueController = TextEditingController();
     final apartmentController = TextEditingController();
+    final hotlineController = TextEditingController();
     final formKey = GlobalKey<FormState>();
+
+    String category = 'general';
     String targetType = 'all';
     bool isUrgent = false;
+    bool isPinned = false;
+    bool autoBroadcast = true;
     bool isSubmitting = false;
+    bool showLivePreview = false;
+
+    DateTime? eventStartAt;
+    DateTime? eventEndAt;
 
     showDialog(
       context: context,
@@ -370,154 +523,292 @@ class AnnouncementManagementScreen extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: const Text('Tạo thông báo mới'),
-              content: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Tiêu đề *',
-                          prefixIcon: Icon(Icons.title),
-                        ),
-                        maxLength: 100,
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Vui lòng nhập tiêu đề thông báo'
-                            : null,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        initialValue: targetType,
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Đối tượng nhận thông báo',
-                          prefixIcon: Icon(Icons.group_outlined),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'all',
-                            child: Text('Tất cả cư dân (Toàn tòa)'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'block',
-                            child: Text('Theo Block'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'floor',
-                            child: Text('Theo Tầng'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'apartment',
-                            child: Text('Căn hộ cụ thể'),
-                          ),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() => targetType = val);
-                          }
-                        },
-                      ),
-                      if (targetType == 'block') ...[
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: targetValueController,
-                          decoration: const InputDecoration(
-                            labelText: 'Mã Block nhận tin *',
-                            hintText: 'VD: A hoặc B',
-                            prefixIcon: Icon(Icons.apartment_outlined),
-                          ),
-                          validator: (v) {
-                            if (targetType == 'block' &&
-                                (v == null || v.trim().isEmpty)) {
-                              return 'Vui lòng nhập mã Block';
-                            }
-                            return null;
-                          },
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                        ),
-                      ],
-                      if (targetType == 'floor') ...[
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: targetValueController,
-                          decoration: const InputDecoration(
-                            labelText: 'Số tầng nhận tin *',
-                            hintText: 'VD: 05 hoặc 12',
-                            prefixIcon: Icon(Icons.layers_outlined),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (v) {
-                            if (targetType == 'floor' &&
-                                (v == null || v.trim().isEmpty)) {
-                              return 'Vui lòng nhập số tầng';
-                            }
-                            return null;
-                          },
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                        ),
-                      ],
-                      if (targetType == 'apartment') ...[
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: apartmentController,
-                          decoration: const InputDecoration(
-                            labelText: 'Mã căn hộ nhận tin *',
-                            hintText: 'VD: A0110',
-                            prefixIcon: Icon(Icons.door_front_door_outlined),
-                          ),
-                          validator: (v) => targetType == 'apartment'
-                              ? validateApartmentCode(v)
-                              : null,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: contentController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nội dung *',
-                          prefixIcon: Icon(Icons.notes),
-                          alignLabelWithHint: true,
-                        ),
-                        maxLines: 4,
-                        maxLength: 1000,
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Vui lòng nhập nội dung thông báo'
-                            : null,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                      ),
-                      const SizedBox(height: 12),
-                      CheckboxListTile(
-                        title: const Text('Đánh dấu Khẩn cấp'),
-                        subtitle: const Text(
-                          'Thông báo sẽ được hiển thị nổi bật cho cư dân',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        value: isUrgent,
-                        activeColor: AppTheme.error,
-                        onChanged: (val) {
-                          setState(() {
-                            isUrgent = val ?? false;
-                          });
-                        },
-                      ),
-                    ],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Row(
+                children: [
+                  const Icon(Icons.campaign, color: AppTheme.primary),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Tạo & Phát sóng Thông báo',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: showLivePreview ? AppTheme.primary : AppTheme.textSecondary,
+                    ),
+                    icon: Icon(showLivePreview ? Icons.edit_note : Icons.phone_android, size: 18),
+                    label: Text(showLivePreview ? 'Soạn thảo' : 'Xem trước'),
+                    onPressed: () => setState(() => showLivePreview = !showLivePreview),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: 500,
+                child: showLivePreview
+                    ? _buildLivePreviewWidget(
+                        title: titleController.text,
+                        content: contentController.text,
+                        category: category,
+                        isUrgent: isUrgent,
+                        isPinned: isPinned,
+                        eventStartAt: eventStartAt,
+                        eventEndAt: eventEndAt,
+                        hotline: hotlineController.text,
+                      )
+                    : SingleChildScrollView(
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // 1. Danh mục thông báo
+                              DropdownButtonFormField<String>(
+                                initialValue: category,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Danh mục thông báo *',
+                                  prefixIcon: Icon(Icons.category_outlined),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'general',
+                                    child: Text('Thông báo chung', overflow: TextOverflow.ellipsis),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'emergency',
+                                    child: Text('Sự cố khẩn cấp (Cháy/Nổ/Sự cố gấp)', overflow: TextOverflow.ellipsis),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'elevator_maintenance',
+                                    child: Text('Bảo trì thang máy', overflow: TextOverflow.ellipsis),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'utility_outage',
+                                    child: Text('Cúp điện / Cắt nước sinh hoạt', overflow: TextOverflow.ellipsis),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'resident_meeting',
+                                    child: Text('Họp cụm cư dân / Hội nghị nhà chung cư', overflow: TextOverflow.ellipsis),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() {
+                                      category = val;
+                                      if (val == 'emergency') isUrgent = true;
+                                    });
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 12),
+
+                              // 2. Tiêu đề
+                              TextFormField(
+                                controller: titleController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Tiêu đề thông báo *',
+                                  hintText: 'VD: Thông báo bảo trì thang máy Tháp A',
+                                  prefixIcon: Icon(Icons.title),
+                                ),
+                                maxLength: 100,
+                                validator: (v) => (v == null || v.trim().isEmpty)
+                                    ? 'Vui lòng nhập tiêu đề thông báo'
+                                    : null,
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                              ),
+                              const SizedBox(height: 12),
+
+                              // 3. Đối tượng nhận
+                              DropdownButtonFormField<String>(
+                                initialValue: targetType,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Đối tượng nhận thông báo',
+                                  prefixIcon: Icon(Icons.group_outlined),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'all',
+                                    child: Text('Tất cả cư dân (Toàn tòa)', overflow: TextOverflow.ellipsis),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'block',
+                                    child: Text('Theo Block (A hoặc B)', overflow: TextOverflow.ellipsis),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'floor',
+                                    child: Text('Theo Tầng', overflow: TextOverflow.ellipsis),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'apartment',
+                                    child: Text('Căn hộ cụ thể (VD: A0110)', overflow: TextOverflow.ellipsis),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) setState(() => targetType = val);
+                                },
+                              ),
+                              if (targetType == 'block') ...[
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: targetValueController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Mã Block nhận tin *',
+                                    hintText: 'VD: A hoặc B',
+                                    prefixIcon: Icon(Icons.apartment_outlined),
+                                  ),
+                                  validator: (v) => (targetType == 'block' && (v == null || v.trim().isEmpty))
+                                      ? 'Vui lòng nhập mã Block'
+                                      : null,
+                                ),
+                              ],
+                              if (targetType == 'floor') ...[
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: targetValueController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Số tầng nhận tin *',
+                                    hintText: 'VD: 05 hoặc 12',
+                                    prefixIcon: Icon(Icons.layers_outlined),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) => (targetType == 'floor' && (v == null || v.trim().isEmpty))
+                                      ? 'Vui lòng nhập số tầng'
+                                      : null,
+                                ),
+                              ],
+                              if (targetType == 'apartment') ...[
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: apartmentController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Mã căn hộ nhận tin *',
+                                    hintText: 'VD: A0110',
+                                    prefixIcon: Icon(Icons.door_front_door_outlined),
+                                  ),
+                                  validator: (v) => targetType == 'apartment'
+                                      ? validateApartmentCode(v)
+                                      : null,
+                                ),
+                              ],
+                              const SizedBox(height: 12),
+
+                              // 4. Khung giờ sự kiện / bảo trì (Tùy chọn)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      icon: const Icon(Icons.play_circle_outline, size: 16),
+                                      label: Text(
+                                        eventStartAt == null
+                                            ? 'Giờ bắt đầu'
+                                            : DateFormat('HH:mm dd/MM').format(eventStartAt!),
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      onPressed: () async {
+                                        final picked = await _pickDateTime(context, eventStartAt);
+                                        if (picked != null) {
+                                          setState(() => eventStartAt = picked);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      icon: const Icon(Icons.stop_circle_outlined, size: 16),
+                                      label: Text(
+                                        eventEndAt == null
+                                            ? 'Giờ kết thúc'
+                                            : DateFormat('HH:mm dd/MM').format(eventEndAt!),
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      onPressed: () async {
+                                        final picked = await _pickDateTime(context, eventEndAt ?? eventStartAt);
+                                        if (picked != null) {
+                                          setState(() => eventEndAt = picked);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+
+                              // 5. Hotline liên hệ nhanh
+                              TextFormField(
+                                controller: hotlineController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Hotline kỹ thuật viên trực ban (Tùy chọn)',
+                                  hintText: 'VD: 0901234567',
+                                  prefixIcon: Icon(Icons.phone_in_talk_outlined),
+                                ),
+                                keyboardType: TextInputType.phone,
+                              ),
+                              const SizedBox(height: 12),
+
+                              // 6. Nội dung
+                              TextFormField(
+                                controller: contentController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Nội dung chi tiết *',
+                                  prefixIcon: Icon(Icons.notes),
+                                  alignLabelWithHint: true,
+                                ),
+                                maxLines: 4,
+                                maxLength: 1000,
+                                validator: (v) => (v == null || v.trim().isEmpty)
+                                    ? 'Vui lòng nhập nội dung thông báo'
+                                    : null,
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                              ),
+                              const SizedBox(height: 8),
+
+                              // 7. Tùy chọn nâng cao
+                              CheckboxListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Ghim đầu bảng tin cư dân', style: TextStyle(fontSize: 13.5)),
+                                value: isPinned,
+                                activeColor: AppTheme.primary,
+                                onChanged: (val) => setState(() => isPinned = val ?? false),
+                              ),
+                              CheckboxListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Đánh dấu Khẩn cấp (Hiển thị nổi bật)', style: TextStyle(fontSize: 13.5)),
+                                value: isUrgent,
+                                activeColor: AppTheme.error,
+                                onChanged: (val) => setState(() => isUrgent = val ?? false),
+                              ),
+                              SwitchListTile.adaptive(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Phát sóng thông báo tức thì (Push Broadcast)', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold)),
+                                subtitle: const Text('Tự động gửi thông báo nổi và rung chuông tới điện thoại cư dân', style: TextStyle(fontSize: 11.5)),
+                                value: autoBroadcast,
+                                activeTrackColor: AppTheme.primary,
+                                onChanged: (val) => setState(() => autoBroadcast = val),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
               ),
               actions: [
                 TextButton(
                   onPressed: isSubmitting ? null : () => Navigator.pop(context),
                   child: const Text('Hủy'),
                 ),
-                ElevatedButton(
+                ElevatedButton.icon(
+                  icon: isSubmitting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.send, size: 16),
+                  label: const Text('Phát sóng'),
                   onPressed: isSubmitting
                       ? null
                       : () async {
@@ -527,30 +818,35 @@ class AnnouncementManagementScreen extends ConsumerWidget {
 
                           setState(() => isSubmitting = true);
                           try {
-                            final repo = ref.read(
-                              announcementRepositoryProvider,
-                            );
+                            final repo = ref.read(announcementRepositoryProvider);
                             final targetVal = targetType == 'apartment'
                                 ? apartmentController.text.trim().toUpperCase()
                                 : (targetType == 'all'
-                                      ? null
-                                      : targetValueController.text.trim());
+                                    ? null
+                                    : targetValueController.text.trim());
 
-                            await repo.createAnnouncement(
+                            final res = await repo.createAnnouncement(
                               title: titleController.text.trim(),
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
                               targetType: targetType,
                               targetValue: targetVal,
-                              targetApartment: targetType == 'apartment'
-                                  ? targetVal
-                                  : null,
+                              targetApartment: targetType == 'apartment' ? targetVal : null,
+                              category: category,
+                              eventStartAt: eventStartAt,
+                              eventEndAt: eventEndAt,
+                              isPinned: isPinned,
+                              hotlineContact: hotlineController.text.trim().isEmpty ? null : hotlineController.text.trim(),
+                              autoBroadcast: autoBroadcast,
                             );
+
                             if (context.mounted) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Tạo thông báo thành công!'),
+                                SnackBar(
+                                  content: Text(
+                                    res['message']?.toString() ?? 'Tạo và phát sóng thông báo thành công!',
+                                  ),
                                   backgroundColor: AppTheme.success,
                                 ),
                               );
@@ -567,16 +863,6 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             }
                           }
                         },
-                  child: isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Đăng'),
                 ),
               ],
             );
@@ -586,7 +872,162 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildLivePreviewWidget({
+    required String title,
+    required String content,
+    required String category,
+    required bool isUrgent,
+    required bool isPinned,
+    DateTime? eventStartAt,
+    DateTime? eventEndAt,
+    String? hotline,
+  }) {
+    final catColor = getCategoryColor(category);
+    final catIcon = getCategoryIcon(category);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.phone_android, size: 16, color: AppTheme.textSecondary),
+              const SizedBox(width: 6),
+              const Text(
+                'Mô phỏng hiển thị trên App Cư dân',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Thẻ xem trước
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isUrgent ? AppTheme.error : (isPinned ? AppTheme.primary : Colors.grey.shade300),
+                width: isUrgent || isPinned ? 1.5 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: catColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(catIcon, size: 12, color: catColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            category == 'emergency'
+                                ? 'Khẩn cấp'
+                                : (category == 'elevator_maintenance'
+                                    ? 'Bảo trì thang máy'
+                                    : (category == 'utility_outage'
+                                        ? 'Cúp điện / nước'
+                                        : (category == 'resident_meeting' ? 'Họp cư dân' : 'Thông báo'))),
+                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: catColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    const Text('Vừa xong', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  title.trim().isEmpty ? '(Chưa có tiêu đề)' : title,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.bold,
+                    color: isUrgent ? AppTheme.error : AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  content.trim().isEmpty ? '(Chưa có nội dung mô tả chi tiết...)' : content,
+                  maxLines: 3,
+                  style: const TextStyle(fontSize: 12.5, color: AppTheme.textSecondary, height: 1.3),
+                ),
+                if (eventStartAt != null && eventEndAt != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Khung giờ: ${DateFormat('HH:mm dd/MM').format(eventStartAt)} - ${DateFormat('HH:mm dd/MM').format(eventEndAt)}',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blue.shade900),
+                    ),
+                  ),
+                ],
+                if (hotline != null && hotline.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.phone_in_talk, size: 12, color: AppTheme.primary),
+                      const SizedBox(width: 4),
+                      Text('Hotline: $hotline', style: const TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<DateTime?> _pickDateTime(BuildContext context, DateTime? initial) async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initial ?? now,
+      firstDate: now.subtract(const Duration(days: 7)),
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (date == null || !context.mounted) return null;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial ?? now),
+    );
+    if (time == null) return date;
+
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  }
+
   void _showDetailDialog(BuildContext context, AnnouncementModel announcement) {
+    final catColor = getCategoryColor(announcement.category);
+    final catIcon = getCategoryIcon(announcement.category);
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -595,45 +1036,51 @@ class AnnouncementManagementScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (announcement.isUrgent)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
+            Wrap(
+              spacing: 6,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppTheme.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppTheme.error.withValues(alpha: 0.3),
-                    ),
+                    color: catColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: catColor.withValues(alpha: 0.3)),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        size: 14,
-                        color: AppTheme.error,
-                      ),
-                      SizedBox(width: 4),
+                      Icon(catIcon, size: 13, color: catColor),
+                      const SizedBox(width: 4),
                       Text(
-                        'Khẩn cấp',
-                        style: TextStyle(
-                          color: AppTheme.error,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        announcement.categoryDisplayName,
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: catColor),
                       ),
                     ],
                   ),
                 ),
-              ),
+                if (announcement.isPinned)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.amber.shade400),
+                    ),
+                    child: Text(
+                      'Đã ghim',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.amber.shade900),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
             Text(
               announcement.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
+              ),
             ),
           ],
         ),
@@ -644,34 +1091,53 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.group_outlined,
-                    size: 16,
-                    color: AppTheme.primary,
-                  ),
+                  const Icon(Icons.group_outlined, size: 16, color: AppTheme.primary),
                   const SizedBox(width: 6),
                   Text(
                     'Đối tượng nhận: ${announcement.targetDisplayName}',
-                    style: const TextStyle(
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 'Ngày đăng: ${DateFormat('dd/MM/yyyy HH:mm').format(announcement.createdAt)}',
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
               ),
+              if (announcement.eventStartAt != null && announcement.eventEndAt != null) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Thời gian hiệu lực: ${DateFormat('HH:mm dd/MM/yyyy').format(announcement.eventStartAt!)} đến ${DateFormat('HH:mm dd/MM/yyyy').format(announcement.eventEndAt!)}',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue.shade900),
+                  ),
+                ),
+              ],
+              if (announcement.hotlineContact != null && announcement.hotlineContact!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Hotline kỹ thuật: ${announcement.hotlineContact}',
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                ),
+              ],
+              const SizedBox(height: 14),
+              const Divider(height: 1),
               const SizedBox(height: 12),
               Text(
                 announcement.content,
                 style: const TextStyle(fontSize: 14, height: 1.5),
+              ),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Text(
+                'Tiến độ xem tin: Đã phát ${announcement.broadcastCount} cư dân • Đã đọc ${announcement.readCount} (${announcement.readRatioPercentageText})',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -693,16 +1159,19 @@ class AnnouncementManagementScreen extends ConsumerWidget {
   ) {
     final titleController = TextEditingController(text: announcement.title);
     final contentController = TextEditingController(text: announcement.content);
-    final targetValueController = TextEditingController(
-      text: announcement.targetValue ?? '',
-    );
-    final apartmentController = TextEditingController(
-      text: announcement.targetApartment ?? announcement.targetValue ?? '',
-    );
+    final targetValueController = TextEditingController(text: announcement.targetValue ?? '');
+    final apartmentController = TextEditingController(text: announcement.targetApartment ?? announcement.targetValue ?? '');
+    final hotlineController = TextEditingController(text: announcement.hotlineContact ?? '');
     final formKey = GlobalKey<FormState>();
+
+    String category = announcement.category;
     String targetType = announcement.targetType;
     bool isUrgent = announcement.isUrgent;
+    bool isPinned = announcement.isPinned;
     bool isSubmitting = false;
+
+    DateTime? eventStartAt = announcement.eventStartAt;
+    DateTime? eventEndAt = announcement.eventEndAt;
 
     showDialog(
       context: context,
@@ -710,9 +1179,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: const Text('Chỉnh sửa thông báo'),
               content: Form(
                 key: formKey,
@@ -720,127 +1187,51 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextFormField(
-                        controller: titleController,
-                        decoration: const InputDecoration(labelText: 'Tiêu đề'),
-                        validator: (value) =>
-                            value == null || value.trim().isEmpty
-                            ? 'Vui lòng nhập tiêu đề'
-                            : null,
-                      ),
-                      const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        initialValue: targetType,
+                        initialValue: category,
                         isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Phạm vi đối tượng',
-                          prefixIcon: Icon(Icons.group_outlined),
-                        ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: 'all',
-                            child: Text('Tất cả cư dân (Toàn tòa)'),
-                          ),
-                          const DropdownMenuItem(
-                            value: 'block',
-                            child: Text('Theo Block'),
-                          ),
-                          const DropdownMenuItem(
-                            value: 'floor',
-                            child: Text('Theo Tầng'),
-                          ),
-                          const DropdownMenuItem(
-                            value: 'apartment',
-                            child: Text('Căn hộ cụ thể'),
-                          ),
-                          if (targetType == 'block_a')
-                            const DropdownMenuItem(
-                              value: 'block_a',
-                              child: Text('Chỉ cư dân Tòa A'),
-                            ),
-                          if (targetType == 'block_b')
-                            const DropdownMenuItem(
-                              value: 'block_b',
-                              child: Text('Chỉ cư dân Tòa B'),
-                            ),
+                        decoration: const InputDecoration(labelText: 'Danh mục thông báo'),
+                        items: const [
+                          DropdownMenuItem(value: 'general', child: Text('Thông báo chung', overflow: TextOverflow.ellipsis)),
+                          DropdownMenuItem(value: 'emergency', child: Text('Khẩn cấp', overflow: TextOverflow.ellipsis)),
+                          DropdownMenuItem(value: 'elevator_maintenance', child: Text('Bảo trì thang máy', overflow: TextOverflow.ellipsis)),
+                          DropdownMenuItem(value: 'utility_outage', child: Text('Cúp điện / nước', overflow: TextOverflow.ellipsis)),
+                          DropdownMenuItem(value: 'resident_meeting', child: Text('Họp cư dân', overflow: TextOverflow.ellipsis)),
                         ],
                         onChanged: (val) {
-                          if (val != null) {
-                            setState(() => targetType = val);
-                          }
+                          if (val != null) setState(() => category = val);
                         },
                       ),
-                      if (targetType == 'block') ...[
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: targetValueController,
-                          decoration: const InputDecoration(
-                            labelText: 'Mã Block nhận tin *',
-                            hintText: 'VD: A hoặc B',
-                            prefixIcon: Icon(Icons.apartment_outlined),
-                          ),
-                          validator: (v) {
-                            if (targetType == 'block' &&
-                                (v == null || v.trim().isEmpty)) {
-                              return 'Vui lòng nhập mã Block';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                      if (targetType == 'floor') ...[
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: targetValueController,
-                          decoration: const InputDecoration(
-                            labelText: 'Số tầng nhận tin *',
-                            hintText: 'VD: 05 hoặc 12',
-                            prefixIcon: Icon(Icons.layers_outlined),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (v) {
-                            if (targetType == 'floor' &&
-                                (v == null || v.trim().isEmpty)) {
-                              return 'Vui lòng nhập số tầng';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                      if (targetType == 'apartment') ...[
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: apartmentController,
-                          decoration: const InputDecoration(
-                            labelText: 'Mã căn hộ nhận tin *',
-                            hintText: 'VD: A0110',
-                            prefixIcon: Icon(Icons.door_front_door_outlined),
-                          ),
-                          validator: (v) => targetType == 'apartment'
-                              ? validateApartmentCode(v)
-                              : null,
-                        ),
-                      ],
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: titleController,
+                        decoration: const InputDecoration(labelText: 'Tiêu đề *'),
+                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập tiêu đề' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: hotlineController,
+                        decoration: const InputDecoration(labelText: 'Hotline kỹ thuật viên'),
+                      ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: contentController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nội dung',
-                        ),
+                        decoration: const InputDecoration(labelText: 'Nội dung *'),
                         maxLines: 4,
-                        validator: (value) =>
-                            value == null || value.trim().isEmpty
-                            ? 'Vui lòng nhập nội dung'
-                            : null,
+                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập nội dung' : null,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       CheckboxListTile(
-                        title: const Text('Khẩn cấp'),
-                        value: isUrgent,
-                        onChanged: (val) =>
-                            setState(() => isUrgent = val ?? false),
                         contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
+                        title: const Text('Ghim đầu bảng tin'),
+                        value: isPinned,
+                        onChanged: (val) => setState(() => isPinned = val ?? false),
+                      ),
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Đánh dấu Khẩn cấp'),
+                        value: isUrgent,
+                        onChanged: (val) => setState(() => isUrgent = val ?? false),
                       ),
                     ],
                   ),
@@ -848,46 +1239,39 @@ class AnnouncementManagementScreen extends ConsumerWidget {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: isSubmitting ? null : () => Navigator.pop(context),
                   child: const Text('Hủy'),
                 ),
                 ElevatedButton(
                   onPressed: isSubmitting
                       ? null
                       : () async {
-                          if (!(formKey.currentState?.validate() ?? false)) {
-                            return;
-                          }
-
+                          if (!(formKey.currentState?.validate() ?? false)) return;
                           setState(() => isSubmitting = true);
                           try {
-                            final repo = ref.read(
-                              announcementRepositoryProvider,
-                            );
                             final targetVal = targetType == 'apartment'
                                 ? apartmentController.text.trim().toUpperCase()
-                                : (targetType == 'all'
-                                      ? null
-                                      : targetValueController.text.trim());
+                                : (targetType == 'all' ? null : targetValueController.text.trim());
 
-                            await repo.updateAnnouncement(
+                            await ref.read(announcementRepositoryProvider).updateAnnouncement(
                               id: announcement.id,
                               title: titleController.text.trim(),
                               content: contentController.text.trim(),
                               isUrgent: isUrgent,
                               targetType: targetType,
                               targetValue: targetVal,
-                              targetApartment: targetType == 'apartment'
-                                  ? targetVal
-                                  : null,
+                              targetApartment: targetType == 'apartment' ? targetVal : null,
+                              category: category,
+                              eventStartAt: eventStartAt,
+                              eventEndAt: eventEndAt,
+                              isPinned: isPinned,
+                              hotlineContact: hotlineController.text.trim().isEmpty ? null : hotlineController.text.trim(),
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Cập nhật thông báo thành công!',
-                                  ),
+                                  content: Text('Cập nhật thông báo thành công'),
                                   backgroundColor: AppTheme.success,
                                 ),
                               );
@@ -905,14 +1289,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                           }
                         },
                   child: isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Text('Lưu'),
                 ),
               ],

@@ -71,3 +71,23 @@ final residentAnnouncementsProvider = Provider<AsyncValue<List<AnnouncementModel
   });
 });
 
+/// Provider lấy các thông báo khẩn cấp hoặc sự cố/bảo trì đang diễn ra dành cho cư dân
+final activeEmergencyAnnouncementsProvider = Provider<List<AnnouncementModel>>((ref) {
+  final announcementsAsync = ref.watch(residentAnnouncementsProvider);
+  final announcements = announcementsAsync.valueOrNull ?? [];
+
+  return announcements.where((a) {
+    // 1. Được đánh dấu khẩn cấp
+    if (a.isUrgent) return true;
+    // 2. Thuộc danh mục khẩn cấp
+    if (a.category == 'emergency') return true;
+    // 3. Sự cố/bảo trì đang trong thời gian diễn ra
+    if (a.isOngoing &&
+        (a.category == 'elevator_maintenance' || a.category == 'utility_outage')) {
+      return true;
+    }
+    return false;
+  }).toList();
+});
+
+
