@@ -654,9 +654,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/vehicle_model.dart": {
-    "mtime": 1793886329.7252228,
-    "seen": 1793891612.8321867,
-    "ast_hash": "445389bd4ee0aa4257b88ca04634603a",
+    "mtime": 1794055127.2666645,
+    "seen": 1794055649.9586089,
+    "ast_hash": "9c199048445747a7da1846808959c948",
     "semantic_hash": ""
   },
   "lib/data/providers/accounting_providers.dart": {
@@ -894,8 +894,8 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/management_repository.dart": {
-    "mtime": 1793982711.2381167,
-    "seen": 1793983376.2879057,
+    "mtime": 1793983517.1856277,
+    "seen": 1794055649.9586089,
     "ast_hash": "a00fca7ccc5af2ad362fd807c2d82393",
     "semantic_hash": ""
   },
@@ -918,9 +918,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/vehicle_repository.dart": {
-    "mtime": 1793886329.7509532,
-    "seen": 1793891612.8332055,
-    "ast_hash": "36a05e34a55fb950fb0050f7df7c3f9c",
+    "mtime": 1794055127.4427314,
+    "seen": 1794055649.9586089,
+    "ast_hash": "7ab1bceb50c19184d3a896b547132783",
     "semantic_hash": ""
   },
   "lib/data/services/accounting_export_service.dart": {
@@ -1062,8 +1062,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/issue_management_screen.dart": {
-    "mtime": 1793982988.2244112,
-    "seen": 1793983376.2879057,
+    "mtime": 1793983517.297161,
+    "seen": 1794055649.9596233,
     "ast_hash": "9b490ecba575f4f105a658a69cb98946",
     "semantic_hash": ""
   },
@@ -1128,9 +1128,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/vehicle_approval_screen.dart": {
-    "mtime": 1793887619.5648613,
-    "seen": 1793891612.8332055,
-    "ast_hash": "f3bf703d4f4c0eca58e5a4baeca8868c",
+    "mtime": 1794055320.880093,
+    "seen": 1794055649.9596233,
+    "ast_hash": "46ed63315af8f33827f02ac9a4f2a2ac",
     "semantic_hash": ""
   },
   "lib/features/management/widgets/bulk_invoice_dialog.dart": {
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/vehicle_management_screen.dart": {
-    "mtime": 1793888402.0944026,
-    "seen": 1793891612.8332055,
-    "ast_hash": "eaf1ca867bc2e70b728bd21a0c195f07",
+    "mtime": 1794055127.5224698,
+    "seen": 1794055649.9596233,
+    "ast_hash": "029f488cad9e65631097c1a9d14e10e5",
     "semantic_hash": ""
   },
   "lib/features/resident/widgets/apartment_switcher_chip.dart": {
@@ -2004,9 +2004,9 @@
     "semantic_hash": ""
   },
   "test/data/repositories/vehicle_repository_test.dart": {
-    "mtime": 1793886329.857675,
-    "seen": 1793891612.8332055,
-    "ast_hash": "135fc2b462e099186790dc5045f967ed",
+    "mtime": 1794055127.721841,
+    "seen": 1794055649.9601305,
+    "ast_hash": "577204a0beb65aea49deb51e6f6102ac",
     "semantic_hash": ""
   },
   "test/data/repositories/vehicle_schema_verification_test.dart": {
@@ -2136,9 +2136,9 @@
     "semantic_hash": ""
   },
   "test/features/management/create_invoice_vehicle_billing_test.dart": {
-    "mtime": 1793886329.8685486,
-    "seen": 1793891612.8332055,
-    "ast_hash": "634c11826b14103b9eac38d6083f0ccf",
+    "mtime": 1794055557.602465,
+    "seen": 1794055649.9601305,
+    "ast_hash": "c41418fbdbbae9955ecf4848d1853c81",
     "semantic_hash": ""
   },
   "test/features/management/dashboard_quick_actions_test.dart": {
@@ -2262,9 +2262,9 @@
     "semantic_hash": ""
   },
   "test/features/management/vehicle_approval_screen_test.dart": {
-    "mtime": 1793886329.8757348,
-    "seen": 1793891612.8332055,
-    "ast_hash": "9622731535abac1b4b3e08961d7dbb88",
+    "mtime": 1794055386.3705466,
+    "seen": 1794055649.9601305,
+    "ast_hash": "3f803a6386b14eb84da6a47b05240ef1",
     "semantic_hash": ""
   },
   "test/features/resident/amenity_booking_payment_failure_ui_test.dart": {
@@ -5226,9 +5226,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/parking_repository.dart": {
-    "mtime": 1793967261.0074112,
-    "seen": 1793967364.3401477,
-    "ast_hash": "29f621c82893698e80535588ef0fcdb1",
+    "mtime": 1794055127.3470764,
+    "seen": 1794055649.9586089,
+    "ast_hash": "c66beb11fe294e56a1ab1abc67115568",
     "semantic_hash": ""
   },
   "lib/features/management/screens/parking_management_screen.dart": {
@@ -5256,9 +5256,9 @@
     "semantic_hash": ""
   },
   "test/data/repositories/parking_repository_test.dart": {
-    "mtime": 1793886320.2149396,
-    "seen": 1793891612.8332055,
-    "ast_hash": "42c743180daf15f8ec9163fe6a021fc5",
+    "mtime": 1794055127.6436417,
+    "seen": 1794055649.9601305,
+    "ast_hash": "50f7efed08544c20d8f250e467d8e73c",
     "semantic_hash": ""
   },
   "test/features/management/screens/parking_management_screen_test.dart": {
@@ -5748,8 +5748,8 @@
     "semantic_hash": ""
   },
   "test/features/issue/issue_smart_triage_ui_test.dart": {
-    "mtime": 1793983265.88482,
-    "seen": 1793983376.2889066,
+    "mtime": 1793983517.5893972,
+    "seen": 1794055649.9601305,
     "ast_hash": "cb5249196cd050ecea6a634420c514cb",
     "semantic_hash": ""
   },
@@ -6438,27 +6438,63 @@
     "semantic_hash": ""
   },
   "test/data/repositories/management_repository_test.dart": {
-    "mtime": 1793982717.1887946,
-    "seen": 1793983376.2889066,
+    "mtime": 1793983517.3702722,
+    "seen": 1794055649.9601305,
     "ast_hash": "eaa401c17734a3eb6a49a082ffb1b3d4",
     "semantic_hash": ""
   },
   "test/features/management/issue_staff_dispatch_test.dart": {
-    "mtime": 1793983048.0322878,
-    "seen": 1793983376.2889066,
+    "mtime": 1793983517.682049,
+    "seen": 1794055649.9601305,
     "ast_hash": "1e21a26847f108b8cb286f1fcff56141",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-06-issue-reporting-and-staff-dispatch.md": {
-    "mtime": 1793982517.0750663,
-    "seen": 1793983376.290907,
-    "ast_hash": "93df1e4feeb6274a816fafb68e537acb",
+    "mtime": 1794054506.9178896,
+    "seen": 1794055649.9621387,
+    "ast_hash": "aae938568dd35682baf5e2e4ee570022",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-06-issue-reporting-and-staff-dispatch-design.md": {
-    "mtime": 1793982490.983572,
-    "seen": 1793983376.290907,
-    "ast_hash": "80e4c908e68ed224a725ac41a41553f0",
+    "mtime": 1794054506.9210532,
+    "seen": 1794055649.9621387,
+    "ast_hash": "e0932457bee34adac7445a5d2275ae50",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261107_01_vehicle_registration_and_slot_allocation.sql": {
+    "mtime": 1794055213.7326038,
+    "seen": 1794055649.9596233,
+    "ast_hash": "959c2a33478fa273094b87a07cea00e7",
+    "semantic_hash": ""
+  },
+  "test/database/vehicle_registration_migration_test.dart": {
+    "mtime": 1794055213.733603,
+    "seen": 1794055649.9601305,
+    "ast_hash": "7ed34196bb142ccf66a3d5ea56ccb2b6",
+    "semantic_hash": ""
+  },
+  "test/features/management/vehicle_approval_slot_allocation_test.dart": {
+    "mtime": 1794055461.9276035,
+    "seen": 1794055649.9601305,
+    "ast_hash": "1ab7662936a6e70c00f48cce6283546b",
+    "semantic_hash": ""
+  },
+  "test/features/resident/vehicle_proof_registration_test.dart": {
+    "mtime": 1794055515.5092652,
+    "seen": 1794055649.9611413,
+    "ast_hash": "cdb5bb97efdbdd253752a791e58b7cec",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-07-vehicle-registration-and-slot-allocation.md": {
+    "mtime": 1794055213.7315946,
+    "seen": 1794055649.9621387,
+    "ast_hash": "8f75a64bba3df80c8ac14dcc117a21fb",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-07-vehicle-registration-and-slot-allocation-design.md": {
+    "mtime": 1794055213.7315946,
+    "seen": 1794055649.9621387,
+    "ast_hash": "8fddf2d188435fca2a8cb0373a076036",
     "semantic_hash": ""
   }
 }
