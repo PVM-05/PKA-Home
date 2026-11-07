@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,10 +50,16 @@ class MockVehicleBillingRepository implements VehicleRepository {
     required String vehicleType,
     required String userId,
     String? brandModel,
+    String? registrationImageUrl,
   }) async => throw UnimplementedError();
 
   @override
-  Future<void> approveVehicle(String vehicleId) async {}
+  Future<void> approveVehicle(
+    String vehicleId, {
+    String? parkingSlotId,
+    String? parkingSlotNumber,
+    String? approvedBy,
+  }) async {}
 
   @override
   Future<void> rejectVehicle(String vehicleId, {String? reason}) async {}
@@ -62,6 +69,12 @@ class MockVehicleBillingRepository implements VehicleRepository {
 
   @override
   Future<void> deleteVehicle(String vehicleId) async {}
+
+  @override
+  Future<String> uploadRegistrationImage(String apartmentId, String userId, File imageFile) async => '';
+
+  @override
+  String getRegistrationImageUrl(String? urlOrPath) => urlOrPath ?? '';
 
   @override
   Future<void> updatePendingVehicle({
