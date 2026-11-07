@@ -149,6 +149,19 @@ class ParkingRepository {
     );
   }
 
+  /// 1b. Lấy danh sách các ô đỗ ô tô còn trống (phục vụ phê duyệt xe ô tô và gán ô đỗ)
+  Future<List<ParkingSlotModel>> fetchAvailableCarSlots({
+    String? buildingId,
+    String? zone,
+  }) async {
+    return fetchSlots(
+      buildingId: buildingId,
+      zone: zone,
+      slotType: 'car',
+      status: 'available',
+    );
+  }
+
   /// 2. Lấy thống kê sức chứa bãi xe thời gian thực
   Future<ParkingCapacityStatsModel> fetchCapacityStats({
     String? buildingId,
@@ -197,18 +210,31 @@ class ParkingRepository {
     required String slotId,
     required String vehicleId,
     required String apartmentId,
+    String? slotNumber,
     String? licensePlate,
     String? apartmentCode,
   }) async {
     return FailClosedGuard.guard(
       operation: 'assignSlot',
       call: () async {
+        String? targetSlotNumber = slotNumber;
+        if (targetSlotNumber == null || targetSlotNumber.isEmpty) {
+          final slotRes = await _supabase
+              .from('parking_slots')
+              .select('slot_number')
+              .eq('id', slotId)
+              .maybeSingle();
+          targetSlotNumber = slotRes?['slot_number'] as String?;
+        }
+
         await _supabase
             .from('parking_slots')
             .update({
               'assigned_vehicle_id': vehicleId,
               'assigned_apartment_id': apartmentId,
               'status': 'occupied',
+              'license_plate': licensePlate,
+              'apartment_id': apartmentId,
               'updated_at': DateTime.now().toIso8601String(),
             })
             .eq('id', slotId);
@@ -217,7 +243,7 @@ class ParkingRepository {
             .from('vehicles')
             .update({
               'parking_slot_id': slotId,
-              'parking_slot_number': licensePlate,
+              'parking_slot_number': targetSlotNumber,
             })
             .eq('id', vehicleId);
 
