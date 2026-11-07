@@ -886,6 +886,15 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
         ),
       );
     }
+    quickActionItems.add(
+      _buildQuickAction(
+        context,
+        icon: Icons.assignment_turned_in_outlined,
+        label: 'Bàn giao',
+        color: Colors.teal,
+        onTap: () => context.push(AppRoutes.managementHandovers),
+      ),
+    );
     // Nút mở Tất cả thao tác
     quickActionItems.add(
       _buildQuickAction(
@@ -1877,6 +1886,15 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           onTap: () =>
                               context.push(AppRoutes.managementApartments),
                         ),
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.assignment_turned_in_outlined,
+                        title: 'Bàn giao & Kiểm kê',
+                        subtitle: 'Biên bản nhận/trả nhà & Ký số kiểm kê tài sản',
+                        color: Colors.teal,
+                        onTap: () =>
+                            context.push(AppRoutes.managementHandovers),
+                      ),
                       if (canManageHandbook)
                         _buildSheetActionItem(
                           context: context,

@@ -26,3 +26,4 @@ final handoverDetailProvider = FutureProvider.family<ApartmentHandoverModel?, St
   final repo = ref.watch(handoverRepositoryProvider);
   return repo.fetchHandoverDetail(handoverId);
 });
+

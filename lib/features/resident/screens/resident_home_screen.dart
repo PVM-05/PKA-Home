@@ -970,6 +970,14 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             ),
             const SizedBox(height: 10),
             buildServiceCard(
+              title: 'Bàn giao & Kiểm kê',
+              subtitle: 'Biên bản nhận/trả căn hộ & Ký số kiểm kê tài sản',
+              icon: Icons.assignment_turned_in_outlined,
+              color: const Color(0xFF00796B),
+              onTap: () => context.push(AppRoutes.residentHandovers),
+            ),
+            const SizedBox(height: 10),
+            buildServiceCard(
               title: 'Tiện ích chung',
               subtitle: 'BBQ, Hồ bơi, Phòng gym & Quy định sinh hoạt',
               icon: Icons.pool_outlined,

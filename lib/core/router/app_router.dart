@@ -6,6 +6,10 @@ import '../../features/management/screens/accounting_web_workstation_screen.dart
 import '../../features/management/screens/subscription_management_screen.dart';
 import '../../features/management/screens/batch_import_center_screen.dart';
 import '../../features/management/screens/financial_report_screen.dart';
+import '../../features/management/screens/handover_management_screen.dart';
+import '../../features/management/screens/inspection_workstation_screen.dart';
+import '../../features/resident/screens/resident_handover_screen.dart';
+import '../../features/resident/screens/resident_handover_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -325,6 +329,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               child: const ResidentMeterReadingScreen(),
             ),
           ),
+          GoRoute(
+            path: 'handovers',
+            pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
+              state: state,
+              child: const ResidentHandoverScreen(),
+            ),
+            routes: [
+              GoRoute(
+                path: 'detail',
+                pageBuilder: (context, state) {
+                  final handoverId = (state.extra as String?) ??
+                      state.uri.queryParameters['id'] ??
+                      '';
+                  return AppPageTransitions.slideFromRight(
+                    state: state,
+                    child: ResidentHandoverDetailScreen(handoverId: handoverId),
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
 
@@ -590,6 +615,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               state: state,
               child: const MaintenanceMaterialsScreen(),
             ),
+          ),
+          GoRoute(
+            path: 'handovers',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const HandoverManagementScreen(),
+            ),
+            routes: [
+              GoRoute(
+                path: 'workstation',
+                pageBuilder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>? ?? {};
+                  return AppPageTransitions.slideFromRight(
+                    state: state,
+                    child: InspectionWorkstationScreen(
+                      buildingId: (extra['buildingId'] as String?) ?? 'bld-01',
+                      apartmentId: (extra['apartmentId'] as String?) ?? 'apt-01',
+                      apartmentCode: (extra['apartmentCode'] as String?) ?? 'A0110',
+                      initialType: extra['initialType'] as String?,
+                      existingHandoverId: extra['existingHandoverId'] as String?,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

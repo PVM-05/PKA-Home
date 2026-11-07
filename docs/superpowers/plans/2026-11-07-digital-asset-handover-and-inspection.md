@@ -26,15 +26,15 @@
 **Interfaces:**
 - Produces: Bảng `apartment_assets`, `apartment_handovers`, `handover_items`, storage bucket `handover-docs`, triggers sinh mã `HO-YYYYMM-XXXXX` và trigger khóa bất biến khi `confirmed`.
 
-- [ ] **Step 1: Viết test kiểm tra migration SQL**
+- [x] **Step 1: Viết test kiểm tra migration SQL**
   Tạo `test/database/handover_migration_test.dart` kiểm tra tính hợp lệ cú pháp SQL, sự tồn tại của các bảng, triggers, indexes và RLS policies.
-- [ ] **Step 2: Chạy test để xác nhận test thất bại**
+- [x] **Step 2: Chạy test để xác nhận test thất bại**
   `flutter test test/database/handover_migration_test.dart` (Fails vì chưa có file SQL).
-- [ ] **Step 3: Viết file migration SQL**
+- [x] **Step 3: Viết file migration SQL**
   Tạo `supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql` với đầy đủ schema theo đặc tả thiết kế.
-- [ ] **Step 4: Chạy test để xác nhận test pass**
+- [x] **Step 4: Chạy test để xác nhận test pass**
   `flutter test test/database/handover_migration_test.dart` (Pass).
-- [ ] **Step 5: Commit lên nhánh main**
+- [x] **Step 5: Commit lên nhánh main**
   `git add supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql test/database/handover_migration_test.dart`
   `git commit -m "feat(db): migration bien ban ban giao va kiem ke tai san can ho so hoa"`
 
@@ -54,15 +54,15 @@
   - `HandoverItemModel` (id, handoverId, assetId, itemName, roomArea, quantity, condition, repairCost, note, photos).
   - `ApartmentHandoverModel` (id, apartmentId, buildingId, residentId, contractId, handoverType, reportCode, handoverDate, conductedBy, initialElectricityReading, initialWaterReading, depositHeld, totalDeduction, depositRefund, status, staffSignatureUrl, residentSignatureUrl, lookupCode, items).
 
-- [ ] **Step 1: Viết test unit cho các models**
+- [x] **Step 1: Viết test unit cho các models**
   Tạo `test/data/models/handover_models_test.dart` test fromJson, toJson, copyWith, và các getters tiếng Việt chuẩn (`roomAreaDisplayName`, `conditionDisplayName`, `statusDisplayName`).
-- [ ] **Step 2: Chạy test kiểm tra thất bại**
+- [x] **Step 2: Chạy test kiểm tra thất bại**
   `flutter test test/data/models/handover_models_test.dart`
-- [ ] **Step 3: Cài đặt các class Model**
+- [x] **Step 3: Cài đặt các class Model**
   Viết `apartment_asset_model.dart`, `handover_item_model.dart`, `apartment_handover_model.dart`.
-- [ ] **Step 4: Chạy test kiểm tra pass**
+- [x] **Step 4: Chạy test kiểm tra pass**
   `flutter test test/data/models/handover_models_test.dart`
-- [ ] **Step 5: Commit lên main**
+- [x] **Step 5: Commit lên main**
   `git commit -m "feat(models): bo sung data models kiem ke va ban giao tai san"`
 
 ---
@@ -89,15 +89,15 @@
     - `uploadHandoverPhoto(String handoverId, Uint8List photoBytes, String fileName)`
     - `uploadSignature(String handoverId, String role, Uint8List signatureBytes)`
 
-- [ ] **Step 1: Viết test cho HandoverRepository**
+- [x] **Step 1: Viết test cho HandoverRepository**
   Tạo `test/data/repositories/handover_repository_test.dart` kiểm tra mock Supabase client và offline fallback engine.
-- [ ] **Step 2: Chạy test kiểm tra thất bại**
+- [x] **Step 2: Chạy test kiểm tra thất bại**
   `flutter test test/data/repositories/handover_repository_test.dart`
-- [ ] **Step 3: Cài đặt HandoverRepository & Providers**
+- [x] **Step 3: Cài đặt HandoverRepository & Providers**
   Cài đặt logic gọi Supabase RPC/Tables kèm offline fallback, tính toán cấn trừ cọc, lưu ảnh và chữ ký.
-- [ ] **Step 4: Chạy test kiểm tra pass**
+- [x] **Step 4: Chạy test kiểm tra pass**
   `flutter test test/data/repositories/handover_repository_test.dart`
-- [ ] **Step 5: Commit lên main**
+- [x] **Step 5: Commit lên main**
   `git commit -m "feat(repo): cai dat HandoverRepository va offline-first engine"`
 
 ---
@@ -111,15 +111,15 @@
 **Interfaces:**
 - Produces: `SignaturePadDialog` (Hộp thoại mở khung vẽ chữ ký cảm ứng, hỗ trợ xóa nét, lưu xuất ra `Uint8List` ảnh PNG trong suốt).
 
-- [ ] **Step 1: Viết test widget cho SignaturePadDialog**
+- [x] **Step 1: Viết test widget cho SignaturePadDialog**
   Tạo `test/core/widgets/signature_pad_dialog_test.dart` kiểm tra hiển thị hộp thoại, thao tác kéo nét vẽ và trả về dữ liệu chữ ký.
-- [ ] **Step 2: Chạy test kiểm tra thất bại**
+- [x] **Step 2: Chạy test kiểm tra thất bại**
   `flutter test test/core/widgets/signature_pad_dialog_test.dart`
-- [ ] **Step 3: Cài đặt SignaturePadDialog với CustomPainter**
+- [x] **Step 3: Cài đặt SignaturePadDialog với CustomPainter**
   Viết `lib/core/widgets/signature_pad_dialog.dart` mượt mà, hỗ trợ cả màn hình cảm ứng điện thoại và chuột trên Web.
-- [ ] **Step 4: Chạy test kiểm tra pass**
+- [x] **Step 4: Chạy test kiểm tra pass**
   `flutter test test/core/widgets/signature_pad_dialog_test.dart`
-- [ ] **Step 5: Commit lên main**
+- [x] **Step 5: Commit lên main**
   `git commit -m "feat(ui): widget khung ve chu ky cam ung so hoa SignaturePadDialog"`
 
 ---
@@ -137,16 +137,16 @@
   - `HandoverManagementScreen`: Dải KPI, bộ lọc loại bàn giao và trạng thái, nút "Tạo biên bản mới".
   - `InspectionWorkstationScreen`: Giao diện duyệt kiểm kê từng phòng, chọn tình trạng tài sản, chụp ảnh hư hỏng, ghi chỉ số điện nước, mở `SignaturePadDialog` để BQL ký và gửi Cư dân.
 
-- [ ] **Step 1: Viết test widget cho màn hình BQL**
+- [x] **Step 1: Viết test widget cho màn hình BQL**
   Kiểm tra render KPI, danh sách biên bản, form kiểm kê và các chip trạng thái.
-- [ ] **Step 2: Chạy test kiểm tra thất bại**
+- [x] **Step 2: Chạy test kiểm tra thất bại**
   `flutter test test/features/management/handover_management_screen_test.dart`
-- [ ] **Step 3: Cài đặt HandoverManagementScreen & InspectionWorkstationScreen**
+- [x] **Step 3: Cài đặt HandoverManagementScreen & InspectionWorkstationScreen**
   Viết UI tuân thủ thiết kế design-rules: tiếng Việt chuẩn mực, Material Icons, responsive.
-- [ ] **Step 4: Chạy test kiểm tra pass**
+- [x] **Step 4: Chạy test kiểm tra pass**
   `flutter test test/features/management/handover_management_screen_test.dart`
   `flutter test test/features/management/inspection_workstation_screen_test.dart`
-- [ ] **Step 5: Commit lên main**
+- [x] **Step 5: Commit lên main**
   `git commit -m "feat(management): man hinh quan tri va tram kiem ke ban giao tai san BQL"`
 
 ---
@@ -163,15 +163,15 @@
   - `ResidentHandoverScreen`: Danh sách biên bản bàn giao gắn với căn hộ/người thuê.
   - `ResidentHandoverDetailScreen`: Xem chi tiết từng món đồ, ảnh hiện trường hư hỏng, bảng chiết tính tiền cọc, nút "Khiếu nại" và nút "Ký tên xác nhận".
 
-- [ ] **Step 1: Viết test widget cho màn hình Cư Dân**
+- [x] **Step 1: Viết test widget cho màn hình Cư Dân**
   Tạo `test/features/resident/resident_handover_screen_test.dart`.
-- [ ] **Step 2: Chạy test kiểm tra thất bại**
+- [x] **Step 2: Chạy test kiểm tra thất bại**
   `flutter test test/features/resident/resident_handover_screen_test.dart`
-- [ ] **Step 3: Cài đặt ResidentHandoverScreen & ResidentHandoverDetailScreen**
+- [x] **Step 3: Cài đặt ResidentHandoverScreen & ResidentHandoverDetailScreen**
   Hoàn thiện giao diện cho cư dân kiểm tra và ký số.
-- [ ] **Step 4: Chạy test kiểm tra pass**
+- [x] **Step 4: Chạy test kiểm tra pass**
   `flutter test test/features/resident/resident_handover_screen_test.dart`
-- [ ] **Step 5: Commit lên main**
+- [x] **Step 5: Commit lên main**
   `git commit -m "feat(resident): man hinh doi soat va ky xac nhan ban giao can ho cho cu dan"`
 
 ---
@@ -185,15 +185,15 @@
 **Interfaces:**
 - Produces: `HandoverPdfBuilder.buildHandoverReportPdf(...)` sinh tài liệu A4 chuẩn pháp lý, nhúng bảng kê tài sản, chỉ số điện nước, bảng chiết tính cọc, mã tra cứu QR code và hai khung chữ ký điện tử.
 
-- [ ] **Step 1: Viết test unit cho HandoverPdfBuilder**
+- [x] **Step 1: Viết test unit cho HandoverPdfBuilder**
   Kiểm tra sinh byte data PDF không null, dung lượng > 0 và hỗ trợ Unicode tiếng Việt.
-- [ ] **Step 2: Chạy test kiểm tra thất bại**
+- [x] **Step 2: Chạy test kiểm tra thất bại**
   `flutter test test/core/utils/handover_pdf_builder_test.dart`
-- [ ] **Step 3: Cài đặt HandoverPdfBuilder**
+- [x] **Step 3: Cài đặt HandoverPdfBuilder**
   Sử dụng thư viện `pdf` và font tiếng Việt của hệ thống.
-- [ ] **Step 4: Chạy test kiểm tra pass**
+- [x] **Step 4: Chạy test kiểm tra pass**
   `flutter test test/core/utils/handover_pdf_builder_test.dart`
-- [ ] **Step 5: Commit lên main**
+- [x] **Step 5: Commit lên main**
   `git commit -m "feat(pdf): bo may xuat bien ban ban giao can ho A4 HandoverPdfBuilder"`
 
 ---
@@ -201,22 +201,28 @@
 ### Task 8: Tích Hợp Menu Điều Hướng, Verification & Đồng Bộ Graphify
 
 **Files:**
+- Modify: `lib/core/router/route_names.dart`
+- Modify: `lib/core/router/app_router.dart`
 - Modify: `lib/features/management/screens/management_home_screen.dart`
 - Modify: `lib/features/resident/screens/resident_home_screen.dart`
-- Modify: `lib/features/management/widgets/management_all_features_sheet.dart`
+- Modify: `lib/features/resident/screens/resident_handover_screen.dart`
+- Modify: `lib/features/resident/screens/resident_handover_detail_screen.dart`
+- Modify: `lib/features/management/screens/handover_management_screen.dart`
+- Modify: `lib/features/management/screens/inspection_workstation_screen.dart`
 
-- [ ] **Step 1: Thêm lối tắt điều hướng tại Dashboard BQL và Cư dân**
-- [ ] **Step 2: Chạy toàn bộ test suite liên quan**
+- [x] **Step 1: Thêm lối tắt điều hướng tại Dashboard BQL và Cư dân**
+- [x] **Step 2: Chạy toàn bộ test suite liên quan**
   `flutter test test/database/handover_migration_test.dart`
   `flutter test test/data/models/handover_models_test.dart`
   `flutter test test/data/repositories/handover_repository_test.dart`
   `flutter test test/core/widgets/signature_pad_dialog_test.dart`
   `flutter test test/features/management/handover_management_screen_test.dart`
+  `flutter test test/features/management/inspection_workstation_screen_test.dart`
   `flutter test test/features/resident/resident_handover_screen_test.dart`
   `flutter test test/core/utils/handover_pdf_builder_test.dart`
-- [ ] **Step 3: Chạy Static Analysis kiểm tra 0 issues**
-  `dart analyze lib test`
-- [ ] **Step 4: Cập nhật Knowledge Graph**
+- [x] **Step 3: Chạy Static Analysis kiểm tra 0 issues**
+  `dart analyze lib test` (0 issues)
+- [x] **Step 4: Cập nhật Knowledge Graph**
   `graphify update .`
-- [ ] **Step 5: Commit hoàn thành module lên main**
+- [x] **Step 5: Commit hoàn thành module lên main**
   `git commit -m "feat: hoan tat tich hop module bien ban ban giao va kiem ke tai san so hoa"`

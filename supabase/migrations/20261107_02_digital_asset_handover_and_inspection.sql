@@ -267,3 +267,4 @@ CREATE POLICY "handover_docs_read_policy" ON storage.objects
 CREATE POLICY "handover_docs_insert_policy" ON storage.objects
     FOR INSERT TO authenticated
     WITH CHECK (bucket_id = 'handover-docs');
+

@@ -297,13 +297,13 @@ class HandoverPdfBuilder {
               ),
             ],
           ),
-          if (handover.lookupCode != null && handover.lookupCode!.isNotEmpty) ...[
+          if (handover.lookupCode.isNotEmpty) ...[
             pw.SizedBox(height: 6),
             pw.RichText(
               text: pw.TextSpan(
                 children: [
                   pw.TextSpan(text: ctx.t('Mã tra cứu bảo mật: '), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                  pw.TextSpan(text: handover.lookupCode!, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900)),
+                  pw.TextSpan(text: handover.lookupCode, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900)),
                 ],
               ),
             ),
@@ -318,11 +318,11 @@ class HandoverPdfBuilder {
     ApartmentHandoverModel handover,
     PdfColor secondaryColor,
   ) {
-    final elec = handover.initialElectricityReading ?? 0.0;
-    final water = handover.initialWaterReading ?? 0.0;
-    final deposit = handover.depositHeld ?? 0.0;
-    final deduction = handover.totalDeduction ?? 0.0;
-    final refund = handover.depositRefund ?? 0.0;
+    final elec = handover.initialElectricityReading;
+    final water = handover.initialWaterReading;
+    final deposit = handover.depositHeld;
+    final deduction = handover.totalDeduction;
+    final refund = handover.depositRefund;
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(10),

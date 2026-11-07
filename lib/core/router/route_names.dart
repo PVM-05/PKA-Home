@@ -31,6 +31,8 @@ class AppRoutes {
   static const String residentMeterReading = '/resident/meter-reading';
   static const String residentVisitorParcel = '/resident/visitor-parcel';
   static const String residentCommunity = '/resident/community';
+  static const String residentHandovers = '/resident/handovers';
+  static const String residentHandoverDetail = '/resident/handovers/detail';
 
   // Management
   static const String managementHome = '/management';
@@ -65,4 +67,6 @@ class AppRoutes {
   static const String managementMaterials = '/management/materials';
   static const String managementFrontDesk = '/management/front-desk';
   static const String managementCommunity = '/management/community';
+  static const String managementHandovers = '/management/handovers';
+  static const String managementInspectionWorkstation = '/management/handovers/workstation';
 }

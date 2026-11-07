@@ -240,3 +240,4 @@ CREATE INDEX IF NOT EXISTS idx_handover_items_parent ON public.handover_items(ha
 4. **Static Analysis Quality Gate:**
    - Đảm bảo `dart analyze lib test` đạt 0 issues.
    - Đồng bộ hóa kiến thức vào Knowledge Graph (`graphify update .`).
+

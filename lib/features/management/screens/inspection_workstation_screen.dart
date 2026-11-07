@@ -149,7 +149,7 @@ class _InspectionWorkstationScreenState extends ConsumerState<InspectionWorkstat
       await repo.createHandover(handoverModel, _items);
       await repo.signByStaff(handoverModel.id, _staffSignatureBytes!, notes: _staffNotesController.text);
 
-      ref.refresh(buildingHandoversProvider(widget.buildingId));
+      ref.invalidate(buildingHandoversProvider(widget.buildingId));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -193,10 +193,10 @@ class _InspectionWorkstationScreenState extends ConsumerState<InspectionWorkstat
                 children: [
                   // 1. Thẻ tổng quan căn hộ
                   Card(
-                    color: const Color(0xFF1E3A8A).withOpacity(0.04),
+                    color: const Color(0xFF1E3A8A).withValues(alpha: 0.04),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: const Color(0xFF1E3A8A).withOpacity(0.2)),
+                      side: BorderSide(color: const Color(0xFF1E3A8A).withValues(alpha: 0.2)),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -386,7 +386,7 @@ class _InspectionWorkstationScreenState extends ConsumerState<InspectionWorkstat
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, index) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final item = _items[index];
                         return _buildItemCard(item, index);
@@ -429,7 +429,7 @@ class _InspectionWorkstationScreenState extends ConsumerState<InspectionWorkstat
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.1),
+                                    color: Colors.green.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Row(
@@ -551,7 +551,7 @@ class _InspectionWorkstationScreenState extends ConsumerState<InspectionWorkstat
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: area,
+                initialValue: area,
                 decoration: const InputDecoration(labelText: 'Khu vực phòng'),
                 items: const [
                   DropdownMenuItem(value: 'living_room', child: Text('Phòng khách')),

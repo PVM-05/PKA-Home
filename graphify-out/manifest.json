@@ -240,9 +240,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/app_router.dart": {
-    "mtime": 1793978207.0188856,
-    "seen": 1793979706.4967022,
-    "ast_hash": "f69752baf19e11ab9257b0690a163581",
+    "mtime": 1794061599.0661407,
+    "seen": 1794061624.702206,
+    "ast_hash": "cb28cb7188d2ea883d2fd12aff1f273f",
     "semantic_hash": ""
   },
   "lib/core/router/page_transitions.dart": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "lib/core/router/route_names.dart": {
-    "mtime": 1793976778.2838166,
-    "seen": 1793978071.2494173,
-    "ast_hash": "67ab9dce66908487e64648824c2f5ff9",
+    "mtime": 1794061074.2096164,
+    "seen": 1794061624.702206,
+    "ast_hash": "6dd99ed6d613a70e684ffc72d7cd1648",
     "semantic_hash": ""
   },
   "lib/core/services/push_notification_service.dart": {
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_home_screen.dart": {
-    "mtime": 1793887619.1000967,
-    "seen": 1793891612.8332055,
-    "ast_hash": "7478c42c74f30dcd118475184fbe4253",
+    "mtime": 1794061600.2352176,
+    "seen": 1794061624.702206,
+    "ast_hash": "efc06d494c0d9ea9c72d7565158616c3",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
@@ -1254,9 +1254,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_home_screen.dart": {
-    "mtime": 1793979635.665765,
-    "seen": 1793979706.4977064,
-    "ast_hash": "9a14cb46865a6e236ceb4e375e937137",
+    "mtime": 1794061600.4114244,
+    "seen": 1794061624.702206,
+    "ast_hash": "67d840634c59c149d37b880812da6871",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_detail_screen.dart": {
@@ -2136,8 +2136,8 @@
     "semantic_hash": ""
   },
   "test/features/management/create_invoice_vehicle_billing_test.dart": {
-    "mtime": 1794055557.602465,
-    "seen": 1794055649.9601305,
+    "mtime": 1794055663.944816,
+    "seen": 1794061624.7032042,
     "ast_hash": "c41418fbdbbae9955ecf4848d1853c81",
     "semantic_hash": ""
   },
@@ -2262,8 +2262,8 @@
     "semantic_hash": ""
   },
   "test/features/management/vehicle_approval_screen_test.dart": {
-    "mtime": 1794055386.3705466,
-    "seen": 1794055649.9601305,
+    "mtime": 1794055663.77598,
+    "seen": 1794061624.7032042,
     "ast_hash": "3f803a6386b14eb84da6a47b05240ef1",
     "semantic_hash": ""
   },
@@ -2574,9 +2574,9 @@
     "semantic_hash": ""
   },
   ".agents/AGENTS.md": {
-    "mtime": 1791722932.3058228,
-    "seen": 1793342452.1356795,
-    "ast_hash": "5a22015bc7a480ed2c623515457d28a5",
+    "mtime": 1794056219.9861329,
+    "seen": 1794061624.7042036,
+    "ast_hash": "90c46787d6e084b2594cbccf3f6ed888",
     "semantic_hash": ""
   },
   ".agents/rules/coding-rules.md": {
@@ -2598,9 +2598,9 @@
     "semantic_hash": ""
   },
   ".agents/rules/document-plan.md": {
-    "mtime": 1787725492.4399047,
-    "seen": 1793342452.1356795,
-    "ast_hash": "03de3d0cd591b4fe17dc3309d27323b5",
+    "mtime": 1794056220.1488981,
+    "seen": 1794061624.7042036,
+    "ast_hash": "df43c53d4d8ae68bbabb040d929c2be2",
     "semantic_hash": ""
   },
   ".agents/skills/brainstorming/SKILL.md": {
@@ -6474,14 +6474,14 @@
     "semantic_hash": ""
   },
   "test/features/management/vehicle_approval_slot_allocation_test.dart": {
-    "mtime": 1794055461.9276035,
-    "seen": 1794055649.9601305,
+    "mtime": 1794055663.8752139,
+    "seen": 1794061624.7032042,
     "ast_hash": "1ab7662936a6e70c00f48cce6283546b",
     "semantic_hash": ""
   },
   "test/features/resident/vehicle_proof_registration_test.dart": {
-    "mtime": 1794055515.5092652,
-    "seen": 1794055649.9611413,
+    "mtime": 1794055663.6187057,
+    "seen": 1794061624.7042036,
     "ast_hash": "cdb5bb97efdbdd253752a791e58b7cec",
     "semantic_hash": ""
   },
@@ -6495,6 +6495,138 @@
     "mtime": 1794055213.7315946,
     "seen": 1794055649.9621387,
     "ast_hash": "8fddf2d188435fca2a8cb0373a076036",
+    "semantic_hash": ""
+  },
+  "lib/core/utils/handover_pdf_builder.dart": {
+    "mtime": 1794061599.6492796,
+    "seen": 1794061624.702206,
+    "ast_hash": "1f9cd1f3edb29a2d40e3e8eab050ca44",
+    "semantic_hash": ""
+  },
+  "lib/core/widgets/signature_pad_dialog.dart": {
+    "mtime": 1794061599.8531053,
+    "seen": 1794061624.702206,
+    "ast_hash": "98b09413f1bf6d924d9823025117acc2",
+    "semantic_hash": ""
+  },
+  "lib/data/models/apartment_asset_model.dart": {
+    "mtime": 1794061211.5936258,
+    "seen": 1794061624.702206,
+    "ast_hash": "b840aee7bd7277b1183d492c0be7d2d3",
+    "semantic_hash": ""
+  },
+  "lib/data/models/apartment_handover_model.dart": {
+    "mtime": 1794061211.7086315,
+    "seen": 1794061624.702206,
+    "ast_hash": "711c7a2293e8b086bde49cf460bc2559",
+    "semantic_hash": ""
+  },
+  "lib/data/models/handover_item_model.dart": {
+    "mtime": 1794061211.8065126,
+    "seen": 1794061624.702206,
+    "ast_hash": "820d35d77915da4345770e1071b4eb85",
+    "semantic_hash": ""
+  },
+  "lib/data/providers/handover_provider.dart": {
+    "mtime": 1794061214.2870438,
+    "seen": 1794061624.702206,
+    "ast_hash": "92bf57f5968d74a5e8dae85029f0662b",
+    "semantic_hash": ""
+  },
+  "lib/data/repositories/handover_repository.dart": {
+    "mtime": 1794061599.9305391,
+    "seen": 1794061624.702206,
+    "ast_hash": "2a2b054e723b61d11858ad7c3787fb46",
+    "semantic_hash": ""
+  },
+  "lib/features/management/screens/handover_management_screen.dart": {
+    "mtime": 1794061600.0664659,
+    "seen": 1794061624.702206,
+    "ast_hash": "479a9583ace799ab6e2c59cd3e2aa047",
+    "semantic_hash": ""
+  },
+  "lib/features/management/screens/inspection_workstation_screen.dart": {
+    "mtime": 1794061600.1527252,
+    "seen": 1794061624.702206,
+    "ast_hash": "a42cc9793da1ba26938b4b5176cd59ae",
+    "semantic_hash": ""
+  },
+  "lib/features/resident/screens/resident_handover_detail_screen.dart": {
+    "mtime": 1794061600.326027,
+    "seen": 1794061624.702206,
+    "ast_hash": "dc05e5cf69537b709928725eba24356e",
+    "semantic_hash": ""
+  },
+  "lib/features/resident/screens/resident_handover_screen.dart": {
+    "mtime": 1794061351.1509035,
+    "seen": 1794061624.702206,
+    "ast_hash": "782ddcdb04938ce833b968b71f6c8b1e",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql": {
+    "mtime": 1794061217.386989,
+    "seen": 1794061624.7032042,
+    "ast_hash": "7d77903a425e45ae81dd4625c3aa4daa",
+    "semantic_hash": ""
+  },
+  "test/core/utils/handover_pdf_builder_test.dart": {
+    "mtime": 1794061496.8941903,
+    "seen": 1794061624.7032042,
+    "ast_hash": "ca45cd8ef625cc052b46a90e0187f3ff",
+    "semantic_hash": ""
+  },
+  "test/core/widgets/signature_pad_dialog_test.dart": {
+    "mtime": 1794061600.5966628,
+    "seen": 1794061624.7032042,
+    "ast_hash": "f568789818793de4f3d310059f696ce2",
+    "semantic_hash": ""
+  },
+  "test/data/models/handover_models_test.dart": {
+    "mtime": 1794061217.766948,
+    "seen": 1794061624.7032042,
+    "ast_hash": "5553a22afb84815762de7040e5a46eda",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/handover_repository_test.dart": {
+    "mtime": 1794061600.707462,
+    "seen": 1794061624.7032042,
+    "ast_hash": "d178dc464b43c6167e7e64b94f38efbb",
+    "semantic_hash": ""
+  },
+  "test/database/handover_migration_test.dart": {
+    "mtime": 1794059849.136849,
+    "seen": 1794061624.7032042,
+    "ast_hash": "0c6463405eb5ba325b2a7b9caff93666",
+    "semantic_hash": ""
+  },
+  "test/features/management/handover_management_screen_test.dart": {
+    "mtime": 1794061219.8975976,
+    "seen": 1794061624.7032042,
+    "ast_hash": "03b796dd442d3294668d31baed71d9e5",
+    "semantic_hash": ""
+  },
+  "test/features/management/inspection_workstation_screen_test.dart": {
+    "mtime": 1794061220.0565436,
+    "seen": 1794061624.7032042,
+    "ast_hash": "80ebb6edd17d8c1101ddd5ea41036d9d",
+    "semantic_hash": ""
+  },
+  "test/features/resident/resident_handover_screen_test.dart": {
+    "mtime": 1794061220.1524432,
+    "seen": 1794061624.7032042,
+    "ast_hash": "d98518fbd6760bbceaf846620fb405ae",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-07-digital-asset-handover-and-inspection.md": {
+    "mtime": 1794059848.6933007,
+    "seen": 1794061624.7042036,
+    "ast_hash": "7526d226cd4c30b211125fc91cd77b2e",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-07-digital-asset-handover-and-inspection-design.md": {
+    "mtime": 1794059848.8264258,
+    "seen": 1794061624.7042036,
+    "ast_hash": "a21a94ccf8ac42f55a303eac86a6cb56",
     "semantic_hash": ""
   }
 }

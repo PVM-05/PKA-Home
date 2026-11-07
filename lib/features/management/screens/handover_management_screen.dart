@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/apartment_handover_model.dart';
+import 'package:printing/printing.dart';
+import '../../../core/utils/handover_pdf_builder.dart';
 import '../../../data/providers/handover_provider.dart';
 import 'inspection_workstation_screen.dart';
 
@@ -9,7 +10,7 @@ class HandoverManagementScreen extends ConsumerStatefulWidget {
 
   const HandoverManagementScreen({
     super.key,
-    required this.buildingId,
+    this.buildingId = 'bld-01',
   });
 
   @override
@@ -147,7 +148,7 @@ class _HandoverManagementScreenState extends ConsumerState<HandoverManagementScr
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
                         itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        separatorBuilder: (_, index) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final item = filtered[index];
                           return Card(
@@ -163,7 +164,7 @@ class _HandoverManagementScreenState extends ConsumerState<HandoverManagementScr
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF1E3A8A).withOpacity(0.08),
+                                          color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: Text(
@@ -178,7 +179,7 @@ class _HandoverManagementScreenState extends ConsumerState<HandoverManagementScr
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: _getStatusColor(item.status).withOpacity(0.12),
+                                          color: _getStatusColor(item.status).withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(6),
                                         ),
                                         child: Text(
@@ -233,6 +234,29 @@ class _HandoverManagementScreenState extends ConsumerState<HandoverManagementScr
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.picture_as_pdf, color: Colors.blueGrey),
+                                        tooltip: 'Xuất biên bản PDF',
+                                        onPressed: () async {
+                                          try {
+                                            final pdfBytes = await HandoverPdfBuilder.buildHandoverReportPdf(
+                                              handover: item,
+                                              items: item.items,
+                                            );
+                                            await Printing.layoutPdf(
+                                              onLayout: (format) async => pdfBytes,
+                                              name: 'Bien_ban_ban_giao_${item.reportCode}.pdf',
+                                            );
+                                          } catch (e) {
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Lỗi tạo PDF: $e')),
+                                              );
+                                            }
+                                          }
+                                        },
+                                      ),
+                                      const SizedBox(width: 8),
                                       OutlinedButton.icon(
                                         onPressed: () {
                                           Navigator.of(context).push(
@@ -294,9 +318,9 @@ class _HandoverManagementScreenState extends ConsumerState<HandoverManagementScr
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -346,7 +370,7 @@ class _HandoverManagementScreenState extends ConsumerState<HandoverManagementScr
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: type,
+                initialValue: type,
                 decoration: const InputDecoration(
                   labelText: 'Loại bàn giao',
                   prefixIcon: Icon(Icons.swap_horiz),

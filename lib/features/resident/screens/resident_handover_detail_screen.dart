@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:printing/printing.dart';
+import '../../../core/utils/handover_pdf_builder.dart';
 import '../../../core/widgets/signature_pad_dialog.dart';
-import '../../../data/models/apartment_handover_model.dart';
-import '../../../data/models/handover_item_model.dart';
 import '../../../data/providers/handover_provider.dart';
 
 class ResidentHandoverDetailScreen extends ConsumerStatefulWidget {
@@ -35,7 +35,7 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
       try {
         final repo = ref.read(handoverRepositoryProvider);
         await repo.signByResident(widget.handoverId, bytes);
-        ref.refresh(handoverDetailProvider(widget.handoverId));
+        ref.invalidate(handoverDetailProvider(widget.handoverId));
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -97,7 +97,7 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
               try {
                 final repo = ref.read(handoverRepositoryProvider);
                 await repo.disputeByResident(widget.handoverId, text);
-                ref.refresh(handoverDetailProvider(widget.handoverId));
+                ref.invalidate(handoverDetailProvider(widget.handoverId));
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -127,11 +127,37 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(handoverDetailProvider(widget.handoverId));
+    final handoverData = detailAsync.valueOrNull;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chi tiết biên bản bàn giao'),
         elevation: 0.5,
+        actions: [
+          if (handoverData != null)
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf),
+              tooltip: 'Xuất file PDF',
+              onPressed: () async {
+                try {
+                  final pdfBytes = await HandoverPdfBuilder.buildHandoverReportPdf(
+                    handover: handoverData,
+                    items: handoverData.items,
+                  );
+                  await Printing.layoutPdf(
+                    onLayout: (format) async => pdfBytes,
+                    name: 'Bien_ban_ban_giao_${handoverData.reportCode}.pdf',
+                  );
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Lỗi tạo PDF: $e')),
+                    );
+                  }
+                }
+              },
+            ),
+        ],
       ),
       body: detailAsync.when(
         data: (handover) {
@@ -169,7 +195,7 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
                                 color: (handover.isConfirmed
                                         ? Colors.green
                                         : (handover.isPendingResident ? Colors.orange : Colors.blueGrey))
-                                    .withOpacity(0.12),
+                                    .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -200,7 +226,7 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.08),
+                              color: Colors.red.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -235,7 +261,7 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.08),
+                                  color: Colors.amber.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Column(
@@ -255,7 +281,7 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.08),
+                                  color: Colors.blue.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Column(
@@ -356,7 +382,7 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: handover.items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, index) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final item = handover.items[index];
                       return Card(
@@ -423,9 +449,9 @@ class _ResidentHandoverDetailScreenState extends ConsumerState<ResidentHandoverD
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: Colors.green.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,

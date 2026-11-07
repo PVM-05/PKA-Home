@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
@@ -371,12 +370,14 @@ class HandoverRepository {
         final fileName = 'signatures/${handoverId}_staff_${DateTime.now().millisecondsSinceEpoch}.png';
         await _supabase.storage.from('handover-docs').uploadBinary(fileName, signatureBytes);
 
-        final updateData = {
+        final updateData = <String, dynamic>{
           'staff_signature_url': fileName,
           'staff_signed_at': DateTime.now().toIso8601String(),
           'status': 'pending_resident',
-          if (notes != null) 'staff_notes': notes,
         };
+        if (notes != null) {
+          updateData['staff_notes'] = notes;
+        }
 
         final response = await _supabase
             .from('apartment_handovers')
@@ -430,12 +431,14 @@ class HandoverRepository {
         final fileName = 'signatures/${handoverId}_resident_${DateTime.now().millisecondsSinceEpoch}.png';
         await _supabase.storage.from('handover-docs').uploadBinary(fileName, signatureBytes);
 
-        final updateData = {
+        final updateData = <String, dynamic>{
           'resident_signature_url': fileName,
           'resident_signed_at': DateTime.now().toIso8601String(),
           'status': 'confirmed',
-          if (notes != null) 'resident_notes': notes,
         };
+        if (notes != null) {
+          updateData['resident_notes'] = notes;
+        }
 
         final response = await _supabase
             .from('apartment_handovers')

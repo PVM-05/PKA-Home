@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/apartment_handover_model.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/handover_provider.dart';
 import 'resident_handover_detail_screen.dart';
 
 class ResidentHandoverScreen extends ConsumerWidget {
-  final String residentId;
+  final String? residentId;
 
   const ResidentHandoverScreen({
     super.key,
-    required this.residentId,
+    this.residentId,
   });
 
   Color _getStatusColor(String status) {
@@ -27,7 +27,8 @@ class ResidentHandoverScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final handoversAsync = ref.watch(residentHandoversProvider(residentId));
+    final effectiveResidentId = residentId ?? ref.watch(authProvider).value?.id ?? 'res-01';
+    final handoversAsync = ref.watch(residentHandoversProvider(effectiveResidentId));
 
     return Scaffold(
       appBar: AppBar(
@@ -55,7 +56,7 @@ class ResidentHandoverScreen extends ConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: handovers.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final item = handovers[index];
               return Card(
@@ -80,7 +81,7 @@ class ResidentHandoverScreen extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E3A8A).withOpacity(0.08),
+                                color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -95,7 +96,7 @@ class ResidentHandoverScreen extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(item.status).withOpacity(0.12),
+                                color: _getStatusColor(item.status).withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
