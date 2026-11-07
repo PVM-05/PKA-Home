@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
@@ -26,6 +29,63 @@ class _VehicleManagementScreenState
     symbol: 'đ',
   );
 
+  void _showImageSourcePicker(
+    BuildContext context,
+    void Function(ImageSource source) onSourceSelected,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Text(
+                'Chọn nguồn ảnh minh chứng',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined, color: AppTheme.primary),
+                title: const Text('Chụp ảnh từ máy ảnh'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onSourceSelected(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined, color: AppTheme.primary),
+                title: const Text('Chọn ảnh từ Thư viện'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onSourceSelected(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showAddVehicleDialog(
     BuildContext context, {
     required String apartmentId,
@@ -35,6 +95,7 @@ class _VehicleManagementScreenState
     final plateController = TextEditingController();
     final brandModelController = TextEditingController();
     String selectedType = currentMotorbikes >= 2 ? 'car' : 'motorbike';
+    File? selectedRegistrationImage;
     bool isSubmitting = false;
 
     showModalBottomSheet(
@@ -297,6 +358,122 @@ class _VehicleManagementScreenState
                           fillColor: Colors.grey.shade50,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Minh chứng giấy đăng ký xe (Cà vẹt)',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Đính kèm ảnh cà vẹt rõ nét để BQL đối soát chính chủ và vị trí đỗ xe.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (selectedRegistrationImage != null) ...[
+                        Stack(
+                          children: [
+                            Container(
+                              height: 130,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade300),
+                                image: DecorationImage(
+                                  image: FileImage(selectedRegistrationImage!),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: InkWell(
+                                onTap: () {
+                                  setModalState(() {
+                                    selectedRegistrationImage = null;
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        InkWell(
+                          onTap: () {
+                            _showImageSourcePicker(modalContext, (source) async {
+                              final picker = ImagePicker();
+                              final picked = await picker.pickImage(
+                                source: source,
+                                imageQuality: 85,
+                              );
+                              if (picked != null) {
+                                setModalState(() {
+                                  selectedRegistrationImage = File(picked.path);
+                                });
+                              }
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.add_a_photo_outlined,
+                                  size: 28,
+                                  color: AppTheme.primary.withValues(alpha: 0.8),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Tải lên ảnh Cà vẹt / Giấy đăng ký xe',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Định dạng JPG, PNG (tối đa 5MB)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
@@ -325,6 +502,17 @@ class _VehicleManagementScreenState
                                       );
                                     }
 
+                                    String? uploadedImageUrl;
+                                    if (selectedRegistrationImage != null) {
+                                      uploadedImageUrl = await ref
+                                          .read(vehicleRepositoryProvider)
+                                          .uploadRegistrationImage(
+                                            apartmentId,
+                                            user.id,
+                                            selectedRegistrationImage!,
+                                          );
+                                    }
+
                                     await ref
                                         .read(vehicleRepositoryProvider)
                                         .registerVehicle(
@@ -340,6 +528,7 @@ class _VehicleManagementScreenState
                                               : brandModelController.text
                                                     .trim(),
                                           userId: user.id,
+                                          registrationImageUrl: uploadedImageUrl,
                                         );
 
                                     ref.invalidate(
@@ -1304,13 +1493,17 @@ class _VehicleManagementScreenState
                                             ),
                                           ),
                                           () {
+                                            final slotNum = vehicle.parkingSlotNumber;
                                             final assignedSlot = allSlots
                                                 .where(
                                                   (s) =>
-                                                      (s.assignedVehicleId !=
-                                                              null &&
-                                                          s.assignedVehicleId ==
-                                                              vehicle.id) ||
+                                                      (vehicle.parkingSlotId != null &&
+                                                          s.id == vehicle.parkingSlotId) ||
+                                                      (s.assignedVehicleId != null &&
+                                                          s.assignedVehicleId == vehicle.id) ||
+                                                      (slotNum != null &&
+                                                          slotNum.isNotEmpty &&
+                                                          s.slotNumber == slotNum) ||
                                                       (s.licensePlate != null &&
                                                           s.licensePlate!
                                                                   .trim()
@@ -1321,9 +1514,16 @@ class _VehicleManagementScreenState
                                                                   .toUpperCase()),
                                                 )
                                                 .firstOrNull;
-                                            if (assignedSlot == null) {
+                                            if ((slotNum == null || slotNum.isEmpty) &&
+                                                assignedSlot == null) {
                                               return const SizedBox.shrink();
                                             }
+                                            final displaySlot = (slotNum != null && slotNum.isNotEmpty)
+                                                ? slotNum
+                                                : assignedSlot!.slotNumber;
+                                            final zoneText = assignedSlot != null
+                                                ? ' (Tầng ${assignedSlot.zone})'
+                                                : '';
                                             return Padding(
                                               padding: const EdgeInsets.only(
                                                 top: 6,
@@ -1355,7 +1555,7 @@ class _VehicleManagementScreenState
                                                     ),
                                                     const SizedBox(width: 4),
                                                     Text(
-                                                      'Vị trí ô đỗ: ${assignedSlot.slotNumber} (Tầng ${assignedSlot.zone})',
+                                                      'Vị trí ô đỗ: $displaySlot$zoneText',
                                                       style: const TextStyle(
                                                         fontSize: 11,
                                                         fontWeight:
@@ -1368,6 +1568,64 @@ class _VehicleManagementScreenState
                                               ),
                                             );
                                           }(),
+                                          if (vehicle.hasRegistrationImage) ...[
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 6),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  final repo = ref.read(vehicleRepositoryProvider);
+                                                  final fullUrl = repo.getRegistrationImageUrl(vehicle.registrationImageUrl);
+                                                  if (fullUrl.isNotEmpty) {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (_) => PhotoViewerScreen(imageUrls: [fullUrl]),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                                borderRadius: BorderRadius.circular(6),
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 3,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.blue.shade50,
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    border: Border.all(
+                                                      color: Colors.blue.shade200,
+                                                    ),
+                                                  ),
+                                                  child: const Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.badge_outlined,
+                                                        size: 13,
+                                                        color: AppTheme.primary,
+                                                      ),
+                                                      SizedBox(width: 4),
+                                                      Text(
+                                                        'Xem ảnh cà vẹt xe',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          fontWeight: FontWeight.w600,
+                                                          color: AppTheme.primary,
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 4),
+                                                      Icon(
+                                                        Icons.open_in_new,
+                                                        size: 11,
+                                                        color: AppTheme.primary,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ),
