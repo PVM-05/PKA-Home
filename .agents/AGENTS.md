@@ -1,11 +1,15 @@
 # Quy định Bắt buộc cho Agent
 
-## 1. Tuân thủ Quy tắc Dự Án
+## 1. Định Vị Sản Phẩm & Tuân thủ Quy tắc Dự Án
+> **ĐỊNH HƯỚNG TỐI THƯỢNG:** PKA-Home là **sản phẩm phần mềm thương mại thực tế (Commercial Production SaaS & PropTech Platform)**, phục vụ người dùng thật (Ban Quản Lý, Chủ tòa nhà, Đơn vị vận hành, Kế toán, Kỹ thuật viên, Cư dân và Khách thuê). Sản phẩm được thiết kế và xây dựng để **kinh doanh thương mại hóa B2B SaaS** và bán giải pháp cho các đơn vị quản lý vận hành bất động sản.
+> 
+> **TUYỆT ĐỐI KHÔNG** xem đây là đồ án môn học, bài tập sinh viên hay sản phẩm demo thử nghiệm. Mọi giải pháp kỹ thuật, thiết kế giao diện, bảo mật dữ liệu, tài liệu và quy trình nghiệp vụ phải tuân thủ tiêu chuẩn sản xuất (production-ready), bảo mật cao, tuân thủ pháp luật Việt Nam (Luật Bảo vệ dữ liệu cá nhân 2026, Luật Nhà ở 2023, Nghị định hóa đơn điện tử) và giải quyết triệt để nỗi đau vận hành thực tế.
+
 Agent phải luôn đọc và tuân thủ chặt chẽ các bộ quy tắc trong hệ thống trước khi bắt đầu công việc:
 - **`coding-rules.md`**: Quy tắc viết mã Flutter, cấu trúc thư mục (Feature-first), đặt tên biến, git workflow và Riverpod.
 - **`database-rules.md`**: Quy tắc thiết kế Supabase, Naming convention, Schema chuẩn, RLS policies và Storage.
-- **`design-rules.md`**: Tiêu chuẩn UI/UX, 100% tiếng Việt, quản lý Font/Icon/Màu sắc.
-- **`document-plan.md`**: Quy trình chuẩn bị tài liệu báo cáo đồ án.
+- **`design-rules.md`**: Tiêu chuẩn UI/UX, 100% tiếng Việt chuẩn mực, quản lý Font/Icon/Màu sắc.
+- **`document-plan.md`**: Quy trình chuẩn bị tài liệu kỹ thuật, tài liệu SOP vận hành chuẩn và hồ sơ bàn giao thương mại B2B SaaS.
 
 ## 2. Ép buộc Kích hoạt Kỹ năng (Skills & Workflows Enforcement)
 Agent **BẮT BUỘC** nhận diện ngữ cảnh và áp dụng ngay lập tức TẤT CẢ các kỹ năng (skills) có trong `.agents/skills/` theo đúng quy trình (workflow). Không chờ người dùng nhắc.
