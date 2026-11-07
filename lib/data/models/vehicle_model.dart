@@ -5,8 +5,13 @@ class VehicleModel {
   final String vehicleType; // 'motorbike', 'car', 'electric_bicycle'
   final String licensePlate;
   final String? brandModel;
-  final String status; // 'pending', 'approved', 'rejected'
+  final String status; // 'pending', 'approved', 'rejected', 'cancelled'
   final String? rejectionReason;
+  final String? registrationImageUrl;
+  final String? parkingSlotId;
+  final String? parkingSlotNumber;
+  final DateTime? approvedAt;
+  final String? approvedBy;
   final DateTime createdAt;
 
   VehicleModel({
@@ -18,6 +23,11 @@ class VehicleModel {
     this.brandModel,
     this.status = 'pending',
     this.rejectionReason,
+    this.registrationImageUrl,
+    this.parkingSlotId,
+    this.parkingSlotNumber,
+    this.approvedAt,
+    this.approvedBy,
     required this.createdAt,
   });
 
@@ -25,14 +35,21 @@ class VehicleModel {
     return VehicleModel(
       id: json['id'] as String? ?? '',
       apartmentId: json['apartment_id'] as String? ?? '',
-      userId: json['user_id'] as String?,
+      userId: json['user_id'] as String? ?? json['registered_by'] as String?,
       vehicleType: json['vehicle_type'] as String? ?? 'motorbike',
       licensePlate: json['license_plate'] as String? ?? json['plate_number'] as String? ?? '',
       brandModel: json['brand_model'] as String?,
       status: json['status'] as String? ?? 'pending',
       rejectionReason: json['rejection_reason'] as String?,
+      registrationImageUrl: json['registration_image_url'] as String?,
+      parkingSlotId: json['parking_slot_id'] as String?,
+      parkingSlotNumber: json['parking_slot_number'] as String?,
+      approvedAt: json['approved_at'] != null
+          ? DateTime.tryParse(json['approved_at'] as String)
+          : null,
+      approvedBy: json['approved_by'] as String?,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at'] as String) ?? DateTime.now()
           : DateTime.now(),
     );
   }
@@ -48,6 +65,11 @@ class VehicleModel {
       'brand_model': brandModel,
       'status': status,
       'rejection_reason': rejectionReason,
+      'registration_image_url': registrationImageUrl,
+      'parking_slot_id': parkingSlotId,
+      'parking_slot_number': parkingSlotNumber,
+      'approved_at': approvedAt?.toIso8601String(),
+      'approved_by': approvedBy,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -61,6 +83,11 @@ class VehicleModel {
     String? brandModel,
     String? status,
     String? rejectionReason,
+    String? registrationImageUrl,
+    String? parkingSlotId,
+    String? parkingSlotNumber,
+    DateTime? approvedAt,
+    String? approvedBy,
     DateTime? createdAt,
   }) {
     return VehicleModel(
@@ -72,6 +99,11 @@ class VehicleModel {
       brandModel: brandModel ?? this.brandModel,
       status: status ?? this.status,
       rejectionReason: rejectionReason ?? this.rejectionReason,
+      registrationImageUrl: registrationImageUrl ?? this.registrationImageUrl,
+      parkingSlotId: parkingSlotId ?? this.parkingSlotId,
+      parkingSlotNumber: parkingSlotNumber ?? this.parkingSlotNumber,
+      approvedAt: approvedAt ?? this.approvedAt,
+      approvedBy: approvedBy ?? this.approvedBy,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -83,6 +115,10 @@ class VehicleModel {
   bool get isActive => isPending || isApproved;
   bool get hasRejectionReason =>
       rejectionReason != null && rejectionReason!.trim().isNotEmpty;
+  bool get hasRegistrationImage =>
+      registrationImageUrl != null && registrationImageUrl!.trim().isNotEmpty;
+  bool get hasAssignedSlot =>
+      parkingSlotNumber != null && parkingSlotNumber!.trim().isNotEmpty;
 
   String get plateNumber => licensePlate;
   bool get isMotorbike => vehicleType == 'motorbike';

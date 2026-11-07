@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
+import '../../core/utils/app_logger.dart';
 import '../models/vehicle_model.dart';
 
 class VehicleRepository {
@@ -7,6 +9,27 @@ class VehicleRepository {
 
   VehicleRepository([SupabaseClient? client])
       : _client = client ?? SupabaseConfig.client;
+
+  /// Tải ảnh Giấy đăng ký xe (Cà vẹt) lên Supabase Storage bucket vehicle-docs
+  Future<String> uploadRegistrationImage(String apartmentId, String userId, File imageFile) async {
+    final fileExt = imageFile.path.split('.').last;
+    final fileName = '$apartmentId/${userId}_${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+    await _client.storage.from('vehicle-docs').upload(fileName, imageFile);
+    return fileName;
+  }
+
+  /// Trích xuất hoặc lấy URL công khai của ảnh đăng ký xe
+  String getRegistrationImageUrl(String? urlOrPath) {
+    if (urlOrPath == null || urlOrPath.trim().isEmpty) return '';
+    if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+      return urlOrPath;
+    }
+    try {
+      return _client.storage.from('vehicle-docs').getPublicUrl(urlOrPath);
+    } catch (_) {
+      return urlOrPath;
+    }
+  }
 
   /// Lấy danh sách phương tiện đã đăng ký của căn hộ
   Future<List<VehicleModel>> getVehiclesByApartment(String apartmentId) async {
@@ -74,6 +97,7 @@ class VehicleRepository {
     required String vehicleType,
     required String userId,
     String? brandModel,
+    String? registrationImageUrl,
   }) async {
     final cleanPlate = plateNumber.trim().toUpperCase();
 
@@ -85,18 +109,23 @@ class VehicleRepository {
       }
     }
 
+    final data = <String, dynamic>{
+      'apartment_id': apartmentId,
+      'plate_number': cleanPlate,
+      'license_plate': cleanPlate,
+      'vehicle_type': vehicleType,
+      'brand_model': brandModel?.trim(),
+      'registered_by': userId,
+      'user_id': userId,
+      'status': 'pending',
+    };
+    if (registrationImageUrl != null && registrationImageUrl.trim().isNotEmpty) {
+      data['registration_image_url'] = registrationImageUrl.trim();
+    }
+
     final response = await _client
         .from('vehicles')
-        .insert({
-          'apartment_id': apartmentId,
-          'plate_number': cleanPlate,
-          'license_plate': cleanPlate,
-          'vehicle_type': vehicleType,
-          'brand_model': brandModel?.trim(),
-          'registered_by': userId,
-          'user_id': userId,
-          'status': 'pending',
-        })
+        .insert(data)
         .select()
         .single();
 
@@ -105,6 +134,26 @@ class VehicleRepository {
 
   /// Hủy đăng ký / Xóa phương tiện
   Future<void> deleteVehicle(String vehicleId) async {
+    try {
+      final vehicle = await _client
+          .from('vehicles')
+          .select('parking_slot_id')
+          .eq('id', vehicleId)
+          .maybeSingle();
+      final slotId = vehicle?['parking_slot_id'] as String?;
+      if (slotId != null && slotId.isNotEmpty) {
+        await _client.from('parking_slots').update({
+          'status': 'available',
+          'apartment_id': null,
+          'license_plate': null,
+          'assigned_date': null,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', slotId);
+      }
+    } catch (e) {
+      AppLogger.w('Không thể giải phóng ô đỗ khi xóa xe $vehicleId: $e');
+    }
+
     await _client.from('vehicles').delete().eq('id', vehicleId);
   }
 
@@ -132,14 +181,85 @@ class VehicleRepository {
     await _client.from('vehicles').update(updates).eq('id', vehicleId);
   }
 
-  /// Phê duyệt cấp thẻ gửi xe cho phương tiện
-  Future<void> approveVehicle(String vehicleId) async {
-    await updateVehicleStatus(vehicleId, 'approved');
+  /// Phê duyệt cấp thẻ gửi xe cho phương tiện, hỗ trợ gán ô đỗ hầm cho ô tô
+  Future<void> approveVehicle(
+    String vehicleId, {
+    String? parkingSlotId,
+    String? parkingSlotNumber,
+    String? approvedBy,
+  }) async {
+    final updates = <String, dynamic>{
+      'status': 'approved',
+      'rejection_reason': null,
+      'approved_at': DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+    if (parkingSlotId != null && parkingSlotId.trim().isNotEmpty) {
+      updates['parking_slot_id'] = parkingSlotId.trim();
+    }
+    if (parkingSlotNumber != null && parkingSlotNumber.trim().isNotEmpty) {
+      updates['parking_slot_number'] = parkingSlotNumber.trim();
+    }
+    if (approvedBy != null && approvedBy.trim().isNotEmpty) {
+      updates['approved_by'] = approvedBy.trim();
+    }
+
+    await _client.from('vehicles').update(updates).eq('id', vehicleId);
+
+    // Nếu gán parking slot, cập nhật parking_slots thành occupied và gán license_plate / apartment_id
+    if (parkingSlotId != null && parkingSlotId.trim().isNotEmpty) {
+      try {
+        final vehicleRes = await _client
+            .from('vehicles')
+            .select('license_plate, apartment_id')
+            .eq('id', vehicleId)
+            .maybeSingle();
+        final plate = vehicleRes?['license_plate'] as String?;
+        final aptId = vehicleRes?['apartment_id'] as String?;
+
+        await _client.from('parking_slots').update({
+          'status': 'occupied',
+          'license_plate': plate,
+          'apartment_id': aptId,
+          'assigned_date': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', parkingSlotId);
+      } catch (e) {
+        AppLogger.w('Không thể cập nhật trạng thái occupied cho parking_slot $parkingSlotId: $e');
+      }
+    }
   }
 
-  /// Từ chối đăng ký phương tiện kèm lý do
+  /// Từ chối đăng ký phương tiện kèm lý do, tự động giải phóng ô đỗ nếu đã từng được gán
   Future<void> rejectVehicle(String vehicleId, {String? reason}) async {
-    await updateVehicleStatus(vehicleId, 'rejected', reason: reason);
+    try {
+      final vehicle = await _client
+          .from('vehicles')
+          .select('parking_slot_id')
+          .eq('id', vehicleId)
+          .maybeSingle();
+      final slotId = vehicle?['parking_slot_id'] as String?;
+      if (slotId != null && slotId.isNotEmpty) {
+        await _client.from('parking_slots').update({
+          'status': 'available',
+          'apartment_id': null,
+          'license_plate': null,
+          'assigned_date': null,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', slotId);
+      }
+    } catch (e) {
+      AppLogger.w('Không thể giải phóng parking_slot khi từ chối xe $vehicleId: $e');
+    }
+
+    final updates = <String, dynamic>{
+      'status': 'rejected',
+      'rejection_reason': (reason != null && reason.trim().isNotEmpty) ? reason.trim() : null,
+      'parking_slot_id': null,
+      'parking_slot_number': null,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+    await _client.from('vehicles').update(updates).eq('id', vehicleId);
   }
 
   /// Cư dân chỉnh sửa thông tin phương tiện đang chờ duyệt (pending)
