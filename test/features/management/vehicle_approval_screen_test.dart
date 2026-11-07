@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,12 @@ class MockVehicleRepository implements VehicleRepository {
   String? lastRejectionReason;
 
   @override
-  Future<void> approveVehicle(String vehicleId) async {
+  Future<void> approveVehicle(
+    String vehicleId, {
+    String? parkingSlotId,
+    String? parkingSlotNumber,
+    String? approvedBy,
+  }) async {
     approveCalled = true;
     lastVehicleId = vehicleId;
   }
@@ -86,9 +92,16 @@ class MockVehicleRepository implements VehicleRepository {
     required String vehicleType,
     required String userId,
     String? brandModel,
+    String? registrationImageUrl,
   }) async {
     throw UnimplementedError();
   }
+
+  @override
+  Future<String> uploadRegistrationImage(String apartmentId, String userId, File imageFile) async => '';
+
+  @override
+  String getRegistrationImageUrl(String? urlOrPath) => urlOrPath ?? '';
 
   @override
   Future<Map<String, int>> getVehicleCounts(String apartmentId) async => {'motorbike': 1, 'car': 1};

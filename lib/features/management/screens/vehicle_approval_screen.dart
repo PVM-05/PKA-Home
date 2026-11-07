@@ -4,7 +4,11 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/photo_viewer_screen.dart';
+import '../../../data/models/parking_slot_model.dart';
 import '../../../data/models/vehicle_model.dart';
+import '../../../data/providers/auth_provider.dart';
+import '../../../data/providers/parking_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/role_guard.dart';
@@ -61,83 +65,179 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
   }
 
   Future<void> _approveVehicle(VehicleModel vehicle) async {
+    List<ParkingSlotModel> availableCarSlots = [];
+    if (vehicle.isCar) {
+      try {
+        availableCarSlots =
+            await ref.read(parkingRepositoryProvider).fetchAvailableCarSlots();
+      } catch (e) {
+        // Fallback or ignore
+      }
+    }
+
+    ParkingSlotModel? selectedSlot =
+        availableCarSlots.isNotEmpty ? availableCarSlots.first : null;
+
+    if (!mounted) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle_outline, color: AppStatusColors.paid),
-            SizedBox(width: 8),
-            Expanded(child: Text('Phê Duyệt Đăng Ký Xe')),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (ctx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) => AlertDialog(
+          title: const Row(
             children: [
-              const Text(
-                'Bạn có chắc chắn muốn phê duyệt cấp thẻ gửi xe cho phương tiện biển số:',
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.black26),
-                  ),
-                  child: Text(
-                    vehicle.licensePlate,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+              Icon(Icons.check_circle_outline, color: AppStatusColors.paid),
+              SizedBox(width: 8),
+              Expanded(child: Text('Phê Duyệt Đăng Ký Xe')),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Bạn có chắc chắn muốn phê duyệt cấp thẻ gửi xe cho phương tiện biển số:',
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.black26),
+                    ),
+                    child: Text(
+                      vehicle.licensePlate,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Biểu phí ${vehicle.vehicleTypeDisplayName}: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng sẽ tự động được cộng vào hóa đơn căn hộ.',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppTheme.textSecondary,
+                const SizedBox(height: 12),
+                Text(
+                  'Biểu phí ${vehicle.vehicleTypeDisplayName}: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng sẽ tự động được cộng vào hóa đơn căn hộ.',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppStatusColors.paid,
-              foregroundColor: Colors.white,
+                if (vehicle.isCar) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Vị trí ô đỗ tầng hầm (B1/B2):',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (availableCarSlots.isNotEmpty) ...[
+                    DropdownButtonFormField<ParkingSlotModel>(
+                      initialValue: selectedSlot,
+                      decoration: InputDecoration(
+                        labelText: 'Chọn ô đỗ ô tô còn trống',
+                        prefixIcon: const Icon(
+                          Icons.local_parking,
+                          color: AppTheme.primary,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      items: availableCarSlots.map((s) {
+                        return DropdownMenuItem(
+                          value: s,
+                          child: Text('${s.slotNumber} (Tầng ${s.zone})'),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setDialogState(() {
+                          selectedSlot = val;
+                        });
+                      },
+                    ),
+                  ] else ...[
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: 16,
+                            color: AppTheme.warning,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Hết ô đỗ ô tô trống ở hầm B1/B2. Phương tiện sẽ được duyệt nhưng chưa thể gán ô đỗ cố định.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.warning,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ],
             ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Xác nhận duyệt'),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppStatusColors.paid,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(dialogCtx, true),
+              child: const Text('Xác nhận duyệt'),
+            ),
+          ],
+        ),
       ),
     );
 
     if (confirmed == true && mounted) {
       try {
-        await ref.read(vehicleRepositoryProvider).approveVehicle(vehicle.id);
+        final user = ref.read(authProvider).valueOrNull;
+        await ref.read(vehicleRepositoryProvider).approveVehicle(
+              vehicle.id,
+              parkingSlotId: selectedSlot?.id,
+              parkingSlotNumber: selectedSlot?.slotNumber,
+              approvedBy: user?.id,
+            );
+        ref.invalidate(parkingSlotsProvider);
         _refreshData();
         if (mounted) {
+          final slotMsg = selectedSlot != null
+              ? ' và đã gán ô đỗ ${selectedSlot!.slotNumber}'
+              : '';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Đã phê duyệt thành công phương tiện ${vehicle.licensePlate}!',
+                'Đã phê duyệt thành công phương tiện ${vehicle.licensePlate}$slotMsg!',
               ),
               backgroundColor: AppStatusColors.paid,
             ),
@@ -528,6 +628,101 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                                   ),
                                 ],
                               ),
+                              if (v.hasAssignedSlot) ...[
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primary.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: AppTheme.primary.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.local_parking,
+                                        size: 14,
+                                        color: AppTheme.primary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Vị trí ô đỗ: ${v.parkingSlotNumber}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              if (v.hasRegistrationImage) ...[
+                                const SizedBox(height: 8),
+                                InkWell(
+                                  onTap: () {
+                                    final repo = ref.read(vehicleRepositoryProvider);
+                                    final url = repo.getRegistrationImageUrl(v.registrationImageUrl);
+                                    if (url.isNotEmpty) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => PhotoViewerScreen(imageUrls: [url]),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: Colors.blue.shade200,
+                                      ),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.badge_outlined,
+                                          size: 14,
+                                          color: AppTheme.primary,
+                                        ),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Xem ảnh cà vẹt xe',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.primary,
+                                          ),
+                                        ),
+                                        SizedBox(width: 4),
+                                        Icon(
+                                          Icons.open_in_new,
+                                          size: 12,
+                                          color: AppTheme.primary,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                               if (v.isRejected) ...[
                                 const SizedBox(height: 10),
                                 Container(
