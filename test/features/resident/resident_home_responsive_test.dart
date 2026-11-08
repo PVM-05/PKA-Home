@@ -47,20 +47,42 @@ void main() {
     createdAt: DateTime(2026, 11, 1),
   );
 
+  final testLargeInvoice = InvoiceModel(
+    id: 'inv-unpaid-large',
+    apartmentId: 'apt-1',
+    period: '11/2026',
+    dueDate: DateTime(2026, 11, 25),
+    totalAmount: 185500000.0,
+    status: 'unpaid',
+    createdAt: DateTime(2026, 11, 1),
+  );
+
+  final testIssue = IssueModel(
+    id: 'iss-1',
+    apartmentId: 'apt-1',
+    reporterId: 'user-res-1',
+    description: 'Bị rò rỉ nước từ đường ống hành lang tầng 5 gần thang máy',
+    status: 'in_progress',
+    priority: 'high',
+    createdAt: DateTime(2026, 11, 5),
+  );
+
   Widget buildTestApp({
     required double width,
     required double height,
     double textScaleFactor = 1.0,
     List<InvoiceModel> invoices = const [],
+    List<IssueModel> issues = const [],
+    UserModel? user,
   }) {
     return ProviderScope(
       overrides: [
-        authProvider.overrideWith((ref) => FakeAuthNotifier(testResident)),
+        authProvider.overrideWith((ref) => FakeAuthNotifier(user ?? testResident)),
         residentLinkProvider.overrideWith((ref) => FakeResidentLinkNotifier()),
         residentInvoiceProvider.overrideWith((ref) => invoices),
-        residentIssueProvider.overrideWith((ref) => <IssueModel>[]),
+        residentIssueProvider.overrideWith((ref) => issues),
         announcementsStreamProvider.overrideWith((ref) => Stream.value(<AnnouncementModel>[])),
-        unreadNotificationsCountProvider.overrideWith((ref) => 0),
+        unreadNotificationsCountProvider.overrideWith((ref) => 2),
         residentApartmentsProvider.overrideWith((ref) => []),
       ],
       child: MaterialApp(
@@ -77,7 +99,7 @@ void main() {
   }
 
   group('ResidentHomeScreen Impeccable & Anti-Overflow Tests', () {
-    testWidgets('renders tablet/desktop width 1200dp cleanly without overflow', (tester) async {
+    testWidgets('renders desktop enterprise width 1200dp in 2-column workstation mode without overflow', (tester) async {
       tester.view.physicalSize = const Size(1200, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -86,6 +108,7 @@ void main() {
         width: 1200,
         height: 900,
         invoices: [testUnpaidInvoice],
+        issues: [testIssue],
       ));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -93,6 +116,8 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Tổng quan hóa đơn'), findsOneWidget);
       expect(find.text('THANH TOÁN NGAY'), findsOneWidget);
+      expect(find.text('Dịch vụ & Tiện ích'), findsOneWidget);
+      expect(find.text('Tiến độ phản ánh'), findsOneWidget);
     });
 
     testWidgets('renders narrow mobile 320dp with unpaid invoice without overflow', (tester) async {
@@ -113,16 +138,25 @@ void main() {
       expect(find.text('THANH TOÁN NGAY'), findsOneWidget);
     });
 
-    testWidgets('renders narrow mobile 320dp with large text scale 1.3x without overflow', (tester) async {
+    testWidgets('renders narrow mobile 320dp with large text scale 1.3x and large currency amount without overflow', (tester) async {
       tester.view.physicalSize = const Size(320, 700);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
+
+      final longNameUser = UserModel(
+        id: 'user-long',
+        fullName: 'Nguyễn Hoàng Đình Thục Cương Long Cư Dân',
+        phone: '0988776655',
+        role: 'resident',
+      );
 
       await tester.pumpWidget(buildTestApp(
         width: 320,
         height: 700,
         textScaleFactor: 1.3,
-        invoices: [testUnpaidInvoice],
+        invoices: [testLargeInvoice],
+        issues: [testIssue],
+        user: longNameUser,
       ));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));

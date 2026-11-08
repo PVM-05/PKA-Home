@@ -350,7 +350,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 child: SafeArea(
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1200),
+                      constraints: const BoxConstraints(maxWidth: 1400),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16.0,
@@ -459,492 +459,395 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
           SliverToBoxAdapter(
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
+                constraints: const BoxConstraints(maxWidth: 1400),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const StickyEmergencyBar(),
-                  // ══════════════════════════════════════════════════════════
-                  // 02 · ƯU TIÊN: Tổng quan hóa đơn
-                  // ══════════════════════════════════════════════════════════
-                  const Text(
-                    'Tổng quan hóa đơn',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
                   ),
-                  const SizedBox(height: 8),
-                  invoiceAsync.when(
-                    data: (invoices) {
-                      final unpaidInvoices = invoices
-                          .where(
-                            (i) =>
-                                i.status == 'unpaid' ||
-                                i.status == 'pending_confirmation',
-                          )
-                          .toList();
-                      final totalUnpaid = unpaidInvoices.fold<double>(
-                        0,
-                        (sum, item) => sum + item.totalAmount,
-                      );
-                      final unpaidCount = unpaidInvoices.length;
-
-                      if (totalUnpaid > 0) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            gradient: AppGradients.brandPrimary,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: AppShadows.softMd,
-                          ),
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isDesktop = constraints.maxWidth >= 900;
+                      if (isDesktop) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Cột trái (60%): Hóa đơn + Thao tác nhanh + Dịch vụ tiện ích
+                            Expanded(
+                              flex: 6,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: const Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.warning_amber_rounded,
-                                          color: Colors.white,
-                                          size: 14,
-                                        ),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          'Đến hạn thanh toán',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Text(
-                                      '( $unpaidCount hóa đơn chưa thanh toán )',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
+                                  _buildInvoiceOverviewSection(invoiceAsync),
+                                  const SizedBox(height: 24),
+                                  _buildQuickActionsRow(),
+                                  const SizedBox(height: 24),
+                                  _buildResidentServicesSection(context),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            // Cột phải (40%): Cảnh báo gián đoạn + Quỹ bảo trì + Phản ánh + Thông báo
+                            Expanded(
+                              flex: 4,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const StickyEmergencyBar(),
+                                  const EquipmentInterruptionBanner(),
+                                  const SizedBox(height: 16),
+                                  const MaintenanceFundCard(),
+                                  const SizedBox(height: 24),
+                                  _buildLatestIssueSection(issueAsync),
+                                  const SizedBox(height: 24),
+                                  _buildAnnouncementsSection(
+                                    announcementsAsync,
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 14),
-                              const Text(
-                                'Tổng tiền cần đóng',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  NumberFormat.currency(
-                                    locale: 'vi_VN',
-                                    symbol: 'VNĐ',
-                                  ).format(totalUnpaid),
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton.icon(
-                                onPressed: () => _onItemTapped(1),
-                                icon: const Icon(
-                                  Icons.qr_code_scanner,
-                                  size: 18,
-                                ),
-                                label: const Text(
-                                  'THANH TOÁN NGAY',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: AppTheme.sapphire,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                        .animate()
-                        .fade(duration: 400.ms, delay: 100.ms)
-                        .slideX(begin: 0.1, curve: Curves.easeOut);
-                      }
-
-                      return AppCard(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.success.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle_outline,
-                                        color: AppTheme.success,
-                                        size: 14,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Đã hoàn tất',
-                                        style: TextStyle(
-                                          color: AppTheme.success,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Flexible(
-                                  child: Text(
-                                    '( Đã thanh toán đầy đủ các kỳ phí )',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: AppTheme.success,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Đã thanh toán đầy đủ các kỳ phí',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Căn hộ của bạn không có hóa đơn quá hạn hoặc đang chờ đối soát.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            OutlinedButton.icon(
-                              onPressed: () => _onItemTapped(1),
-                              icon: const Icon(Icons.receipt_long, size: 18),
-                              label: const Text(
-                                'XEM HÓA ĐƠN',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
                             ),
                           ],
-                        ),
-                      )
-                      .animate()
-                      .fade(duration: 400.ms, delay: 100.ms)
-                      .slideX(begin: 0.1, curve: Curves.easeOut);
-                    },
-                    loading: () => const InvoiceCardSkeleton(),
-                    error: (err, st) => AppErrorCard(
-                      error: err,
-                      onRetry: () => ref.invalidate(residentInvoiceProvider),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const MaintenanceFundCard(),
-                  const SizedBox(height: 20),
-
-                  // ══════════════════════════════════════════════════════════
-                  // 03 · CẦN QUAN TÂM: Cảnh báo gián đoạn & Thông báo quan trọng
-                  // ══════════════════════════════════════════════════════════
-                  const EquipmentInterruptionBanner(),
-                  const SizedBox(height: 20),
-
-                  // ══════════════════════════════════════════════════════════
-                  // 04 · THAO TÁC: Lưới thao tác nhanh 4 nút
-                  // ══════════════════════════════════════════════════════════
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _buildQuickAction(
-                          Icons.qr_code_scanner,
-                          'Thanh toán',
-                          () => _onItemTapped(1),
-                          accentColor: AppTheme.sapphire,
-                        ).animate().fade(duration: 300.ms).slideY(
-                          begin: 0.2,
-                          curve: Curves.easeOutQuad,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildQuickAction(
-                          Icons.build_circle_outlined,
-                          'Báo sự cố',
-                          () => _onItemTapped(2),
-                          accentColor: Colors.orange,
-                        ).animate().fade(duration: 300.ms, delay: 100.ms).slideY(
-                          begin: 0.2,
-                          curve: Curves.easeOutQuad,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildQuickAction(
-                          Icons.emergency_outlined,
-                          'Hotline',
-                          () => context.push(
-                            AppRoutes.residentHandbook,
-                            extra: 0,
-                          ),
-                          accentColor: AppTheme.error,
-                        ).animate().fade(duration: 300.ms, delay: 200.ms).slideY(
-                          begin: 0.2,
-                          curve: Curves.easeOutQuad,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildQuickAction(
-                          Icons.menu_book_outlined,
-                          'Cẩm nang',
-                          () => context.push(
-                            AppRoutes.residentHandbook,
-                            extra: 1,
-                          ),
-                          accentColor: Colors.teal,
-                        ).animate().fade(duration: 300.ms, delay: 300.ms).slideY(
-                          begin: 0.2,
-                          curve: Curves.easeOutQuad,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // ══════════════════════════════════════════════════════════
-                  // 05 · DỊCH VỤ: Dịch vụ & Tiện ích Cư dân
-                  // ══════════════════════════════════════════════════════════
-                  _buildResidentServicesSection(context),
-                  const SizedBox(height: 24),
-
-                  // Latest Issue Status
-                  const Text(
-                    'Tiến độ phản ánh',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  issueAsync.when(
-                    data: (issues) {
-                      if (issues.isEmpty) {
-                        return const AppCard(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            'Không có phản ánh nào gần đây.',
-                            style: TextStyle(color: AppTheme.textSecondary),
-                          ),
                         );
                       }
-                      final latestIssue = issues.first;
-                      Color statusColor;
-                      String statusText;
-                      IconData statusIcon;
-                      switch (latestIssue.status) {
-                        case 'resolved':
-                          statusColor = AppTheme.success;
-                          statusText = 'Đã xử lý';
-                          statusIcon = Icons.check_circle;
-                          break;
-                        case 'in_progress':
-                          statusColor = AppTheme.primary;
-                          statusText = 'Đang xử lý';
-                          statusIcon = Icons.engineering;
-                          break;
-                        default:
-                          statusColor = AppTheme.warning;
-                          statusText = 'Chờ tiếp nhận';
-                          statusIcon = Icons.pending_actions;
-                      }
-                      return AppCard(
-                            padding: EdgeInsets.zero,
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: statusColor.withValues(
-                                  alpha: 0.1,
-                                ),
-                                child: Icon(statusIcon, color: statusColor),
-                              ),
-                              title: Text(
-                                latestIssue.description,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              subtitle: Text(
-                                statusText,
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              trailing: const Icon(
-                                Icons.chevron_right,
-                                color: AppTheme.textSecondary,
-                              ),
-                              onTap: () => _onItemTapped(2),
-                            ),
-                          )
-                          .animate()
-                          .fade(duration: 400.ms, delay: 200.ms)
-                          .slideX(begin: 0.1, curve: Curves.easeOut);
-                    },
-                    loading: () => const ListItemSkeleton(),
-                    error: (err, st) => AppErrorCard(
-                      error: err,
-                      onRetry: () => ref.invalidate(residentIssueProvider),
-                    ),
-                  ),
 
-                  const SizedBox(height: 24),
-
-                  // Announcements
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Thông báo mới nhất',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      announcementsAsync.maybeWhen(
-                        data: (announcements) => announcements.length > 3
-                            ? TextButton(
-                                onPressed: () => context.push(
-                                  AppRoutes.residentNotifications,
-                                ),
-                                child: const Text('Xem tất cả'),
-                              )
-                            : const SizedBox.shrink(),
-                        orElse: () => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  announcementsAsync.when(
-                    data: (announcements) {
-                      if (announcements.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Text(
-                              'Không có thông báo nào.',
-                              style: TextStyle(color: AppTheme.textSecondary),
-                            ),
-                          ),
-                        );
-                      }
-                      final top3Announcements = announcements.take(3).toList();
+                      // Mobile & Tablet (< 900dp): 1 Column
                       return Column(
-                        children: top3Announcements.map((announcement) {
-                          return NotificationCard(
-                            title: announcement.title,
-                            content: announcement.content,
-                            date:
-                                '${announcement.createdAt.day.toString().padLeft(2, '0')}/${announcement.createdAt.month.toString().padLeft(2, '0')}/${announcement.createdAt.year}',
-                            onTap: () {
-                              context.push(
-                                AppRoutes.residentAnnouncementDetail,
-                                extra: announcement,
-                              );
-                            },
-                          );
-                        }).toList(),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const StickyEmergencyBar(),
+                          _buildInvoiceOverviewSection(invoiceAsync),
+                          const SizedBox(height: 12),
+                          const MaintenanceFundCard(),
+                          const SizedBox(height: 20),
+                          const EquipmentInterruptionBanner(),
+                          const SizedBox(height: 20),
+                          _buildQuickActionsRow(),
+                          const SizedBox(height: 24),
+                          _buildResidentServicesSection(context),
+                          const SizedBox(height: 24),
+                          _buildLatestIssueSection(issueAsync),
+                          const SizedBox(height: 24),
+                          _buildAnnouncementsSection(announcementsAsync),
+                          const SizedBox(height: 40),
+                        ],
                       );
                     },
-                    loading: () => Column(
-                      children: const [ListItemSkeleton(), ListItemSkeleton()],
-                    ),
-                    error: (error, stack) => AppErrorCard(
-                      error: error,
-                      onRetry: () =>
-                          ref.invalidate(announcementsStreamProvider),
-                    ),
                   ),
-                  const SizedBox(height: 40),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
         ],
       ),
     );
   }
 
+  Widget _buildInvoiceOverviewSection(
+    AsyncValue<List<InvoiceModel>> invoiceAsync,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Tổng quan hóa đơn',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        invoiceAsync.when(
+          data: (invoices) {
+            final unpaidInvoices = invoices
+                .where(
+                  (i) =>
+                      i.status == 'unpaid' ||
+                      i.status == 'pending_confirmation',
+                )
+                .toList();
+            final totalUnpaid = unpaidInvoices.fold<double>(
+              0,
+              (sum, item) => sum + item.totalAmount,
+            );
+            final unpaidCount = unpaidInvoices.length;
+
+            if (totalUnpaid > 0) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: AppGradients.brandPrimary,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: AppShadows.softMd,
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Đến hạn thanh toán',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            '( $unpaidCount hóa đơn chưa thanh toán )',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const Text(
+                      'Tổng tiền cần đóng',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        NumberFormat.currency(
+                          locale: 'vi_VN',
+                          symbol: 'VNĐ',
+                        ).format(totalUnpaid),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => _onItemTapped(1),
+                      icon: const Icon(
+                        Icons.qr_code_scanner,
+                        size: 18,
+                      ),
+                      label: const Text(
+                        'THANH TOÁN NGAY',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                          fontSize: 14,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppTheme.sapphire,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              .animate()
+              .fade(duration: 400.ms, delay: 100.ms)
+              .slideX(begin: 0.1, curve: Curves.easeOut);
+            }
+
+            return AppCard(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.success.withValues(
+                            alpha: 0.12,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              color: AppTheme.success,
+                              size: 14,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Đã hoàn tất',
+                              style: TextStyle(
+                                color: AppTheme.success,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Flexible(
+                        child: Text(
+                          '( Đã thanh toán đầy đủ các kỳ phí )',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppTheme.success,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Đã thanh toán đầy đủ các kỳ phí',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Căn hộ của bạn không có hóa đơn quá hạn hoặc đang chờ đối soát.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  OutlinedButton.icon(
+                    onPressed: () => _onItemTapped(1),
+                    icon: const Icon(Icons.receipt_long, size: 18),
+                    label: const Text(
+                      'XEM HÓA ĐƠN',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+            .animate()
+            .fade(duration: 400.ms, delay: 100.ms)
+            .slideX(begin: 0.1, curve: Curves.easeOut);
+          },
+          loading: () => const InvoiceCardSkeleton(),
+          error: (err, st) => AppErrorCard(
+            error: err,
+            onRetry: () => ref.invalidate(residentInvoiceProvider),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActionsRow() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _buildQuickAction(
+            Icons.qr_code_scanner,
+            'Thanh toán',
+            () => _onItemTapped(1),
+            accentColor: AppTheme.sapphire,
+          ).animate().fade(duration: 300.ms).slideY(
+            begin: 0.2,
+            curve: Curves.easeOutQuad,
+          ),
+        ),
+        Expanded(
+          child: _buildQuickAction(
+            Icons.build_circle_outlined,
+            'Báo sự cố',
+            () => _onItemTapped(2),
+            accentColor: Colors.orange,
+          ).animate().fade(duration: 300.ms, delay: 100.ms).slideY(
+            begin: 0.2,
+            curve: Curves.easeOutQuad,
+          ),
+        ),
+        Expanded(
+          child: _buildQuickAction(
+            Icons.emergency_outlined,
+            'Hotline',
+            () => context.push(
+              AppRoutes.residentHandbook,
+              extra: 0,
+            ),
+            accentColor: AppTheme.error,
+          ).animate().fade(duration: 300.ms, delay: 200.ms).slideY(
+            begin: 0.2,
+            curve: Curves.easeOutQuad,
+          ),
+        ),
+        Expanded(
+          child: _buildQuickAction(
+            Icons.menu_book_outlined,
+            'Cẩm nang',
+            () => context.push(
+              AppRoutes.residentHandbook,
+              extra: 1,
+            ),
+            accentColor: Colors.teal,
+          ).animate().fade(duration: 300.ms, delay: 300.ms).slideY(
+            begin: 0.2,
+            curve: Curves.easeOutQuad,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildResidentServicesSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg =
-        Theme.of(context).cardTheme.color ??
-        Theme.of(context).colorScheme.surface;
 
     Widget buildServiceCard({
       required String title,
@@ -953,16 +856,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
       required Color color,
       required VoidCallback onTap,
     }) {
-      return Card(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        color: cardBg,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: isDark ? Colors.white12 : color.withValues(alpha: 0.2),
-          ),
-        ),
+      return AppCard(
+        padding: EdgeInsets.zero,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
@@ -1017,7 +912,57 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
       );
     }
 
-    return Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 380;
+        Widget meterAndVehicleRow;
+        if (isNarrow) {
+          meterAndVehicleRow = Column(
+            children: [
+              buildServiceCard(
+                title: 'Số điện nước',
+                subtitle: 'Quét OCR & Gửi chỉ số',
+                icon: Icons.speed_outlined,
+                color: const Color(0xFFE65100),
+                onTap: () => context.push(AppRoutes.residentMeterReading),
+              ),
+              const SizedBox(height: 10),
+              buildServiceCard(
+                title: 'Đăng ký gửi xe',
+                subtitle: 'Quản lý phương tiện',
+                icon: Icons.directions_car_filled_outlined,
+                color: const Color(0xFF1E88E5),
+                onTap: () => context.push(AppRoutes.residentVehicles),
+              ),
+            ],
+          );
+        } else {
+          meterAndVehicleRow = Row(
+            children: [
+              Expanded(
+                child: buildServiceCard(
+                  title: 'Số điện nước',
+                  subtitle: 'Quét OCR & Gửi chỉ số',
+                  icon: Icons.speed_outlined,
+                  color: const Color(0xFFE65100),
+                  onTap: () => context.push(AppRoutes.residentMeterReading),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: buildServiceCard(
+                  title: 'Đăng ký gửi xe',
+                  subtitle: 'Quản lý phương tiện',
+                  icon: Icons.directions_car_filled_outlined,
+                  color: const Color(0xFF1E88E5),
+                  onTap: () => context.push(AppRoutes.residentVehicles),
+                ),
+              ),
+            ],
+          );
+        }
+
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
@@ -1025,29 +970,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: buildServiceCard(
-                    title: 'Số điện nước',
-                    subtitle: 'Quét OCR & Gửi chỉ số',
-                    icon: Icons.speed_outlined,
-                    color: const Color(0xFFE65100),
-                    onTap: () => context.push(AppRoutes.residentMeterReading),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: buildServiceCard(
-                    title: 'Đăng ký gửi xe',
-                    subtitle: 'Quản lý phương tiện',
-                    icon: Icons.directions_car_filled_outlined,
-                    color: const Color(0xFF1E88E5),
-                    onTap: () => context.push(AppRoutes.residentVehicles),
-                  ),
-                ),
-              ],
-            ),
+            meterAndVehicleRow,
             const SizedBox(height: 10),
             buildServiceCard(
               title: 'Đón khách & Bưu kiện',
@@ -1085,6 +1008,167 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         .animate()
         .fade(duration: 350.ms, delay: 150.ms)
         .slideY(begin: 0.1, curve: Curves.easeOutQuad);
+      },
+    );
+  }
+
+  Widget _buildLatestIssueSection(AsyncValue<List<IssueModel>> issueAsync) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Tiến độ phản ánh',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        issueAsync.when(
+          data: (issues) {
+            if (issues.isEmpty) {
+              return const AppCard(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Không có phản ánh nào gần đây.',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
+              );
+            }
+            final latestIssue = issues.first;
+            Color statusColor;
+            String statusText;
+            IconData statusIcon;
+            switch (latestIssue.status) {
+              case 'resolved':
+                statusColor = AppTheme.success;
+                statusText = 'Đã xử lý';
+                statusIcon = Icons.check_circle;
+                break;
+              case 'in_progress':
+                statusColor = AppTheme.primary;
+                statusText = 'Đang xử lý';
+                statusIcon = Icons.engineering;
+                break;
+              default:
+                statusColor = AppTheme.warning;
+                statusText = 'Chờ tiếp nhận';
+                statusIcon = Icons.pending_actions;
+            }
+            return AppCard(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: statusColor.withValues(
+                    alpha: 0.1,
+                  ),
+                  child: Icon(statusIcon, color: statusColor),
+                ),
+                title: Text(
+                  latestIssue.description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  statusText,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: AppTheme.textSecondary,
+                ),
+                onTap: () => _onItemTapped(2),
+              ),
+            )
+            .animate()
+            .fade(duration: 400.ms, delay: 200.ms)
+            .slideX(begin: 0.1, curve: Curves.easeOut);
+          },
+          loading: () => const ListItemSkeleton(),
+          error: (err, st) => AppErrorCard(
+            error: err,
+            onRetry: () => ref.invalidate(residentIssueProvider),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnnouncementsSection(
+    AsyncValue<List<AnnouncementModel>> announcementsAsync,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: Text(
+                'Thông báo mới nhất',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            announcementsAsync.maybeWhen(
+              data: (announcements) => announcements.length > 3
+                  ? TextButton(
+                      onPressed: () => context.push(
+                        AppRoutes.residentNotifications,
+                      ),
+                      child: const Text('Xem tất cả'),
+                    )
+                  : const SizedBox.shrink(),
+              orElse: () => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        announcementsAsync.when(
+          data: (announcements) {
+            if (announcements.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: Text(
+                    'Không có thông báo nào.',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                ),
+              );
+            }
+            final top3Announcements = announcements.take(3).toList();
+            return Column(
+              children: top3Announcements.map((announcement) {
+                return NotificationCard(
+                  title: announcement.title,
+                  content: announcement.content,
+                  date:
+                      '${announcement.createdAt.day.toString().padLeft(2, '0')}/${announcement.createdAt.month.toString().padLeft(2, '0')}/${announcement.createdAt.year}',
+                  onTap: () {
+                    context.push(
+                      AppRoutes.residentAnnouncementDetail,
+                      extra: announcement,
+                    );
+                  },
+                );
+              }).toList(),
+            );
+          },
+          loading: () => Column(
+            children: const [ListItemSkeleton(), ListItemSkeleton()],
+          ),
+          error: (error, stack) => AppErrorCard(
+            error: error,
+            onRetry: () =>
+                ref.invalidate(announcementsStreamProvider),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildQuickAction(
@@ -1119,15 +1203,17 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                 child: Icon(icon, color: color, size: 24),
               ),
               const SizedBox(height: 6),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white70 : AppTheme.textPrimary,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : AppTheme.textPrimary,
+                  ),
                 ),
               ),
             ],
