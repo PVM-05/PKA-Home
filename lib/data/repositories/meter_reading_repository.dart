@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
 import '../models/meter_reading_submission_model.dart';
+import '../models/building_utility_rate_model.dart';
 
 class MeterReadingRepository {
   final SupabaseClient _client;
@@ -162,6 +163,32 @@ class MeterReadingRepository {
     if (resMap['success'] != true) {
       throw Exception(resMap['message'] ?? 'Không thể cập nhật chỉ số.');
     }
+  }
+
+  /// Lấy danh sách biểu giá tiện ích (điện, nước) của tòa nhà
+  Future<List<BuildingUtilityRateModel>> getUtilityRates() async {
+    final response = await _client
+        .from('building_utility_rates')
+        .select('*')
+        .eq('is_active', true)
+        .order('utility_type');
+
+    return (response as List)
+        .map((json) => BuildingUtilityRateModel.fromJson(json))
+        .toList();
+  }
+
+  /// Kỹ thuật viên / BQL chốt số hàng loạt theo tầng/block
+  Future<Map<String, dynamic>> batchRecordReadings({
+    required String period,
+    required List<Map<String, dynamic>> readings,
+  }) async {
+    final response = await _client.rpc('batch_record_meter_readings', params: {
+      'p_period': period,
+      'p_readings': readings,
+    });
+
+    return Map<String, dynamic>.from(response as Map);
   }
 
   /// Cư dân hủy phiếu gửi chỉ số đang chờ duyệt

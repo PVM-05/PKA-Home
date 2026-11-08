@@ -1,11 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/supabase_config.dart';
 import '../models/meter_reading_submission_model.dart';
+import '../models/building_utility_rate_model.dart';
 import '../repositories/meter_reading_repository.dart';
 import 'vehicle_provider.dart';
 
 final meterReadingRepositoryProvider = Provider<MeterReadingRepository>((ref) {
   return MeterReadingRepository();
+});
+
+/// Danh sách biểu giá điện nước tòa nhà
+final buildingUtilityRatesProvider =
+    FutureProvider<List<BuildingUtilityRateModel>>((ref) async {
+  final repo = ref.watch(meterReadingRepositoryProvider);
+  return await repo.getUtilityRates();
 });
 
 /// Danh sách các lần gửi chỉ số của căn hộ cư dân đang đăng nhập
