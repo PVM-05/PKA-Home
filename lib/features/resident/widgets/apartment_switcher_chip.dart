@@ -153,12 +153,16 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                 children: [
                   Icon(Icons.add_link, color: Colors.white, size: 16),
                   SizedBox(width: 4),
-                  Text(
-                    'Liên kết căn hộ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                  Flexible(
+                    child: Text(
+                      'Liên kết căn hộ',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -190,12 +194,16 @@ class ApartmentSwitcherChip extends ConsumerWidget {
               children: [
                 const Icon(Icons.apartment, color: Colors.white, size: 16),
                 const SizedBox(width: 6),
-                Text(
-                  '$code',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                Flexible(
+                  child: Text(
+                    '$code',
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 if (hasMultiple) ...[
@@ -222,9 +230,13 @@ class ApartmentSwitcherChip extends ConsumerWidget {
           children: [
             Icon(Icons.apartment, color: Colors.white70, size: 16),
             SizedBox(width: 6),
-            Text(
-              'Đang tải...',
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+            Flexible(
+              child: Text(
+                'Đang tải...',
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
             ),
           ],
         ),

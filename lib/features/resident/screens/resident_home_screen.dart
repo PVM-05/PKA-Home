@@ -348,103 +348,108 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                   ),
                 ),
                 child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 12.0,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AppAvatar(
-                              name: fullName,
-                              size: 40,
-                              fontSize: 15,
-                              onTap: () => _onItemTapped(3),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'Xin chào,',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
+                            Row(
+                              children: [
+                                AppAvatar(
+                                  name: fullName,
+                                  size: 40,
+                                  fontSize: 15,
+                                  onTap: () => _onItemTapped(3),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        'Xin chào,',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        fullName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    fullName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Consumer(
-                              builder: (context, ref, _) {
-                                final unreadCount = ref.watch(
-                                  unreadNotificationsCountProvider,
-                                );
-                                return IconButton(
+                                ),
+                                const SizedBox(width: 8),
+                                Consumer(
+                                  builder: (context, ref, _) {
+                                    final unreadCount = ref.watch(
+                                      unreadNotificationsCountProvider,
+                                    );
+                                    return IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 36,
+                                        minHeight: 36,
+                                      ),
+                                      icon: Badge(
+                                        isLabelVisible: unreadCount > 0,
+                                        label: Text('$unreadCount'),
+                                        backgroundColor: AppStatusColors.unpaid,
+                                        child: const Icon(
+                                          Icons.notifications_outlined,
+                                          color: Colors.white,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      tooltip: 'Thông báo',
+                                      onPressed: () {
+                                        context.push(
+                                          AppRoutes.residentNotifications,
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
                                   visualDensity: VisualDensity.compact,
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
                                     minWidth: 36,
                                     minHeight: 36,
                                   ),
-                                  icon: Badge(
-                                    isLabelVisible: unreadCount > 0,
-                                    label: Text('$unreadCount'),
-                                    backgroundColor: AppStatusColors.unpaid,
-                                    child: const Icon(
-                                      Icons.notifications_outlined,
-                                      color: Colors.white,
-                                      size: 22,
-                                    ),
+                                  icon: const Icon(
+                                    Icons.logout_outlined,
+                                    color: Colors.white,
+                                    size: 22,
                                   ),
-                                  tooltip: 'Thông báo',
-                                  onPressed: () {
-                                    context.push(
-                                      AppRoutes.residentNotifications,
-                                    );
-                                  },
-                                );
-                              },
+                                  tooltip: 'Đăng xuất',
+                                  onPressed: () => _showLogoutDialog(context),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              visualDensity: VisualDensity.compact,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 36,
-                                minHeight: 36,
-                              ),
-                              icon: const Icon(
-                                Icons.logout_outlined,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                              tooltip: 'Đăng xuất',
-                              onPressed: () => _showLogoutDialog(context),
-                            ),
+                            const SizedBox(height: 8),
+                            const ApartmentSwitcherChip(),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        const ApartmentSwitcherChip(),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -452,9 +457,12 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const StickyEmergencyBar(),
@@ -481,133 +489,216 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                       );
                       final unpaidCount = unpaidInvoices.length;
 
-                      return AppCard(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Tổng tiền cần đóng',
-                                            style: TextStyle(
-                                              color: AppTheme.textSecondary,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 14,
-                                            ),
+                      if (totalUnpaid > 0) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: AppGradients.brandPrimary,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: AppShadows.softMd,
+                          ),
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.warning_amber_rounded,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          'Đến hạn thanh toán',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            NumberFormat.currency(
-                                              locale: 'vi_VN',
-                                              symbol: 'VNĐ',
-                                            ).format(totalUnpaid),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 26,
-                                              fontWeight: FontWeight.bold,
-                                              color: totalUnpaid > 0
-                                                  ? AppStatusColors.unpaid
-                                                  : AppTheme.success,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      '( $unpaidCount hóa đơn chưa thanh toán )',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            (totalUnpaid > 0
-                                                    ? AppTheme.error
-                                                    : AppTheme.success)
-                                                .withValues(alpha: 0.12),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        totalUnpaid > 0
-                                            ? Icons.warning_amber_rounded
-                                            : Icons.check_circle_outline,
-                                        color: totalUnpaid > 0
-                                            ? AppTheme.error
-                                            : AppTheme.success,
-                                        size: 30,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              const Text(
+                                'Tổng tiền cần đóng',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  totalUnpaid > 0
-                                      ? '( $unpaidCount hóa đơn chưa thanh toán )'
-                                      : '( Đã thanh toán đầy đủ các kỳ phí )',
+                              ),
+                              const SizedBox(height: 4),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  NumberFormat.currency(
+                                    locale: 'vi_VN',
+                                    symbol: 'VNĐ',
+                                  ).format(totalUnpaid),
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton.icon(
+                                onPressed: () => _onItemTapped(1),
+                                icon: const Icon(
+                                  Icons.qr_code_scanner,
+                                  size: 18,
+                                ),
+                                label: const Text(
+                                  'THANH TOÁN NGAY',
                                   style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: totalUnpaid > 0
-                                        ? AppTheme.textSecondary
-                                        : AppTheme.success,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                    fontSize: 14,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                if (totalUnpaid > 0)
-                                  ElevatedButton.icon(
-                                    onPressed: () => _onItemTapped(1),
-                                    icon: const Icon(Icons.payment, size: 18),
-                                    label: const Text(
-                                      'THANH TOÁN NGAY',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: AppTheme.sapphire,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        .animate()
+                        .fade(duration: 400.ms, delay: 100.ms)
+                        .slideX(begin: 0.1, curve: Curves.easeOut);
+                      }
+
+                      return AppCard(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.success.withValues(
+                                      alpha: 0.12,
                                     ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppTheme.primary,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_outline,
+                                        color: AppTheme.success,
+                                        size: 14,
                                       ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Đã hoàn tất',
+                                        style: TextStyle(
+                                          color: AppTheme.success,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                else
-                                  OutlinedButton.icon(
-                                    onPressed: () => _onItemTapped(1),
-                                    icon: const Icon(
-                                      Icons.receipt_long,
-                                      size: 18,
-                                    ),
-                                    label: const Text(
-                                      'XEM HÓA ĐƠN',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Flexible(
+                                  child: Text(
+                                    '( Đã thanh toán đầy đủ các kỳ phí )',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: AppTheme.success,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
+                                ),
                               ],
                             ),
-                          )
-                          .animate()
-                          .fade(duration: 400.ms, delay: 100.ms)
-                          .slideX(begin: 0.1, curve: Curves.easeOut);
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Đã thanh toán đầy đủ các kỳ phí',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Căn hộ của bạn không có hóa đơn quá hạn hoặc đang chờ đối soát.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            OutlinedButton.icon(
+                              onPressed: () => _onItemTapped(1),
+                              icon: const Icon(Icons.receipt_long, size: 18),
+                              label: const Text(
+                                'XEM HÓA ĐƠN',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      .animate()
+                      .fade(duration: 400.ms, delay: 100.ms)
+                      .slideX(begin: 0.1, curve: Curves.easeOut);
                     },
                     loading: () => const InvoiceCardSkeleton(),
                     error: (err, st) => AppErrorCard(
@@ -629,56 +720,57 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                   // 04 · THAO TÁC: Lưới thao tác nhanh 4 nút
                   // ══════════════════════════════════════════════════════════
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child:
-                            _buildQuickAction(
-                                  Icons.payment,
-                                  'Thanh toán',
-                                  () => _onItemTapped(1),
-                                )
-                                .animate()
-                                .fade(duration: 300.ms)
-                                .slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                        child: _buildQuickAction(
+                          Icons.qr_code_scanner,
+                          'Thanh toán',
+                          () => _onItemTapped(1),
+                          accentColor: AppTheme.sapphire,
+                        ).animate().fade(duration: 300.ms).slideY(
+                          begin: 0.2,
+                          curve: Curves.easeOutQuad,
+                        ),
                       ),
                       Expanded(
-                        child:
-                            _buildQuickAction(
-                                  Icons.build_circle_outlined,
-                                  'Báo sự cố',
-                                  () => _onItemTapped(2),
-                                )
-                                .animate()
-                                .fade(duration: 300.ms, delay: 100.ms)
-                                .slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                        child: _buildQuickAction(
+                          Icons.build_circle_outlined,
+                          'Báo sự cố',
+                          () => _onItemTapped(2),
+                          accentColor: Colors.orange,
+                        ).animate().fade(duration: 300.ms, delay: 100.ms).slideY(
+                          begin: 0.2,
+                          curve: Curves.easeOutQuad,
+                        ),
                       ),
                       Expanded(
-                        child:
-                            _buildQuickAction(
-                                  Icons.emergency_outlined,
-                                  'Hotline',
-                                  () => context.push(
-                                    AppRoutes.residentHandbook,
-                                    extra: 0,
-                                  ),
-                                )
-                                .animate()
-                                .fade(duration: 300.ms, delay: 200.ms)
-                                .slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                        child: _buildQuickAction(
+                          Icons.emergency_outlined,
+                          'Hotline',
+                          () => context.push(
+                            AppRoutes.residentHandbook,
+                            extra: 0,
+                          ),
+                          accentColor: AppTheme.error,
+                        ).animate().fade(duration: 300.ms, delay: 200.ms).slideY(
+                          begin: 0.2,
+                          curve: Curves.easeOutQuad,
+                        ),
                       ),
                       Expanded(
-                        child:
-                            _buildQuickAction(
-                                  Icons.menu_book_outlined,
-                                  'Cẩm nang',
-                                  () => context.push(
-                                    AppRoutes.residentHandbook,
-                                    extra: 1,
-                                  ),
-                                )
-                                .animate()
-                                .fade(duration: 300.ms, delay: 300.ms)
-                                .slideY(begin: 0.2, curve: Curves.easeOutQuad),
+                        child: _buildQuickAction(
+                          Icons.menu_book_outlined,
+                          'Cẩm nang',
+                          () => context.push(
+                            AppRoutes.residentHandbook,
+                            extra: 1,
+                          ),
+                          accentColor: Colors.teal,
+                        ).animate().fade(duration: 300.ms, delay: 300.ms).slideY(
+                          begin: 0.2,
+                          curve: Curves.easeOutQuad,
+                        ),
                       ),
                     ],
                   ),
@@ -841,6 +933,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               ),
             ),
           ),
+        ),
+      ),
         ],
       ),
     );
@@ -894,6 +988,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                     children: [
                       Text(
                         title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -991,32 +1087,51 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         .slideY(begin: 0.1, curve: Curves.easeOutQuad);
   }
 
-  Widget _buildQuickAction(IconData icon, String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(14),
+  Widget _buildQuickAction(
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    Color? accentColor,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = accentColor ?? AppTheme.primary;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: color.withValues(alpha: isDark ? 0.3 : 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(icon, color: color, size: 24),
               ),
-              child: Icon(icon, color: AppTheme.primary, size: 24),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            ),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white70 : AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
