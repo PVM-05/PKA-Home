@@ -10,6 +10,7 @@ import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/building_amenity_model.dart';
 import '../../../data/models/amenity_booking_model.dart';
+import '../../../data/models/amenity_inspection_model.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/providers/amenity_booking_provider.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -43,7 +44,7 @@ class _AmenityManagementScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -378,7 +379,7 @@ class _AmenityManagementScreenState
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(Icons.qr_code_scanner, color: AppTheme.primary),
+            Icon(Icons.qr_code_scanner_outlined, color: AppTheme.primary),
             SizedBox(width: 8),
             Expanded(child: Text('Check-in Tiện Ích (QR/Mã)')),
           ],
@@ -394,10 +395,11 @@ class _AmenityManagementScreenState
               ),
               const SizedBox(height: 12),
               TextField(
+                key: const Key('qr_token_input_field'),
                 controller: codeController,
                 decoration: const InputDecoration(
                   labelText: 'Mã đặt chỗ (Booking ID)',
-                  hintText: 'Nhập UUID hoặc mã đặt chỗ',
+                  hintText: 'Nhập UUID hoặc mã đặt chỗ / Token QR',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.confirmation_number_outlined),
                 ),
@@ -418,14 +420,34 @@ class _AmenityManagementScreenState
             icon: const Icon(Icons.check, size: 16),
             label: const Text('Xác nhận Check-in'),
             onPressed: () async {
-              final code = codeController.text.trim();
-              if (code.isEmpty) return;
+              String token = codeController.text.trim();
+              if (token.isEmpty) return;
+              if (token.startsWith('PKA-TICKET:')) {
+                final parts = token.split(':');
+                if (parts.length >= 2) {
+                  token = parts[1];
+                }
+              }
               Navigator.pop(ctx);
 
               try {
-                final result = await ref
-                    .read(amenityBookingRepositoryProvider)
-                    .checkInBooking(code);
+                Map<String, dynamic> result;
+                if (token.startsWith('TK-')) {
+                  result = await ref
+                      .read(amenityBookingRepositoryProvider)
+                      .checkInTicket(token);
+                } else {
+                  try {
+                    result = await ref
+                        .read(amenityBookingRepositoryProvider)
+                        .checkInTicket(token);
+                  } catch (_) {
+                    result = await ref
+                        .read(amenityBookingRepositoryProvider)
+                        .checkInBooking(token);
+                  }
+                }
+
                 if (_selectedAmenityId != null) {
                   ref.invalidate(
                     amenityBookingsForDateProvider(
@@ -437,6 +459,7 @@ class _AmenityManagementScreenState
                   );
                 }
                 ref.invalidate(allAmenityBookingsProvider);
+                ref.invalidate(pendingAmenityInspectionsProvider);
 
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -972,6 +995,330 @@ class _AmenityManagementScreenState
     );
   }
 
+  void _showInspectionDialog(AmenityBookingModel booking) {
+    String inspectionResult = 'passed';
+    final notesController = TextEditingController();
+    final forfeitedController = TextEditingController(text: '0');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final isPassed = inspectionResult == 'passed';
+          final deposit = booking.depositAmount;
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text('Nghiệm Thu & Quyết Toán Cọc'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tiện ích: ${booking.amenityName ?? "Dịch vụ"}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Căn hộ: ${booking.apartmentCode ?? booking.apartmentId} • Ca: ${booking.timeSlot}',
+                  ),
+                  Text(
+                    'Tiền cọc giữ: ${_currencyFormat.format(deposit)}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppStatusColors.paid,
+                    ),
+                  ),
+                  const Divider(height: 20),
+                  const Text(
+                    'Kết quả kiểm tra hiện trường:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  const SizedBox(height: 8),
+                  RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    value: 'passed',
+                    groupValue: inspectionResult,
+                    title: const Text(
+                      'Đạt tiêu chuẩn (Hoàn 100%)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Hoàn trả ${_currencyFormat.format(deposit)} cho cư dân',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() {
+                          inspectionResult = val;
+                          forfeitedController.text = '0';
+                        });
+                      }
+                    },
+                  ),
+                  RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    value: 'violated',
+                    groupValue: inspectionResult,
+                    title: const Text(
+                      'Vi phạm / Hư hại mặt bằng',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.error,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Khấu trừ một phần hoặc toàn bộ tiền cọc để đền bù',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() {
+                          inspectionResult = val;
+                        });
+                      }
+                    },
+                  ),
+                  if (!isPassed) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: forfeitedController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Số tiền khấu trừ đền bù (VNĐ)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.money_off),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: notesController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'Ghi chú nghiệm thu',
+                      hintText:
+                          'Hiện trạng vệ sinh, tài sản, biên bản bàn giao...',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Đóng'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  final forfeited =
+                      double.tryParse(forfeitedController.text.trim()) ?? 0.0;
+                  final inspection = AmenityInspectionModel(
+                    bookingId: booking.id,
+                    inspectionResult: inspectionResult,
+                    forfeitedAmount: isPassed ? 0.0 : forfeited,
+                    notes: notesController.text.trim(),
+                  );
+
+                  Navigator.pop(ctx);
+
+                  try {
+                    await ref
+                        .read(amenityBookingRepositoryProvider)
+                        .inspectAndSettleDeposit(inspection);
+
+                    ref.invalidate(pendingAmenityInspectionsProvider);
+                    ref.invalidate(allAmenityBookingsProvider);
+
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isPassed
+                                ? 'Nghiệm thu đạt! Đã chuyển lệnh hoàn cọc ${_currencyFormat.format(deposit)}.'
+                                : 'Đã ghi nhận vi phạm và khấu trừ ${_currencyFormat.format(forfeited)}.',
+                          ),
+                          backgroundColor: isPassed
+                              ? AppStatusColors.paid
+                              : AppTheme.warning,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(formatErrorMessage(e)),
+                          backgroundColor: AppTheme.error,
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Xác Nhận Quyết Toán'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildInspectionStationTab() {
+    final pendingAsync = ref.watch(pendingAmenityInspectionsProvider);
+
+    return RefreshIndicator(
+      onRefresh: () async => ref.invalidate(pendingAmenityInspectionsProvider),
+      child: pendingAsync.when(
+        data: (bookings) {
+          if (bookings.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.assignment_turned_in_outlined,
+                    size: 64,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Không có ca nào cần nghiệm thu hoặc xử lý cọc',
+                    style: TextStyle(color: Colors.grey, fontSize: 15),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: bookings.length,
+            itemBuilder: (context, index) {
+              final b = bookings[index];
+              return AppCard(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              b.amenityName ?? 'Tiện ích',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: b.isCheckedIn
+                                  ? Colors.green.shade50
+                                  : Colors.amber.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: b.isCheckedIn
+                                    ? Colors.green.shade200
+                                    : Colors.amber.shade200,
+                              ),
+                            ),
+                            child: Text(
+                              b.isCheckedIn ? 'Đã check-in' : 'Chờ nghiệm thu',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: b.isCheckedIn
+                                    ? Colors.green.shade800
+                                    : Colors.amber.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Căn hộ: ${b.apartmentCode ?? b.apartmentId} • Người đặt: ${b.bookerName ?? "Cư dân"}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Ngày: ${_dateFormat.format(b.bookingDate)} • Ca: ${b.timeSlot}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tiền cọc đã nộp: ${_currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppStatusColors.paid,
+                        ),
+                      ),
+                      if (b.qrTicketToken != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Mã vé: ${b.qrTicketToken}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primary,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: const Icon(Icons.fact_check, size: 16),
+                            label: const Text('Nghiệm Thu Mặt Bằng'),
+                            onPressed: () => _showInspectionDialog(b),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: AppErrorCard(error: e)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final amenitiesAsync = ref.watch(buildingAmenitiesProvider);
@@ -1001,6 +1348,10 @@ class _AmenityManagementScreenState
               ),
               Tab(icon: Icon(Icons.tune_outlined), text: 'Tiện Ích & Sức Chứa'),
               Tab(icon: Icon(Icons.build_outlined), text: 'Lịch Bảo Trì'),
+              Tab(
+                icon: Icon(Icons.assignment_turned_in_outlined),
+                text: 'Nghiệm Thu Cọc',
+              ),
             ],
           ),
         ),
@@ -1012,6 +1363,7 @@ class _AmenityManagementScreenState
                 _buildGlobalBookingsApprovalTab(amenities),
                 _buildAmenitiesConfigTab(amenities),
                 _buildMaintenanceTabWithSelector(amenities),
+                _buildInspectionStationTab(),
               ],
             );
           },
