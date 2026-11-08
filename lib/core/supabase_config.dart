@@ -3,6 +3,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SupabaseConfig {
+  static String _getEnvVar(String key) {
+    if (!dotenv.isInitialized) return '';
+    return dotenv.env[key] ?? '';
+  }
+
   static Future<void> initialize() async {
     // Ưu tiên 1: Đọc từ compile-time define (--dart-define)
     // Ưu tiên 2: Đọc từ file .env cục bộ (chỉ tồn tại trên máy dev, được bảo vệ bởi .gitignore)
@@ -11,10 +16,10 @@ class SupabaseConfig {
 
     final supabaseUrl = envUrl.isNotEmpty
         ? envUrl
-        : (dotenv.env['SUPABASE_URL'] ?? '');
+        : _getEnvVar('SUPABASE_URL');
     final supabaseAnonKey = envAnonKey.isNotEmpty
         ? envAnonKey
-        : (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+        : _getEnvVar('SUPABASE_ANON_KEY');
 
     if (supabaseUrl.isEmpty ||
         supabaseAnonKey.isEmpty ||
@@ -44,8 +49,8 @@ class SupabaseConfig {
   static bool get isConfigured {
     const envUrl = String.fromEnvironment('SUPABASE_URL');
     const envAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
-    final url = envUrl.isNotEmpty ? envUrl : (dotenv.env['SUPABASE_URL'] ?? '');
-    final key = envAnonKey.isNotEmpty ? envAnonKey : (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+    final url = envUrl.isNotEmpty ? envUrl : _getEnvVar('SUPABASE_URL');
+    final key = envAnonKey.isNotEmpty ? envAnonKey : _getEnvVar('SUPABASE_ANON_KEY');
 
     return url.isNotEmpty &&
         key.isNotEmpty &&
