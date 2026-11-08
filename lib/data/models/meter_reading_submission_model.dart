@@ -19,6 +19,10 @@ class MeterReadingSubmissionModel {
   final String? anomalyReason;
   final double? previousElectricReading;
   final double? previousWaterReading;
+  final double? electricConsumed;
+  final double? waterConsumed;
+  final String? invoiceId;
+  final String? readerId;
   final double? avgElectricUsage;
   final double? avgWaterUsage;
   final DateTime createdAt;
@@ -45,6 +49,10 @@ class MeterReadingSubmissionModel {
     this.anomalyReason,
     this.previousElectricReading,
     this.previousWaterReading,
+    this.electricConsumed,
+    this.waterConsumed,
+    this.invoiceId,
+    this.readerId,
     this.avgElectricUsage,
     this.avgWaterUsage,
     required this.createdAt,
@@ -59,6 +67,24 @@ class MeterReadingSubmissionModel {
   bool get hasAnomaly => isAnomaly;
   bool get isDangerAnomaly => isAnomaly && anomalySeverity == 'danger';
   bool get isWarningAnomaly => isAnomaly && anomalySeverity == 'warning';
+
+  bool get hasGeneratedInvoice => invoiceId != null && invoiceId!.isNotEmpty;
+
+  double get effectiveElectricConsumed =>
+      electricConsumed ??
+      (previousElectricReading != null
+          ? (electricReading - previousElectricReading!)
+              .clamp(0, double.infinity)
+              .toDouble()
+          : 0.0);
+
+  double get effectiveWaterConsumed =>
+      waterConsumed ??
+      (previousWaterReading != null
+          ? (waterReading - previousWaterReading!)
+              .clamp(0, double.infinity)
+              .toDouble()
+          : 0.0);
 
   String get anomalySeverityDisplayName {
     switch (anomalySeverity) {
@@ -120,6 +146,10 @@ class MeterReadingSubmissionModel {
       anomalyReason: json['anomaly_reason'] as String?,
       previousElectricReading: (json['previous_electric_reading'] as num?)?.toDouble(),
       previousWaterReading: (json['previous_water_reading'] as num?)?.toDouble(),
+      electricConsumed: (json['electric_consumed'] as num?)?.toDouble(),
+      waterConsumed: (json['water_consumed'] as num?)?.toDouble(),
+      invoiceId: json['invoice_id'] as String?,
+      readerId: json['reader_id'] as String?,
       avgElectricUsage: (json['avg_electric_usage'] as num?)?.toDouble(),
       avgWaterUsage: (json['avg_water_usage'] as num?)?.toDouble(),
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : DateTime.now(),
@@ -149,6 +179,10 @@ class MeterReadingSubmissionModel {
       if (anomalyReason != null) 'anomaly_reason': anomalyReason,
       if (previousElectricReading != null) 'previous_electric_reading': previousElectricReading,
       if (previousWaterReading != null) 'previous_water_reading': previousWaterReading,
+      if (electricConsumed != null) 'electric_consumed': electricConsumed,
+      if (waterConsumed != null) 'water_consumed': waterConsumed,
+      if (invoiceId != null) 'invoice_id': invoiceId,
+      if (readerId != null) 'reader_id': readerId,
       if (avgElectricUsage != null) 'avg_electric_usage': avgElectricUsage,
       if (avgWaterUsage != null) 'avg_water_usage': avgWaterUsage,
       'created_at': createdAt.toIso8601String(),
@@ -177,6 +211,10 @@ class MeterReadingSubmissionModel {
     String? anomalyReason,
     double? previousElectricReading,
     double? previousWaterReading,
+    double? electricConsumed,
+    double? waterConsumed,
+    String? invoiceId,
+    String? readerId,
     double? avgElectricUsage,
     double? avgWaterUsage,
     DateTime? createdAt,
@@ -203,6 +241,10 @@ class MeterReadingSubmissionModel {
       anomalyReason: anomalyReason ?? this.anomalyReason,
       previousElectricReading: previousElectricReading ?? this.previousElectricReading,
       previousWaterReading: previousWaterReading ?? this.previousWaterReading,
+      electricConsumed: electricConsumed ?? this.electricConsumed,
+      waterConsumed: waterConsumed ?? this.waterConsumed,
+      invoiceId: invoiceId ?? this.invoiceId,
+      readerId: readerId ?? this.readerId,
       avgElectricUsage: avgElectricUsage ?? this.avgElectricUsage,
       avgWaterUsage: avgWaterUsage ?? this.avgWaterUsage,
       createdAt: createdAt ?? this.createdAt,
