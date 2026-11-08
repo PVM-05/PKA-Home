@@ -172,15 +172,19 @@ class PaymentService {
         bankBin: '970422',
       );
     }
-    final res = await SupabaseConfig.client
-        .from('building_payment_configs')
-        .select()
-        .eq('building_id', buildingId)
-        .eq('is_active', true)
-        .maybeSingle();
+    try {
+      final res = await SupabaseConfig.client
+          .from('building_payment_configs')
+          .select()
+          .eq('building_id', buildingId)
+          .eq('is_active', true)
+          .maybeSingle();
 
-    if (res == null) return null;
-    return BuildingPaymentConfigModel.fromJson(Map<String, dynamic>.from(res));
+      if (res == null) return null;
+      return BuildingPaymentConfigModel.fromJson(Map<String, dynamic>.from(res));
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Xử lý Webhook biến động số dư ngân hàng chung

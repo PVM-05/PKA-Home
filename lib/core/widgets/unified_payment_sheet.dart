@@ -308,11 +308,17 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
             ? ref.watch(residentBuildingProvider).value
             : ref.watch(activeBuildingProvider).value);
 
-    final hasBankConfig = building != null && building.hasValidBankAccount;
-    final bankBin = building?.bankBin ?? '';
-    final bankName = building?.bankName ?? '';
-    final bankAccountNumber = building?.bankAccountNumber ?? '';
-    final bankAccountName = building?.bankAccountName ?? '';
+    final targetBldId = widget.buildingId ?? residentBldId ?? building?.id;
+    final sepayConfig = targetBldId != null && targetBldId.isNotEmpty
+        ? ref.watch(buildingPaymentConfigProvider(targetBldId)).value
+        : null;
+
+    final hasSepayConfig = sepayConfig != null && sepayConfig.isActive && sepayConfig.bankAccountNumber.isNotEmpty;
+    final hasBankConfig = hasSepayConfig || (building != null && building.hasValidBankAccount);
+    final bankBin = hasSepayConfig ? sepayConfig.bankBin : (building?.bankBin ?? '');
+    final bankName = hasSepayConfig ? sepayConfig.bankName : (building?.bankName ?? '');
+    final bankAccountNumber = hasSepayConfig ? sepayConfig.bankAccountNumber : (building?.bankAccountNumber ?? '');
+    final bankAccountName = hasSepayConfig ? sepayConfig.bankAccountName : (building?.bankAccountName ?? '');
 
     // Chuẩn hóa memo chữ-số thuần túy (loại bỏ #, -, ký tự đặc biệt)
     final cleanMemo = widget.referenceCode
@@ -910,6 +916,41 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                       fontSize: 11,
                       fontStyle: FontStyle.italic,
                       color: AppTheme.textSecondary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Radar tín hiệu Realtime CDC SePay Webhook
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F2942) : const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFBFDBFE),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.sync,
+                          size: 16,
+                          color: isDark ? const Color(0xFF60A5FA) : AppTheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Hệ thống đang lắng nghe biến động số dư. Màn hình tự gạch nợ sau 2-3s.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1D4ED8),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
