@@ -122,3 +122,4 @@ graph TD
    - Test 2: Mobile hẹp & Font to (320dp x 600dp, Text Scale 1.3x) — Thẻ chỉ số và thanh tiêu đề không bị tràn cạnh.
 3. **Static Analysis Quality Gate:**
    - Chạy `dart analyze lib test` đạt 0 warning, 0 error.
+
