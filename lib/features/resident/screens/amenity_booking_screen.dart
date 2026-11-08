@@ -618,6 +618,75 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                   ],
                 ),
               ],
+              if (widget.amenity.maxSlotsPerWeek > 0) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.event_repeat_rounded,
+                      size: 16,
+                      color: AppTheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Hạn mức: Tối đa ${widget.amenity.maxSlotsPerWeek} lượt/tuần / căn hộ',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              if (widget.amenity.rulesAndRegulations != null &&
+                  widget.amenity.rulesAndRegulations!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade100),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.rule_folder_outlined,
+                        size: 16,
+                        color: Colors.blue.shade700,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Quy định & Hoàn cọc:',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue.shade900,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.amenity.rulesAndRegulations!,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.blue.shade900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -1357,15 +1426,94 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                                 padding: EdgeInsets.zero,
                                 visualDensity: VisualDensity.compact,
                               ),
-                            if (b.depositAmount > 0)
+                            if (b.isCheckedIn)
                               Chip(
-                                label: Text(
-                                  'Cọc: ${_currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
-                                  style: const TextStyle(fontSize: 11),
+                                avatar: const Icon(
+                                  Icons.check_circle_outline,
+                                  size: 14,
+                                  color: Colors.green,
                                 ),
+                                label: const Text(
+                                  'Đã check-in',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                backgroundColor: Colors.green.shade50,
                                 padding: EdgeInsets.zero,
                                 visualDensity: VisualDensity.compact,
                               ),
+                            if (b.depositAmount > 0) ...[
+                              if (b.depositStatus == 'refunded')
+                                Chip(
+                                  avatar: const Icon(
+                                    Icons.verified_outlined,
+                                    size: 14,
+                                    color: Colors.teal,
+                                  ),
+                                  label: Text(
+                                    'Đã hoàn cọc 100% (${_currencyFormat.format(b.refundAmount > 0 ? b.refundAmount : b.depositAmount)})',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.teal,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.teal.shade50,
+                                  padding: EdgeInsets.zero,
+                                  visualDensity: VisualDensity.compact,
+                                )
+                              else if (b.depositStatus == 'forfeited')
+                                Chip(
+                                  avatar: const Icon(
+                                    Icons.warning_amber_rounded,
+                                    size: 14,
+                                    color: Colors.deepOrange,
+                                  ),
+                                  label: Text(
+                                    'Khấu trừ cọc: ${_currencyFormat.format(b.forfeitedAmount)}',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.deepOrange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.deepOrange.shade50,
+                                  padding: EdgeInsets.zero,
+                                  visualDensity: VisualDensity.compact,
+                                )
+                              else if (b.depositStatus == 'received')
+                                Chip(
+                                  label: Text(
+                                    b.isCheckedIn
+                                        ? 'Cọc: ${_currencyFormat.format(b.depositAmount)} (Chờ nghiệm thu hoàn cọc)'
+                                        : 'Cọc: ${_currencyFormat.format(b.depositAmount)} (Đã nộp)',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: b.isCheckedIn
+                                          ? Colors.blue.shade900
+                                          : Colors.orange.shade900,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  backgroundColor: b.isCheckedIn
+                                      ? Colors.blue.shade50
+                                      : Colors.amber.shade50,
+                                  padding: EdgeInsets.zero,
+                                  visualDensity: VisualDensity.compact,
+                                )
+                              else
+                                Chip(
+                                  label: Text(
+                                    'Cọc: ${_currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                            ],
                           ],
                         ),
                       ],
@@ -1477,7 +1625,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                               onPressed: () =>
                                   _showAmenityReceiptBottomSheet(context, b),
                             ),
-                          if (b.isConfirmed)
+                          if (b.isConfirmed || b.isCheckedIn)
                             OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppTheme.primary,
@@ -1663,6 +1811,10 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
     String bookingCode,
     String slot,
   ) {
+    final token = booking.qrTicketToken ?? bookingCode;
+    final aptCode = booking.apartmentCode ?? 'A0110';
+    final ticketPayload = 'PKA-TICKET:$token:$aptCode:$slot';
+
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -1671,7 +1823,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
           child: Column(
             children: [
               const Text(
-                'Mã QR Check-in Dịch Vụ',
+                'Vé Điện Tử Check-in',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
@@ -1698,25 +1850,76 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                     ),
                   ],
                 ),
-                child: QrImageView(
-                  data: 'PKA-BOOKING:$bookingCode:${widget.amenity.name}:$slot',
-                  version: QrVersions.auto,
-                  size: 200.0,
-                  backgroundColor: Colors.white,
+                child: SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: QrImageView(
+                    data: ticketPayload,
+                    version: QrVersions.auto,
+                    size: 200.0,
+                    backgroundColor: Colors.white,
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
-              Text(
-                bookingCode,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  letterSpacing: 1,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  token,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    letterSpacing: 1,
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
-                'Xuất trình mã này cho lễ tân / BQL khi vào sử dụng dịch vụ',
+                'Căn hộ: $aptCode • Ca: $slot',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              if (booking.isCheckedIn) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.green.shade200),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle, size: 14, color: Colors.green),
+                      SizedBox(width: 4),
+                      Text(
+                        'Đã check-in tại cổng',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 8),
+              Text(
+                'Xuất trình mã này cho bảo vệ / lễ tân để quét check-in vào tiện ích',
                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
@@ -1733,7 +1936,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
               ),
             ),
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Hoàn tất'),
+            child: const Text('Đóng'),
           ),
         ],
       ),
