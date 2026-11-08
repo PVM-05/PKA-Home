@@ -5,7 +5,7 @@ class AmenityBookingModel {
   final String? bookedBy;
   final DateTime bookingDate;
   final String timeSlot;
-  final String status; // 'confirmed' | 'waitlist' | 'cancelled' | 'completed' | 'no_show'
+  final String status; // 'confirmed' | 'pending_payment' | 'checked_in' | 'waitlist' | 'cancelled' | 'completed' | 'no_show'
   final int guestsCount;
   final double feeAmount;
   final double depositAmount;
@@ -13,6 +13,15 @@ class AmenityBookingModel {
   final String? depositNotes;
   final String? notes;
   final DateTime? checkedInAt;
+  final String? checkedInBy;
+  final String? qrTicketToken;
+  final String? inspectedBy;
+  final DateTime? inspectedAt;
+  final String? inspectionResult; // 'pending' | 'passed' | 'violated'
+  final double forfeitedAmount;
+  final double refundAmount;
+  final String? inspectionNotes;
+  final List<String> inspectionImageUrls;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final String? amenityName;
@@ -39,6 +48,15 @@ class AmenityBookingModel {
     this.depositNotes,
     this.notes,
     this.checkedInAt,
+    this.checkedInBy,
+    this.qrTicketToken,
+    this.inspectedBy,
+    this.inspectedAt,
+    this.inspectionResult,
+    this.forfeitedAmount = 0.0,
+    this.refundAmount = 0.0,
+    this.inspectionNotes,
+    this.inspectionImageUrls = const [],
     required this.createdAt,
     this.updatedAt,
     this.amenityName,
@@ -56,10 +74,15 @@ class AmenityBookingModel {
 
   bool get isConfirmed => status == 'confirmed';
   bool get isPendingPayment => status == 'pending_payment';
+  bool get isCheckedIn => status == 'checked_in';
   bool get isWaitlist => status == 'waitlist';
   bool get isCancelled => status == 'cancelled';
   bool get isCompleted => status == 'completed';
   bool get isNoShow => status == 'no_show';
+
+  bool get isRefunded => depositStatus == 'refunded';
+  bool get isForfeited => depositStatus == 'forfeited';
+  bool get isDepositReceived => depositStatus == 'received';
 
   String get statusDisplayName {
     switch (status) {
@@ -67,6 +90,8 @@ class AmenityBookingModel {
         return 'Đã xác nhận';
       case 'pending_payment':
         return 'Chờ thanh toán';
+      case 'checked_in':
+        return 'Đang sử dụng';
       case 'waitlist':
         return 'Danh sách chờ';
       case 'completed':
@@ -116,6 +141,18 @@ class AmenityBookingModel {
       }
     }
 
+    DateTime? checkInDate;
+    if (json['check_in_time'] != null) {
+      checkInDate = DateTime.tryParse(json['check_in_time'] as String);
+    } else if (json['checked_in_at'] != null) {
+      checkInDate = DateTime.tryParse(json['checked_in_at'] as String);
+    }
+
+    List<String> imgUrls = const [];
+    if (json['inspection_image_urls'] != null && json['inspection_image_urls'] is List) {
+      imgUrls = (json['inspection_image_urls'] as List).map((e) => e.toString()).toList();
+    }
+
     return AmenityBookingModel(
       id: json['id'] as String? ?? '',
       amenityId: json['amenity_id'] as String? ?? '',
@@ -132,9 +169,16 @@ class AmenityBookingModel {
       depositStatus: json['deposit_status'] as String? ?? 'none',
       depositNotes: json['deposit_notes'] as String?,
       notes: json['notes'] as String?,
-      checkedInAt: json['checked_in_at'] != null
-          ? DateTime.parse(json['checked_in_at'] as String)
-          : null,
+      checkedInAt: checkInDate,
+      checkedInBy: json['checked_in_by'] as String?,
+      qrTicketToken: json['qr_ticket_token'] as String?,
+      inspectedBy: json['inspected_by'] as String?,
+      inspectedAt: json['inspected_at'] != null ? DateTime.tryParse(json['inspected_at'] as String) : null,
+      inspectionResult: json['inspection_result'] as String?,
+      forfeitedAmount: (json['forfeited_amount'] as num?)?.toDouble() ?? 0.0,
+      refundAmount: (json['refund_amount'] as num?)?.toDouble() ?? 0.0,
+      inspectionNotes: json['inspection_notes'] as String?,
+      inspectionImageUrls: imgUrls,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -168,6 +212,15 @@ class AmenityBookingModel {
       if (depositNotes != null) 'deposit_notes': depositNotes,
       if (notes != null) 'notes': notes,
       if (checkedInAt != null) 'checked_in_at': checkedInAt!.toIso8601String(),
+      if (qrTicketToken != null) 'qr_ticket_token': qrTicketToken,
+      if (checkedInBy != null) 'checked_in_by': checkedInBy,
+      if (inspectedBy != null) 'inspected_by': inspectedBy,
+      if (inspectedAt != null) 'inspected_at': inspectedAt!.toIso8601String(),
+      if (inspectionResult != null) 'inspection_result': inspectionResult,
+      'forfeited_amount': forfeitedAmount,
+      'refund_amount': refundAmount,
+      if (inspectionNotes != null) 'inspection_notes': inspectionNotes,
+      'inspection_image_urls': inspectionImageUrls,
     };
   }
 }

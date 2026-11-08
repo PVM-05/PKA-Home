@@ -12,6 +12,9 @@ class BuildingAmenityModel {
   final double depositAmount;
   final bool requiresDeposit;
   final bool isActive;
+  final int maxAdvanceDays;
+  final int maxSlotsPerWeek;
+  final String? rulesAndRegulations;
 
   BuildingAmenityModel({
     required this.id,
@@ -27,6 +30,9 @@ class BuildingAmenityModel {
     this.depositAmount = 0.0,
     this.requiresDeposit = false,
     this.isActive = true,
+    this.maxAdvanceDays = 7,
+    this.maxSlotsPerWeek = 3,
+    this.rulesAndRegulations,
   });
 
   bool get isShared => bookingType == 'shared';
@@ -47,6 +53,9 @@ class BuildingAmenityModel {
       depositAmount: (json['deposit_amount'] as num?)?.toDouble() ?? 0.0,
       requiresDeposit: json['requires_deposit'] as bool? ?? false,
       isActive: json['is_active'] as bool? ?? true,
+      maxAdvanceDays: (json['max_advance_days'] as num?)?.toInt() ?? 7,
+      maxSlotsPerWeek: (json['max_slots_per_week'] as num?)?.toInt() ?? 3,
+      rulesAndRegulations: json['rules_and_regulations'] as String?,
     );
   }
 
@@ -63,6 +72,9 @@ class BuildingAmenityModel {
     'deposit_amount': depositAmount,
     'requires_deposit': requiresDeposit,
     'is_active': isActive,
+    'max_advance_days': maxAdvanceDays,
+    'max_slots_per_week': maxSlotsPerWeek,
+    'rules_and_regulations': rulesAndRegulations,
   };
 
   @override
