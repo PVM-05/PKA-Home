@@ -100,113 +100,124 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         ),
       ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(
-                    Icons.lock_reset_rounded,
-                    size: 72,
-                    color: AppTheme.primary,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Khôi phục mật khẩu',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Nhập địa chỉ thư điện tử tài khoản của bạn để nhận mã OTP gồm 6 chữ số.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
-                  ),
-                  const SizedBox(height: 32),
-                  AppCard(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TextField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => _submit(),
-                            decoration: const InputDecoration(
-                              labelText: 'Thư điện tử',
-                              hintText: 'vidu@pka-home.vn',
-                              prefixIcon: Icon(Icons.email_outlined),
-                            ),
-                          ),
-                          if (_errorMessage != null) ...[
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppTheme.error.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.error_outline, color: AppTheme.error),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _errorMessage!,
-                                      style: const TextStyle(color: AppTheme.error),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: _isLoading ? null : _submit,
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text('Gửi mã xác thực'),
-                          ),
-                        ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final contentPadding = constraints.maxWidth < 360 ? 16.0 : 24.0;
+            return Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: contentPadding, vertical: 16.0),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Icon(
+                        Icons.lock_reset_rounded,
+                        size: 72,
+                        color: AppTheme.primary,
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Khôi phục mật khẩu',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Nhập địa chỉ thư điện tử tài khoản của bạn để nhận mã OTP gồm 6 chữ số.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
+                      ),
+                      const SizedBox(height: 32),
+                      AppCard(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _submit(),
+                                decoration: const InputDecoration(
+                                  labelText: 'Thư điện tử',
+                                  hintText: 'vidu@pka-home.vn',
+                                  prefixIcon: Icon(Icons.email_outlined),
+                                ),
+                              ),
+                              if (_errorMessage != null) ...[
+                                const SizedBox(height: 16),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.error.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.error_outline, color: AppTheme.error),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _errorMessage!,
+                                          style: const TextStyle(color: AppTheme.error),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: _isLoading ? null : _submit,
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text('Gửi mã xác thực'),
+                                      ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go(AppRoutes.login);
+                            }
+                          },
+                          icon: const Icon(Icons.arrow_back, size: 18),
+                          label: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Quay lại đăng nhập'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go(AppRoutes.login);
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_back, size: 18),
-                      label: const Text('Quay lại đăng nhập'),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

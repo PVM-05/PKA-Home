@@ -5,12 +5,19 @@ import 'package:pka_home/core/theme/app_theme.dart';
 import 'package:pka_home/features/auth/screens/login_screen.dart';
 
 void main() {
-  Widget buildTestApp({required double width, required double height}) {
+  Widget buildTestApp({
+    required double width,
+    required double height,
+    double textScale = 1.0,
+  }) {
     return ProviderScope(
       child: MaterialApp(
         theme: AppTheme.lightTheme,
         home: MediaQuery(
-          data: MediaQueryData(size: Size(width, height)),
+          data: MediaQueryData(
+            size: Size(width, height),
+            textScaler: TextScaler.linear(textScale),
+          ),
           child: const LoginScreen(),
         ),
       ),
@@ -34,17 +41,31 @@ void main() {
       expect(find.text('Kích hoạt tài khoản lần đầu'), findsOneWidget);
     });
 
-    testWidgets('renders mobile centered layout at width 360dp without overflow', (tester) async {
-      tester.view.physicalSize = const Size(360, 640);
+    testWidgets('renders desktop safely on low-height viewport (1024dp x 580dp) without vertical overflow', (tester) async {
+      tester.view.physicalSize = const Size(1024, 580);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildTestApp(width: 360, height: 640));
+      await tester.pumpWidget(buildTestApp(width: 1024, height: 580));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('PKA'), findsWidgets);
+      expect(find.text('Đăng nhập'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('renders mobile centered layout at width 320dp with 1.3x text scale without overflow', (tester) async {
+      tester.view.physicalSize = const Size(320, 600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildTestApp(width: 320, height: 600, textScale: 1.3));
       await tester.pumpAndSettle();
 
       expect(find.text('Thư điện tử'), findsOneWidget);
       expect(find.text('Mật khẩu'), findsOneWidget);
       expect(find.text('Đăng nhập'), findsOneWidget);
+      expect(find.text('Kích hoạt tài khoản lần đầu'), findsOneWidget);
       // No RenderFlex overflow exception
       expect(tester.takeException(), isNull);
     });

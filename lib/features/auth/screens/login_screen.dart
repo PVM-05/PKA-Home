@@ -117,115 +117,135 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     decoration: const BoxDecoration(
                       gradient: AppGradients.heroDark,
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 36),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Header logo
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                gradient: AppGradients.brandPrimary,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: AppShadows.cardGlow,
-                              ),
-                              child: const Icon(
-                                Icons.apartment_rounded,
-                                size: 28,
-                                color: Colors.white,
-                              ),
+                    child: LayoutBuilder(
+                      builder: (context, heroConstraints) {
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 36),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: (heroConstraints.maxHeight - 72).clamp(0.0, double.infinity),
                             ),
-                            const SizedBox(width: 14),
-                            Text(
-                              'PKA-Home',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // Mid showcase content
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: AppTheme.sapphire.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: AppTheme.sapphire.withValues(alpha: 0.4),
-                                ),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
+                            child: IntrinsicHeight(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Icon(Icons.verified_rounded, size: 14, color: Color(0xFF60A5FA)),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'Commercial PropTech SaaS Platform',
-                                    style: TextStyle(
-                                      color: Color(0xFF93C5FD),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                  // Header logo
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          gradient: AppGradients.brandPrimary,
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: AppShadows.cardGlow,
+                                        ),
+                                        child: const Icon(
+                                          Icons.apartment_rounded,
+                                          size: 28,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Text(
+                                        'PKA-Home',
+                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  // Mid showcase content
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.sapphire.withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(
+                                            color: AppTheme.sapphire.withValues(alpha: 0.4),
+                                          ),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.verified_rounded, size: 14, color: Color(0xFF60A5FA)),
+                                            SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                'Commercial PropTech SaaS Platform',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: Color(0xFF93C5FD),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Text(
+                                        'Vận Hành Tòa Nhà\nThông Minh & Chuẩn Mực',
+                                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 36,
+                                          height: 1.25,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      const Text(
+                                        'Giải pháp quản trị bất động sản toàn diện: đối soát ngân hàng VietQR tự động, sổ cái công nợ bất biến, điều phối sự cố SLA đa tầng và kết nối cư dân số hóa.',
+                                        style: TextStyle(
+                                          color: Color(0xFF94A3B8),
+                                          fontSize: 15,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 32),
+                                      _buildShowcasePill(
+                                        icon: Icons.shield_outlined,
+                                        title: 'Bảo Mật Tiêu Chuẩn Doanh Nghiệp',
+                                        desc: 'Tuân thủ Luật Dữ liệu cá nhân 2026 & Luật Nhà ở 2023',
+                                      ),
+                                      const SizedBox(height: 14),
+                                      _buildShowcasePill(
+                                        icon: Icons.qr_code_2_rounded,
+                                        title: 'Đối Soát Ngân Hàng Tự Động 2 Giây',
+                                        desc: 'Tích hợp VietQR Napas 247 & Webhook SePay gạch nợ tức thì',
+                                      ),
+                                      const SizedBox(height: 14),
+                                      _buildShowcasePill(
+                                        icon: Icons.menu_book_rounded,
+                                        title: 'Sổ Cái Kế Toán Append-Only Bất Biến',
+                                        desc: 'Kiểm toán minh bạch dòng tiền vận hành & Quỹ bảo trì 2%',
+                                      ),
+                                    ],
+                                  ),
+
+                                  // Footer
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 24),
+                                    child: Text(
+                                      '© 2026 PKA-Home Commercial SaaS. Tất cả các quyền được bảo lưu.',
+                                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'Vận Hành Tòa Nhà\nThông Minh & Chuẩn Mực',
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                color: Colors.white,
-                                fontSize: 36,
-                                height: 1.25,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Giải pháp quản trị bất động sản toàn diện: đối soát ngân hàng VietQR tự động, sổ cái công nợ bất biến, điều phối sự cố SLA đa tầng và kết nối cư dân số hóa.',
-                              style: TextStyle(
-                                color: Color(0xFF94A3B8),
-                                fontSize: 15,
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                            _buildShowcasePill(
-                              icon: Icons.shield_outlined,
-                              title: 'Bảo Mật Tiêu Chuẩn Doanh Nghiệp',
-                              desc: 'Tuân thủ Luật Dữ liệu cá nhân 2026 & Luật Nhà ở 2023',
-                            ),
-                            const SizedBox(height: 14),
-                            _buildShowcasePill(
-                              icon: Icons.qr_code_2_rounded,
-                              title: 'Đối Soát Ngân Hàng Tự Động 2 Giây',
-                              desc: 'Tích hợp VietQR Napas 247 & Webhook SePay gạch nợ tức thì',
-                            ),
-                            const SizedBox(height: 14),
-                            _buildShowcasePill(
-                              icon: Icons.menu_book_rounded,
-                              title: 'Sổ Cái Kế Toán Append-Only Bất Biến',
-                              desc: 'Kiểm toán minh bạch dòng tiền vận hành & Quỹ bảo trì 2%',
-                            ),
-                          ],
-                        ),
-
-                        // Footer
-                        const Text(
-                          '© 2026 PKA-Home Commercial SaaS. Tất cả các quyền được bảo lưu.',
-                          style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                        ),
-                      ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -499,9 +519,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Đăng nhập',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    : const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Đăng nhập',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
                       ),
               ),
 
@@ -546,16 +569,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // Nút Kích hoạt tài khoản lần đầu
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
                   side: const BorderSide(color: AppTheme.primary, width: 1.2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 icon: const Icon(Icons.key_rounded, size: 20),
-                label: const Text(
-                  'Kích hoạt tài khoản lần đầu',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                label: const FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Kích hoạt tài khoản lần đầu',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 onPressed: () => context.push(AppRoutes.residentActivation),
               ),
