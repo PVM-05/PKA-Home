@@ -112,48 +112,63 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(widget.length, (index) {
-        return SizedBox(
-          width: 46,
-          height: 54,
-          child: KeyboardListener(
-            focusNode: _keyboardFocusNodes[index],
-            onKeyEvent: (event) => _handleKeyEvent(index, event),
-            child: TextField(
-              controller: _controllers[index],
-              focusNode: _focusNodes[index],
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              maxLength: 6, // Cho phép dán chuỗi dài để bắt trong onChanged
-              buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final totalGaps = widget.length - 1;
+        final spacing = (availableWidth < 300) ? 4.0 : 8.0;
+        final maxForBoxes = availableWidth - (totalGaps * spacing);
+        final boxWidth = (maxForBoxes / widget.length).clamp(32.0, 48.0);
+        final boxHeight = boxWidth * 1.18;
+        final fontSize = (boxWidth * 0.46).clamp(16.0, 22.0);
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(widget.length, (index) {
+            return SizedBox(
+              width: boxWidth,
+              height: boxHeight,
+              child: KeyboardListener(
+                focusNode: _keyboardFocusNodes[index],
+                onKeyEvent: (event) => _handleKeyEvent(index, event),
+                child: TextField(
+                  controller: _controllers[index],
+                  focusNode: _focusNodes[index],
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLength: 6, // Cho phép dán chuỗi dài để bắt trong onChanged
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.zero,
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                    ),
+                  ),
+                  onChanged: (val) => _handleChanged(index, val),
                 ),
               ),
-              onChanged: (val) => _handleChanged(index, val),
-            ),
-          ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }
