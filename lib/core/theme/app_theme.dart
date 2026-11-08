@@ -14,21 +14,88 @@ class AppStatusColors {
   static const Color rejected = Color(0xFFE57373); // Đỏ nhạt
 }
 
+class AppGradients {
+  static const LinearGradient brandPrimary = LinearGradient(
+    colors: [Color(0xFF1E40AF), Color(0xFF2563EB), Color(0xFF3B82F6)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient heroDark = LinearGradient(
+    colors: [Color(0xFF0F172A), Color(0xFF1E293B), Color(0xFF0F172A)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient cardHighlight = LinearGradient(
+    colors: [Color(0xFF1E293B), Color(0xFF334155)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient emeraldSuccess = LinearGradient(
+    colors: [Color(0xFF059669), Color(0xFF10B981)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+}
+
+class AppShadows {
+  static const List<BoxShadow> softSm = [
+    BoxShadow(
+      color: Color(0x0A000000),
+      blurRadius: 4,
+      offset: Offset(0, 1),
+    ),
+  ];
+
+  static const List<BoxShadow> softMd = [
+    BoxShadow(
+      color: Color(0x06000000),
+      blurRadius: 6,
+      offset: Offset(0, 2),
+    ),
+    BoxShadow(
+      color: Color(0x0A000000),
+      blurRadius: 16,
+      offset: Offset(0, 4),
+    ),
+  ];
+
+  static const List<BoxShadow> cardGlow = [
+    BoxShadow(
+      color: Color(0x1F2563EB),
+      blurRadius: 20,
+      offset: Offset(0, 8),
+    ),
+  ];
+}
+
 class AppTheme {
-  // 1. Màu Sắc (Color Palette)
-  static const Color primary = Color(0xFF1E88E5); // Xanh biển
-  static const Color secondary = Color(0xFF03A9F4); // Xanh sáng
-  static const Color success = Color(0xFF4CAF50); // Xanh lá
-  static const Color warning = Color(0xFFFF9800); // Cam
-  static const Color error = Color(0xFFF44336); // Đỏ
-  static const Color background = Color(0xFFF5F7FA); // Xám rất nhạt
+  // 1. Màu Sắc Modern Enterprise PropTech (Color Palette)
+  static const Color sapphire = Color(0xFF2563EB); // Sapphire Blue
+  static const Color slate900 = Color(0xFF0F172A); // Deep Slate Navy
+  static const Color slate800 = Color(0xFF1E293B); // Dark Slate
+  static const Color slate700 = Color(0xFF334155); // Muted Slate
+  static const Color slate100 = Color(0xFFF1F5F9); // Light Slate
+  static const Color slate50 = Color(0xFFF8FAFC);  // Off-white Slate
+  static const Color emerald = Color(0xFF10B981);  // Success Emerald
+  static const Color amber = Color(0xFFF59E0B);    // Warning Amber
+  static const Color rose = Color(0xFFF43F5E);     // Error Rose
+
+  static const Color primary = sapphire;
+  static const Color secondary = Color(0xFF0EA5E9); // Sky Cyan
+  static const Color success = emerald;
+  static const Color warning = amber;
+  static const Color error = rose;
+  static const Color background = slate50;
   static const Color surface = Color(0xFFFFFFFF); // Trắng
-  static const Color textPrimary = Color(0xFF212121); // Xám đen
-  static const Color textSecondary = Color(0xFF757575); // Xám trung tính
-  static const Color border = Color(0xFFE0E0E0); // Viền xám nhạt
-  static const Color warningBackground = Color(0xFFFFF3CD); // Nền thông báo cảnh báo/chú ý
-  static const Color warningText = Color(0xFF856404); // Chữ cảnh báo/chú ý
-  static const Color warningBorder = Color(0xFFFFEEBA); // Viền cảnh báo/chú ý
+  static const Color textPrimary = Color(0xFF0F172A); // Slate đen sắc nét
+  static const Color textSecondary = Color(0xFF64748B); // Slate trung tính
+  static const Color border = Color(0xFFE2E8F0); // Viền Slate nhạt tinh tế
+  static const Color warningBackground = Color(0xFFFFFBEB); // Nền vàng ấm
+  static const Color warningText = Color(0xFFB45309); // Chữ cảnh báo
+  static const Color warningBorder = Color(0xFFFDE68A); // Viền cảnh báo
 
   // Spacing chuẩn (theme_spec.md)
   static const double spacingXs = 4.0;
