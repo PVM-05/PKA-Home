@@ -1008,8 +1008,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/apartment_management_screen.dart": {
-    "mtime": 1794153895.2596092,
-    "seen": 1794154219.225983,
+    "mtime": 1794154479.0245895,
+    "seen": 1794155741.029243,
     "ast_hash": "a8f9a58164b136b7a7b2e0d7255971ce",
     "semantic_hash": ""
   },
@@ -1056,14 +1056,14 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/invoice_management_screen.dart": {
-    "mtime": 1794152147.5562565,
-    "seen": 1794154219.225983,
+    "mtime": 1794154479.2481253,
+    "seen": 1794155741.029243,
     "ast_hash": "2559b9f109e33761dd2ed06ec7dca053",
     "semantic_hash": ""
   },
   "lib/features/management/screens/issue_management_screen.dart": {
-    "mtime": 1794153350.2816615,
-    "seen": 1794154219.225983,
+    "mtime": 1794154479.661685,
+    "seen": 1794155741.029243,
     "ast_hash": "ffb2706e78235e038e80836df974f4e1",
     "semantic_hash": ""
   },
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_home_screen.dart": {
-    "mtime": 1794150815.612976,
-    "seen": 1794154219.225983,
-    "ast_hash": "9b7703b29396a05daa8bb9341d5fda20",
+    "mtime": 1794155468.0178866,
+    "seen": 1794155741.029243,
+    "ast_hash": "72fbc759d729674a36fef4aed5923f70",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
@@ -1110,8 +1110,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/resident_management_screen.dart": {
-    "mtime": 1794153955.0991359,
-    "seen": 1794154219.225983,
+    "mtime": 1794154479.9430616,
+    "seen": 1794155741.029243,
     "ast_hash": "dae7be7b1828611de4ea5c7e83bc3c42",
     "semantic_hash": ""
   },
@@ -1206,8 +1206,8 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/create_issue_screen.dart": {
-    "mtime": 1794153029.9396122,
-    "seen": 1794154219.225983,
+    "mtime": 1794154480.0656755,
+    "seen": 1794155741.0302436,
     "ast_hash": "27d3320a554f518c5cebe147d4be8845",
     "semantic_hash": ""
   },
@@ -1254,26 +1254,26 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_home_screen.dart": {
-    "mtime": 1794150815.829377,
-    "seen": 1794154219.225983,
-    "ast_hash": "3f526842131672c17f185f44aaa47c7c",
+    "mtime": 1794155115.704796,
+    "seen": 1794155741.0302436,
+    "ast_hash": "0aeae4596c4823b489e21e6436014c49",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_detail_screen.dart": {
-    "mtime": 1794151921.448641,
-    "seen": 1794154219.225983,
+    "mtime": 1794154480.2253728,
+    "seen": 1794155741.0302436,
     "ast_hash": "2701b6a317e0bb01ddc0f9bc15f90df3",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_screen.dart": {
-    "mtime": 1794151264.3992038,
-    "seen": 1794154219.225983,
+    "mtime": 1794154480.3204665,
+    "seen": 1794155741.0302436,
     "ast_hash": "9e839a38d6b44c912571aa694a9ae021",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_issue_screen.dart": {
-    "mtime": 1794152975.7090082,
-    "seen": 1794154219.225983,
+    "mtime": 1794154480.414114,
+    "seen": 1794155741.0302436,
     "ast_hash": "b5eddaa4e6ed916ed65ada07cb6f144c",
     "semantic_hash": ""
   },
@@ -6822,56 +6822,56 @@
     "semantic_hash": ""
   },
   "test/features/management/invoice_management_responsive_test.dart": {
-    "mtime": 1794152032.0414424,
-    "seen": 1794154219.2269812,
+    "mtime": 1794154480.4985077,
+    "seen": 1794155741.0312655,
     "ast_hash": "5a12218b76346e02328e9a70f4e64141",
     "semantic_hash": ""
   },
   "test/features/management/issue_management_responsive_test.dart": {
-    "mtime": 1794153153.1854744,
-    "seen": 1794154219.2269812,
-    "ast_hash": "6bd1ec880b92d91a4a28dcb4610a2c32",
+    "mtime": 1794154257.90246,
+    "seen": 1794155741.0312655,
+    "ast_hash": "b824e9eb0d62455d866d73b1169b5b91",
     "semantic_hash": ""
   },
   "test/features/management/management_home_responsive_test.dart": {
-    "mtime": 1794150816.1470635,
-    "seen": 1794154219.2269812,
-    "ast_hash": "69787dac998d1c787db8e2ed978fd275",
+    "mtime": 1794155533.5703475,
+    "seen": 1794155741.0312655,
+    "ast_hash": "6c6f4a09c3f718a46826ca5d1d34f958",
     "semantic_hash": ""
   },
   "test/features/management/resident_directory_responsive_test.dart": {
-    "mtime": 1794153487.1998403,
-    "seen": 1794154219.2269812,
-    "ast_hash": "06245234312ac386aa8f0b43653cc0cc",
+    "mtime": 1794154258.0742962,
+    "seen": 1794155741.0312655,
+    "ast_hash": "3097de887550ea75227e451a294af8cd",
     "semantic_hash": ""
   },
   "test/features/resident/resident_home_responsive_test.dart": {
-    "mtime": 1794150816.269884,
-    "seen": 1794154219.2269812,
-    "ast_hash": "a5adf582bdb9dcdbece4e9531c99c033",
+    "mtime": 1794155140.775988,
+    "seen": 1794155741.0312655,
+    "ast_hash": "096f2bed3e066871fa3f5cc23a583ed4",
     "semantic_hash": ""
   },
   "test/features/resident/resident_invoice_detail_responsive_test.dart": {
-    "mtime": 1794154105.8790715,
-    "seen": 1794154219.2269812,
+    "mtime": 1794154480.578228,
+    "seen": 1794155741.0312655,
     "ast_hash": "5ae492947149fdba997ed2bc17ad0ca9",
     "semantic_hash": ""
   },
   "test/features/resident/resident_invoice_responsive_test.dart": {
-    "mtime": 1794151217.4094143,
-    "seen": 1794154219.2269812,
-    "ast_hash": "7691179fd77b2bbb98caafd8ef700e4a",
+    "mtime": 1794154259.3209195,
+    "seen": 1794155741.0312655,
+    "ast_hash": "129e98488f5534e30fcc4c502c1e6582",
     "semantic_hash": ""
   },
   "test/features/resident/resident_issue_responsive_test.dart": {
-    "mtime": 1794153047.4358995,
-    "seen": 1794154219.2269812,
+    "mtime": 1794154480.674549,
+    "seen": 1794155741.0312655,
     "ast_hash": "1e015b1fe2d0f33a02327040678128fe",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-08-full-system-impeccable-ui.md": {
-    "mtime": 1794154173.0228395,
-    "seen": 1794154219.2287772,
+    "mtime": 1794154478.571168,
+    "seen": 1794155741.0322344,
     "ast_hash": "bf34971deeb609bac59cfaee0e87910d",
     "semantic_hash": ""
   },
@@ -6882,15 +6882,27 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-08-full-system-impeccable-ui-design.md": {
-    "mtime": 1794151131.5899935,
-    "seen": 1794154219.2287772,
-    "ast_hash": "adc6c1b7e89babf9b13ebd6cd6bea7ac",
+    "mtime": 1794154251.2026453,
+    "seen": 1794155741.0322344,
+    "ast_hash": "90a8dd2f2d10d2cd142d918c76f8589d",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-08-impeccable-ui-and-anti-overflow-design.md": {
     "mtime": 1794149025.633429,
     "seen": 1794154219.2287772,
     "ast_hash": "382fc5ce996062450d670cb0a6929894",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-08-home-dashboards-impeccable-ui.md": {
+    "mtime": 1794155723.22939,
+    "seen": 1794155741.0322344,
+    "ast_hash": "1151517cf25f01e8cc477e1975290cfc",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-08-home-dashboards-impeccable-ui-design.md": {
+    "mtime": 1794154872.3626142,
+    "seen": 1794155741.0322344,
+    "ast_hash": "d760088c215bc52764c131e212cf6936",
     "semantic_hash": ""
   }
 }
