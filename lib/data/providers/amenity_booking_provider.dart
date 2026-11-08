@@ -62,3 +62,9 @@ final allAmenityBookingsProvider = FutureProvider<List<AmenityBookingModel>>((re
   return await repo.getAllBookings();
 });
 
+/// Danh sách các ca tiện ích có tiền cọc chờ BQL nghiệm thu hiện trường
+final pendingAmenityInspectionsProvider = FutureProvider<List<AmenityBookingModel>>((ref) async {
+  final repo = ref.watch(amenityBookingRepositoryProvider);
+  return await repo.getBookingsPendingInspection();
+});
+

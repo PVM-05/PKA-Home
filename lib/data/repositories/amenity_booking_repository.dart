@@ -3,6 +3,7 @@ import '../../core/supabase_config.dart';
 import '../../core/utils/app_logger.dart';
 import '../contracts/contracts.dart';
 import '../models/amenity_booking_model.dart';
+import '../models/amenity_inspection_model.dart';
 import '../models/amenity_maintenance_model.dart';
 
 class AmenityBookingRepository {
@@ -272,6 +273,38 @@ class AmenityBookingRepository {
       throw Exception(resMap['message'] ?? 'Không thể đổi lịch đặt tiện ích.');
     }
     return resMap;
+  }
+
+  /// Quét mã QR vé tại cổng để xác nhận check-in
+  Future<Map<String, dynamic>> checkInTicket(String qrTicketToken) async {
+    final response = await _client.rpc(
+      'check_in_amenity_ticket',
+      params: {'p_qr_ticket_token': qrTicketToken},
+    );
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  /// Nghiệm thu hiện trường mặt bằng tiện ích và hoàn cọc / khấu trừ cọc
+  Future<Map<String, dynamic>> inspectAndSettleDeposit(AmenityInspectionModel inspection) async {
+    final response = await _client.rpc(
+      'inspect_and_settle_amenity_deposit',
+      params: inspection.toRpcParams(),
+    );
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  /// Lấy danh sách các ca tiệc / sử dụng có cọc cần nghiệm thu hiện trường
+  Future<List<AmenityBookingModel>> getBookingsPendingInspection() async {
+    final response = await _client
+        .from('amenity_bookings')
+        .select('*, building_amenities(name), apartments(code), users(full_name), payment_transactions(*)')
+        .gt('deposit_amount', 0)
+        .inFilter('deposit_status', ['received', 'pending'])
+        .order('booking_date', ascending: false);
+
+    return (response as List)
+        .map((json) => AmenityBookingModel.fromJson(json))
+        .toList();
   }
 }
 
