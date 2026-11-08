@@ -1574,13 +1574,10 @@ class _AmenityManagementScreenState
                     const Divider(height: 16),
                     _buildReceiptRow(
                       label: 'Phương thức thanh toán',
-                      value: booking.paymentMethod == 'CASH'
+                      value: booking.paymentMethod == 'CASH' ||
+                              booking.paymentMethod == 'cash'
                           ? 'Tiền mặt tại BQL'
-                          : (booking.paymentMethod == 'DEMO'
-                                ? 'Cổng thanh toán điện tử'
-                                : (booking.paymentMethod == 'BANK_TRANSFER'
-                                      ? 'Chuyển khoản VietQR'
-                                      : 'Chuyển khoản ngân hàng')),
+                          : 'Chuyển khoản VietQR (Napas 247)',
                     ),
                     const Divider(height: 16),
                     _buildReceiptRow(

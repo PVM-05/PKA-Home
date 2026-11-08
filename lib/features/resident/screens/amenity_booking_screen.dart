@@ -1886,11 +1886,10 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                     _buildReceiptRow(
                       context,
                       label: 'Phương thức',
-                      value: booking.paymentMethod == 'CASH'
+                      value: booking.paymentMethod == 'CASH' ||
+                              booking.paymentMethod == 'cash'
                           ? 'Tiền mặt tại BQL'
-                          : (booking.paymentMethod == 'DEMO'
-                                ? 'Cổng thanh toán điện tử'
-                                : 'Chuyển khoản VietQR'),
+                          : 'Chuyển khoản VietQR (Napas 247)',
                     ),
                     const Divider(height: 16),
                     _buildReceiptRow(

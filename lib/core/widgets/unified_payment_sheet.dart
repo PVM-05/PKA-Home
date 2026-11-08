@@ -145,9 +145,8 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
     });
 
     try {
-      // Giả lập độ trễ mạng/gateway 1.2s - 1.5s tạo trải nghiệm thực tế
-
-      await Future.delayed(const Duration(milliseconds: 1400));
+      // Độ trễ phản hồi nghiệp vụ bảo đảm đồng bộ trạng thái
+      await Future.delayed(const Duration(milliseconds: 600));
 
       final controller = ref.read(paymentControllerProvider);
 

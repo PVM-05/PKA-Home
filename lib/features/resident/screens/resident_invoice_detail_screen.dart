@@ -1057,10 +1057,15 @@ class _ResidentInvoiceDetailScreenState
                     _buildCopyableRow(
                       context,
                       label: 'Phương thức',
-                      value: _invoice.paymentMethod == 'DEMO'
-                          ? 'Cổng thanh toán điện tử'
-                          : (_invoice.paymentMethod ??
-                                'Chuyển khoản trực tuyến'),
+                      value: _invoice.paymentMethod == 'sepay' ||
+                              _invoice.paymentMethod == 'VIETQR' ||
+                              _invoice.paymentMethod == 'bank_transfer'
+                          ? 'Chuyển khoản VietQR (Napas 247)'
+                          : (_invoice.paymentMethod == 'cash' ||
+                                  _invoice.paymentMethod == 'CASH'
+                              ? 'Tiền mặt tại BQL'
+                              : (_invoice.paymentMethod ??
+                                  'Chuyển khoản trực tuyến')),
                     ),
                     if (_invoice.transactionCode != null) ...[
                       const Divider(height: 16),

@@ -19,7 +19,7 @@ class FakePostgrestFilterBuilder extends Fake implements PostgrestFilterBuilder<
 }
 
 void main() {
-  group('ResidentInvoiceService.simulatePayment Tests', () {
+  group('ResidentInvoiceService Tests', () {
     late MockSupabaseClient mockSupabase;
     late MockWidgetRef mockRef;
 
@@ -28,31 +28,20 @@ void main() {
       mockRef = MockWidgetRef();
     });
 
-    test('gọi RPC simulate_invoice_payment và trả về kết quả thành công', () async {
-      final fakeBuilder = FakePostgrestFilterBuilder({
-        'success': true,
-        'status': 'paid',
-        'transaction_code': 'PAY-20261005-00125',
-        'amount': 500000.0,
-      });
+    test('gọi RPC confirm_payment và làm mới residentInvoiceProvider', () async {
+      final fakeBuilder = FakePostgrestFilterBuilder(null);
 
-      when(() => mockSupabase.rpc('simulate_unified_payment', params: {
-        'p_reference_id': 'inv-101',
-        'p_payment_type': 'INVOICE',
-        'p_payment_method': 'DEMO',
-        'p_outcome': 'SUCCESS',
+      when(() => mockSupabase.rpc('confirm_payment', params: {
+        'p_invoice_id': 'inv-101',
       })).thenAnswer((_) => fakeBuilder);
 
-      final result = await ResidentInvoiceService.simulatePayment(
-        ref: mockRef,
-        invoiceId: 'inv-101',
-        outcome: 'SUCCESS',
+      await ResidentInvoiceService.confirmPayment(
+        mockRef,
+        'inv-101',
         client: mockSupabase,
       );
 
-      expect(result['success'], isTrue);
-      expect(result['status'], 'paid');
-      expect(result['transaction_code'], 'PAY-20261005-00125');
+      verify(() => mockSupabase.rpc('confirm_payment', params: {'p_invoice_id': 'inv-101'})).called(1);
       verify(() => mockRef.invalidate(residentInvoiceProvider)).called(1);
     });
   });
