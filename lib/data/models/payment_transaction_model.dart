@@ -39,6 +39,7 @@ class PaymentTransactionModel {
   bool get isPending => status == 'PENDING';
   bool get isFailed => status == 'FAILED';
   bool get isCancelled => status == 'CANCELLED';
+  bool get isUnmatched => status == 'UNMATCHED';
 
   bool get isInvoice => type == 'INVOICE';
   bool get isService => type == 'SERVICE';
@@ -49,6 +50,8 @@ class PaymentTransactionModel {
         return 'Thành công';
       case 'PENDING':
         return 'Chờ xác nhận';
+      case 'UNMATCHED':
+        return 'Chưa khớp cú pháp';
       case 'FAILED':
         return 'Thất bại';
       case 'CANCELLED':

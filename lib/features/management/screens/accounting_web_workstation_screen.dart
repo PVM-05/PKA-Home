@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/models/payment_transaction_model.dart';
 import '../../../data/providers/accounting_workstation_provider.dart';
+import '../../../data/providers/payment_provider.dart';
 
 class AccountingWebWorkstationScreen extends ConsumerStatefulWidget {
   const AccountingWebWorkstationScreen({super.key});
@@ -16,6 +19,7 @@ class _AccountingWebWorkstationScreenState
   final TextEditingController _searchController = TextEditingController();
   final int _sortColumnIndex = 0;
   final bool _sortAscending = true;
+  int _currentTab = 0; // 0: Sổ công nợ, 1: Đối soát SePay
 
   @override
   void dispose() {
@@ -41,29 +45,295 @@ class _AccountingWebWorkstationScreenState
             // 1. Header & Actions Bar
             _buildHeader(context, rowsAsync.value ?? []),
 
-            const SizedBox(height: 20),
-
-            // 2. Top KPI Strip
-            _buildKpiStrip(summary),
-
-            const SizedBox(height: 24),
-
-            // 3. Filter Bar
-            _buildFilterBar(filter, periods),
-
             const SizedBox(height: 16),
 
-            // 4. Bulk Action Bar (hien khi co it nhat 1 row duoc chon)
-            if (selectedIds.isNotEmpty) ...[
-              _buildBulkActionBar(selectedIds.length),
-              const SizedBox(height: 16),
-            ],
+            // 1b. Tab Bar chuyển đổi chế độ xem
+            _buildTabBar(),
 
-            // 5. Main Table Card
-            _buildMainTableCard(rowsAsync, selectedIds),
+            if (_currentTab == 0) ...[
+              // 2. Top KPI Strip
+              _buildKpiStrip(summary),
+
+              const SizedBox(height: 24),
+
+              // 3. Filter Bar
+              _buildFilterBar(filter, periods),
+
+              const SizedBox(height: 16),
+
+              // 4. Bulk Action Bar (hien khi co it nhat 1 row duoc chon)
+              if (selectedIds.isNotEmpty) ...[
+                _buildBulkActionBar(selectedIds.length),
+                const SizedBox(height: 16),
+              ],
+
+              // 5. Main Table Card
+              _buildMainTableCard(rowsAsync, selectedIds),
+            ] else ...[
+              // Chế độ Đối Soát SePay & Giao dịch chưa khớp
+              _buildSepayView(context),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        children: [
+          ChoiceChip(
+            label: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.receipt_long_rounded, size: 16),
+                SizedBox(width: 6),
+                Text('Sổ Công Nợ Hóa Đơn'),
+              ],
+            ),
+            selected: _currentTab == 0,
+            onSelected: (val) {
+              if (val) setState(() => _currentTab = 0);
+            },
+          ),
+          const SizedBox(width: 12),
+          ChoiceChip(
+            label: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.qr_code_2_rounded, size: 16),
+                SizedBox(width: 6),
+                Text('Đối Soát SePay & Chưa Khớp'),
+              ],
+            ),
+            selected: _currentTab == 1,
+            onSelected: (val) {
+              if (val) setState(() => _currentTab = 1);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSepayView(BuildContext context) {
+    final txsAsync = ref.watch(paymentTransactionsProvider);
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+
+    return txsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(48.0),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (err, _) => Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Center(
+          child: Text('Lỗi tải giao dịch SePay: $err', style: const TextStyle(color: Colors.red)),
+        ),
+      ),
+      data: (transactions) {
+        final sepayTxs = transactions.where((t) {
+          final m = t.paymentMethod.toLowerCase();
+          return m == 'sepay' || m == 'vietqr' || t.status == 'UNMATCHED';
+        }).toList();
+
+        final totalTxs = sepayTxs.length;
+        final autoPaidTxs = sepayTxs.where((t) => t.isSuccess).length;
+        final unmatchedTxs = sepayTxs.where((t) => t.isUnmatched).length;
+        final totalAmount = sepayTxs
+            .where((t) => t.isSuccess)
+            .fold<double>(0.0, (sum, t) => sum + t.amount);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // KPI Strip cho SePay
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final double width = constraints.maxWidth;
+                int crossAxisCount = 4;
+                if (width < 600) {
+                  crossAxisCount = 1;
+                } else if (width < 1000) {
+                  crossAxisCount = 2;
+                }
+
+                final cards = [
+                  _buildKpiCard(
+                    title: 'Tổng Giao Dịch SePay',
+                    value: '$totalTxs',
+                    subtitle: 'Biến động số dư nhận được',
+                    icon: Icons.account_balance_wallet_outlined,
+                    iconColor: AppTheme.primary,
+                    bgColor: AppTheme.primary.withValues(alpha: 0.08),
+                  ),
+                  _buildKpiCard(
+                    title: 'Đã Gạch Nợ Tự Động',
+                    value: '$autoPaidTxs',
+                    subtitle: 'Khớp mã hóa đơn tức thì',
+                    icon: Icons.check_circle_outline_rounded,
+                    iconColor: Colors.teal,
+                    bgColor: Colors.teal.withValues(alpha: 0.08),
+                  ),
+                  _buildKpiCard(
+                    title: 'Giao Dịch Chưa Khớp',
+                    value: '$unmatchedTxs',
+                    subtitle: 'Cần kế toán viên kiểm tra',
+                    icon: Icons.warning_amber_rounded,
+                    iconColor: Colors.deepOrange,
+                    bgColor: Colors.deepOrange.withValues(alpha: 0.08),
+                  ),
+                  _buildKpiCard(
+                    title: 'Tổng Tiền Thực Nhận',
+                    value: currencyFormat.format(totalAmount),
+                    subtitle: 'Đã vào tài khoản ngân hàng',
+                    icon: Icons.monetization_on_outlined,
+                    iconColor: Colors.green.shade700,
+                    bgColor: Colors.green.withValues(alpha: 0.08),
+                  ),
+                ];
+
+                if (crossAxisCount == 1) {
+                  return Column(children: cards.map((c) => Padding(padding: const EdgeInsets.only(bottom: 12), child: c)).toList());
+                }
+                if (crossAxisCount == 2) {
+                  return Column(
+                    children: [
+                      Row(children: [Expanded(child: cards[0]), const SizedBox(width: 12), Expanded(child: cards[1])]),
+                      const SizedBox(height: 12),
+                      Row(children: [Expanded(child: cards[2]), const SizedBox(width: 12), Expanded(child: cards[3])]),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: cards[0]),
+                    const SizedBox(width: 12),
+                    Expanded(child: cards[1]),
+                    const SizedBox(width: 12),
+                    Expanded(child: cards[2]),
+                    const SizedBox(width: 12),
+                    Expanded(child: cards[3]),
+                  ],
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            // Bảng danh sách giao dịch SePay
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: sepayTxs.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(48.0),
+                      child: Center(
+                        child: Text(
+                          'Chưa có giao dịch SePay nào được ghi nhận.',
+                          style: TextStyle(color: AppTheme.textSecondary),
+                        ),
+                      ),
+                    )
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 900),
+                          child: DataTable(
+                            headingRowColor: WidgetStateProperty.all(AppTheme.background),
+                            columns: const [
+                              DataColumn(label: Text('Mã Giao Dịch', style: TextStyle(fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('Số Tiền', style: TextStyle(fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('Nội Dung Chuyển Khoản', style: TextStyle(fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('Thời Gian', style: TextStyle(fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('Trạng Thái', style: TextStyle(fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('Thao Tác', style: TextStyle(fontWeight: FontWeight.bold))),
+                            ],
+                            rows: sepayTxs.map((tx) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    Text(
+                                      tx.transactionCode,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      currencyFormat.format(tx.amount),
+                                      style: const TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(maxWidth: 260),
+                                      child: Text(
+                                        tx.title ?? tx.failureReason ?? '-',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(Text(dateFormat.format(tx.createdAt))),
+                                  DataCell(
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: tx.isSuccess
+                                            ? Colors.teal.withValues(alpha: 0.12)
+                                            : (tx.isUnmatched
+                                                ? Colors.deepOrange.withValues(alpha: 0.12)
+                                                : Colors.orange.withValues(alpha: 0.12)),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        tx.statusDisplayName,
+                                        style: TextStyle(
+                                          color: tx.isSuccess
+                                              ? Colors.teal.shade800
+                                              : (tx.isUnmatched ? Colors.deepOrange.shade800 : Colors.orange.shade800),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    tx.isUnmatched
+                                        ? FilledButton.tonal(
+                                            onPressed: () {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('Mở hộp thoại gán hóa đơn thủ công cho giao dịch chưa khớp.'),
+                                                ),
+                                              );
+                                            },
+                                            style: FilledButton.styleFrom(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                            ),
+                                            child: const Text('Khớp nợ thủ công', style: TextStyle(fontSize: 12)),
+                                          )
+                                        : const Text('Tự động khớp', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 
