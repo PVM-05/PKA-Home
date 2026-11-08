@@ -635,1020 +635,931 @@ class _ResidentMeterReadingScreenState
                 )
               : null;
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(currentApartmentReadingsProvider);
+          final isDesktop = MediaQuery.of(context).size.width >= 900;
+          final warningWidget = DateTime.now().day > 25 ? _buildOverdueWarning() : null;
+          final previousCard = _buildPreviousReadingsCard(aptCode, oldElec, oldWater);
+          final electricCard = _buildElectricCard(elecAnalysis);
+          final waterCard = _buildWaterCard(waterAnalysis);
+          final periodField = _buildPeriodField();
+          final submitButton = _buildSubmitButton(oldElec, oldWater);
+          final historySection = _buildHistorySection(historyAsync);
 
-              ref.invalidate(residentMeterReadingsProvider);
-            },
-
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-
-              physics: const AlwaysScrollableScrollPhysics(),
-
-              child: Form(
-                key: _formKey,
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                  children: [
-                    // Cảnh báo nếu đã quá hạn nộp chỉ số (hạn chót ngày 25 hàng tháng)
-                    if (DateTime.now().day > 25) ...[
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-
-                        padding: const EdgeInsets.all(12),
-
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade50,
-
-                          borderRadius: BorderRadius.circular(10),
-
-                          border: Border.all(color: Colors.amber.shade400),
-                        ),
-
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-
+          Widget content;
+          if (isDesktop) {
+            content = Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Cột trái: Đối chiếu chỉ số cũ & Lịch sử khai báo
+                      Expanded(
+                        flex: 5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Icon(
-                              Icons.warning_amber_rounded,
-                              color: Colors.amber.shade800,
-                              size: 22,
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-
-                                children: [
-                                  Text(
-                                    'Lưu ý: Đã quá hạn chốt số tháng này (Hạn chót: ngày 25)',
-
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-
-                                      fontSize: 13,
-
-                                      color: Colors.amber.shade900,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 2),
-
-                                  const Text(
-                                    'Vui lòng gửi chỉ số sớm nhất có thể để tránh bị tạm tính chỉ số theo mức trung bình của căn hộ.',
-
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            ?warningWidget,
+                            previousCard,
+                            const SizedBox(height: 24),
+                            historySection,
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      // Cột phải: Form khai báo chỉ số
+                      Expanded(
+                        flex: 7,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            electricCard,
+                            const SizedBox(height: 16),
+                            waterCard,
+                            const SizedBox(height: 16),
+                            periodField,
+                            const SizedBox(height: 20),
+                            submitButton,
                           ],
                         ),
                       ),
                     ],
-
-                    // Banner đối chiếu chỉ số cũ
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.history_toggle_off,
-                                color: AppTheme.primary,
-                              ),
-
-                              const SizedBox(width: 8),
-
-                              Text(
-                                'Chỉ số kỳ trước • Căn hộ $aptCode',
-
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-
-                                  decoration: BoxDecoration(
-                                    color: Colors.amber.shade50,
-
-                                    borderRadius: BorderRadius.circular(10),
-
-                                    border: Border.all(
-                                      color: Colors.amber.shade200,
-                                    ),
-                                  ),
-
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.bolt,
-                                            color: Colors.amber.shade800,
-                                            size: 20,
-                                          ),
-
-                                          const SizedBox(width: 4),
-
-                                          const Text(
-                                            'Điện cũ',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      const SizedBox(height: 6),
-
-                                      Text(
-                                        '$oldElec kWh',
-
-                                        style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.amber.shade900,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(width: 12),
-
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-
-                                    borderRadius: BorderRadius.circular(10),
-
-                                    border: Border.all(
-                                      color: Colors.blue.shade200,
-                                    ),
-                                  ),
-
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.water_drop,
-                                            color: Colors.blue.shade800,
-                                            size: 20,
-                                          ),
-
-                                          const SizedBox(width: 4),
-
-                                          const Text(
-                                            'Nước cũ',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      const SizedBox(height: 6),
-
-                                      Text(
-                                        '$oldWater m³',
-
-                                        style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue.shade900,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Khối khai báo công tơ điện
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-                          Wrap(
-                            alignment: WrapAlignment.spaceBetween,
-
-                            crossAxisAlignment: WrapCrossAlignment.center,
-
-                            spacing: 8,
-
-                            runSpacing: 8,
-
-                            children: [
-                              const Row(
-                                mainAxisSize: MainAxisSize.min,
-
-                                children: [
-                                  Icon(Icons.bolt, color: Colors.amber),
-
-                                  SizedBox(width: 6),
-
-                                  Text(
-                                    'Công tơ Điện (kWh)',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-
-                                children: [
-                                  IconButton.filledTonal(
-                                    visualDensity: VisualDensity.compact,
-
-                                    tooltip: 'Chụp ảnh công tơ điện',
-
-                                    icon: const Icon(
-                                      Icons.camera_alt_outlined,
-                                      size: 18,
-                                    ),
-
-                                    onPressed: () => _pickMeterImage(
-                                      MeterType.electric,
-                                      ImageSource.camera,
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 4),
-
-                                  IconButton.outlined(
-                                    visualDensity: VisualDensity.compact,
-
-                                    tooltip: 'Chọn ảnh từ thư viện',
-
-                                    icon: const Icon(
-                                      Icons.photo_library_outlined,
-                                      size: 18,
-                                    ),
-
-                                    onPressed: () => _pickMeterImage(
-                                      MeterType.electric,
-                                      ImageSource.gallery,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-
-                          if (_isScanningElectric) ...[
-                            const SizedBox(height: 12),
-
-                            const LinearProgressIndicator(),
-
-                            const SizedBox(height: 6),
-
-                            const Center(
-                              child: Text(
-                                'Đang chạy thuật toán mô phỏng nhận diện công tơ điện...',
-
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ],
-
-                          if (_electricImagePath != null) ...[
-                            const SizedBox(height: 8),
-
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-
-                              decoration: BoxDecoration(
-                                color: AppTheme.success.withValues(alpha: 0.1),
-
-                                borderRadius: BorderRadius.circular(6),
-
-                                border: Border.all(
-                                  color: AppTheme.success.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                ),
-                              ),
-
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle_outline,
-                                    size: 16,
-                                    color: AppTheme.success,
-                                  ),
-
-                                  const SizedBox(width: 6),
-
-                                  Expanded(
-                                    child: Text(
-                                      'Đã đính kèm ảnh công tơ điện: ${_electricImagePath!.split(r'/').last.split(r'\\').last}',
-
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppTheme.success,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-
-                                      maxLines: 1,
-
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: AppTheme.textSecondary,
-                                    ),
-
-                                    onPressed: () => setState(
-                                      () => _electricImagePath = null,
-                                    ),
-
-                                    visualDensity: VisualDensity.compact,
-
-                                    padding: EdgeInsets.zero,
-
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 12),
-
-                          TextFormField(
-                            controller: _electricController,
-
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-
-                            decoration: const InputDecoration(
-                              labelText: 'Chỉ số điện mới *',
-
-                              suffixText: 'kWh',
-
-                              border: OutlineInputBorder(),
-
-                              prefixIcon: Icon(Icons.electric_meter_outlined),
-                            ),
-
-                            validator: (val) {
-                              if (val == null || val.trim().isEmpty) {
-                                return 'Vui lòng nhập chỉ số điện';
-                              }
-
-                              if (double.tryParse(val.trim()) == null) {
-                                return 'Chỉ số phải là số hợp lệ';
-                              }
-
-                              return null;
-                            },
-                          ),
-
-                          if (elecAnalysis != null)
-                            _buildAnomalyBanner(elecAnalysis),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Khối khai báo công tơ nước
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-                          Wrap(
-                            alignment: WrapAlignment.spaceBetween,
-
-                            crossAxisAlignment: WrapCrossAlignment.center,
-
-                            spacing: 8,
-
-                            runSpacing: 8,
-
-                            children: [
-                              const Row(
-                                mainAxisSize: MainAxisSize.min,
-
-                                children: [
-                                  Icon(Icons.water_drop, color: Colors.blue),
-
-                                  SizedBox(width: 6),
-
-                                  Text(
-                                    'Công tơ Nước (m³)',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-
-                                children: [
-                                  IconButton.filledTonal(
-                                    visualDensity: VisualDensity.compact,
-
-                                    tooltip: 'Chụp ảnh công tơ nước',
-
-                                    icon: const Icon(
-                                      Icons.camera_alt_outlined,
-                                      size: 18,
-                                    ),
-
-                                    onPressed: () => _pickMeterImage(
-                                      MeterType.water,
-                                      ImageSource.camera,
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 4),
-
-                                  IconButton.outlined(
-                                    visualDensity: VisualDensity.compact,
-
-                                    tooltip: 'Chọn ảnh từ thư viện',
-
-                                    icon: const Icon(
-                                      Icons.photo_library_outlined,
-                                      size: 18,
-                                    ),
-
-                                    onPressed: () => _pickMeterImage(
-                                      MeterType.water,
-                                      ImageSource.gallery,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-
-                          if (_isScanningWater) ...[
-                            const SizedBox(height: 12),
-
-                            const LinearProgressIndicator(),
-
-                            const SizedBox(height: 6),
-
-                            const Center(
-                              child: Text(
-                                'Đang chạy thuật toán mô phỏng nhận diện công tơ nước...',
-
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ],
-
-                          if (_waterImagePath != null) ...[
-                            const SizedBox(height: 8),
-
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-
-                              decoration: BoxDecoration(
-                                color: AppTheme.success.withValues(alpha: 0.1),
-
-                                borderRadius: BorderRadius.circular(6),
-
-                                border: Border.all(
-                                  color: AppTheme.success.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                ),
-                              ),
-
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle_outline,
-                                    size: 16,
-                                    color: AppTheme.success,
-                                  ),
-
-                                  const SizedBox(width: 6),
-
-                                  Expanded(
-                                    child: Text(
-                                      'Đã đính kèm ảnh công tơ nước: ${_waterImagePath!.split(r'/').last.split(r'\\').last}',
-
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppTheme.success,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-
-                                      maxLines: 1,
-
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.close,
-                                      size: 16,
-                                      color: AppTheme.textSecondary,
-                                    ),
-
-                                    onPressed: () =>
-                                        setState(() => _waterImagePath = null),
-
-                                    visualDensity: VisualDensity.compact,
-
-                                    padding: EdgeInsets.zero,
-
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 12),
-
-                          TextFormField(
-                            controller: _waterController,
-
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-
-                            decoration: const InputDecoration(
-                              labelText: 'Chỉ số nước mới *',
-
-                              suffixText: 'm³',
-
-                              border: OutlineInputBorder(),
-
-                              prefixIcon: Icon(Icons.water_damage_outlined),
-                            ),
-
-                            validator: (val) {
-                              if (val == null || val.trim().isEmpty) {
-                                return 'Vui lòng nhập chỉ số nước';
-                              }
-
-                              if (double.tryParse(val.trim()) == null) {
-                                return 'Chỉ số phải là số hợp lệ';
-                              }
-
-                              return null;
-                            },
-                          ),
-
-                          if (waterAnalysis != null)
-                            _buildAnomalyBanner(waterAnalysis),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Kỳ khai báo
-                    TextFormField(
-                      controller: _periodController,
-
-                      decoration: const InputDecoration(
-                        labelText: 'Kỳ khai báo (MM/yyyy) *',
-
-                        border: OutlineInputBorder(),
-
-                        prefixIcon: Icon(Icons.calendar_month_outlined),
-                      ),
-
-                      validator: validateInvoicePeriod,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Nút gửi
-                    SizedBox(
-                      width: double.infinity,
-
-                      height: 50,
-
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
-
-                          foregroundColor: Colors.white,
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-
-                        icon: _isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.send_outlined),
-
-                        label: Text(
-                          _isSubmitting
-                              ? 'Đang gửi...'
-                              : 'Gửi chỉ số cho Ban Quản Lý',
-
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        onPressed: _isSubmitting
-                            ? null
-                            : () => _submit(oldElec, oldWater),
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // Danh sách lịch sử các lần gửi
-                    const Text(
-                      'Lịch Sử Khai Báo Chỉ Số',
-
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    historyAsync.when(
-                      data: (history) {
-                        if (history.isEmpty) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 24),
-
-                              child: Text(
-                                'Chưa có lịch sử khai báo chỉ số nào.',
-                                style: TextStyle(color: AppTheme.textSecondary),
-                              ),
-                            ),
-                          );
-                        }
-
-                        return ListView.builder(
-                          shrinkWrap: true,
-
-                          physics: const NeverScrollableScrollPhysics(),
-
-                          itemCount: history.length,
-
-                          itemBuilder: (context, index) {
-                            final item = history[index];
-
-                            Color statusColor = AppTheme.warning;
-
-                            if (item.isApproved) {
-                              statusColor = AppStatusColors.paid;
-                            }
-
-                            if (item.isRejected) statusColor = AppTheme.error;
-
-                            if (item.isCancelled) statusColor = Colors.grey;
-
-                            return AppCard(
-                              margin: const EdgeInsets.only(bottom: 12),
-
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-
-                                    children: [
-                                      Text(
-                                        'Kỳ: ${item.period}',
-
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-
-                                        decoration: BoxDecoration(
-                                          color: statusColor.withValues(
-                                            alpha: 0.12,
-                                          ),
-
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-
-                                        child: Text(
-                                          item.statusDisplayName,
-
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: statusColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 8),
-
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          'Điện: ${item.electricReading} kWh',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-
-                                      Expanded(
-                                        child: Text(
-                                          'Nước: ${item.waterReading} m³',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 6),
-
-                                  Text(
-                                    'Gửi lúc: ${_dateFormat.format(item.createdAt)}',
-
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                  ),
-
-                                  if (item.hasAnomaly &&
-                                      item.anomalyReason != null) ...[
-                                    const SizedBox(height: 8),
-
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-
-                                      decoration: BoxDecoration(
-                                        color: item.isDangerAnomaly
-                                            ? AppTheme.error.withValues(
-                                                alpha: 0.08,
-                                              )
-                                            : Colors.orange.withValues(
-                                                alpha: 0.08,
-                                              ),
-
-                                        borderRadius: BorderRadius.circular(6),
-
-                                        border: Border.all(
-                                          color: item.isDangerAnomaly
-                                              ? AppTheme.error
-                                              : Colors.orange,
-                                        ),
-                                      ),
-
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            item.isDangerAnomaly
-                                                ? Icons.error_outline
-                                                : Icons.warning_amber_rounded,
-
-                                            size: 16,
-
-                                            color: item.isDangerAnomaly
-                                                ? AppTheme.error
-                                                : Colors.orange.shade800,
-                                          ),
-
-                                          const SizedBox(width: 6),
-
-                                          Expanded(
-                                            child: Text(
-                                              'Lưu ý BQL: ${item.anomalyReason}',
-
-                                              style: TextStyle(
-                                                fontSize: 12,
-
-                                                color: item.isDangerAnomaly
-                                                    ? AppTheme.error
-                                                    : Colors.orange.shade900,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-
-                                  if (item.isRejected &&
-                                      item.rejectReason != null) ...[
-                                    const SizedBox(height: 8),
-
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.error.withValues(
-                                          alpha: 0.08,
-                                        ),
-
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.info_outline,
-                                            size: 16,
-                                            color: AppTheme.error,
-                                          ),
-
-                                          const SizedBox(width: 6),
-
-                                          Expanded(
-                                            child: Text(
-                                              'Lý do từ chối: ${item.rejectReason}',
-
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                color: AppTheme.error,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-
-                                  if (item.isPending) ...[
-                                    const SizedBox(height: 10),
-
-                                    const Divider(height: 1),
-
-                                    const SizedBox(height: 6),
-
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-
-                                      children: [
-                                        OutlinedButton.icon(
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: AppTheme.primary,
-
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                          ),
-
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            size: 16,
-                                          ),
-
-                                          label: const Text('Sửa chỉ số'),
-
-                                          onPressed: () =>
-                                              _showEditSubmissionDialog(
-                                                context,
-                                                item,
-                                              ),
-                                        ),
-
-                                        const SizedBox(width: 8),
-
-                                        TextButton.icon(
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: AppTheme.error,
-
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                          ),
-
-                                          icon: const Icon(
-                                            Icons.cancel_outlined,
-                                            size: 16,
-                                          ),
-
-                                          label: const Text('Hủy phiếu'),
-
-                                          onPressed: () =>
-                                              _confirmCancelSubmission(
-                                                context,
-                                                item,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-
-                      error: (e, _) => AppErrorCard(error: e),
-                    ),
-                  ],
+                  ),
                 ),
+              ),
+            );
+          } else {
+            content = Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ?warningWidget,
+                  previousCard,
+                  const SizedBox(height: 16),
+                  electricCard,
+                  const SizedBox(height: 16),
+                  waterCard,
+                  const SizedBox(height: 16),
+                  periodField,
+                  const SizedBox(height: 20),
+                  submitButton,
+                  const SizedBox(height: 28),
+                  historySection,
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(currentApartmentReadingsProvider);
+              ref.invalidate(residentMeterReadingsProvider);
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Form(
+                key: _formKey,
+                child: content,
               ),
             ),
           );
         },
-
         loading: () => const Center(child: CircularProgressIndicator()),
-
         error: (e, _) => Center(child: AppErrorCard(error: e)),
       ),
+    );
+  }
+
+  Widget _buildOverdueWarning() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.amber.shade400),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.amber.shade800,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Lưu ý: Đã quá hạn chốt số tháng này (Hạn chót: ngày 25)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Vui lòng gửi chỉ số sớm nhất có thể để tránh bị tạm tính chỉ số theo mức trung bình của căn hộ.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviousReadingsCard(
+    String aptCode,
+    double oldElec,
+    double oldWater,
+  ) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.history_toggle_off,
+                color: AppTheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Chỉ số kỳ trước • Căn hộ $aptCode',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.amber.shade200,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.bolt,
+                            color: Colors.amber.shade800,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          const Expanded(
+                            child: Text(
+                              'Điện cũ',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '$oldElec kWh',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.blue.shade200,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.water_drop,
+                            color: Colors.blue.shade800,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          const Expanded(
+                            child: Text(
+                              'Nước cũ',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '$oldWater m³',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildElectricCard(AnomalyAnalysisResult? elecAnalysis) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.bolt, color: Colors.amber),
+                  SizedBox(width: 6),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Công tơ Điện (kWh)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton.filledTonal(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Chụp ảnh công tơ điện',
+                    icon: const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 18,
+                    ),
+                    onPressed: () => _pickMeterImage(
+                      MeterType.electric,
+                      ImageSource.camera,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton.outlined(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Chọn ảnh từ thư viện',
+                    icon: const Icon(
+                      Icons.photo_library_outlined,
+                      size: 18,
+                    ),
+                    onPressed: () => _pickMeterImage(
+                      MeterType.electric,
+                      ImageSource.gallery,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (_isScanningElectric) ...[
+            const SizedBox(height: 12),
+            const LinearProgressIndicator(),
+            const SizedBox(height: 6),
+            const Center(
+              child: Text(
+                'Đang chạy thuật toán mô phỏng nhận diện công tơ điện...',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ),
+          ],
+          if (_electricImagePath != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.success.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: AppTheme.success.withValues(
+                    alpha: 0.3,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 16,
+                    color: AppTheme.success,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Đã đính kèm ảnh công tơ điện: ${_electricImagePath!.split(r'/').last.split(r'\\').last}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.success,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    onPressed: () => setState(
+                      () => _electricImagePath = null,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _electricController,
+            keyboardType: const TextInputType.numberWithOptions(
+              decimal: true,
+            ),
+            decoration: const InputDecoration(
+              labelText: 'Chỉ số điện mới *',
+              suffixText: 'kWh',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.electric_meter_outlined),
+            ),
+            validator: (val) {
+              if (val == null || val.trim().isEmpty) {
+                return 'Vui lòng nhập chỉ số điện';
+              }
+              if (double.tryParse(val.trim()) == null) {
+                return 'Chỉ số phải là số hợp lệ';
+              }
+              return null;
+            },
+          ),
+          if (elecAnalysis != null)
+            _buildAnomalyBanner(elecAnalysis),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWaterCard(AnomalyAnalysisResult? waterAnalysis) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.water_drop, color: Colors.blue),
+                  SizedBox(width: 6),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Công tơ Nước (m³)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton.filledTonal(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Chụp ảnh công tơ nước',
+                    icon: const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 18,
+                    ),
+                    onPressed: () => _pickMeterImage(
+                      MeterType.water,
+                      ImageSource.camera,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton.outlined(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Chọn ảnh từ thư viện',
+                    icon: const Icon(
+                      Icons.photo_library_outlined,
+                      size: 18,
+                    ),
+                    onPressed: () => _pickMeterImage(
+                      MeterType.water,
+                      ImageSource.gallery,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (_isScanningWater) ...[
+            const SizedBox(height: 12),
+            const LinearProgressIndicator(),
+            const SizedBox(height: 6),
+            const Center(
+              child: Text(
+                'Đang chạy thuật toán mô phỏng nhận diện công tơ nước...',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ),
+          ],
+          if (_waterImagePath != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.success.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: AppTheme.success.withValues(
+                    alpha: 0.3,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 16,
+                    color: AppTheme.success,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Đã đính kèm ảnh công tơ nước: ${_waterImagePath!.split(r'/').last.split(r'\\').last}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.success,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    onPressed: () =>
+                        setState(() => _waterImagePath = null),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _waterController,
+            keyboardType: const TextInputType.numberWithOptions(
+              decimal: true,
+            ),
+            decoration: const InputDecoration(
+              labelText: 'Chỉ số nước mới *',
+              suffixText: 'm³',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.water_damage_outlined),
+            ),
+            validator: (val) {
+              if (val == null || val.trim().isEmpty) {
+                return 'Vui lòng nhập chỉ số nước';
+              }
+              if (double.tryParse(val.trim()) == null) {
+                return 'Chỉ số phải là số hợp lệ';
+              }
+              return null;
+            },
+          ),
+          if (waterAnalysis != null)
+            _buildAnomalyBanner(waterAnalysis),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPeriodField() {
+    return TextFormField(
+      controller: _periodController,
+      decoration: const InputDecoration(
+        labelText: 'Kỳ khai báo (MM/yyyy) *',
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.calendar_month_outlined),
+      ),
+      validator: validateInvoicePeriod,
+    );
+  }
+
+  Widget _buildSubmitButton(double oldElec, double oldWater) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          icon: _isSubmitting
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(Icons.send_outlined),
+          label: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              _isSubmitting
+                  ? 'Đang gửi...'
+                  : 'Gửi chỉ số cho Ban Quản Lý',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          onPressed: _isSubmitting
+              ? null
+              : () => _submit(oldElec, oldWater),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHistorySection(
+    AsyncValue<List<MeterReadingSubmissionModel>> historyAsync,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Lịch Sử Khai Báo Chỉ Số',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        historyAsync.when(
+          data: (history) {
+            if (history.isEmpty) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    'Chưa có lịch sử khai báo chỉ số nào.',
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: history.length,
+              itemBuilder: (context, index) {
+                final item = history[index];
+                Color statusColor = AppTheme.warning;
+                if (item.isApproved) {
+                  statusColor = AppStatusColors.paid;
+                }
+                if (item.isRejected) statusColor = AppTheme.error;
+                if (item.isCancelled) statusColor = Colors.grey;
+
+                return AppCard(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Kỳ: ${item.period}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 100),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(
+                                  alpha: 0.12,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  8,
+                                ),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  item.statusDisplayName,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Điện: ${item.electricReading} kWh',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Nước: ${item.waterReading} m³',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Gửi lúc: ${_dateFormat.format(item.createdAt)}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      if (item.hasAnomaly &&
+                          item.anomalyReason != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: item.isDangerAnomaly
+                                ? AppTheme.error.withValues(
+                                    alpha: 0.08,
+                                  )
+                                : Colors.orange.withValues(
+                                    alpha: 0.08,
+                                  ),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: item.isDangerAnomaly
+                                  ? AppTheme.error
+                                  : Colors.orange,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                item.isDangerAnomaly
+                                    ? Icons.error_outline
+                                    : Icons.warning_amber_rounded,
+                                size: 16,
+                                color: item.isDangerAnomaly
+                                    ? AppTheme.error
+                                    : Colors.orange.shade800,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Lưu ý BQL: ${item.anomalyReason}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: item.isDangerAnomaly
+                                        ? AppTheme.error
+                                        : Colors.orange.shade900,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (item.isRejected &&
+                          item.rejectReason != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.error.withValues(
+                              alpha: 0.08,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color: AppTheme.error,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Lý do từ chối: ${item.rejectReason}',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppTheme.error,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (item.isPending) ...[
+                        const SizedBox(height: 10),
+                        const Divider(height: 1),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.primary,
+                                visualDensity:
+                                    VisualDensity.compact,
+                              ),
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                size: 16,
+                              ),
+                              label: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text('Sửa chỉ số'),
+                              ),
+                              onPressed: () =>
+                                  _showEditSubmissionDialog(
+                                    context,
+                                    item,
+                                  ),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.error,
+                                visualDensity:
+                                    VisualDensity.compact,
+                              ),
+                              icon: const Icon(
+                                Icons.cancel_outlined,
+                                size: 16,
+                              ),
+                              label: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text('Hủy phiếu'),
+                              ),
+                              onPressed: () =>
+                                  _confirmCancelSubmission(
+                                    context,
+                                    item,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+          loading: () =>
+              const Center(child: CircularProgressIndicator()),
+          error: (e, _) => AppErrorCard(error: e),
+        ),
+      ],
     );
   }
 
