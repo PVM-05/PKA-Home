@@ -450,9 +450,9 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/unified_payment_sheet.dart": {
-    "mtime": 1793968197.3483555,
-    "seen": 1793968350.5547857,
-    "ast_hash": "3b7be192c77b883e449ffa385d83ae07",
+    "mtime": 1794136457.103685,
+    "seen": 1794136877.3714228,
+    "ast_hash": "045ab687e06438bf75fdcf9e42b5ce4c",
     "semantic_hash": ""
   },
   "lib/data/models/accounting_period_model.dart": {
@@ -624,9 +624,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/payment_transaction_model.dart": {
-    "mtime": 1793886319.8221104,
-    "seen": 1793891612.8321867,
-    "ast_hash": "ac48841fafff9ca6fb7986dae9d1f0cd",
+    "mtime": 1794136580.6827013,
+    "seen": 1794136877.3719287,
+    "ast_hash": "f71900760745a3056100c7ae0f5402e4",
     "semantic_hash": ""
   },
   "lib/data/models/resident_model.dart": {
@@ -786,9 +786,9 @@
     "semantic_hash": ""
   },
   "lib/data/providers/payment_provider.dart": {
-    "mtime": 1793886329.7337527,
-    "seen": 1793891612.8321867,
-    "ast_hash": "62a07ceb542234d764a34b290a73a25e",
+    "mtime": 1794136123.261404,
+    "seen": 1794136877.3719287,
+    "ast_hash": "8a2a076c5b0b955a71f627641c9b6e89",
     "semantic_hash": ""
   },
   "lib/data/providers/resident_apartment_provider.dart": {
@@ -798,9 +798,9 @@
     "semantic_hash": ""
   },
   "lib/data/providers/resident_invoice_provider.dart": {
-    "mtime": 1793886329.7357547,
-    "seen": 1793891612.8321867,
-    "ast_hash": "d9d0dac7684b461faac1a043661d74b1",
+    "mtime": 1794136469.772244,
+    "seen": 1794136877.3719287,
+    "ast_hash": "6201e36e0aecb06daa459fe4559789f4",
     "semantic_hash": ""
   },
   "lib/data/providers/resident_issue_provider.dart": {
@@ -930,9 +930,9 @@
     "semantic_hash": ""
   },
   "lib/data/services/payment_service.dart": {
-    "mtime": 1793886329.7509532,
-    "seen": 1793891612.8332055,
-    "ast_hash": "65d77f778405915c36cf8843533e1ed4",
+    "mtime": 1794136379.3287973,
+    "seen": 1794136877.3719287,
+    "ast_hash": "3a773e32725707e706b9fb54b5cda5f9",
     "semantic_hash": ""
   },
   "lib/features/auth/screens/change_password_screen.dart": {
@@ -990,9 +990,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/amenity_management_screen.dart": {
-    "mtime": 1793889482.3602824,
-    "seen": 1793891612.8332055,
-    "ast_hash": "f632663329038c34ced853b0dd8f5efe",
+    "mtime": 1794136453.190968,
+    "seen": 1794136877.3719287,
+    "ast_hash": "71931f983df7044f9c1f76a5aa80ecaa",
     "semantic_hash": ""
   },
   "lib/features/management/screens/announcement_management_screen.dart": {
@@ -1200,9 +1200,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/amenity_booking_screen.dart": {
-    "mtime": 1793889482.4649043,
-    "seen": 1793891612.8332055,
-    "ast_hash": "4671c2da08bcd8e00012016706c62ece",
+    "mtime": 1794136449.506895,
+    "seen": 1794136877.372508,
+    "ast_hash": "fd9f59b4009566e4db92f983749b8fa7",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/create_issue_screen.dart": {
@@ -1260,9 +1260,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_detail_screen.dart": {
-    "mtime": 1793968080.704379,
-    "seen": 1793968350.5547857,
-    "ast_hash": "ef4eda53141ececc8b510a427853fe0e",
+    "mtime": 1794136445.695111,
+    "seen": 1794136877.372508,
+    "ast_hash": "4a4c50fc677eae1604b05b2c82f52b56",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_screen.dart": {
@@ -1794,9 +1794,9 @@
     "semantic_hash": ""
   },
   "test/data/providers/resident_invoice_service_test.dart": {
-    "mtime": 1793886329.8430607,
-    "seen": 1793891612.8332055,
-    "ast_hash": "c711c69f6eeabfcfb97bfb8e6a401f93",
+    "mtime": 1794136475.0261333,
+    "seen": 1794136877.373042,
+    "ast_hash": "73c00647f005fe9da056d7e903a7b1fc",
     "semantic_hash": ""
   },
   "test/data/providers/resident_issue_provider_test.dart": {
@@ -3126,9 +3126,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792933849.680207,
-    "seen": 1793342452.1356795,
-    "ast_hash": "053bc4afde90eb4087787dadab3219d5",
+    "mtime": 1794136711.5298548,
+    "seen": 1794136877.3735728,
+    "ast_hash": "cb1dd7fa5a7d62192bd058e76b2dd73d",
     "semantic_hash": ""
   },
   "docs/API_AND_RPC.md": {
@@ -5052,9 +5052,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/accounting_web_workstation_screen.dart": {
-    "mtime": 1793887617.9785862,
-    "seen": 1793891612.8332055,
-    "ast_hash": "02ef77596db43a8fd30223d33f4816b1",
+    "mtime": 1794136807.4536803,
+    "seen": 1794136877.3719287,
+    "ast_hash": "22a3c8b62a89b9b9955e1d683439ee29",
     "semantic_hash": ""
   },
   "test/core/widgets/adaptive_management_scaffold_test.dart": {
@@ -6618,15 +6618,75 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-07-digital-asset-handover-and-inspection.md": {
-    "mtime": 1794059848.6933007,
-    "seen": 1794061624.7042036,
-    "ast_hash": "7526d226cd4c30b211125fc91cd77b2e",
+    "mtime": 1794061662.8190465,
+    "seen": 1794136877.3741193,
+    "ast_hash": "0d565761dc312a190292169371c79c0c",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-07-digital-asset-handover-and-inspection-design.md": {
     "mtime": 1794059848.8264258,
     "seen": 1794061624.7042036,
     "ast_hash": "a21a94ccf8ac42f55a303eac86a6cb56",
+    "semantic_hash": ""
+  },
+  "lib/data/models/building_payment_config_model.dart": {
+    "mtime": 1794136055.5228734,
+    "seen": 1794136877.3719287,
+    "ast_hash": "7947ccca2926a29cd6bb11a1d1720f3a",
+    "semantic_hash": ""
+  },
+  "lib/data/models/sepay_webhook_payload_model.dart": {
+    "mtime": 1794136045.6503174,
+    "seen": 1794136877.3719287,
+    "ast_hash": "a96eeda4e4c2238bd94f8afbd41154f2",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261108_01_sepay_real_payment_and_webhook.sql": {
+    "mtime": 1794135994.7577608,
+    "seen": 1794136877.372508,
+    "ast_hash": "88c80fa58c0ba156219a4124beb98fbf",
+    "semantic_hash": ""
+  },
+  "test/core/widgets/unified_payment_sheet_real_payment_test.dart": {
+    "mtime": 1794136383.486927,
+    "seen": 1794136877.372508,
+    "ast_hash": "0e045a6dcdccf16eedbf75a89989382b",
+    "semantic_hash": ""
+  },
+  "test/data/models/sepay_models_test.dart": {
+    "mtime": 1794136024.2629776,
+    "seen": 1794136877.373042,
+    "ast_hash": "a3ef275804225b49b09892452761d82d",
+    "semantic_hash": ""
+  },
+  "test/data/services/payment_service_sepay_test.dart": {
+    "mtime": 1794136086.2192805,
+    "seen": 1794136877.373042,
+    "ast_hash": "0bf5fa7c6b8fc086a94ab35f1622fdcc",
+    "semantic_hash": ""
+  },
+  "test/database/sepay_migration_test.dart": {
+    "mtime": 1794135963.8344839,
+    "seen": 1794136877.373042,
+    "ast_hash": "99ec3c58c1aa5000bee1e68c7b8f3180",
+    "semantic_hash": ""
+  },
+  "test/features/management/accounting_sepay_workstation_test.dart": {
+    "mtime": 1794136572.9951866,
+    "seen": 1794136877.373042,
+    "ast_hash": "2a576f250ba6d4fa7c66755ce8b63f6f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-08-sepay-production-real-payment-and-webhook-engine.md": {
+    "mtime": 1794135963.662408,
+    "seen": 1794136877.3741193,
+    "ast_hash": "8f8e9b88901b666215c0ffc58db92610",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-08-sepay-production-real-payment-and-webhook-engine-design.md": {
+    "mtime": 1794135963.7484179,
+    "seen": 1794136877.3741193,
+    "ast_hash": "2cde3e44179aa0d0cf10c62888eddfd5",
     "semantic_hash": ""
   }
 }

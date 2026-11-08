@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../data/models/payment_transaction_model.dart';
 import '../../../data/providers/accounting_workstation_provider.dart';
 import '../../../data/providers/payment_provider.dart';
 
