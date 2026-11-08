@@ -276,73 +276,87 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Gửi Phản Ánh')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Chuyên môn sự cố:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              key: const Key('issue_category_dropdown'),
-              initialValue: _selectedCategory,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.handyman_outlined),
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Chuyên môn sự cố:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'electrical',
-                  child: Text('Điện / Thiết bị điện'),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  key: const Key('issue_category_dropdown'),
+                  isExpanded: true,
+                  initialValue: _selectedCategory,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.handyman_outlined),
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'electrical',
+                      child: Text('Điện / Thiết bị điện'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'plumbing',
+                      child: Text('Nước / Thiết bị vệ sinh'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'construction',
+                      child: Text('Xây dựng / Cửa / Sơn bả'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'elevator',
+                      child: Text('Thang máy / Cửa từ'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'fire_safety',
+                      child: Text('PCCC & Cảnh báo an toàn'),
+                    ),
+                    DropdownMenuItem(value: 'other', child: Text('Sự cố khác')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedCategory = val);
+                  },
                 ),
-                DropdownMenuItem(
-                  value: 'plumbing',
-                  child: Text('Nước / Thiết bị vệ sinh'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Mức độ khẩn cấp & Cam kết SLA:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                DropdownMenuItem(
-                  value: 'construction',
-                  child: Text('Xây dựng / Cửa / Sơn bả'),
+                const SizedBox(height: 8),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                        child: SegmentedButton<String>(
+                          key: const Key('issue_priority_segmented'),
+                          segments: const [
+                            ButtonSegment(value: 'low', label: Text('Thường (72h)')),
+                            ButtonSegment(value: 'medium', label: Text('Ưu tiên (24h)')),
+                            ButtonSegment(value: 'high', label: Text('Khẩn cấp (2h)')),
+                          ],
+                          selected: {_selectedPriority},
+                          onSelectionChanged: (set) {
+                            setState(() => _selectedPriority = set.first);
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                DropdownMenuItem(
-                  value: 'elevator',
-                  child: Text('Thang máy / Cửa từ'),
-                ),
-                DropdownMenuItem(
-                  value: 'fire_safety',
-                  child: Text('PCCC & Cảnh báo an toàn'),
-                ),
-                DropdownMenuItem(value: 'other', child: Text('Sự cố khác')),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedCategory = val);
-              },
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Mức độ khẩn cấp & Cam kết SLA:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            SegmentedButton<String>(
-              key: const Key('issue_priority_segmented'),
-              segments: const [
-                ButtonSegment(value: 'low', label: Text('Thường (72h)')),
-                ButtonSegment(value: 'medium', label: Text('Ưu tiên (24h)')),
-                ButtonSegment(value: 'high', label: Text('Khẩn cấp (2h)')),
-              ],
-              selected: {_selectedPriority},
-              onSelectionChanged: (set) {
-                setState(() => _selectedPriority = set.first);
-              },
-            ),
-            const SizedBox(height: 8),
+                const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -407,7 +421,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               maxLines: 5,
               decoration: const InputDecoration(
                 hintText:
-                    'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy, hoặc vỡ ống nước...',
+                    'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy...',
                 alignLabelWithHint: true,
               ),
             ),
@@ -659,10 +673,14 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Đính kèm hình ảnh (Tối đa 3 ảnh):',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                const Flexible(
+                  child: Text(
+                    'Đính kèm hình ảnh (Tối đa 3 ảnh):',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '${_imageFiles.length}/3',
                   style: const TextStyle(
@@ -678,7 +696,10 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               GestureDetector(
                 onTap: _showImageSourceDialog,
                 child: Container(
-                  height: 140,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 24,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: Theme.of(context).dividerColor),
                     borderRadius: BorderRadius.circular(12),
@@ -705,6 +726,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                       SizedBox(height: 4),
                       Text(
                         '(Chụp ảnh hoặc chọn từ thư viện - Tối đa 3 ảnh)',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppTheme.textSecondary,
@@ -810,6 +832,8 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }

@@ -13,6 +13,7 @@ import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../core/widgets/app_storage_image.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_card.dart';
 
 class ResidentIssueScreen extends ConsumerWidget {
   const ResidentIssueScreen({super.key});
@@ -23,55 +24,63 @@ class ResidentIssueScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Phản ánh sự cố')),
-      body: issueState.when(
-        data: (issues) {
-          if (issues.isEmpty) {
-            return RefreshIndicator(
-              color: AppTheme.primary,
-              onRefresh: () async {
-                HapticFeedback.lightImpact();
-                ref.invalidate(residentIssueProvider);
-              },
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    child: _buildEmptyState(context),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: issueState.when(
+            data: (issues) {
+              if (issues.isEmpty) {
+                return RefreshIndicator(
+                  color: AppTheme.primary,
+                  onRefresh: () async {
+                    HapticFeedback.lightImpact();
+                    ref.invalidate(residentIssueProvider);
+                  },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: _buildEmptyState(context),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }
+                );
+              }
 
-          return RefreshIndicator(
-            color: AppTheme.primary,
-            onRefresh: () async {
-              HapticFeedback.lightImpact();
-              ref.invalidate(residentIssueProvider);
+              return RefreshIndicator(
+                color: AppTheme.primary,
+                onRefresh: () async {
+                  HapticFeedback.lightImpact();
+                  ref.invalidate(residentIssueProvider);
+                },
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
+                  ),
+                  itemCount: issues.length,
+                  itemBuilder: (context, index) {
+                    return _buildIssueCard(context, ref, issues[index]);
+                  },
+                ),
+              );
             },
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
+            loading: () => ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: issues.length,
-              itemBuilder: (context, index) {
-                return _buildIssueCard(context, ref, issues[index]);
-              },
+              children: const [
+                IssueCardSkeleton(),
+                IssueCardSkeleton(),
+                IssueCardSkeleton(),
+              ],
             ),
-          );
-        },
-        loading: () => ListView(
-          padding: const EdgeInsets.all(16),
-          children: const [
-            IssueCardSkeleton(),
-            IssueCardSkeleton(),
-            IssueCardSkeleton(),
-          ],
-        ),
-        error: (error, stack) => Center(
-          child: AppErrorCard(
-            error: error,
-            onRetry: () => ref.invalidate(residentIssueProvider),
+            error: (error, stack) => Center(
+              child: AppErrorCard(
+                error: error,
+                onRetry: () => ref.invalidate(residentIssueProvider),
+              ),
+            ),
           ),
         ),
       ),
@@ -243,62 +252,79 @@ class ResidentIssueScreen extends ConsumerWidget {
         priorityText = 'Bình thường';
     }
 
-    return GestureDetector(
-      onTap: () => context.push(AppRoutes.residentIssueDetail, extra: issue),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.residentIssueDetail, extra: issue),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.access_time,
-                        size: 16,
+                        size: 14,
                         color: AppTheme.textSecondary,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        formatDate.format(issue.createdAt),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
+                      Expanded(
+                        child: Text(
+                          formatDate.format(issue.createdAt),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          statusText,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
+                ),
+                const SizedBox(width: 6),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: statusColor.withValues(alpha: 0.3),
+                          width: 1,
                         ),
                       ),
-                      if (issue.status == 'pending') ...[
-                        const SizedBox(width: 4),
-                        PopupMenuButton<String>(
+                      child: Text(
+                        statusText,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    if (issue.status == 'pending') ...[
+                      const SizedBox(width: 2),
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
+                          iconSize: 18,
                           icon: const Icon(
                             Icons.more_vert,
-                            size: 20,
+                            size: 18,
                             color: AppTheme.textSecondary,
                           ),
                           onSelected: (value) {
@@ -345,11 +371,12 @@ class ResidentIssueScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ],
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
+            ),
               const SizedBox(height: 12),
               Text(issue.description, style: const TextStyle(fontSize: 14)),
 
@@ -513,22 +540,30 @@ class ResidentIssueScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Text(
-                    'Mức độ: ',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textSecondary,
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        text: 'Mức độ: ',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: priorityText,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: priorityColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
-                    priorityText,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: priorityColor,
-                    ),
-                  ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -539,14 +574,13 @@ class ResidentIssueScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Xem chi tiết & trao đổi',
+                        'Chi tiết',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppTheme.primary.withValues(alpha: 0.7),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(width: 2),
                       Icon(
                         Icons.chevron_right,
                         size: 16,
@@ -559,7 +593,6 @@ class ResidentIssueScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
