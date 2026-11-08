@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/core/widgets/app_card.dart';
 import 'package:pka_home/data/models/apartment_model.dart';
 import 'package:pka_home/data/models/invoice_model.dart';
 import 'package:pka_home/data/providers/resident_invoice_provider.dart';
