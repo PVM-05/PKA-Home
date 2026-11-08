@@ -462,8 +462,8 @@
     "semantic_hash": ""
   },
   "lib/data/models/amenity_booking_model.dart": {
-    "mtime": 1794138974.9717386,
-    "seen": 1794139909.1964087,
+    "mtime": 1794139988.2565525,
+    "seen": 1794145048.1065013,
     "ast_hash": "1fb98a10960a99612ec1636ff412b18f",
     "semantic_hash": ""
   },
@@ -606,9 +606,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/meter_reading_submission_model.dart": {
-    "mtime": 1793886319.814076,
-    "seen": 1793891612.8321867,
-    "ast_hash": "a9e4af4e0463a8807fef5bd6966fb37d",
+    "mtime": 1794144361.5241838,
+    "seen": 1794145048.1065013,
+    "ast_hash": "0d97eb0eb276bcd395a0c775672b1731",
     "semantic_hash": ""
   },
   "lib/data/models/notification_model.dart": {
@@ -666,8 +666,8 @@
     "semantic_hash": ""
   },
   "lib/data/providers/amenity_booking_provider.dart": {
-    "mtime": 1794139041.7914333,
-    "seen": 1794139909.1964087,
+    "mtime": 1794139988.4421656,
+    "seen": 1794145048.1065013,
     "ast_hash": "a4964523f43b177647726d0004e4a88d",
     "semantic_hash": ""
   },
@@ -774,9 +774,9 @@
     "semantic_hash": ""
   },
   "lib/data/providers/meter_reading_provider.dart": {
-    "mtime": 1793886319.8622334,
-    "seen": 1793891612.8321867,
-    "ast_hash": "c18e5185ca894943068e8c31cd959413",
+    "mtime": 1794144444.4034715,
+    "seen": 1794145048.1065013,
+    "ast_hash": "28391bd9b1879f255257195289dff44a",
     "semantic_hash": ""
   },
   "lib/data/providers/notification_provider.dart": {
@@ -828,8 +828,8 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/amenity_booking_repository.dart": {
-    "mtime": 1794139031.5833602,
-    "seen": 1794139909.1964087,
+    "mtime": 1794139988.547933,
+    "seen": 1794145048.1065013,
     "ast_hash": "9138c28531c5466f3378e7f686216956",
     "semantic_hash": ""
   },
@@ -900,9 +900,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/meter_reading_repository.dart": {
-    "mtime": 1793886319.8940027,
-    "seen": 1793891612.8332055,
-    "ast_hash": "ef803ac98d64853b2f412777604c28f4",
+    "mtime": 1794144433.7705042,
+    "seen": 1794145048.1075,
+    "ast_hash": "1c976047e67d75ac486c8a77eadcb79d",
     "semantic_hash": ""
   },
   "lib/data/repositories/notification_repository.dart": {
@@ -990,8 +990,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/amenity_management_screen.dart": {
-    "mtime": 1794139843.7685392,
-    "seen": 1794139909.1964087,
+    "mtime": 1794139988.62318,
+    "seen": 1794145048.1075,
     "ast_hash": "d37645a87efd081c8c6a4eb10cf8326a",
     "semantic_hash": ""
   },
@@ -1092,9 +1092,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_meter_reading_screen.dart": {
-    "mtime": 1793888402.086013,
-    "seen": 1793891612.8332055,
-    "ast_hash": "e6f660555327c256c45b8a5eac21e69b",
+    "mtime": 1794144958.9255962,
+    "seen": 1794145048.1075,
+    "ast_hash": "299514febc88daf2fd88361b3f58ea24",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_payment_transactions_screen.dart": {
@@ -1200,8 +1200,8 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/amenity_booking_screen.dart": {
-    "mtime": 1794139403.207329,
-    "seen": 1794139909.1974075,
+    "mtime": 1794139988.6940892,
+    "seen": 1794145048.1075,
     "ast_hash": "47f6ae150455283d71dcec644b2723f9",
     "semantic_hash": ""
   },
@@ -1944,9 +1944,9 @@
     "semantic_hash": ""
   },
   "test/data/repositories/meter_reading_repository_test.dart": {
-    "mtime": 1793886320.2139401,
-    "seen": 1793891612.8332055,
-    "ast_hash": "c0d876714eab92a49898e16092ff7c73",
+    "mtime": 1794144938.8857358,
+    "seen": 1794145048.1075,
+    "ast_hash": "a5081b3ff769f929fa80a33466ac5846",
     "semantic_hash": ""
   },
   "test/data/repositories/notification_repository_phase_e1_test.dart": {
@@ -6690,9 +6690,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/amenity_inspection_model.dart": {
-    "mtime": 1794138933.4745352,
-    "seen": 1794139909.1964087,
-    "ast_hash": "760a58afab2864063d97bc14f425555e",
+    "mtime": 1794144550.6196408,
+    "seen": 1794145048.1065013,
+    "ast_hash": "ec681fe261e9d52a0a013c7edcb1ddc5",
     "semantic_hash": ""
   },
   "supabase/functions/sepay-webhook/index.ts": {
@@ -6702,38 +6702,38 @@
     "semantic_hash": ""
   },
   "supabase/migrations/20261108_02_amenity_lifecycle_and_deposit.sql": {
-    "mtime": 1794138887.4322681,
-    "seen": 1794139909.1974075,
-    "ast_hash": "944fdf645a0d5dc943e7394569055ff1",
+    "mtime": 1794144550.6221626,
+    "seen": 1794145048.1075,
+    "ast_hash": "ca9af6e56557e43e319fb222e24856f5",
     "semantic_hash": ""
   },
   "test/data/models/amenity_lifecycle_models_test.dart": {
-    "mtime": 1794138916.079213,
-    "seen": 1794139909.1974075,
-    "ast_hash": "9981fadf83176b974eeaa8c7bef40dd1",
+    "mtime": 1794144550.625474,
+    "seen": 1794145048.1075,
+    "ast_hash": "3c6b39055ac956ae6b36edd16e0c9add",
     "semantic_hash": ""
   },
   "test/data/repositories/amenity_booking_repository_lifecycle_test.dart": {
-    "mtime": 1794139003.339135,
-    "seen": 1794139909.1974075,
-    "ast_hash": "911b91b35daf8db74193807c0ab72309",
+    "mtime": 1794144550.6276171,
+    "seen": 1794145048.1075,
+    "ast_hash": "ef4665ed4b3f1d637d431d0d2495356e",
     "semantic_hash": ""
   },
   "test/database/amenity_lifecycle_migration_test.dart": {
-    "mtime": 1794138841.890995,
-    "seen": 1794139909.1974075,
-    "ast_hash": "e592243e16900d96e6aa169b7d687a16",
+    "mtime": 1794144550.6296275,
+    "seen": 1794145048.1075,
+    "ast_hash": "e9209ca057712645878c537f58152500",
     "semantic_hash": ""
   },
   "test/features/management/amenity_management_inspection_ui_test.dart": {
-    "mtime": 1794139762.215137,
-    "seen": 1794139909.1974075,
+    "mtime": 1794139988.9566472,
+    "seen": 1794145048.1075,
     "ast_hash": "6dd77476f8c96e3d3729afe2ba564467",
     "semantic_hash": ""
   },
   "test/features/resident/amenity_booking_qr_ticket_ui_test.dart": {
-    "mtime": 1794139380.0144472,
-    "seen": 1794139909.1974075,
+    "mtime": 1794139989.005833,
+    "seen": 1794145048.1075,
     "ast_hash": "6ae3f247be1f0d9308ffa4bfdd167b15",
     "semantic_hash": ""
   },
@@ -6744,15 +6744,63 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-08-amenity-booking-and-deposit-lifecycle.md": {
-    "mtime": 1794138828.5159109,
-    "seen": 1794139909.198408,
-    "ast_hash": "5c132d4add2a399b379f2c4fab14ea8d",
+    "mtime": 1794139988.1392124,
+    "seen": 1794145048.1085074,
+    "ast_hash": "05b38d8edcd010fd4c816c54162d1867",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-08-amenity-booking-and-deposit-lifecycle-design.md": {
     "mtime": 1794139122.9193983,
     "seen": 1794139909.198408,
     "ast_hash": "a2cf04714cb79145fa025cddab55ca30",
+    "semantic_hash": ""
+  },
+  "lib/data/models/building_utility_rate_model.dart": {
+    "mtime": 1794144898.1221292,
+    "seen": 1794145048.1065013,
+    "ast_hash": "1145eb3247facc224f5f971d45d5eb06",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261108_03_utility_billing_engine.sql": {
+    "mtime": 1794145003.1724336,
+    "seen": 1794145048.1075,
+    "ast_hash": "4bfb6f38b36bd088fb9d732592e88e3e",
+    "semantic_hash": ""
+  },
+  "test/data/models/utility_billing_models_test.dart": {
+    "mtime": 1794145003.1744423,
+    "seen": 1794145048.1075,
+    "ast_hash": "2481e513828593afd7809cd3c9782c38",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/utility_billing_repository_test.dart": {
+    "mtime": 1794144898.5279143,
+    "seen": 1794145048.1075,
+    "ast_hash": "7a7f75b302e19995aa725350e5f5afda",
+    "semantic_hash": ""
+  },
+  "test/database/utility_billing_engine_migration_test.dart": {
+    "mtime": 1794145003.1754413,
+    "seen": 1794145048.1075,
+    "ast_hash": "b390838c3fcfb3dce2be5ab18ef305b0",
+    "semantic_hash": ""
+  },
+  "test/features/management/management_meter_reading_billing_ui_test.dart": {
+    "mtime": 1794144746.2506156,
+    "seen": 1794145048.1075,
+    "ast_hash": "e55334ac797d35b50a57e29b75ba6d9b",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-08-utility-meter-reading-and-billing-engine.md": {
+    "mtime": 1794145019.8957827,
+    "seen": 1794145048.1085074,
+    "ast_hash": "c1def4b79b63cb958e3fbf07994f7e63",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-08-utility-meter-reading-and-billing-engine-design.md": {
+    "mtime": 1794145003.1709173,
+    "seen": 1794145048.1085074,
+    "ast_hash": "a1af72615e4dd31ac46200541491e579",
     "semantic_hash": ""
   }
 }

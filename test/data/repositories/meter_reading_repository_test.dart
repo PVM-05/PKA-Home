@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pka_home/data/models/building_utility_rate_model.dart';
 import 'package:pka_home/data/models/meter_reading_submission_model.dart';
 import 'package:pka_home/data/repositories/meter_reading_repository.dart';
 
@@ -9,6 +10,18 @@ class MockMeterReadingRepository implements MeterReadingRepository {
   bool detectAnomalyCalled = false;
 
   final List<MeterReadingSubmissionModel> _items = [];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  Future<List<BuildingUtilityRateModel>> getUtilityRates() async => [];
+
+  @override
+  Future<Map<String, dynamic>> batchRecordReadings({
+    required String period,
+    required List<Map<String, dynamic>> readings,
+  }) async => {'success': true};
 
   @override
   Future<Map<String, dynamic>> detectAnomaly({

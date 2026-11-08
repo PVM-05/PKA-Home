@@ -29,11 +29,11 @@
   - RPC: `approve_meter_reading(p_submission_id, p_generate_invoice, p_due_date)`.
   - RPC: `batch_record_meter_readings(p_period, p_readings)`.
 
-- [ ] **Step 1: Viết failing test cho Migration SQL**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Tạo file migration `20261108_03_utility_billing_engine.sql` với đầy đủ schema & 2 RPCs**
-- [ ] **Step 4: Chạy lại test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết failing test cho Migration SQL**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Tạo file migration `20261108_03_utility_billing_engine.sql` với đầy đủ schema & 2 RPCs**
+- [x] **Step 4: Chạy lại test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -50,11 +50,11 @@
   - `BuildingUtilityRateModel`: Hỗ trợ biểu giá cố định và bậc thang EVN/nước sạch.
   - `MeterReadingSubmissionModel`: Bổ sung `previousElectricReading`, `previousWaterReading`, `electricConsumed`, `waterConsumed`, `invoiceId`.
 
-- [ ] **Step 1: Viết test cho models mới và serialization**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Tạo `building_utility_rate_model.dart` và cập nhật `meter_reading_submission_model.dart`**
-- [ ] **Step 4: Chạy test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết test cho models mới và serialization**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Tạo `building_utility_rate_model.dart` và cập nhật `meter_reading_submission_model.dart`**
+- [x] **Step 4: Chạy test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -72,11 +72,11 @@
   - `MeterReadingRepository.batchRecordReadings(period, readings)`
   - `MeterReadingRepository.approveReading(submissionId, generateInvoice, dueDate)`
 
-- [ ] **Step 1: Viết test cho Repository các hàm lấy biểu giá và chốt số hàng loạt**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Cập nhật Repository và Providers**
-- [ ] **Step 4: Chạy test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết test cho Repository các hàm lấy biểu giá và chốt số hàng loạt**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Cập nhật Repository và Providers**
+- [x] **Step 4: Chạy test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -92,11 +92,11 @@
   - Tab "Chốt Số Nhanh Theo Tầng": Kỹ thuật viên chọn Tầng, nhập nhanh số mới từng căn, hiển thị tiêu thụ chênh lệch và cảnh báo bất thường trực quan.
   - Hộp thoại Phê duyệt nâng cấp: Tính toán trước chi phí và tích hợp sinh hóa đơn tự động sang phân hệ kế toán.
 
-- [ ] **Step 1: Viết widget test cho Trạm Chốt Số Nhanh và Hộp thoại phê duyệt sinh hóa đơn**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Cập nhật `ManagementMeterReadingScreen`**
-- [ ] **Step 4: Chạy test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết widget test cho Trạm Chốt Số Nhanh và Hộp thoại phê duyệt sinh hóa đơn**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Cập nhật `ManagementMeterReadingScreen`**
+- [x] **Step 4: Chạy test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -105,7 +105,8 @@
 **Files:**
 - Toàn bộ test suite liên quan đến tiện ích, chỉ số điện nước và hóa đơn.
 
-- [ ] **Step 1: Chạy toàn bộ test suite của phân hệ điện nước & hóa đơn**
-- [ ] **Step 2: Chạy `dart analyze lib test` đảm bảo 0 issues**
-- [ ] **Step 3: Chạy `graphify update .`**
-- [ ] **Step 4: Commit hoàn tất module lên `main`**
+- [x] **Step 1: Chạy toàn bộ test suite của phân hệ điện nước & hóa đơn**
+- [x] **Step 2: Chạy `dart analyze lib test` đảm bảo 0 issues**
+- [x] **Step 3: Chạy `graphify update .`**
+- [x] **Step 4: Commit hoàn tất module lên `main`**
+

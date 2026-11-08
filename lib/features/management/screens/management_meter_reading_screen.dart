@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../data/models/building_utility_rate_model.dart';
 import '../../../data/models/meter_reading_submission_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/meter_reading_provider.dart';
@@ -44,12 +45,287 @@ class _ManagementMeterReadingScreenState
     ref.invalidate(pendingAnomalyCountProvider);
   }
 
+  String _formatConsumed(double v) {
+    if (v == v.roundToDouble()) {
+      return v.toInt().toString();
+    }
+    return v.toStringAsFixed(1);
+  }
+
+  Future<void> _showBatchRecordDialog() async {
+    final now = DateTime.now();
+    final defaultPeriod = '${now.month.toString().padLeft(2, '0')}/${now.year}';
+    final periodController = TextEditingController(text: defaultPeriod);
+    final formKey = GlobalKey<FormState>();
+
+    final rows = <_BatchRowData>[
+      _BatchRowData(),
+    ];
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.flash_on, color: AppTheme.primary, size: 26),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Trạm Chốt Số Tiện Ích Theo Tầng',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: 600,
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Kỹ thuật viên nhập đồng thời chỉ số điện và nước cho các căn hộ trong kỳ chốt số:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: periodController,
+                          decoration: const InputDecoration(
+                            labelText: 'Kỳ chốt số (MM/yyyy)',
+                            hintText: 'VD: 11/2026',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.calendar_month, size: 20),
+                          ),
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) {
+                              return 'Vui lòng nhập kỳ chốt số';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Danh sách căn hộ',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton.icon(
+                              icon: const Icon(Icons.add, size: 18),
+                              label: const Text('Thêm căn hộ'),
+                              onPressed: () {
+                                setDialogState(() {
+                                  rows.add(_BatchRowData());
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ...rows.asMap().entries.map((entry) {
+                          final idx = entry.key;
+                          final row = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: TextFormField(
+                                    controller: row.aptController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Căn hộ #${idx + 1}',
+                                      hintText: 'A0110',
+                                      border: const OutlineInputBorder(),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    validator: (val) {
+                                      if (val == null || val.trim().isEmpty) {
+                                        return 'Cần mã căn';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  flex: 3,
+                                  child: TextFormField(
+                                    controller: row.electricController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Điện (kWh)',
+                                      border: OutlineInputBorder(),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    validator: (val) {
+                                      if (val == null || double.tryParse(val.trim()) == null) {
+                                        return 'Nhập số';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  flex: 3,
+                                  child: TextFormField(
+                                    controller: row.waterController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Nước (m³)',
+                                      border: OutlineInputBorder(),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    validator: (val) {
+                                      if (val == null || double.tryParse(val.trim()) == null) {
+                                        return 'Nhập số';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                if (rows.length > 1) ...[
+                                  IconButton(
+                                    icon: const Icon(Icons.remove_circle_outline, color: AppTheme.error),
+                                    onPressed: () {
+                                      setDialogState(() {
+                                        rows.removeAt(idx);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Đóng'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    if (formKey.currentState?.validate() ?? false) {
+                      final payload = rows.map((r) => {
+                        'apartment_code': r.aptController.text.trim(),
+                        'electric_reading': double.parse(r.electricController.text.trim()),
+                        'water_reading': double.parse(r.waterController.text.trim()),
+                      }).toList();
+
+                      Navigator.pop(ctx, {
+                        'period': periodController.text.trim(),
+                        'payload': payload,
+                      });
+                    }
+                  },
+                  child: const Text('Xác nhận chốt số'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null || !mounted) return;
+
+    try {
+      final period = result['period'] as String;
+      final payload = result['payload'] as List<Map<String, dynamic>>;
+
+      final res = await ref.read(meterReadingRepositoryProvider).batchRecordReadings(
+        period: period,
+        readings: payload,
+      );
+
+      _refreshAll();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? 'Đã chốt số hàng loạt thành công!'),
+            backgroundColor: AppStatusColors.paid,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(NetworkErrorHandler.getMessage(e)),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _showApproveDialog(MeterReadingSubmissionModel item) async {
     final user = ref.read(authProvider).valueOrNull;
     if (user == null) return;
 
     bool generateInvoice = true;
     final defaultDueDate = DateTime.now().add(const Duration(days: 10));
+
+    final rates = ref.read(buildingUtilityRatesProvider).valueOrNull ?? [];
+    BuildingUtilityRateModel? elecRate;
+    BuildingUtilityRateModel? waterRate;
+    for (final r in rates) {
+      if (r.utilityType == 'electricity') elecRate = r;
+      if (r.utilityType == 'water') waterRate = r;
+    }
+
+    final double elecConsumed = item.effectiveElectricConsumed;
+    final double waterConsumed = item.effectiveWaterConsumed;
+
+    final double estElec = elecRate != null
+        ? elecRate.calculateTotal(elecConsumed)
+        : (elecConsumed * 3500 * 1.08);
+    final double estWater = waterRate != null
+        ? waterRate.calculateTotal(waterConsumed)
+        : (waterConsumed * 25000 * 1.15);
+    final double estTotal = estElec + estWater;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -145,13 +421,39 @@ class _ManagementMeterReadingScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '• Điện mới: ${item.electricReading} kWh',
+                            '• Tiêu thụ điện: ${_formatConsumed(elecConsumed)} kWh (Chỉ số: ${item.previousElectricReading ?? 0} → ${item.electricReading})',
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
-                            '• Nước mới: ${item.waterReading} m³',
+                            '• Tiêu thụ nước: ${_formatConsumed(waterConsumed)} m³ (Chỉ số: ${item.previousWaterReading ?? 0} → ${item.waterReading})',
                             style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          const Divider(height: 1),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Ước tính phí tiện ích:',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                NumberFormat.currency(
+                                  locale: 'vi_VN',
+                                  symbol: 'đ',
+                                ).format(estTotal),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -167,7 +469,7 @@ class _ManagementMeterReadingScreenState
                         ),
                       ),
                       subtitle: const Text(
-                        'Tính phí điện, nước theo chỉ số mới và phí quản lý',
+                        'Tính phí điện, nước theo chỉ số mới và phát hành công nợ',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppTheme.textSecondary,
@@ -435,8 +737,26 @@ class _ManagementMeterReadingScreenState
       permission: AppPermissions.meterReadingManagement,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Duyệt Chỉ Số Điện Nước'),
+          title: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Duyệt Chỉ Số Điện Nước',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Quản Lý Chỉ Số Tiện Ích',
+                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.flash_on_outlined),
+              tooltip: 'Chốt số theo tầng',
+              onPressed: _showBatchRecordDialog,
+            ),
             IconButton(
               icon: const Icon(Icons.refresh),
               tooltip: 'Làm mới',
@@ -719,6 +1039,34 @@ class _ManagementMeterReadingScreenState
               ),
             ],
           ),
+
+          // Huy hiệu đã xuất hóa đơn
+          if (item.hasGeneratedInvoice) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.shade300),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.receipt_long, size: 16, color: Colors.green.shade700),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Đã xuất hóa đơn ${item.invoiceId != null ? "(${item.invoiceId})" : ""}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Banner cảnh báo bất thường AI/OCR nếu có
           if (item.hasAnomaly) ...[
@@ -1042,4 +1390,10 @@ class _ManagementMeterReadingScreenState
       ),
     );
   }
+}
+
+class _BatchRowData {
+  final TextEditingController aptController = TextEditingController();
+  final TextEditingController electricController = TextEditingController();
+  final TextEditingController waterController = TextEditingController();
 }

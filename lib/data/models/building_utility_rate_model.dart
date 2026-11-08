@@ -49,6 +49,11 @@ class BuildingUtilityRateModel {
     };
   }
 
+  /// Tính tổng chi phí sau thuế & phí theo lượng tiêu thụ
+  double calculateTotal(double consumed) {
+    return calculateCost(consumed)['total_amount'] ?? 0.0;
+  }
+
   factory BuildingUtilityRateModel.fromJson(Map<String, dynamic> json) {
     return BuildingUtilityRateModel(
       id: json['id'] as String? ?? '',
@@ -78,3 +83,4 @@ class BuildingUtilityRateModel {
     };
   }
 }
+
