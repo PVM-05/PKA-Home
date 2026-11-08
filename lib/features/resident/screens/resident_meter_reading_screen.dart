@@ -46,18 +46,13 @@ class _ResidentMeterReadingScreenState
 
   late final TextEditingController _periodController;
 
-  final bool _isScanningElectric = false;
-
-  final bool _isScanningWater = false;
-
+  bool _isScanningElectric = false;
+  bool _isScanningWater = false;
   bool _isSubmitting = false;
 
   String? _electricImagePath;
-
   String? _waterImagePath;
-
   MeterOcrResult? _electricOcrResult;
-
   MeterOcrResult? _waterOcrResult;
 
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -65,15 +60,11 @@ class _ResidentMeterReadingScreenState
   @override
   void initState() {
     super.initState();
-
     final now = DateTime.now();
-
     _periodController = TextEditingController(
       text: '${now.month.toString().padLeft(2, '0')}/${now.year}',
     );
-
     _electricController.addListener(_onFieldChanged);
-
     _waterController.addListener(_onFieldChanged);
   }
 
@@ -84,16 +75,63 @@ class _ResidentMeterReadingScreenState
   @override
   void dispose() {
     _electricController.removeListener(_onFieldChanged);
-
     _waterController.removeListener(_onFieldChanged);
-
     _electricController.dispose();
-
     _waterController.dispose();
-
     _periodController.dispose();
-
     super.dispose();
+  }
+
+  Future<void> _scanMeter(MeterType type, double oldReading) async {
+    setState(() {
+      if (type == MeterType.electric) {
+        _isScanningElectric = true;
+      } else {
+        _isScanningWater = true;
+      }
+    });
+
+    try {
+      final simResult = await MeterOcrSimulator.simulateScan(
+        meterType: type,
+        currentReading: oldReading,
+        simulatedDelayMs: 1200,
+      );
+
+      final updatedResult = MeterOcrResult(
+        detectedReading: simResult.detectedReading,
+        meterType: type,
+        confidence: simResult.confidence,
+        unit: simResult.unit,
+        rawText: simResult.rawText,
+      );
+
+      if (mounted) {
+        setState(() {
+          if (type == MeterType.electric) {
+            _electricOcrResult = updatedResult;
+            _electricImagePath = null;
+            _electricController.text = simResult.detectedReading.toString();
+            _isScanningElectric = false;
+          } else {
+            _waterOcrResult = updatedResult;
+            _waterImagePath = null;
+            _waterController.text = simResult.detectedReading.toString();
+            _isScanningWater = false;
+          }
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          if (type == MeterType.electric) {
+            _isScanningElectric = false;
+          } else {
+            _isScanningWater = false;
+          }
+        });
+      }
+    }
   }
 
   Future<void> _pickMeterImage(MeterType type, ImageSource source) async {
@@ -247,31 +285,25 @@ class _ResidentMeterReadingScreenState
   Future<void> _submit(double oldElec, double oldWater) async {
     if (_isSubmitting) return;
 
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
 
     final elecVal = double.tryParse(_electricController.text.trim()) ?? 0.0;
-
     final waterVal = double.tryParse(_waterController.text.trim()) ?? 0.0;
 
     // Phân tích bất thường
-
     final elecAnalysis = UtilityAnomalyDetector.analyzeReading(
       currentReading: elecVal,
-
       previousReading: oldElec,
-
       averageUsage: 130.0, // Mức trung bình tham chiếu
-
       meterType: MeterType.electric,
     );
 
     final waterAnalysis = UtilityAnomalyDetector.analyzeReading(
       currentReading: waterVal,
-
       previousReading: oldWater,
-
       averageUsage: 12.0, // Mức trung bình tham chiếu
-
       meterType: MeterType.water,
     );
 
@@ -281,11 +313,9 @@ class _ResidentMeterReadingScreenState
           content: Text(
             'Chỉ số điện mới ($elecVal) không được nhỏ hơn chỉ số cũ ($oldElec kWh).',
           ),
-
           backgroundColor: AppTheme.error,
         ),
       );
-
       return;
     }
 
@@ -295,41 +325,45 @@ class _ResidentMeterReadingScreenState
           content: Text(
             'Chỉ số nước mới ($waterVal) không được nhỏ hơn chỉ số cũ ($oldWater m³).',
           ),
-
           backgroundColor: AppTheme.error,
         ),
       );
-
       return;
     }
 
     // Nếu phát hiện tiêu thụ tăng cao bất thường (warning hoặc danger), hiển thị dialog xác nhận
+    final bool hasSevereAnomaly = (elecAnalysis.isAnomaly &&
+            (elecAnalysis.severity == AnomalySeverity.warning ||
+                elecAnalysis.severity == AnomalySeverity.danger)) ||
+        (waterAnalysis.isAnomaly &&
+            (waterAnalysis.severity == AnomalySeverity.warning ||
+                waterAnalysis.severity == AnomalySeverity.danger));
 
-    if (elecAnalysis.isAnomaly || waterAnalysis.isAnomaly) {
+    if (hasSevereAnomaly) {
       final reasons = <String>[];
-
-      if (elecAnalysis.isAnomaly && elecAnalysis.reason != null) {
+      if (elecAnalysis.isAnomaly &&
+          (elecAnalysis.severity == AnomalySeverity.warning ||
+              elecAnalysis.severity == AnomalySeverity.danger) &&
+          elecAnalysis.reason != null) {
         reasons.add(elecAnalysis.reason!);
       }
-
-      if (waterAnalysis.isAnomaly && waterAnalysis.reason != null) {
+      if (waterAnalysis.isAnomaly &&
+          (waterAnalysis.severity == AnomalySeverity.warning ||
+              waterAnalysis.severity == AnomalySeverity.danger) &&
+          waterAnalysis.reason != null) {
         reasons.add(waterAnalysis.reason!);
       }
 
       final proceed = await showDialog<bool>(
         context: context,
-
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-
           title: const Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
-
               SizedBox(width: 8),
-
               Expanded(
                 child: Text(
                   'Cảnh Báo Tiêu Thụ Bất Thường',
@@ -338,25 +372,18 @@ class _ResidentMeterReadingScreenState
               ),
             ],
           ),
-
           content: Column(
             mainAxisSize: MainAxisSize.min,
-
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
               const Text(
                 'Hệ thống AI/OCR phát hiện mức tiêu thụ kỳ này có dấu hiệu tăng cao bất thường so với tháng trước:',
-
                 style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
               ),
-
               const SizedBox(height: 10),
-
               ...reasons.map(
                 (r) => Padding(
                   padding: const EdgeInsets.only(bottom: 6),
-
                   child: Text(
                     '• $r',
                     style: const TextStyle(
@@ -366,97 +393,83 @@ class _ResidentMeterReadingScreenState
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
-
               const Text(
                 'Bạn đã kiểm tra đối chiếu kỹ chữ số trên mặt công tơ thực tế chưa?',
-
                 style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
               ),
             ],
           ),
-
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-
               child: const Text('Kiểm tra lại công tơ'),
             ),
-
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
-
                 foregroundColor: Colors.white,
               ),
-
               onPressed: () => Navigator.pop(ctx, true),
-
               child: const Text('Tôi đã kiểm tra & Tiếp tục gửi'),
             ),
           ],
         ),
       );
 
-      if (proceed != true) return;
+      if (proceed != true) {
+        return;
+      }
     }
 
     final period = _periodController.text.trim();
-
     final existingReadings =
         ref.read(residentMeterReadingsProvider).valueOrNull ?? [];
-
     final alreadySubmitted = existingReadings.any(
       (r) => r.period == period && !r.isRejected,
     );
 
     if (alreadySubmitted) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Kỳ $period đã được gửi khai báo trước đó. Vui lòng chờ Ban Quản Lý xử lý.',
           ),
-
           backgroundColor: AppTheme.error,
         ),
       );
-
       return;
     }
 
     final user = ref.read(authProvider).valueOrNull;
-
     final aptId = await ref.read(residentApartmentIdProvider.future);
-
     if (!mounted) return;
 
     if (user == null || aptId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Không tìm thấy thông tin căn hộ liên kết của bạn.'),
-
           backgroundColor: AppTheme.error,
         ),
       );
-
       return;
     }
 
-    if (_electricImagePath == null && _waterImagePath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Vui lòng chụp ảnh công tơ điện hoặc nước thực tế để Ban Quản Lý đối soát.',
+    if (_electricImagePath == null &&
+        _waterImagePath == null &&
+        _electricOcrResult == null &&
+        _waterOcrResult == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Lưu ý: Bạn gửi chỉ số nhập tay mà không đính kèm ảnh. Ban Quản Lý có thể cần kiểm tra đối soát trực tiếp.',
+            ),
+            duration: Duration(seconds: 2),
           ),
-
-          backgroundColor: AppTheme.error,
-        ),
-      );
-
-      return;
+        );
+      }
     }
 
     setState(() => _isSubmitting = true);
@@ -638,8 +651,8 @@ class _ResidentMeterReadingScreenState
           final isDesktop = MediaQuery.of(context).size.width >= 900;
           final warningWidget = DateTime.now().day > 25 ? _buildOverdueWarning() : null;
           final previousCard = _buildPreviousReadingsCard(aptCode, oldElec, oldWater);
-          final electricCard = _buildElectricCard(elecAnalysis);
-          final waterCard = _buildWaterCard(waterAnalysis);
+          final electricCard = _buildElectricCard(elecAnalysis, oldElec);
+          final waterCard = _buildWaterCard(waterAnalysis, oldWater);
           final periodField = _buildPeriodField();
           final submitButton = _buildSubmitButton(oldElec, oldWater);
           final historySection = _buildHistorySection(historyAsync);
@@ -920,7 +933,7 @@ class _ResidentMeterReadingScreenState
     );
   }
 
-  Widget _buildElectricCard(AnomalyAnalysisResult? elecAnalysis) {
+  Widget _buildElectricCard(AnomalyAnalysisResult? elecAnalysis, double oldElec) {
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -949,6 +962,18 @@ class _ResidentMeterReadingScreenState
                     ),
                   ),
                 ],
+              ),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                ),
+                icon: const Icon(Icons.document_scanner_outlined, size: 14),
+                label: const FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('Mô phỏng nhận diện', style: TextStyle(fontSize: 12)),
+                ),
+                onPressed: _isScanningElectric ? null : () => _scanMeter(MeterType.electric, oldElec),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -993,6 +1018,55 @@ class _ResidentMeterReadingScreenState
                   fontSize: 12,
                   color: AppTheme.textSecondary,
                 ),
+              ),
+            ),
+          ],
+          if (_electricOcrResult != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: AppTheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.auto_awesome,
+                    size: 16,
+                    color: AppTheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế (OCR: ${_electricOcrResult!.detectedReading} kWh)',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    onPressed: () => setState(
+                      () => _electricOcrResult = null,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
             ),
           ],
@@ -1078,7 +1152,7 @@ class _ResidentMeterReadingScreenState
     );
   }
 
-  Widget _buildWaterCard(AnomalyAnalysisResult? waterAnalysis) {
+  Widget _buildWaterCard(AnomalyAnalysisResult? waterAnalysis, double oldWater) {
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1107,6 +1181,18 @@ class _ResidentMeterReadingScreenState
                     ),
                   ),
                 ],
+              ),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                ),
+                icon: const Icon(Icons.document_scanner_outlined, size: 14),
+                label: const FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text('Mô phỏng nhận diện', style: TextStyle(fontSize: 12)),
+                ),
+                onPressed: _isScanningWater ? null : () => _scanMeter(MeterType.water, oldWater),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -1151,6 +1237,55 @@ class _ResidentMeterReadingScreenState
                   fontSize: 12,
                   color: AppTheme.textSecondary,
                 ),
+              ),
+            ),
+          ],
+          if (_waterOcrResult != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: AppTheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.auto_awesome,
+                    size: 16,
+                    color: AppTheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế (OCR: ${_waterOcrResult!.detectedReading} m³)',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    onPressed: () => setState(
+                      () => _waterOcrResult = null,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
             ),
           ],
