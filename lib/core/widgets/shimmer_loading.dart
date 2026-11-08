@@ -131,16 +131,17 @@ class StatCardSkeleton extends StatelessWidget {
           side: BorderSide(color: borderColor),
         ),
         child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              SkeletonBox(width: 36, height: 36, borderRadius: 10),
-              SizedBox(height: 10),
-              SkeletonBox(width: 80, height: 12, borderRadius: 4),
+              SkeletonBox(width: 32, height: 32, borderRadius: 10),
               SizedBox(height: 6),
-              SkeletonBox(width: 50, height: 22, borderRadius: 6),
+              SkeletonBox(width: 70, height: 10, borderRadius: 4),
+              SizedBox(height: 4),
+              SkeletonBox(width: 48, height: 18, borderRadius: 6),
             ],
           ),
         ),

@@ -409,29 +409,33 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     child: Text('Ban Quản Lý', overflow: TextOverflow.ellipsis),
                   ),
                   if (currentUser != null) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getRoleBadgeColor(
-                          currentUser.role,
-                        ).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
                           color: _getRoleBadgeColor(
                             currentUser.role,
-                          ).withValues(alpha: 0.5),
+                          ).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _getRoleBadgeColor(
+                              currentUser.role,
+                            ).withValues(alpha: 0.5),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        currentUser.roleDisplayName,
-                        style: TextStyle(
-                          color: _getRoleBadgeColor(currentUser.role),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                        child: Text(
+                          currentUser.roleDisplayName,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: _getRoleBadgeColor(currentUser.role),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -982,14 +986,21 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 1.05,
-              children: quickActionItems,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final int cols = width < 420 ? 3 : (width < 768 ? 4 : (width < 1100 ? 6 : 8));
+                final double ratio = width < 360 ? 0.95 : (width < 600 ? 1.05 : 1.15);
+                return GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: cols,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: ratio,
+                  children: quickActionItems,
+                );
+              },
             ),
             const SizedBox(height: 24),
 
@@ -1235,14 +1246,19 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.1,
-              children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final int cols = width < 600 ? 2 : (width < 1100 ? 3 : 4);
+                final double ratio = width < 380 ? 1.12 : (width < 600 ? 1.25 : 1.45);
+                return GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: cols,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: ratio,
+                  children: [
                 ref.watch(totalApartmentsProvider).isLoading
                     ? const StatCardSkeleton()
                     : StatCard(
@@ -1315,8 +1331,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           color: Colors.amber.shade700,
                         ),
               ],
-            ),
-            const SizedBox(height: 24),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
 
             // 4. TÀI CHÍNH & THU PHÍ (A2)
             if (!isTechnician || canManageInvoices) ...[
@@ -1366,14 +1384,19 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.1,
-              children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final int cols = width < 600 ? 2 : (width < 1100 ? 3 : 4);
+                final double ratio = width < 380 ? 1.12 : (width < 600 ? 1.25 : 1.45);
+                return GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: cols,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: ratio,
+                  children: [
                 pendingIssuesAsync.isLoading
                     ? const StatCardSkeleton()
                     : StatCard(
@@ -1400,11 +1423,13 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         color: Colors.orange,
                       ),
               ],
-            ),
-          ],
+            );
+          },
         ),
-      ),
-    );
+      ],
+    ),
+  ),
+);
   }
 
   Widget _buildRecentTransactionsCard() {
@@ -1748,15 +1773,17 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11.5,
+                  ),
                 ),
               ),
             ],

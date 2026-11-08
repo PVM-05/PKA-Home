@@ -116,3 +116,4 @@ flowchart TD
 3. **Bước 3 (Admin Dashboard & Anti-RenderFlex):** Cải tiến `adaptive_management_scaffold.dart` và `management_home_screen.dart` với responsive grid đa cột tự động theo chiều rộng màn hình, giải quyết triệt để lỗi RenderFlex.
 4. **Bước 4 (Resident Home Polish):** Tinh chỉnh `resident_home_screen.dart` với Hero Invoice Card và ma trận tiện ích an toàn.
 5. **Bước 5 (Verification & Test Suite):** Chạy kiểm thử tự động toàn diện (`flutter test`) và `dart analyze` để đảm bảo 500+ tests tiếp tục pass 100%.
+
