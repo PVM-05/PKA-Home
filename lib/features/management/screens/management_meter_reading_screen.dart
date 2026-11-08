@@ -86,8 +86,8 @@ class _ManagementMeterReadingScreenState
                   ),
                 ],
               ),
-              content: SizedBox(
-                width: 600,
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
                 child: Form(
                   key: formKey,
                   child: SingleChildScrollView(
@@ -141,92 +141,203 @@ class _ManagementMeterReadingScreenState
                           ],
                         ),
                         const SizedBox(height: 8),
-                        ...rows.asMap().entries.map((entry) {
-                          final idx = entry.key;
-                          final row = entry.value;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: TextFormField(
-                                    controller: row.aptController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Căn hộ #${idx + 1}',
-                                      hintText: 'A0110',
-                                      border: const OutlineInputBorder(),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 12,
-                                      ),
+                        Builder(
+                          builder: (context) {
+                            final isCompact = MediaQuery.of(context).size.width < 500;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: rows.asMap().entries.map((entry) {
+                                final idx = entry.key;
+                                final row = entry.value;
+
+                                if (isCompact) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 12.0),
+                                    padding: const EdgeInsets.all(10.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade50,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.grey.shade200),
                                     ),
-                                    validator: (val) {
-                                      if (val == null || val.trim().isEmpty) {
-                                        return 'Cần mã căn';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  flex: 3,
-                                  child: TextFormField(
-                                    controller: row.electricController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Điện (kWh)',
-                                      border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 12,
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextFormField(
+                                                controller: row.aptController,
+                                                decoration: InputDecoration(
+                                                  labelText: 'Căn hộ #${idx + 1}',
+                                                  hintText: 'A0110',
+                                                  border: const OutlineInputBorder(),
+                                                  contentPadding: const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 10,
+                                                  ),
+                                                ),
+                                                validator: (val) {
+                                                  if (val == null || val.trim().isEmpty) {
+                                                    return 'Cần mã căn';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                            if (rows.length > 1) ...[
+                                              const SizedBox(width: 4),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.remove_circle_outline,
+                                                  color: AppTheme.error,
+                                                  size: 20,
+                                                ),
+                                                onPressed: () {
+                                                  setDialogState(() {
+                                                    rows.removeAt(idx);
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextFormField(
+                                                controller: row.electricController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: const InputDecoration(
+                                                  labelText: 'Điện (kWh)',
+                                                  border: OutlineInputBorder(),
+                                                  contentPadding: EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 10,
+                                                  ),
+                                                ),
+                                                validator: (val) {
+                                                  if (val == null || double.tryParse(val.trim()) == null) {
+                                                    return 'Nhập số';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: TextFormField(
+                                                controller: row.waterController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: const InputDecoration(
+                                                  labelText: 'Nước (m³)',
+                                                  border: OutlineInputBorder(),
+                                                  contentPadding: EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 10,
+                                                  ),
+                                                ),
+                                                validator: (val) {
+                                                  if (val == null || double.tryParse(val.trim()) == null) {
+                                                    return 'Nhập số';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                    validator: (val) {
-                                      if (val == null || double.tryParse(val.trim()) == null) {
-                                        return 'Nhập số';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  flex: 3,
-                                  child: TextFormField(
-                                    controller: row.waterController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Nước (m³)',
-                                      border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 12,
+                                  );
+                                }
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: TextFormField(
+                                          controller: row.aptController,
+                                          decoration: InputDecoration(
+                                            labelText: 'Căn hộ #${idx + 1}',
+                                            hintText: 'A0110',
+                                            border: const OutlineInputBorder(),
+                                            contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          validator: (val) {
+                                            if (val == null || val.trim().isEmpty) {
+                                              return 'Cần mã căn';
+                                            }
+                                            return null;
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                    validator: (val) {
-                                      if (val == null || double.tryParse(val.trim()) == null) {
-                                        return 'Nhập số';
-                                      }
-                                      return null;
-                                    },
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        flex: 3,
+                                        child: TextFormField(
+                                          controller: row.electricController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Điện (kWh)',
+                                            border: OutlineInputBorder(),
+                                            contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          validator: (val) {
+                                            if (val == null || double.tryParse(val.trim()) == null) {
+                                              return 'Nhập số';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        flex: 3,
+                                        child: TextFormField(
+                                          controller: row.waterController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Nước (m³)',
+                                            border: OutlineInputBorder(),
+                                            contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          validator: (val) {
+                                            if (val == null || double.tryParse(val.trim()) == null) {
+                                              return 'Nhập số';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                      if (rows.length > 1) ...[
+                                        IconButton(
+                                          icon: const Icon(Icons.remove_circle_outline, color: AppTheme.error),
+                                          onPressed: () {
+                                            setDialogState(() {
+                                              rows.removeAt(idx);
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ],
                                   ),
-                                ),
-                                if (rows.length > 1) ...[
-                                  IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline, color: AppTheme.error),
-                                    onPressed: () {
-                                      setDialogState(() {
-                                        rows.removeAt(idx);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ],
-                            ),
-                          );
-                        }),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -885,14 +996,7 @@ class _ManagementMeterReadingScreenState
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return _buildSubmissionCard(item, item.status);
-            },
-          );
+          return _buildResponsiveList(items, 'pending');
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -940,18 +1044,201 @@ class _ManagementMeterReadingScreenState
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return _buildSubmissionCard(item, status);
-            },
-          );
+          return _buildResponsiveList(items, status);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: AppErrorCard(error: e, onRetry: _refreshAll),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResponsiveList(
+    List<MeterReadingSubmissionModel> items,
+    String currentTabStatus,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= 900;
+        final pendingCount = ref.watch(pendingMeterReadingsCountProvider).valueOrNull ?? 0;
+        final pendingAnomaly = ref.watch(pendingAnomalyCountProvider).valueOrNull ?? 0;
+
+        if (isDesktop) {
+          final leftCol = <Widget>[];
+          final rightCol = <Widget>[];
+          for (var i = 0; i < items.length; i++) {
+            if (i.isEven) {
+              leftCol.add(_buildSubmissionCard(items[i], currentTabStatus));
+            } else {
+              rightCol.add(_buildSubmissionCard(items[i], currentTabStatus));
+            }
+          }
+
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildExecutiveKpiBar(pendingCount, pendingAnomaly),
+                      const SizedBox(height: 20),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: Column(children: leftCol)),
+                          const SizedBox(width: 20),
+                          Expanded(child: Column(children: rightCol)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return _buildSubmissionCard(item, currentTabStatus);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildExecutiveKpiBar(int pendingCount, int pendingAnomaly) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildKpiItem(
+              icon: Icons.pending_actions,
+              iconColor: AppTheme.primary,
+              title: 'Chờ duyệt',
+              value: '$pendingCount',
+              subtitle: 'Cần xác nhận',
+            ),
+          ),
+          Container(height: 40, width: 1, color: AppTheme.border),
+          Expanded(
+            child: _buildKpiItem(
+              icon: Icons.warning_amber_rounded,
+              iconColor: Colors.orange.shade800,
+              title: 'Bất thường AI',
+              value: '$pendingAnomaly',
+              subtitle: 'Tăng vọt / OCR thấp',
+            ),
+          ),
+          Container(height: 40, width: 1, color: AppTheme.border),
+          Expanded(
+            child: _buildKpiItem(
+              icon: Icons.flash_on,
+              iconColor: Colors.amber.shade800,
+              title: 'Chốt số nhanh',
+              value: 'Trạm tầng',
+              subtitle: 'Nhập hàng loạt',
+              onTap: _showBatchRecordDialog,
+            ),
+          ),
+          Container(height: 40, width: 1, color: AppTheme.border),
+          Expanded(
+            child: _buildKpiItem(
+              icon: Icons.sync,
+              iconColor: Colors.teal,
+              title: 'Đồng bộ hóa đơn',
+              value: 'Tự động',
+              subtitle: 'Sau khi duyệt',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKpiItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String value,
+    required String subtitle,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: iconColor, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: iconColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -974,66 +1261,66 @@ class _ManagementMeterReadingScreenState
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.apartment,
+                  color: AppTheme.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                    Text(
+                      'Căn hộ ${item.apartmentCode ?? ''}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                      child: const Icon(
-                        Icons.apartment,
-                        color: AppTheme.primary,
-                        size: 20,
-                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Căn hộ ${item.apartmentCode ?? ''}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            'Kỳ: ${item.period} • Gửi lúc ${_dateFormat.format(item.createdAt)}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.textSecondary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                    Text(
+                      'Kỳ: ${item.period} • Gửi lúc ${_dateFormat.format(item.createdAt)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  item.statusDisplayName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 90),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      item.statusDisplayName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1055,12 +1342,15 @@ class _ManagementMeterReadingScreenState
                 children: [
                   Icon(Icons.receipt_long, size: 16, color: Colors.green.shade700),
                   const SizedBox(width: 6),
-                  Text(
-                    'Đã xuất hóa đơn ${item.invoiceId != null ? "(${item.invoiceId})" : ""}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade800,
+                  Flexible(
+                    child: Text(
+                      'Đã xuất hóa đơn ${item.invoiceId != null ? "(${item.invoiceId})" : ""}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green.shade800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -1097,14 +1387,17 @@ class _ManagementMeterReadingScreenState
                             : Colors.orange.shade800,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        'Phát hiện bất thường: ${item.anomalySeverityDisplayName}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: item.isDangerAnomaly
-                              ? AppTheme.error
-                              : Colors.orange.shade900,
+                      Expanded(
+                        child: Text(
+                          'Phát hiện bất thường: ${item.anomalySeverityDisplayName}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: item.isDangerAnomaly
+                                ? AppTheme.error
+                                : Colors.orange.shade900,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -1296,7 +1589,6 @@ class _ManagementMeterReadingScreenState
           if (item.submitterName != null) ...[
             const SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
@@ -1308,11 +1600,16 @@ class _ManagementMeterReadingScreenState
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Text(
-                  'Độ tin cậy OCR: ${(item.ocrConfidence * 100).toStringAsFixed(1)}%',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppTheme.textSecondary,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'Độ tin cậy OCR: ${(item.ocrConfidence * 100).toStringAsFixed(1)}%',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                    ),
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -1364,7 +1661,10 @@ class _ManagementMeterReadingScreenState
                       ),
                     ),
                     icon: const Icon(Icons.close, size: 18),
-                    label: const Text('Từ chối'),
+                    label: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Từ chối'),
+                    ),
                     onPressed: () => _showRejectDialog(item),
                   ),
                 ),
@@ -1379,7 +1679,10 @@ class _ManagementMeterReadingScreenState
                       ),
                     ),
                     icon: const Icon(Icons.check, size: 18),
-                    label: const Text('Phê duyệt'),
+                    label: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Phê duyệt'),
+                    ),
                     onPressed: () => _showApproveDialog(item),
                   ),
                 ),
