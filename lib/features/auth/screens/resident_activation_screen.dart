@@ -119,31 +119,233 @@ class _ResidentActivationScreenState
         ),
       ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 450),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Thanh tiến trình 4 bước
-                  _buildStepIndicator(state.currentStep),
-                  const SizedBox(height: 28),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isDesktop = constraints.maxWidth >= 900;
+            final contentPadding = constraints.maxWidth < 360 ? 16.0 : 24.0;
 
-                  // Nội dung từng bước
-                  switch (state.currentStep) {
-                    ActivationStep.enterCode => _buildStep1EnterCode(state, notifier),
-                    ActivationStep.enterOtp => _buildStep2EnterOtp(state, notifier),
-                    ActivationStep.setPassword => _buildStep3SetPassword(state, notifier),
-                    ActivationStep.completed => _buildStep4Completed(state),
-                  },
-                ],
+            if (isDesktop) {
+              return Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1100),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Cột trái: Hero Brand Showcase
+                        Expanded(
+                          flex: 5,
+                          child: _buildHeroShowcase(context),
+                        ),
+                        const SizedBox(width: 32),
+                        // Cột phải: Form kích hoạt 4 bước
+                        Expanded(
+                          flex: 6,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildStepIndicator(state.currentStep),
+                              const SizedBox(height: 28),
+                              switch (state.currentStep) {
+                                ActivationStep.enterCode => _buildStep1EnterCode(state, notifier),
+                                ActivationStep.enterOtp => _buildStep2EnterOtp(state, notifier),
+                                ActivationStep.setPassword => _buildStep3SetPassword(state, notifier),
+                                ActivationStep.completed => _buildStep4Completed(state),
+                              },
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // Bố cục Mobile (< 900dp)
+            return Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(contentPadding),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Thanh tiến trình 4 bước
+                      _buildStepIndicator(state.currentStep),
+                      const SizedBox(height: 28),
+
+                      // Nội dung từng bước
+                      switch (state.currentStep) {
+                        ActivationStep.enterCode => _buildStep1EnterCode(state, notifier),
+                        ActivationStep.enterOtp => _buildStep2EnterOtp(state, notifier),
+                        ActivationStep.setPassword => _buildStep3SetPassword(state, notifier),
+                        ActivationStep.completed => _buildStep4Completed(state),
+                      },
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  // --- WIDGET HERO SHOWCASE (DESKTOP) ---
+  Widget _buildHeroShowcase(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppGradients.heroDark,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: AppShadows.cardGlow,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: AppGradients.brandPrimary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.apartment_rounded,
+                  size: 26,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Text(
+                'PKA-Home',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppTheme.sapphire.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppTheme.sapphire.withValues(alpha: 0.4),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFF60A5FA)),
+                SizedBox(width: 6),
+                Text(
+                  'Cổng Kích Hoạt Cư Dân Số Hóa',
+                  style: TextStyle(
+                    color: Color(0xFF93C5FD),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Chào Mừng Cư Dân Đến Với\nKhông Gian Sống Thông Minh',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  height: 1.3,
+                ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Kích hoạt tài khoản để tiếp nhận mã căn hộ số hóa, tra cứu chỉ số điện nước minh bạch, nhận thông báo kịp thời và thanh toán phí dịch vụ tiện lợi.',
+            style: TextStyle(
+              color: Color(0xFF94A3B8),
+              fontSize: 13.5,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 28),
+          _buildHeroFeaturePill(
+            icon: Icons.domain_verification_rounded,
+            title: 'Định danh & Sở hữu căn hộ chuẩn xác',
+            desc: 'Liên kết trực tiếp mã căn hộ và hồ sơ cư dân bảo mật.',
+          ),
+          const SizedBox(height: 14),
+          _buildHeroFeaturePill(
+            icon: Icons.qr_code_2_rounded,
+            title: 'Hóa đơn & Biểu phí minh bạch',
+            desc: 'Đối soát tức thì qua cổng VietQR Napas 247 an toàn.',
+          ),
+          const SizedBox(height: 14),
+          _buildHeroFeaturePill(
+            icon: Icons.build_circle_outlined,
+            title: 'Tiếp nhận phản ánh kỹ thuật 24/7',
+            desc: 'Cam kết thời gian xử lý sự cố chuẩn mực theo SLA.',
+          ),
+          const SizedBox(height: 14),
+          _buildHeroFeaturePill(
+            icon: Icons.notifications_active_outlined,
+            title: 'Thông báo khẩn cấp từ Ban Quản Lý',
+            desc: 'Cập nhật lịch bảo trì, thông điệp an ninh toàn diện.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroFeaturePill({
+    required IconData icon,
+    required String title,
+    required String desc,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Icon(icon, size: 18, color: const Color(0xFF60A5FA)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                desc,
+                style: const TextStyle(
+                  color: Color(0xFF94A3B8),
+                  fontSize: 11.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -163,8 +365,10 @@ class _ResidentActivationScreenState
         if (index.isOdd) {
           final isPassed = (index ~/ 2) < currentIndex;
           return Expanded(
+            flex: 2,
             child: Container(
               height: 2,
+              margin: const EdgeInsets.only(bottom: 18),
               color: isPassed ? AppTheme.primary : Colors.grey.shade300,
             ),
           );
@@ -175,34 +379,42 @@ class _ResidentActivationScreenState
         final isActive = stepIndex <= currentIndex;
         final isCurrent = stepIndex == currentIndex;
 
-        return Column(
-          children: [
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: isCurrent
-                  ? AppTheme.primary
-                  : (isActive ? AppTheme.success : Colors.grey.shade300),
-              child: isActive && !isCurrent
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
-                  : Text(
-                      '${stepIndex + 1}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: isActive ? Colors.white : Colors.grey.shade700,
+        return Expanded(
+          flex: 3,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 13,
+                backgroundColor: isCurrent
+                    ? AppTheme.primary
+                    : (isActive ? AppTheme.success : Colors.grey.shade300),
+                child: isActive && !isCurrent
+                    ? const Icon(Icons.check, size: 15, color: Colors.white)
+                    : Text(
+                        '${stepIndex + 1}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isActive ? Colors.white : Colors.grey.shade700,
+                        ),
                       ),
-                    ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              stepItem['title'] as String,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                color: isCurrent ? AppTheme.primary : AppTheme.textSecondary,
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  stepItem['title'] as String,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                    color: isCurrent ? AppTheme.primary : AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       }),
     );
@@ -292,17 +504,15 @@ class _ResidentActivationScreenState
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Tiếp tục xác thực OTP'),
+                : const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Tiếp tục xác thực OTP'),
+                  ),
           ),
           const SizedBox(height: 16),
 
           Center(
-            child: TextButton.icon(
-              icon: const Icon(Icons.help_outline, size: 16),
-              label: const Text(
-                'Chưa có mã kích hoạt? Liên hệ BQL',
-                style: TextStyle(fontSize: 12.5),
-              ),
+            child: TextButton(
               onPressed: () {
                 showDialog(
                   context: context,
@@ -322,6 +532,21 @@ class _ResidentActivationScreenState
                   ),
                 );
               },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.help_outline, size: 16),
+                  SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      'Chưa có mã kích hoạt? Liên hệ BQL',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12.5),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -429,7 +654,10 @@ class _ResidentActivationScreenState
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Xác thực OTP & Thiết lập mật khẩu'),
+                : const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Xác thực OTP & Thiết lập mật khẩu'),
+                  ),
           ),
         ],
       ),
@@ -546,7 +774,10 @@ class _ResidentActivationScreenState
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Hoàn tất kích hoạt'),
+                : const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Hoàn tất kích hoạt'),
+                  ),
           ),
         ],
       ),
