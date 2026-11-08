@@ -10,7 +10,7 @@
 **PKA-Home** là nền tảng phần mềm thương mại thực tế (SaaS B2B) được thiết kế chuyên biệt để giải quyết triệt để các bài toán nhức nhối nhất trong vận hành bất động sản hiện đại:
 
 - **Bàn giao & Kiểm kê tài sản số hóa**: Xóa bỏ hoàn toàn văn bản giấy và tranh chấp tiền cọc khi cư dân nhận nhà (Move-in) hoặc trả phòng (Move-out). Tích hợp trạm kiểm kê hiện trường, chốt chỉ số điện/nước, chiết tính cấn trừ cọc và ký số trực tiếp trên màn hình, tự động kết xuất biên bản PDF chuẩn pháp lý.
-- **Minh bạch tài chính & Tự động hóa thu phí**: Tự động tổng hợp và phát hành hóa đơn hàng loạt theo định kỳ. Hỗ trợ thanh toán VietQR động chuẩn NAPAS, đối soát tức thì tại Bàn làm việc Kế toán Web (`Accounting Workstation`), quản lý quỹ bảo trì 2% theo đúng quy định pháp luật.
+- **Cổng thanh toán thật 100% VietQR SePay & Tự động gạch nợ Webhook**: Tích hợp cổng chuyển khoản VietQR Napas 247 động theo chuẩn gateway SePay (`sepay.vn`), tự động xử lý biến động số dư ngân hàng qua Webhook, gạch nợ hóa đơn tức thì sau 2-3 giây qua Supabase Realtime CDC, cơ chế chống thanh toán trùng lặp (Idempotency Key), tự động bóc tách mã hóa đơn chuẩn mực và lưu vết đối soát giao dịch chưa khớp (`UNMATCHED`) tại Bàn làm việc Kế toán Web. Loại bỏ 100% mã nguồn và cơ chế demo/giả lập.
 - **Kiểm soát phương tiện & Minh chứng cà vẹt**: Quy trình thẩm định xe chính chủ với ảnh chụp giấy đăng ký xe (Cà vẹt), trực quan hóa sơ đồ bãi đỗ xe và gán vị trí ô đỗ cố định tại tầng hầm B1/B2 (`parking_slots`), tự động hạch toán phí gửi xe pro-rata.
 - **Tiếp nhận & Điều phối sự cố thông minh**: Phân loại mức độ khẩn cấp (Rule-Based), tự động điều phối kỹ thuật viên hiện trường, trao đổi bình luận thời gian thực qua Realtime CDC và đánh giá chất lượng dịch vụ 3 tiêu chí sau khi nghiệm thu.
 - **Onboarding & Trung tâm nhập liệu hàng loạt (Batch Import Center)**: Hỗ trợ nạp hàng nghìn căn hộ, cư dân, hợp đồng và số dư ban đầu qua tệp Excel (`.xlsx`) với cơ chế kiểm tra lỗi (Dry-run validation) trước khi ghi vào cơ sở dữ liệu.
@@ -28,6 +28,7 @@
 | **Quản lý Trạng thái** | [Flutter Riverpod](https://riverpod.dev) (^2.6.1) | Clean Architecture + Feature-First (`AsyncNotifier`, `StreamProvider`) |
 | **Backend & CSDL** | [Supabase Enterprise](https://supabase.com) (PostgreSQL 15+) | CSDL quan hệ, Auth JWT, RLS Multi-tenant, Realtime CDC, Storage |
 | **Điều hướng & Guard** | [GoRouter](https://pub.dev/packages/go_router) (^14.8.1) | Declarative Routing, quản lý URL Web, Deep-linking và Role-based Guard |
+| **Cổng Thanh Toán & Webhook** | [SePay Gateway](https://sepay.vn) & VietQR Napas 247 | Tự động hóa gạch nợ biến động số dư ngân hàng 24/7, loại bỏ 100% demo |
 | **Bộ máy Xuất PDF** | `pdf` (^3.12.0) & `printing` (^5.14.3) | Kết xuất PDF Vector A4 hóa đơn, biên lai thu tiền và biên bản kiểm kê |
 | **Xử lý Dữ liệu Lớn** | `excel` (^4.0.6) | Đọc/ghi bảng tính Excel trong Batch Import Center và Báo cáo tài chính |
 | **Chữ Ký Số Cảm Ứng** | Flutter `CustomPainter` & Canvas Vector | Ký điện tử trực tiếp trên màn hình di động/máy tính bảng |
