@@ -450,8 +450,8 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/unified_payment_sheet.dart": {
-    "mtime": 1794136457.103685,
-    "seen": 1794136877.3714228,
+    "mtime": 1794137516.2653964,
+    "seen": 1794139909.1964087,
     "ast_hash": "045ab687e06438bf75fdcf9e42b5ce4c",
     "semantic_hash": ""
   },
@@ -462,9 +462,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/amenity_booking_model.dart": {
-    "mtime": 1793886329.7149749,
-    "seen": 1793891612.8321867,
-    "ast_hash": "ea3a6d629e07e4af9a9e4372478ddba1",
+    "mtime": 1794138974.9717386,
+    "seen": 1794139909.1964087,
+    "ast_hash": "1fb98a10960a99612ec1636ff412b18f",
     "semantic_hash": ""
   },
   "lib/data/models/amenity_maintenance_model.dart": {
@@ -498,9 +498,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/building_amenity_model.dart": {
-    "mtime": 1793886329.716982,
-    "seen": 1793891612.8321867,
-    "ast_hash": "aa90e1a8b060455d5ab087ec28f39fbd",
+    "mtime": 1794138946.414055,
+    "seen": 1794139909.1964087,
+    "ast_hash": "e268d188ddef2fecc218964afd423127",
     "semantic_hash": ""
   },
   "lib/data/models/building_equipment_model.dart": {
@@ -666,9 +666,9 @@
     "semantic_hash": ""
   },
   "lib/data/providers/amenity_booking_provider.dart": {
-    "mtime": 1793886329.7272232,
-    "seen": 1793891612.8321867,
-    "ast_hash": "307061e73c54e6cb86b813a815e6f6d7",
+    "mtime": 1794139041.7914333,
+    "seen": 1794139909.1964087,
+    "ast_hash": "a4964523f43b177647726d0004e4a88d",
     "semantic_hash": ""
   },
   "lib/data/providers/announcement_provider.dart": {
@@ -798,8 +798,8 @@
     "semantic_hash": ""
   },
   "lib/data/providers/resident_invoice_provider.dart": {
-    "mtime": 1794136469.772244,
-    "seen": 1794136877.3719287,
+    "mtime": 1794137516.504656,
+    "seen": 1794139909.1964087,
     "ast_hash": "6201e36e0aecb06daa459fe4559789f4",
     "semantic_hash": ""
   },
@@ -828,9 +828,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/amenity_booking_repository.dart": {
-    "mtime": 1793886329.7398002,
-    "seen": 1793891612.8332055,
-    "ast_hash": "608dbaf69d85ae51f9b6a0f86344387f",
+    "mtime": 1794139031.5833602,
+    "seen": 1794139909.1964087,
+    "ast_hash": "9138c28531c5466f3378e7f686216956",
     "semantic_hash": ""
   },
   "lib/data/repositories/announcement_repository.dart": {
@@ -930,8 +930,8 @@
     "semantic_hash": ""
   },
   "lib/data/services/payment_service.dart": {
-    "mtime": 1794136379.3287973,
-    "seen": 1794136877.3719287,
+    "mtime": 1794137516.5824974,
+    "seen": 1794139909.1964087,
     "ast_hash": "3a773e32725707e706b9fb54b5cda5f9",
     "semantic_hash": ""
   },
@@ -990,9 +990,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/amenity_management_screen.dart": {
-    "mtime": 1794136453.190968,
-    "seen": 1794136877.3719287,
-    "ast_hash": "71931f983df7044f9c1f76a5aa80ecaa",
+    "mtime": 1794139843.7685392,
+    "seen": 1794139909.1964087,
+    "ast_hash": "d37645a87efd081c8c6a4eb10cf8326a",
     "semantic_hash": ""
   },
   "lib/features/management/screens/announcement_management_screen.dart": {
@@ -1200,9 +1200,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/amenity_booking_screen.dart": {
-    "mtime": 1794136449.506895,
-    "seen": 1794136877.372508,
-    "ast_hash": "fd9f59b4009566e4db92f983749b8fa7",
+    "mtime": 1794139403.207329,
+    "seen": 1794139909.1974075,
+    "ast_hash": "47f6ae150455283d71dcec644b2723f9",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/create_issue_screen.dart": {
@@ -1260,8 +1260,8 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_detail_screen.dart": {
-    "mtime": 1794136445.695111,
-    "seen": 1794136877.372508,
+    "mtime": 1794137516.9538546,
+    "seen": 1794139909.1974075,
     "ast_hash": "4a4c50fc677eae1604b05b2c82f52b56",
     "semantic_hash": ""
   },
@@ -1794,8 +1794,8 @@
     "semantic_hash": ""
   },
   "test/data/providers/resident_invoice_service_test.dart": {
-    "mtime": 1794136475.0261333,
-    "seen": 1794136877.373042,
+    "mtime": 1794137517.076542,
+    "seen": 1794139909.1974075,
     "ast_hash": "73c00647f005fe9da056d7e903a7b1fc",
     "semantic_hash": ""
   },
@@ -3126,8 +3126,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794136711.5298548,
-    "seen": 1794136877.3735728,
+    "mtime": 1794137516.147936,
+    "seen": 1794139909.198408,
     "ast_hash": "cb1dd7fa5a7d62192bd058e76b2dd73d",
     "semantic_hash": ""
   },
@@ -5052,8 +5052,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/accounting_web_workstation_screen.dart": {
-    "mtime": 1794136807.4536803,
-    "seen": 1794136877.3719287,
+    "mtime": 1794137516.668877,
+    "seen": 1794139909.1964087,
     "ast_hash": "22a3c8b62a89b9b9955e1d683439ee29",
     "semantic_hash": ""
   },
@@ -6630,39 +6630,39 @@
     "semantic_hash": ""
   },
   "lib/data/models/building_payment_config_model.dart": {
-    "mtime": 1794136055.5228734,
-    "seen": 1794136877.3719287,
-    "ast_hash": "7947ccca2926a29cd6bb11a1d1720f3a",
+    "mtime": 1794139122.9224846,
+    "seen": 1794139909.1964087,
+    "ast_hash": "0cb438707e0cc14a58aafe9e86c8b37e",
     "semantic_hash": ""
   },
   "lib/data/models/sepay_webhook_payload_model.dart": {
-    "mtime": 1794136045.6503174,
-    "seen": 1794136877.3719287,
-    "ast_hash": "a96eeda4e4c2238bd94f8afbd41154f2",
+    "mtime": 1794139122.9224846,
+    "seen": 1794139909.1964087,
+    "ast_hash": "ec08440e83fd2b7dc2ec2e2a58899a3f",
     "semantic_hash": ""
   },
   "supabase/migrations/20261108_01_sepay_real_payment_and_webhook.sql": {
-    "mtime": 1794135994.7577608,
-    "seen": 1794136877.372508,
-    "ast_hash": "88c80fa58c0ba156219a4124beb98fbf",
+    "mtime": 1794139122.9254851,
+    "seen": 1794139909.1974075,
+    "ast_hash": "b513565f391822982e2d5350b055c3f1",
     "semantic_hash": ""
   },
   "test/core/widgets/unified_payment_sheet_real_payment_test.dart": {
-    "mtime": 1794136383.486927,
-    "seen": 1794136877.372508,
+    "mtime": 1794137517.019857,
+    "seen": 1794139909.1974075,
     "ast_hash": "0e045a6dcdccf16eedbf75a89989382b",
     "semantic_hash": ""
   },
   "test/data/models/sepay_models_test.dart": {
-    "mtime": 1794136024.2629776,
-    "seen": 1794136877.373042,
-    "ast_hash": "a3ef275804225b49b09892452761d82d",
+    "mtime": 1794139122.9274857,
+    "seen": 1794139909.1974075,
+    "ast_hash": "e2d924824d842a7ff63fce671b0bfc90",
     "semantic_hash": ""
   },
   "test/data/services/payment_service_sepay_test.dart": {
-    "mtime": 1794136086.2192805,
-    "seen": 1794136877.373042,
-    "ast_hash": "0bf5fa7c6b8fc086a94ab35f1622fdcc",
+    "mtime": 1794139122.9284842,
+    "seen": 1794139909.1974075,
+    "ast_hash": "d0c10dd88775d891f85c61f046baecc9",
     "semantic_hash": ""
   },
   "test/database/sepay_migration_test.dart": {
@@ -6672,9 +6672,9 @@
     "semantic_hash": ""
   },
   "test/features/management/accounting_sepay_workstation_test.dart": {
-    "mtime": 1794136572.9951866,
-    "seen": 1794136877.373042,
-    "ast_hash": "2a576f250ba6d4fa7c66755ce8b63f6f",
+    "mtime": 1794139122.929991,
+    "seen": 1794139909.1974075,
+    "ast_hash": "05cf9535cf16741353cde69a3a2ed63d",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-08-sepay-production-real-payment-and-webhook-engine.md": {
@@ -6687,6 +6687,72 @@
     "mtime": 1794135963.7484179,
     "seen": 1794136877.3741193,
     "ast_hash": "2cde3e44179aa0d0cf10c62888eddfd5",
+    "semantic_hash": ""
+  },
+  "lib/data/models/amenity_inspection_model.dart": {
+    "mtime": 1794138933.4745352,
+    "seen": 1794139909.1964087,
+    "ast_hash": "760a58afab2864063d97bc14f425555e",
+    "semantic_hash": ""
+  },
+  "supabase/functions/sepay-webhook/index.ts": {
+    "mtime": 1794139122.924484,
+    "seen": 1794139909.1974075,
+    "ast_hash": "eebab61ddb5ff13480010e2ac63a7c7b",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261108_02_amenity_lifecycle_and_deposit.sql": {
+    "mtime": 1794138887.4322681,
+    "seen": 1794139909.1974075,
+    "ast_hash": "944fdf645a0d5dc943e7394569055ff1",
+    "semantic_hash": ""
+  },
+  "test/data/models/amenity_lifecycle_models_test.dart": {
+    "mtime": 1794138916.079213,
+    "seen": 1794139909.1974075,
+    "ast_hash": "9981fadf83176b974eeaa8c7bef40dd1",
+    "semantic_hash": ""
+  },
+  "test/data/repositories/amenity_booking_repository_lifecycle_test.dart": {
+    "mtime": 1794139003.339135,
+    "seen": 1794139909.1974075,
+    "ast_hash": "911b91b35daf8db74193807c0ab72309",
+    "semantic_hash": ""
+  },
+  "test/database/amenity_lifecycle_migration_test.dart": {
+    "mtime": 1794138841.890995,
+    "seen": 1794139909.1974075,
+    "ast_hash": "e592243e16900d96e6aa169b7d687a16",
+    "semantic_hash": ""
+  },
+  "test/features/management/amenity_management_inspection_ui_test.dart": {
+    "mtime": 1794139762.215137,
+    "seen": 1794139909.1974075,
+    "ast_hash": "6dd77476f8c96e3d3729afe2ba564467",
+    "semantic_hash": ""
+  },
+  "test/features/resident/amenity_booking_qr_ticket_ui_test.dart": {
+    "mtime": 1794139380.0144472,
+    "seen": 1794139909.1974075,
+    "ast_hash": "6ae3f247be1f0d9308ffa4bfdd167b15",
+    "semantic_hash": ""
+  },
+  "docs/SEPAY_INTEGRATION_GUIDE.md": {
+    "mtime": 1794139122.9183993,
+    "seen": 1794139909.198408,
+    "ast_hash": "8a750bfbc170fcf04535270c5977b560",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-08-amenity-booking-and-deposit-lifecycle.md": {
+    "mtime": 1794138828.5159109,
+    "seen": 1794139909.198408,
+    "ast_hash": "5c132d4add2a399b379f2c4fab14ea8d",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-08-amenity-booking-and-deposit-lifecycle-design.md": {
+    "mtime": 1794139122.9193983,
+    "seen": 1794139909.198408,
+    "ast_hash": "a2cf04714cb79145fa025cddab55ca30",
     "semantic_hash": ""
   }
 }

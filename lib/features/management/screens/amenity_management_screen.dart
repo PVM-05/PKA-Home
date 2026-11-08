@@ -1037,54 +1037,40 @@ class _AmenityManagementScreenState
                     'Kết quả kiểm tra hiện trường:',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
-                  const SizedBox(height: 8),
-                  RadioListTile<String>(
-                    contentPadding: EdgeInsets.zero,
-                    value: 'passed',
-                    groupValue: inspectionResult,
-                    title: const Text(
-                      'Đạt tiêu chuẩn (Hoàn 100%)',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                  const SizedBox(height: 10),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'passed',
+                        label: Text('Đạt tiêu chuẩn (Hoàn 100%)'),
+                        icon: Icon(Icons.check_circle_outline),
                       ),
-                    ),
-                    subtitle: Text(
-                      'Hoàn trả ${_currencyFormat.format(deposit)} cho cư dân',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setDialogState(() {
-                          inspectionResult = val;
+                      ButtonSegment(
+                        value: 'violated',
+                        label: Text('Vi phạm / Khấu trừ'),
+                        icon: Icon(Icons.warning_amber_rounded),
+                      ),
+                    ],
+                    selected: {inspectionResult},
+                    onSelectionChanged: (Set<String> newSelection) {
+                      setDialogState(() {
+                        inspectionResult = newSelection.first;
+                        if (inspectionResult == 'passed') {
                           forfeitedController.text = '0';
-                        });
-                      }
+                        }
+                      });
                     },
                   ),
-                  RadioListTile<String>(
-                    contentPadding: EdgeInsets.zero,
-                    value: 'violated',
-                    groupValue: inspectionResult,
-                    title: const Text(
-                      'Vi phạm / Hư hại mặt bằng',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.error,
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    isPassed
+                        ? '• Hoàn trả ${_currencyFormat.format(deposit)} cho cư dân'
+                        : '• Khấu trừ một phần hoặc toàn bộ tiền cọc để đền bù',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isPassed ? Colors.teal.shade800 : AppTheme.error,
+                      fontWeight: FontWeight.w500,
                     ),
-                    subtitle: const Text(
-                      'Khấu trừ một phần hoặc toàn bộ tiền cọc để đền bù',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setDialogState(() {
-                          inspectionResult = val;
-                        });
-                      }
-                    },
                   ),
                   if (!isPassed) ...[
                     const SizedBox(height: 8),

@@ -28,11 +28,11 @@
   - Bảng `amenity_bookings` mở rộng: `qr_ticket_token`, `checked_in_by`, `inspected_by`, `inspected_at`, `inspection_result`, `forfeited_amount`, `refund_amount`, `inspection_notes`, `inspection_image_urls`.
   - RPC: `book_amenity_slot(...)`, `check_in_amenity_ticket(p_token UUID)`, `inspect_and_settle_amenity_deposit(p_booking_id UUID, p_result TEXT, p_forfeited_amount NUMERIC, p_notes TEXT, p_image_urls JSONB)`.
 
-- [ ] **Step 1: Viết failing test cho Migration SQL**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Tạo file migration `20261108_02_amenity_lifecycle_and_deposit.sql` với đầy đủ schema & 3 RPCs**
-- [ ] **Step 4: Chạy lại test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết failing test cho Migration SQL**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Tạo file migration `20261108_02_amenity_lifecycle_and_deposit.sql` với đầy đủ schema & 3 RPCs**
+- [x] **Step 4: Chạy lại test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -51,11 +51,11 @@
   - `AmenityBookingModel`: `qrTicketToken`, `isCheckedIn`, `inspectionResult`, `refundAmount`, `forfeitedAmount`, `inspectionNotes`, `inspectionImageUrls`.
   - `AmenityInspectionModel`: DTO phục vụ gửi kết quả nghiệm thu cọc.
 
-- [ ] **Step 1: Viết test cho các trường mới và serialization**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Cập nhật `building_amenity_model.dart`, `amenity_booking_model.dart` và tạo `amenity_inspection_model.dart`**
-- [ ] **Step 4: Chạy test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết test cho các trường mới và serialization**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Cập nhật `building_amenity_model.dart`, `amenity_booking_model.dart` và tạo `amenity_inspection_model.dart`**
+- [x] **Step 4: Chạy test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -73,11 +73,11 @@
   - `AmenityBookingRepository.inspectAndSettleDeposit(...)`
   - `pendingInspectionsProvider`: Lấy danh sách ca cần nghiệm thu mặt bằng / xử lý cọc.
 
-- [ ] **Step 1: Viết test cho Repository các hàm check-in và nghiệm thu cọc**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Cập nhật Repository và Providers**
-- [ ] **Step 4: Chạy test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết test cho Repository các hàm check-in và nghiệm thu cọc**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Cập nhật Repository và Providers**
+- [x] **Step 4: Chạy test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -94,11 +94,11 @@
   - Phân màu lưới ca trực quan (Còn trống / Sắp đầy / Đã kín / Bảo trì).
   - Thẻ Vé Điện Tử QR Code tại tab "Lịch của tôi" để cư dân xuất trình tại cổng.
 
-- [ ] **Step 1: Viết widget test cho hiển thị vé QR và phân màu lưới ca**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Cập nhật `AmenityBookingScreen`**
-- [ ] **Step 4: Chạy test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết widget test cho hiển thị vé QR và phân màu lưới ca**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Cập nhật `AmenityBookingScreen`**
+- [x] **Step 4: Chạy test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -114,11 +114,11 @@
   - Tab "Lịch Đặt & Quét Check-in": Hộp thoại quét/nhập mã vé QR.
   - Tab "Nghiệm Thu & Quản Lý Cọc": Hộp thoại nghiệm thu bàn giao mặt bằng có ảnh chụp, hoàn cọc 100% hoặc khấu trừ đền bù.
 
-- [ ] **Step 1: Viết widget test cho hộp thoại check-in và nghiệm thu cọc**
-- [ ] **Step 2: Chạy test xác nhận Red phase**
-- [ ] **Step 3: Cập nhật `AmenityManagementScreen`**
-- [ ] **Step 4: Chạy test xác nhận Green phase**
-- [ ] **Step 5: Commit vào `main`**
+- [x] **Step 1: Viết widget test cho hộp thoại check-in và nghiệm thu cọc**
+- [x] **Step 2: Chạy test xác nhận Red phase**
+- [x] **Step 3: Cập nhật `AmenityManagementScreen`**
+- [x] **Step 4: Chạy test xác nhận Green phase**
+- [x] **Step 5: Commit vào `main`**
 
 ---
 
@@ -127,7 +127,7 @@
 **Files:**
 - Test toàn bộ các file liên quan đến tiện ích và thanh toán.
 
-- [ ] **Step 1: Chạy toàn bộ test suite của module Amenity**
-- [ ] **Step 2: Chạy `dart analyze lib test` đảm bảo 0 issues**
-- [ ] **Step 3: Chạy `graphify update .`**
-- [ ] **Step 4: Commit hoàn tất module lên `main`**
+- [x] **Step 1: Chạy toàn bộ test suite của module Amenity**
+- [x] **Step 2: Chạy `dart analyze lib test` đảm bảo 0 issues**
+- [x] **Step 3: Chạy `graphify update .`**
+- [x] **Step 4: Commit hoàn tất module lên `main`**
