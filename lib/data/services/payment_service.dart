@@ -1,4 +1,6 @@
 import '../../core/supabase_config.dart';
+import '../models/building_payment_config_model.dart';
+import '../models/sepay_webhook_payload_model.dart';
 
 enum PaymentType { invoice, service }
 
@@ -63,10 +65,11 @@ class PaymentResult {
   }
 }
 
-/// Dịch vụ thanh toán thuần túy (Decoupled Service)
-/// Độc lập hoàn toàn với Riverpod để tuân thủ kiến trúc phân tầng sạch
+/// Dịch vụ thanh toán thực tế (Decoupled Production Payment Service)
 class PaymentService {
-  const PaymentService();
+  final bool isMockMode;
+
+  const PaymentService({this.isMockMode = false});
 
   /// Khởi tạo ý định thanh toán thực tế (Payment Intent)
   /// Trả về trạng thái PENDING, mã VietQR và mã đối soát ngân hàng
@@ -75,6 +78,19 @@ class PaymentService {
     required String referenceId,
     String paymentMethod = 'bank_transfer',
   }) async {
+    if (isMockMode) {
+      return PaymentResult(
+        success: true,
+        isPending: true,
+        status: 'PENDING',
+        transactionCode: 'TX-${DateTime.now().millisecondsSinceEpoch}',
+        transactionId: 'tx-mock-01',
+        amount: 1500000.0,
+        title: 'Thanh toán phí dịch vụ',
+        paidAt: DateTime.now(),
+      );
+    }
+
     final typeString = type == PaymentType.invoice ? 'INVOICE' : 'SERVICE';
 
     final res = await SupabaseConfig.client.rpc(
@@ -89,8 +105,7 @@ class PaymentService {
     return PaymentResult.fromJson(Map<String, dynamic>.from(res as Map));
   }
 
-  /// Gửi yêu cầu thanh toán (Mặc định khởi tạo Payment Intent PENDING an toàn)
-  /// Thay thế hoàn toàn cơ chế simulate_unified_payment cũ
+  /// Gửi yêu cầu thanh toán (Khởi tạo Payment Intent PENDING an toàn)
   Future<PaymentResult> pay({
     required PaymentType type,
     required String referenceId,
@@ -105,7 +120,70 @@ class PaymentService {
     );
   }
 
-  /// Xử lý Webhook biến động số dư từ cổng ngân hàng / VietQR (Napas 247)
+  /// Xử lý Webhook biến động số dư từ cổng SePay (sepay.vn)
+  Future<Map<String, dynamic>> processSepayWebhook(
+    SepayWebhookPayloadModel payload, {
+    String? apiKey,
+  }) async {
+    if (isMockMode) {
+      if (!payload.isIncomingTransfer) {
+        return {
+          'success': true,
+          'status': 'IGNORED_OUTGOING',
+          'message': 'Giao dịch chi tiền ra, bỏ qua an toàn.',
+        };
+      }
+      final code = payload.extractedPaymentCode;
+      if (code != null && code.isNotEmpty) {
+        return {
+          'success': true,
+          'status': 'SUCCESS',
+          'invoice_id': 'inv-mock-01',
+          'receipt_number': 'REC-${DateTime.now().millisecondsSinceEpoch}',
+          'message': 'Gạch nợ hóa đơn tự động qua SePay Webhook thành công.',
+        };
+      }
+      return {
+        'success': false,
+        'status': 'UNMATCHED',
+        'message': 'Không tìm thấy hóa đơn khớp với nội dung chuyển khoản SePay.',
+      };
+    }
+
+    final res = await SupabaseConfig.client.rpc(
+      'process_sepay_webhook',
+      params: {
+        'p_payload': payload.toJson(),
+        'p_api_key': apiKey,
+      },
+    );
+    return Map<String, dynamic>.from(res as Map);
+  }
+
+  /// Lấy cấu hình tài khoản ngân hàng & SePay của tòa nhà
+  Future<BuildingPaymentConfigModel?> fetchBuildingPaymentConfig(String buildingId) async {
+    if (isMockMode) {
+      return BuildingPaymentConfigModel(
+        id: 'cfg-mock',
+        buildingId: buildingId,
+        bankName: 'MBBank',
+        bankAccountNumber: '0388888888',
+        bankAccountName: 'BAN QUAN LY PKA HOME',
+        bankBin: '970422',
+      );
+    }
+    final res = await SupabaseConfig.client
+        .from('building_payment_configs')
+        .select()
+        .eq('building_id', buildingId)
+        .eq('is_active', true)
+        .maybeSingle();
+
+    if (res == null) return null;
+    return BuildingPaymentConfigModel.fromJson(Map<String, dynamic>.from(res));
+  }
+
+  /// Xử lý Webhook biến động số dư ngân hàng chung
   Future<Map<String, dynamic>> processBankPaymentWebhook(Map<String, dynamic> payload) async {
     final res = await SupabaseConfig.client.rpc(
       'process_bank_payment_webhook',
@@ -116,4 +194,3 @@ class PaymentService {
     return Map<String, dynamic>.from(res as Map);
   }
 }
-

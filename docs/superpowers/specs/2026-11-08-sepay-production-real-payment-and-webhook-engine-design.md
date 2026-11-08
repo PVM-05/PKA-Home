@@ -143,3 +143,4 @@ Cho phép mỗi tòa nhà/cơ sở B2B SaaS cấu hình riêng tài khoản SePa
    - `dart analyze lib test` đạt 0 issues.
    - Kiểm thử toàn bộ test suite pass 100%.
    - Commit trực tiếp vào nhánh `main`.
+

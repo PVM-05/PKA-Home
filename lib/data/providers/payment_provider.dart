@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/supabase_config.dart';
+import '../models/building_payment_config_model.dart';
 import '../models/payment_transaction_model.dart';
 import '../services/payment_service.dart';
 import 'resident_invoice_provider.dart';
@@ -8,6 +9,12 @@ import 'management_provider.dart';
 
 final paymentServiceProvider = Provider<PaymentService>((ref) {
   return const PaymentService();
+});
+
+/// Provider nạp cấu hình tài khoản ngân hàng & SePay theo tòa nhà
+final buildingPaymentConfigProvider = FutureProvider.family<BuildingPaymentConfigModel?, String>((ref, buildingId) async {
+  final service = ref.watch(paymentServiceProvider);
+  return service.fetchBuildingPaymentConfig(buildingId);
 });
 
 /// Bộ điều khiển thanh toán (Orchestration Controller)
