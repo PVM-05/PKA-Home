@@ -30,21 +30,21 @@
   - Adaptive Batch Dialog: Thích ứng tự động: nếu width < 600dp, hiển thị các khối thẻ dọc cho từng căn; nếu width $\ge 600$dp, hiển thị bảng ngang.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1400`): Executive Utility KPI Bar (Chờ duyệt, Bất thường AI, Đã duyệt, Tỷ lệ hoàn thành) + Danh sách lưới 2 cột.
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `ManagementMeterReadingScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `ManagementMeterReadingScreen`**
   Tạo `test/features/management/management_meter_reading_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render cả 4 tabs không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render Executive KPI Bar và bố cục lưới 2 cột.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/management/management_meter_reading_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `ManagementMeterReadingScreen` với kiến trúc Responsive Impeccable**
-  - Sửa `_showBatchRecordDialog`: Dialog dùng `LayoutBuilder` để hiển thị dạng khối thẻ dọc khi chiều rộng $< 600$dp, và bảng ngang khi $\ge 600$dp.
-  - Sửa `_buildSubmissionCard`: Bọc nhãn nút trong `FittedBox(fit: BoxFit.scaleDown, child: Text(...))`, tiêu đề và huy hiệu bọc `Flexible`.
+- [x] **Step 3: Cập nhật `ManagementMeterReadingScreen` với kiến trúc Responsive Impeccable**
+  - Sửa `_showBatchRecordDialog`: Dialog dùng `Builder` + `MediaQuery.sizeOf(context)` để hiển thị dạng khối thẻ dọc khi chiều rộng $< 500$dp, và bảng ngang khi $\ge 500$dp.
+  - Sửa `_buildSubmissionCard`: Bọc nhãn nút trong `FittedBox(fit: BoxFit.scaleDown, child: Text(...))`, tiêu đề và huy hiệu bọc `Flexible` & `ConstrainedBox`.
   - Sửa `build`:
     - Thêm `_buildExecutiveKpiBar` trên Desktop ($\ge 900$dp).
     - Thêm bố cục lưới 2 cột trên Desktop cho danh sách phiếu.
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của management meter reading**
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của management meter reading**
   Chạy `flutter test test/features/management/management_meter_reading*` đảm bảo cả test chức năng lẫn responsive pass 100%.
-- [ ] **Step 5: Commit thay đổi Task 1 vào `main`**
+- [x] **Step 5: Commit thay đổi Task 1 vào `main`**
   `git commit -m "feat(management): nang cap quan ly chi so dien nuoc responsive web workstation va mobile"`
 
 ---
@@ -61,19 +61,20 @@
   - Mobile (< 900dp): Bỏ `height: 50` cứng ở nút gửi, bọc thẻ đính kèm và nút bấm với `Flexible` & `FittedBox`.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1200`): Split-Screen 2 cột (Cột trái: Chỉ số kỳ trước + Lịch sử khai báo; Cột phải: Form khai báo & OCR Scanner).
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `ResidentMeterReadingScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `ResidentMeterReadingScreen`**
   Tạo `test/features/resident/resident_meter_reading_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render Form và Lịch sử không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render bố cục Split-Screen 2 cột hoàn chỉnh.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/resident/resident_meter_reading_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `ResidentMeterReadingScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `ResidentMeterReadingScreen` với kiến trúc Responsive Impeccable**
   - Sửa nút gửi: Dùng `ConstrainedBox(constraints: BoxConstraints(minHeight: 48))` thay vì cố định `height: 50`.
   - Sửa thẻ ảnh công tơ: Bọc tên file trong `Flexible(child: Text(..., overflow: TextOverflow.ellipsis))`.
+  - Tách header thẻ công tơ điện nước trong `Wrap` thành 3 phần tử con độc lập tránh tràn 320dp.
   - Sửa `build`: Thêm bố cục Split-Screen 2 cột khi `maxWidth >= 900`.
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của resident meter reading**
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của resident meter reading**
   Chạy `flutter test test/features/resident/*meter*` đảm bảo pass 100%.
-- [ ] **Step 5: Commit thay đổi Task 2 vào `main`**
+- [x] **Step 5: Commit thay đổi Task 2 vào `main`**
   `git commit -m "feat(resident): nang cap khai bao chi so dien nuoc responsive split-screen va mobile"`
 
 ---
@@ -84,11 +85,12 @@
 - Verify: Toàn bộ codebase `lib/` và `test/`
 - Update: Knowledge Graph qua `graphify update .`
 
-- [ ] **Step 1: Chạy toàn bộ test suite của phân hệ Điện Nước**
+- [x] **Step 1: Chạy toàn bộ test suite của phân hệ Điện Nước**
   Chạy `flutter test test/features/management/*meter* test/features/resident/*meter* test/features/meter_reading/` đảm bảo 100% test pass.
-- [ ] **Step 2: Chạy static analysis toàn dự án**
+- [x] **Step 2: Chạy static analysis toàn dự án**
   Chạy `dart analyze lib test` đảm bảo 0 warning, 0 error.
-- [ ] **Step 3: Cập nhật Knowledge Graph**
+- [x] **Step 3: Cập nhật Knowledge Graph**
   Chạy `graphify update .` đồng bộ kiến trúc dự án.
-- [ ] **Step 4: Commit tài liệu hoàn thành và tri thức hệ thống vào `main`**
+- [x] **Step 4: Commit tài liệu hoàn thành và tri thức hệ thống vào `main`**
   `git commit -m "docs: hoan thanh cai tien giao dien phan he dien nuoc theo chuan impeccable"`
+

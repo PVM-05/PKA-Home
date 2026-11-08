@@ -63,3 +63,4 @@
    - Test 2: Desktop 1200dp render bố cục Split-Screen 2 cột hoàn chỉnh.
 3. **Static Analysis Quality Gate:**
    - Chạy `dart analyze lib test` đạt 0 warning, 0 error.
+

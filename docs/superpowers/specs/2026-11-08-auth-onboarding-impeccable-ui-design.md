@@ -68,3 +68,4 @@
    - Test 6: `ForgotPasswordScreen` render an toàn trên 320dp với font scale 1.3x.
 2. **Static Analysis Quality Gate:**
    - Chạy `dart analyze lib test` đạt 0 warning, 0 error.
+
