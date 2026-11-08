@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/resident_model.dart';
@@ -1162,550 +1163,832 @@ class _ResidentManagementScreenState
                 },
               )
             : null,
-        body: Column(
-          children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                onChanged: (val) {
-                  setState(() {
-                    _searchQuery = val.toLowerCase().trim();
-                  });
-                },
-              ),
-            ),
-
-            // Tool row: Counter + Filter Button (A5)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      residentsAsync.hasValue
-                          ? 'Hiển thị ${filteredResidents.length}/${allResidents.length} người dùng'
-                          : 'Đang tải người dùng...',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textSecondary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () => _showFilterBottomSheet(context),
-                    icon: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(Icons.filter_list, size: 18),
-                        if (_activeFilterCount > 0)
-                          Positioned(
-                            right: -4,
-                            top: -4,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppTheme.primary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    label: Text(
-                      _activeFilterCount > 0
-                          ? 'Bộ lọc ($_activeFilterCount)'
-                          : 'Bộ lọc',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Active Filter Chips (A5)
-            if (_activeFilterCount > 0)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 2,
-                ),
-                child: Row(
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isDesktop = constraints.maxWidth >= 900;
+                return Column(
                   children: [
-                    if (_selectedRoleFilter != 'all')
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: InputChip(
-                          label: Text(
-                            'Vai trò: ${_getRoleLabel(_selectedRoleFilter)}',
-                            style: const TextStyle(fontSize: 12),
+                    // Search & Filter Toolbar
+                    _buildResidentToolbar(
+                      context,
+                      isDesktop: isDesktop,
+                      filteredCount: filteredResidents.length,
+                      totalCount: allResidents.length,
+                      hasData: residentsAsync.hasValue,
+                    ),
+
+                    // Active Filters Chips
+                    if (_activeFilterCount > 0)
+                      _buildActiveFilterChips(),
+
+                    const SizedBox(height: 4),
+
+                    // Main List/Table
+                    Expanded(
+                      child: AppStateView<List<ResidentModel>>(
+                        asyncValue: residentsAsync,
+                        skeletonBuilder: (_) => ListView(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                          onDeleted: () {
-                            setState(() {
-                              _selectedRoleFilter = 'all';
-                            });
-                          },
-                          deleteIcon: const Icon(Icons.cancel, size: 16),
+                          children: const [
+                            ListItemSkeleton(),
+                            ListItemSkeleton(),
+                            ListItemSkeleton(),
+                          ],
                         ),
-                      ),
-                    if (_selectedStatusFilter != 'all')
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: InputChip(
-                          label: Text(
-                            'Trạng thái: ${_getStatusLabel(_selectedStatusFilter)}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onDeleted: () {
-                            setState(() {
-                              _selectedStatusFilter = 'all';
-                            });
-                          },
-                          deleteIcon: const Icon(Icons.cancel, size: 16),
-                        ),
-                      ),
-                    if (_selectedApartmentFilter != 'all')
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: InputChip(
-                          label: Text(
-                            'Căn hộ: ${_selectedApartmentFilter == 'assigned' ? 'Đã gán' : 'Chưa gán'}',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onDeleted: () {
-                            setState(() {
-                              _selectedApartmentFilter = 'all';
-                            });
-                          },
-                          deleteIcon: const Icon(Icons.cancel, size: 16),
-                        ),
-                      ),
-                    if (_activeFilterCount > 1)
-                      ActionChip(
-                        label: const Text(
-                          'Xóa tất cả',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        avatar: const Icon(Icons.close, size: 14),
-                        onPressed: () {
-                          setState(() {
-                            _selectedRoleFilter = 'all';
-                            _selectedStatusFilter = 'all';
-                            _selectedApartmentFilter = 'all';
-                          });
+                        emptyMessage: 'Không có người dùng nào',
+                        emptyIcon: Icons.group_outlined,
+                        onRetry: () {
+                          ref.invalidate(residentsProvider);
+                          ref.invalidate(apartmentsProvider);
+                        },
+                        dataBuilder: (_) {
+                          if (filteredResidents.isEmpty) {
+                            return _buildEmptyResidentsView(context);
+                          }
+
+                          if (isDesktop) {
+                            return _buildDesktopResidentWorkstation(
+                              context,
+                              filteredResidents,
+                              apartmentsAsync.value ?? [],
+                              isCurrentUserAdmin,
+                            );
+                          }
+
+                          return _buildMobileResidentList(
+                            context,
+                            filteredResidents,
+                            apartmentsAsync.value ?? [],
+                            isCurrentUserAdmin,
+                          );
                         },
                       ),
+                    ),
                   ],
-                ),
-              ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-            const SizedBox(height: 4),
-
-            Expanded(
-              child: AppStateView<List<ResidentModel>>(
-                asyncValue: residentsAsync,
-                skeletonBuilder: (_) => ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+  Widget _buildResidentToolbar(
+    BuildContext context, {
+    required bool isDesktop,
+    required int filteredCount,
+    required int totalCount,
+    required bool hasData,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: isDesktop
+          ? Row(
+              children: [
+                SizedBox(
+                  width: 400,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
+                      prefixIcon: const Icon(Icons.search, size: 20),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                    ),
+                    onChanged: (val) {
+                      setState(() => _searchQuery = val.toLowerCase().trim());
+                    },
                   ),
-                  children: const [
-                    ListItemSkeleton(),
-                    ListItemSkeleton(),
-                    ListItemSkeleton(),
-                    ListItemSkeleton(),
-                    ListItemSkeleton(),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    hasData
+                        ? 'Hiển thị $filteredCount/$totalCount người dùng'
+                        : 'Đang tải người dùng...',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () => _showFilterBottomSheet(context),
+                  icon: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.filter_list, size: 18),
+                      if (_activeFilterCount > 0)
+                        Positioned(
+                          right: -4,
+                          top: -4,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  label: Text(
+                    _activeFilterCount > 0
+                        ? 'Bộ lọc ($_activeFilterCount)'
+                        : 'Bộ lọc',
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                  ),
+                  onChanged: (val) {
+                    setState(() => _searchQuery = val.toLowerCase().trim());
+                  },
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        hasData
+                            ? 'Hiển thị $filteredCount/$totalCount người dùng'
+                            : 'Đang tải người dùng...',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => _showFilterBottomSheet(context),
+                      icon: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(Icons.filter_list, size: 16),
+                          if (_activeFilterCount > 0)
+                            Positioned(
+                              right: -3,
+                              top: -3,
+                              child: Container(
+                                width: 7,
+                                height: 7,
+                                decoration: const BoxDecoration(
+                                  color: AppTheme.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      label: Text(
+                        _activeFilterCount > 0
+                            ? 'Bộ lọc ($_activeFilterCount)'
+                            : 'Bộ lọc',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
                   ],
                 ),
-                emptyMessage: 'Không có người dùng nào',
-                emptyIcon: Icons.group_outlined,
-                onRetry: () {
-                  ref.invalidate(residentsProvider);
-                  ref.invalidate(apartmentsProvider);
+              ],
+            ),
+    );
+  }
+
+  Widget _buildActiveFilterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      child: Row(
+        children: [
+          if (_selectedRoleFilter != 'all')
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: InputChip(
+                label: Text(
+                  'Vai trò: ${_getRoleLabel(_selectedRoleFilter)}',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onDeleted: () {
+                  setState(() => _selectedRoleFilter = 'all');
                 },
-                dataBuilder: (_) {
-                  if (filteredResidents.isEmpty) {
-                    return RefreshIndicator(
-                      color: AppTheme.primary,
-                      onRefresh: () async {
-                        HapticFeedback.lightImpact();
-                        ref.invalidate(residentsProvider);
-                        ref.invalidate(apartmentsProvider);
-                      },
-                      child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.15,
-                          ),
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.border.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.person_search,
-                                    size: 48,
-                                    color: AppTheme.textSecondary.withValues(
-                                      alpha: 0.6,
-                                    ),
+                deleteIcon: const Icon(Icons.cancel, size: 16),
+              ),
+            ),
+          if (_selectedStatusFilter != 'all')
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: InputChip(
+                label: Text(
+                  'Trạng thái: ${_getStatusLabel(_selectedStatusFilter)}',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onDeleted: () {
+                  setState(() => _selectedStatusFilter = 'all');
+                },
+                deleteIcon: const Icon(Icons.cancel, size: 16),
+              ),
+            ),
+          if (_selectedApartmentFilter != 'all')
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: InputChip(
+                label: Text(
+                  'Căn hộ: ${_selectedApartmentFilter == 'assigned' ? 'Đã gán' : 'Chưa gán'}',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onDeleted: () {
+                  setState(() => _selectedApartmentFilter = 'all');
+                },
+                deleteIcon: const Icon(Icons.cancel, size: 16),
+              ),
+            ),
+          if (_activeFilterCount > 1)
+            ActionChip(
+              label: const Text(
+                'Xóa tất cả',
+                style: TextStyle(fontSize: 12),
+              ),
+              avatar: const Icon(Icons.close, size: 14),
+              onPressed: () {
+                setState(() {
+                  _selectedRoleFilter = 'all';
+                  _selectedStatusFilter = 'all';
+                  _selectedApartmentFilter = 'all';
+                });
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyResidentsView(BuildContext context) {
+    return RefreshIndicator(
+      color: AppTheme.primary,
+      onRefresh: () async {
+        HapticFeedback.lightImpact();
+        ref.invalidate(residentsProvider);
+        ref.invalidate(apartmentsProvider);
+      },
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.border.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.person_search,
+                    size: 48,
+                    color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Không tìm thấy người dùng nào phù hợp',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopResidentWorkstation(
+    BuildContext context,
+    List<ResidentModel> residents,
+    List<ApartmentModel> apartments,
+    bool isCurrentUserAdmin,
+  ) {
+    return RefreshIndicator(
+      color: AppTheme.primary,
+      onRefresh: () async {
+        HapticFeedback.lightImpact();
+        ref.invalidate(residentsProvider);
+        ref.invalidate(apartmentsProvider);
+      },
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          AppCard(
+            padding: EdgeInsets.zero,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 950),
+                child: DataTable(
+                  columnSpacing: 16,
+                  horizontalMargin: 16,
+                  headingRowColor: WidgetStateProperty.all(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : const Color(0xFFF8FAFC),
+                  ),
+                  columns: const [
+                    DataColumn(
+                      label: Text(
+                        'Người dùng',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Vai trò',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Trạng thái',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Căn hộ liên kết',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Liên hệ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Thao tác',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                  rows: residents.map((resident) {
+                    final roleColor = _getRoleColor(resident.role);
+                    return DataRow(
+                      cells: [
+                        // Người dùng
+                        DataCell(
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: roleColor.withValues(alpha: 0.15),
+                                child: Text(
+                                  resident.fullName.isNotEmpty
+                                      ? resident.fullName[0].toUpperCase()
+                                      : '?',
+                                  style: TextStyle(
+                                    color: roleColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                resident.fullName,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Vai trò
+                        DataCell(_buildRoleChip(resident)),
+
+                        // Trạng thái
+                        DataCell(_buildStatusChip(resident)),
+
+                        // Căn hộ liên kết
+                        DataCell(
+                          Text(
+                            resident.apartmentSummary,
+                            style: TextStyle(
+                              color: resident.apartments.isNotEmpty ||
+                                      resident.apartment != null
+                                  ? AppTheme.success
+                                  : AppTheme.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+
+                        // Liên hệ
+                        DataCell(
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (resident.email != null &&
+                                  resident.email!.isNotEmpty)
                                 Text(
-                                  'Không tìm thấy người dùng nào',
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(color: AppTheme.textSecondary),
+                                  resident.email!,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              if (resident.phone != null &&
+                                  resident.phone!.isNotEmpty)
+                                Text(
+                                  resident.phone!,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        // Thao tác
+                        DataCell(
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isCurrentUserAdmin)
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.manage_accounts_outlined,
+                                    size: 18,
+                                    color: AppTheme.secondary,
+                                  ),
+                                  tooltip: 'Phân quyền vai trò',
+                                  onPressed: () =>
+                                      _showChangeRoleDialog(context, resident),
+                                ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.add_home_work_outlined,
+                                  size: 18,
+                                  color: AppTheme.primary,
+                                ),
+                                tooltip: 'Gán căn hộ',
+                                onPressed: () => _showAssignApartmentDialog(
+                                  context,
+                                  resident,
+                                  apartments,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.visibility_outlined,
+                                  size: 18,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                tooltip: 'Xem chi tiết 360',
+                                onPressed: () async {
+                                  await showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (_) => Resident360DetailSheet(
+                                      resident: resident,
+                                    ),
+                                  );
+                                  ref.invalidate(residentsProvider);
+                                  ref.invalidate(apartmentsProvider);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileResidentList(
+    BuildContext context,
+    List<ResidentModel> residents,
+    List<ApartmentModel> apartments,
+    bool isCurrentUserAdmin,
+  ) {
+    return RefreshIndicator(
+      color: AppTheme.primary,
+      onRefresh: () async {
+        HapticFeedback.lightImpact();
+        ref.invalidate(residentsProvider);
+        ref.invalidate(apartmentsProvider);
+      },
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 80),
+        itemCount: residents.length,
+        itemBuilder: (context, index) {
+          final resident = residents[index];
+          final hasApartments =
+              resident.apartments.isNotEmpty || resident.apartment != null;
+
+          return AppCard(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.all(12.0),
+            onTap: () async {
+              await showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => Resident360DetailSheet(resident: resident),
+              );
+              ref.invalidate(residentsProvider);
+              ref.invalidate(apartmentsProvider);
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor:
+                          _getRoleColor(resident.role).withValues(alpha: 0.15),
+                      child: Text(
+                        resident.fullName.isNotEmpty
+                            ? resident.fullName[0].toUpperCase()
+                            : '?',
+                        style: TextStyle(
+                          color: _getRoleColor(resident.role),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            resident.fullName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 3),
+                          if (resident.email != null &&
+                              resident.email!.isNotEmpty)
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.email_outlined,
+                                  size: 13,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    resident.email!,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ),
+                          if (resident.phone != null &&
+                              resident.phone!.isNotEmpty)
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.phone_outlined,
+                                  size: 13,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    resident.phone!,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              Icon(
+                                hasApartments
+                                    ? Icons.domain
+                                    : Icons.domain_disabled_outlined,
+                                size: 14,
+                                color: hasApartments
+                                    ? AppTheme.success
+                                    : AppTheme.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  resident.apartmentSummary,
+                                  style: TextStyle(
+                                    color: hasApartments
+                                        ? AppTheme.success
+                                        : AppTheme.textSecondary,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    color: AppTheme.primary,
-                    onRefresh: () async {
-                      HapticFeedback.lightImpact();
-                      ref.invalidate(residentsProvider);
-                      ref.invalidate(apartmentsProvider);
-                    },
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 80),
-                      itemCount: filteredResidents.length,
-                      itemBuilder: (context, index) {
-                        final resident = filteredResidents[index];
-                        final hasApartments =
-                            resident.apartments.isNotEmpty ||
-                            resident.apartment != null;
-
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: InkWell(
-                            onTap: () async {
-                              await showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (_) =>
-                                    Resident360DetailSheet(resident: resident),
-                              );
-                              ref.invalidate(residentsProvider);
-                              ref.invalidate(apartmentsProvider);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Avatar
-                                  CircleAvatar(
-                                    radius: 24,
-                                    backgroundColor: _getRoleColor(
-                                      resident.role,
-                                    ).withValues(alpha: 0.15),
-                                    child: Text(
-                                      resident.fullName.isNotEmpty
-                                          ? resident.fullName[0].toUpperCase()
-                                          : '?',
-                                      style: TextStyle(
-                                        color: _getRoleColor(resident.role),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-
-                                  // Info
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          resident.fullName,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 3),
-                                        if (resident.email != null &&
-                                            resident.email!.isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 2,
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.email_outlined,
-                                                  size: 13,
-                                                  color: AppTheme.textSecondary,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Expanded(
-                                                  child: Text(
-                                                    resident.email!,
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: AppTheme
-                                                          .textSecondary,
-                                                    ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        if (resident.phone != null &&
-                                            resident.phone!.isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 2,
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.phone_outlined,
-                                                  size: 13,
-                                                  color: AppTheme.textSecondary,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  resident.phone!,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color:
-                                                        AppTheme.textSecondary,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        const SizedBox(height: 3),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              hasApartments
-                                                  ? Icons.domain
-                                                  : Icons
-                                                        .domain_disabled_outlined,
-                                              size: 14,
-                                              color: hasApartments
-                                                  ? AppTheme.success
-                                                  : AppTheme.textSecondary,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                resident.apartmentSummary,
-                                                style: TextStyle(
-                                                  color: hasApartments
-                                                      ? AppTheme.success
-                                                      : AppTheme.textSecondary,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 13,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Wrap(
-                                          spacing: 6,
-                                          runSpacing: 4,
-                                          children: [
-                                            // Role chip
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: _getRoleColor(
-                                                  resident.role,
-                                                ).withValues(alpha: 0.12),
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                border: Border.all(
-                                                  color: _getRoleColor(
-                                                    resident.role,
-                                                  ).withValues(alpha: 0.4),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                resident.roleDisplayName,
-                                                style: TextStyle(
-                                                  color: _getRoleColor(
-                                                    resident.role,
-                                                  ),
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                            // Status chip
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: !resident.isActive
-                                                    ? Colors.grey.withValues(
-                                                        alpha: 0.15,
-                                                      )
-                                                    : resident.isLocked
-                                                    ? AppTheme.error.withValues(
-                                                        alpha: 0.12,
-                                                      )
-                                                    : AppTheme.success
-                                                          .withValues(
-                                                            alpha: 0.12,
-                                                          ),
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                border: Border.all(
-                                                  color: !resident.isActive
-                                                      ? Colors.grey
-                                                      : resident.isLocked
-                                                      ? AppTheme.error
-                                                            .withValues(
-                                                              alpha: 0.4,
-                                                            )
-                                                      : AppTheme.success
-                                                            .withValues(
-                                                              alpha: 0.4,
-                                                            ),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                !resident.isActive
-                                                    ? 'Đã vô hiệu hóa'
-                                                    : resident.isLocked
-                                                    ? 'Đã khóa'
-                                                    : 'Hoạt động',
-                                                style: TextStyle(
-                                                  color: !resident.isActive
-                                                      ? Colors.grey.shade700
-                                                      : resident.isLocked
-                                                      ? AppTheme.error
-                                                      : AppTheme.success,
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Action Buttons
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (isCurrentUserAdmin)
-                                        IconButton(
-                                          tooltip: 'Phân quyền vai trò',
-                                          icon: const Icon(
-                                            Icons.manage_accounts_outlined,
-                                            color: AppTheme.secondary,
-                                          ),
-                                          onPressed: () =>
-                                              _showChangeRoleDialog(
-                                                context,
-                                                resident,
-                                              ),
-                                        ),
-                                      IconButton(
-                                        tooltip: 'Gán căn hộ',
-                                        icon: const Icon(
-                                          Icons.add_home_work_outlined,
-                                          color: AppTheme.primary,
-                                        ),
-                                        onPressed: () {
-                                          apartmentsAsync.whenData((
-                                            apartments,
-                                          ) {
-                                            _showAssignApartmentDialog(
-                                              context,
-                                              resident,
-                                              apartments,
-                                            );
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
                     ),
-                  );
-                },
-              ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isCurrentUserAdmin)
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
+                            iconSize: 20,
+                            tooltip: 'Phân quyền vai trò',
+                            icon: const Icon(
+                              Icons.manage_accounts_outlined,
+                              color: AppTheme.secondary,
+                            ),
+                            onPressed: () =>
+                                _showChangeRoleDialog(context, resident),
+                          ),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          iconSize: 20,
+                          tooltip: 'Gán căn hộ',
+                          icon: const Icon(
+                            Icons.add_home_work_outlined,
+                            color: AppTheme.primary,
+                          ),
+                          onPressed: () => _showAssignApartmentDialog(
+                            context,
+                            resident,
+                            apartments,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    _buildRoleChip(resident),
+                    _buildStatusChip(resident),
+                  ],
+                ),
+              ],
             ),
-          ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRoleChip(ResidentModel resident) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: _getRoleColor(resident.role).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: _getRoleColor(resident.role).withValues(alpha: 0.4),
+        ),
+      ),
+      child: Text(
+        resident.roleDisplayName,
+        style: TextStyle(
+          color: _getRoleColor(resident.role),
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(ResidentModel resident) {
+    Color color;
+    String text;
+    if (!resident.isActive) {
+      color = Colors.grey;
+      text = 'Đã vô hiệu hóa';
+    } else if (resident.isLocked) {
+      color = AppTheme.error;
+      text = 'Đã khóa';
+    } else {
+      color = AppStatusColors.paid;
+      text = 'Hoạt động';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

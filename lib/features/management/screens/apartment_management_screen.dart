@@ -10,6 +10,7 @@ import '../../../data/models/apartment_model.dart';
 import '../../../core/supabase_config.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/models/batch_import_model.dart';
 import '../../../data/providers/batch_import_provider.dart';
 import '../widgets/apartment_contract_sheet.dart';
@@ -101,141 +102,516 @@ class _ApartmentManagementScreenState
             ),
           ],
         ),
-        body: apartmentsAsync.when(
-          data: (allApartments) {
-            if (allApartments.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.apartment_outlined,
-                          size: 64,
-                          color: AppTheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Chưa có dữ liệu căn hộ trong hệ thống',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Hạ tầng tòa nhà đang trống. Bạn có thể tải file mẫu Excel hoặc CSV để nhập nhanh danh sách căn hộ theo lô.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.download),
-                            label: const Text('Tải mẫu Excel/CSV'),
-                            onPressed: () => _showDownloadTemplateSheet(context),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isDesktop = constraints.maxWidth >= 900;
+
+                return apartmentsAsync.when(
+                  data: (allApartments) {
+                    if (allApartments.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.apartment_outlined,
+                                  size: 64,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                'Chưa có dữ liệu căn hộ trong hệ thống',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Hạ tầng tòa nhà đang trống. Bạn có thể tải file mẫu Excel hoặc CSV để nhập nhanh danh sách căn hộ theo lô.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Wrap(
+                                spacing: 12,
+                                runSpacing: 12,
+                                alignment: WrapAlignment.center,
+                                children: [
+                                  OutlinedButton.icon(
+                                    icon: const Icon(Icons.download),
+                                    label: const Text('Tải mẫu Excel/CSV'),
+                                    onPressed: () =>
+                                        _showDownloadTemplateSheet(context),
+                                  ),
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.upload_file),
+                                    label: const Text('Nhập từ Excel/CSV'),
+                                    onPressed: () => context.push(
+                                      AppRoutes.managementBatchImport,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.upload_file),
-                            label: const Text('Nhập từ Excel/CSV'),
-                            onPressed: () =>
-                                context.push(AppRoutes.managementBatchImport),
+                        ),
+                      );
+                    }
+
+                    // 1. Danh sách các Tòa nhà duy nhất
+                    final buildings = allApartments
+                        .map((a) => a.buildingCode.toUpperCase())
+                        .where((b) => b.isNotEmpty)
+                        .toSet()
+                        .toList()
+                      ..sort();
+
+                    // 2. Danh sách các Tầng theo Tòa nhà đang chọn
+                    final floors = allApartments
+                        .where(
+                          (a) =>
+                              _selectedBuilding == null ||
+                              a.buildingCode.toUpperCase() == _selectedBuilding,
+                        )
+                        .map((a) => a.floorNumber)
+                        .toSet()
+                        .toList()
+                      ..sort();
+
+                    // 3. Lọc danh sách căn hộ theo các tiêu chí
+                    final filteredApartments = allApartments.where((apt) {
+                      if (_searchQuery.isNotEmpty) {
+                        if (!apt.code.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            )) {
+                          return false;
+                        }
+                      }
+
+                      if (_selectedBuilding != null &&
+                          apt.buildingCode.toUpperCase() != _selectedBuilding) {
+                        return false;
+                      }
+
+                      if (_selectedFloor != null &&
+                          apt.floorNumber != _selectedFloor) {
+                        return false;
+                      }
+
+                      if (_statusFilter == 'empty' && !apt.isEmpty) return false;
+                      if (_statusFilter == 'occupied' && apt.isEmpty) return false;
+
+                      return true;
+                    }).toList()
+                      ..sort((a, b) => a.code.compareTo(b.code));
+
+                    final emptyCount =
+                        allApartments.where((a) => a.isEmpty).length;
+                    final occupiedCount =
+                        allApartments.where((a) => !a.isEmpty).length;
+
+                    if (isDesktop) {
+                      return _buildDesktopApartmentWorkstation(
+                        context,
+                        allApartments,
+                        filteredApartments,
+                        buildings,
+                        floors,
+                        emptyCount,
+                        occupiedCount,
+                      );
+                    }
+
+                    return Column(
+                      children: [
+                        // Khu vực bộ lọc phân cấp Mobile
+                        Container(
+                          color: Theme.of(context).cardColor,
+                          padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextField(
+                                controller: _searchController,
+                                decoration: InputDecoration(
+                                  hintText:
+                                      'Tìm theo mã căn hộ (VD: A0110, B0502)...',
+                                  prefixIcon: const Icon(Icons.search, size: 20),
+                                  suffixIcon: _searchQuery.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear, size: 18),
+                                          onPressed: () {
+                                            _searchController.clear();
+                                            setState(() => _searchQuery = '');
+                                          },
+                                        )
+                                      : null,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 10,
+                                  ),
+                                ),
+                                onChanged: (val) {
+                                  setState(() => _searchQuery = val.trim());
+                                },
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Cấp 1: Chọn Tòa nhà
+                              Row(
+                                children: [
+                                  const Text(
+                                    'Tòa nhà:',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(right: 6.0),
+                                            child: ChoiceChip(
+                                              label: const Text('Tất cả'),
+                                              selected: _selectedBuilding == null,
+                                              onSelected: (selected) {
+                                                if (selected) {
+                                                  setState(() {
+                                                    _selectedBuilding = null;
+                                                    _selectedFloor = null;
+                                                  });
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          ...buildings.map((b) {
+                                            final isSelected =
+                                                _selectedBuilding == b;
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: 6.0,
+                                              ),
+                                              child: ChoiceChip(
+                                                label: Text('Tòa $b'),
+                                                selected: isSelected,
+                                                selectedColor: AppTheme.primary,
+                                                labelStyle: TextStyle(
+                                                  color: isSelected
+                                                      ? Colors.white
+                                                      : AppTheme.textPrimary,
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                                ),
+                                                onSelected: (selected) {
+                                                  setState(() {
+                                                    _selectedBuilding =
+                                                        selected ? b : null;
+                                                    _selectedFloor = null;
+                                                  });
+                                                },
+                                              ),
+                                            );
+                                          }),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+
+                              // Cấp 2: Chọn Số Tầng
+                              if (floors.isNotEmpty) ...[
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Số tầng: ',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: 6.0,
+                                              ),
+                                              child: ChoiceChip(
+                                                label: const Text('Tất cả tầng'),
+                                                selected: _selectedFloor == null,
+                                                onSelected: (selected) {
+                                                  if (selected) {
+                                                    setState(
+                                                      () => _selectedFloor = null,
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                            ...floors.map((floor) {
+                                              final isSelected =
+                                                  _selectedFloor == floor;
+                                              final floorLabel =
+                                                  'Tầng ${floor.toString().padLeft(2, '0')}';
+                                              return Padding(
+                                                padding: const EdgeInsets.only(
+                                                  right: 6.0,
+                                                ),
+                                                child: ChoiceChip(
+                                                  label: Text(floorLabel),
+                                                  selected: isSelected,
+                                                  selectedColor:
+                                                      AppTheme.secondary,
+                                                  labelStyle: TextStyle(
+                                                    color: isSelected
+                                                        ? Colors.white
+                                                        : AppTheme.textPrimary,
+                                                    fontWeight: isSelected
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
+                                                  ),
+                                                  onSelected: (selected) {
+                                                    setState(() {
+                                                      _selectedFloor =
+                                                          selected ? floor : null;
+                                                    });
+                                                  },
+                                                ),
+                                              );
+                                            }),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                              ],
+
+                              // Cấp 3: Lọc trạng thái
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    _buildStatusChip(
+                                      'all',
+                                      'Tất cả (${allApartments.length})',
+                                      null,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildStatusChip(
+                                      'empty',
+                                      'Còn trống ($emptyCount)',
+                                      AppStatusColors.paid,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildStatusChip(
+                                      'occupied',
+                                      'Đã có chủ ($occupiedCount)',
+                                      AppTheme.primary,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+
+                        const Divider(height: 1),
+
+                        // Danh sách / Lưới hiển thị các căn hộ
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              ref.invalidate(apartmentsProvider);
+                            },
+                            child: filteredApartments.isEmpty
+                                ? _buildEmptyFilteredView(context)
+                                : _isGridView
+                                    ? _buildGridView(filteredApartments)
+                                    : _buildListView(filteredApartments),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(
+                    child: Text(
+                      formatErrorMessage(e),
+                      style: const TextStyle(color: AppTheme.error),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'apartment_management_fab',
+          onPressed: () => _showApartmentDialog(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('Thêm căn hộ'),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyFilteredView(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.4,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off_rounded,
+                  size: 56,
+                  color: AppTheme.textSecondary.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Không tìm thấy căn hộ phù hợp bộ lọc',
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              );
-            }
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchQuery = '';
+                      _selectedBuilding = null;
+                      _selectedFloor = null;
+                      _statusFilter = 'all';
+                    });
+                  },
+                  child: const Text('Đặt lại bộ lọc'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-            // 1. Danh sách các Tòa nhà duy nhất
-            final buildings =
-                allApartments
-                    .map((a) => a.buildingCode.toUpperCase())
-                    .where((b) => b.isNotEmpty)
-                    .toSet()
-                    .toList()
-                  ..sort();
+  Widget _buildDesktopApartmentWorkstation(
+    BuildContext context,
+    List<ApartmentModel> allApartments,
+    List<ApartmentModel> filteredApartments,
+    List<String> buildings,
+    List<int> floors,
+    int emptyCount,
+    int occupiedCount,
+  ) {
+    final occupancyRate = allApartments.isNotEmpty
+        ? (occupiedCount / allApartments.length) * 100
+        : 0.0;
 
-            // 2. Danh sách các Tầng theo Tòa nhà đang chọn
-            final floors =
-                allApartments
-                    .where(
-                      (a) =>
-                          _selectedBuilding == null ||
-                          a.buildingCode.toUpperCase() == _selectedBuilding,
-                    )
-                    .map((a) => a.floorNumber)
-                    .toSet()
-                    .toList()
-                  ..sort();
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(apartmentsProvider);
+      },
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // KPI Quick Stats Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildKpiBox(
+                  'Tổng số căn hộ',
+                  '${allApartments.length} căn',
+                  AppTheme.primary,
+                  Icons.apartment,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildKpiBox(
+                  'Đã có cư dân',
+                  '$occupiedCount căn',
+                  AppTheme.primary,
+                  Icons.home,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildKpiBox(
+                  'Căn hộ trống',
+                  '$emptyCount căn',
+                  AppStatusColors.paid,
+                  Icons.meeting_room_outlined,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildKpiBox(
+                  'Tỷ lệ lấp đầy',
+                  '${occupancyRate.toStringAsFixed(1)}%',
+                  occupancyRate >= 80 ? Colors.green : Colors.orange,
+                  Icons.pie_chart_outline,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
 
-            // 3. Lọc danh sách căn hộ theo các tiêu chí
-            final filteredApartments = allApartments.where((apt) {
-              // Lọc theo tìm kiếm mã căn hộ
-              if (_searchQuery.isNotEmpty) {
-                if (!apt.code.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                )) {
-                  return false;
-                }
-              }
-
-              // Lọc theo Tòa nhà
-              if (_selectedBuilding != null &&
-                  apt.buildingCode.toUpperCase() != _selectedBuilding) {
-                return false;
-              }
-
-              // Lọc theo Tầng
-              if (_selectedFloor != null && apt.floorNumber != _selectedFloor) {
-                return false;
-              }
-
-              // Lọc theo Trạng thái
-              if (_statusFilter == 'empty' && !apt.isEmpty) return false;
-              if (_statusFilter == 'occupied' && apt.isEmpty) return false;
-
-              return true;
-            }).toList()..sort((a, b) => a.code.compareTo(b.code));
-
-            final emptyCount = allApartments.where((a) => a.isEmpty).length;
-            final occupiedCount = allApartments.where((a) => !a.isEmpty).length;
-
-            return Column(
+          // Desktop Filter Bar Card
+          AppCard(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Khu vực bộ lọc phân cấp (Header Control Panel)
-                Container(
-                  color: Theme.of(context).cardColor,
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Thanh tìm kiếm
-                      TextField(
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 320,
+                      child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Tìm theo mã căn hộ (VD: A0110, B0502)...',
-                          prefixIcon: const Icon(Icons.search),
+                          hintText: 'Tìm theo mã căn hộ (VD: A0110)...',
+                          prefixIcon: const Icon(Icons.search, size: 20),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
-                                  icon: const Icon(Icons.clear),
+                                  icon: const Icon(Icons.clear, size: 18),
                                   onPressed: () {
                                     _searchController.clear();
                                     setState(() => _searchQuery = '');
@@ -243,7 +619,7 @@ class _ApartmentManagementScreenState
                                 )
                               : null,
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
+                            horizontal: 14,
                             vertical: 10,
                           ),
                         ),
@@ -251,154 +627,10 @@ class _ApartmentManagementScreenState
                           setState(() => _searchQuery = val.trim());
                         },
                       ),
-                      const SizedBox(height: 12),
-
-                      // Cấp 1: Chọn Tòa nhà (Block)
-                      Row(
-                        children: [
-                          const Text(
-                            'Tòa nhà:',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 6.0),
-                                    child: ChoiceChip(
-                                      label: const Text('Tất cả'),
-                                      selected: _selectedBuilding == null,
-                                      onSelected: (selected) {
-                                        if (selected) {
-                                          setState(() {
-                                            _selectedBuilding = null;
-                                            _selectedFloor = null;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  ...buildings.map((b) {
-                                    final isSelected = _selectedBuilding == b;
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 6.0,
-                                      ),
-                                      child: ChoiceChip(
-                                        label: Text('Tòa $b'),
-                                        selected: isSelected,
-                                        selectedColor: AppTheme.primary,
-                                        labelStyle: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white
-                                              : AppTheme.textPrimary,
-                                          fontWeight: isSelected
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                        onSelected: (selected) {
-                                          setState(() {
-                                            _selectedBuilding = selected
-                                                ? b
-                                                : null;
-                                            _selectedFloor =
-                                                null; // reset tầng khi đổi tòa
-                                          });
-                                        },
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Cấp 2: Chọn Số Tầng (Floors)
-                      if (floors.isNotEmpty) ...[
-                        Row(
-                          children: [
-                            const Text(
-                              'Số tầng: ',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 6.0,
-                                      ),
-                                      child: ChoiceChip(
-                                        label: const Text('Tất cả tầng'),
-                                        selected: _selectedFloor == null,
-                                        onSelected: (selected) {
-                                          if (selected) {
-                                            setState(
-                                              () => _selectedFloor = null,
-                                            );
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    ...floors.map((floor) {
-                                      final isSelected =
-                                          _selectedFloor == floor;
-                                      final floorLabel =
-                                          'Tầng ${floor.toString().padLeft(2, '0')}';
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 6.0,
-                                        ),
-                                        child: ChoiceChip(
-                                          label: Text(floorLabel),
-                                          selected: isSelected,
-                                          selectedColor: AppTheme.secondary,
-                                          labelStyle: TextStyle(
-                                            color: isSelected
-                                                ? Colors.white
-                                                : AppTheme.textPrimary,
-                                            fontWeight: isSelected
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                          ),
-                                          onSelected: (selected) {
-                                            setState(() {
-                                              _selectedFloor = selected
-                                                  ? floor
-                                                  : null;
-                                            });
-                                          },
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-
-                      // Cấp 3: Lọc trạng thái (Tất cả / Trống / Đã có chủ)
-                      SingleChildScrollView(
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
@@ -422,85 +654,272 @@ class _ApartmentManagementScreenState
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-
-                const Divider(height: 1),
-
-                // Danh sách / Lưới hiển thị các căn hộ
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      ref.invalidate(apartmentsProvider);
-                    },
-                    child: filteredApartments.isEmpty
-                        ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.4,
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.search_off_rounded,
-                                        size: 56,
-                                        color: AppTheme.textSecondary
-                                            .withValues(alpha: 0.5),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        'Không tìm thấy căn hộ phù hợp bộ lọc',
-                                        style: TextStyle(
-                                          color: AppTheme.textSecondary,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _searchController.clear();
-                                            _searchQuery = '';
-                                            _selectedBuilding = null;
-                                            _selectedFloor = null;
-                                            _statusFilter = 'all';
-                                          });
-                                        },
-                                        child: const Text('Đặt lại bộ lọc'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Text(
+                      'Tòa nhà: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6.0),
+                              child: ChoiceChip(
+                                label: const Text('Tất cả'),
+                                selected: _selectedBuilding == null,
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    setState(() {
+                                      _selectedBuilding = null;
+                                      _selectedFloor = null;
+                                    });
+                                  }
+                                },
                               ),
-                            ],
-                          )
-                        : _isGridView
-                        ? _buildGridView(filteredApartments)
-                        : _buildListView(filteredApartments),
-                  ),
+                            ),
+                            ...buildings.map((b) {
+                              final isSelected = _selectedBuilding == b;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 6.0),
+                                child: ChoiceChip(
+                                  label: Text('Tòa $b'),
+                                  selected: isSelected,
+                                  selectedColor: AppTheme.primary,
+                                  labelStyle: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppTheme.textPrimary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _selectedBuilding = selected ? b : null;
+                                      _selectedFloor = null;
+                                    });
+                                  },
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Text(
-              formatErrorMessage(e),
-              style: const TextStyle(color: AppTheme.error),
             ),
           ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          heroTag: 'apartment_management_fab',
-          onPressed: () => _showApartmentDialog(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('Thêm căn hộ'),
-        ),
+          const SizedBox(height: 16),
+
+          // Desktop Table View
+          AppCard(
+            padding: EdgeInsets.zero,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 900),
+                child: DataTable(
+                  columnSpacing: 16,
+                  horizontalMargin: 16,
+                  headingRowColor: WidgetStateProperty.all(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : const Color(0xFFF8FAFC),
+                  ),
+                  columns: const [
+                    DataColumn(
+                      label: Text(
+                        'Mã căn hộ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Tòa nhà',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Tầng',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Diện tích',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Trạng thái',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Thao tác',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                  rows: filteredApartments.map((apt) {
+                    final statusColor =
+                        apt.isEmpty ? AppStatusColors.paid : AppTheme.primary;
+                    final statusText =
+                        apt.isEmpty ? 'Còn trống' : 'Đã có chủ';
+
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          Text(
+                            apt.code,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        DataCell(Text('Tòa ${apt.buildingCode}')),
+                        DataCell(
+                          Text(
+                            'Tầng ${apt.floorNumber.toString().padLeft(2, '0')}',
+                          ),
+                        ),
+                        DataCell(Text('${apt.area ?? 0} m²')),
+                        DataCell(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: statusColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Text(
+                              statusText,
+                              style: TextStyle(
+                                color: statusColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.visibility_outlined,
+                                  size: 18,
+                                  color: AppTheme.primary,
+                                ),
+                                tooltip: 'Chi tiết căn hộ',
+                                onPressed: () =>
+                                    _showApartmentDetailsModal(context, ref, apt),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit_outlined,
+                                  size: 18,
+                                  color: AppTheme.secondary,
+                                ),
+                                tooltip: 'Chỉnh sửa',
+                                onPressed: () => _showApartmentDialog(
+                                  context,
+                                  ref,
+                                  apartment: apt,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                  color: AppTheme.error,
+                                ),
+                                tooltip: 'Xóa',
+                                onPressed: () =>
+                                    _deleteApartment(context, ref, apt),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKpiBox(
+    String title,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -529,26 +948,25 @@ class _ApartmentManagementScreenState
 
   Widget _buildGridView(List<ApartmentModel> apartments) {
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       physics: const AlwaysScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 220,
-        childAspectRatio: 1.12,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        maxCrossAxisExtent: 240,
+        childAspectRatio: 0.95,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
       ),
       itemCount: apartments.length,
       itemBuilder: (context, index) {
         final apt = apartments[index];
-        final statusColor = apt.isEmpty
-            ? AppStatusColors.paid
-            : AppTheme.primary;
+        final statusColor =
+            apt.isEmpty ? AppStatusColors.paid : AppTheme.primary;
         final statusText = apt.isEmpty ? 'Còn trống' : 'Đã có chủ';
 
         return Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             side: BorderSide(
               color: apt.isEmpty
                   ? Colors.grey.shade200
@@ -557,10 +975,10 @@ class _ApartmentManagementScreenState
             ),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             onTap: () => _showApartmentDetailsModal(context, ref, apt),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -570,37 +988,41 @@ class _ApartmentManagementScreenState
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          apt.code,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: statusColor,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                          horizontal: 7,
+                          vertical: 3,
                         ),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          statusText,
+                          apt.code,
                           style: TextStyle(
-                            fontSize: 10,
                             fontWeight: FontWeight.bold,
+                            fontSize: 13,
                             color: statusColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
@@ -611,17 +1033,20 @@ class _ApartmentManagementScreenState
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.square_foot,
-                            size: 14,
+                            size: 13,
                             color: AppTheme.textSecondary,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            '${apt.area ?? 0} m²',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.textSecondary,
+                          Expanded(
+                            child: Text(
+                              '${apt.area ?? 0} m²',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -629,17 +1054,20 @@ class _ApartmentManagementScreenState
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.layers_outlined,
-                            size: 14,
+                            size: 13,
                             color: AppTheme.textSecondary,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            'Tòa ${apt.buildingCode} - Tầng ${apt.floorNumber.toString().padLeft(2, '0')}',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppTheme.textSecondary,
+                          Expanded(
+                            child: Text(
+                              'Tòa ${apt.buildingCode} - Tầng ${apt.floorNumber.toString().padLeft(2, '0')}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -654,23 +1082,23 @@ class _ApartmentManagementScreenState
                             _showApartmentDialog(context, ref, apartment: apt),
                         borderRadius: BorderRadius.circular(20),
                         child: const Padding(
-                          padding: EdgeInsets.all(4.0),
+                          padding: EdgeInsets.all(3.0),
                           child: Icon(
                             Icons.edit_outlined,
-                            size: 18,
+                            size: 17,
                             color: AppTheme.primary,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       InkWell(
                         onTap: () => _deleteApartment(context, ref, apt),
                         borderRadius: BorderRadius.circular(20),
                         child: const Padding(
-                          padding: EdgeInsets.all(4.0),
+                          padding: EdgeInsets.all(3.0),
                           child: Icon(
                             Icons.delete_outline,
-                            size: 18,
+                            size: 17,
                             color: AppTheme.error,
                           ),
                         ),
@@ -688,84 +1116,110 @@ class _ApartmentManagementScreenState
 
   Widget _buildListView(List<ApartmentModel> apartments) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: apartments.length,
       itemBuilder: (context, index) {
         final apt = apartments[index];
-        final statusColor = apt.isEmpty
-            ? AppStatusColors.paid
-            : AppTheme.primary;
+        final statusColor =
+            apt.isEmpty ? AppStatusColors.paid : AppTheme.primary;
         final statusText = apt.isEmpty ? 'Còn trống' : 'Đã có chủ';
 
-        return Card(
-          elevation: 0,
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.shade200),
-          ),
-          child: ListTile(
-            onTap: () => _showApartmentDetailsModal(context, ref, apt),
-            leading: CircleAvatar(
-              backgroundColor: statusColor.withValues(alpha: 0.15),
-              child: Icon(
-                apt.isEmpty ? Icons.apartment_outlined : Icons.home,
-                color: statusColor,
+        return AppCard(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          onTap: () => _showApartmentDetailsModal(context, ref, apt),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: statusColor.withValues(alpha: 0.15),
+                child: Icon(
+                  apt.isEmpty ? Icons.apartment_outlined : Icons.home,
+                  color: statusColor,
+                  size: 18,
+                ),
               ),
-            ),
-            title: Row(
-              children: [
-                Text(
-                  'Căn hộ ${apt.code}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: statusColor,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Căn ${apt.code}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Tòa ${apt.buildingCode} • Tầng ${apt.floorNumber.toString().padLeft(2, '0')} • ${apt.area ?? 0} m²',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    iconSize: 18,
+                    icon: const Icon(
+                      Icons.edit_outlined,
+                      color: AppTheme.primary,
+                    ),
+                    onPressed: () =>
+                        _showApartmentDialog(context, ref, apartment: apt),
                   ),
-                ),
-              ],
-            ),
-            subtitle: Text(
-              'Tòa ${apt.buildingCode} • Tầng ${apt.floorNumber.toString().padLeft(2, '0')} • Diện tích: ${apt.area ?? 0} m²',
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.edit_outlined,
-                    color: AppTheme.primary,
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    iconSize: 18,
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppTheme.error,
+                    ),
+                    onPressed: () => _deleteApartment(context, ref, apt),
                   ),
-                  tooltip: 'Sửa thông tin',
-                  onPressed: () =>
-                      _showApartmentDialog(context, ref, apartment: apt),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: AppTheme.error),
-                  tooltip: 'Xóa căn hộ',
-                  onPressed: () => _deleteApartment(context, ref, apt),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
         );
       },
