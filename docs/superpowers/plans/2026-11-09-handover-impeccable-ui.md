@@ -63,19 +63,19 @@
   - Thẻ biên bản chuẩn `AppCard`, loại bỏ màu hardcode.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1400`): Bố cục lưới 2 cột hoặc Data Table Workstation căn giữa trang nhã.
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `HandoverManagementScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `HandoverManagementScreen`**
   Tạo `test/features/management/handover_management_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render an toàn không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render Executive KPI Bar và danh sách lưới 2 cột.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/management/handover_management_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `HandoverManagementScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `HandoverManagementScreen` với kiến trúc Responsive Impeccable**
   - Sửa dải KPI Header: Bọc `LayoutBuilder` cuộn ngang khi width $< 420$dp.
   - Sửa thẻ biên bản: Chuyển sang `AppCard`, bọc mã biên bản trong `Expanded`, badge trạng thái bọc `ConstrainedBox(maxWidth: 105)` + `FittedBox`.
   - Bọc toàn bộ màn hình trong `Center(ConstrainedBox(maxWidth: 1400))` và hỗ trợ lưới 2 cột trên Desktop $\ge 900$dp.
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của handover management**
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của handover management**
   Chạy `flutter test test/features/management/*handover*` đảm bảo pass 100%.
-- [ ] **Step 5: Commit thay đổi Task 2 vào `main`**
+- [x] **Step 5: Commit thay đổi Task 2 vào `main`**
   `git commit -m "feat(management): nang cap quan ly bien ban ban giao responsive web workstation va mobile"`
 
 ---
