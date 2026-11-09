@@ -29,19 +29,19 @@
   - Mobile (< 900dp): Thẻ hạn mức chuyển sang khối xếp dọc khi width < 380dp, các nhãn trạng thái và biển số bọc `Flexible` & `FittedBox`.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1200`): Bố cục Split-Screen 2 cột (Cột trái 38%: Hạn mức & Quy chế bãi đỗ; Cột phải 62%: Danh sách xe & Slot ô đỗ).
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `VehicleManagementScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `VehicleManagementScreen`**
   Tạo `test/features/resident/vehicle_management_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render Thẻ hạn mức và Danh sách xe không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render bố cục Split-Screen 2 cột hoàn chỉnh.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/resident/vehicle_management_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `VehicleManagementScreen` với kiến trúc Responsive Impeccable**
-  - Cải tiến Thẻ hạn mức căn hộ dùng `LayoutBuilder` (xếp dọc khi width < 380dp).
-  - Bọc huy hiệu trạng thái và nút hành động trong `Flexible` / `FittedBox`.
-  - Cải tiến `build` với Split-Screen 2 cột trên Desktop $\ge 900$dp (`maxWidth: 1200`).
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của resident vehicle**
+- [x] **Step 3: Cập nhật `VehicleManagementScreen` với kiến trúc Responsive Impeccable**
+  - Cải tiến Thẻ hạn mức căn hộ dùng `LayoutBuilder` (xếp dọc khi width < 360dp, text bọc `Flexible` & `FittedBox`).
+  - Tái cấu trúc thẻ xe: Header làm phẳng với icon 36x36, biển số, badge trạng thái và nút thao tác bọc gọn; bọc `brandModel` với `Expanded(Flexible)` chống tràn; hiển thị vị trí ô đỗ và ảnh cà vẹt trong `Wrap`.
+  - Cải tiến `build` với Split-Screen 2 cột trên Desktop $\ge 900$dp (`maxWidth: 1200`) và dải hướng dẫn quy chế bãi xe.
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của resident vehicle**
   Chạy `flutter test test/features/resident/*vehicle*` đảm bảo pass 100%.
-- [ ] **Step 5: Commit thay đổi Task 1 vào `main`**
+- [x] **Step 5: Commit thay đổi Task 1 vào `main`**
   `git commit -m "feat(resident): nang cap giao dien quan ly phuong tien responsive split-screen va mobile"`
 
 ---
