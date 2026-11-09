@@ -145,3 +145,4 @@ PKA-Home áp dụng hệ thống thiết kế hiện đại, thanh lịch theo t
 - KHÔNG sử dụng emoji trong nhãn, tiêu đề, nút bấm hay thông báo hệ thống.
 - KHÔNG dùng từ tiếng Anh trong ngoặc đơn để giải nghĩa (VD: Không dùng `Mật khẩu (Password)`).
 - KHÔNG sử dụng màu hardcode rời rạc trong widget (`Colors.blue`, `Color(0xFF1E3A8A)`). Luôn gọi từ `AppTheme`.
+

@@ -51,3 +51,4 @@ Sản phẩm thương mại PropTech thế hệ mới tuân thủ nghiêm ngặt
 2. **Absolute Responsive Guarantee**: Mọi màn hình co giãn mượt mà theo `LayoutBuilder`, `Wrap`, `Expanded`/`Flexible`, tự động chuyển đổi giữa Mobile Single-Column và Web Desktop Multi-Column Workstation.
 3. **Data Integrity & Security**: Bảo mật RLS cấp cơ sở dữ liệu, phân quyền vai trò (BQL, Kế toán, Kỹ thuật, Cư dân) triệt để và minh bạch nhật ký kiểm toán (Audit Trail).
 4. **Frictionless Operations**: Tối ưu từng cú chạm của người dùng thật, thao tác ký điện tử tại chỗ, xuất PDF biên bản tức thì.
+
