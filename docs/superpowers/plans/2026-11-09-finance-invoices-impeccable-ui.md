@@ -90,17 +90,17 @@
   - `ResidentInvoiceScreen`: Thẻ hóa đơn viền mỏng mờ, huy hiệu quá hạn rõ ràng, chống tràn 100% trên 320dp.
   - `ResidentInvoiceDetailScreen`: Split-Screen trên Web Desktop $\ge 900$dp (Cột trái: Tổng tiền & QR VietQR; Cột phải: Chi tiết các khoản phí).
 
-- [ ] **Step 1: Chạy test resident invoice hiện tại**
+- [x] **Step 1: Chạy test resident invoice hiện tại**
   Chạy `flutter test test/features/resident/*invoice*`.
-- [ ] **Step 2: Cập nhật `ResidentInvoiceScreen` với tiêu chuẩn Impeccable**
+- [x] **Step 2: Cập nhật `ResidentInvoiceScreen` với tiêu chuẩn Impeccable**
   - Chuẩn hóa màu sắc thẻ theo `AppTheme` và `DESIGN.md`.
   - Bọc nhãn hạn thanh toán và huy hiệu trạng thái trong `FittedBox` + `ConstrainedBox`.
-- [ ] **Step 3: Cập nhật `ResidentInvoiceDetailScreen` với bố cục Split-Screen Desktop**
+- [x] **Step 3: Cập nhật `ResidentInvoiceDetailScreen` với bố cục Split-Screen Desktop**
   - Thêm hỗ trợ màn hình lớn $\ge 900$dp (`maxWidth: 1200`).
   - Tối ưu hiển thị bảng tính lũy tiến và mã QR chuyển khoản VietQR.
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của resident invoice**
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của resident invoice**
   Chạy `flutter test test/features/resident/*invoice*` đảm bảo pass 100%.
-- [ ] **Step 5: Commit Task 3 vào `main`**
+- [x] **Step 5: Commit Task 3 vào `main`**
   `git commit -m "feat(resident): nang cap giao dien hoa don va chi tiet thanh toan vietqr responsive"`
 
 ---

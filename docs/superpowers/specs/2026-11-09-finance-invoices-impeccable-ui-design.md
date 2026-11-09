@@ -69,3 +69,4 @@ Mọi màn hình và thành phần giao diện trong phân hệ phải vượt q
 - Sử dụng màu semantic từ `AppTheme` và `AppStatusColors` (`AppStatusColors.paid`, `AppStatusColors.unpaid`, `AppStatusColors.pendingConfirmation`).
 - Tuyệt đối không hardcode mã màu hex rời rạc trong các file màn hình.
 - 100% Tiếng Việt chuẩn mực SaaS, không emoji.
+

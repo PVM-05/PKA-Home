@@ -113,6 +113,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            debugShowCheckedModeBanner: false,
             home: ResidentInvoiceDetailScreen(invoice: samplePaidInvoice),
           ),
         ),
@@ -142,6 +143,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            debugShowCheckedModeBanner: false,
             home: ResidentInvoiceDetailScreen(invoice: samplePaidInvoice),
           ),
         ),
@@ -176,6 +178,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            debugShowCheckedModeBanner: false,
             home: ResidentInvoiceDetailScreen(invoice: sampleUnpaidInvoice),
           ),
         ),

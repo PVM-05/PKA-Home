@@ -103,26 +103,97 @@ class _ResidentInvoiceDetailScreenState
               position: _slideAnimation,
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 900),
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                    children: [
-                      _buildSummaryCard(context, formatCurrency, formatDate),
-                      const SizedBox(height: 28),
-                      const Text(
-                        'CHI TIẾT CÁC KHOẢN PHÍ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ...items.map(
-                        (item) => _buildFeeItemCard(context, item, formatCurrency),
-                      ),
-                    ],
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isDesktop = constraints.maxWidth >= 900;
+
+                      if (isDesktop) {
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Cột trái: Tóm tắt & Nút hành động
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    _buildSummaryCard(
+                                      context,
+                                      formatCurrency,
+                                      formatDate,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    _buildActionWidget(context, items),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              // Cột phải: Danh sách chi tiết các khoản phí
+                              Expanded(
+                                flex: 7,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    const Text(
+                                      'CHI TIẾT CÁC KHOẢN PHÍ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: AppTheme.textSecondary,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ...items.map(
+                                      (item) => _buildFeeItemCard(
+                                        context,
+                                        item,
+                                        formatCurrency,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      // Giao diện Mobile / Tablet (< 900dp)
+                      return ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                        children: [
+                          _buildSummaryCard(
+                            context,
+                            formatCurrency,
+                            formatDate,
+                          ),
+                          const SizedBox(height: 28),
+                          const Text(
+                            'CHI TIẾT CÁC KHOẢN PHÍ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: AppTheme.textSecondary,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ...items.map(
+                            (item) => _buildFeeItemCard(
+                              context,
+                              item,
+                              formatCurrency,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -138,7 +209,13 @@ class _ResidentInvoiceDetailScreenState
         ),
       ),
       bottomNavigationBar: detailState.whenOrNull(
-        data: (items) => _buildBottomAction(context, items),
+        data: (items) {
+          final screenWidth = MediaQuery.of(context).size.width;
+          if (screenWidth >= 900) {
+            return const SizedBox.shrink();
+          }
+          return _buildBottomAction(context, items);
+        },
       ),
     );
   }
@@ -398,15 +475,23 @@ class _ResidentInvoiceDetailScreenState
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: AppTheme.textSecondary),
+        Icon(icon, size: 18, color: AppTheme.textSecondary),
         const SizedBox(width: 8),
-        Text(label, style: const TextStyle(color: AppTheme.textSecondary)),
-        const SizedBox(width: 16),
         Expanded(
+          flex: 5,
+          child: Text(
+            label,
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 6,
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -588,26 +673,30 @@ class _ResidentInvoiceDetailScreenState
                           color: feeColor.withValues(alpha: 0.3),
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.tune_rounded, size: 13, color: feeColor),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Chi tiết bậc thang',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.tune_rounded, size: 13, color: feeColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Chi tiết bậc thang',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: feeColor,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 14,
                               color: feeColor,
                             ),
-                          ),
-                          const SizedBox(width: 2),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            size: 14,
-                            color: feeColor,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -626,24 +715,28 @@ class _ResidentInvoiceDetailScreenState
                         color: Colors.teal.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.calendar_month_outlined,
-                          size: 13,
-                          color: Colors.teal,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Phí theo ngày lẻ',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.calendar_month_outlined,
+                            size: 13,
                             color: Colors.teal,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 4),
+                          Text(
+                            'Phí theo ngày lẻ',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -723,171 +816,134 @@ class _ResidentInvoiceDetailScreenState
     }
   }
 
-  Widget _buildBottomAction(
+  Widget _buildActionWidget(
     BuildContext context,
     List<Map<String, dynamic>> items,
   ) {
     if (_invoice.status == 'unpaid') {
-      return Container(
-        decoration: BoxDecoration(
-          color:
-              Theme.of(context).cardTheme.color ??
-              Theme.of(context).scaffoldBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              offset: const Offset(0, -3),
-              blurRadius: 12,
-            ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    icon: const Icon(Icons.payment_rounded, size: 22),
-                    label: const Text(
-                      'THANH TOÁN NGAY',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    onPressed: () {
-                      _handlePayment(context, items);
-                    },
-                  ),
-                ),
-              ),
+      return SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primary,
+            foregroundColor: Colors.white,
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
+          icon: const Icon(Icons.payment_rounded, size: 22),
+          label: const Text(
+            'THANH TOÁN NGAY',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          onPressed: () {
+            _handlePayment(context, items);
+          },
         ),
       );
     } else if (_invoice.status == 'pending_confirmation') {
-      return Container(
-        decoration: BoxDecoration(
-          color:
-              Theme.of(context).cardTheme.color ??
-              Theme.of(context).scaffoldBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              offset: const Offset(0, -3),
-              blurRadius: 12,
-            ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.orange, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.hourglass_top_rounded,
-                      color: Colors.orange,
-                    ),
-                    label: const Text(
-                      'ĐANG CHỜ BQL XÁC NHẬN (CHI TIẾT)',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                    onPressed: () {
-                      _showDigitalReceiptBottomSheet(context);
-                    },
-                  ),
-                ),
-              ),
+      return SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.orange, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
+          icon: const Icon(
+            Icons.hourglass_top_rounded,
+            color: Colors.orange,
+          ),
+          label: const Text(
+            'ĐANG CHỜ BQL XÁC NHẬN (CHI TIẾT)',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange,
+            ),
+          ),
+          onPressed: () {
+            _showDigitalReceiptBottomSheet(context);
+          },
         ),
       );
     } else if (_invoice.status == 'paid') {
-      return Container(
-        decoration: BoxDecoration(
-          color:
-              Theme.of(context).cardTheme.color ??
-              Theme.of(context).scaffoldBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              offset: const Offset(0, -3),
-              blurRadius: 12,
-            ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppTheme.primary, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.receipt_outlined,
-                      color: AppTheme.primary,
-                    ),
-                    label: const Text(
-                      'XEM BIÊN NHẬN ĐIỆN TỬ',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                    onPressed: () {
-                      _showDigitalReceiptBottomSheet(context);
-                    },
-                  ),
-                ),
-              ),
+      return SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppTheme.primary, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
+          icon: const Icon(
+            Icons.receipt_outlined,
+            color: AppTheme.primary,
+          ),
+          label: const Text(
+            'XEM BIÊN NHẬN ĐIỆN TỬ',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary,
+            ),
+          ),
+          onPressed: () {
+            _showDigitalReceiptBottomSheet(context);
+          },
         ),
       );
     }
-
     return const SizedBox.shrink();
+  }
+
+  Widget _buildBottomAction(
+    BuildContext context,
+    List<Map<String, dynamic>> items,
+  ) {
+    if (_invoice.status != 'unpaid' &&
+        _invoice.status != 'pending_confirmation' &&
+        _invoice.status != 'paid') {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            Theme.of(context).cardTheme.color ??
+            Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            offset: const Offset(0, -3),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Center(
+            heightFactor: 1.0,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: _buildActionWidget(context, items),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   bool _isOpeningPayment = false;

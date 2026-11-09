@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pka_home/core/widgets/unified_payment_sheet.dart';
 import 'package:pka_home/data/models/invoice_model.dart';
 import 'package:pka_home/data/models/apartment_model.dart';
+import 'package:pka_home/data/models/building_model.dart';
+import 'package:pka_home/data/providers/building_provider.dart';
 import 'package:pka_home/data/services/payment_service.dart';
 import 'package:pka_home/data/providers/payment_provider.dart';
 import 'package:pka_home/data/providers/resident_invoice_provider.dart';
@@ -65,6 +67,18 @@ void main() {
       ProviderScope(
         overrides: [
           paymentServiceProvider.overrideWithValue(MockPaymentService(mockPaymentResult)),
+          activeBuildingProvider.overrideWith((ref) => Future.value(
+            BuildingModel(
+              organizationId: 'org-01',
+              id: 'bld-01',
+              code: 'A',
+              name: 'Tòa Landmark A',
+              bankBin: '970418',
+              bankName: 'BIDV',
+              bankAccountNumber: '1234567890',
+              bankAccountName: 'BQL PKA LANDMARK',
+            ),
+          )),
           residentInvoiceDetailProvider('inv-test-1').overrideWith(
             (ref) async => [
               {
@@ -106,7 +120,9 @@ void main() {
     expect(find.descendant(of: find.byType(UnifiedPaymentSheet), matching: find.text('Phí quản lý')), findsOneWidget);
 
     // Bấm GỬI THÔNG BÁO THANH TOÁN trong sheet
-    await tester.tap(find.text('GỬI THÔNG BÁO THANH TOÁN'));
+    final submitPaymentBtn = find.text('GỬI THÔNG BÁO THANH TOÁN');
+    await tester.ensureVisible(submitPaymentBtn);
+    await tester.tap(submitPaymentBtn);
     await tester.pump();
     expect(find.text('Đang gửi thông báo thanh toán...'), findsOneWidget);
 
