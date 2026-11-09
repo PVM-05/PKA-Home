@@ -1128,9 +1128,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/vehicle_approval_screen.dart": {
-    "mtime": 1794055320.880093,
-    "seen": 1794055649.9596233,
-    "ast_hash": "46ed63315af8f33827f02ac9a4f2a2ac",
+    "mtime": 1794228231.0012023,
+    "seen": 1794229091.2947323,
+    "ast_hash": "2ff4a86225d38b1853675bac65173a9d",
     "semantic_hash": ""
   },
   "lib/features/management/widgets/bulk_invoice_dialog.dart": {
@@ -1278,8 +1278,8 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_meter_reading_screen.dart": {
-    "mtime": 1794159884.251914,
-    "seen": 1794160055.3179736,
+    "mtime": 1794160618.0687995,
+    "seen": 1794229091.2947323,
     "ast_hash": "bdb0da6199e6105abb183b1d5e661cb2",
     "semantic_hash": ""
   },
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/vehicle_management_screen.dart": {
-    "mtime": 1794055127.5224698,
-    "seen": 1794055649.9596233,
-    "ast_hash": "029f488cad9e65631097c1a9d14e10e5",
+    "mtime": 1794227517.0226483,
+    "seen": 1794229091.2947323,
+    "ast_hash": "782af9cfa5c78bf3a1c2f613d1d5f3b2",
     "semantic_hash": ""
   },
   "lib/features/resident/widgets/apartment_switcher_chip.dart": {
@@ -5232,9 +5232,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/parking_management_screen.dart": {
-    "mtime": 1793888402.0880344,
-    "seen": 1793891612.8332055,
-    "ast_hash": "b11ff76d6c961ff4306e7a3587b0cd9a",
+    "mtime": 1794228625.877194,
+    "seen": 1794229091.2947323,
+    "ast_hash": "2fd6ff516908ff5d8c39e3f785076fed",
     "semantic_hash": ""
   },
   "supabase/migrations/20261102_01_parking_slots_and_visitor_tickets.sql": {
@@ -6948,8 +6948,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-09-meter-reading-impeccable-ui.md": {
-    "mtime": 1794160004.848268,
-    "seen": 1794160055.3204956,
+    "mtime": 1794160618.1650584,
+    "seen": 1794229091.2967336,
     "ast_hash": "455f2c34b1b994e8d3f2d9963eb00f97",
     "semantic_hash": ""
   },
@@ -6957,6 +6957,36 @@
     "mtime": 1794158539.2119691,
     "seen": 1794160055.3204956,
     "ast_hash": "80a4224a283a95216472bb8910073679",
+    "semantic_hash": ""
+  },
+  "test/features/management/parking_management_responsive_test.dart": {
+    "mtime": 1794228657.359139,
+    "seen": 1794229091.2957325,
+    "ast_hash": "3349ea49ee05450359e2d3a830148c7a",
+    "semantic_hash": ""
+  },
+  "test/features/management/vehicle_approval_responsive_test.dart": {
+    "mtime": 1794228973.8222194,
+    "seen": 1794229091.2957325,
+    "ast_hash": "030868fd6fb49d2e0b3d52790f40d616",
+    "semantic_hash": ""
+  },
+  "test/features/resident/vehicle_management_responsive_test.dart": {
+    "mtime": 1794227077.6635623,
+    "seen": 1794229091.2957325,
+    "ast_hash": "590a7d82fdfc7335e1821b60b2dc3d4c",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-09-vehicle-parking-impeccable-ui.md": {
+    "mtime": 1794228730.7338853,
+    "seen": 1794229091.2967336,
+    "ast_hash": "59e61b2cda667823d5630f2a6db6666c",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-09-vehicle-parking-impeccable-ui-design.md": {
+    "mtime": 1794226675.3333209,
+    "seen": 1794229091.2967336,
+    "ast_hash": "9e7c17dd538906057b672a5cf11228ce",
     "semantic_hash": ""
   }
 }
