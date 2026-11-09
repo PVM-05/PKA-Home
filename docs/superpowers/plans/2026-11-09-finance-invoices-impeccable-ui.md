@@ -111,13 +111,13 @@
 - Verify: Toàn bộ codebase phân hệ Tài chính
 - Update: Knowledge Graph qua `graphify update .`
 
-- [ ] **Step 1: Chạy toàn bộ test suite của phân hệ Tài chính & Hóa đơn**
+- [x] **Step 1: Chạy toàn bộ test suite của phân hệ Tài chính & Hóa đơn**
   Chạy `flutter test test/features/management/*invoice* test/features/resident/*invoice* test/features/management/*finance*`.
-- [ ] **Step 2: Chạy static analysis toàn dự án**
+- [x] **Step 2: Chạy static analysis toàn dự án**
   Chạy `dart analyze lib test` đảm bảo 0 warning, 0 error.
-- [ ] **Step 3: Quét kiểm tra chất lượng giao diện bằng Impeccable engine**
+- [x] **Step 3: Quét kiểm tra chất lượng giao diện bằng Impeccable engine**
   Chạy `.agents/skills/impeccable/scripts/impeccable.cmd detect lib/`.
-- [ ] **Step 4: Cập nhật Knowledge Graph**
+- [x] **Step 4: Cập nhật Knowledge Graph**
   Chạy `graphify update .`.
-- [ ] **Step 5: Commit tài liệu hoàn thành vào `main`**
+- [x] **Step 5: Commit tài liệu hoàn thành vào `main`**
   `git commit -m "docs: hoan thanh cai tien toan dien giao dien phan he tai chinh va hoa don vietqr"`
