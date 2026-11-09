@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../data/models/apartment_handover_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/handover_provider.dart';
 import 'resident_handover_detail_screen.dart';
@@ -15,20 +18,22 @@ class ResidentHandoverScreen extends ConsumerWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'confirmed':
-        return Colors.green;
+        return AppStatusColors.paid;
       case 'pending_resident':
-        return Colors.orange;
+        return AppTheme.warning;
       case 'disputed':
-        return Colors.red;
+        return AppTheme.error;
       default:
-        return Colors.blueGrey;
+        return AppTheme.textSecondary;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final effectiveResidentId = residentId ?? ref.watch(authProvider).value?.id ?? 'res-01';
-    final handoversAsync = ref.watch(residentHandoversProvider(effectiveResidentId));
+    final effectiveResidentId =
+        residentId ?? ref.watch(authProvider).value?.id ?? 'res-01';
+    final handoversAsync =
+        ref.watch(residentHandoversProvider(effectiveResidentId));
 
     return Scaffold(
       appBar: AppBar(
@@ -42,124 +47,179 @@ class ResidentHandoverScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.assignment_turned_in_outlined, size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.assignment_turned_in_outlined,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 12),
-                  Text(
+                  const Text(
                     'Bạn chưa có biên bản bàn giao nào',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 15,
+                    ),
                   ),
                 ],
               ),
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: handovers.length,
-            separatorBuilder: (_, index) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final item = handovers[index];
-              return Card(
-                elevation: 1,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ResidentHandoverDetailScreen(handoverId: item.id),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1E3A8A).withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                item.reportCode,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1E3A8A),
-                                ),
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(item.status).withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                item.statusDisplayName,
-                                style: TextStyle(
-                                  color: _getStatusColor(item.status),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Text(
-                              'Căn hộ: ${item.apartmentCode ?? 'A0110'}',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(width: 12),
-                            Chip(
-                              padding: EdgeInsets.zero,
-                              visualDensity: VisualDensity.compact,
-                              label: Text(item.handoverTypeDisplayName, style: const TextStyle(fontSize: 12)),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Đại diện BQL: ${item.staffName ?? 'Ban Quản Lý'} - Ngày: ${item.handoverDate.day}/${item.handoverDate.month}/${item.handoverDate.year}',
-                          style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              item.isPendingResident ? 'Bấm để kiểm tra & ký tên' : 'Xem chi tiết biên bản',
-                              style: TextStyle(
-                                color: item.isPendingResident ? Colors.orange.shade800 : const Color(0xFF1E3A8A),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 13,
-                              color: item.isPendingResident ? Colors.orange.shade800 : const Color(0xFF1E3A8A),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1000),
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: handovers.length,
+                separatorBuilder: (_, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final item = handovers[index];
+                  return _buildHandoverCard(context, item);
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Lỗi tải dữ liệu: $err')),
+      ),
+    );
+  }
+
+  Widget _buildHandoverCard(BuildContext context, ApartmentHandoverModel item) {
+    final statusColor = _getStatusColor(item.status);
+
+    return AppCard(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ResidentHandoverDetailScreen(handoverId: item.id),
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      item.reportCode,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 110),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        item.statusDisplayName,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'Căn hộ: ${item.apartmentCode ?? 'A0110'}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Chip(
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  label: Text(
+                    item.handoverTypeDisplayName,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Đại diện BQL: ${item.staffName ?? 'Ban Quản Lý'} • Ngày: ${item.handoverDate.day}/${item.handoverDate.month}/${item.handoverDate.year}',
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 13,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      item.isPendingResident
+                          ? 'Bấm để kiểm tra & ký tên'
+                          : 'Xem chi tiết biên bản',
+                      style: TextStyle(
+                        color: item.isPendingResident
+                            ? AppTheme.warning
+                            : AppTheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 13,
+                    color: item.isPendingResident
+                        ? AppTheme.warning
+                        : AppTheme.primary,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

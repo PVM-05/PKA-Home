@@ -30,22 +30,22 @@
   - `ResidentHandoverScreen` thích ứng với thẻ `AppCard` viền siêu mỏng, căn giữa `maxWidth: 1000`, header thẻ bọc `Expanded` và `ConstrainedBox` chống tràn.
   - `ResidentHandoverDetailScreen` hỗ trợ Split-Screen 2 cột trên Desktop Web $\ge 900$dp (`maxWidth: 1200`), và bố cục cuộn 1 cột an toàn tuyệt đối trên Mobile 320dp kèm Text Zoom 1.3x.
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho phân hệ Bàn Giao Cư Dân**
+- [x] **Step 1: Viết test kiểm tra Responsive cho phân hệ Bàn Giao Cư Dân**
   Tạo `test/features/resident/resident_handover_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render Danh sách và Chi tiết không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render Danh sách và Chi tiết ở bố cục Split-Screen cân đối.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/resident/resident_handover_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `ResidentHandoverScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `ResidentHandoverScreen` với kiến trúc Responsive Impeccable**
   - Chuyển `Card` sang `AppCard` viền mỏng mờ, loại bỏ mã màu hardcode, căn giữa `maxWidth: 1000`.
   - Bọc mã biên bản trong `Expanded` + `ellipsis`, badge trạng thái trong `ConstrainedBox(maxWidth: 105)` + `FittedBox`.
   - Hàng thông tin căn hộ và BQL bọc `Wrap` linh hoạt.
-- [ ] **Step 4: Cập nhật `ResidentHandoverDetailScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 4: Cập nhật `ResidentHandoverDetailScreen` với kiến trúc Responsive Impeccable**
   - Mobile (< 900dp): Thẻ chỉ số điện nước, bảng chiết tính tiền cọc và danh sách tài sản bọc `FittedBox` / `Expanded`, nút khiếu nại và ký tên bọc `FittedBox`.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1200`): Bố cục Split-Screen 2 cột (Cột trái: Thông tin tổng quan, Chỉ số, Bảng cọc; Cột phải: Bảng kiểm kê chi tiết từng phòng & Tác vụ).
-- [ ] **Step 5: Chạy kiểm thử toàn bộ test của resident handover**
+- [x] **Step 5: Chạy kiểm thử toàn bộ test của resident handover**
   Chạy `flutter test test/features/resident/*handover*` đảm bảo pass 100%.
-- [ ] **Step 6: Commit thay đổi Task 1 vào `main`**
+- [x] **Step 6: Commit thay đổi Task 1 vào `main`**
   `git commit -m "feat(resident): nang cap giao dien ban giao can ho responsive split-screen va mobile"`
 
 ---
