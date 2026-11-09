@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/announcement_provider.dart';
@@ -85,287 +86,362 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             );
           }
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(announcementsStreamProvider);
-            },
-            child: ListView.builder(
+          Widget buildAnnouncementCard(AnnouncementModel announcement) {
+            final catColor = getCategoryColor(announcement.category);
+            final catIcon = getCategoryIcon(announcement.category);
+
+            return AppCard(
+              margin: const EdgeInsets.only(bottom: 14),
               padding: const EdgeInsets.all(16),
-              itemCount: announcements.length,
-              itemBuilder: (context, index) {
-                final announcement = announcements[index];
-                final catColor = getCategoryColor(announcement.category);
-                final catIcon = getCategoryIcon(announcement.category);
-
-                return Card(
-                  elevation: 0,
-                  margin: const EdgeInsets.only(bottom: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: announcement.isUrgent
-                          ? AppTheme.error.withValues(alpha: 0.4)
-                          : (announcement.isPinned
-                              ? AppTheme.primary.withValues(alpha: 0.3)
-                              : Colors.grey.shade200),
-                      width: announcement.isUrgent || announcement.isPinned ? 1.5 : 1,
-                    ),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => _showDetailDialog(context, announcement),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Hàng 1: Chip danh mục & Ghim & Đối tượng
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    if (announcement.isPinned)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber.shade50,
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(color: Colors.amber.shade400),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.push_pin, size: 12, color: Colors.amber.shade900),
-                                            const SizedBox(width: 3),
-                                            Text(
-                                              'Đã ghim',
-                                              style: TextStyle(
-                                                fontSize: 10.5,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.amber.shade900,
-                                              ),
-                                            ),
-                                          ],
+              borderColor: announcement.isUrgent
+                  ? AppTheme.error.withValues(alpha: 0.45)
+                  : (announcement.isPinned
+                      ? AppTheme.primary.withValues(alpha: 0.35)
+                      : null),
+              onTap: () => _showDetailDialog(context, announcement),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Hàng 1: Chip danh mục & Ghim & Đối tượng + Nút thao tác
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            if (announcement.isPinned)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.shade50,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: Colors.amber.shade400),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.push_pin, size: 12, color: Colors.amber.shade900),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        'Đã ghim',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber.shade900,
                                         ),
                                       ),
-                                    // Badge Danh mục
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: catColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(color: catColor.withValues(alpha: 0.3)),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(catIcon, size: 13, color: catColor),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            announcement.categoryDisplayName,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: catColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Badge Phạm vi
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(color: Colors.grey.shade300),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(Icons.group_outlined, size: 13, color: AppTheme.textSecondary),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            announcement.targetDisplayName,
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppTheme.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Thời gian tạo
-                                    Text(
-                                      DateFormat('dd/MM HH:mm').format(announcement.createdAt),
-                                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                              // Nút thao tác
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.notifications_active_outlined, size: 18),
-                                    tooltip: 'Phát lại thông báo đẩy (Re-broadcast)',
-                                    color: AppTheme.primary,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-                                    onPressed: () => _handleRebroadcast(context, ref, announcement),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_outlined, size: 18),
-                                    tooltip: 'Chỉnh sửa',
-                                    color: AppTheme.primary,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-                                    onPressed: () => _showEditDialog(context, ref, announcement),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline, size: 18),
-                                    tooltip: 'Xóa thông báo',
-                                    color: AppTheme.error,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-                                    onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Tiêu đề
-                          Text(
-                            announcement.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15.5,
-                              color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-
-                          // Nội dung
-                          Text(
-                            announcement.content,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: AppTheme.textSecondary, height: 1.4, fontSize: 13),
-                          ),
-
-                          // Khung giờ sự kiện / bảo trì (nếu có)
-                          if (announcement.eventStartAt != null && announcement.eventEndAt != null) ...[
-                            const SizedBox(height: 10),
+                            // Badge Danh mục
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: announcement.isOngoing
-                                    ? Colors.orange.shade50
-                                    : Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: announcement.isOngoing
-                                      ? Colors.orange.shade300
-                                      : Colors.blue.shade200,
-                                ),
+                                color: catColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: catColor.withValues(alpha: 0.3)),
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    announcement.isOngoing
-                                        ? Icons.access_time_filled
-                                        : Icons.event_available,
-                                    size: 15,
-                                    color: announcement.isOngoing
-                                        ? Colors.orange.shade800
-                                        : Colors.blue.shade800,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      'Thời gian: ${DateFormat('HH:mm dd/MM').format(announcement.eventStartAt!)} - ${DateFormat('HH:mm dd/MM').format(announcement.eventEndAt!)}${announcement.isOngoing ? " • Đang diễn ra" : ""}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: announcement.isOngoing
-                                            ? Colors.orange.shade900
-                                            : Colors.blue.shade900,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 12),
-                          const Divider(height: 1),
-                          const SizedBox(height: 8),
-
-                          // Thống kê tỷ lệ đọc tin
-                          Row(
-                            children: [
-                              Icon(Icons.mark_email_read_outlined, size: 15, color: Colors.grey.shade600),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Đã phát: ${announcement.broadcastCount} • Đã đọc: ${announcement.readCount} (${announcement.readRatioPercentageText})',
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                              const Spacer(),
-                              if (announcement.hotlineContact != null && announcement.hotlineContact!.isNotEmpty)
-                                Row(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.phone_in_talk, size: 13, color: AppTheme.primary),
+                                    Icon(catIcon, size: 13, color: catColor),
                                     const SizedBox(width: 4),
                                     Text(
-                                      announcement.hotlineContact!,
-                                      style: const TextStyle(
-                                        fontSize: 11.5,
-                                        color: AppTheme.primary,
+                                      announcement.categoryDisplayName,
+                                      style: TextStyle(
+                                        fontSize: 11,
                                         fontWeight: FontWeight.bold,
+                                        color: catColor,
                                       ),
                                     ),
                                   ],
                                 ),
-                            ],
+                              ),
+                            ),
+                            // Badge Phạm vi
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.group_outlined, size: 13, color: AppTheme.textSecondary),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      announcement.targetDisplayName,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Thời gian tạo
+                            Text(
+                              DateFormat('dd/MM HH:mm').format(announcement.createdAt),
+                              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      // Nút thao tác
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                            tooltip: 'Phát lại thông báo đẩy (Re-broadcast)',
+                            color: AppTheme.primary,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                            onPressed: () => _handleRebroadcast(context, ref, announcement),
                           ),
-                          const SizedBox(height: 6),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: announcement.readRatio,
-                              minHeight: 4,
-                              backgroundColor: Colors.grey.shade200,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                announcement.readRatio > 0.7
-                                    ? AppTheme.success
-                                    : (announcement.readRatio > 0.3
-                                        ? AppTheme.primary
-                                        : Colors.orange),
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            tooltip: 'Chỉnh sửa',
+                            color: AppTheme.primary,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                            onPressed: () => _showEditDialog(context, ref, announcement),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                            tooltip: 'Xóa thông báo',
+                            color: AppTheme.error,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                            onPressed: () => _confirmDelete(context, ref, announcement.id, announcement.title),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Tiêu đề
+                  Text(
+                    announcement.title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15.5,
+                      color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Nội dung
+                  Text(
+                    announcement.content,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: AppTheme.textSecondary, height: 1.4, fontSize: 13),
+                  ),
+
+                  // Khung giờ sự kiện / bảo trì (nếu có)
+                  if (announcement.eventStartAt != null && announcement.eventEndAt != null) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: announcement.isOngoing
+                            ? Colors.orange.shade50
+                            : Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: announcement.isOngoing
+                              ? Colors.orange.shade300
+                              : Colors.blue.shade200,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            announcement.isOngoing
+                                ? Icons.access_time_filled
+                                : Icons.event_available,
+                            size: 15,
+                            color: announcement.isOngoing
+                                ? Colors.orange.shade800
+                                : Colors.blue.shade800,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Thời gian: ${DateFormat('HH:mm dd/MM').format(announcement.eventStartAt!)} - ${DateFormat('HH:mm dd/MM').format(announcement.eventEndAt!)}${announcement.isOngoing ? " • Đang diễn ra" : ""}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: announcement.isOngoing
+                                    ? Colors.orange.shade900
+                                    : Colors.blue.shade900,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                  ],
+
+                  const SizedBox(height: 12),
+                  const Divider(height: 1),
+                  const SizedBox(height: 8),
+
+                  // Thống kê tỷ lệ đọc tin & Hotline (Tự động xuống hàng an toàn khi màn hình hẹp)
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.mark_email_read_outlined, size: 15, color: Colors.grey.shade600),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Đã phát: ${announcement.broadcastCount} • Đã đọc: ${announcement.readCount} (${announcement.readRatioPercentageText})',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (announcement.hotlineContact != null && announcement.hotlineContact!.isNotEmpty)
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.phone_in_talk, size: 13, color: AppTheme.primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  announcement.hotlineContact!,
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    color: AppTheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: announcement.readRatio,
+                      minHeight: 4,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        announcement.readRatio > 0.7
+                            ? AppTheme.success
+                            : (announcement.readRatio > 0.3
+                                ? AppTheme.primary
+                                : Colors.orange),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isDesktop = constraints.maxWidth >= 900;
+
+              if (isDesktop) {
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(announcementsStreamProvider);
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1300),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  for (int i = 0; i < announcements.length; i += 2)
+                                    buildAnnouncementCard(announcements[i]),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  for (int i = 1; i < announcements.length; i += 2)
+                                    buildAnnouncementCard(announcements[i]),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 );
-              },
-            ),
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(announcementsStreamProvider);
+                },
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: announcements.length,
+                      itemBuilder: (context, index) =>
+                          buildAnnouncementCard(announcements[index]),
+                    ),
+                  ),
+                ),
+              );
+            },
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
