@@ -294,7 +294,11 @@ class _MaintenanceFundLedgerScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sổ Quỹ Bảo Trì 2%'),
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text('Sổ Quỹ Bảo Trì 2%'),
+        ),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 12),
@@ -312,301 +316,439 @@ class _MaintenanceFundLedgerScreenState
           ref.invalidate(activeMaintenanceFundProvider);
           ref.invalidate(maintenanceFundLedgerProvider);
         },
-        child: ListView(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isDesktop = constraints.maxWidth >= 900;
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                child: isDesktop
+                    ? ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Cột trái: Thẻ số dư & Thao tác nhanh
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    _buildFundBalanceCard(
+                                      fundAsync,
+                                      activeBuilding,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppTheme.primary,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                      ),
+                                      onPressed: () => _showCreateVoucherSheet(
+                                        context,
+                                        activeBuilding?.id,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.add_circle_outline,
+                                      ),
+                                      label: const Text(
+                                        'Lập phiếu thu / chi quỹ',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              // Cột phải: Bộ lọc và Nhật ký chứng từ
+                              Expanded(
+                                flex: 7,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    _buildFilterChips(currentFilter),
+                                    const SizedBox(height: 16),
+                                    _buildTransactionsHeader(theme),
+                                    const SizedBox(height: 8),
+                                    _buildTransactionsList(
+                                      ledgerAsync,
+                                      activeBuilding,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          _buildFundBalanceCard(fundAsync, activeBuilding),
+                          const SizedBox(height: 16),
+                          _buildFilterChips(currentFilter),
+                          const SizedBox(height: 16),
+                          _buildTransactionsHeader(theme),
+                          const SizedBox(height: 8),
+                          _buildTransactionsList(
+                            ledgerAsync,
+                            activeBuilding,
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFundBalanceCard(
+    AsyncValue<dynamic> fundAsync,
+    dynamic activeBuilding,
+  ) {
+    return fundAsync.when(
+      data: (fund) {
+        final balance = fund?.totalBalance ?? 0.0;
+        final interestEarned = fund?.annualInterestEarned ?? 0.0;
+        final interestRate = fund?.interestRatePercent ?? 5.2;
+
+        return AppCard(
           padding: const EdgeInsets.all(16),
-          children: [
-            // Thẻ số dư tổng quan
-            fundAsync.when(
-              data: (fund) {
-                final balance = fund?.totalBalance ?? 0.0;
-                final interestEarned = fund?.annualInterestEarned ?? 0.0;
-                final interestRate = fund?.interestRatePercent ?? 5.2;
-
-                return AppCard(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Số dư quỹ khả dụng',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppTheme.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              activeBuilding?.name ?? 'Toàn tòa nhà',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        _currencyFormat.format(balance),
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.trending_up,
-                            color: AppTheme.success,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              'Lãi tiền gửi ($interestRate%/năm): +${_currencyFormat.format(interestEarned)}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.success,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  const Text(
+                    'Số dư quỹ khả dụng',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => AppErrorCard(error: err),
-            ),
-            const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      activeBuilding?.name ?? 'Toàn tòa nhà',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _currencyFormat.format(balance),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.trending_up,
+                    color: AppTheme.success,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Lãi tiền gửi ($interestRate%/năm): +${_currencyFormat.format(interestEarned)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.success,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              if (fund != null && fund.bankAccountNumber.isNotEmpty) ...[
+                const Divider(height: 20),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.account_balance_outlined,
+                      size: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '${fund.bankName} - ${fund.bankAccountNumber}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (err, _) => AppErrorCard(error: err),
+    );
+  }
 
-            // Bộ lọc loại chứng từ
-            Row(
+  Widget _buildFilterChips(String currentFilter) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          FilterChip(
+            label: const Text('Tất cả'),
+            selected: currentFilter == 'ALL',
+            onSelected: (_) =>
+                ref
+                    .read(maintenanceFundLedgerFilterProvider.notifier)
+                    .state = 'ALL',
+          ),
+          const SizedBox(width: 8),
+          FilterChip(
+            label: const Text('Thu quỹ'),
+            selected: currentFilter == 'INCOME',
+            onSelected: (_) =>
+                ref
+                    .read(maintenanceFundLedgerFilterProvider.notifier)
+                    .state = 'INCOME',
+          ),
+          const SizedBox(width: 8),
+          FilterChip(
+            label: const Text('Chi quỹ'),
+            selected: currentFilter == 'EXPENSE',
+            onSelected: (_) =>
+                ref
+                    .read(maintenanceFundLedgerFilterProvider.notifier)
+                    .state = 'EXPENSE',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionsHeader(ThemeData theme) {
+    return Text(
+      'Nhật ký giao dịch chứng từ',
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildTransactionsList(
+    AsyncValue<dynamic> ledgerAsync,
+    dynamic activeBuilding,
+  ) {
+    return ledgerAsync.when(
+      data: (transactions) {
+        if (transactions.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(32),
+            alignment: Alignment.center,
+            child: Column(
               children: [
-                FilterChip(
-                  label: const Text('Tất cả'),
-                  selected: currentFilter == 'ALL',
-                  onSelected: (_) =>
-                      ref
-                              .read(
-                                maintenanceFundLedgerFilterProvider.notifier,
-                              )
-                              .state =
-                          'ALL',
+                Icon(
+                  Icons.menu_book_outlined,
+                  size: 48,
+                  color: AppTheme.textSecondary.withValues(alpha: 0.5),
                 ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('Thu quỹ'),
-                  selected: currentFilter == 'INCOME',
-                  onSelected: (_) =>
-                      ref
-                              .read(
-                                maintenanceFundLedgerFilterProvider.notifier,
-                              )
-                              .state =
-                          'INCOME',
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('Chi quỹ'),
-                  selected: currentFilter == 'EXPENSE',
-                  onSelected: (_) =>
-                      ref
-                              .read(
-                                maintenanceFundLedgerFilterProvider.notifier,
-                              )
-                              .state =
-                          'EXPENSE',
+                const SizedBox(height: 12),
+                const Text(
+                  'Chưa có giao dịch chứng từ nào.',
+                  style: TextStyle(color: AppTheme.textSecondary),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+          );
+        }
 
-            // Danh sách nhật ký sổ cái
-            Text(
-              'Nhật ký giao dịch chứng từ',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: transactions.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final tx = transactions[index];
+            final isIncome = tx.isIncome;
 
-            ledgerAsync.when(
-              data: (transactions) {
-                if (transactions.isEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(32),
-                    alignment: Alignment.center,
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.menu_book_outlined,
-                          size: 48,
-                          color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Chưa có giao dịch chứng từ nào.',
-                          style: TextStyle(color: AppTheme.textSecondary),
-                        ),
-                      ],
-                    ),
+            return AppCard(
+              padding: const EdgeInsets.all(12),
+              child: InkWell(
+                onTap: () {
+                  AccountingVoucherDialog.show(
+                    context,
+                    transaction: tx,
+                    buildingName:
+                        activeBuilding?.name ?? 'Tòa nhà PKA-Home',
                   );
-                }
-
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: transactions.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final tx = transactions[index];
-                    final isIncome = tx.isIncome;
-
-                    return AppCard(
-                      padding: const EdgeInsets.all(12),
-                      child: InkWell(
-                        onTap: () {
-                          AccountingVoucherDialog.show(
-                            context,
-                            transaction: tx,
-                            buildingName:
-                                activeBuilding?.name ?? 'Tòa nhà PKA-Home',
-                          );
-                        },
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color:
-                                    (isIncome
-                                            ? AppTheme.success
-                                            : AppTheme.error)
-                                        .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(
-                                isIncome
-                                    ? Icons.arrow_downward
-                                    : Icons.arrow_upward,
-                                color: isIncome
+                },
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color:
+                            (isIncome
                                     ? AppTheme.success
-                                    : AppTheme.error,
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        tx.voucherNumber,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${isIncome ? '+' : '-'}${_currencyFormat.format(tx.amount)}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                          color: isIncome
-                                              ? AppTheme.success
-                                              : AppTheme.error,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    tx.categoryDisplayName,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: isIncome
-                                          ? AppTheme.primary
-                                          : AppTheme.error,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    tx.description,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        DateFormat(
-                                          'dd/MM/yyyy HH:mm',
-                                        ).format(tx.createdAt),
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: AppTheme.textSecondary,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Số dư sau GD: ${_currencyFormat.format(tx.balanceAfter)}',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppTheme.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                                    : AppTheme.error)
+                                .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator(),
+                      child: Icon(
+                        isIncome
+                            ? Icons.arrow_downward
+                            : Icons.arrow_upward,
+                        color: isIncome
+                            ? AppTheme.success
+                            : AppTheme.error,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              Text(
+                                tx.voucherNumber,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                '${isIncome ? '+' : '-'}${_currencyFormat.format(tx.amount)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: isIncome
+                                      ? AppTheme.success
+                                      : AppTheme.error,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            tx.categoryDisplayName,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: isIncome
+                                  ? AppTheme.primary
+                                  : AppTheme.error,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            tx.description,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              Text(
+                                DateFormat(
+                                  'dd/MM/yyyy HH:mm',
+                                ).format(tx.createdAt),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                'Số dư sau GD: ${_currencyFormat.format(tx.balanceAfter)}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              error: (err, _) => AppErrorCard(error: err),
-            ),
-          ],
+            );
+          },
+        );
+      },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(),
         ),
       ),
+      error: (err, _) => AppErrorCard(error: err),
     );
   }
 }
