@@ -91,18 +91,18 @@
   - Mobile (< 900dp): Trường nhập chỉ số, tiền cọc và cụm chip tình trạng bọc `Wrap(spacing: 6, runSpacing: 6)`, nút chụp ảnh minh chứng co giãn an toàn.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1400`): Split-Screen Workstation 2 cột (Cột trái: Thông tin hợp đồng & Chỉ số & Cọc & Ký số; Cột phải: Bảng kiểm kê chi tiết từng phòng).
 
-- [ ] **Step 1: Bổ sung kịch bản kiểm thử Responsive cho `InspectionWorkstationScreen` trong `handover_management_responsive_test.dart`**
+- [x] **Step 1: Bổ sung kịch bản kiểm thử Responsive cho `InspectionWorkstationScreen` trong `handover_management_responsive_test.dart`**
   - Test kiểm tra màn hình hiện trường trên Mobile 320dp x 600dp (Text Scale 1.3x) và Desktop 1200dp.
-- [ ] **Step 2: Chạy test để xác nhận lỗi tràn hiện tại**
+- [x] **Step 2: Chạy test để xác nhận lỗi tràn hiện tại**
   Chạy `flutter test test/features/management/handover_management_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `InspectionWorkstationScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `InspectionWorkstationScreen` với kiến trúc Responsive Impeccable**
   - Tách bố cục theo `isDesktop = MediaQuery.sizeOf(context).width >= 900`.
   - Cụm chip chọn tình trạng tài sản bọc `Wrap` chống ép hàng.
   - Khung chữ ký và nút lưu/gửi biên bản bọc `FittedBox`.
   - Căn giữa `maxWidth: 1400` trên Web Desktop.
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của inspection workstation**
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của inspection workstation**
   Chạy `flutter test test/features/management/inspection_workstation*` và test responsive mới.
-- [ ] **Step 5: Commit thay đổi Task 3 vào `main`**
+- [x] **Step 5: Commit thay đổi Task 3 vào `main`**
   `git commit -m "feat(management): nang cap tram kiem ke ban giao hien truong responsive"`
 
 ---
