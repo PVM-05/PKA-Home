@@ -71,3 +71,4 @@
 3. **Chất lượng mã nguồn:**
    - `dart analyze lib test` đạt 0 issues (0 warning, 0 error).
    - Kiểm thử toàn bộ pass 100%.
+

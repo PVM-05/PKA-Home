@@ -996,9 +996,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/announcement_management_screen.dart": {
-    "mtime": 1793979592.7278066,
-    "seen": 1793979706.4977064,
-    "ast_hash": "93ec5550262bd491250f1fc9897132c9",
+    "mtime": 1794244144.733001,
+    "seen": 1794245184.0487602,
+    "ast_hash": "074e37b422425658944f08e6fe02ad57",
     "semantic_hash": ""
   },
   "lib/features/management/screens/apartment_ledger_screen.dart": {
@@ -1050,9 +1050,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/handbook_management_screen.dart": {
-    "mtime": 1793888402.0849512,
-    "seen": 1793891612.8332055,
-    "ast_hash": "8185555d895efca382cbc4108586a6d5",
+    "mtime": 1794244803.4606516,
+    "seen": 1794245184.0508564,
+    "ast_hash": "ec10ee967fcfa979eab6105afa31a09d",
     "semantic_hash": ""
   },
   "lib/features/management/screens/invoice_management_screen.dart": {
@@ -1242,15 +1242,15 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_announcement_detail_screen.dart": {
-    "mtime": 1793979537.7924788,
-    "seen": 1793979706.4977064,
-    "ast_hash": "ef0ef3e284624bd761c454c38986fa17",
+    "mtime": 1794244537.5203228,
+    "seen": 1794245184.060823,
+    "ast_hash": "a29d02ccc01ade8a89b699fe83480607",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_handbook_screen.dart": {
-    "mtime": 1793889482.6729922,
-    "seen": 1793891612.8332055,
-    "ast_hash": "79428d9e43292b10253cd54226dbb271",
+    "mtime": 1794244898.0653088,
+    "seen": 1794245184.060823,
+    "ast_hash": "c91be92ebf5c2cd265f767530d3a6801",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_home_screen.dart": {
@@ -7770,15 +7770,45 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-09-issue-detail-and-invoice-workstation-impeccable-ui.md": {
-    "mtime": 1794241999.7477157,
-    "seen": 1794243578.9309068,
-    "ast_hash": "b80e56b17b649375d7d611386a0e551c",
+    "mtime": 1794243604.3051822,
+    "seen": 1794245184.2413888,
+    "ast_hash": "9a901cb5e5c4e5962c7b9ce130601d83",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-09-issue-detail-and-invoice-workstation-impeccable-ui-design.md": {
     "mtime": 1794241999.8797178,
     "seen": 1794243578.9567099,
     "ast_hash": "2bebaf4f9ec9bb2f5813d9791f816e64",
+    "semantic_hash": ""
+  },
+  "test/features/management/announcement_management_responsive_test.dart": {
+    "mtime": 1794244544.0337944,
+    "seen": 1794245184.1444438,
+    "ast_hash": "903cb389b62536696f7928e60983ae1b",
+    "semantic_hash": ""
+  },
+  "test/features/management/handbook_screens_responsive_test.dart": {
+    "mtime": 1794244904.8334596,
+    "seen": 1794245184.1469734,
+    "ast_hash": "1ed0d20afe8af12c10e57d99bf8cdf08",
+    "semantic_hash": ""
+  },
+  "test/features/resident/resident_announcement_detail_responsive_test.dart": {
+    "mtime": 1794244401.4638016,
+    "seen": 1794245184.160037,
+    "ast_hash": "dc2171da08688de5ae5eba1084916983",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-10-announcements-and-handbooks-impeccable-ui.md": {
+    "mtime": 1794243939.1328428,
+    "seen": 1794245184.2424638,
+    "ast_hash": "a620f85e98ef54d6ee2c6ab35cab3d3a",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-10-announcements-and-handbooks-impeccable-ui-design.md": {
+    "mtime": 1794243939.2854092,
+    "seen": 1794245184.250527,
+    "ast_hash": "e649b918577dd7de171b11e95fef4cec",
     "semantic_hash": ""
   }
 }
