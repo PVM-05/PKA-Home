@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/invoice_items_provider.dart';
@@ -13,6 +14,10 @@ import '../../../core/widgets/electronic_receipt_sheet.dart';
 import '../../../core/utils/document_pdf_builder.dart';
 import '../../document/screens/document_preview_screen.dart';
 
+/// Màn hình chi tiết hóa đơn & đối soát phía Ban Quản Lý.
+/// Hỗ trợ chuẩn B2B SaaS Impeccable Taste:
+/// - Desktop (>= 900dp): Workstation Split-Screen 2 cột (Cột trái: Tóm tắt & Cụm hành động; Cột phải: Bảng chi tiết phí).
+/// - Mobile (< 900dp): Bố cục dọc tối ưu, thanh đáy heightFactor: 1.0 chống chiếm trọn màn hình, chống tràn 100% trên 320dp (Text Zoom 1.3x).
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
   final InvoiceModel invoice;
 
@@ -22,9 +27,9 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
-    final detailState = ref.watch(
-      invoiceDetailProvider(invoice.id),
-    ); // Provider dùng chung để lấy chi tiết invoice_items
+    final detailState = ref.watch(invoiceDetailProvider(invoice.id));
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 900;
 
     return Scaffold(
       appBar: AppBar(
@@ -62,30 +67,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       ),
       body: detailState.when(
         data: (items) {
-          return Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    _buildSummaryCard(formatCurrency, formatDate),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'CHI TIẾT CÁC KHOẢN PHÍ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...items.map((item) => _buildFeeItem(item, formatCurrency)),
-                  ],
-                ),
-              ),
-              _buildBottomAction(context, ref),
-            ],
-          );
+          if (isDesktop) {
+            return _buildDesktopLayout(context, ref, items, formatCurrency, formatDate);
+          }
+          return _buildMobileLayout(context, ref, items, formatCurrency, formatDate);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
@@ -93,6 +78,167 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
             formatErrorMessage(error),
             style: const TextStyle(color: AppTheme.error),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout(
+    BuildContext context,
+    WidgetRef ref,
+    List<Map<String, dynamic>> items,
+    NumberFormat formatCurrency,
+    DateFormat formatDate,
+  ) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1300),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cột trái: Tóm tắt hóa đơn và khối nút hành động
+              SizedBox(
+                width: 440,
+                child: ListView(
+                  children: [
+                    _buildSummaryCard(formatCurrency, formatDate),
+                    const SizedBox(height: 16),
+                    _buildDesktopActionPanel(context, ref, items),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 24),
+              // Cột phải: Danh mục chi tiết các khoản phí
+              Expanded(
+                child: AppCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.receipt_long_outlined,
+                            size: 20,
+                            color: AppTheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'CHI TIẾT CÁC KHOẢN PHÍ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${items.length} mục',
+                              style: const TextStyle(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      Expanded(
+                        child: ListView(
+                          children: items
+                              .map((item) => _buildFeeItem(item, formatCurrency))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(
+    BuildContext context,
+    WidgetRef ref,
+    List<Map<String, dynamic>> items,
+    NumberFormat formatCurrency,
+    DateFormat formatDate,
+  ) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _buildSummaryCard(formatCurrency, formatDate),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.receipt_long_outlined,
+                              size: 18,
+                              color: AppTheme.textSecondary,
+                            ),
+                            SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'CHI TIẾT CÁC KHOẢN PHÍ',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${items.length} mục',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ...items.map((item) => _buildFeeItem(item, formatCurrency)),
+                  const SizedBox(height: 80),
+                ],
+              ),
+            ),
+            _buildBottomAction(context, ref),
+          ],
         ),
       ),
     );
@@ -116,25 +262,23 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
         statusText = 'Chưa thanh toán';
     }
 
-    return Card(
+    return AppCard(
       color: statusColor.withValues(alpha: 0.05),
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: statusColor.withValues(alpha: 0.5)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(
-              'TỔNG CỘNG',
-              style: TextStyle(
-                color: AppTheme.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
+      borderColor: statusColor.withValues(alpha: 0.4),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const Text(
+            'TỔNG CỘNG',
+            style: TextStyle(
+              color: AppTheme.textSecondary,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 8),
-            Text(
+          ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
               formatCurrency.format(invoice.totalAmount),
               style: TextStyle(
                 fontSize: 32,
@@ -142,16 +286,16 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                 color: statusColor,
               ),
             ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 16),
-            _buildInfoRow('Trạng thái', statusText, valueColor: statusColor),
-            const SizedBox(height: 8),
-            _buildInfoRow('Hạn thanh toán', formatDate.format(invoice.dueDate)),
-            const SizedBox(height: 8),
-            _buildInfoRow('Căn hộ', invoice.apartment?.code ?? 'N/A'),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 16),
+          _buildInfoRow('Trạng thái', statusText, valueColor: statusColor),
+          const SizedBox(height: 8),
+          _buildInfoRow('Hạn thanh toán', formatDate.format(invoice.dueDate)),
+          const SizedBox(height: 8),
+          _buildInfoRow('Căn hộ', invoice.apartment?.code ?? 'N/A'),
+        ],
       ),
     );
   }
@@ -160,10 +304,26 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: AppTheme.textSecondary)),
-        Text(
-          value,
-          style: TextStyle(fontWeight: FontWeight.w600, color: valueColor),
+        Expanded(
+          flex: 5,
+          child: Text(
+            label,
+            style: const TextStyle(color: AppTheme.textSecondary),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 6,
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: valueColor,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );
@@ -185,7 +345,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+          bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
         ),
       ),
       child: Row(
@@ -206,6 +366,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   feeDisplayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -214,6 +376,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${formatCurrency.format(item['unit_price'] ?? 0)} x $qtyStr$feeUnit',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.textSecondary,
@@ -223,9 +387,122 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            formatCurrency.format(item['subtotal'] ?? 0),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          Flexible(
+            child: Text(
+              formatCurrency.format(item['subtotal'] ?? 0),
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopActionPanel(
+    BuildContext context,
+    WidgetRef ref,
+    List<Map<String, dynamic>> items,
+  ) {
+    final isPending = invoice.status == 'pending_confirmation';
+    final isUnpaid = invoice.status == 'unpaid';
+    final isPaid = invoice.status == 'paid';
+
+    return AppCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'THAO TÁC NGHIỆP VỤ',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textSecondary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (isPaid) ...[
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              icon: const Icon(Icons.receipt_long, size: 18),
+              label: const Text(
+                'XEM BIÊN LAI THU TIỀN',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              onPressed: () => showElectronicReceiptSheet(
+                context: context,
+                invoice: invoice,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (isPending || isUnpaid) ...[
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.success,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              icon: const Icon(Icons.check_circle_outline, size: 18),
+              label: Text(
+                isPending
+                    ? 'XÁC NHẬN ĐÃ THU TIỀN'
+                    : 'XÁC NHẬN THU TẠI QUẦY',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              onPressed: () => _confirmPayment(context, ref, isPending),
+            ),
+            const SizedBox(height: 10),
+          ],
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            icon: const Icon(Icons.print_outlined, size: 18),
+            label: const Text('In ấn / Xuất PDF (A4 & 80mm)'),
+            onPressed: () => _showPrintExportBottomSheet(context, items),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            label: const Text('Chỉnh sửa thông tin hóa đơn'),
+            onPressed: () async {
+              final updated = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => EditInvoiceScreen(invoice: invoice),
+                ),
+              );
+              if (updated == true) {
+                ref.invalidate(invoiceDetailProvider(invoice.id));
+                ref.invalidate(invoicesProvider);
+              }
+            },
           ),
         ],
       ),
@@ -242,44 +519,49 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     }
 
     if (isPaid) {
-      return Container(
-        decoration: BoxDecoration(
-          color:
-              Theme.of(context).cardTheme.color ??
-              Theme.of(context).scaffoldBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              offset: const Offset(0, -3),
-              blurRadius: 12,
+      return Center(
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color ??
+                  Theme.of(context).scaffoldBackgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  offset: const Offset(0, -3),
+                  blurRadius: 12,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    icon: const Icon(Icons.receipt_long, size: 20),
+                    label: const Text(
+                      'XEM BIÊN LAI THU TIỀN',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      textAlign: TextAlign.center,
+                    ),
+                    onPressed: () => showElectronicReceiptSheet(
+                      context: context,
+                      invoice: invoice,
+                    ),
                   ),
-                ),
-                icon: const Icon(Icons.receipt_long, size: 20),
-                label: const Text(
-                  'XEM BIÊN LAI THU TIỀN',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  textAlign: TextAlign.center,
-                ),
-                onPressed: () => showElectronicReceiptSheet(
-                  context: context,
-                  invoice: invoice,
                 ),
               ),
             ),
@@ -300,45 +582,53 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       buttonLabel = 'XÁC NHẬN ĐÃ THU (Thu trực tiếp tại quầy)';
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color:
-            Theme.of(context).cardTheme.color ??
-            Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            offset: const Offset(0, -3),
-            blurRadius: 12,
+    return Center(
+      heightFactor: 1.0,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color ??
+                Theme.of(context).scaffoldBackgroundColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                offset: const Offset(0, -3),
+                blurRadius: 12,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.success,
-                foregroundColor: Colors.white,
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.success,
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  icon: const Icon(Icons.check_circle_outline, size: 20),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      buttonLabel,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  onPressed: () => _confirmPayment(context, ref, isPending),
                 ),
               ),
-              icon: const Icon(Icons.check_circle_outline, size: 20),
-              label: Text(
-                buttonLabel,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              onPressed: () => _confirmPayment(context, ref, isPending),
             ),
           ),
         ),
