@@ -408,8 +408,8 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/building_switcher_dropdown.dart": {
-    "mtime": 1794238285.4931908,
-    "seen": 1794241643.1396334,
+    "mtime": 1794241730.6415086,
+    "seen": 1794243578.4206314,
     "ast_hash": "fd2d04c3127fcc0089a565659aaf0361",
     "semantic_hash": ""
   },
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "lib/data/models/invoice_model.dart": {
-    "mtime": 1794239934.1358018,
-    "seen": 1794241643.1553378,
+    "mtime": 1794241730.9175515,
+    "seen": 1794243578.4434369,
     "ast_hash": "cf8ea74edbc383409d19553a5ce70cc0",
     "semantic_hash": ""
   },
@@ -1020,14 +1020,14 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/create_invoice_screen.dart": {
-    "mtime": 1794239242.5511498,
-    "seen": 1794241643.1971838,
+    "mtime": 1794241731.5067658,
+    "seen": 1794243578.5042663,
     "ast_hash": "fe1fae41a9f53d77e8ceaed02c42ea00",
     "semantic_hash": ""
   },
   "lib/features/management/screens/edit_invoice_screen.dart": {
-    "mtime": 1794239137.6912017,
-    "seen": 1794241643.1971838,
+    "mtime": 1794241731.7802227,
+    "seen": 1794243578.5042663,
     "ast_hash": "8c04febf2346f502b2d39dde245b19e5",
     "semantic_hash": ""
   },
@@ -1074,8 +1074,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/maintenance_fund_ledger_screen.dart": {
-    "mtime": 1794238473.1553564,
-    "seen": 1794241643.1991975,
+    "mtime": 1794241732.2542408,
+    "seen": 1794243578.5082874,
     "ast_hash": "40c480458d6a4286fbfc561d93727ad2",
     "semantic_hash": ""
   },
@@ -1086,9 +1086,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
-    "mtime": 1793887619.1469593,
-    "seen": 1793891612.8332055,
-    "ast_hash": "645b6e610fdb313955cb3e170f322b3f",
+    "mtime": 1794242843.9611266,
+    "seen": 1794243578.5092995,
+    "ast_hash": "44a54886ad418f36fd92f50ded9b5c4c",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_meter_reading_screen.dart": {
@@ -1212,15 +1212,15 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/edit_issue_screen.dart": {
-    "mtime": 1793887617.0820477,
-    "seen": 1793891612.8332055,
-    "ast_hash": "8c4227894601dcd6d0190d65301fed10",
+    "mtime": 1794243028.8313441,
+    "seen": 1794243578.5214517,
+    "ast_hash": "183f29159bcc800077db093c6680a1a5",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/issue_detail_screen.dart": {
-    "mtime": 1793887617.1386538,
-    "seen": 1793891612.8332055,
-    "ast_hash": "192b6d2ef2c664ddae5b0fa5c6189154",
+    "mtime": 1794243026.3439796,
+    "seen": 1794243578.5214517,
+    "ast_hash": "63bafac50f9a43803985c7f40e51b9e2",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/link_request_screen.dart": {
@@ -1260,14 +1260,14 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_detail_screen.dart": {
-    "mtime": 1794241229.7612264,
-    "seen": 1794241643.2148914,
+    "mtime": 1794241732.4141555,
+    "seen": 1794243578.5280845,
     "ast_hash": "55a45e88a78aee90be9b9e297817b708",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_invoice_screen.dart": {
-    "mtime": 1794239653.6013582,
-    "seen": 1794241643.2148914,
+    "mtime": 1794241732.5395472,
+    "seen": 1794243578.5280845,
     "ast_hash": "c9169675c120510df9b6a1a2695a4945",
     "semantic_hash": ""
   },
@@ -2388,8 +2388,8 @@
     "semantic_hash": ""
   },
   "test/features/resident/resident_invoice_unified_payment_test.dart": {
-    "mtime": 1794240868.7451746,
-    "seen": 1794241643.4025598,
+    "mtime": 1794241732.981888,
+    "seen": 1794243578.730426,
     "ast_hash": "36d648a056a1ed5a093e1a005f7b34bd",
     "semantic_hash": ""
   },
@@ -4830,8 +4830,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/financial_report_screen.dart": {
-    "mtime": 1794238337.152815,
-    "seen": 1794241643.1981983,
+    "mtime": 1794241732.0152867,
+    "seen": 1794243578.5057778,
     "ast_hash": "9c84eb1c8aa0d28cefb2a952757c31bb",
     "semantic_hash": ""
   },
@@ -7128,14 +7128,14 @@
     "semantic_hash": ""
   },
   "test/features/management/finance_reports_responsive_test.dart": {
-    "mtime": 1794238519.2191033,
-    "seen": 1794241643.3663971,
+    "mtime": 1794241732.6646242,
+    "seen": 1794243578.6973107,
     "ast_hash": "a5fd6cc73839738d3c5400cc21c21616",
     "semantic_hash": ""
   },
   "test/features/management/invoice_forms_responsive_test.dart": {
-    "mtime": 1794238909.1262212,
-    "seen": 1794241643.3674006,
+    "mtime": 1794241732.8264165,
+    "seen": 1794243578.6988342,
     "ast_hash": "a1c5914d904b97108b87a06179d97e78",
     "semantic_hash": ""
   },
@@ -7740,15 +7740,45 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-09-finance-invoices-impeccable-ui.md": {
-    "mtime": 1794241458.4616914,
-    "seen": 1794241643.5399063,
-    "ast_hash": "bcd9249ff2fc76f3babbd3c0023aa900",
+    "mtime": 1794241658.4660623,
+    "seen": 1794243578.9304051,
+    "ast_hash": "0a9e143beae8e045b7e6b4dd5de7f0f1",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-09-finance-invoices-impeccable-ui-design.md": {
     "mtime": 1794241306.9133148,
     "seen": 1794241643.5539982,
     "ast_hash": "76ad834c2afbd7ce2708c180e62b23d2",
+    "semantic_hash": ""
+  },
+  "test/features/management/management_invoice_detail_responsive_test.dart": {
+    "mtime": 1794242777.1689165,
+    "seen": 1794243578.7023442,
+    "ast_hash": "3dea2dc9f038f1c8d2e9d6b5f943d78f",
+    "semantic_hash": ""
+  },
+  "test/features/resident/edit_issue_responsive_test.dart": {
+    "mtime": 1794242446.9652803,
+    "seen": 1794243578.7216992,
+    "ast_hash": "f43fe3074bc70fc3b1c37b68d5daf363",
+    "semantic_hash": ""
+  },
+  "test/features/resident/issue_detail_responsive_test.dart": {
+    "mtime": 1794242032.6289897,
+    "seen": 1794243578.7216992,
+    "ast_hash": "6001b2bc88b54a1729ebf2977449c0e9",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-09-issue-detail-and-invoice-workstation-impeccable-ui.md": {
+    "mtime": 1794241999.7477157,
+    "seen": 1794243578.9309068,
+    "ast_hash": "b80e56b17b649375d7d611386a0e551c",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-09-issue-detail-and-invoice-workstation-impeccable-ui-design.md": {
+    "mtime": 1794241999.8797178,
+    "seen": 1794243578.9567099,
+    "ast_hash": "2bebaf4f9ec9bb2f5813d9791f816e64",
     "semantic_hash": ""
   }
 }
