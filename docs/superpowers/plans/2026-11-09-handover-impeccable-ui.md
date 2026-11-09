@@ -113,11 +113,11 @@
 - Verify: Toàn bộ codebase `lib/` và `test/`
 - Update: Knowledge Graph qua `graphify update .`
 
-- [ ] **Step 1: Chạy toàn bộ test suite của phân hệ Bàn Giao Căn Hộ**
+- [x] **Step 1: Chạy toàn bộ test suite của phân hệ Bàn Giao Căn Hộ**
   Chạy `flutter test test/features/resident/*handover* test/features/management/*handover* test/data/models/*handover* test/data/repositories/handover*` đảm bảo 100% test pass.
-- [ ] **Step 2: Chạy static analysis toàn dự án**
+- [x] **Step 2: Chạy static analysis toàn dự án**
   Chạy `dart analyze lib test` đảm bảo 0 warning, 0 error.
-- [ ] **Step 3: Cập nhật Knowledge Graph**
+- [x] **Step 3: Cập nhật Knowledge Graph**
   Chạy `graphify update .` đồng bộ kiến trúc dự án.
-- [ ] **Step 4: Commit tài liệu hoàn thành và tri thức hệ thống vào `main`**
+- [x] **Step 4: Commit tài liệu hoàn thành và tri thức hệ thống vào `main`**
   `git commit -m "docs: hoan thanh cai tien giao dien phan he ban giao can ho theo chuan impeccable"`

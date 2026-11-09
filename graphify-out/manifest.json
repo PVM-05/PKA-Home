@@ -1128,8 +1128,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/vehicle_approval_screen.dart": {
-    "mtime": 1794228231.0012023,
-    "seen": 1794229091.2947323,
+    "mtime": 1794229156.5734909,
+    "seen": 1794236474.6179593,
     "ast_hash": "2ff4a86225d38b1853675bac65173a9d",
     "semantic_hash": ""
   },
@@ -1290,8 +1290,8 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/vehicle_management_screen.dart": {
-    "mtime": 1794227517.0226483,
-    "seen": 1794229091.2947323,
+    "mtime": 1794229156.8408833,
+    "seen": 1794236474.6179593,
     "ast_hash": "782af9cfa5c78bf3a1c2f613d1d5f3b2",
     "semantic_hash": ""
   },
@@ -5232,8 +5232,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/parking_management_screen.dart": {
-    "mtime": 1794228625.877194,
-    "seen": 1794229091.2947323,
+    "mtime": 1794229156.4334357,
+    "seen": 1794236474.6179593,
     "ast_hash": "2fd6ff516908ff5d8c39e3f785076fed",
     "semantic_hash": ""
   },
@@ -6540,27 +6540,27 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/handover_management_screen.dart": {
-    "mtime": 1794061600.0664659,
-    "seen": 1794061624.702206,
-    "ast_hash": "479a9583ace799ab6e2c59cd3e2aa047",
+    "mtime": 1794236045.1196425,
+    "seen": 1794236474.6179593,
+    "ast_hash": "7763ccd9ed866d00cde44a69880e3f74",
     "semantic_hash": ""
   },
   "lib/features/management/screens/inspection_workstation_screen.dart": {
-    "mtime": 1794061600.1527252,
-    "seen": 1794061624.702206,
-    "ast_hash": "a42cc9793da1ba26938b4b5176cd59ae",
+    "mtime": 1794236257.6957777,
+    "seen": 1794236474.6179593,
+    "ast_hash": "a77b278ed1aad8c470b396682dc5ae1f",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_handover_detail_screen.dart": {
-    "mtime": 1794061600.326027,
-    "seen": 1794061624.702206,
-    "ast_hash": "dc05e5cf69537b709928725eba24356e",
+    "mtime": 1794235677.6099982,
+    "seen": 1794236474.6179593,
+    "ast_hash": "91d1a8009173b3ee4a2665e3eecb981f",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_handover_screen.dart": {
-    "mtime": 1794061351.1509035,
-    "seen": 1794061624.702206,
-    "ast_hash": "782ddcdb04938ce833b968b71f6c8b1e",
+    "mtime": 1794235409.8105433,
+    "seen": 1794236474.6179593,
+    "ast_hash": "1296016537e802ac4aee6d0247cadf97",
     "semantic_hash": ""
   },
   "supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql": {
@@ -6960,33 +6960,57 @@
     "semantic_hash": ""
   },
   "test/features/management/parking_management_responsive_test.dart": {
-    "mtime": 1794228657.359139,
-    "seen": 1794229091.2957325,
+    "mtime": 1794229156.9295948,
+    "seen": 1794236474.6189573,
     "ast_hash": "3349ea49ee05450359e2d3a830148c7a",
     "semantic_hash": ""
   },
   "test/features/management/vehicle_approval_responsive_test.dart": {
-    "mtime": 1794228973.8222194,
-    "seen": 1794229091.2957325,
+    "mtime": 1794229157.0075953,
+    "seen": 1794236474.6189573,
     "ast_hash": "030868fd6fb49d2e0b3d52790f40d616",
     "semantic_hash": ""
   },
   "test/features/resident/vehicle_management_responsive_test.dart": {
-    "mtime": 1794227077.6635623,
-    "seen": 1794229091.2957325,
+    "mtime": 1794229157.0902004,
+    "seen": 1794236474.6189573,
     "ast_hash": "590a7d82fdfc7335e1821b60b2dc3d4c",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-09-vehicle-parking-impeccable-ui.md": {
-    "mtime": 1794228730.7338853,
-    "seen": 1794229091.2967336,
-    "ast_hash": "59e61b2cda667823d5630f2a6db6666c",
+    "mtime": 1794229156.1831458,
+    "seen": 1794236474.6189573,
+    "ast_hash": "13cb29dcf836b84d921686606cb953c9",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-09-vehicle-parking-impeccable-ui-design.md": {
-    "mtime": 1794226675.3333209,
-    "seen": 1794229091.2967336,
-    "ast_hash": "9e7c17dd538906057b672a5cf11228ce",
+    "mtime": 1794235816.0488782,
+    "seen": 1794236474.6189573,
+    "ast_hash": "1e3ca8fa52139cf622eb7c0e50af1464",
+    "semantic_hash": ""
+  },
+  "test/features/management/handover_management_responsive_test.dart": {
+    "mtime": 1794236212.7989864,
+    "seen": 1794236474.6189573,
+    "ast_hash": "f4b4514a585e0726fbdb98e496d27f55",
+    "semantic_hash": ""
+  },
+  "test/features/resident/resident_handover_responsive_test.dart": {
+    "mtime": 1794236420.667607,
+    "seen": 1794236474.6189573,
+    "ast_hash": "2ca6af7433e1a93e66725728c908c6a4",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-09-handover-impeccable-ui.md": {
+    "mtime": 1794236298.8159935,
+    "seen": 1794236474.6189573,
+    "ast_hash": "9e610488e8eaa360fa23819042c7bffe",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-09-handover-impeccable-ui-design.md": {
+    "mtime": 1794235203.515343,
+    "seen": 1794236474.6189573,
+    "ast_hash": "831de9881b427f62a1e8372021e41cc3",
     "semantic_hash": ""
   }
 }

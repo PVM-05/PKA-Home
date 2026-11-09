@@ -88,16 +88,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final err = tester.takeException();
-      if (err != null) {
-        if (err is FlutterError) {
-          // ignore: avoid_print
-          for (final d in err.diagnostics) {
-            print('DIAG: ${d.name} -> ${d.toDescription()}');
-          }
-        }
-      }
-      expect(err, isNull);
+      expect(tester.takeException(), isNull);
       expect(find.text('Biên bản bàn giao căn hộ'), findsOneWidget);
       expect(find.text('HO-202611-00001'), findsOneWidget);
     });
@@ -134,16 +125,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final err = tester.takeException();
-      if (err != null) {
-        if (err is FlutterError) {
-          // ignore: avoid_print
-          for (final d in err.diagnostics) {
-            print('DIAG: ${d.name} -> ${d.toDescription()}');
-          }
-        }
-      }
-      expect(err, isNull);
+      expect(tester.takeException(), isNull);
       expect(find.text('Chi tiết biên bản bàn giao'), findsOneWidget);
       expect(find.text('Điều hòa Daikin Inverter 1.5HP Tiết Kiệm Điện'), findsOneWidget);
     });
