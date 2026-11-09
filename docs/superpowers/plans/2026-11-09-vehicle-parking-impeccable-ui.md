@@ -89,20 +89,20 @@
   - Trạm soát vé cổng hỗ trợ cuộn ngang bảng vé vãng lai.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1400`): Bố cục căn giữa trang nhã, không dãn biên.
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `ParkingManagementScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `ParkingManagementScreen`**
   Tạo `test/features/management/parking_management_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render Sơ đồ ô đỗ và Trạm soát vé không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render Sơ đồ ô đỗ và Trạm soát vé cân đối.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/management/parking_management_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `ParkingManagementScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `ParkingManagementScreen` với kiến trúc Responsive Impeccable**
   - Bọc dải KPI sức chứa trong cuộn ngang hoặc `Wrap`.
   - Điều chỉnh `crossAxisCount` và `childAspectRatio` của GridView ô đỗ theo chiều rộng.
   - Bọc bảng soát vé vãng lai trong `SingleChildScrollView(scrollDirection: Axis.horizontal)`.
   - Bọc toàn bộ nội dung trong `Center(ConstrainedBox(maxWidth: 1400))`.
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của parking management**
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của parking management**
   Chạy `flutter test test/features/management/screens/parking_management_screen_test.dart` và test responsive mới.
-- [ ] **Step 5: Commit thay đổi Task 3 vào `main`**
+- [x] **Step 5: Commit thay đổi Task 3 vào `main`**
   `git commit -m "feat(management): nang cap quan ly bai do xe va so do o do responsive"`
 
 ---

@@ -364,7 +364,11 @@ class _ParkingManagementScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quản Lý Bãi Xe & Ô Đỗ'),
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text('Quản Lý Bãi Xe & Ô Đỗ'),
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -376,62 +380,126 @@ class _ParkingManagementScreenState
           ],
         ),
       ),
-      body: Column(
-        children: [
-          // KPI strip sức chứa
-          statsAsync.when(
-            data: (stats) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: Colors.grey.shade50,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildKpiBox(
-                      icon: Icons.directions_car,
-                      label: 'Ô tô hầm',
-                      value: '${stats.carOccupied}/${stats.carTotal}',
-                      subtext: 'Trống ${stats.carAvailable}',
-                      color: AppTheme.primary,
-                    ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1400),
+          child: Column(
+            children: [
+              // KPI strip sức chứa
+              statsAsync.when(
+                data: (stats) => Container(
+                  color: Colors.grey.shade50,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isNarrow = constraints.maxWidth < 420;
+                      if (isNarrow) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 135,
+                                child: _buildKpiBox(
+                                  icon: Icons.directions_car,
+                                  label: 'Ô tô hầm',
+                                  value:
+                                      '${stats.carOccupied}/${stats.carTotal}',
+                                  subtext: 'Trống ${stats.carAvailable}',
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 135,
+                                child: _buildKpiBox(
+                                  icon: Icons.two_wheeler,
+                                  label: 'Xe máy hầm',
+                                  value:
+                                      '${stats.motoOccupied}/${stats.motoTotal}',
+                                  subtext: 'Trống ${stats.motoAvailable}',
+                                  color: Colors.teal,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 135,
+                                child: _buildKpiBox(
+                                  icon: Icons.confirmation_number_outlined,
+                                  label: 'Xe vãng lai',
+                                  value: '${stats.visitorCount}',
+                                  subtext: 'Đang gửi',
+                                  color: Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _buildKpiBox(
+                                icon: Icons.directions_car,
+                                label: 'Ô tô hầm',
+                                value:
+                                    '${stats.carOccupied}/${stats.carTotal}',
+                                subtext: 'Trống ${stats.carAvailable}',
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildKpiBox(
+                                icon: Icons.two_wheeler,
+                                label: 'Xe máy hầm',
+                                value:
+                                    '${stats.motoOccupied}/${stats.motoTotal}',
+                                subtext: 'Trống ${stats.motoAvailable}',
+                                color: Colors.teal,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildKpiBox(
+                                icon: Icons.confirmation_number_outlined,
+                                label: 'Xe vãng lai',
+                                value: '${stats.visitorCount}',
+                                subtext: 'Đang gửi',
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildKpiBox(
-                      icon: Icons.two_wheeler,
-                      label: 'Xe máy hầm',
-                      value: '${stats.motoOccupied}/${stats.motoTotal}',
-                      subtext: 'Trống ${stats.motoAvailable}',
-                      color: Colors.teal,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildKpiBox(
-                      icon: Icons.confirmation_number_outlined,
-                      label: 'Xe vãng lai',
-                      value: '${stats.visitorCount}',
-                      subtext: 'Đang gửi',
-                      color: Colors.orange,
-                    ),
-                  ),
-                ],
+                ),
+                loading: () => const SizedBox(
+                  height: 70,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
               ),
-            ),
-            loading: () => const SizedBox(
-              height: 70,
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (_, _) => const SizedBox.shrink(),
-          ),
 
-          // Nội dung 2 tabs
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [_buildSlotsTab(), _buildGateWorkstationTab()],
-            ),
+              // Nội dung 2 tabs
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [_buildSlotsTab(), _buildGateWorkstationTab()],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -452,32 +520,43 @@ class _ParkingManagementScreenState
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             children: [
               Icon(icon, size: 16, color: color),
               const SizedBox(width: 4),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppTheme.textSecondary,
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ),
           Text(
             subtext,
             style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -582,18 +661,24 @@ class _ParkingManagementScreenState
                 );
               }
 
-              return GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 220,
-                  mainAxisExtent: 140,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemCount: slots.length,
-                itemBuilder: (context, index) {
-                  final slot = slots[index];
-                  return _buildSlotCard(slot);
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 420;
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 240,
+                          mainAxisExtent: isNarrow ? 155 : 145,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                    itemCount: slots.length,
+                    itemBuilder: (context, index) {
+                      final slot = slots[index];
+                      return _buildSlotCard(slot);
+                    },
+                  );
                 },
               );
             },
@@ -619,7 +704,7 @@ class _ParkingManagementScreenState
     }
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -630,15 +715,19 @@ class _ParkingManagementScreenState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                slot.slotNumber,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+              Expanded(
+                child: Text(
+                  slot.slotNumber,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 4),
               Icon(
                 slot.isCar ? Icons.directions_car : Icons.two_wheeler,
                 size: 16,
@@ -647,16 +736,19 @@ class _ParkingManagementScreenState
             ],
           ),
           if (slot.isOccupied) ...[
-            Text(
-              slot.licensePlate ?? 'Đã có xe',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: AppTheme.primary,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                slot.licensePlate ?? 'Đã có xe',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: AppTheme.primary,
+                ),
               ),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
@@ -665,23 +757,30 @@ class _ParkingManagementScreenState
                       fontSize: 11,
                       color: AppTheme.textSecondary,
                     ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 4),
-                InkWell(
-                  onTap: () async {
-                    final repo = ref.read(parkingRepositoryProvider);
-                    await repo.releaseSlot(slot.id);
-                    ref.invalidate(parkingSlotsProvider);
-                    ref.invalidate(parkingCapacityStatsProvider);
-                  },
-                  child: const Text(
-                    'Giải phóng',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppTheme.error,
-                      fontWeight: FontWeight.bold,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 55),
+                  child: InkWell(
+                    onTap: () async {
+                      final repo = ref.read(parkingRepositoryProvider);
+                      await repo.releaseSlot(slot.id);
+                      ref.invalidate(parkingSlotsProvider);
+                      ref.invalidate(parkingCapacityStatsProvider);
+                    },
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Giải phóng',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -697,17 +796,22 @@ class _ParkingManagementScreenState
                     ? Colors.green.shade700
                     : Colors.orange.shade700,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             Align(
               alignment: Alignment.centerRight,
               child: InkWell(
                 onTap: () => _showAssignSlotDialog(slot),
-                child: const Text(
-                  'Gán xe',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppTheme.primary,
-                    fontWeight: FontWeight.bold,
+                child: const FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Gán xe',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -732,7 +836,10 @@ class _ParkingManagementScreenState
                 child: ElevatedButton.icon(
                   onPressed: _showCheckInDialog,
                   icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('Check-in Xe Vào'),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Check-in Xe Vào'),
+                  ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -771,48 +878,62 @@ class _ParkingManagementScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  ticket.isCar
-                                      ? Icons.directions_car
-                                      : Icons.two_wheeler,
-                                  color: AppTheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  ticket.licensePlate,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    ticket.isCar
+                                        ? Icons.directions_car
+                                        : Icons.two_wheeler,
+                                    color: AppTheme.primary,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      ticket.licensePlate,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                ticket.displayStatus,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
+                            const SizedBox(width: 8),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 95),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    ticket.displayStatus,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Row(
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 4,
                           children: [
                             Text(
                               'Loại xe: ${ticket.displayVehicleType}',
@@ -821,7 +942,6 @@ class _ParkingManagementScreenState
                                 color: AppTheme.textSecondary,
                               ),
                             ),
-                            const SizedBox(width: 16),
                             Text(
                               'Mã vé: ${ticket.ticketCode}',
                               style: const TextStyle(
@@ -859,12 +979,18 @@ class _ParkingManagementScreenState
                             TextButton.icon(
                               onPressed: () => _showTicketDetailModal(ticket),
                               icon: const Icon(Icons.qr_code, size: 18),
-                              label: const Text('Xem mã QR vé'),
+                              label: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text('Xem mã QR vé'),
+                              ),
                             ),
                             ElevatedButton.icon(
                               onPressed: () => _showCheckoutDialog(ticket),
                               icon: const Icon(Icons.payment, size: 18),
-                              label: const Text('Check-out & Thu tiền'),
+                              label: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text('Check-out & Thu tiền'),
+                              ),
                             ),
                           ],
                         ),
