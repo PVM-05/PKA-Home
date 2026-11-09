@@ -409,7 +409,12 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
         appBar: AppBar(
           title: Row(
             children: [
-              const Text('Duyệt Đăng Ký Phương Tiện'),
+              const Flexible(
+                child: Text(
+                  'Duyệt Đăng Ký Phương Tiện',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               const SizedBox(width: 8),
               pendingCountAsync.when(
                 data: (count) {
@@ -500,11 +505,22 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                           type.contains(keyword);
                     }).toList();
 
+                    final isDesktop = MediaQuery.sizeOf(context).width >= 900;
+                    final pendingCount = vehicles.where((v) => v.isPending).length;
+
                     if (filtered.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            if (isDesktop) ...[
+                              _buildExecutiveKpiBar(
+                                context,
+                                vehicles,
+                                pendingCount,
+                              ),
+                              const SizedBox(height: 32),
+                            ],
                             Icon(
                               Icons.directions_car_outlined,
                               size: 56,
@@ -523,306 +539,58 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                       );
                     }
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final v = filtered[index];
-
-                        Color statusColor = AppTheme.warning;
-                        if (v.isApproved) statusColor = AppStatusColors.paid;
-                        if (v.isRejected) statusColor = AppTheme.error;
-
-                        return AppCard(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: statusColor.withValues(
-                                        alpha: 0.12,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Icon(
-                                      _getVehicleIcon(v.vehicleType),
-                                      color: statusColor,
-                                      size: 28,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          v.licensePlate,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 17,
-                                          ),
+                    if (isDesktop) {
+                      return Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1400),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              children: [
+                                _buildExecutiveKpiBar(
+                                  context,
+                                  vehicles,
+                                  pendingCount,
+                                ),
+                                const SizedBox(height: 16),
+                                Expanded(
+                                  child: GridView.builder(
+                                    padding: const EdgeInsets.only(bottom: 24),
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          crossAxisSpacing: 16,
+                                          mainAxisSpacing: 16,
+                                          mainAxisExtent: 290,
                                         ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${v.vehicleTypeDisplayName}${v.brandModel != null && v.brandModel!.isNotEmpty ? ' • ${v.brandModel}' : ''}',
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            color: AppTheme.textSecondary,
-                                          ),
+                                    itemCount: filtered.length,
+                                    itemBuilder: (context, index) =>
+                                        _buildVehicleApprovalCard(
+                                          context,
+                                          filtered[index],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: statusColor.withValues(
-                                        alpha: 0.12,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      v.statusDisplayName,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: statusColor,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.payment_outlined,
-                                    size: 16,
-                                    color: AppTheme.primary,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Biểu phí: ${_currencyFormat.format(v.monthlyFee)}/tháng',
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.primary,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    'Đăng ký: ${_dateFormat.format(v.createdAt)}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (v.hasAssignedSlot) ...[
-                                const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primary.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: AppTheme.primary.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.local_parking,
-                                        size: 14,
-                                        color: AppTheme.primary,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Vị trí ô đỗ: ${v.parkingSlotNumber}',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppTheme.primary,
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ],
-                              if (v.hasRegistrationImage) ...[
-                                const SizedBox(height: 8),
-                                InkWell(
-                                  onTap: () {
-                                    final repo = ref.read(vehicleRepositoryProvider);
-                                    final url = repo.getRegistrationImageUrl(v.registrationImageUrl);
-                                    if (url.isNotEmpty) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => PhotoViewerScreen(imageUrls: [url]),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: Colors.blue.shade200,
-                                      ),
-                                    ),
-                                    child: const Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.badge_outlined,
-                                          size: 14,
-                                          color: AppTheme.primary,
-                                        ),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          'Xem ảnh cà vẹt xe',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppTheme.primary,
-                                          ),
-                                        ),
-                                        SizedBox(width: 4),
-                                        Icon(
-                                          Icons.open_in_new,
-                                          size: 12,
-                                          color: AppTheme.primary,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              if (v.isRejected) ...[
-                                const SizedBox(height: 10),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.error.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: AppTheme.error.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.error_outline,
-                                        size: 16,
-                                        color: AppTheme.error,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'Lý do từ chối: ${v.hasRejectionReason ? v.rejectionReason! : 'Không đủ điều kiện cấp thẻ xe.'}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppTheme.error,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              if (v.isPending) ...[
-                                const Divider(height: 20),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    OutlinedButton.icon(
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: AppTheme.error,
-                                        side: const BorderSide(
-                                          color: AppTheme.error,
-                                        ),
-                                      ),
-                                      icon: const Icon(Icons.close, size: 16),
-                                      label: const Text('Từ chối'),
-                                      onPressed: () => _rejectVehicle(v),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    ElevatedButton.icon(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppStatusColors.paid,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      icon: const Icon(Icons.check, size: 16),
-                                      label: const Text('Phê duyệt'),
-                                      onPressed: () => _approveVehicle(v),
-                                    ),
-                                  ],
-                                ),
-                              ] else if (v.isRejected) ...[
-                                const Divider(height: 20),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton.icon(
-                                      icon: const Icon(Icons.refresh, size: 16),
-                                      label: const Text('Xem xét duyệt lại'),
-                                      onPressed: () => _approveVehicle(v),
-                                    ),
-                                  ],
-                                ),
-                              ] else if (v.isApproved) ...[
-                                const Divider(height: 20),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton.icon(
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: AppTheme.error,
-                                      ),
-                                      icon: const Icon(Icons.block, size: 16),
-                                      label: const Text('Thu hồi thẻ gửi xe'),
-                                      onPressed: () => _rejectVehicle(v),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ],
+                            ),
                           ),
-                        );
-                      },
+                        ),
+                      );
+                    }
+
+                    return Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) =>
+                              _buildVehicleApprovalCard(
+                                context,
+                                filtered[index],
+                              ),
+                        ),
+                      ),
                     );
                   },
                   loading: () =>
@@ -833,6 +601,438 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildExecutiveKpiBar(
+    BuildContext context,
+    List<VehicleModel> vehicles,
+    int pendingCount,
+  ) {
+    final approvedCount = vehicles.where((v) => v.isApproved).length;
+    final rejectedCount = vehicles.where((v) => v.isRejected).length;
+    final totalCount = vehicles.length;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildKpiItem(
+                'Chờ duyệt',
+                '$pendingCount xe',
+                AppTheme.warning,
+                Icons.pending_actions,
+              ),
+            ),
+            const VerticalDivider(width: 24, thickness: 1),
+            Expanded(
+              child: _buildKpiItem(
+                'Đang hoạt động',
+                '$approvedCount xe',
+                AppStatusColors.paid,
+                Icons.check_circle_outline,
+              ),
+            ),
+            const VerticalDivider(width: 24, thickness: 1),
+            Expanded(
+              child: _buildKpiItem(
+                'Đã từ chối',
+                '$rejectedCount xe',
+                AppTheme.error,
+                Icons.cancel_outlined,
+              ),
+            ),
+            const VerticalDivider(width: 24, thickness: 1),
+            Expanded(
+              child: _buildKpiItem(
+                'Tổng đăng ký',
+                '$totalCount xe',
+                AppTheme.primary,
+                Icons.directions_car_outlined,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKpiItem(
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVehicleApprovalCard(BuildContext context, VehicleModel v) {
+    Color statusColor = AppTheme.warning;
+    if (v.isApproved) statusColor = AppStatusColors.paid;
+    if (v.isRejected) statusColor = AppTheme.error;
+
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  _getVehicleIcon(v.vehicleType),
+                  color: statusColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.licensePlate,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${v.vehicleTypeDisplayName}${v.brandModel != null && v.brandModel!.isNotEmpty ? ' • ${v.brandModel}' : ''}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 95),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      v.statusDisplayName,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 220),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.payment_outlined,
+                      size: 15,
+                      color: AppTheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        'Biểu phí: ${_currencyFormat.format(v.monthlyFee)}/tháng',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'Đăng ký: ${_dateFormat.format(v.createdAt)}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          if (v.hasAssignedSlot) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: AppTheme.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.local_parking,
+                    size: 14,
+                    color: AppTheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Vị trí ô đỗ: ${v.parkingSlotNumber}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (v.hasRegistrationImage) ...[
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: () {
+                final repo = ref.read(vehicleRepositoryProvider);
+                final url = repo.getRegistrationImageUrl(
+                  v.registrationImageUrl,
+                );
+                if (url.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PhotoViewerScreen(imageUrls: [url]),
+                    ),
+                  );
+                }
+              },
+              borderRadius: BorderRadius.circular(6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.badge_outlined,
+                      size: 13,
+                      color: AppTheme.primary,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      'Xem ảnh cà vẹt xe',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.open_in_new,
+                      size: 11,
+                      color: AppTheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (v.isRejected) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.error.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.error.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 15,
+                    color: AppTheme.error,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Lý do từ chối: ${v.hasRejectionReason ? v.rejectionReason! : 'Không đủ điều kiện cấp thẻ xe.'}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.error,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (v.isPending) ...[
+            const Divider(height: 16),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.error,
+                    side: const BorderSide(color: AppTheme.error),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: const Icon(Icons.close, size: 14),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Từ chối'),
+                  ),
+                  onPressed: () => _rejectVehicle(v),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppStatusColors.paid,
+                    foregroundColor: Colors.white,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: const Icon(Icons.check, size: 14),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Phê duyệt'),
+                  ),
+                  onPressed: () => _approveVehicle(v),
+                ),
+              ],
+            ),
+          ] else if (v.isRejected) ...[
+            const Divider(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.refresh, size: 15),
+                  label: const Text('Xem xét duyệt lại'),
+                  onPressed: () => _approveVehicle(v),
+                ),
+              ),
+            ),
+          ] else if (v.isApproved) ...[
+            const Divider(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.error,
+                  ),
+                  icon: const Icon(Icons.block, size: 15),
+                  label: const Text('Thu hồi thẻ gửi xe'),
+                  onPressed: () => _rejectVehicle(v),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

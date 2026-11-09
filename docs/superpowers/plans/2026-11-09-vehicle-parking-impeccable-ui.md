@@ -58,19 +58,19 @@
   - Mobile (< 900dp): Thẻ yêu cầu bọc `Flexible` cho căn hộ và biển số, nút Từ chối & Duyệt bọc `FittedBox`.
   - Desktop Web ($\ge 900$dp, `maxWidth: 1400`): Executive Vehicle KPI Bar + Bố cục lưới danh sách 2 cột.
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `VehicleApprovalScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `VehicleApprovalScreen`**
   Tạo `test/features/management/vehicle_approval_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render an toàn cả 4 tabs không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render Executive Vehicle KPI Bar và danh sách lưới 2 cột.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/management/vehicle_approval_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `VehicleApprovalScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `VehicleApprovalScreen` với kiến trúc Responsive Impeccable**
   - Header thẻ phiếu: Bọc căn hộ, biển số và badge trạng thái trong `Flexible` & `TextOverflow.ellipsis`.
   - Nút Từ chối và Phê duyệt: Bọc nhãn văn bản trong `FittedBox(fit: BoxFit.scaleDown)`.
   - Thêm `_buildExecutiveKpiBar` và bố cục lưới 2 cột trên Desktop $\ge 900$dp.
-- [ ] **Step 4: Chạy kiểm thử toàn bộ test của vehicle approval**
+- [x] **Step 4: Chạy kiểm thử toàn bộ test của vehicle approval**
   Chạy `flutter test test/features/management/vehicle_approval*` đảm bảo pass 100%.
-- [ ] **Step 5: Commit thay đổi Task 2 vào `main`**
+- [x] **Step 5: Commit thay đổi Task 2 vào `main`**
   `git commit -m "feat(management): nang cap duyet phuong tien responsive web workstation va mobile"`
 
 ---
