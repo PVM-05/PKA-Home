@@ -30,21 +30,21 @@
   - `FinancialReportScreen`: Bọc `Center(ConstrainedBox(maxWidth: 1400))`, KPI chuyển 4 cột trên Desktop và lưới 2 cột co giãn an toàn trên Mobile 320dp (Text Zoom 1.3x).
   - `MaintenanceFundLedgerScreen`: Bố cục Split-Screen 2 cột trên Desktop $\ge 900$dp, bộ lọc FilterChip cuộn ngang an toàn trên Mobile.
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `FinancialReportScreen` và `MaintenanceFundLedgerScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `FinancialReportScreen` và `MaintenanceFundLedgerScreen`**
   Tạo `test/features/management/finance_reports_responsive_test.dart`:
   - Test 1: Mobile 320dp x 600dp (Text Scale 1.3x) render không có lỗi RenderFlex.
   - Test 2: Desktop 1200dp render Executive KPI Bar và Workstation cân đối.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
+- [x] **Step 2: Chạy test để xác nhận trạng thái hiện tại**
   Chạy `flutter test test/features/management/finance_reports_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `FinancialReportScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `FinancialReportScreen` với kiến trúc Responsive Impeccable**
   - Bọc toàn bộ nội dung trong `Center(ConstrainedBox(maxWidth: 1400))`.
   - Nâng cấp dải KPI 4 chỉ số: 4 cột trên Desktop, 2 cột co giãn linh hoạt trên Mobile.
-- [ ] **Step 4: Cập nhật `MaintenanceFundLedgerScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 4: Cập nhật `MaintenanceFundLedgerScreen` với kiến trúc Responsive Impeccable**
   - Hỗ trợ Split-Screen 2 cột trên Desktop $\ge 900$dp (`maxWidth: 1400`).
   - Bọc bộ lọc FilterChip trong `SingleChildScrollView(scrollDirection: Axis.horizontal)`.
-- [ ] **Step 5: Chạy kiểm thử xác minh và static analysis**
+- [x] **Step 5: Chạy kiểm thử xác minh và static analysis**
   Chạy `flutter test test/features/management/finance_reports_responsive_test.dart`.
-- [ ] **Step 6: Commit Task 1 vào `main`**
+- [x] **Step 6: Commit Task 1 vào `main`**
   `git commit -m "feat(management): nang cap bao cao tai chinh va so quy bao tri responsive impeccable"`
 
 ---
@@ -62,18 +62,18 @@
   - Bố cục Split-Screen 2 cột trên Web Desktop $\ge 900$dp (`maxWidth: 1400`).
   - Mobile (< 900dp): Trường nhập đơn giá, số lượng và tổng tiền co giãn an toàn qua `LayoutBuilder`.
 
-- [ ] **Step 1: Viết test kiểm tra Responsive cho `CreateInvoiceScreen` và `EditInvoiceScreen`**
+- [x] **Step 1: Viết test kiểm tra Responsive cho `CreateInvoiceScreen` và `EditInvoiceScreen`**
   Tạo `test/features/management/invoice_forms_responsive_test.dart`.
-- [ ] **Step 2: Chạy test để xác nhận trạng thái**
+- [x] **Step 2: Chạy test để xác nhận trạng thái**
   Chạy `flutter test test/features/management/invoice_forms_responsive_test.dart`.
-- [ ] **Step 3: Cập nhật `CreateInvoiceScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 3: Cập nhật `CreateInvoiceScreen` với kiến trúc Responsive Impeccable**
   - Tách bố cục Desktop Split-Screen (Cột trái: Thông tin căn hộ & kỳ thu; Cột phải: Các khoản mục phí).
   - Chống tràn bằng `LayoutBuilder` cho các cặp trường nhập đơn giá & số lượng.
-- [ ] **Step 4: Cập nhật `EditInvoiceScreen` với kiến trúc Responsive Impeccable**
+- [x] **Step 4: Cập nhật `EditInvoiceScreen` với kiến trúc Responsive Impeccable**
   - Căn giữa `maxWidth: 1400` trên Desktop, bọc `Expanded` và `FittedBox` cho các dòng chi phí.
-- [ ] **Step 5: Chạy kiểm thử xác minh**
+- [x] **Step 5: Chạy kiểm thử xác minh**
   Chạy `flutter test test/features/management/invoice_forms_responsive_test.dart`.
-- [ ] **Step 6: Commit Task 2 vào `main`**
+- [x] **Step 6: Commit Task 2 vào `main`**
   `git commit -m "feat(management): nang cap bieu mau lap va sua hoa don responsive split-screen"`
 
 ---
