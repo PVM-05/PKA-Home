@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
 import '../../../data/models/building_rule_model.dart';
@@ -101,76 +102,118 @@ class _HandbookManagementScreenState
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-            itemCount: contacts.length,
-            itemBuilder: (context, index) {
-              final contact = contacts[index];
-              return Card(
-                elevation: 0,
-                color: Theme.of(context).cardColor,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Theme.of(context).dividerColor),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  final contact = contacts[index];
+                  return AppCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.phone_in_talk,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                contact.name,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5),
+                              ),
+                              const SizedBox(height: 4),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Text(
+                                    'SĐT: ${contact.phone}',
+                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primary.withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      contact.contactTypeDisplayName,
+                                      style: const TextStyle(
+                                        fontSize: 10.5,
+                                        color: AppTheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    'Thứ tự: ${contact.displayOrder}',
+                                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                color: AppTheme.primary,
+                                size: 20,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                              onPressed: () => _showContactDialog(contact: contact),
+                              tooltip: 'Chỉnh sửa',
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: AppTheme.error,
+                                size: 20,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                              onPressed: () => _confirmDelete(
+                                title: 'Xóa đường dây nóng',
+                                message:
+                                    'Bạn có chắc chắn muốn xóa "${contact.name}" không?',
+                                onConfirm: () async {
+                                  await ref
+                                      .read(handbookRepositoryProvider)
+                                      .deleteEmergencyContact(contact.id);
+                                  ref.invalidate(emergencyContactsProvider);
+                                },
+                              ),
+                              tooltip: 'Xóa',
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    child: const Icon(
-                      Icons.phone_in_talk,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                  title: Text(
-                    contact.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    'SĐT: ${contact.phone} • Loại: ${contact.contactTypeDisplayName} • Thứ tự: ${contact.displayOrder}',
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.edit_outlined,
-                          color: AppTheme.primary,
-                        ),
-                        onPressed: () => _showContactDialog(contact: contact),
-                        tooltip: 'Chỉnh sửa',
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          color: AppTheme.error,
-                        ),
-                        onPressed: () => _confirmDelete(
-                          title: 'Xóa đường dây nóng',
-                          message:
-                              'Bạn có chắc chắn muốn xóa "${contact.name}" không?',
-                          onConfirm: () async {
-                            await ref
-                                .read(handbookRepositoryProvider)
-                                .deleteEmergencyContact(contact.id);
-                            ref.invalidate(emergencyContactsProvider);
-                          },
-                        ),
-                        tooltip: 'Xóa',
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -341,79 +384,87 @@ class _HandbookManagementScreenState
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-            itemCount: rules.length,
-            itemBuilder: (context, index) {
-              final rule = rules[index];
-              return Card(
-                elevation: 0,
-                color: Theme.of(context).cardColor,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Theme.of(context).dividerColor),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${index + 1}. ${rule.title}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                itemCount: rules.length,
+                itemBuilder: (context, index) {
+                  final rule = rules[index];
+                  return AppCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${index + 1}. ${rule.title}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.edit_outlined,
-                              color: AppTheme.primary,
-                              size: 20,
+                            const SizedBox(width: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: AppTheme.primary,
+                                    size: 20,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  onPressed: () => _showRuleDialog(rule: rule),
+                                  tooltip: 'Chỉnh sửa',
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppTheme.error,
+                                    size: 20,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  onPressed: () => _confirmDelete(
+                                    title: 'Xóa nội quy',
+                                    message:
+                                        'Bạn có chắc chắn muốn xóa nội quy "${rule.title}" không?',
+                                    onConfirm: () async {
+                                      await ref
+                                          .read(handbookRepositoryProvider)
+                                          .deleteBuildingRule(rule.id);
+                                      ref.invalidate(buildingRulesProvider);
+                                    },
+                                  ),
+                                  tooltip: 'Xóa',
+                                ),
+                              ],
                             ),
-                            onPressed: () => _showRuleDialog(rule: rule),
-                            tooltip: 'Chỉnh sửa',
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: AppTheme.error,
-                              size: 20,
-                            ),
-                            onPressed: () => _confirmDelete(
-                              title: 'Xóa nội quy',
-                              message:
-                                  'Bạn có chắc chắn muốn xóa nội quy "${rule.title}" không?',
-                              onConfirm: () async {
-                                await ref
-                                    .read(handbookRepositoryProvider)
-                                    .deleteBuildingRule(rule.id);
-                                ref.invalidate(buildingRulesProvider);
-                              },
-                            ),
-                            tooltip: 'Xóa',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        rule.content,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade700,
-                          height: 1.4,
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                        const SizedBox(height: 8),
+                        Text(
+                          rule.content,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -549,194 +600,208 @@ class _HandbookManagementScreenState
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-            itemCount: amenities.length,
-            itemBuilder: (context, index) {
-              final amenity = amenities[index];
-              return Card(
-                elevation: 0,
-                color: Theme.of(context).cardColor,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Theme.of(context).dividerColor),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              amenity.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.edit_outlined,
-                              color: AppTheme.primary,
-                              size: 20,
-                            ),
-                            onPressed: () =>
-                                _showAmenityDialog(amenity: amenity),
-                            tooltip: 'Chỉnh sửa',
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: AppTheme.error,
-                              size: 20,
-                            ),
-                            onPressed: () => _confirmDelete(
-                              title: 'Xóa tiện ích',
-                              message:
-                                  'Bạn có chắc chắn muốn xóa tiện ích "${amenity.name}" không?',
-                              onConfirm: () async {
-                                await ref
-                                    .read(handbookRepositoryProvider)
-                                    .deleteBuildingAmenity(amenity.id);
-                                ref.invalidate(buildingAmenitiesProvider);
-                              },
-                            ),
-                            tooltip: 'Xóa',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          if (amenity.openHours != null &&
-                              amenity.openHours!.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppStatusColors.paid.withAlpha(25),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.access_time,
-                                    size: 14,
-                                    color: AppStatusColors.paid,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    amenity.openHours!,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppStatusColors.paid,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary.withAlpha(25),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  amenity.isShared
-                                      ? Icons.groups_outlined
-                                      : Icons.lock_clock_outlined,
-                                  size: 14,
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                itemCount: amenities.length,
+                itemBuilder: (context, index) {
+                  final amenity = amenities[index];
+                  return AppCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                amenity.name,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                   color: AppTheme.primary,
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  amenity.isShared
-                                      ? 'Dùng chung (${amenity.maxCapacity} người)'
-                                      : 'Bao trọn khung giờ',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
                                     color: AppTheme.primary,
+                                    size: 20,
                                   ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  onPressed: () =>
+                                      _showAmenityDialog(amenity: amenity),
+                                  tooltip: 'Chỉnh sửa',
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppTheme.error,
+                                    size: 20,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  onPressed: () => _confirmDelete(
+                                    title: 'Xóa tiện ích',
+                                    message:
+                                        'Bạn có chắc chắn muốn xóa tiện ích "${amenity.name}" không?',
+                                    onConfirm: () async {
+                                      await ref
+                                          .read(handbookRepositoryProvider)
+                                          .deleteBuildingAmenity(amenity.id);
+                                      ref.invalidate(buildingAmenitiesProvider);
+                                    },
+                                  ),
+                                  tooltip: 'Xóa',
                                 ),
                               ],
                             ),
-                          ),
-                          if (amenity.feeAmount > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withAlpha(25),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'Phí: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.feeAmount)}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            ),
-                          if (amenity.requiresDeposit &&
-                              amenity.depositAmount > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.withAlpha(35),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'Cọc: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.depositAmount)}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.brown,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (amenity.description != null &&
-                          amenity.description!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          amenity.description!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade700,
-                            height: 1.4,
-                          ),
+                          ],
                         ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          children: [
+                            if (amenity.openHours != null &&
+                                amenity.openHours!.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppStatusColors.paid.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 14,
+                                        color: AppStatusColors.paid,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        amenity.openHours!,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppStatusColors.paid,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withAlpha(25),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      amenity.isShared
+                                          ? Icons.groups_outlined
+                                          : Icons.lock_clock_outlined,
+                                      size: 14,
+                                      color: AppTheme.primary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      amenity.isShared
+                                          ? 'Dùng chung (${amenity.maxCapacity} người)'
+                                          : 'Bao trọn khung giờ',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (amenity.feeAmount > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Phí: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.feeAmount)}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                            if (amenity.requiresDeposit &&
+                                amenity.depositAmount > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withAlpha(35),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Cọc: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.depositAmount)}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.brown,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (amenity.description != null &&
+                            amenity.description!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            amenity.description!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade700,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ),
-              );
-            },
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

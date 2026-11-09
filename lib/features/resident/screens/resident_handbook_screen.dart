@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
 import 'amenity_booking_screen.dart';
@@ -172,13 +173,18 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: filteredContacts.length,
-            itemBuilder: (context, index) {
-              final contact = filteredContacts[index];
-              return _buildContactCard(contact);
-            },
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: filteredContacts.length,
+                itemBuilder: (context, index) {
+                  final contact = filteredContacts[index];
+                  return _buildContactCard(contact);
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -216,90 +222,108 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         break;
     }
 
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).cardColor,
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).dividerColor),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: typeColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(typeIcon, color: typeColor, size: 28),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: typeColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      typeLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: typeColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    contact.name,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    contact.phone,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppStatusColors.paid,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                shape: RoundedRectangleBorder(
+      padding: const EdgeInsets.all(16.0),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 360;
+
+          final headerContent = Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: typeColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
+                child: Icon(typeIcon, color: typeColor, size: 28),
               ),
-              onPressed: () => _makePhoneCall(contact.phone),
-              icon: const Icon(Icons.phone, size: 16),
-              label: const Text(
-                'Gọi ngay',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: typeColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        typeLabel,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: typeColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      contact.name,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      contact.phone,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+
+          final callButton = ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppStatusColors.paid,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-          ],
-        ),
+            onPressed: () => _makePhoneCall(contact.phone),
+            icon: const Icon(Icons.phone, size: 16),
+            label: const Text(
+              'Gọi ngay',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          );
+
+          if (isNarrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                headerContent,
+                const SizedBox(height: 12),
+                callButton,
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              Expanded(child: headerContent),
+              const SizedBox(width: 8),
+              callButton,
+            ],
+          );
+        },
       ),
     );
   }
@@ -339,64 +363,64 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: filteredRules.length,
-            itemBuilder: (context, index) {
-              final rule = filteredRules[index];
-              return Card(
-                elevation: 0,
-                color: Theme.of(context).cardColor,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Theme.of(context).dividerColor),
-                ),
-                child: Theme(
-                  data: Theme.of(
-                    context,
-                  ).copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    leading: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${index + 1}',
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      rule.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: Text(
-                          rule.content,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade800,
-                            height: 1.5,
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: filteredRules.length,
+                itemBuilder: (context, index) {
+                  final rule = filteredRules[index];
+                  return AppCard(
+                    padding: EdgeInsets.zero,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Theme(
+                      data: Theme.of(
+                        context,
+                      ).copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        leading: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
+                        title: Text(
+                          rule.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Text(
+                              rule.content,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade800,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -421,126 +445,126 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: amenities.length,
-            itemBuilder: (context, index) {
-              final amenity = amenities[index];
-              return Card(
-                elevation: 0,
-                color: Theme.of(context).cardColor,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Theme.of(context).dividerColor),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              amenity.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primary,
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: amenities.length,
+                itemBuilder: (context, index) {
+                  final amenity = amenities[index];
+                  return AppCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                amenity.name,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primary,
+                                ),
                               ),
+                            ),
+                            if (amenity.openHours != null &&
+                                amenity.openHours!.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppStatusColors.paid.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 14,
+                                        color: AppStatusColors.paid,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        amenity.openHours!,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppStatusColors.paid,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (amenity.description != null &&
+                            amenity.description!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            amenity.description!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade800,
+                              height: 1.4,
                             ),
                           ),
-                          if (amenity.openHours != null &&
-                              amenity.openHours!.isNotEmpty)
-                            Container(
+                        ],
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primary,
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
+                                horizontal: 16,
+                                vertical: 8,
                               ),
-                              decoration: BoxDecoration(
-                                color: AppStatusColors.paid.withValues(
-                                  alpha: 0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.access_time,
-                                    size: 14,
-                                    color: AppStatusColors.paid,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    amenity.openHours!,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppStatusColors.paid,
-                                    ),
-                                  ),
-                                ],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                        ],
-                      ),
-                      if (amenity.description != null &&
-                          amenity.description!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          amenity.description!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade800,
-                            height: 1.4,
+                            icon: const Icon(
+                              Icons.calendar_month_outlined,
+                              size: 16,
+                            ),
+                            label: const Text(
+                              'Đặt lịch sử dụng',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      AmenityBookingScreen(amenity: amenity),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ],
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon: const Icon(
-                            Icons.calendar_month_outlined,
-                            size: 16,
-                          ),
-                          label: const Text(
-                            'Đặt lịch sử dụng',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    AmenityBookingScreen(amenity: amenity),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -553,86 +577,84 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
   // Tab 4: Biểu Phí & FAQ
   // ===========================================================================
   Widget _buildFeeScheduleAndFaqTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Text(
-          'Biểu Phí Quản Lý & Vận Hành',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          elevation: 0,
-          color: Theme.of(context).cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Theme.of(context).dividerColor),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildFeeRow(
-                  title: 'Phí dịch vụ quản lý',
-                  rate: AppConstants.kDefaultManagementFeeFormatted,
-                  formula: 'Đơn giá × Diện tích thông thủy căn hộ',
-                ),
-                const Divider(height: 20),
-                _buildFeeRow(
-                  title: 'Phí gửi xe máy',
-                  rate: AppConstants.kMotorbikeFeeFormatted,
-                  formula: 'Đăng ký tối đa 2 xe máy/căn hộ',
-                ),
-                const Divider(height: 20),
-                _buildFeeRow(
-                  title: 'Phí gửi ô tô',
-                  rate: AppConstants.kCarFeeFormatted,
-                  formula: 'Theo vị trí đỗ xe tại tầng hầm',
-                ),
-                const Divider(height: 20),
-                _buildFeeRow(
-                  title: 'Tiền điện sinh hoạt',
-                  rate: 'Biểu giá EVN',
-                  formula: 'Bậc thang theo công tơ riêng của từng căn',
-                ),
-                const Divider(height: 20),
-                _buildFeeRow(
-                  title: 'Tiền nước sạch',
-                  rate: 'Theo định mức nước',
-                  formula: 'Chỉ số đồng hồ đo thực tế × Đơn giá',
-                ),
-              ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              'Biểu Phí Quản Lý & Vận Hành',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primary,
+              ),
             ),
-          ),
+            const SizedBox(height: 8),
+            AppCard(
+              padding: const EdgeInsets.all(16.0),
+              margin: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  _buildFeeRow(
+                    title: 'Phí dịch vụ quản lý',
+                    rate: AppConstants.kDefaultManagementFeeFormatted,
+                    formula: 'Đơn giá × Diện tích thông thủy căn hộ',
+                  ),
+                  const Divider(height: 20),
+                  _buildFeeRow(
+                    title: 'Phí gửi xe máy',
+                    rate: AppConstants.kMotorbikeFeeFormatted,
+                    formula: 'Đăng ký tối đa 2 xe máy/căn hộ',
+                  ),
+                  const Divider(height: 20),
+                  _buildFeeRow(
+                    title: 'Phí gửi ô tô',
+                    rate: AppConstants.kCarFeeFormatted,
+                    formula: 'Theo vị trí đỗ xe tại tầng hầm',
+                  ),
+                  const Divider(height: 20),
+                  _buildFeeRow(
+                    title: 'Tiền điện sinh hoạt',
+                    rate: 'Biểu giá EVN',
+                    formula: 'Bậc thang theo công tơ riêng của từng căn',
+                  ),
+                  const Divider(height: 20),
+                  _buildFeeRow(
+                    title: 'Tiền nước sạch',
+                    rate: 'Theo định mức nước',
+                    formula: 'Chỉ số đồng hồ đo thực tế × Đơn giá',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Câu Hỏi Thường Gặp',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildFaqItem(
+              question: 'Tôi thanh toán hóa đơn bằng cách nào?',
+              answer:
+                  'Tại màn hình Hóa đơn, nhấn "Xem chi tiết" -> "Thanh toán". Ứng dụng cung cấp Cổng thanh toán trực tuyến tiện lợi hỗ trợ thanh toán tức thì hoặc Cư dân có thể thanh toán trực tiếp tại văn phòng Ban Quản Lý.',
+            ),
+            _buildFaqItem(
+              question: 'Khi gặp sự cố trong căn hộ thì xử lý thế nào?',
+              answer:
+                  'Bạn có thể vào mục "Phản ánh" để gửi hình ảnh và mô tả sự cố cho BQL tiếp nhận. Nếu là sự cố khẩn cấp (chập điện, rò nước), vui lòng gọi ngay hotline kỹ thuật tại tab "Đường dây nóng".',
+            ),
+            _buildFaqItem(
+              question: 'Làm thế nào để thêm thành viên cùng ở vào căn hộ?',
+              answer:
+                  'Thành viên mới cần cài đặt app, đăng ký tài khoản với vai trò Cư dân, sau đó tại màn hình "Tài khoản của tôi" bấm "Xin liên kết căn hộ". Ban Quản Lý sẽ xác minh và phê duyệt trong vòng 24 giờ.',
+            ),
+          ],
         ),
-        const SizedBox(height: 24),
-        Text(
-          'Câu Hỏi Thường Gặp',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        _buildFaqItem(
-          question: 'Tôi thanh toán hóa đơn bằng cách nào?',
-          answer:
-              'Tại màn hình Hóa đơn, nhấn "Xem chi tiết" -> "Thanh toán". Ứng dụng cung cấp Cổng thanh toán trực tuyến tiện lợi hỗ trợ thanh toán tức thì hoặc Cư dân có thể thanh toán trực tiếp tại văn phòng Ban Quản Lý.',
-        ),
-        _buildFaqItem(
-          question: 'Khi gặp sự cố trong căn hộ thì xử lý thế nào?',
-          answer:
-              'Bạn có thể vào mục "Phản ánh" để gửi hình ảnh và mô tả sự cố cho BQL tiếp nhận. Nếu là sự cố khẩn cấp (chập điện, rò nước), vui lòng gọi ngay hotline kỹ thuật tại tab "Đường dây nóng".',
-        ),
-        _buildFaqItem(
-          question: 'Làm thế nào để thêm thành viên cùng ở vào căn hộ?',
-          answer:
-              'Thành viên mới cần cài đặt app, đăng ký tài khoản với vai trò Cư dân, sau đó tại màn hình "Tài khoản của tôi" bấm "Xin liên kết căn hộ". Ban Quản Lý sẽ xác minh và phê duyệt trong vòng 24 giờ.',
-        ),
-      ],
+      ),
     );
   }
 
@@ -676,14 +698,9 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
   }
 
   Widget _buildFaqItem({required String question, required String answer}) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).cardColor,
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).dividerColor),
-      ),
+      padding: EdgeInsets.zero,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
