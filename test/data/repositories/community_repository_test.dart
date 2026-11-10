@@ -6,7 +6,7 @@ void main() {
     late CommunityRepository repository;
 
     setUp(() {
-      repository = CommunityRepository();
+      repository = CommunityRepository(null, true);
     });
 
     test('1. fetchPolls tra ve danh sach polls mau co options', () async {

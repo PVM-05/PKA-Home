@@ -7,13 +7,22 @@ import '../models/issue_sla_stats_model.dart';
 
 class MaterialRepository {
   final SupabaseClient? _client;
-  SupabaseClient get _supabase => _client ?? SupabaseConfig.client;
+  final bool _isMockMode;
+
+  SupabaseClient get _supabase {
+    final c = _client;
+    if (c != null) return c;
+    if (SupabaseConfig.isConfigured) {
+      return SupabaseConfig.client;
+    }
+    throw const AppException('Supabase chưa sẵn sàng');
+  }
 
   // In-memory cache phục vụ offline fallback và test runner
   final List<MaintenanceMaterialModel> _inMemoryMaterials = [];
   final List<IssueMaterialUsageModel> _inMemoryIssueMaterials = [];
 
-  MaterialRepository([this._client]) {
+  MaterialRepository([this._client, this._isMockMode = false]) {
     _initMockData();
   }
 
@@ -140,6 +149,13 @@ class MaterialRepository {
     String? buildingId,
     String? category,
   }) async {
+    if (_isMockMode) {
+      var list = List<MaintenanceMaterialModel>.from(_inMemoryMaterials);
+      if (category != null && category.isNotEmpty && category != 'all') {
+        list = list.where((m) => m.category == category).toList();
+      }
+      return list;
+    }
     return FailClosedGuard.guard(
       operation: 'fetchMaterials',
       call: () async {
@@ -174,6 +190,11 @@ class MaterialRepository {
   Future<List<IssueMaterialUsageModel>> fetchIssueMaterials(
     String issueId,
   ) async {
+    if (_isMockMode) {
+      return _inMemoryIssueMaterials
+          .where((im) => im.issueReportId == issueId)
+          .toList();
+    }
     return FailClosedGuard.guard(
       operation: 'fetchIssueMaterials',
       call: () async {
@@ -205,6 +226,43 @@ class MaterialRepository {
     required List<Map<String, dynamic>> materials,
     String? staffId,
   }) async {
+    if (_isMockMode) {
+      for (final item in materials) {
+        final matId = item['material_id'] as String;
+        final qty = (item['quantity'] as num?)?.toInt() ?? 1;
+        final isChargeable = item['is_chargeable'] as bool? ?? false;
+        final note = item['note'] as String?;
+
+        final matIndex = _inMemoryMaterials.indexWhere((m) => m.id == matId);
+        if (matIndex != -1) {
+          final mat = _inMemoryMaterials[matIndex];
+          final newStock = (mat.stockQuantity - qty).clamp(0, 999999);
+          _inMemoryMaterials[matIndex] = mat.copyWith(stockQuantity: newStock);
+
+          _inMemoryIssueMaterials.add(
+            IssueMaterialUsageModel(
+              id: 'usage-${DateTime.now().millisecondsSinceEpoch}-${_inMemoryIssueMaterials.length}',
+              issueReportId: issueId,
+              materialId: mat.id,
+              materialName: mat.name,
+              quantity: qty,
+              unit: mat.unit,
+              unitPrice: mat.unitPrice,
+              totalAmount: mat.unitPrice * qty,
+              isChargeable: isChargeable,
+              note: note,
+              createdAt: DateTime.now(),
+            ),
+          );
+        }
+      }
+
+      return {
+        'success': true,
+        'message': 'Đã xuất kho và ghi nhận vật tư thành công (Offline Mock)',
+        'items_recorded': materials.length,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'recordMaterialsUsage',
       call: () async {
@@ -263,6 +321,15 @@ class MaterialRepository {
 
   /// 4. Lấy thống kê KPI SLA sự cố
   Future<IssueSlaStatsModel> fetchSlaStats({String? buildingId}) async {
+    if (_isMockMode) {
+      return const IssueSlaStatsModel(
+        totalIssues: 12,
+        onTimeCount: 9,
+        warningCount: 2,
+        breachedCount: 1,
+        complianceRate: 91.7,
+      );
+    }
     return FailClosedGuard.guard(
       operation: 'fetchSlaStats',
       call: () async {
@@ -296,6 +363,15 @@ class MaterialRepository {
     required String materialId,
     required int newStock,
   }) async {
+    if (_isMockMode) {
+      final index = _inMemoryMaterials.indexWhere((m) => m.id == materialId);
+      if (index != -1) {
+        _inMemoryMaterials[index] = _inMemoryMaterials[index].copyWith(
+          stockQuantity: newStock,
+        );
+      }
+      return {'success': true, 'message': 'Đã cập nhật tồn kho (Mock)'};
+    }
     return FailClosedGuard.guard(
       operation: 'updateMaterialStock',
       call: () async {
@@ -324,6 +400,10 @@ class MaterialRepository {
   Future<MaintenanceMaterialModel> createMaterial(
     MaintenanceMaterialModel material,
   ) async {
+    if (_isMockMode) {
+      _inMemoryMaterials.add(material);
+      return material;
+    }
     return FailClosedGuard.guard(
       operation: 'createMaterial',
       call: () async {

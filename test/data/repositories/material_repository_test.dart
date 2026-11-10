@@ -6,7 +6,7 @@ void main() {
     late MaterialRepository repository;
 
     setUp(() {
-      repository = MaterialRepository();
+      repository = MaterialRepository(null, true);
     });
 
     test('1. fetchMaterials trả về danh sách vật tư mẫu khi offline', () async {

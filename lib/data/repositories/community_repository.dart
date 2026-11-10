@@ -7,8 +7,9 @@ import '../models/petition_model.dart';
 
 class CommunityRepository {
   final SupabaseClient? _client;
+  final bool _isMockMode;
 
-  CommunityRepository([this._client]);
+  CommunityRepository([this._client, this._isMockMode = false]);
 
   SupabaseClient? get _supabase {
     if (_client != null) return _client;
@@ -141,6 +142,19 @@ class CommunityRepository {
     String? status,
     String? apartmentId,
   }) async {
+    if (_isMockMode) {
+      var result = List<PollModel>.from(_mockPolls);
+      if (status != null && status.isNotEmpty) {
+        result = result.where((p) => p.status == status).toList();
+      }
+      if (apartmentId != null && apartmentId.isNotEmpty) {
+        result = result.map((p) {
+          final votedSet = _mockVotedApartments[p.id] ?? {};
+          return p.copyWith(hasVoted: votedSet.contains(apartmentId));
+        }).toList();
+      }
+      return result;
+    }
     return FailClosedGuard.guard(
       operation: 'fetchPolls',
       call: () async {
@@ -200,6 +214,43 @@ class CommunityRepository {
     required String createdBy,
     String? buildingId,
   }) async {
+    if (_isMockMode) {
+      final id = 'poll-${DateTime.now().millisecondsSinceEpoch}';
+      final code =
+          'POLL-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPolls.length + 1).toString().padLeft(5, '0')}';
+      final parsedOptions = options
+          .asMap()
+          .entries
+          .map(
+            (e) => PollOptionModel(
+              id: 'opt-$id-${e.key}',
+              pollId: id,
+              optionText: e.value,
+              optionOrder: e.key + 1,
+            ),
+          )
+          .toList();
+
+      final poll = PollModel(
+        id: id,
+        pollCode: code,
+        title: title,
+        description: description,
+        category: category,
+        voteWeightType: voteWeightType,
+        choiceType: choiceType,
+        minParticipationRate: minParticipationRate,
+        requiredApprovalRate: requiredApprovalRate,
+        startTime: startTime,
+        endTime: endTime,
+        status: 'active',
+        createdBy: createdBy,
+        createdAt: DateTime.now(),
+        options: parsedOptions,
+      );
+      _mockPolls.insert(0, poll);
+      return poll;
+    }
     return FailClosedGuard.guard(
       operation: 'createPoll',
       call: () async {
@@ -292,6 +343,25 @@ class CommunityRepository {
     String? voterUserId,
     required List<String> selectedOptionIds,
   }) async {
+    if (_isMockMode) {
+      final votedSet = _mockVotedApartments.putIfAbsent(
+        pollId,
+        () => <String>{},
+      );
+      if (votedSet.contains(apartmentId)) {
+        return {
+          'success': false,
+          'message': 'Căn hộ này đã tham gia biểu quyết rồi',
+        };
+      }
+      votedSet.add(apartmentId);
+
+      return {
+        'success': true,
+        'message': 'Gửi phiếu biểu quyết thành công (Mock)',
+        'vote_id': 'vote-${DateTime.now().millisecondsSinceEpoch}',
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'submitPollVote',
       call: () async {
@@ -334,6 +404,42 @@ class CommunityRepository {
   }
 
   Future<PollResultModel> getPollResults(String pollId) async {
+    if (_isMockMode) {
+      final poll = _mockPolls.firstWhere(
+        (p) => p.id == pollId,
+        orElse: () => _mockPolls.first,
+      );
+      final votedCount = (_mockVotedApartments[poll.id] ?? {}).length + 35;
+      const totalApts = 50;
+      final rate = (votedCount / totalApts) * 100;
+
+      final optResults = poll.options.asMap().entries.map((e) {
+        final cnt = e.key == 0 ? 25 : 10;
+        final pct = votedCount > 0 ? (cnt / votedCount) * 100 : 0.0;
+        return PollOptionResultModel(
+          optionId: e.value.id,
+          optionText: e.value.optionText,
+          voteCount: cnt,
+          voteWeightSum: cnt * 75.0,
+          percentOfVotes: double.parse(pct.toStringAsFixed(1)),
+        );
+      }).toList();
+
+      return PollResultModel(
+        pollId: poll.id,
+        pollCode: poll.pollCode,
+        title: poll.title,
+        status: poll.status,
+        voteWeightType: poll.voteWeightType,
+        totalApartments: totalApts,
+        votedApartments: votedCount,
+        totalArea: totalApts * 75.0,
+        votedArea: votedCount * 75.0,
+        participationRate: double.parse(rate.toStringAsFixed(1)),
+        isQuorumMet: rate >= poll.minParticipationRate,
+        options: optResults,
+      );
+    }
     return FailClosedGuard.guard(
       operation: 'getPollResults',
       call: () async {
@@ -390,6 +496,22 @@ class CommunityRepository {
     String? category,
     String? apartmentId,
   }) async {
+    if (_isMockMode) {
+      var result = List<PetitionModel>.from(_mockPetitions);
+      if (status != null && status.isNotEmpty) {
+        result = result.where((p) => p.status == status).toList();
+      }
+      if (category != null && category.isNotEmpty) {
+        result = result.where((p) => p.category == category).toList();
+      }
+      if (apartmentId != null && apartmentId.isNotEmpty) {
+        result = result.map((p) {
+          final endorsedSet = _mockEndorsedApartments[p.id] ?? {};
+          return p.copyWith(isEndorsedByMe: endorsedSet.contains(apartmentId));
+        }).toList();
+      }
+      return result;
+    }
     return FailClosedGuard.guard(
       operation: 'fetchPetitions',
       call: () async {
@@ -454,6 +576,28 @@ class CommunityRepository {
     String category = 'general',
     List<String> imageUrls = const [],
   }) async {
+    if (_isMockMode) {
+      final id = 'pet-${DateTime.now().millisecondsSinceEpoch}';
+      final code =
+          'PET-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPetitions.length + 1).toString().padLeft(5, '0')}';
+      final pet = PetitionModel(
+        id: id,
+        petitionCode: code,
+        apartmentId: apartmentId,
+        apartmentCode: 'A0110',
+        authorUserId: authorUserId,
+        authorName: 'Cư dân',
+        title: title,
+        content: content,
+        category: category,
+        imageUrls: imageUrls,
+        endorsementCount: 0,
+        status: 'pending',
+        createdAt: DateTime.now(),
+      );
+      _mockPetitions.insert(0, pet);
+      return pet;
+    }
     return FailClosedGuard.guard(
       operation: 'createPetition',
       call: () async {
@@ -504,6 +648,36 @@ class CommunityRepository {
     required String apartmentId,
     String? userId,
   }) async {
+    if (_isMockMode) {
+      final endorsedSet = _mockEndorsedApartments.putIfAbsent(
+        petitionId,
+        () => <String>{},
+      );
+      if (endorsedSet.contains(apartmentId)) {
+        return {
+          'success': false,
+          'message': 'Căn hộ của bạn đã bấm đồng thuận kiến nghị này rồi',
+        };
+      }
+      endorsedSet.add(apartmentId);
+
+      final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
+      if (idx != -1) {
+        final current = _mockPetitions[idx];
+        _mockPetitions[idx] = current.copyWith(
+          endorsementCount: current.endorsementCount + 1,
+          isEndorsedByMe: true,
+        );
+      }
+
+      return {
+        'success': true,
+        'message': 'Đã ghi nhận sự đồng thuận của bạn (Mock)',
+        'endorsement_count': idx != -1
+            ? _mockPetitions[idx].endorsementCount
+            : 1,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'endorsePetition',
       call: () async {
@@ -561,6 +735,25 @@ class CommunityRepository {
     required String officialResponse,
     required String staffId,
   }) async {
+    if (_isMockMode) {
+      final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
+      if (idx == -1) {
+        return {'success': false, 'message': 'Không tìm thấy kiến nghị'};
+      }
+
+      _mockPetitions[idx] = _mockPetitions[idx].copyWith(
+        status: status,
+        officialResponse: officialResponse,
+        respondedByStaffId: staffId,
+        respondedAt: DateTime.now(),
+      );
+
+      return {
+        'success': true,
+        'message': 'Cập nhật phản hồi chính thức thành công',
+        'status': status,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'updatePetitionResponse',
       call: () async {
