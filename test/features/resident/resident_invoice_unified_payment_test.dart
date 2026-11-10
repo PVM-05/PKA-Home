@@ -43,6 +43,7 @@ void main() {
       dueDate: DateTime(2026, 10, 15),
       totalAmount: 1480000.0,
       status: 'unpaid',
+      paymentCode: 'INV2610A0110001',
       createdAt: DateTime(2026, 10, 1),
       apartment: ApartmentModel(
         id: 'apt-01',

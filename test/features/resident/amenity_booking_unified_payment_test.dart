@@ -3,12 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pka_home/data/models/building_amenity_model.dart';
+import 'package:pka_home/data/models/building_model.dart';
 import 'package:pka_home/data/models/amenity_booking_model.dart';
 import 'package:pka_home/data/models/amenity_maintenance_model.dart';
 import 'package:pka_home/data/models/user_model.dart';
 import 'package:pka_home/data/repositories/amenity_booking_repository.dart';
 import 'package:pka_home/data/providers/amenity_booking_provider.dart';
 import 'package:pka_home/data/providers/auth_provider.dart';
+import 'package:pka_home/data/providers/building_provider.dart';
 import 'package:pka_home/data/providers/vehicle_provider.dart';
 import 'package:pka_home/data/services/payment_service.dart';
 import 'package:pka_home/data/providers/payment_provider.dart';
@@ -129,6 +131,30 @@ void main() {
           amenityBookingRepositoryProvider.overrideWithValue(FakeAmenityBookingRepo()),
           authProvider.overrideWith((ref) => MockAuthNotifier(mockUser)),
           residentApartmentIdProvider.overrideWith((ref) => 'apt-01'),
+          activeBuildingProvider.overrideWith((ref) => Future.value(
+            BuildingModel(
+              organizationId: 'org-01',
+              id: 'bld-01',
+              code: 'A',
+              name: 'Tòa Landmark A',
+              bankBin: '970418',
+              bankName: 'BIDV',
+              bankAccountNumber: '1234567890',
+              bankAccountName: 'BQL PKA LANDMARK',
+            ),
+          )),
+          residentBuildingProvider.overrideWith((ref) => Future.value(
+            BuildingModel(
+              organizationId: 'org-01',
+              id: 'bld-01',
+              code: 'A',
+              name: 'Tòa Landmark A',
+              bankBin: '970418',
+              bankName: 'BIDV',
+              bankAccountNumber: '1234567890',
+              bankAccountName: 'BQL PKA LANDMARK',
+            ),
+          )),
         ],
         child: MaterialApp(
           home: AmenityBookingScreen(amenity: amenity),

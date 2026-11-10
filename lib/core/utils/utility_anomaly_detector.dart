@@ -1,4 +1,5 @@
 import '../../data/models/meter_reading_submission_model.dart';
+export '../../data/models/meter_reading_submission_model.dart' show MeterType;
 
 enum AnomalySeverity { normal, info, warning, danger }
 

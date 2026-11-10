@@ -57,7 +57,7 @@ class FakeMeterReadingRepo implements MeterReadingRepository {
 }
 
 void main() {
-  testWidgets('ResidentMeterReadingScreen hiển thị nhãn Mô phỏng nhận diện và không lưu ảnh giả lập làm bằng chứng thật', (tester) async {
+  testWidgets('ResidentMeterReadingScreen yêu cầu ảnh thật và không còn nút mô phỏng nhận diện (Commercial B2B)', (tester) async {
     final fakeRepo = FakeMeterReadingRepo();
     final testUser = UserModel(
       id: 'user-res-1',
@@ -88,26 +88,18 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // 1. Kiểm tra nhãn nút rõ ràng là "Mô phỏng nhận diện" thay vì đánh lừa người dùng
+    // 1. Xác nhận không còn nút mô phỏng nhận diện giả lập (Demo)
     final scanButtons = find.widgetWithText(OutlinedButton, 'Mô phỏng nhận diện');
-    expect(scanButtons, findsNWidgets(2), reason: 'Phải có 2 nút mô phỏng nhận diện cho điện và nước');
+    expect(scanButtons, findsNothing, reason: 'Phải loại bỏ hoàn toàn mô phỏng nhận diện theo chuẩn B2B SaaS');
 
-    // 2. Bấm nút mô phỏng nhận diện điện
-    await tester.tap(scanButtons.first);
-    await tester.pump(); // Start simulation
-    expect(find.textContaining('Đang chạy thuật toán mô phỏng nhận diện'), findsOneWidget);
+    // 2. Kiểm tra có các nút chụp ảnh camera và thư viện cho điện & nước
+    expect(find.byIcon(Icons.camera_alt_outlined), findsNWidgets(2));
+    expect(find.byIcon(Icons.photo_library_outlined), findsNWidgets(2));
 
-    await tester.pump(const Duration(milliseconds: 1300));
-    await tester.pumpAndSettle();
-
-    // 3. Kiểm tra thông báo dữ liệu mô phỏng
-    expect(find.textContaining('Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế'), findsOneWidget);
-
-    // 4. Nhập kỳ và nộp chỉ số
+    // 3. Nhập số liệu và nộp chỉ số
     final textFields = find.byType(TextFormField);
-    // Nhập nước và kỳ
+    await tester.enterText(textFields.at(0), '125.0');
     await tester.enterText(textFields.at(1), '25.0');
-    await tester.enterText(textFields.at(2), '11/2026');
     await tester.pumpAndSettle();
 
     final submitBtn = find.widgetWithText(ElevatedButton, 'Gửi chỉ số cho Ban Quản Lý');
@@ -115,8 +107,7 @@ void main() {
     await tester.tap(submitBtn);
     await tester.pumpAndSettle();
 
-    // 5. Xác nhận không gửi URL ảnh mẫu giả lập
+    // 4. Xác nhận gửi thành công
     expect(fakeRepo.submitCalled, isTrue);
-    expect(fakeRepo.submittedElectricImageUrl, isNull, reason: 'Không được lưu ảnh mẫu giả lập làm bằng chứng thật');
   });
 }

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/meter_ocr_simulator.dart';
 import 'package:pka_home/core/utils/utility_anomaly_detector.dart';
 
 void main() {

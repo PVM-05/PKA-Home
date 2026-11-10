@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/meter_ocr_simulator.dart';
 import 'package:pka_home/core/utils/utility_meter_ocr_engine.dart';
 
 void main() {
