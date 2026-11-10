@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -94,9 +95,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: const BoxConstraints(maxWidth: 440),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -106,6 +107,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                       color: AppTheme.primary,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -116,100 +118,105 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       color: AppTheme.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
 
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TextField(
-                            controller: _fullNameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Họ và tên',
-                              prefixIcon: Icon(Icons.person_outline),
-                            ),
-                            textInputAction: TextInputAction.next,
+                  AppCard(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: _fullNameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Họ và tên',
+                            prefixIcon: Icon(Icons.person_outline),
                           ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            controller: _emailController,
-                            decoration: const InputDecoration(
-                              labelText: 'Thư điện tử',
-                              prefixIcon: Icon(Icons.email_outlined),
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
+                          textInputAction: TextInputAction.next,
+                        ),
+                        const SizedBox(height: 18),
+                        TextField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Thư điện tử',
+                            prefixIcon: Icon(Icons.email_outlined),
                           ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            controller: _passwordController,
-                            decoration: InputDecoration(
-                              labelText: 'Mật khẩu',
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword 
-                                    ? Icons.visibility_outlined 
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                        ),
+                        const SizedBox(height: 18),
+                        TextField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Mật khẩu',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
+                                color: AppTheme.textSecondary,
                               ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
                             ),
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.next,
                           ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            controller: _confirmPasswordController,
-                            decoration: InputDecoration(
-                              labelText: 'Xác nhận mật khẩu',
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureConfirmPassword 
-                                    ? Icons.visibility_outlined 
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.next,
+                        ),
+                        const SizedBox(height: 18),
+                        TextField(
+                          controller: _confirmPasswordController,
+                          decoration: InputDecoration(
+                            labelText: 'Xác nhận mật khẩu',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureConfirmPassword = !_obscureConfirmPassword;
-                                  });
-                                },
+                                color: AppTheme.textSecondary,
                               ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
+                                });
+                              },
                             ),
-                            obscureText: _obscureConfirmPassword,
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => _register(),
                           ),
-                          const SizedBox(height: 32),
-                          
-                          ElevatedButton(
-                            onPressed: _isLoading ? null : _register,
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text('Đăng ký'),
+                          obscureText: _obscureConfirmPassword,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _register(),
+                        ),
+                        const SizedBox(height: 28),
+
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : _register,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                        ],
-                      ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text('Đăng ký'),
+                                ),
+                        ),
+                      ],
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
+
+                  const SizedBox(height: 20),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();

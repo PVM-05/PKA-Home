@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -65,86 +66,111 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       appBar: AppBar(
         title: const Text('Đổi mật khẩu'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(
-                Icons.vpn_key_outlined,
-                size: 64,
-                color: AppTheme.primary,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Nhập mật khẩu mới của bạn. Mật khẩu phải chứa ít nhất 6 ký tự, bao gồm cả chữ cái và chữ số để đảm bảo an toàn.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Mật khẩu mới',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.vpn_key_outlined,
+                        size: 48,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Nhập mật khẩu mới của bạn. Mật khẩu phải chứa ít nhất 6 ký tự, bao gồm cả chữ cái và chữ số để đảm bảo an toàn.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                    ),
+                    const SizedBox(height: 24),
+                    AppCard(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              labelText: 'Mật khẩu mới',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Vui lòng nhập mật khẩu';
+                              }
+                              if (value.length < 6) {
+                                return 'Mật khẩu phải từ 6 ký tự trở lên';
+                              }
+                              if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
+                                return 'Mật khẩu phải bao gồm cả chữ cái và chữ số';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirm,
+                            decoration: InputDecoration(
+                              labelText: 'Xác nhận mật khẩu mới',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                icon: Icon(_obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                                onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Vui lòng xác nhận mật khẩu';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Mật khẩu xác nhận không khớp';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: _isLoading ? null : _submit,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  )
+                                : const FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text('Cập nhật mật khẩu', style: TextStyle(fontSize: 16)),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập mật khẩu';
-                  }
-                  if (value.length < 6) {
-                    return 'Mật khẩu phải từ 6 ký tự trở lên';
-                  }
-                  if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
-                    return 'Mật khẩu phải bao gồm cả chữ cái và chữ số';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: _obscureConfirm,
-                decoration: InputDecoration(
-                  labelText: 'Xác nhận mật khẩu mới',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                    onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng xác nhận mật khẩu';
-                  }
-                  if (value != _passwordController.text) {
-                    return 'Mật khẩu xác nhận không khớp';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Text('CẬP NHẬT MẬT KHẨU', style: TextStyle(fontSize: 16)),
-              ),
-            ],
+            ),
           ),
         ),
       ),
