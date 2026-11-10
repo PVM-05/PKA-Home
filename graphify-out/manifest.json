@@ -936,9 +936,9 @@
     "semantic_hash": ""
   },
   "lib/features/auth/screens/change_password_screen.dart": {
-    "mtime": 1793886329.7524607,
-    "seen": 1793891612.8332055,
-    "ast_hash": "004d118d5c6aeff60aff9d1135800d64",
+    "mtime": 1794309402.0661922,
+    "seen": 1794309728.7918773,
+    "ast_hash": "0db67e9e2dee6dd439578cc9a8e3c35e",
     "semantic_hash": ""
   },
   "lib/features/auth/screens/forgot_password_screen.dart": {
@@ -954,9 +954,9 @@
     "semantic_hash": ""
   },
   "lib/features/auth/screens/register_screen.dart": {
-    "mtime": 1793886329.7549815,
-    "seen": 1793891612.8332055,
-    "ast_hash": "c5fd08b2e46c2ece23a4baadf729c5b8",
+    "mtime": 1794309371.4643373,
+    "seen": 1794309728.7928724,
+    "ast_hash": "807c22b64fdda8af4482a4b414511892",
     "semantic_hash": ""
   },
   "lib/features/auth/screens/reset_password_screen.dart": {
@@ -996,8 +996,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/announcement_management_screen.dart": {
-    "mtime": 1794244144.733001,
-    "seen": 1794245184.0487602,
+    "mtime": 1794245338.1421862,
+    "seen": 1794309728.7954454,
     "ast_hash": "074e37b422425658944f08e6fe02ad57",
     "semantic_hash": ""
   },
@@ -1050,8 +1050,8 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/handbook_management_screen.dart": {
-    "mtime": 1794244803.4606516,
-    "seen": 1794245184.0508564,
+    "mtime": 1794245338.418005,
+    "seen": 1794309728.7974596,
     "ast_hash": "ec10ee967fcfa979eab6105afa31a09d",
     "semantic_hash": ""
   },
@@ -1068,9 +1068,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/link_request_management_screen.dart": {
-    "mtime": 1793887618.8982277,
-    "seen": 1793891612.8332055,
-    "ast_hash": "6c0d128a5f1ed3bc77b8e75324ba5303",
+    "mtime": 1794308344.6995542,
+    "seen": 1794309728.7974596,
+    "ast_hash": "152ee9384787af5f7d5d006252896165",
     "semantic_hash": ""
   },
   "lib/features/management/screens/maintenance_fund_ledger_screen.dart": {
@@ -1104,9 +1104,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/permission_matrix_screen.dart": {
-    "mtime": 1793887619.292125,
-    "seen": 1793891612.8332055,
-    "ast_hash": "c573655108d20e6f432004f3a83387cf",
+    "mtime": 1794308693.392298,
+    "seen": 1794309728.7995994,
+    "ast_hash": "ad3a1ead98211be8392e56266d1cc98a",
     "semantic_hash": ""
   },
   "lib/features/management/screens/resident_management_screen.dart": {
@@ -1116,9 +1116,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/role_delegation_screen.dart": {
-    "mtime": 1793888402.0906036,
-    "seen": 1793891612.8332055,
-    "ast_hash": "e87b2b5d9104d319ba2aea6751279778",
+    "mtime": 1794308732.3848825,
+    "seen": 1794309728.7995994,
+    "ast_hash": "937e34d72cb133621eddd027cc3d01e9",
     "semantic_hash": ""
   },
   "lib/features/management/screens/service_rating_overview_screen.dart": {
@@ -1224,9 +1224,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/link_request_screen.dart": {
-    "mtime": 1793888402.0917132,
-    "seen": 1793891612.8332055,
-    "ast_hash": "bff70c6e8a75a5ba11a9270e24cd6b5d",
+    "mtime": 1794308535.1735642,
+    "seen": 1794309728.8051329,
+    "ast_hash": "c71b19fa1d99be407095d92a289b9c03",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/notification_center_screen.dart": {
@@ -1242,14 +1242,14 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_announcement_detail_screen.dart": {
-    "mtime": 1794244537.5203228,
-    "seen": 1794245184.060823,
+    "mtime": 1794245338.6270494,
+    "seen": 1794309728.8051329,
     "ast_hash": "a29d02ccc01ade8a89b699fe83480607",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_handbook_screen.dart": {
-    "mtime": 1794244898.0653088,
-    "seen": 1794245184.060823,
+    "mtime": 1794245338.8372376,
+    "seen": 1794309728.8051329,
     "ast_hash": "c91be92ebf5c2cd265f767530d3a6801",
     "semantic_hash": ""
   },
@@ -1284,9 +1284,9 @@
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_profile_screen.dart": {
-    "mtime": 1793887617.6143153,
-    "seen": 1793891612.8332055,
-    "ast_hash": "23e22a95bcab875cab325eb0de82cee4",
+    "mtime": 1794308174.2329576,
+    "seen": 1794309728.807638,
+    "ast_hash": "2b3a335949e05b9eee16dc3cefe3ced2",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/vehicle_management_screen.dart": {
@@ -5322,9 +5322,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/maintenance_materials_screen.dart": {
-    "mtime": 1793887618.9868836,
-    "seen": 1793891612.8332055,
-    "ast_hash": "5b00b234669b3302cc1ad979e302428d",
+    "mtime": 1794309232.0311763,
+    "seen": 1794309728.7974596,
+    "ast_hash": "d34f03e5cf561777a6cfb505641500b8",
     "semantic_hash": ""
   },
   "lib/features/management/widgets/resolve_issue_materials_sheet.dart": {
@@ -7788,27 +7788,69 @@
     "semantic_hash": ""
   },
   "test/features/management/handbook_screens_responsive_test.dart": {
-    "mtime": 1794244904.8334596,
-    "seen": 1794245184.1469734,
+    "mtime": 1794245338.9674504,
+    "seen": 1794309728.8975332,
     "ast_hash": "1ed0d20afe8af12c10e57d99bf8cdf08",
     "semantic_hash": ""
   },
   "test/features/resident/resident_announcement_detail_responsive_test.dart": {
-    "mtime": 1794244401.4638016,
-    "seen": 1794245184.160037,
+    "mtime": 1794245339.25268,
+    "seen": 1794309728.9209561,
     "ast_hash": "dc2171da08688de5ae5eba1084916983",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-10-announcements-and-handbooks-impeccable-ui.md": {
-    "mtime": 1794243939.1328428,
-    "seen": 1794245184.2424638,
-    "ast_hash": "a620f85e98ef54d6ee2c6ab35cab3d3a",
+    "mtime": 1794245210.4530928,
+    "seen": 1794309729.039039,
+    "ast_hash": "a6512914182f0529d60bbb9d1210f007",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-10-announcements-and-handbooks-impeccable-ui-design.md": {
     "mtime": 1794243939.2854092,
     "seen": 1794245184.250527,
     "ast_hash": "e649b918577dd7de171b11e95fef4cec",
+    "semantic_hash": ""
+  },
+  "test/features/auth/register_and_password_responsive_test.dart": {
+    "mtime": 1794309282.8041542,
+    "seen": 1794309728.8864534,
+    "ast_hash": "2f465908da9b25cab29072d2189e5e45",
+    "semantic_hash": ""
+  },
+  "test/features/management/governance_screens_responsive_test.dart": {
+    "mtime": 1794308617.892041,
+    "seen": 1794309728.8975332,
+    "ast_hash": "9aa046015f93a48436b846048763e5f4",
+    "semantic_hash": ""
+  },
+  "test/features/management/link_request_responsive_test.dart": {
+    "mtime": 1794308541.9782286,
+    "seen": 1794309728.9015546,
+    "ast_hash": "55a87f5650ea8674d0b876a4d6aacdd5",
+    "semantic_hash": ""
+  },
+  "test/features/management/maintenance_materials_responsive_test.dart": {
+    "mtime": 1794309018.7735755,
+    "seen": 1794309728.9025614,
+    "ast_hash": "3abb1ba44a00ba15bfee2f67df01bbef",
+    "semantic_hash": ""
+  },
+  "test/features/resident/resident_profile_responsive_test.dart": {
+    "mtime": 1794308182.0192535,
+    "seen": 1794309728.92549,
+    "ast_hash": "912b616d6cf3ac190efb2a29e3cd0d50",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-10-governance-profile-and-security-impeccable-ui.md": {
+    "mtime": 1794307896.164156,
+    "seen": 1794309729.039039,
+    "ast_hash": "db1e1662c31251dc44c7a23ece128b87",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-10-governance-profile-and-security-impeccable-ui-design.md": {
+    "mtime": 1794307879.1459677,
+    "seen": 1794309729.0541105,
+    "ast_hash": "059785eaad7c7647ac021a1612e776c0",
     "semantic_hash": ""
   }
 }
