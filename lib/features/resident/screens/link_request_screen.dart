@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/link_request_provider.dart';
 import '../widgets/accept_invitation_dialog.dart';
@@ -85,9 +86,9 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: const BoxConstraints(maxWidth: 440),
               child: _buildContent(linkState),
             ),
           ),
@@ -237,74 +238,86 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
   }
 
   Widget _buildFormState() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Icon(
-              Icons.apartment_outlined,
-              size: 60,
-              color: AppTheme.primary,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Liên kết căn hộ của bạn',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            ref
-                .watch(availableApartmentsProvider)
-                .when(
-                  data: (apartments) {
-                    if (apartments.isEmpty) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Card(
-                            elevation: 0,
+    return AppCard(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(
+            Icons.apartment_outlined,
+            size: 60,
+            color: AppTheme.primary,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Liên kết căn hộ của bạn',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+          ref
+              .watch(availableApartmentsProvider)
+              .when(
+                data: (apartments) {
+                  if (apartments.isEmpty) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
                             color: AppTheme.warningBackground,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: AppTheme.radiusMd,
-                              side: const BorderSide(
-                                color: AppTheme.warningBorder,
-                              ),
+                            borderRadius: AppTheme.radiusMd,
+                            border: Border.all(
+                              color: AppTheme.warningBorder,
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(AppTheme.spacingMd),
-                              child: Row(
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.info_outline,
                                     color: AppTheme.warningText,
-                                    size: 28,
+                                    size: 20,
                                   ),
-                                  const SizedBox(width: 12),
-                                  const Expanded(
+                                  SizedBox(width: 8),
+                                  Expanded(
                                     child: Text(
-                                      'Chưa tải được danh mục căn hộ tự động. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
+                                      'Chưa tải được danh mục căn hộ tự động. Bạn có thể nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
                                       style: TextStyle(
                                         color: AppTheme.warningText,
                                         fontSize: 13,
                                       ),
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.refresh,
-                                      color: AppTheme.warningText,
-                                    ),
-                                    tooltip: 'Tải lại danh mục',
-                                    onPressed: () => ref.invalidate(
-                                      availableApartmentsProvider,
-                                    ),
-                                  ),
                                 ],
                               ),
-                            ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  icon: const Icon(
+                                    Icons.refresh,
+                                    color: AppTheme.warningText,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    'Tải lại danh mục',
+                                    style: TextStyle(
+                                      color: AppTheme.warningText,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  onPressed: () => ref.invalidate(
+                                    availableApartmentsProvider,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _codeController,
@@ -506,43 +519,57 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                   error: (err, st) => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Card(
-                        elevation: 0,
-                        color: AppTheme.error.withValues(alpha: 0.1),
-                        shape: RoundedRectangleBorder(
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.error.withValues(alpha: 0.1),
                           borderRadius: AppTheme.radiusMd,
-                          side: const BorderSide(color: AppTheme.error),
+                          border: Border.all(color: AppTheme.error),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppTheme.spacingMd),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                color: AppTheme.error,
-                                size: 28,
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text(
-                                  'Không thể tải danh mục căn hộ. Bạn có thể nhấn biểu tượng tải lại hoặc nhập trực tiếp mã căn hộ ở ô bên dưới.',
-                                  style: TextStyle(
-                                    color: AppTheme.error,
-                                    fontSize: 13,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: AppTheme.error,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Không thể tải danh mục căn hộ. Bạn có thể nhập trực tiếp mã căn hộ ở ô bên dưới.',
+                                    style: TextStyle(
+                                      color: AppTheme.error,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              IconButton(
+                              ],
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
                                 icon: const Icon(
                                   Icons.refresh,
                                   color: AppTheme.error,
+                                  size: 16,
                                 ),
-                                tooltip: 'Tải lại danh mục',
-                                onPressed: () =>
-                                    ref.invalidate(availableApartmentsProvider),
+                                label: const Text(
+                                  'Tải lại danh mục',
+                                  style: TextStyle(
+                                    color: AppTheme.error,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                onPressed: () => ref.invalidate(
+                                  availableApartmentsProvider,
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -562,6 +589,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                 ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: _relationRole,
               decoration: const InputDecoration(
                 labelText: 'Vai trò',
@@ -615,12 +643,14 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                 );
               },
               icon: const Icon(Icons.qr_code_scanner_rounded),
-              label: const Text('Gia nhập bằng mã mời (Tự phục vụ)'),
+              label: const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Gia nhập bằng mã mời'),
+              ),
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   @override

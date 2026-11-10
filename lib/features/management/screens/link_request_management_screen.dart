@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
@@ -31,111 +32,122 @@ class LinkRequestManagementScreen extends ConsumerWidget {
           emptyIcon: Icons.check_circle_outline,
           onRetry: () => ref.invalidate(linkRequestManagementProvider),
           dataBuilder: (requests) {
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: requests.length,
-              itemBuilder: (context, index) {
-                final req = requests[index];
-                final user = req['users'];
-                final apartment = req['apartments'];
-                final roleLabel = req['requested_relation_role'] == 'owner'
-                    ? 'Chủ hộ'
-                    : 'Khách thuê';
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: requests.length,
+                  itemBuilder: (context, index) {
+                    final req = requests[index];
+                    final user = req['users'];
+                    final apartment = req['apartments'];
+                    final roleLabel = req['requested_relation_role'] == 'owner'
+                        ? 'Chủ hộ'
+                        : 'Khách thuê';
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade200),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                user['full_name'] ?? 'Cư dân',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                roleLabel,
-                                style: const TextStyle(
-                                  color: AppTheme.primary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                    return AppCard(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  user['full_name'] ?? 'Cư dân',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.apartment_outlined,
-                              size: 16,
-                              color: AppTheme.textSecondary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Căn hộ: ${apartment['code']}',
-                              style: const TextStyle(
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    roleLabel,
+                                    style: const TextStyle(
+                                      color: AppTheme.primary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.apartment_outlined,
+                                size: 16,
                                 color: AppTheme.textSecondary,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Wrap(
-                          alignment: WrapAlignment.end,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          children: [
-                            TextButton.icon(
-                              icon: const Icon(
-                                Icons.close,
-                                color: AppTheme.error,
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Căn hộ: ${apartment['code']}',
+                                  style: const TextStyle(
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                              label: const Text(
-                                'Từ chối',
-                                style: TextStyle(color: AppTheme.error),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              TextButton.icon(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: AppTheme.error,
+                                ),
+                                label: const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Từ chối',
+                                    style: TextStyle(color: AppTheme.error),
+                                  ),
+                                ),
+                                onPressed: () =>
+                                    _handleReject(context, ref, req['id']),
                               ),
-                              onPressed: () =>
-                                  _handleReject(context, ref, req['id']),
-                            ),
-                            ElevatedButton.icon(
-                              icon: const Icon(Icons.check),
-                              label: const Text('Phê duyệt'),
-                              onPressed: () =>
-                                  _handleApprove(context, ref, req['id']),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                              ElevatedButton.icon(
+                                icon: const Icon(Icons.check),
+                                label: const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text('Phê duyệt'),
+                                ),
+                                onPressed: () =>
+                                    _handleApprove(context, ref, req['id']),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
             );
           },
         ),
