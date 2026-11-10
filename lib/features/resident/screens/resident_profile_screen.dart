@@ -119,10 +119,13 @@ class ResidentProfileScreen extends ConsumerWidget {
         data: (user) {
           if (user == null) return const Center(child: Text('Chưa đăng nhập'));
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
                 const SizedBox(height: 16),
                 AppAvatar(name: user.fullName, size: 92, fontSize: 34),
                 const SizedBox(height: 14),
@@ -173,13 +176,14 @@ class ResidentProfileScreen extends ConsumerWidget {
 
                 // Căn hộ của bạn
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Căn hộ của bạn',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Expanded(
+                      child: Text(
+                        'Căn hộ của bạn',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     TextButton.icon(
@@ -192,7 +196,10 @@ class ResidentProfileScreen extends ConsumerWidget {
                         }
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text('Xin liên kết'),
+                      label: const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('Xin liên kết'),
+                      ),
                     ),
                   ],
                 ),
@@ -435,7 +442,9 @@ class ResidentProfileScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          );
+          ),
+        ),
+      );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -610,12 +619,15 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                   color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  role,
-                  style: const TextStyle(
-                    color: AppTheme.primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    role,
+                    style: const TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -630,12 +642,16 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                 color: AppTheme.textSecondary,
               ),
               SizedBox(width: 6),
-              Text(
-                'Thành viên cùng căn hộ:',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textSecondary,
+              Expanded(
+                child: Text(
+                  'Thành viên cùng căn hộ:',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -676,24 +692,33 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            memberName,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                memberName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (memberPhone.isNotEmpty) ...[
+                                const SizedBox(height: 1),
+                                Text(
+                                  memberPhone,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        if (memberPhone.isNotEmpty) ...[
-                          Text(
-                            memberPhone,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
+                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -706,15 +731,18 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                                 : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(
-                            memberRole,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.grey.shade300
-                                  : Colors.grey.shade700,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              memberRole,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.grey.shade300
+                                    : Colors.grey.shade700,
+                              ),
                             ),
                           ),
                         ),
