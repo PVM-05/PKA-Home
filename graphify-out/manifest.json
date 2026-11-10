@@ -3186,9 +3186,9 @@
     "semantic_hash": ""
   },
   "docs/TESTING_AND_QA.md": {
-    "mtime": 1793205432.3520923,
-    "seen": 1793342452.1356795,
-    "ast_hash": "8c98b4615242891a96be0c52b72c7a8b",
+    "mtime": 1794327004.943043,
+    "seen": 1794327169.7950537,
+    "ast_hash": "077656b2fa6511c7c0fb04d99bb65ecf",
     "semantic_hash": ""
   },
   "docs/archive/capstone_project/SRS.md": {
@@ -7863,6 +7863,24 @@
     "mtime": 1794326643.411026,
     "seen": 1794326716.1511881,
     "ast_hash": "202cf1c03743e86a23f90abbd8ac2d81",
+    "semantic_hash": ""
+  },
+  "docs/DEPLOYMENT_PLAYBOOK.md": {
+    "mtime": 1794327128.9596097,
+    "seen": 1794327169.792994,
+    "ast_hash": "81b95f7ae15d7f1d2fdd796b3c93974c",
+    "semantic_hash": ""
+  },
+  "docs/PITCH_DECK_PROPOSAL.md": {
+    "mtime": 1794327129.078857,
+    "seen": 1794327169.792994,
+    "ast_hash": "b53e8e64cbdf21f79112e4091df0cb9c",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-10-commercial-docs-and-onboarding-playbook.md": {
+    "mtime": 1794327105.4795244,
+    "seen": 1794327169.865935,
+    "ast_hash": "c2dfc3c191867e32c84e5c4d1992a077",
     "semantic_hash": ""
   }
 }
