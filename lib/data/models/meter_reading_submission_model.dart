@@ -1,3 +1,5 @@
+enum MeterType { electric, water }
+
 class MeterReadingSubmissionModel {
   final String id;
   final String apartmentId;

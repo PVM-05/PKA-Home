@@ -1,4 +1,4 @@
-enum MeterType { electric, water }
+import '../../data/models/meter_reading_submission_model.dart';
 
 class MeterOcrResult {
   final double detectedReading;

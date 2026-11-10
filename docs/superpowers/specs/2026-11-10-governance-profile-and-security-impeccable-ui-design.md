@@ -58,3 +58,4 @@ PKA-Home là giải pháp B2B SaaS Quản lý Vận hành Chung cư & Bất đ�
   1. Màn hình hẹp 320dp x 600dp kèm Text Zoom 1.3x: Xác nhận không có ngoại lệ RenderFlex overflow.
   2. Màn hình máy tính lớn 1200dp x 800dp: Xác nhận các giới hạn `maxWidth` co giãn hài hòa.
 - Chạy `dart analyze lib test` đảm bảo 0 issues.
+

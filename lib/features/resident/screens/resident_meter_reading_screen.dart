@@ -1,5 +1,3 @@
-import '../../../core/utils/meter_ocr_simulator.dart';
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,14 +44,10 @@ class _ResidentMeterReadingScreenState
 
   late final TextEditingController _periodController;
 
-  bool _isScanningElectric = false;
-  bool _isScanningWater = false;
   bool _isSubmitting = false;
 
   String? _electricImagePath;
   String? _waterImagePath;
-  MeterOcrResult? _electricOcrResult;
-  MeterOcrResult? _waterOcrResult;
 
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
@@ -80,58 +74,6 @@ class _ResidentMeterReadingScreenState
     _waterController.dispose();
     _periodController.dispose();
     super.dispose();
-  }
-
-  Future<void> _scanMeter(MeterType type, double oldReading) async {
-    setState(() {
-      if (type == MeterType.electric) {
-        _isScanningElectric = true;
-      } else {
-        _isScanningWater = true;
-      }
-    });
-
-    try {
-      final simResult = await MeterOcrSimulator.simulateScan(
-        meterType: type,
-        currentReading: oldReading,
-        simulatedDelayMs: 1200,
-      );
-
-      final updatedResult = MeterOcrResult(
-        detectedReading: simResult.detectedReading,
-        meterType: type,
-        confidence: simResult.confidence,
-        unit: simResult.unit,
-        rawText: simResult.rawText,
-      );
-
-      if (mounted) {
-        setState(() {
-          if (type == MeterType.electric) {
-            _electricOcrResult = updatedResult;
-            _electricImagePath = null;
-            _electricController.text = simResult.detectedReading.toString();
-            _isScanningElectric = false;
-          } else {
-            _waterOcrResult = updatedResult;
-            _waterImagePath = null;
-            _waterController.text = simResult.detectedReading.toString();
-            _isScanningWater = false;
-          }
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          if (type == MeterType.electric) {
-            _isScanningElectric = false;
-          } else {
-            _isScanningWater = false;
-          }
-        });
-      }
-    }
   }
 
   Future<void> _pickMeterImage(MeterType type, ImageSource source) async {
@@ -456,15 +398,12 @@ class _ResidentMeterReadingScreenState
       return;
     }
 
-    if (_electricImagePath == null &&
-        _waterImagePath == null &&
-        _electricOcrResult == null &&
-        _waterOcrResult == null) {
+    if (_electricImagePath == null && _waterImagePath == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'Lưu ý: Bạn gửi chỉ số nhập tay mà không đính kèm ảnh. Ban Quản Lý có thể cần kiểm tra đối soát trực tiếp.',
+              'Lưu ý: Bạn gửi chỉ số nhập tay mà không đính kèm ảnh công tơ thật. Ban Quản Lý có thể yêu cầu đối soát trực tiếp.',
             ),
             duration: Duration(seconds: 2),
           ),
@@ -476,11 +415,7 @@ class _ResidentMeterReadingScreenState
 
     try {
       final double confidence =
-          (_electricOcrResult != null && _waterOcrResult != null)
-          ? ((_electricOcrResult!.confidence + _waterOcrResult!.confidence) / 2)
-          : (_electricOcrResult?.confidence ??
-                _waterOcrResult?.confidence ??
-                0.95);
+          (_electricImagePath != null || _waterImagePath != null) ? 1.0 : 0.85;
 
       await ref
           .read(meterReadingRepositoryProvider)
@@ -511,10 +446,6 @@ class _ResidentMeterReadingScreenState
           _electricController.clear();
 
           _waterController.clear();
-
-          _electricOcrResult = null;
-
-          _waterOcrResult = null;
 
           _electricImagePath = null;
 
@@ -963,18 +894,6 @@ class _ResidentMeterReadingScreenState
                   ),
                 ],
               ),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                ),
-                icon: const Icon(Icons.document_scanner_outlined, size: 14),
-                label: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('Mô phỏng nhận diện', style: TextStyle(fontSize: 12)),
-                ),
-                onPressed: _isScanningElectric ? null : () => _scanMeter(MeterType.electric, oldElec),
-              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1007,69 +926,6 @@ class _ResidentMeterReadingScreenState
               ),
             ],
           ),
-          if (_isScanningElectric) ...[
-            const SizedBox(height: 12),
-            const LinearProgressIndicator(),
-            const SizedBox(height: 6),
-            const Center(
-              child: Text(
-                'Đang chạy thuật toán mô phỏng nhận diện công tơ điện...',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ),
-          ],
-          if (_electricOcrResult != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: AppTheme.primary.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.auto_awesome,
-                    size: 16,
-                    color: AppTheme.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế (OCR: ${_electricOcrResult!.detectedReading} kWh)',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      size: 16,
-                      color: AppTheme.textSecondary,
-                    ),
-                    onPressed: () => setState(
-                      () => _electricOcrResult = null,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-            ),
-          ],
           if (_electricImagePath != null) ...[
             const SizedBox(height: 8),
             Container(
@@ -1182,18 +1038,6 @@ class _ResidentMeterReadingScreenState
                   ),
                 ],
               ),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                ),
-                icon: const Icon(Icons.document_scanner_outlined, size: 14),
-                label: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('Mô phỏng nhận diện', style: TextStyle(fontSize: 12)),
-                ),
-                onPressed: _isScanningWater ? null : () => _scanMeter(MeterType.water, oldWater),
-              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1226,69 +1070,6 @@ class _ResidentMeterReadingScreenState
               ),
             ],
           ),
-          if (_isScanningWater) ...[
-            const SizedBox(height: 12),
-            const LinearProgressIndicator(),
-            const SizedBox(height: 6),
-            const Center(
-              child: Text(
-                'Đang chạy thuật toán mô phỏng nhận diện công tơ nước...',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ),
-          ],
-          if (_waterOcrResult != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: AppTheme.primary.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.auto_awesome,
-                    size: 16,
-                    color: AppTheme.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      'Số liệu mô phỏng (Demo) • Vui lòng đối chiếu công tơ thực tế (OCR: ${_waterOcrResult!.detectedReading} m³)',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      size: 16,
-                      color: AppTheme.textSecondary,
-                    ),
-                    onPressed: () => setState(
-                      () => _waterOcrResult = null,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-            ),
-          ],
           if (_waterImagePath != null) ...[
             const SizedBox(height: 8),
             Container(

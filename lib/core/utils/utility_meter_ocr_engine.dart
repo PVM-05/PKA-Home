@@ -1,4 +1,4 @@
-import 'meter_ocr_simulator.dart';
+import '../../data/models/meter_reading_submission_model.dart';
 
 class MeterOcrParsedResult {
   final bool isValid;
