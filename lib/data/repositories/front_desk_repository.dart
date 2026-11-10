@@ -9,8 +9,9 @@ import '../models/front_desk_stats_model.dart';
 
 class FrontDeskRepository {
   final SupabaseClient? _client;
+  final bool _isMockMode;
 
-  FrontDeskRepository([this._client]);
+  FrontDeskRepository([this._client, this._isMockMode = false]);
 
   SupabaseClient? get _supabase {
     if (_client != null) return _client;
@@ -107,6 +108,16 @@ class FrontDeskRepository {
     String? status,
     String? apartmentId,
   }) async {
+    if (_isMockMode) {
+      var result = List<VisitorPassModel>.from(_mockPasses);
+      if (status != null && status.isNotEmpty) {
+        result = result.where((p) => p.status == status).toList();
+      }
+      if (apartmentId != null && apartmentId.isNotEmpty) {
+        result = result.where((p) => p.apartmentId == apartmentId).toList();
+      }
+      return result;
+    }
     return FailClosedGuard.guard(
       operation: 'fetchVisitorPasses',
       call: () async {
@@ -152,6 +163,38 @@ class FrontDeskRepository {
     String purpose = 'visit',
     String? note,
   }) async {
+    if (_isMockMode) {
+      final id = 'vp-${DateTime.now().millisecondsSinceEpoch}';
+      final code =
+          'VP-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPasses.length + 1).toString().padLeft(5, '0')}';
+      final effectiveDeparture = expectedDeparture ?? expectedArrival.add(const Duration(hours: 24));
+      final signedQr = VisitorPassTokenService.generateSignedQrPayload(
+        passCode: code,
+        issuedAt: DateTime.now(),
+        expiresAt: effectiveDeparture,
+      );
+      final pass = VisitorPassModel(
+        id: id,
+        passCode: code,
+        apartmentId: apartmentId,
+        apartmentCode: 'A0110',
+        hostUserId: hostUserId,
+        visitorName: visitorName,
+        visitorPhone: visitorPhone,
+        licensePlate: licensePlate,
+        vehicleType: vehicleType,
+        visitorCount: visitorCount,
+        expectedArrival: expectedArrival,
+        expectedDeparture: expectedDeparture,
+        purpose: purpose,
+        qrPayload: signedQr,
+        status: 'pending',
+        note: note,
+        createdAt: DateTime.now(),
+      );
+      _mockPasses.insert(0, pass);
+      return pass;
+    }
     return FailClosedGuard.guard(
       operation: 'createVisitorPass',
       call: () async {
@@ -217,6 +260,39 @@ class FrontDeskRepository {
     String? guardId,
     String? qrPayload,
   }) async {
+    if (_isMockMode) {
+      final idx = _mockPasses.indexWhere(
+        (p) => p.passCode.toUpperCase() == passCode.trim().toUpperCase(),
+      );
+      if (idx == -1) {
+        return {
+          'success': false,
+          'message': 'Không tìm thấy vé khách với mã đã quét.',
+        };
+      }
+      final target = _mockPasses[idx];
+      if (target.status == 'checked_in') {
+        return {
+          'success': false,
+          'message':
+              'Cảnh báo bảo mật: Vé khách này đã được check-in vào tòa nhà trước đó (Chống quét lặp lại).',
+        };
+      }
+
+      final updated = target.copyWith(
+        status: 'checked_in',
+        checkInAt: DateTime.now(),
+        checkInGuardId: guardId,
+      );
+      _mockPasses[idx] = updated;
+
+      return {
+        'success': true,
+        'message': 'Check-in thành công. Chào mừng khách viếng thăm!',
+        'pass_code': target.passCode,
+        'visitor_name': target.visitorName,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'checkInVisitor',
       call: () async {
@@ -277,6 +353,38 @@ class FrontDeskRepository {
     required String passCode,
     String? guardId,
   }) async {
+    if (_isMockMode) {
+      final idx = _mockPasses.indexWhere(
+        (p) => p.passCode.toUpperCase() == passCode.trim().toUpperCase(),
+      );
+      if (idx == -1) {
+        return {
+          'success': false,
+          'message': 'Không tìm thấy vé khách với mã đã quét.',
+        };
+      }
+      final target = _mockPasses[idx];
+      if (target.status == 'checked_out') {
+        return {
+          'success': false,
+          'message': 'Khách này đã check-out rời tòa nhà rồi.',
+        };
+      }
+
+      final updated = target.copyWith(
+        status: 'checked_out',
+        checkOutAt: DateTime.now(),
+        checkOutGuardId: guardId,
+      );
+      _mockPasses[idx] = updated;
+
+      return {
+        'success': true,
+        'message': 'Check-out hoàn tất. Khách đã rời khỏi tòa nhà.',
+        'pass_code': target.passCode,
+        'visitor_name': target.visitorName,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'checkOutVisitor',
       call: () async {
@@ -334,6 +442,16 @@ class FrontDeskRepository {
     String? status,
     String? apartmentId,
   }) async {
+    if (_isMockMode) {
+      var result = List<ParcelModel>.from(_mockParcels);
+      if (status != null && status.isNotEmpty) {
+        result = result.where((p) => p.status == status).toList();
+      }
+      if (apartmentId != null && apartmentId.isNotEmpty) {
+        result = result.where((p) => p.apartmentId == apartmentId).toList();
+      }
+      return result;
+    }
     return FailClosedGuard.guard(
       operation: 'fetchParcels',
       call: () async {
@@ -376,6 +494,32 @@ class FrontDeskRepository {
     String? imageUrl,
     required String staffId,
   }) async {
+    if (_isMockMode) {
+      final id = 'pcl-${DateTime.now().millisecondsSinceEpoch}';
+      final code =
+          'PCL-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockParcels.length + 1).toString().padLeft(5, '0')}';
+      final pin = (100000 + Random().nextInt(900000)).toString();
+
+      final parcel = ParcelModel(
+        id: id,
+        parcelCode: code,
+        apartmentId: apartmentId,
+        apartmentCode: 'A0110',
+        recipientName: recipientName,
+        carrier: carrier,
+        trackingNumber: trackingNumber,
+        description: description,
+        shelfLocation: shelfLocation,
+        imageUrl: imageUrl,
+        pickupPin: pin,
+        status: 'arrived',
+        arrivedAt: DateTime.now(),
+        receivedStaffId: staffId,
+        createdAt: DateTime.now(),
+      );
+      _mockParcels.insert(0, parcel);
+      return parcel;
+    }
     return FailClosedGuard.guard(
       operation: 'receiveParcel',
       call: () async {
@@ -433,6 +577,44 @@ class FrontDeskRepository {
     String? staffId,
     String collectedBy = 'Cư dân',
   }) async {
+    if (_isMockMode) {
+      final idx = _mockParcels.indexWhere((p) => p.id == parcelId);
+      if (idx == -1) {
+        return {
+          'success': false,
+          'message': 'Không tìm thấy kiện hàng yêu cầu.',
+        };
+      }
+      final target = _mockParcels[idx];
+      if (target.status == 'collected') {
+        return {
+          'success': false,
+          'message': 'Kiện hàng này đã được bàn giao trước đó.',
+        };
+      }
+
+      if (pickupPin.trim() != target.pickupPin) {
+        return {
+          'success': false,
+          'message': 'Mã PIN lấy hàng không chính xác!',
+        };
+      }
+
+      final updated = target.copyWith(
+        status: 'collected',
+        collectedAt: DateTime.now(),
+        handoverStaffId: staffId,
+        collectedBy: collectedBy,
+      );
+      _mockParcels[idx] = updated;
+
+      return {
+        'success': true,
+        'message': 'Bàn giao bưu kiện cho cư dân thành công.',
+        'parcel_code': target.parcelCode,
+        'tracking_number': target.trackingNumber,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'collectParcel',
       call: () async {
@@ -495,6 +677,27 @@ class FrontDeskRepository {
 
   // ─── 3. FRONT DESK STATS API ───
   Future<FrontDeskStatsModel> fetchFrontDeskStats({String? buildingId}) async {
+    if (_isMockMode) {
+      final pendingPcls = _mockParcels
+          .where((p) => p.status == 'arrived')
+          .length;
+      final overduePcls = _mockParcels
+          .where((p) => p.isOverdueStorage)
+          .length;
+      final expectedVsts = _mockPasses
+          .where((p) => p.status != 'cancelled')
+          .length;
+      final inVsts = _mockPasses
+          .where((p) => p.status == 'checked_in')
+          .length;
+
+      return FrontDeskStatsModel(
+        expectedVisitorsToday: expectedVsts,
+        visitorsInBuilding: inVsts,
+        pendingParcels: pendingPcls,
+        overdueParcels: overduePcls,
+      );
+    }
     return FailClosedGuard.guard(
       operation: 'fetchFrontDeskStats',
       call: () async {

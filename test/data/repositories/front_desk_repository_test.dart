@@ -6,7 +6,7 @@ void main() {
     late FrontDeskRepository repository;
 
     setUp(() {
-      repository = FrontDeskRepository(null); // Offline mode
+      repository = FrontDeskRepository(null, true); // Offline mode
     });
 
     test('1. fetchVisitorPasses tra ve danh sach mau', () async {

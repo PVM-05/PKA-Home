@@ -80,7 +80,7 @@ void main() {
     late ParkingRepository repo;
 
     setUp(() {
-      repo = ParkingRepository();
+      repo = ParkingRepository(null, true);
     });
 
     test('fetchSlots returns non-empty mock parking slots when offline or unconfigured', () async {

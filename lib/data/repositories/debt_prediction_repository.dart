@@ -1,3 +1,4 @@
+import '../../core/supabase_config.dart';
 import '../../core/utils/guard_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/debt_risk_score_model.dart';
@@ -7,13 +8,17 @@ import '../services/debt_prediction_engine.dart';
 
 class DebtPredictionRepository {
   final SupabaseClient? client;
+  final bool isMockMode;
 
-  DebtPredictionRepository({this.client});
+  DebtPredictionRepository({this.client, this.isMockMode = false});
 
   SupabaseClient get _supabase {
     final c = client;
     if (c != null) return c;
-    return Supabase.instance.client;
+    if (SupabaseConfig.isConfigured) {
+      return SupabaseConfig.client;
+    }
+    throw const AppException('Supabase chưa sẵn sàng');
   }
 
   /// Bộ nhớ tạm lưu các hành động đôn đốc khi chạy offline
@@ -85,6 +90,9 @@ class DebtPredictionRepository {
 
   /// Lấy toàn bộ radar rủi ro nợ xấu của tòa nhà
   Future<DebtRadarDataModel> getBuildingDebtRadar(String buildingId) async {
+    if (isMockMode) {
+      return _generateFallbackRadar(buildingId);
+    }
     return FailClosedGuard.guard(
       operation: 'getBuildingDebtRadar',
       call: () async {
@@ -109,6 +117,44 @@ class DebtPredictionRepository {
     required String buildingId,
     required String apartmentId,
   }) async {
+    if (isMockMode) {
+      final mock = _mockApartmentsSeed.firstWhere(
+        (m) => m['apartment_id'] == apartmentId,
+        orElse: () => {
+          'apartment_id': apartmentId,
+          'apartment_code': 'A0101',
+          'owner_name': 'Cư dân',
+          'owner_phone': '',
+          'unpaid_amount': 2000000.0,
+          'overdue_days': 15,
+          'monthly_fee_avg': 1500000.0,
+          'late_payment_count': 1,
+        },
+      );
+
+      final calc = DebtPredictionEngine.calculate(
+        unpaidAmount: (mock['unpaid_amount'] as num).toDouble(),
+        overdueDays: (mock['overdue_days'] as num).toInt(),
+        monthlyFeeAvg: (mock['monthly_fee_avg'] as num).toDouble(),
+        latePaymentCount: (mock['late_payment_count'] as num).toInt(),
+      );
+
+      return DebtRiskScoreModel(
+        apartmentId: apartmentId,
+        apartmentCode: mock['apartment_code']?.toString() ?? 'A0101',
+        buildingId: buildingId,
+        ownerName: mock['owner_name']?.toString() ?? 'Chưa đăng ký',
+        ownerPhone: mock['owner_phone']?.toString() ?? '',
+        riskScore: calc.riskScore,
+        riskLevel: calc.riskLevel,
+        overdueDays: (mock['overdue_days'] as num).toInt(),
+        unpaidAmount: (mock['unpaid_amount'] as num).toDouble(),
+        monthlyFeeAvg: (mock['monthly_fee_avg'] as num).toDouble(),
+        latePaymentCount: (mock['late_payment_count'] as num).toInt(),
+        recommendedTier: calc.recommendedTier,
+        riskFactors: calc.riskFactors,
+      );
+    }
     return FailClosedGuard.guard(
       operation: 'calculateApartmentDebtRisk',
       call: () async {
@@ -177,6 +223,23 @@ class DebtPredictionRepository {
     required String title,
     required String content,
   }) async {
+    if (isMockMode) {
+      final fallbackAction = DunningActionModel(
+        id: 'dunning-${DateTime.now().millisecondsSinceEpoch}',
+        apartmentId: apartmentId,
+        buildingId: buildingId,
+        tier: tier,
+        actionType: 'notification',
+        actionTitle: title,
+        actionContent: content,
+        status: 'sent',
+        performedBy: client?.auth.currentUser?.id,
+        createdAt: DateTime.now(),
+      );
+
+      _offlineDunningActions.add(fallbackAction);
+      return fallbackAction;
+    }
     return FailClosedGuard.guard(
       operation: 'executeDunningAction',
       call: () async {

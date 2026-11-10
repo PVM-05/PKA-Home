@@ -63,7 +63,7 @@ void main() {
     });
 
     test('createVisitorPass sinh mã QR đã ký chuẩn PKAPASS.v1 thay cho fake random', () async {
-      final repo = FrontDeskRepository(null);
+      final repo = FrontDeskRepository(null, true);
       final pass = await repo.createVisitorPass(
         apartmentId: 'apt-01',
         hostUserId: 'usr-host',
@@ -75,7 +75,7 @@ void main() {
     });
 
     test('checkInVisitor ngăn chặn quét lặp lại (replay attacks)', () async {
-      final repo = FrontDeskRepository(null);
+      final repo = FrontDeskRepository(null, true);
       final passes = await repo.fetchVisitorPasses();
       final pending = passes.firstWhere((p) => p.status == 'pending');
 

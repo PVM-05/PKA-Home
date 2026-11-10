@@ -96,7 +96,7 @@ void main() {
 
     setUp(() {
       mockClient = MockSupabaseClient();
-      repository = DebtPredictionRepository(client: mockClient);
+      repository = DebtPredictionRepository(client: mockClient, isMockMode: true);
     });
 
     test('Khi RPC gặp sự cố hoặc offline, getBuildingDebtRadar phải kích hoạt Fallback Engine', () async {

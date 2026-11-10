@@ -8,13 +8,22 @@ import '../models/visitor_parking_ticket_model.dart';
 
 class ParkingRepository {
   final SupabaseClient? _client;
-  SupabaseClient get _supabase => _client ?? SupabaseConfig.client;
+  final bool _isMockMode;
+
+  SupabaseClient get _supabase {
+    final c = _client;
+    if (c != null) return c;
+    if (SupabaseConfig.isConfigured) {
+      return SupabaseConfig.client;
+    }
+    throw const AppException('Supabase chưa sẵn sàng');
+  }
 
   // Bộ nhớ in-memory phục vụ offline-fallback và môi trường test
   final List<ParkingSlotModel> _inMemorySlots = [];
   final List<VisitorParkingTicketModel> _inMemoryTickets = [];
 
-  ParkingRepository([this._client]) {
+  ParkingRepository([this._client, this._isMockMode = false]) {
     _initMockData();
   }
 
@@ -103,6 +112,19 @@ class ParkingRepository {
     String? slotType,
     String? status,
   }) async {
+    if (_isMockMode) {
+      var filtered = List<ParkingSlotModel>.from(_inMemorySlots);
+      if (zone != null && zone.isNotEmpty && zone != 'all') {
+        filtered = filtered.where((s) => s.zone == zone).toList();
+      }
+      if (slotType != null && slotType.isNotEmpty && slotType != 'all') {
+        filtered = filtered.where((s) => s.slotType == slotType).toList();
+      }
+      if (status != null && status.isNotEmpty && status != 'all') {
+        filtered = filtered.where((s) => s.status == status).toList();
+      }
+      return filtered;
+    }
     return FailClosedGuard.guard(
       operation: 'fetchSlots',
       call: () async {
@@ -166,6 +188,26 @@ class ParkingRepository {
   Future<ParkingCapacityStatsModel> fetchCapacityStats({
     String? buildingId,
   }) async {
+    if (_isMockMode) {
+      final carSlots = _inMemorySlots.where((s) => s.isCar).toList();
+      final motoSlots = _inMemorySlots.where((s) => s.isMotorcycle).toList();
+      final activeVisitors = _inMemoryTickets
+          .where((t) => t.isInParking)
+          .length;
+
+      final carOccupied = carSlots.where((s) => s.isOccupied).length;
+      final motoOccupied = motoSlots.where((s) => s.isOccupied).length;
+
+      return ParkingCapacityStatsModel(
+        carTotal: carSlots.length,
+        carOccupied: carOccupied,
+        carAvailable: carSlots.length - carOccupied,
+        motoTotal: motoSlots.length,
+        motoOccupied: motoOccupied,
+        motoAvailable: motoSlots.length - motoOccupied,
+        visitorCount: activeVisitors,
+      );
+    }
     return FailClosedGuard.guard(
       operation: 'fetchCapacityStats',
       call: () async {
@@ -214,6 +256,19 @@ class ParkingRepository {
     String? licensePlate,
     String? apartmentCode,
   }) async {
+    if (_isMockMode) {
+      final index = _inMemorySlots.indexWhere((s) => s.id == slotId);
+      if (index != -1) {
+        _inMemorySlots[index] = _inMemorySlots[index].copyWith(
+          status: 'occupied',
+          assignedVehicleId: vehicleId,
+          assignedApartmentId: apartmentId,
+          licensePlate: licensePlate,
+          apartmentCode: apartmentCode,
+        );
+      }
+      return {'success': true, 'message': 'Đã gán ô đỗ thành công (Mock)'};
+    }
     return FailClosedGuard.guard(
       operation: 'assignSlot',
       call: () async {
@@ -267,6 +322,16 @@ class ParkingRepository {
 
   /// 4. Giải phóng ô đỗ
   Future<Map<String, dynamic>> releaseSlot(String slotId) async {
+    if (_isMockMode) {
+      final index = _inMemorySlots.indexWhere((s) => s.id == slotId);
+      if (index != -1) {
+        _inMemorySlots[index] = _inMemorySlots[index].copyWith(
+          status: 'available',
+          clearAssigned: true,
+        );
+      }
+      return {'success': true, 'message': 'Đã giải phóng ô đỗ (Mock)'};
+    }
     return FailClosedGuard.guard(
       operation: 'releaseSlot',
       call: () async {
@@ -333,6 +398,15 @@ class ParkingRepository {
       createdAt: now,
     );
 
+    if (_isMockMode) {
+      _inMemoryTickets.insert(0, ticket);
+      return {
+        'success': true,
+        'message': 'Đã check-in xe thành công (Mock)',
+        'ticket': ticket,
+      };
+    }
+
     return FailClosedGuard.guard(
       operation: 'createVisitorTicket',
       call: () async {
@@ -362,6 +436,9 @@ class ParkingRepository {
   Future<List<VisitorParkingTicketModel>> fetchActiveVisitorTickets({
     String? buildingId,
   }) async {
+    if (_isMockMode) {
+      return _inMemoryTickets.where((t) => t.isInParking).toList();
+    }
     return FailClosedGuard.guard(
       operation: 'fetchActiveVisitorTickets',
       call: () async {
@@ -389,6 +466,40 @@ class ParkingRepository {
 
   /// 7. Tính phí đỗ xe theo giờ
   Future<Map<String, dynamic>> calculateVisitorFee(String ticketId) async {
+    if (_isMockMode) {
+      final ticket = _inMemoryTickets.firstWhere(
+        (t) => t.id == ticketId,
+        orElse: () => _inMemoryTickets.first,
+      );
+
+      final diffMinutes = DateTime.now()
+          .difference(ticket.checkInAt)
+          .inMinutes;
+      final hours = (diffMinutes / 60.0).ceil();
+      final effectiveHours = hours < 1 ? 1 : hours;
+
+      double fee = 0;
+      if (ticket.isCar) {
+        fee = effectiveHours <= 2
+            ? 25000
+            : 25000 + ((effectiveHours - 2) * 15000);
+        if (effectiveHours >= 12) fee += 50000;
+      } else {
+        fee = effectiveHours <= 2
+            ? 5000
+            : 5000 + ((effectiveHours - 2) * 3000);
+        if (effectiveHours >= 12) fee += 15000;
+      }
+
+      return {
+        'success': true,
+        'ticket_id': ticket.id,
+        'ticket_code': ticket.ticketCode,
+        'license_plate': ticket.licensePlate,
+        'total_hours': effectiveHours,
+        'fee_amount': fee,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'calculateVisitorFee',
       call: () async {
@@ -443,6 +554,29 @@ class ParkingRepository {
     required String ticketId,
     String paymentMethod = 'vietqr',
   }) async {
+    if (_isMockMode) {
+      final index = _inMemoryTickets.indexWhere((t) => t.id == ticketId);
+      if (index != -1) {
+        final feeCalc = await calculateVisitorFee(ticketId);
+        final fee = (feeCalc['fee_amount'] as num?)?.toDouble() ?? 5000.0;
+        final hours = (feeCalc['total_hours'] as num?)?.toDouble() ?? 1.0;
+
+        _inMemoryTickets[index] = _inMemoryTickets[index].copyWith(
+          status: 'completed',
+          paymentStatus: 'paid',
+          paymentMethod: paymentMethod,
+          feeAmount: fee,
+          totalHours: hours,
+          checkOutAt: DateTime.now(),
+        );
+      }
+
+      return <String, dynamic>{
+        'success': true,
+        'message': 'Đã check-out và xác nhận thu tiền thành công (Mock)',
+        'payment_method': paymentMethod,
+      };
+    }
     return FailClosedGuard.guard(
       operation: 'checkoutVisitorTicket',
       call: () async {
