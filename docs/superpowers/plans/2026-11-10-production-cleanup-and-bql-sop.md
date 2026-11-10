@@ -17,11 +17,11 @@
 - Chỉnh sửa: `lib/features/resident/screens/resident_meter_reading_screen.dart`
 - Kiểm thử: `test/features/resident/resident_meter_reading_responsive_test.dart`
 
-- [ ] **Step 1:** Gỡ bỏ các nút bấm `OutlinedButton.icon` nhãn "Mô phỏng nhận diện" ở cả 2 phần điện và nước.
-- [ ] **Step 2:** Gỡ bỏ import `meter_ocr_simulator.dart` và hàm `_scanMeter`.
-- [ ] **Step 3:** Giữ lại các nút chụp ảnh camera và chọn ảnh thư viện (`_pickMeterImage`), chuẩn hóa nhãn tiếng Việt và tooltips.
-- [ ] **Step 4:** Chạy test kiểm tra giao diện không lỗi: `flutter test test/features/resident/resident_meter_reading_responsive_test.dart`.
-- [ ] **Step 5:** Commit thay đổi vào `main`: `fix(resident): go bo mo phong nhan dien bat buoc anh cong to that`.
+- [x] **Step 1:** Gỡ bỏ các nút bấm `OutlinedButton.icon` nhãn "Mô phỏng nhận diện" ở cả 2 phần điện và nước.
+- [x] **Step 2:** Gỡ bỏ import `meter_ocr_simulator.dart` và hàm `_scanMeter`.
+- [x] **Step 3:** Giữ lại các nút chụp ảnh camera và chọn ảnh thư viện (`_pickMeterImage`), chuẩn hóa nhãn tiếng Việt và tooltips.
+- [x] **Step 4:** Chạy test kiểm tra giao diện không lỗi: `flutter test test/features/resident/resident_meter_reading_responsive_test.dart`.
+- [x] **Step 5:** Commit thay đổi vào `main`: `fix(resident): go bo mo phong nhan dien bat buoc anh cong to that`.
 
 ---
 
@@ -30,9 +30,9 @@
 - Chỉnh sửa: `lib/data/models/invoice_model.dart`
 - Kiểm thử: `test/data/models/invoice_model_payment_code_test.dart`
 
-- [ ] **Step 1:** Khôi phục `String get effectivePaymentCode => paymentCode ?? '';` chặn client tự sinh mã thanh toán khi DB chưa cấp.
-- [ ] **Step 2:** Chạy test xác nhận: `flutter test test/data/models/invoice_model_payment_code_test.dart`.
-- [ ] **Step 3:** Commit thay đổi vào `main`: `fix(finance): khoi phuc fail-closed chan bia payment_code client`.
+- [x] **Step 1:** Khôi phục `String get effectivePaymentCode => paymentCode ?? '';` chặn client tự sinh mã thanh toán khi DB chưa cấp.
+- [x] **Step 2:** Chạy test xác nhận: `flutter test test/data/models/invoice_model_payment_code_test.dart`.
+- [x] **Step 3:** Commit thay đổi vào `main`: `fix(finance): khoi phuc fail-closed chan bia payment_code client`.
 
 ---
 
@@ -42,11 +42,11 @@
 - Chỉnh sửa: `lib/data/repositories/community_repository.dart`
 - Chỉnh sửa các tệp test tương ứng trong `test/data/repositories/`
 
-- [ ] **Step 1:** Thêm cờ `_isMockMode = false` vào constructor của `MaterialRepository`. Nếu `_isMockMode == true`, trực tiếp phục vụ bộ dữ liệu mẫu in-memory fallback mà không gọi Supabase client uninitialized.
-- [ ] **Step 2:** Cập nhật `test/data/repositories/material_repository_test.dart` để khởi tạo `MaterialRepository(null, true)`.
-- [ ] **Step 3:** Thêm cờ `_isMockMode = false` vào `CommunityRepository` và cập nhật `test/data/repositories/community_repository_test.dart`.
-- [ ] **Step 4:** Chạy kiểm thử xác nhận cả 2 repository test pass 100%.
-- [ ] **Step 5:** Commit thay đổi vào `main`: `fix(data): dong bo isMockMode explicit cho repository offline fallback tests`.
+- [x] **Step 1:** Thêm cờ `_isMockMode = false` vào constructor của `MaterialRepository`. Nếu `_isMockMode == true`, trực tiếp phục vụ bộ dữ liệu mẫu in-memory fallback mà không gọi Supabase client uninitialized.
+- [x] **Step 2:** Cập nhật `test/data/repositories/material_repository_test.dart` để khởi tạo `MaterialRepository(null, true)`.
+- [x] **Step 3:** Thêm cờ `_isMockMode = false` vào `CommunityRepository` và cập nhật `test/data/repositories/community_repository_test.dart`.
+- [x] **Step 4:** Chạy kiểm thử xác nhận cả 2 repository test pass 100%.
+- [x] **Step 5:** Commit thay đổi vào `main`: `fix(data): dong bo isMockMode explicit cho repository offline fallback tests`.
 
 ---
 
@@ -73,6 +73,8 @@
 ---
 
 ### Task 6: Kiểm Thử Toàn Diện, Static Analysis & Cập Nhật Tri Thức
-- Chạy `dart analyze lib test` (đảm bảo 0 issues).
-- Chạy `graphify update .`.
-- Cập nhật roadmap và plan hoàn thành.
+- [x] Chạy `dart analyze lib test` (đảm bảo 0 issues).
+- [x] Cập nhật các test UI resident & payment đồng bộ với fail-closed policy.
+- [x] Chạy `graphify update .`.
+- [x] Hoàn tất kế hoạch chuẩn hóa sản xuất thương mại B2B SaaS.
+

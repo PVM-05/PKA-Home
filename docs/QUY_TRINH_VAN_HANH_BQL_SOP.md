@@ -287,3 +287,4 @@ Nhằm bảo đảm tuân thủ nghiêm ngặt Luật Bảo vệ dữ liệu cá
 
 ---
 *Tài liệu này là tài sản bảo mật của Đơn Vị Vận Hành và Ban Quản Lý Tòa Nhà. Mọi sửa đổi, bổ sung quy trình phải được phê duyệt chính thức bằng văn bản của Trưởng Ban Quản Lý và Tổng Giám Đốc Công Ty Quản Lý Vận Hành.*
+
