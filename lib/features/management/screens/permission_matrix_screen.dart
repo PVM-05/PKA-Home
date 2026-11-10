@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_card.dart';
 
 class PermissionMatrixScreen extends StatelessWidget {
   const PermissionMatrixScreen({super.key});
@@ -21,11 +22,14 @@ class PermissionMatrixScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Banner giải thích kiến trúc
             Container(
               padding: const EdgeInsets.all(16),
@@ -92,12 +96,8 @@ class PermissionMatrixScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Card(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.grey.shade200),
-                      ),
+                    AppCard(
+                      padding: EdgeInsets.zero,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: SingleChildScrollView(
@@ -107,6 +107,8 @@ class PermissionMatrixScreen extends StatelessWidget {
                               Colors.grey.shade100,
                             ),
                             columnSpacing: 20,
+                            dataRowMinHeight: 48,
+                            dataRowMaxHeight: 80,
                             columns: const [
                               DataColumn(
                                 label: Text(
@@ -157,6 +159,7 @@ class PermissionMatrixScreen extends StatelessWidget {
                                             MainAxisAlignment.center,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             perm.name,
@@ -164,7 +167,10 @@ class PermissionMatrixScreen extends StatelessWidget {
                                               fontWeight: FontWeight.bold,
                                               fontSize: 13,
                                             ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
+                                          const SizedBox(height: 2),
                                           Text(
                                             perm.description,
                                             style: const TextStyle(
@@ -230,7 +236,9 @@ class PermissionMatrixScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildStatusIcon(bool allowed) {

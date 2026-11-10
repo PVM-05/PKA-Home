@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/role_delegation_model.dart';
@@ -387,162 +388,167 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
           emptyIcon: Icons.admin_panel_settings_outlined,
           onRetry: () => ref.invalidate(delegationsListProvider),
           dataBuilder: (delegations) {
-            return RefreshIndicator(
-              onRefresh: () async => ref.invalidate(delegationsListProvider),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: delegations.length,
-                itemBuilder: (context, index) {
-                  final item = delegations[index];
-                  final isActive = item.isActive;
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: RefreshIndicator(
+                  onRefresh: () async => ref.invalidate(delegationsListProvider),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: delegations.length,
+                    itemBuilder: (context, index) {
+                      final item = delegations[index];
+                      final isActive = item.isActive;
 
-                  Color statusColor = Colors.grey;
-                  String statusText = 'Đã kết thúc';
-                  if (isActive) {
-                    statusColor = AppTheme.success;
-                    statusText = 'Đang hiệu lực';
-                  } else if (item.isUpcoming) {
-                    statusColor = Colors.orange;
-                    statusText = 'Sắp diễn ra';
-                  }
+                      Color statusColor = Colors.grey;
+                      String statusText = 'Đã kết thúc';
+                      if (isActive) {
+                        statusColor = AppTheme.success;
+                        statusText = 'Đang hiệu lực';
+                      } else if (item.isUpcoming) {
+                        statusColor = Colors.orange;
+                        statusText = 'Sắp diễn ra';
+                      }
 
-                  final roleColor = item.delegatedRole == 'accountant'
-                      ? Colors.purple
-                      : Colors.orange;
+                      final roleColor = item.delegatedRole == 'accountant'
+                          ? Colors.purple
+                          : Colors.orange;
 
-                  return Card(
-                    elevation: 0,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: isActive
-                            ? statusColor.withValues(alpha: 0.5)
-                            : Colors.grey.shade300,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: roleColor.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      item.roleDisplayName,
-                                      style: TextStyle(
-                                        color: roleColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
+                      return AppCard(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              alignment: WrapAlignment.spaceBetween,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: statusColor.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: statusColor.withValues(
-                                          alpha: 0.4,
+                                      decoration: BoxDecoration(
+                                        color: roleColor.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          item.roleDisplayName,
+                                          style: TextStyle(
+                                            color: roleColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    child: Text(
-                                      statusText,
-                                      style: TextStyle(
-                                        color: statusColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: statusColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: statusColor.withValues(
+                                            alpha: 0.4,
+                                          ),
+                                        ),
+                                      ),
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          statusText,
+                                          style: TextStyle(
+                                            color: statusColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              if (isActive)
-                                TextButton(
-                                  onPressed: () => _confirmRevoke(item),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: AppTheme.error,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size(50, 30),
-                                  ),
-                                  child: const Text('Thu hồi'),
+                                  ],
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Người nhận: ${item.delegateName ?? "N/A"}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                                if (isActive)
+                                  TextButton(
+                                    onPressed: () => _confirmRevoke(item),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppTheme.error,
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: const Size(50, 30),
+                                    ),
+                                    child: const Text('Thu hồi'),
+                                  ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Người ủy quyền: ${item.delegatorName ?? "Quản trị viên"}',
-                            style: const TextStyle(
-                              color: AppTheme.textSecondary,
-                              fontSize: 13,
+                            const SizedBox(height: 12),
+                            Text(
+                              'Người nhận: ${item.delegateName ?? "N/A"}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.access_time,
-                                size: 16,
+                            const SizedBox(height: 4),
+                            Text(
+                              'Người ủy quyền: ${item.delegatorName ?? "Quản trị viên"}',
+                              style: const TextStyle(
                                 color: AppTheme.textSecondary,
+                                fontSize: 13,
                               ),
-                              const SizedBox(width: 6),
-                              Expanded(
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.access_time,
+                                  size: 16,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    '${_dateFormat.format(item.startsAt)} -> ${_dateFormat.format(item.endsAt)}',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (item.note != null && item.note!.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
                                 child: Text(
-                                  '${_dateFormat.format(item.startsAt)} -> ${_dateFormat.format(item.endsAt)}',
-                                  style: const TextStyle(fontSize: 13),
+                                  'Lý do: ${item.note}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
                                 ),
                               ),
                             ],
-                          ),
-                          if (item.note != null && item.note!.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade50,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'Lý do: ${item.note}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ),
                           ],
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             );
           },
