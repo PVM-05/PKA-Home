@@ -113,3 +113,4 @@ THỜI GIAN HOÀN VỐN ĐẦU TƯ: 1.8 Tháng
 - **Đường dây nóng tư vấn B2B:** 1900 xxxx (Nhánh 1 - Bộ phận Doanh Nghiệp)
 - **Thư điện tử:** enterprise@pkahome.vn
 - **Cổng thông tin giải pháp:** https://pkahome.vn
+

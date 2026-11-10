@@ -133,3 +133,4 @@ Trong 30 ngày đầu sau ngày Go-Live, khách hàng được hưởng chế đ
 - **Đường dây nóng kỹ thuật:** Phản hồi sự cố vận hành trong vòng 15 phút (24/7).
 - **Hỗ trợ On-site:** Có chuyên viên thường trực tại văn phòng Ban Quản Lý trong các ngày cao điểm thu phí (từ ngày 01 đến ngày 05 hàng tháng).
 - **Báo cáo định kỳ:** Cung cấp báo cáo phân tích hiệu suất thu phí, tỷ lệ cư dân sử dụng app và thời gian xử lý sự cố hàng tuần cho Chủ đầu tư / Ban Quản Trị.
+
