@@ -137,12 +137,6 @@
     "ast_hash": "93e565ef7217b41b3a77662d9c0328b1",
     "semantic_hash": ""
   },
-  "android/app/google-services.json": {
-    "mtime": 1791117040.468058,
-    "seen": 1793342452.1356795,
-    "ast_hash": "664d06349a0bfeb9058460b3f097eb1e",
-    "semantic_hash": ""
-  },
   "android/app/src/main/kotlin/com/example/pka_home/MainActivity.kt": {
     "mtime": 1787724337.9098015,
     "seen": 1793342452.1356795,
@@ -3186,8 +3180,8 @@
     "semantic_hash": ""
   },
   "docs/TESTING_AND_QA.md": {
-    "mtime": 1794327004.943043,
-    "seen": 1794327169.7950537,
+    "mtime": 1794327241.3096576,
+    "seen": 1794407409.4999716,
     "ast_hash": "077656b2fa6511c7c0fb04d99bb65ecf",
     "semantic_hash": ""
   },
@@ -7878,9 +7872,15 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-10-commercial-docs-and-onboarding-playbook.md": {
-    "mtime": 1794327105.4795244,
-    "seen": 1794327169.865935,
+    "mtime": 1794327241.3946052,
+    "seen": 1794407409.5624607,
     "ast_hash": "c2dfc3c191867e32c84e5c4d1992a077",
+    "semantic_hash": ""
+  },
+  "android/app/google-services.example.json": {
+    "mtime": 1794407057.1577246,
+    "seen": 1794407409.0946891,
+    "ast_hash": "f0fef11d6528dd0f1f7268f331da39f0",
     "semantic_hash": ""
   }
 }
