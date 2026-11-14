@@ -32,7 +32,7 @@ serve(async (req: Request) => {
       apiKey = authHeader.substring(7).trim();
     } else if (authHeader.startsWith("Bearer ")) {
       apiKey = authHeader.substring(7).trim();
-    } else if (authHeader.isNotEmpty) {
+    } else if (authHeader.length > 0) {
       apiKey = authHeader.trim();
     }
 

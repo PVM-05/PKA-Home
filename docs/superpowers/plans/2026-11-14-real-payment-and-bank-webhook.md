@@ -32,9 +32,9 @@
 - Chỉnh sửa: `supabase/functions/sepay-webhook/index.ts`
 - Tạo mới: `supabase/functions/vnpay-ipn/index.ts`
 
-- [ ] **Step 1:** Chuẩn hóa `sepay-webhook/index.ts`: Bắt buộc kiểm tra API Key từ Header `Authorization` / `x-sepay-key`, gọi RPC bằng `SUPABASE_SERVICE_ROLE_KEY`.
-- [ ] **Step 2:** Tạo `vnpay-ipn/index.ts`: Tiếp nhận IPN từ VNPay, sắp xếp query params, xác thực chữ ký HMAC-SHA512 `vnp_SecureHash`, gọi RPC gạch nợ an toàn bằng `service_role`.
-- [ ] **Step 3:** Commit vào `main`: `feat(functions): hoan thien edge function sepay webhook va vnpay ipn`.
+- [x] **Step 1:** Chuẩn hóa `sepay-webhook/index.ts`: Bắt buộc kiểm tra API Key từ Header `Authorization` / `x-sepay-key`, gọi RPC bằng `SUPABASE_SERVICE_ROLE_KEY`.
+- [x] **Step 2:** Tạo `vnpay-ipn/index.ts`: Tiếp nhận IPN từ VNPay, sắp xếp query params, xác thực chữ ký HMAC-SHA512 `vnp_SecureHash`, gọi RPC gạch nợ an toàn bằng `service_role`.
+- [x] **Step 3:** Commit vào `main`: `feat(functions): hoan thien edge function sepay webhook va vnpay ipn`.
 
 ---
 
