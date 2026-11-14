@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_card.dart';
 import '../widgets/stat_card.dart';
 import '../../../data/models/user_model.dart';
@@ -1330,7 +1332,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => AppSkeletonShimmer.cardList(
+            count: 2,
+            itemHeight: 56,
+            borderRadius: BorderRadius.circular(12),
+          ),
           error: (e, _) => const Text(
             'Lỗi tải dữ liệu',
             style: TextStyle(color: AppTheme.error),
@@ -1716,9 +1722,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ),
         );
       },
-      loading: () => const AppCard(
-        padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
+      loading: () => AppSkeletonShimmer.cardList(
+        count: 3,
+        itemHeight: 64,
+        borderRadius: BorderRadius.circular(12),
       ),
       error: (_, _) => const SizedBox.shrink(),
     );
@@ -1921,7 +1928,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => AppSkeletonShimmer.rectangular(
+        width: double.infinity,
+        height: 140,
+        borderRadius: BorderRadius.circular(16),
+      ),
       error: (e, _) => const SizedBox.shrink(),
     );
   }
