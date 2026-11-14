@@ -58,13 +58,13 @@
 - Chỉnh sửa: `lib/core/widgets/unified_payment_sheet.dart`
 - Kiểm thử: `test/core/widgets/unified_payment_sheet_vnpay_test.dart`
 
-- [ ] **Step 1:** Bổ sung phương thức `createVnpayPaymentUrl` trong `PaymentService`.
-- [ ] **Step 2:** Cập nhật `UnifiedPaymentSheet`:
+- [x] **Step 1:** Bổ sung phương thức `createVnpayPaymentUrl` trong `PaymentService`.
+- [x] **Step 2:** Cập nhật `UnifiedPaymentSheet`:
   - Thêm phương thức thanh toán `'vnpay'` bên cạnh `'bank_transfer'` và `'cash'`.
   - Hiển thị nút "MỞ CỔNG VNPAY" dẫn tới URL thanh toán nếu tòa nhà đã kích hoạt VNPay.
-- [ ] **Step 3:** Viết test `unified_payment_sheet_vnpay_test.dart` kiểm tra chuyển đổi phương thức VNPay và hiển thị nút thanh toán hợp lệ.
-- [ ] **Step 4:** Chạy test: `flutter test test/core/widgets/unified_payment_sheet_vnpay_test.dart`.
-- [ ] **Step 5:** Commit vào `main`: `feat(ui): tich hop cong thanh toan vnpay vao unified payment sheet`.
+- [x] **Step 3:** Viết test `unified_payment_sheet_vnpay_test.dart` kiểm tra chuyển đổi phương thức VNPay và hiển thị nút thanh toán hợp lệ.
+- [x] **Step 4:** Chạy test: `flutter test test/core/widgets/unified_payment_sheet_vnpay_test.dart`.
+- [x] **Step 5:** Commit vào `main`: `feat(ui): tich hop cong thanh toan vnpay vao unified payment sheet`.
 
 ---
 

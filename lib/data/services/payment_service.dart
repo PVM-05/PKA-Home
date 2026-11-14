@@ -1,4 +1,5 @@
 import '../../core/supabase_config.dart';
+import '../../core/services/vnpay_service.dart';
 import '../models/building_payment_config_model.dart';
 import '../models/sepay_webhook_payload_model.dart';
 
@@ -185,6 +186,38 @@ class PaymentService {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Tạo URL thanh toán VNPay trực tuyến dựa trên cấu hình tòa nhà
+  Future<String?> createVnpayPaymentUrl({
+    required String buildingId,
+    required double amount,
+    required String txnRef,
+    required String orderInfo,
+    required String returnUrl,
+    String? bankCode,
+    bool isSandbox = true,
+  }) async {
+    final config = await fetchBuildingPaymentConfig(buildingId);
+    if (config == null ||
+        !config.vnpayIsActive ||
+        config.vnpayTmnCode == null ||
+        config.vnpayTmnCode!.isEmpty ||
+        config.vnpayHashSecret == null ||
+        config.vnpayHashSecret!.isEmpty) {
+      return null;
+    }
+
+    return VnpayService.createPaymentUrl(
+      tmnCode: config.vnpayTmnCode!,
+      hashSecret: config.vnpayHashSecret!,
+      amount: amount,
+      txnRef: txnRef,
+      orderInfo: orderInfo,
+      returnUrl: returnUrl,
+      bankCode: bankCode,
+      isSandbox: isSandbox,
+    );
   }
 
   /// Xử lý Webhook biến động số dư ngân hàng chung
