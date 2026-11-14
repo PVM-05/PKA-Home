@@ -114,13 +114,14 @@ Gửi file Excel mẫu có 6 sheet sau cho chủ trọ/đơn vị quản lý đi
 
 ## 4. Danh Sách Kiểm Tra Khi Nghiệm Thu (UAT Checklist)
 
-- [ ] **Tạo và sửa phòng trọ:** Admin nhập được mã phòng tự do như `P101`, `101`, `Phòng 3` thành công.
-- [ ] **Lập hóa đơn tiền phòng:**
+- [x] **Tạo và sửa phòng trọ:** Admin nhập được mã phòng tự do như `P101`, `101`, `Phòng 3` thành công.
+- [x] **Lập hóa đơn tiền phòng:**
   - Chọn phòng có tiền thuê cài đặt sẵn -> Hệ thống tự động kích hoạt chế độ "Tiền thuê phòng cố định".
   - Hóa đơn lưu đúng loại phí `"Tiền thuê phòng"`, số lượng 1 phòng.
-- [ ] **Ẩn module không liên quan:** Màn hình chính của cơ sở phòng trọ không hiển thị thẻ Quỹ bảo trì 2%.
-- [ ] **Thông báo hướng đích:** Admin gửi thông báo đến đích danh phòng `P101` hoặc `101` không bị báo lỗi định dạng.
-- [ ] **Biên lai thu tiền điện tử:** Chia sẻ biên lai hiển thị đúng mã phòng của khách thuê, không có fallback lỗi.
+- [x] **Ẩn module không liên quan:** Màn hình chính của cơ sở phòng trọ không hiển thị thẻ Quỹ bảo trì 2%.
+- [x] **Thông báo hướng đích:** Admin gửi thông báo đến đích danh phòng `P101` hoặc `101` không bị báo lỗi định dạng.
+- [x] **Biên lai thu tiền điện tử:** Chia sẻ biên lai hiển thị đúng mã phòng của khách thuê, không có fallback lỗi.
+- [x] **Fail-Closed An Toàn:** Dọn sạch toàn bộ mock dữ liệu trong các repository, đảm bảo tính chuẩn xác và bảo mật khi mất kết nối mạng.
 
 ---
 
