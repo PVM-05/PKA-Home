@@ -135,3 +135,4 @@ graph TD
    - Kiểm tra render an toàn trên kích thước hẹp 320dp và kích thước rộng 1200dp.
    - Kiểm tra Text scale $1.3\times$ không gây lỗi RenderFlex.
 4. **Phân tích tĩnh**: `dart analyze lib test` đạt 0 issues.
+
