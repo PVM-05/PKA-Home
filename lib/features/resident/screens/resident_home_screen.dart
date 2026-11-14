@@ -9,6 +9,8 @@ import '../widgets/sticky_emergency_bar.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_card.dart';
@@ -778,7 +780,11 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             .fade(duration: 400.ms, delay: 100.ms)
             .slideX(begin: 0.1, curve: Curves.easeOut);
           },
-          loading: () => const InvoiceCardSkeleton(),
+          loading: () => AppSkeletonShimmer.rectangular(
+            width: double.infinity,
+            height: 160,
+            borderRadius: BorderRadius.circular(20),
+          ),
           error: (err, st) => AppErrorCard(
             error: err,
             onRetry: () => ref.invalidate(residentInvoiceProvider),
@@ -1024,11 +1030,44 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         issueAsync.when(
           data: (issues) {
             if (issues.isEmpty) {
-              return const AppCard(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Không có phản ánh nào gần đây.',
-                  style: TextStyle(color: AppTheme.textSecondary),
+              return AppCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.success.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_circle_outline,
+                        color: AppTheme.success,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Căn hộ hoạt động ổn định',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Không có phản ánh nào gần đây.',
+                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => _onItemTapped(2),
+                      child: const Text('Báo mới'),
+                    ),
+                  ],
                 ),
               );
             }
@@ -1084,7 +1123,11 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             .fade(duration: 400.ms, delay: 200.ms)
             .slideX(begin: 0.1, curve: Curves.easeOut);
           },
-          loading: () => const ListItemSkeleton(),
+          loading: () => AppSkeletonShimmer.cardList(
+            count: 1,
+            itemHeight: 68,
+            borderRadius: BorderRadius.circular(16),
+          ),
           error: (err, st) => AppErrorCard(
             error: err,
             onRetry: () => ref.invalidate(residentIssueProvider),
@@ -1130,7 +1173,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
         announcementsAsync.when(
           data: (announcements) {
             if (announcements.isEmpty) {
-              return const Padding(
+              return const AppCard(
                 padding: EdgeInsets.all(16.0),
                 child: Center(
                   child: Text(
@@ -1158,8 +1201,10 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               }).toList(),
             );
           },
-          loading: () => Column(
-            children: const [ListItemSkeleton(), ListItemSkeleton()],
+          loading: () => AppSkeletonShimmer.cardList(
+            count: 2,
+            itemHeight: 74,
+            borderRadius: BorderRadius.circular(16),
           ),
           error: (error, stack) => AppErrorCard(
             error: error,
