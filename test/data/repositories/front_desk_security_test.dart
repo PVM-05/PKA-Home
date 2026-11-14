@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pka_home/core/security/visitor_pass_token_service.dart';
 import 'package:pka_home/data/contracts/community_rpc_contracts.dart';
 import 'package:pka_home/data/contracts/operations_rpc_contracts.dart';
-import 'package:pka_home/data/repositories/front_desk_repository.dart';
 
 void main() {
   group('Security Contracts & Replay Protection Tests (P0/P1)', () {
@@ -62,31 +62,23 @@ void main() {
       expect(params.containsKey('p_user_id'), isFalse);
     });
 
-    test('createVisitorPass sinh mã QR đã ký chuẩn PKAPASS.v1 thay cho fake random', () async {
-      final repo = FrontDeskRepository(null, true);
-      final pass = await repo.createVisitorPass(
-        apartmentId: 'apt-01',
-        hostUserId: 'usr-host',
-        visitorName: 'Nguyễn Văn An',
-        expectedArrival: DateTime.now().add(const Duration(hours: 1)),
+    test('VisitorPassTokenService sinh mã QR đã ký chuẩn PKAPASS.v1 thay cho fake random', () {
+      final qrPayload = VisitorPassTokenService.generateSignedQrPayload(
+        passCode: 'VP-202611-00001',
+        issuedAt: DateTime.now(),
+        expiresAt: DateTime.now().add(const Duration(hours: 24)),
       );
 
-      expect(pass.qrPayload.startsWith('PKAPASS.v1.'), isTrue);
+      expect(qrPayload.startsWith('PKAPASS.v1.'), isTrue);
+      expect(VisitorPassTokenService.verifyAndParseQrPayload(qrPayload).isValid, isTrue);
     });
 
-    test('checkInVisitor ngăn chặn quét lặp lại (replay attacks)', () async {
-      final repo = FrontDeskRepository(null, true);
-      final passes = await repo.fetchVisitorPasses();
-      final pending = passes.firstWhere((p) => p.status == 'pending');
-
-      // Lần 1: Check-in thành công
-      final firstCheck = await repo.checkInVisitor(passCode: pending.passCode);
-      expect(firstCheck['success'], isTrue);
-
-      // Lần 2: Quét lại cùng mã -> Bị từ chối
-      final replayCheck = await repo.checkInVisitor(passCode: pending.passCode);
-      expect(replayCheck['success'], isFalse);
-      expect(replayCheck['message'], contains('trước đó'));
+    test('VisitorPassCheckInRequestDto mang thông tin mã vé chống replay attack', () {
+      const dto = VisitorPassCheckInRequestDto(
+        passCode: 'VP-202611-00001',
+      );
+      final params = dto.toRpcParams();
+      expect(params['p_pass_code'], 'VP-202611-00001');
     });
   });
 }

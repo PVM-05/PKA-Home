@@ -1,13 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/models/visitor_parking_ticket_model.dart';
 import 'package:pka_home/data/repositories/parking_repository.dart';
+import '../helpers/test_workflow_fakes.dart';
 
 void main() {
   group('Parking Workflow Integration Test D2', () {
     late ParkingRepository repository;
 
     setUp(() {
-      repository = ParkingRepository(null, true);
+      repository = FakeParkingWorkflowRepository();
     });
 
     test('1. Luong check-in xe vang lai, tinh phi theo gio va check-out thanh toan', () async {

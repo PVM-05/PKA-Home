@@ -75,3 +75,4 @@ Cập nhật `docs/BAN_GIAO_VAN_HANH.md` và `docs/BAN_GIAO_PHONG_TRO.md` với 
 - Chạy `dart analyze lib test` đảm bảo 0 warning, 0 error.
 - Cập nhật các test file trong `test/data/repositories/` để phản ánh đúng hành vi Fail-Closed.
 - Kiểm tra toàn bộ git diff đảm bảo không còn dữ liệu mock hardcode.
+

@@ -61,9 +61,9 @@ class BatchImportRepository {
     final client = _client;
     if (client == null) {
       return {
-        'success': true,
-        'total_imported': apartments.length,
-        'message': 'Đã lưu danh sách căn hộ (offline mock)',
+        'success': false,
+        'total_imported': 0,
+        'message': 'Không thể kết nối đến máy chủ Supabase. Vui lòng kiểm tra kết nối mạng và thử lại.',
       };
     }
 
@@ -86,9 +86,9 @@ class BatchImportRepository {
     final client = _client;
     if (client == null) {
       return {
-        'success': true,
-        'total_imported': residents.length,
-        'message': 'Đã lưu danh sách cư dân (offline mock)',
+        'success': false,
+        'total_imported': 0,
+        'message': 'Không thể kết nối đến máy chủ Supabase. Vui lòng kiểm tra kết nối mạng và thử lại.',
       };
     }
 
@@ -111,9 +111,9 @@ class BatchImportRepository {
     final client = _client;
     if (client == null) {
       return {
-        'success': true,
-        'total_imported': readings.length,
-        'message': 'Đã lưu chỉ số điện nước (offline mock)',
+        'success': false,
+        'total_imported': 0,
+        'message': 'Không thể kết nối đến máy chủ Supabase. Vui lòng kiểm tra kết nối mạng và thử lại.',
       };
     }
 

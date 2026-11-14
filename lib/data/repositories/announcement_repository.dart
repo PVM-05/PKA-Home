@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
+import '../../core/utils/guard_helper.dart';
 
 final announcementRepositoryProvider = Provider<AnnouncementRepository>((ref) {
   return AnnouncementRepository();
@@ -65,12 +66,7 @@ class AnnouncementRepository {
 
     final client = _clientSafe;
     if (client == null) {
-      return {
-        'success': true,
-        'id': 'mock-announcement-id',
-        'broadcast_count': 5,
-        'message': 'Đã tạo thông báo mẫu (môi trường kiểm thử)',
-      };
+      throw const AppException('Không thể kết nối đến máy chủ thông báo');
     }
 
     final res = await client
@@ -90,11 +86,7 @@ class AnnouncementRepository {
   Future<Map<String, dynamic>> broadcastAnnouncement(String id) async {
     final client = _clientSafe;
     if (client == null) {
-      return {
-        'success': true,
-        'broadcast_count': 10,
-        'message': 'Đã phát sóng thông báo mẫu (môi trường kiểm thử)',
-      };
+      throw const AppException('Không thể kết nối đến máy chủ thông báo');
     }
 
     try {
@@ -114,7 +106,7 @@ class AnnouncementRepository {
   ) async {
     final client = _clientSafe;
     if (client == null) {
-      return {'success': true, 'updated_count': 1};
+      throw const AppException('Không thể kết nối đến máy chủ thông báo');
     }
 
     try {

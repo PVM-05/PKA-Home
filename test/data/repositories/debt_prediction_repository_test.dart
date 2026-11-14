@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pka_home/core/utils/guard_helper.dart';
 import 'package:pka_home/data/models/debt_risk_score_model.dart';
 import 'package:pka_home/data/models/dunning_action_model.dart';
 import 'package:pka_home/data/repositories/debt_prediction_repository.dart';
@@ -90,64 +91,36 @@ void main() {
     });
   });
 
-  group('DebtPredictionRepository - Fallback Engine & Realtime', () {
+  group('DebtPredictionRepository - Fail-Closed Engine', () {
     late MockSupabaseClient mockClient;
     late DebtPredictionRepository repository;
 
     setUp(() {
       mockClient = MockSupabaseClient();
-      repository = DebtPredictionRepository(client: mockClient, isMockMode: true);
+      repository = DebtPredictionRepository(client: mockClient);
     });
 
-    test('Khi RPC gặp sự cố hoặc offline, getBuildingDebtRadar phải kích hoạt Fallback Engine', () async {
+    test('Khi RPC gặp sự cố hoặc offline, getBuildingDebtRadar ném AppException (Fail-Closed)', () async {
       when(() => mockClient.rpc(any(), params: any(named: 'params')))
           .thenThrow(Exception('No connection to database'));
 
-      final radar = await repository.getBuildingDebtRadar('bld-mock-1');
-
-      expect(radar.apartments.isNotEmpty, isTrue);
-      expect(radar.kpi.totalAtRiskApartments, greaterThan(0));
-      expect(radar.kpi.totalOverdueDebt, greaterThan(0));
-      // Kiểm tra sắp xếp giảm dần theo điểm rủi ro
-      for (int i = 0; i < radar.apartments.length - 1; i++) {
-        expect(
-          radar.apartments[i].riskScore,
-          greaterThanOrEqualTo(radar.apartments[i + 1].riskScore),
-        );
-      }
+      expect(
+        () => repository.getBuildingDebtRadar('bld-mock-1'),
+        throwsA(isA<AppException>()),
+      );
     });
 
-    test('calculateApartmentDebtRisk tính toán fallback chính xác cho căn hộ', () async {
+    test('calculateApartmentDebtRisk ném AppException khi RPC thất bại', () async {
       when(() => mockClient.rpc(any(), params: any(named: 'params')))
           .thenThrow(Exception('RPC failed'));
 
-      final res = await repository.calculateApartmentDebtRisk(
-        buildingId: 'bld-mock-1',
-        apartmentId: 'apt-01',
+      expect(
+        () => repository.calculateApartmentDebtRisk(
+          buildingId: 'bld-mock-1',
+          apartmentId: 'apt-01',
+        ),
+        throwsA(isA<AppException>()),
       );
-
-      expect(res.apartmentId, 'apt-01');
-      expect(res.apartmentCode, 'A0110');
-      expect(res.riskScore, greaterThan(50));
-      expect(res.riskLevel, DebtRiskLevel.high);
-    });
-
-    test('executeDunningAction lưu vết hành động thành công dù offline', () async {
-      when(() => mockClient.rpc(any(), params: any(named: 'params')))
-          .thenThrow(Exception('Offline'));
-      when(() => mockClient.auth).thenReturn(FakeGoTrueClient());
-
-      final action = await repository.executeDunningAction(
-        buildingId: 'bld-1',
-        apartmentId: 'apt-01',
-        tier: DunningTier.tier2,
-        title: 'Cảnh báo nợ',
-        content: 'Vui lòng thanh toán',
-      );
-
-      expect(action.apartmentId, 'apt-01');
-      expect(action.tier, DunningTier.tier2);
-      expect(action.status, 'sent');
     });
   });
 }

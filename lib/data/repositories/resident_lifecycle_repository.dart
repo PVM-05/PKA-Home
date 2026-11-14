@@ -41,7 +41,6 @@ class ResidentLifecycleRepository {
         }
         return [];
       },
-      mockFallback: () => _getFallbackContracts(apartmentId),
     );
   }
 
@@ -66,7 +65,6 @@ class ResidentLifecycleRepository {
           return ApartmentInvitationModel.fromJson(map);
         }).toList();
       },
-      mockFallback: () => [],
     );
   }
 
@@ -90,15 +88,6 @@ class ResidentLifecycleRepository {
         );
         return Map<String, dynamic>.from(response as Map);
       },
-      mockFallback: () => {
-        'success': true,
-        'invite_code': 'PKA${apartmentId.length >= 4 ? apartmentId.substring(0, 4).toUpperCase() : '0000'}X',
-        'apartment_id': apartmentId,
-        'target_role': targetRole,
-        'expires_at': DateTime.now()
-            .add(Duration(hours: expiresHours))
-            .toIso8601String(),
-      },
     );
   }
 
@@ -112,20 +101,6 @@ class ResidentLifecycleRepository {
           params: {'p_invite_code': inviteCode.trim().toUpperCase()},
         );
         return Map<String, dynamic>.from(response as Map);
-      },
-      mockFallback: () {
-        if (inviteCode.trim().toUpperCase().startsWith('PKA')) {
-          return {
-            'success': true,
-            'message': 'Kích hoạt gia nhập căn hộ thành công!',
-            'apartment_code': 'A0110',
-            'role': 'member',
-          };
-        }
-        return {
-          'success': false,
-          'message': 'Mã mời không tồn tại hoặc đã hết hạn.',
-        };
       },
     );
   }
@@ -154,32 +129,6 @@ class ResidentLifecycleRepository {
         );
         return Map<String, dynamic>.from(response as Map);
       },
-      mockFallback: () => {
-        'success': true,
-        'message': 'Đã kết thúc lưu trú thành công (Mock).',
-        'user_id': userId,
-        'apartment_id': apartmentId,
-      },
     );
-  }
-
-  List<ResidentLeaseContractModel> _getFallbackContracts(String apartmentId) {
-    final now = DateTime.now();
-    return [
-      ResidentLeaseContractModel(
-        id: 'fallback-contract-1',
-        userId: 'user-sample',
-        apartmentId: apartmentId,
-        fullName: 'Cư dân hợp đồng',
-        relationRole: 'tenant',
-        status: 'active',
-        startDate: now.subtract(const Duration(days: 90)),
-        endDate: now.add(const Duration(days: 275)),
-        depositAmount: 10000000,
-        contractNumber: 'HD-2026/A-01',
-        note: 'Hợp đồng mẫu dự phòng ngoại tuyến',
-        createdAt: now.subtract(const Duration(days: 90)),
-      ),
-    ];
   }
 }

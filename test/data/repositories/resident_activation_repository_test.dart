@@ -1,91 +1,71 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pka_home/core/utils/guard_helper.dart';
 import 'package:pka_home/data/repositories/resident_activation_repository.dart';
 
 void main() {
-  group('ResidentActivationRepository Tests', () {
-    test('verifyActivationCode mockFallback handles matching codes', () async {
-      final repo = ResidentActivationRepository();
+  group('ResidentActivationRepository Tests (Fail-Closed)', () {
+    late ResidentActivationRepository repository;
 
-      final successRes = await repo.verifyActivationCode(
-        phone: '0901234567',
-        activationCode: 'ACT-123456',
+    setUp(() {
+      repository = ResidentActivationRepository();
+    });
+
+    test('generateActivationCodes throws AppException when Supabase is unavailable', () async {
+      expect(
+        () => repository.generateActivationCodes(buildingId: 'bld-01'),
+        throwsA(isA<AppException>()),
       );
-      expect(successRes['success'], isTrue);
-      expect(successRes['full_name'], 'Nguyễn Văn An');
-      expect(successRes['apartment_code'], 'A0110');
-      expect(successRes['otp_hint'], '123456');
+    });
 
-      final failRes = await repo.verifyActivationCode(
-        phone: '0901234567',
-        activationCode: '12',
+    test('verifyActivationCode throws AppException when Supabase is unavailable', () async {
+      expect(
+        () => repository.verifyActivationCode(phone: '0901234567', activationCode: 'ACT-123456'),
+        throwsA(isA<AppException>()),
       );
-      expect(failRes['success'], isFalse);
     });
 
-    test('verifyActivationOtp validates mock OTP code', () async {
-      final repo = ResidentActivationRepository();
-
-      final successOtp = await repo.verifyActivationOtp(
-        phone: '0901234567',
-        activationCode: 'ACT-123456',
-        otpCode: '123456',
+    test('verifyActivationOtp throws AppException when Supabase is unavailable', () async {
+      expect(
+        () => repository.verifyActivationOtp(
+          phone: '0901234567',
+          activationCode: 'ACT-123456',
+          otpCode: '123456',
+        ),
+        throwsA(isA<AppException>()),
       );
-      expect(successOtp['success'], isTrue);
+    });
 
-      final failOtp = await repo.verifyActivationOtp(
-        phone: '0901234567',
-        activationCode: 'ACT-123456',
-        otpCode: '999999',
+    test('completeActivation throws AppException when Supabase is unavailable', () async {
+      expect(
+        () => repository.completeActivation(
+          phone: '0901234567',
+          activationCode: 'ACT-123456',
+          otpCode: '123456',
+          authUserId: 'user-01',
+        ),
+        throwsA(isA<AppException>()),
       );
-      expect(failOtp['success'], isFalse);
     });
 
-    test('completeActivation succeeds with valid payload', () async {
-      final repo = ResidentActivationRepository();
-
-      final res = await repo.completeActivation(
-        phone: '0901234567',
-        activationCode: 'ACT-123456',
-        otpCode: '123456',
-        authUserId: 'user-auth-uuid',
+    test('regenerateActivationCode throws AppException when Supabase is unavailable', () async {
+      expect(
+        () => repository.regenerateActivationCode(userId: 'user-01'),
+        throwsA(isA<AppException>()),
       );
-
-      expect(res['success'], isTrue);
-      expect(res['user_id'], 'user-auth-uuid');
     });
 
-    test('generateActivationCodes returns positive count in mock', () async {
-      final repo = ResidentActivationRepository();
-      final res = await repo.generateActivationCodes(buildingId: 'b-1');
-
-      expect(res['success'], isTrue);
-      expect(res['generated_count'], greaterThan(0));
+    test('revokeActivation throws AppException when Supabase is unavailable', () async {
+      expect(
+        () => repository.revokeActivation(activationId: 'act-01'),
+        throwsA(isA<AppException>()),
+      );
     });
 
-    test('fetchBuildingActivationList returns list of activation records', () async {
-      final repo = ResidentActivationRepository();
-      final list = await repo.fetchBuildingActivationList('b-1');
-
-      expect(list, isNotEmpty);
-      expect(list.any((a) => a.fullName == 'Nguyễn Văn An'), isTrue);
-      expect(list.any((a) => a.isLocked), isTrue);
-    });
-
-    test('regenerateActivationCode returns new activation code in mock', () async {
-      final repo = ResidentActivationRepository();
-      final res = await repo.regenerateActivationCode(userId: 'user-mock-1');
-
-      expect(res['success'], isTrue);
-      expect(res['activation_code'], startsWith('ACT-'));
-      expect(res['full_name'], 'Nguyễn Văn An');
-    });
-
-    test('revokeActivation returns success in mock', () async {
-      final repo = ResidentActivationRepository();
-      final res = await repo.revokeActivation(activationId: 'act-mock-1');
-
-      expect(res['success'], isTrue);
+    test('fetchBuildingActivationList throws AppException when Supabase is unavailable', () async {
+      expect(
+        () => repository.fetchBuildingActivationList('bld-01'),
+        throwsA(isA<AppException>()),
+      );
     });
   });
 }
-

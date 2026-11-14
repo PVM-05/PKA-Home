@@ -7,9 +7,8 @@ import '../models/petition_model.dart';
 
 class CommunityRepository {
   final SupabaseClient? _client;
-  final bool _isMockMode;
 
-  CommunityRepository([this._client, this._isMockMode = false]);
+  CommunityRepository([this._client]);
 
   SupabaseClient? get _supabase {
     if (_client != null) return _client;
@@ -21,140 +20,11 @@ class CommunityRepository {
     return null;
   }
 
-  // ─── OFFLINE FALLBACK ENGINE ───
-  static final List<PollModel> _mockPolls = [
-    PollModel(
-      id: 'poll-mock-01',
-      pollCode: 'POLL-202611-00001',
-      title: 'Biểu quyết lựa chọn đơn vị vận hành năm 2027',
-      description:
-          'Đánh giá năng lực hồ sơ thầu dịch vụ quản lý vận hành tòa nhà chung cư nhiệm kỳ mới theo Điều 102 Luật Nhà ở 2023.',
-      category: 'agm',
-      voteWeightType: 'by_area',
-      choiceType: 'single_choice',
-      minParticipationRate: 50.0,
-      requiredApprovalRate: 60.0,
-      startTime: DateTime.now().subtract(const Duration(days: 1)),
-      endTime: DateTime.now().add(const Duration(days: 5)),
-      status: 'active',
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      options: const [
-        PollOptionModel(
-          id: 'opt-mock-01',
-          pollId: 'poll-mock-01',
-          optionText: 'Công ty Savills Property Management',
-          optionOrder: 1,
-        ),
-        PollOptionModel(
-          id: 'opt-mock-02',
-          pollId: 'poll-mock-01',
-          optionText: 'Công ty CBRE Việt Nam',
-          optionOrder: 2,
-        ),
-        PollOptionModel(
-          id: 'opt-mock-03',
-          pollId: 'poll-mock-01',
-          optionText: 'Không đồng thuận với cả 2 đơn vị trên',
-          optionOrder: 3,
-        ),
-      ],
-    ),
-    PollModel(
-      id: 'poll-mock-02',
-      pollCode: 'POLL-202611-00002',
-      title: 'Khảo sát lắp đặt trạm sạc xe điện thông minh tầng hầm B2',
-      description:
-          'Lấy ý kiến cư dân về phương án bố trí 10 trụ sạc xe máy điện & ô tô điện có hệ thống tự ngắt PCCC an toàn.',
-      category: 'maintenance',
-      voteWeightType: 'per_apartment',
-      choiceType: 'single_choice',
-      minParticipationRate: 40.0,
-      requiredApprovalRate: 50.0,
-      startTime: DateTime.now().subtract(const Duration(days: 3)),
-      endTime: DateTime.now().add(const Duration(days: 2)),
-      status: 'active',
-      createdAt: DateTime.now().subtract(const Duration(days: 3)),
-      options: const [
-        PollOptionModel(
-          id: 'opt-mock-04',
-          pollId: 'poll-mock-02',
-          optionText: 'Đồng ý lắp đặt (Ưu tiên xe cư dân)',
-          optionOrder: 1,
-        ),
-        PollOptionModel(
-          id: 'opt-mock-05',
-          pollId: 'poll-mock-02',
-          optionText: 'Chưa nên lắp đặt (Lo ngại nguy cơ an toàn cháy nổ)',
-          optionOrder: 2,
-        ),
-      ],
-    ),
-  ];
-
-  static final Map<String, Set<String>> _mockVotedApartments = {
-    'poll-mock-01': {'apt-02'},
-  };
-
-  static final List<PetitionModel> _mockPetitions = [
-    PetitionModel(
-      id: 'pet-mock-01',
-      petitionCode: 'PET-202611-00001',
-      apartmentId: 'apt-01',
-      apartmentCode: 'A0502',
-      authorUserId: 'usr-01',
-      authorName: 'Nguyễn Văn Nam',
-      title: 'Đề xuất lắp thêm camera hành lang tầng 5 tháp A',
-      content:
-          'Khu vực hành lang tầng 5 góc khuất cạnh lối thoát hiểm chưa có mắt camera giám sát. Đề nghị BQL khảo sát lắp bổ sung để đảm bảo an ninh.',
-      category: 'security',
-      endorsementCount: 14,
-      status: 'in_progress',
-      officialResponse:
-          'BQL đã tiếp nhận kiến nghị và cử kỹ thuật khảo sát trong tuần này.',
-      createdAt: DateTime.now().subtract(const Duration(days: 3)),
-    ),
-    PetitionModel(
-      id: 'pet-mock-02',
-      petitionCode: 'PET-202611-00002',
-      apartmentId: 'apt-02',
-      apartmentCode: 'A0205',
-      authorUserId: 'usr-02',
-      authorName: 'Trần Minh Tuấn',
-      title: 'Mở cửa phòng tập Gym sớm hơn lúc 5h30 sáng',
-      content:
-          'Hiện tại phòng Gym mở lúc 6h00 khiến cư dân đi làm sớm không kịp tập luyện. Kính mong BQL hỗ trợ điều chỉnh giờ mở cửa từ 5h30 sáng.',
-      category: 'amenity',
-      endorsementCount: 28,
-      status: 'resolved',
-      officialResponse:
-          'BQL đã cập nhật quy chế và bố trí nhân viên mở cửa từ 5h30 sáng các ngày trong tuần bắt đầu từ ngày 01 tháng sau.',
-      createdAt: DateTime.now().subtract(const Duration(days: 7)),
-    ),
-  ];
-
-  static final Map<String, Set<String>> _mockEndorsedApartments = {
-    'pet-mock-01': {'apt-01', 'apt-03'},
-    'pet-mock-02': {'apt-02', 'apt-04'},
-  };
-
   // ─── 1. POLLS APIS ───
   Future<List<PollModel>> fetchPolls({
     String? status,
     String? apartmentId,
   }) async {
-    if (_isMockMode) {
-      var result = List<PollModel>.from(_mockPolls);
-      if (status != null && status.isNotEmpty) {
-        result = result.where((p) => p.status == status).toList();
-      }
-      if (apartmentId != null && apartmentId.isNotEmpty) {
-        result = result.map((p) {
-          final votedSet = _mockVotedApartments[p.id] ?? {};
-          return p.copyWith(hasVoted: votedSet.contains(apartmentId));
-        }).toList();
-      }
-      return result;
-    }
     return FailClosedGuard.guard(
       operation: 'fetchPolls',
       call: () async {
@@ -184,19 +54,6 @@ class CommunityRepository {
         }
         return list;
       },
-      mockFallback: () {
-        var result = List<PollModel>.from(_mockPolls);
-        if (status != null && status.isNotEmpty) {
-          result = result.where((p) => p.status == status).toList();
-        }
-        if (apartmentId != null && apartmentId.isNotEmpty) {
-          result = result.map((p) {
-            final votedSet = _mockVotedApartments[p.id] ?? {};
-            return p.copyWith(hasVoted: votedSet.contains(apartmentId));
-          }).toList();
-        }
-        return result;
-      },
     );
   }
 
@@ -214,43 +71,6 @@ class CommunityRepository {
     required String createdBy,
     String? buildingId,
   }) async {
-    if (_isMockMode) {
-      final id = 'poll-${DateTime.now().millisecondsSinceEpoch}';
-      final code =
-          'POLL-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPolls.length + 1).toString().padLeft(5, '0')}';
-      final parsedOptions = options
-          .asMap()
-          .entries
-          .map(
-            (e) => PollOptionModel(
-              id: 'opt-$id-${e.key}',
-              pollId: id,
-              optionText: e.value,
-              optionOrder: e.key + 1,
-            ),
-          )
-          .toList();
-
-      final poll = PollModel(
-        id: id,
-        pollCode: code,
-        title: title,
-        description: description,
-        category: category,
-        voteWeightType: voteWeightType,
-        choiceType: choiceType,
-        minParticipationRate: minParticipationRate,
-        requiredApprovalRate: requiredApprovalRate,
-        startTime: startTime,
-        endTime: endTime,
-        status: 'active',
-        createdBy: createdBy,
-        createdAt: DateTime.now(),
-        options: parsedOptions,
-      );
-      _mockPolls.insert(0, poll);
-      return poll;
-    }
     return FailClosedGuard.guard(
       operation: 'createPoll',
       call: () async {
@@ -297,43 +117,6 @@ class CommunityRepository {
         completeJson['poll_options'] = optionsRes;
         return PollModel.fromJson(completeJson);
       },
-      mockFallback: () {
-        final id = 'poll-${DateTime.now().millisecondsSinceEpoch}';
-        final code =
-            'POLL-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPolls.length + 1).toString().padLeft(5, '0')}';
-        final parsedOptions = options
-            .asMap()
-            .entries
-            .map(
-              (e) => PollOptionModel(
-                id: 'opt-$id-${e.key}',
-                pollId: id,
-                optionText: e.value,
-                optionOrder: e.key + 1,
-              ),
-            )
-            .toList();
-
-        final poll = PollModel(
-          id: id,
-          pollCode: code,
-          title: title,
-          description: description,
-          category: category,
-          voteWeightType: voteWeightType,
-          choiceType: choiceType,
-          minParticipationRate: minParticipationRate,
-          requiredApprovalRate: requiredApprovalRate,
-          startTime: startTime,
-          endTime: endTime,
-          status: 'active',
-          createdBy: createdBy,
-          createdAt: DateTime.now(),
-          options: parsedOptions,
-        );
-        _mockPolls.insert(0, poll);
-        return poll;
-      },
     );
   }
 
@@ -343,25 +126,6 @@ class CommunityRepository {
     String? voterUserId,
     required List<String> selectedOptionIds,
   }) async {
-    if (_isMockMode) {
-      final votedSet = _mockVotedApartments.putIfAbsent(
-        pollId,
-        () => <String>{},
-      );
-      if (votedSet.contains(apartmentId)) {
-        return {
-          'success': false,
-          'message': 'Căn hộ này đã tham gia biểu quyết rồi',
-        };
-      }
-      votedSet.add(apartmentId);
-
-      return {
-        'success': true,
-        'message': 'Gửi phiếu biểu quyết thành công (Mock)',
-        'vote_id': 'vote-${DateTime.now().millisecondsSinceEpoch}',
-      };
-    }
     return FailClosedGuard.guard(
       operation: 'submitPollVote',
       call: () async {
@@ -381,65 +145,10 @@ class CommunityRepository {
         );
         return Map<String, dynamic>.from(res as Map);
       },
-      mockFallback: () {
-        final votedSet = _mockVotedApartments.putIfAbsent(
-          pollId,
-          () => <String>{},
-        );
-        if (votedSet.contains(apartmentId)) {
-          return {
-            'success': false,
-            'message': 'Căn hộ này đã tham gia biểu quyết rồi',
-          };
-        }
-        votedSet.add(apartmentId);
-
-        return {
-          'success': true,
-          'message': 'Gửi phiếu biểu quyết thành công (Mock)',
-          'vote_id': 'vote-${DateTime.now().millisecondsSinceEpoch}',
-        };
-      },
     );
   }
 
   Future<PollResultModel> getPollResults(String pollId) async {
-    if (_isMockMode) {
-      final poll = _mockPolls.firstWhere(
-        (p) => p.id == pollId,
-        orElse: () => _mockPolls.first,
-      );
-      final votedCount = (_mockVotedApartments[poll.id] ?? {}).length + 35;
-      const totalApts = 50;
-      final rate = (votedCount / totalApts) * 100;
-
-      final optResults = poll.options.asMap().entries.map((e) {
-        final cnt = e.key == 0 ? 25 : 10;
-        final pct = votedCount > 0 ? (cnt / votedCount) * 100 : 0.0;
-        return PollOptionResultModel(
-          optionId: e.value.id,
-          optionText: e.value.optionText,
-          voteCount: cnt,
-          voteWeightSum: cnt * 75.0,
-          percentOfVotes: double.parse(pct.toStringAsFixed(1)),
-        );
-      }).toList();
-
-      return PollResultModel(
-        pollId: poll.id,
-        pollCode: poll.pollCode,
-        title: poll.title,
-        status: poll.status,
-        voteWeightType: poll.voteWeightType,
-        totalApartments: totalApts,
-        votedApartments: votedCount,
-        totalArea: totalApts * 75.0,
-        votedArea: votedCount * 75.0,
-        participationRate: double.parse(rate.toStringAsFixed(1)),
-        isQuorumMet: rate >= poll.minParticipationRate,
-        options: optResults,
-      );
-    }
     return FailClosedGuard.guard(
       operation: 'getPollResults',
       call: () async {
@@ -451,42 +160,6 @@ class CommunityRepository {
         );
         return PollResultModel.fromJson(Map<String, dynamic>.from(res as Map));
       },
-      mockFallback: () {
-        final poll = _mockPolls.firstWhere(
-          (p) => p.id == pollId,
-          orElse: () => _mockPolls.first,
-        );
-        final votedCount = (_mockVotedApartments[poll.id] ?? {}).length + 35;
-        const totalApts = 50;
-        final rate = (votedCount / totalApts) * 100;
-
-        final optResults = poll.options.asMap().entries.map((e) {
-          final cnt = e.key == 0 ? 25 : 10;
-          final pct = votedCount > 0 ? (cnt / votedCount) * 100 : 0.0;
-          return PollOptionResultModel(
-            optionId: e.value.id,
-            optionText: e.value.optionText,
-            voteCount: cnt,
-            voteWeightSum: cnt * 75.0,
-            percentOfVotes: double.parse(pct.toStringAsFixed(1)),
-          );
-        }).toList();
-
-        return PollResultModel(
-          pollId: poll.id,
-          pollCode: poll.pollCode,
-          title: poll.title,
-          status: poll.status,
-          voteWeightType: poll.voteWeightType,
-          totalApartments: totalApts,
-          votedApartments: votedCount,
-          totalArea: totalApts * 75.0,
-          votedArea: votedCount * 75.0,
-          participationRate: double.parse(rate.toStringAsFixed(1)),
-          isQuorumMet: rate >= poll.minParticipationRate,
-          options: optResults,
-        );
-      },
     );
   }
 
@@ -496,22 +169,6 @@ class CommunityRepository {
     String? category,
     String? apartmentId,
   }) async {
-    if (_isMockMode) {
-      var result = List<PetitionModel>.from(_mockPetitions);
-      if (status != null && status.isNotEmpty) {
-        result = result.where((p) => p.status == status).toList();
-      }
-      if (category != null && category.isNotEmpty) {
-        result = result.where((p) => p.category == category).toList();
-      }
-      if (apartmentId != null && apartmentId.isNotEmpty) {
-        result = result.map((p) {
-          final endorsedSet = _mockEndorsedApartments[p.id] ?? {};
-          return p.copyWith(isEndorsedByMe: endorsedSet.contains(apartmentId));
-        }).toList();
-      }
-      return result;
-    }
     return FailClosedGuard.guard(
       operation: 'fetchPetitions',
       call: () async {
@@ -549,22 +206,6 @@ class CommunityRepository {
         }
         return list;
       },
-      mockFallback: () {
-        var result = List<PetitionModel>.from(_mockPetitions);
-        if (status != null && status.isNotEmpty) {
-          result = result.where((p) => p.status == status).toList();
-        }
-        if (category != null && category.isNotEmpty) {
-          result = result.where((p) => p.category == category).toList();
-        }
-        if (apartmentId != null && apartmentId.isNotEmpty) {
-          result = result.map((p) {
-            final endorsedSet = _mockEndorsedApartments[p.id] ?? {};
-            return p.copyWith(isEndorsedByMe: endorsedSet.contains(apartmentId));
-          }).toList();
-        }
-        return result;
-      },
     );
   }
 
@@ -576,28 +217,6 @@ class CommunityRepository {
     String category = 'general',
     List<String> imageUrls = const [],
   }) async {
-    if (_isMockMode) {
-      final id = 'pet-${DateTime.now().millisecondsSinceEpoch}';
-      final code =
-          'PET-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPetitions.length + 1).toString().padLeft(5, '0')}';
-      final pet = PetitionModel(
-        id: id,
-        petitionCode: code,
-        apartmentId: apartmentId,
-        apartmentCode: 'A0110',
-        authorUserId: authorUserId,
-        authorName: 'Cư dân',
-        title: title,
-        content: content,
-        category: category,
-        imageUrls: imageUrls,
-        endorsementCount: 0,
-        status: 'pending',
-        createdAt: DateTime.now(),
-      );
-      _mockPetitions.insert(0, pet);
-      return pet;
-    }
     return FailClosedGuard.guard(
       operation: 'createPetition',
       call: () async {
@@ -618,28 +237,6 @@ class CommunityRepository {
             .single();
         return PetitionModel.fromJson(res);
       },
-      mockFallback: () {
-        final id = 'pet-${DateTime.now().millisecondsSinceEpoch}';
-        final code =
-            'PET-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-${(_mockPetitions.length + 1).toString().padLeft(5, '0')}';
-        final pet = PetitionModel(
-          id: id,
-          petitionCode: code,
-          apartmentId: apartmentId,
-          apartmentCode: 'A0110',
-          authorUserId: authorUserId,
-          authorName: 'Cư dân',
-          title: title,
-          content: content,
-          category: category,
-          imageUrls: imageUrls,
-          endorsementCount: 0,
-          status: 'pending',
-          createdAt: DateTime.now(),
-        );
-        _mockPetitions.insert(0, pet);
-        return pet;
-      },
     );
   }
 
@@ -648,36 +245,6 @@ class CommunityRepository {
     required String apartmentId,
     String? userId,
   }) async {
-    if (_isMockMode) {
-      final endorsedSet = _mockEndorsedApartments.putIfAbsent(
-        petitionId,
-        () => <String>{},
-      );
-      if (endorsedSet.contains(apartmentId)) {
-        return {
-          'success': false,
-          'message': 'Căn hộ của bạn đã bấm đồng thuận kiến nghị này rồi',
-        };
-      }
-      endorsedSet.add(apartmentId);
-
-      final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
-      if (idx != -1) {
-        final current = _mockPetitions[idx];
-        _mockPetitions[idx] = current.copyWith(
-          endorsementCount: current.endorsementCount + 1,
-          isEndorsedByMe: true,
-        );
-      }
-
-      return {
-        'success': true,
-        'message': 'Đã ghi nhận sự đồng thuận của bạn (Mock)',
-        'endorsement_count': idx != -1
-            ? _mockPetitions[idx].endorsementCount
-            : 1,
-      };
-    }
     return FailClosedGuard.guard(
       operation: 'endorsePetition',
       call: () async {
@@ -696,36 +263,6 @@ class CommunityRepository {
         );
         return Map<String, dynamic>.from(res as Map);
       },
-      mockFallback: () {
-        final endorsedSet = _mockEndorsedApartments.putIfAbsent(
-          petitionId,
-          () => <String>{},
-        );
-        if (endorsedSet.contains(apartmentId)) {
-          return {
-            'success': false,
-            'message': 'Căn hộ của bạn đã bấm đồng thuận kiến nghị này rồi',
-          };
-        }
-        endorsedSet.add(apartmentId);
-
-        final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
-        if (idx != -1) {
-          final current = _mockPetitions[idx];
-          _mockPetitions[idx] = current.copyWith(
-            endorsementCount: current.endorsementCount + 1,
-            isEndorsedByMe: true,
-          );
-        }
-
-        return {
-          'success': true,
-          'message': 'Đã ghi nhận sự đồng thuận của bạn (Mock)',
-          'endorsement_count': idx != -1
-              ? _mockPetitions[idx].endorsementCount
-              : 1,
-        };
-      },
     );
   }
 
@@ -735,25 +272,6 @@ class CommunityRepository {
     required String officialResponse,
     required String staffId,
   }) async {
-    if (_isMockMode) {
-      final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
-      if (idx == -1) {
-        return {'success': false, 'message': 'Không tìm thấy kiến nghị'};
-      }
-
-      _mockPetitions[idx] = _mockPetitions[idx].copyWith(
-        status: status,
-        officialResponse: officialResponse,
-        respondedByStaffId: staffId,
-        respondedAt: DateTime.now(),
-      );
-
-      return {
-        'success': true,
-        'message': 'Cập nhật phản hồi chính thức thành công',
-        'status': status,
-      };
-    }
     return FailClosedGuard.guard(
       operation: 'updatePetitionResponse',
       call: () async {
@@ -769,25 +287,6 @@ class CommunityRepository {
           },
         );
         return Map<String, dynamic>.from(res as Map);
-      },
-      mockFallback: () {
-        final idx = _mockPetitions.indexWhere((p) => p.id == petitionId);
-        if (idx == -1) {
-          return {'success': false, 'message': 'Không tìm thấy kiến nghị'};
-        }
-
-        _mockPetitions[idx] = _mockPetitions[idx].copyWith(
-          status: status,
-          officialResponse: officialResponse,
-          respondedByStaffId: staffId,
-          respondedAt: DateTime.now(),
-        );
-
-        return {
-          'success': true,
-          'message': 'Cập nhật phản hồi chính thức thành công',
-          'status': status,
-        };
       },
     );
   }

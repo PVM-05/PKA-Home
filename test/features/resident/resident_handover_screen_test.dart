@@ -13,7 +13,7 @@ void main() {
     late HandoverRepository repository;
 
     setUp(() {
-      repository = HandoverRepository(null, true);
+      repository = HandoverRepository();
     });
 
     testWidgets('Hiển thị danh sách biên bản bàn giao của cư dân', (tester) async {

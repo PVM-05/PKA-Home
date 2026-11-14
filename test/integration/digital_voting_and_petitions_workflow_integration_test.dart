@@ -1,12 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/repositories/community_repository.dart';
+import '../helpers/test_workflow_fakes.dart';
 
 void main() {
   group('Quy trình Tích hợp Biểu Quyết Điện Tử & Kiến Nghị Cộng Đồng (D7)', () {
     late CommunityRepository repository;
 
     setUp(() {
-      repository = CommunityRepository(null, true);
+      repository = FakeCommunityWorkflowRepository();
     });
 
     test('Toan ven luong bieu quyet theo dien tich va kien nghi dong thuan', () async {

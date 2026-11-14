@@ -8,125 +8,8 @@ import '../models/handover_item_model.dart';
 
 class HandoverRepository {
   final SupabaseClient? _client;
-  final bool _isMockMode;
 
-  // In-memory cache cho offline fallback mode
-  static final List<ApartmentHandoverModel> _mockHandovers = [
-    ApartmentHandoverModel(
-      id: 'ho-01',
-      apartmentId: 'apt-01',
-      buildingId: 'bld-01',
-      residentId: 'res-01',
-      contractId: 'ctr-01',
-      handoverType: 'move_out',
-      reportCode: 'HO-202611-00001',
-      handoverDate: DateTime.now().subtract(const Duration(days: 1)),
-      conductedBy: 'staff-01',
-      initialElectricityReading: 1540.0,
-      initialWaterReading: 85.0,
-      depositHeld: 10000000.0,
-      totalDeduction: 1200000.0,
-      depositRefund: 8800000.0,
-      status: 'pending_resident',
-      staffSignatureUrl: 'signatures/staff_ho-01.png',
-      staffSignedAt: DateTime.now().subtract(const Duration(hours: 4)),
-      lookupCode: 'HK-98A1B2C3D4',
-      apartmentCode: 'A0110',
-      residentName: 'Nguyễn Văn An',
-      staffName: 'Trần Kỹ Thuật',
-      items: [
-        const HandoverItemModel(
-          id: 'item-01',
-          handoverId: 'ho-01',
-          itemName: 'Điều hòa Daikin 1.5HP',
-          roomArea: 'bedroom',
-          quantity: 1,
-          condition: 'good',
-        ),
-        const HandoverItemModel(
-          id: 'item-02',
-          handoverId: 'ho-01',
-          itemName: 'Mặt bàn trà phòng khách',
-          roomArea: 'living_room',
-          quantity: 1,
-          condition: 'damaged',
-          repairCost: 500000.0,
-          note: 'Vết trầy sâu 15cm góc bàn',
-          photos: ['photos/ho-01/ban_tra.jpg'],
-        ),
-        const HandoverItemModel(
-          id: 'item-03',
-          handoverId: 'ho-01',
-          itemName: 'Bộ điều khiển cửa cuốn',
-          roomArea: 'living_room',
-          quantity: 1,
-          condition: 'missing',
-          repairCost: 700000.0,
-          note: 'Cư dân làm mất remote phụ',
-        ),
-      ],
-    ),
-  ];
-
-  static final List<ApartmentAssetModel> _mockAssets = [
-    const ApartmentAssetModel(
-      id: 'asset-01',
-      apartmentId: 'apt-01',
-      buildingId: 'bld-01',
-      roomArea: 'living_room',
-      name: 'Khóa cửa thông minh vân tay',
-      assetCode: 'LCK-01',
-      quantity: 1,
-      condition: 'good',
-      replacementPrice: 3500000.0,
-    ),
-    const ApartmentAssetModel(
-      id: 'asset-02',
-      apartmentId: 'apt-01',
-      buildingId: 'bld-01',
-      roomArea: 'living_room',
-      name: 'Sofa bọc da cao cấp',
-      assetCode: 'SFA-01',
-      quantity: 1,
-      condition: 'good',
-      replacementPrice: 6000000.0,
-    ),
-    const ApartmentAssetModel(
-      id: 'asset-03',
-      apartmentId: 'apt-01',
-      buildingId: 'bld-01',
-      roomArea: 'bedroom',
-      name: 'Điều hòa Daikin 1.5HP Inverter',
-      assetCode: 'AC-01',
-      quantity: 1,
-      condition: 'good',
-      replacementPrice: 9000000.0,
-    ),
-    const ApartmentAssetModel(
-      id: 'asset-04',
-      apartmentId: 'apt-01',
-      buildingId: 'bld-01',
-      roomArea: 'kitchen',
-      name: 'Tủ lạnh Panasonic 2 cánh 250L',
-      assetCode: 'FRG-01',
-      quantity: 1,
-      condition: 'good',
-      replacementPrice: 7500000.0,
-    ),
-    const ApartmentAssetModel(
-      id: 'asset-05',
-      apartmentId: 'apt-01',
-      buildingId: 'bld-01',
-      roomArea: 'bathroom',
-      name: 'Bình nước nóng Ariston 20L',
-      assetCode: 'WTR-01',
-      quantity: 1,
-      condition: 'good',
-      replacementPrice: 2800000.0,
-    ),
-  ];
-
-  HandoverRepository([this._client, this._isMockMode = false]);
+  HandoverRepository([this._client]);
 
   SupabaseClient get _supabase {
     final c = _client;
@@ -139,9 +22,6 @@ class HandoverRepository {
 
   /// Lấy danh mục tài sản nội thất gắn với căn hộ
   Future<List<ApartmentAssetModel>> fetchAssetsByApartment(String apartmentId) async {
-    if (_isMockMode) {
-      return _mockAssets.where((a) => a.apartmentId == apartmentId).toList();
-    }
     return FailClosedGuard.guard(
       operation: 'fetchAssetsByApartment',
       call: () async {
@@ -155,7 +35,6 @@ class HandoverRepository {
             .map((json) => ApartmentAssetModel.fromJson(Map<String, dynamic>.from(json as Map)))
             .toList();
       },
-      mockFallback: () => _mockAssets.where((a) => a.apartmentId == apartmentId).toList(),
     );
   }
 
@@ -165,14 +44,6 @@ class HandoverRepository {
     String? status,
     String? type,
   }) async {
-    if (_isMockMode) {
-      return _mockHandovers.where((h) {
-        if (h.buildingId != buildingId) return false;
-        if (status != null && status.isNotEmpty && h.status != status) return false;
-        if (type != null && type.isNotEmpty && h.handoverType != type) return false;
-        return true;
-      }).toList();
-    }
     return FailClosedGuard.guard(
       operation: 'fetchHandoversByBuilding',
       call: () async {
@@ -204,22 +75,11 @@ class HandoverRepository {
           return ApartmentHandoverModel.fromJson(map);
         }).toList();
       },
-      mockFallback: () {
-        return _mockHandovers.where((h) {
-          if (h.buildingId != buildingId) return false;
-          if (status != null && status.isNotEmpty && h.status != status) return false;
-          if (type != null && type.isNotEmpty && h.handoverType != type) return false;
-          return true;
-        }).toList();
-      },
     );
   }
 
   /// Lấy danh sách biên bản của cư dân
   Future<List<ApartmentHandoverModel>> fetchHandoversByResident(String residentId) async {
-    if (_isMockMode) {
-      return _mockHandovers.where((h) => h.residentId == residentId).toList();
-    }
     return FailClosedGuard.guard(
       operation: 'fetchHandoversByResident',
       call: () async {
@@ -240,16 +100,11 @@ class HandoverRepository {
           return ApartmentHandoverModel.fromJson(map);
         }).toList();
       },
-      mockFallback: () => _mockHandovers.where((h) => h.residentId == residentId).toList(),
     );
   }
 
   /// Lấy chi tiết biên bản kèm danh sách items
   Future<ApartmentHandoverModel?> fetchHandoverDetail(String handoverId) async {
-    if (_isMockMode) {
-      final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-      return idx != -1 ? _mockHandovers[idx] : null;
-    }
     return FailClosedGuard.guard(
       operation: 'fetchHandoverDetail',
       call: () async {
@@ -272,10 +127,6 @@ class HandoverRepository {
         }
         return ApartmentHandoverModel.fromJson(map);
       },
-      mockFallback: () {
-        final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-        return idx != -1 ? _mockHandovers[idx] : null;
-      },
     );
   }
 
@@ -284,11 +135,6 @@ class HandoverRepository {
     ApartmentHandoverModel handover,
     List<HandoverItemModel> items,
   ) async {
-    if (_isMockMode) {
-      final created = handover.copyWith(items: items);
-      _mockHandovers.insert(0, created);
-      return created;
-    }
     return FailClosedGuard.guard(
       operation: 'createHandover',
       call: () async {
@@ -313,11 +159,6 @@ class HandoverRepository {
 
         return createdHandover;
       },
-      mockFallback: () {
-        final created = handover.copyWith(items: items);
-        _mockHandovers.insert(0, created);
-        return created;
-      },
     );
   }
 
@@ -328,19 +169,6 @@ class HandoverRepository {
     required Uint8List signatureBytes,
     String? notes,
   }) async {
-    if (_isMockMode) {
-      final fileName = 'signatures/${handover.id}_staff.png';
-      final signedHandover = handover.copyWith(
-        staffSignatureUrl: fileName,
-        staffSignedAt: DateTime.now(),
-        staffNotes: notes ?? handover.staffNotes,
-        status: 'pending_resident',
-        items: items,
-      );
-      _mockHandovers.removeWhere((h) => h.id == handover.id);
-      _mockHandovers.insert(0, signedHandover);
-      return signedHandover;
-    }
     return FailClosedGuard.guard(
       operation: 'createHandoverWithStaffSignature',
       call: () async {
@@ -379,27 +207,11 @@ class HandoverRepository {
 
         return createdHandover;
       },
-      mockFallback: () {
-        final fileName = 'signatures/${handover.id}_staff.png';
-        final signedHandover = handover.copyWith(
-          staffSignatureUrl: fileName,
-          staffSignedAt: DateTime.now(),
-          staffNotes: notes ?? handover.staffNotes,
-          status: 'pending_resident',
-          items: items,
-        );
-        _mockHandovers.removeWhere((h) => h.id == handover.id);
-        _mockHandovers.insert(0, signedHandover);
-        return signedHandover;
-      },
     );
   }
 
   /// Cập nhật một hạng mục kiểm kê (tình trạng, ảnh, chi phí)
   Future<HandoverItemModel> updateHandoverItem(HandoverItemModel item) async {
-    if (_isMockMode) {
-      return item;
-    }
     return FailClosedGuard.guard(
       operation: 'updateHandoverItem',
       call: () async {
@@ -412,9 +224,6 @@ class HandoverRepository {
 
         return HandoverItemModel.fromJson(Map<String, dynamic>.from(response as Map));
       },
-      mockFallback: () {
-        return item;
-      },
     );
   }
 
@@ -424,20 +233,6 @@ class HandoverRepository {
     Uint8List signatureBytes, {
     String? notes,
   }) async {
-    if (_isMockMode) {
-      final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-      if (idx != -1) {
-        final updated = _mockHandovers[idx].copyWith(
-          staffSignatureUrl: 'signatures/${handoverId}_staff.png',
-          staffSignedAt: DateTime.now(),
-          status: 'pending_resident',
-          staffNotes: notes,
-        );
-        _mockHandovers[idx] = updated;
-        return updated;
-      }
-      throw const AppException('Không tìm thấy biên bản');
-    }
     return FailClosedGuard.guard(
       operation: 'signByStaff',
       call: () async {
@@ -462,20 +257,6 @@ class HandoverRepository {
 
         return ApartmentHandoverModel.fromJson(Map<String, dynamic>.from(response as Map));
       },
-      mockFallback: () {
-        final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-        if (idx != -1) {
-          final updated = _mockHandovers[idx].copyWith(
-            staffSignatureUrl: 'signatures/${handoverId}_staff.png',
-            staffSignedAt: DateTime.now(),
-            status: 'pending_resident',
-            staffNotes: notes,
-          );
-          _mockHandovers[idx] = updated;
-          return updated;
-        }
-        throw const AppException('Không tìm thấy biên bản');
-      },
     );
   }
 
@@ -485,20 +266,6 @@ class HandoverRepository {
     Uint8List signatureBytes, {
     String? notes,
   }) async {
-    if (_isMockMode) {
-      final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-      if (idx != -1) {
-        final updated = _mockHandovers[idx].copyWith(
-          residentSignatureUrl: 'signatures/${handoverId}_resident.png',
-          residentSignedAt: DateTime.now(),
-          status: 'confirmed',
-          residentNotes: notes,
-        );
-        _mockHandovers[idx] = updated;
-        return updated;
-      }
-      throw const AppException('Không tìm thấy biên bản');
-    }
     return FailClosedGuard.guard(
       operation: 'signByResident',
       call: () async {
@@ -523,20 +290,6 @@ class HandoverRepository {
 
         return ApartmentHandoverModel.fromJson(Map<String, dynamic>.from(response as Map));
       },
-      mockFallback: () {
-        final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-        if (idx != -1) {
-          final updated = _mockHandovers[idx].copyWith(
-            residentSignatureUrl: 'signatures/${handoverId}_resident.png',
-            residentSignedAt: DateTime.now(),
-            status: 'confirmed',
-            residentNotes: notes,
-          );
-          _mockHandovers[idx] = updated;
-          return updated;
-        }
-        throw const AppException('Không tìm thấy biên bản');
-      },
     );
   }
 
@@ -545,18 +298,6 @@ class HandoverRepository {
     String handoverId,
     String disputeReason,
   ) async {
-    if (_isMockMode) {
-      final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-      if (idx != -1) {
-        final updated = _mockHandovers[idx].copyWith(
-          status: 'disputed',
-          residentNotes: disputeReason,
-        );
-        _mockHandovers[idx] = updated;
-        return updated;
-      }
-      throw const AppException('Không tìm thấy biên bản');
-    }
     return FailClosedGuard.guard(
       operation: 'disputeByResident',
       call: () async {
@@ -574,18 +315,6 @@ class HandoverRepository {
 
         return ApartmentHandoverModel.fromJson(Map<String, dynamic>.from(response as Map));
       },
-      mockFallback: () {
-        final idx = _mockHandovers.indexWhere((h) => h.id == handoverId);
-        if (idx != -1) {
-          final updated = _mockHandovers[idx].copyWith(
-            status: 'disputed',
-            residentNotes: disputeReason,
-          );
-          _mockHandovers[idx] = updated;
-          return updated;
-        }
-        throw const AppException('Không tìm thấy biên bản');
-      },
     );
   }
 
@@ -595,18 +324,12 @@ class HandoverRepository {
     Uint8List photoBytes,
     String fileName,
   ) async {
-    if (_isMockMode) {
-      return 'photos/$handoverId/mock_$fileName';
-    }
     return FailClosedGuard.guard(
       operation: 'uploadHandoverPhoto',
       call: () async {
         final path = 'photos/$handoverId/${DateTime.now().millisecondsSinceEpoch}_$fileName';
         await _supabase.storage.from('handover-docs').uploadBinary(path, photoBytes);
         return path;
-      },
-      mockFallback: () {
-        return 'photos/$handoverId/mock_$fileName';
       },
     );
   }

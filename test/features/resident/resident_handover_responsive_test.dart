@@ -51,7 +51,7 @@ void main() {
     );
 
     setUp(() {
-      repository = HandoverRepository(null, true);
+      repository = HandoverRepository();
     });
 
     Widget buildTestWidget(Widget screen, {double textScale = 1.0}) {

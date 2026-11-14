@@ -69,7 +69,7 @@ class MeterReadingRepository {
         return _client.storage.from('meter-images').getPublicUrl(fileName);
       }
     } catch (_) {
-      // Fallback khi offline / mock / test: trả về link storage chuẩn
+      // Fallback khi Storage chưa sẵn sàng hoặc môi trường cục bộ: trả về đường dẫn storage chuẩn
     }
 
     return 'https://supabase.pka-home.vn/storage/v1/object/public/meter-images/$fileName';

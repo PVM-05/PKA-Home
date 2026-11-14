@@ -8,7 +8,8 @@ import '../models/visitor_parking_ticket_model.dart';
 
 class ParkingRepository {
   final SupabaseClient? _client;
-  final bool _isMockMode;
+
+  ParkingRepository([this._client]);
 
   SupabaseClient get _supabase {
     final c = _client;
@@ -19,92 +20,6 @@ class ParkingRepository {
     throw const AppException('Supabase chưa sẵn sàng');
   }
 
-  // Bộ nhớ in-memory phục vụ offline-fallback và môi trường test
-  final List<ParkingSlotModel> _inMemorySlots = [];
-  final List<VisitorParkingTicketModel> _inMemoryTickets = [];
-
-  ParkingRepository([this._client, this._isMockMode = false]) {
-    _initMockData();
-  }
-
-  void _initMockData() {
-    if (_inMemorySlots.isNotEmpty) return;
-
-    // Khởi tạo 20 ô ô tô tầng B1 (1-6 đã đỗ, còn lại trống)
-    for (int i = 1; i <= 20; i++) {
-      final isOccupied = i <= 6;
-      final numStr = i.toString().padLeft(2, '0');
-      _inMemorySlots.add(
-        ParkingSlotModel(
-          id: 'slot-b1-$numStr',
-          zone: 'B1',
-          slotNumber: 'P-B1-$numStr',
-          slotType: 'car',
-          status: isOccupied ? 'occupied' : 'available',
-          licensePlate: isOccupied ? '30A-${100 + i}.88' : null,
-          apartmentCode: isOccupied
-              ? 'A01${i.toString().padLeft(2, '0')}'
-              : null,
-          createdAt: DateTime.now().subtract(Duration(days: 30 - i)),
-        ),
-      );
-    }
-
-    // Khởi tạo 30 ô xe máy tầng B2 (1-12 đã đỗ)
-    for (int i = 1; i <= 30; i++) {
-      final isOccupied = i <= 12;
-      final numStr = i.toString().padLeft(2, '0');
-      _inMemorySlots.add(
-        ParkingSlotModel(
-          id: 'slot-b2-$numStr',
-          zone: 'B2',
-          slotNumber: 'M-B2-$numStr',
-          slotType: 'motorcycle',
-          status: isOccupied ? 'occupied' : 'available',
-          licensePlate: isOccupied ? '29V1-${500 + i}.99' : null,
-          apartmentCode: isOccupied
-              ? 'A02${i.toString().padLeft(2, '0')}'
-              : null,
-          createdAt: DateTime.now().subtract(Duration(days: 30 - i)),
-        ),
-      );
-    }
-
-    // Khởi tạo vé xe vãng lai mẫu
-    _inMemoryTickets.addAll([
-      VisitorParkingTicketModel(
-        id: 'tkt-mock-01',
-        ticketCode: 'TKT-202611-0001',
-        licensePlate: '30E-888.99',
-        vehicleType: 'car',
-        checkInAt: DateTime.now().subtract(
-          const Duration(hours: 2, minutes: 15),
-        ),
-        status: 'in_parking',
-        hourlyRate: 25000,
-        feeAmount: 40000,
-        qrPayload: 'PKAPARKING:TKT-202611-0001:30E-888.99',
-        note: 'Khách lên thăm phòng A0501',
-        createdAt: DateTime.now().subtract(
-          const Duration(hours: 2, minutes: 15),
-        ),
-      ),
-      VisitorParkingTicketModel(
-        id: 'tkt-mock-02',
-        ticketCode: 'TKT-202611-0002',
-        licensePlate: '29AA-123.45',
-        vehicleType: 'motorcycle',
-        checkInAt: DateTime.now().subtract(const Duration(minutes: 45)),
-        status: 'in_parking',
-        hourlyRate: 5000,
-        feeAmount: 5000,
-        qrPayload: 'PKAPARKING:TKT-202611-0002:29AA-123.45',
-        note: 'Giao hàng Shopee tầng 3',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 45)),
-      ),
-    ]);
-  }
-
   /// 1. Lấy danh sách ô đỗ tầng hầm theo bộ lọc
   Future<List<ParkingSlotModel>> fetchSlots({
     String? buildingId,
@@ -112,19 +27,6 @@ class ParkingRepository {
     String? slotType,
     String? status,
   }) async {
-    if (_isMockMode) {
-      var filtered = List<ParkingSlotModel>.from(_inMemorySlots);
-      if (zone != null && zone.isNotEmpty && zone != 'all') {
-        filtered = filtered.where((s) => s.zone == zone).toList();
-      }
-      if (slotType != null && slotType.isNotEmpty && slotType != 'all') {
-        filtered = filtered.where((s) => s.slotType == slotType).toList();
-      }
-      if (status != null && status.isNotEmpty && status != 'all') {
-        filtered = filtered.where((s) => s.status == status).toList();
-      }
-      return filtered;
-    }
     return FailClosedGuard.guard(
       operation: 'fetchSlots',
       call: () async {
@@ -155,19 +57,6 @@ class ParkingRepository {
             )
             .toList();
       },
-      mockFallback: () {
-        var filtered = List<ParkingSlotModel>.from(_inMemorySlots);
-        if (zone != null && zone.isNotEmpty && zone != 'all') {
-          filtered = filtered.where((s) => s.zone == zone).toList();
-        }
-        if (slotType != null && slotType.isNotEmpty && slotType != 'all') {
-          filtered = filtered.where((s) => s.slotType == slotType).toList();
-        }
-        if (status != null && status.isNotEmpty && status != 'all') {
-          filtered = filtered.where((s) => s.status == status).toList();
-        }
-        return filtered;
-      },
     );
   }
 
@@ -188,26 +77,6 @@ class ParkingRepository {
   Future<ParkingCapacityStatsModel> fetchCapacityStats({
     String? buildingId,
   }) async {
-    if (_isMockMode) {
-      final carSlots = _inMemorySlots.where((s) => s.isCar).toList();
-      final motoSlots = _inMemorySlots.where((s) => s.isMotorcycle).toList();
-      final activeVisitors = _inMemoryTickets
-          .where((t) => t.isInParking)
-          .length;
-
-      final carOccupied = carSlots.where((s) => s.isOccupied).length;
-      final motoOccupied = motoSlots.where((s) => s.isOccupied).length;
-
-      return ParkingCapacityStatsModel(
-        carTotal: carSlots.length,
-        carOccupied: carOccupied,
-        carAvailable: carSlots.length - carOccupied,
-        motoTotal: motoSlots.length,
-        motoOccupied: motoOccupied,
-        motoAvailable: motoSlots.length - motoOccupied,
-        visitorCount: activeVisitors,
-      );
-    }
     return FailClosedGuard.guard(
       operation: 'fetchCapacityStats',
       call: () async {
@@ -224,30 +93,10 @@ class ParkingRepository {
           'Không nhận được thống kê sức chứa bãi xe từ máy chủ',
         );
       },
-      mockFallback: () {
-        final carSlots = _inMemorySlots.where((s) => s.isCar).toList();
-        final motoSlots = _inMemorySlots.where((s) => s.isMotorcycle).toList();
-        final activeVisitors = _inMemoryTickets
-            .where((t) => t.isInParking)
-            .length;
-
-        final carOccupied = carSlots.where((s) => s.isOccupied).length;
-        final motoOccupied = motoSlots.where((s) => s.isOccupied).length;
-
-        return ParkingCapacityStatsModel(
-          carTotal: carSlots.length,
-          carOccupied: carOccupied,
-          carAvailable: carSlots.length - carOccupied,
-          motoTotal: motoSlots.length,
-          motoOccupied: motoOccupied,
-          motoAvailable: motoSlots.length - motoOccupied,
-          visitorCount: activeVisitors,
-        );
-      },
     );
   }
 
-  /// 3. Gán ô đỗ cho phương tiện / căn hộ (P0-#6: Sử dụng ID thật, an toàn ngoại khóa)
+  /// 3. Gán ô đỗ cho phương tiện / căn hộ (Sử dụng ID thật, an toàn ngoại khóa)
   Future<Map<String, dynamic>> assignSlot({
     required String slotId,
     required String vehicleId,
@@ -260,19 +109,6 @@ class ParkingRepository {
     final String? cleanVehicleId = isRealVehicle ? vehicleId : null;
     final bool isRealApartment = apartmentId.isNotEmpty && !apartmentId.startsWith('apt-');
 
-    if (_isMockMode) {
-      final index = _inMemorySlots.indexWhere((s) => s.id == slotId);
-      if (index != -1) {
-        _inMemorySlots[index] = _inMemorySlots[index].copyWith(
-          status: 'occupied',
-          assignedVehicleId: cleanVehicleId,
-          assignedApartmentId: apartmentId,
-          licensePlate: licensePlate,
-          apartmentCode: apartmentCode,
-        );
-      }
-      return {'success': true, 'message': 'Đã gán ô đỗ thành công (Mock)'};
-    }
     return FailClosedGuard.guard(
       operation: 'assignSlot',
       call: () async {
@@ -321,34 +157,11 @@ class ParkingRepository {
 
         return {'success': true, 'message': 'Đã gán ô đỗ thành công'};
       },
-      mockFallback: () {
-        final index = _inMemorySlots.indexWhere((s) => s.id == slotId);
-        if (index != -1) {
-          _inMemorySlots[index] = _inMemorySlots[index].copyWith(
-            status: 'occupied',
-            assignedVehicleId: cleanVehicleId,
-            assignedApartmentId: apartmentId,
-            licensePlate: licensePlate,
-            apartmentCode: apartmentCode,
-          );
-        }
-        return {'success': true, 'message': 'Đã gán ô đỗ thành công (Mock)'};
-      },
     );
   }
 
   /// 4. Giải phóng ô đỗ
   Future<Map<String, dynamic>> releaseSlot(String slotId) async {
-    if (_isMockMode) {
-      final index = _inMemorySlots.indexWhere((s) => s.id == slotId);
-      if (index != -1) {
-        _inMemorySlots[index] = _inMemorySlots[index].copyWith(
-          status: 'available',
-          clearAssigned: true,
-        );
-      }
-      return {'success': true, 'message': 'Đã giải phóng ô đỗ (Mock)'};
-    }
     return FailClosedGuard.guard(
       operation: 'releaseSlot',
       call: () async {
@@ -371,16 +184,6 @@ class ParkingRepository {
             .eq('id', slotId);
 
         return {'success': true, 'message': 'Đã giải phóng ô đỗ'};
-      },
-      mockFallback: () {
-        final index = _inMemorySlots.indexWhere((s) => s.id == slotId);
-        if (index != -1) {
-          _inMemorySlots[index] = _inMemorySlots[index].copyWith(
-            status: 'available',
-            clearAssigned: true,
-          );
-        }
-        return {'success': true, 'message': 'Đã giải phóng ô đỗ (Mock)'};
       },
     );
   }
@@ -415,15 +218,6 @@ class ParkingRepository {
       createdAt: now,
     );
 
-    if (_isMockMode) {
-      _inMemoryTickets.insert(0, ticket);
-      return {
-        'success': true,
-        'message': 'Đã check-in xe thành công (Mock)',
-        'ticket': ticket,
-      };
-    }
-
     return FailClosedGuard.guard(
       operation: 'createVisitorTicket',
       call: () async {
@@ -438,14 +232,6 @@ class ParkingRepository {
           'ticket': VisitorParkingTicketModel.fromJson(res),
         };
       },
-      mockFallback: () {
-        _inMemoryTickets.insert(0, ticket);
-        return {
-          'success': true,
-          'message': 'Đã check-in xe thành công (Mock)',
-          'ticket': ticket,
-        };
-      },
     );
   }
 
@@ -453,9 +239,6 @@ class ParkingRepository {
   Future<List<VisitorParkingTicketModel>> fetchActiveVisitorTickets({
     String? buildingId,
   }) async {
-    if (_isMockMode) {
-      return _inMemoryTickets.where((t) => t.isInParking).toList();
-    }
     return FailClosedGuard.guard(
       operation: 'fetchActiveVisitorTickets',
       call: () async {
@@ -477,46 +260,11 @@ class ParkingRepository {
             )
             .toList();
       },
-      mockFallback: () => _inMemoryTickets.where((t) => t.isInParking).toList(),
     );
   }
 
   /// 7. Tính phí đỗ xe theo giờ
   Future<Map<String, dynamic>> calculateVisitorFee(String ticketId) async {
-    if (_isMockMode) {
-      final ticket = _inMemoryTickets.firstWhere(
-        (t) => t.id == ticketId,
-        orElse: () => _inMemoryTickets.first,
-      );
-
-      final diffMinutes = DateTime.now()
-          .difference(ticket.checkInAt)
-          .inMinutes;
-      final hours = (diffMinutes / 60.0).ceil();
-      final effectiveHours = hours < 1 ? 1 : hours;
-
-      double fee = 0;
-      if (ticket.isCar) {
-        fee = effectiveHours <= 2
-            ? 25000
-            : 25000 + ((effectiveHours - 2) * 15000);
-        if (effectiveHours >= 12) fee += 50000;
-      } else {
-        fee = effectiveHours <= 2
-            ? 5000
-            : 5000 + ((effectiveHours - 2) * 3000);
-        if (effectiveHours >= 12) fee += 15000;
-      }
-
-      return {
-        'success': true,
-        'ticket_id': ticket.id,
-        'ticket_code': ticket.ticketCode,
-        'license_plate': ticket.licensePlate,
-        'total_hours': effectiveHours,
-        'fee_amount': fee,
-      };
-    }
     return FailClosedGuard.guard(
       operation: 'calculateVisitorFee',
       call: () async {
@@ -529,40 +277,6 @@ class ParkingRepository {
         }
         throw const AppException('Không nhận được tính toán phí đỗ xe');
       },
-      mockFallback: () {
-        final ticket = _inMemoryTickets.firstWhere(
-          (t) => t.id == ticketId,
-          orElse: () => _inMemoryTickets.first,
-        );
-
-        final diffMinutes = DateTime.now()
-            .difference(ticket.checkInAt)
-            .inMinutes;
-        final hours = (diffMinutes / 60.0).ceil();
-        final effectiveHours = hours < 1 ? 1 : hours;
-
-        double fee = 0;
-        if (ticket.isCar) {
-          fee = effectiveHours <= 2
-              ? 25000
-              : 25000 + ((effectiveHours - 2) * 15000);
-          if (effectiveHours >= 12) fee += 50000;
-        } else {
-          fee = effectiveHours <= 2
-              ? 5000
-              : 5000 + ((effectiveHours - 2) * 3000);
-          if (effectiveHours >= 12) fee += 15000;
-        }
-
-        return {
-          'success': true,
-          'ticket_id': ticket.id,
-          'ticket_code': ticket.ticketCode,
-          'license_plate': ticket.licensePlate,
-          'total_hours': effectiveHours,
-          'fee_amount': fee,
-        };
-      },
     );
   }
 
@@ -571,29 +285,6 @@ class ParkingRepository {
     required String ticketId,
     String paymentMethod = 'vietqr',
   }) async {
-    if (_isMockMode) {
-      final index = _inMemoryTickets.indexWhere((t) => t.id == ticketId);
-      if (index != -1) {
-        final feeCalc = await calculateVisitorFee(ticketId);
-        final fee = (feeCalc['fee_amount'] as num?)?.toDouble() ?? 5000.0;
-        final hours = (feeCalc['total_hours'] as num?)?.toDouble() ?? 1.0;
-
-        _inMemoryTickets[index] = _inMemoryTickets[index].copyWith(
-          status: 'completed',
-          paymentStatus: 'paid',
-          paymentMethod: paymentMethod,
-          feeAmount: fee,
-          totalHours: hours,
-          checkOutAt: DateTime.now(),
-        );
-      }
-
-      return <String, dynamic>{
-        'success': true,
-        'message': 'Đã check-out và xác nhận thu tiền thành công (Mock)',
-        'payment_method': paymentMethod,
-      };
-    }
     return FailClosedGuard.guard(
       operation: 'checkoutVisitorTicket',
       call: () async {
@@ -607,29 +298,6 @@ class ParkingRepository {
         throw const AppException(
           'Không nhận được phản hồi check-out từ máy chủ',
         );
-      },
-      mockFallback: () async {
-        final index = _inMemoryTickets.indexWhere((t) => t.id == ticketId);
-        if (index != -1) {
-          final feeCalc = await calculateVisitorFee(ticketId);
-          final fee = (feeCalc['fee_amount'] as num?)?.toDouble() ?? 5000.0;
-          final hours = (feeCalc['total_hours'] as num?)?.toDouble() ?? 1.0;
-
-          _inMemoryTickets[index] = _inMemoryTickets[index].copyWith(
-            status: 'completed',
-            paymentStatus: 'paid',
-            paymentMethod: paymentMethod,
-            feeAmount: fee,
-            totalHours: hours,
-            checkOutAt: DateTime.now(),
-          );
-        }
-
-        return <String, dynamic>{
-          'success': true,
-          'message': 'Đã check-out và xác nhận thu tiền thành công (Mock)',
-          'payment_method': paymentMethod,
-        };
       },
     );
   }

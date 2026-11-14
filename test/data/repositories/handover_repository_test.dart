@@ -1,41 +1,39 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_asset_model.dart';
+import 'package:pka_home/core/utils/guard_helper.dart';
 import 'package:pka_home/data/models/apartment_handover_model.dart';
-import 'package:pka_home/data/models/handover_item_model.dart';
 import 'package:pka_home/data/repositories/handover_repository.dart';
 
 void main() {
-  group('HandoverRepository Tests', () {
+  group('HandoverRepository Fail-Closed Tests', () {
     late HandoverRepository repository;
 
     setUp(() {
-      repository = HandoverRepository(null, true);
+      repository = HandoverRepository(null);
     });
 
-    test('fetchAssetsByApartment returns assets list', () async {
-      final assets = await repository.fetchAssetsByApartment('apt-01');
-      expect(assets, isNotEmpty);
-      expect(assets.first, isA<ApartmentAssetModel>());
-      expect(assets.first.apartmentId, 'apt-01');
+    test('1. fetchAssetsByApartment ném AppException khi không có kết nối Supabase', () async {
+      expect(
+        () => repository.fetchAssetsByApartment('apt-01'),
+        throwsA(isA<AppException>()),
+      );
     });
 
-    test('fetchHandoversByBuilding returns handovers list', () async {
-      final handovers = await repository.fetchHandoversByBuilding('bld-01');
-      expect(handovers, isNotEmpty);
-      expect(handovers.first, isA<ApartmentHandoverModel>());
-      expect(handovers.first.buildingId, 'bld-01');
+    test('2. fetchHandoversByBuilding ném AppException khi không có kết nối Supabase', () async {
+      expect(
+        () => repository.fetchHandoversByBuilding('bld-01'),
+        throwsA(isA<AppException>()),
+      );
     });
 
-    test('fetchHandoverDetail returns handover with items', () async {
-      final handover = await repository.fetchHandoverDetail('ho-01');
-      expect(handover, isNotNull);
-      expect(handover!.id, 'ho-01');
-      expect(handover.items, isNotEmpty);
-      expect(handover.items.first, isA<HandoverItemModel>());
+    test('3. fetchHandoverDetail ném AppException khi không có kết nối Supabase', () async {
+      expect(
+        () => repository.fetchHandoverDetail('ho-01'),
+        throwsA(isA<AppException>()),
+      );
     });
 
-    test('createHandover saves new handover and items', () async {
+    test('4. createHandover ném AppException khi không có kết nối Supabase', () async {
       final newHandover = ApartmentHandoverModel(
         id: 'ho-test-99',
         apartmentId: 'apt-01',
@@ -49,89 +47,35 @@ void main() {
         initialElectricityReading: 1200.0,
         initialWaterReading: 50.0,
         depositHeld: 5000000.0,
-        totalDeduction: 0.0,
+        totalDeduction: 0,
         depositRefund: 5000000.0,
         status: 'draft',
-        lookupCode: 'HK-TEST9999',
+        lookupCode: 'HK-TEST01',
+        apartmentCode: 'A0110',
+        residentName: 'Nguyễn Văn An',
+        staffName: 'Trần Kỹ Thuật',
       );
 
-      final items = [
-        const HandoverItemModel(
-          id: 'item-test-1',
-          handoverId: 'ho-test-99',
-          itemName: 'Khóa cửa vân tay',
-          roomArea: 'living_room',
-          condition: 'good',
-        ),
-      ];
-
-      final created = await repository.createHandover(newHandover, items);
-      expect(created.id, 'ho-test-99');
-      expect(created.items.length, 1);
-    });
-
-    test('signByStaff updates staff signature and moves to pending_resident', () async {
-      final dummySignature = Uint8List.fromList([1, 2, 3, 4]);
-      final updated = await repository.signByStaff('ho-01', dummySignature, notes: 'Đã kiểm tra kỹ');
-      expect(updated.staffSignatureUrl, isNotNull);
-      expect(updated.isPendingResident, isTrue);
-    });
-
-    test('signByResident updates resident signature and moves to confirmed', () async {
-      final dummySignature = Uint8List.fromList([5, 6, 7, 8]);
-      final confirmed = await repository.signByResident('ho-01', dummySignature);
-      expect(confirmed.residentSignatureUrl, isNotNull);
-      expect(confirmed.isConfirmed, isTrue);
-    });
-
-    test('createHandoverWithStaffSignature atomically creates handover and staff signature', () async {
-      final newHandover = ApartmentHandoverModel(
-        id: 'ho-atomic-01',
-        apartmentId: 'apt-01',
-        buildingId: 'bld-01',
-        residentId: 'res-01',
-        handoverType: 'move_in',
-        reportCode: 'HO-202611-00088',
-        handoverDate: DateTime.now(),
-        conductedBy: 'staff-01',
-        initialElectricityReading: 1300.0,
-        initialWaterReading: 60.0,
-        depositHeld: 5000000.0,
-        totalDeduction: 0.0,
-        depositRefund: 5000000.0,
-        status: 'draft',
-        lookupCode: 'HK-ATOMIC01',
+      expect(
+        () => repository.createHandover(newHandover, []),
+        throwsA(isA<AppException>()),
       );
-
-      final items = [
-        const HandoverItemModel(
-          id: 'item-atomic-1',
-          handoverId: 'ho-atomic-01',
-          itemName: 'Bàn ăn 4 ghế',
-          roomArea: 'kitchen',
-          condition: 'good',
-        ),
-      ];
-
-      final dummySig = Uint8List.fromList([9, 10, 11, 12]);
-      final created = await repository.createHandoverWithStaffSignature(
-        handover: newHandover,
-        items: items,
-        signatureBytes: dummySig,
-        notes: 'Kiểm tra hiện trường hoàn tất',
-      );
-
-      expect(created.id, 'ho-atomic-01');
-      expect(created.isPendingResident, isTrue);
-      expect(created.staffSignatureUrl, contains('signatures/'));
-      expect(created.staffNotes, 'Kiểm tra hiện trường hoàn tất');
-      expect(created.items.length, 1);
     });
 
-    test('disputeByResident records dispute notes and moves to disputed', () async {
-      final disputed = await repository.disputeByResident('ho-01', 'Bồn rửa bị rò rỉ nhưng chưa ghi nhận');
-      expect(disputed.status, 'disputed');
-      expect(disputed.residentNotes, contains('Bồn rửa bị rò rỉ'));
+    test('5. signByStaff ném AppException khi không có kết nối Supabase', () async {
+      final fakeBytes = Uint8List.fromList([1, 2, 3, 4]);
+      expect(
+        () => repository.signByStaff('ho-01', fakeBytes),
+        throwsA(isA<AppException>()),
+      );
+    });
+
+    test('6. signByResident ném AppException khi không có kết nối Supabase', () async {
+      final fakeBytes = Uint8List.fromList([1, 2, 3, 4]);
+      expect(
+        () => repository.signByResident('ho-01', fakeBytes),
+        throwsA(isA<AppException>()),
+      );
     });
   });
 }

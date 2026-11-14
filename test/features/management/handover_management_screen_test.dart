@@ -2,23 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/models/apartment_handover_model.dart';
+import 'package:pka_home/data/models/user_model.dart';
+import 'package:pka_home/data/providers/auth_provider.dart';
 import 'package:pka_home/data/providers/handover_provider.dart';
 import 'package:pka_home/data/repositories/handover_repository.dart';
 import 'package:pka_home/features/management/screens/handover_management_screen.dart';
 
+class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeHandoverRepository extends Fake implements HandoverRepository {
+  @override
+  Future<List<ApartmentHandoverModel>> fetchHandoversByBuilding(
+    String buildingId, {
+    String? status,
+    String? type,
+  }) async =>
+      [];
+}
+
 void main() {
   group('HandoverManagementScreen Widget Tests', () {
-    late HandoverRepository repository;
-
-    setUp(() {
-      repository = HandoverRepository(null, true);
-    });
+    final adminUser = UserModel(
+      id: 'admin-01',
+      fullName: 'Quản Lý Trưởng',
+      role: 'admin',
+    );
 
     testWidgets('Hiển thị tiêu đề, dải KPI và danh sách biên bản', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            handoverRepositoryProvider.overrideWithValue(repository),
+            authProvider.overrideWith((ref) => FakeAuthNotifier(adminUser)),
+            handoverRepositoryProvider.overrideWithValue(FakeHandoverRepository()),
             buildingHandoversProvider.overrideWith((ref, buildingId) async {
               return [
                 ApartmentHandoverModel(

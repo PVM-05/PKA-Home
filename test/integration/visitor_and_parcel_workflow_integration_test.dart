@@ -1,12 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/repositories/front_desk_repository.dart';
+import '../helpers/test_workflow_fakes.dart';
 
 void main() {
   group('Quy trình Tích hợp Khách Viếng Thăm & Bưu Kiện Lễ Tân (D6)', () {
     late FrontDeskRepository repository;
 
     setUp(() {
-      repository = FrontDeskRepository(null, true);
+      repository = FakeFrontDeskWorkflowRepository();
     });
 
     test('Toan ven quy trinh Don khach QR va Giao nhan buu kien PIN', () async {

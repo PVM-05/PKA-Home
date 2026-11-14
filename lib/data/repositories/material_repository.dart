@@ -7,7 +7,8 @@ import '../models/issue_sla_stats_model.dart';
 
 class MaterialRepository {
   final SupabaseClient? _client;
-  final bool _isMockMode;
+
+  MaterialRepository([this._client]);
 
   SupabaseClient get _supabase {
     final c = _client;
@@ -18,144 +19,11 @@ class MaterialRepository {
     throw const AppException('Supabase chưa sẵn sàng');
   }
 
-  // In-memory cache phục vụ offline fallback và test runner
-  final List<MaintenanceMaterialModel> _inMemoryMaterials = [];
-  final List<IssueMaterialUsageModel> _inMemoryIssueMaterials = [];
-
-  MaterialRepository([this._client, this._isMockMode = false]) {
-    _initMockData();
-  }
-
-  void _initMockData() {
-    if (_inMemoryMaterials.isNotEmpty) return;
-
-    final now = DateTime.now();
-    _inMemoryMaterials.addAll([
-      MaintenanceMaterialModel(
-        id: 'mat-01',
-        code: 'MAT-ELEC-01',
-        name: 'Bóng đèn LED Rạng Đông 18W',
-        category: 'electrical',
-        unit: 'cái',
-        unitPrice: 65000,
-        stockQuantity: 45,
-        minStockAlert: 10,
-        createdAt: now.subtract(const Duration(days: 30)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-02',
-        code: 'MAT-ELEC-02',
-        name: 'Aptomat tép Schneider 1P 20A',
-        category: 'electrical',
-        unit: 'cái',
-        unitPrice: 120000,
-        stockQuantity: 20,
-        minStockAlert: 5,
-        createdAt: now.subtract(const Duration(days: 28)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-03',
-        code: 'MAT-ELEC-03',
-        name: 'Dây điện đôi Cadivi 2x2.5mm',
-        category: 'electrical',
-        unit: 'mét',
-        unitPrice: 18000,
-        stockQuantity: 150,
-        minStockAlert: 30,
-        createdAt: now.subtract(const Duration(days: 25)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-04',
-        code: 'MAT-PLUMB-01',
-        name: 'Van bi đồng Miha D21',
-        category: 'plumbing',
-        unit: 'cái',
-        unitPrice: 85000,
-        stockQuantity: 25,
-        minStockAlert: 8,
-        createdAt: now.subtract(const Duration(days: 22)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-05',
-        code: 'MAT-PLUMB-02',
-        name: 'Dây cấp nước bồn cầu inox 304',
-        category: 'plumbing',
-        unit: 'sợi',
-        unitPrice: 45000,
-        stockQuantity: 30,
-        minStockAlert: 10,
-        createdAt: now.subtract(const Duration(days: 20)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-06',
-        code: 'MAT-PLUMB-03',
-        name: 'Keo dán ống PVC Bình Minh 500g',
-        category: 'plumbing',
-        unit: 'hộp',
-        unitPrice: 55000,
-        stockQuantity: 12,
-        minStockAlert: 4,
-        createdAt: now.subtract(const Duration(days: 18)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-07',
-        code: 'MAT-CONST-01',
-        name: 'Keo silicone Apolo A500',
-        category: 'construction',
-        unit: 'chai',
-        unitPrice: 58000,
-        stockQuantity: 35,
-        minStockAlert: 10,
-        createdAt: now.subtract(const Duration(days: 15)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-08',
-        code: 'MAT-CONST-02',
-        name: 'Khóa tay gạt cửa thông phòng Hafele',
-        category: 'construction',
-        unit: 'bộ',
-        unitPrice: 380000,
-        stockQuantity: 8,
-        minStockAlert: 3,
-        createdAt: now.subtract(const Duration(days: 12)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-09',
-        code: 'MAT-ELEV-01',
-        name: 'Đèn chiếu sáng cabin thang máy LED 12V',
-        category: 'elevator',
-        unit: 'bộ',
-        unitPrice: 220000,
-        stockQuantity: 6,
-        minStockAlert: 2,
-        createdAt: now.subtract(const Duration(days: 10)),
-      ),
-      MaintenanceMaterialModel(
-        id: 'mat-10',
-        code: 'MAT-FIRE-01',
-        name: 'Đầu phun sprinkler chữa cháy quay xuống',
-        category: 'fire_safety',
-        unit: 'cái',
-        unitPrice: 75000,
-        stockQuantity: 15,
-        minStockAlert: 5,
-        createdAt: now.subtract(const Duration(days: 8)),
-      ),
-    ]);
-  }
-
-  /// 1. Lấy danh sách vật tư kho
+  /// 1. Lấy danh mục vật tư thiết bị trong kho
   Future<List<MaintenanceMaterialModel>> fetchMaterials({
     String? buildingId,
     String? category,
   }) async {
-    if (_isMockMode) {
-      var list = List<MaintenanceMaterialModel>.from(_inMemoryMaterials);
-      if (category != null && category.isNotEmpty && category != 'all') {
-        list = list.where((m) => m.category == category).toList();
-      }
-      return list;
-    }
     return FailClosedGuard.guard(
       operation: 'fetchMaterials',
       call: () async {
@@ -176,13 +44,6 @@ class MaterialRepository {
             )
             .toList();
       },
-      mockFallback: () {
-        var list = List<MaintenanceMaterialModel>.from(_inMemoryMaterials);
-        if (category != null && category.isNotEmpty && category != 'all') {
-          list = list.where((m) => m.category == category).toList();
-        }
-        return list;
-      },
     );
   }
 
@@ -190,11 +51,6 @@ class MaterialRepository {
   Future<List<IssueMaterialUsageModel>> fetchIssueMaterials(
     String issueId,
   ) async {
-    if (_isMockMode) {
-      return _inMemoryIssueMaterials
-          .where((im) => im.issueReportId == issueId)
-          .toList();
-    }
     return FailClosedGuard.guard(
       operation: 'fetchIssueMaterials',
       call: () async {
@@ -212,11 +68,6 @@ class MaterialRepository {
             )
             .toList();
       },
-      mockFallback: () {
-        return _inMemoryIssueMaterials
-            .where((im) => im.issueReportId == issueId)
-            .toList();
-      },
     );
   }
 
@@ -226,43 +77,6 @@ class MaterialRepository {
     required List<Map<String, dynamic>> materials,
     String? staffId,
   }) async {
-    if (_isMockMode) {
-      for (final item in materials) {
-        final matId = item['material_id'] as String;
-        final qty = (item['quantity'] as num?)?.toInt() ?? 1;
-        final isChargeable = item['is_chargeable'] as bool? ?? false;
-        final note = item['note'] as String?;
-
-        final matIndex = _inMemoryMaterials.indexWhere((m) => m.id == matId);
-        if (matIndex != -1) {
-          final mat = _inMemoryMaterials[matIndex];
-          final newStock = (mat.stockQuantity - qty).clamp(0, 999999);
-          _inMemoryMaterials[matIndex] = mat.copyWith(stockQuantity: newStock);
-
-          _inMemoryIssueMaterials.add(
-            IssueMaterialUsageModel(
-              id: 'usage-${DateTime.now().millisecondsSinceEpoch}-${_inMemoryIssueMaterials.length}',
-              issueReportId: issueId,
-              materialId: mat.id,
-              materialName: mat.name,
-              quantity: qty,
-              unit: mat.unit,
-              unitPrice: mat.unitPrice,
-              totalAmount: mat.unitPrice * qty,
-              isChargeable: isChargeable,
-              note: note,
-              createdAt: DateTime.now(),
-            ),
-          );
-        }
-      }
-
-      return {
-        'success': true,
-        'message': 'Đã xuất kho và ghi nhận vật tư thành công (Offline Mock)',
-        'items_recorded': materials.length,
-      };
-    }
     return FailClosedGuard.guard(
       operation: 'recordMaterialsUsage',
       call: () async {
@@ -279,57 +93,11 @@ class MaterialRepository {
         }
         throw const AppException('Không nhận được phản hồi từ máy chủ khi xuất kho');
       },
-      mockFallback: () {
-        for (final item in materials) {
-          final matId = item['material_id'] as String;
-          final qty = (item['quantity'] as num?)?.toInt() ?? 1;
-          final isChargeable = item['is_chargeable'] as bool? ?? false;
-          final note = item['note'] as String?;
-
-          final matIndex = _inMemoryMaterials.indexWhere((m) => m.id == matId);
-          if (matIndex != -1) {
-            final mat = _inMemoryMaterials[matIndex];
-            final newStock = (mat.stockQuantity - qty).clamp(0, 999999);
-            _inMemoryMaterials[matIndex] = mat.copyWith(stockQuantity: newStock);
-
-            _inMemoryIssueMaterials.add(
-              IssueMaterialUsageModel(
-                id: 'usage-${DateTime.now().millisecondsSinceEpoch}-${_inMemoryIssueMaterials.length}',
-                issueReportId: issueId,
-                materialId: mat.id,
-                materialName: mat.name,
-                quantity: qty,
-                unit: mat.unit,
-                unitPrice: mat.unitPrice,
-                totalAmount: mat.unitPrice * qty,
-                isChargeable: isChargeable,
-                note: note,
-                createdAt: DateTime.now(),
-              ),
-            );
-          }
-        }
-
-        return {
-          'success': true,
-          'message': 'Đã xuất kho và ghi nhận vật tư thành công (Offline Mock)',
-          'items_recorded': materials.length,
-        };
-      },
     );
   }
 
   /// 4. Lấy thống kê KPI SLA sự cố
   Future<IssueSlaStatsModel> fetchSlaStats({String? buildingId}) async {
-    if (_isMockMode) {
-      return const IssueSlaStatsModel(
-        totalIssues: 12,
-        onTimeCount: 9,
-        warningCount: 2,
-        breachedCount: 1,
-        complianceRate: 91.7,
-      );
-    }
     return FailClosedGuard.guard(
       operation: 'fetchSlaStats',
       call: () async {
@@ -348,13 +116,6 @@ class MaterialRepository {
         }
         throw const AppException('Không nhận được thống kê SLA từ máy chủ');
       },
-      mockFallback: () => const IssueSlaStatsModel(
-        totalIssues: 12,
-        onTimeCount: 9,
-        warningCount: 2,
-        breachedCount: 1,
-        complianceRate: 91.7,
-      ),
     );
   }
 
@@ -363,15 +124,6 @@ class MaterialRepository {
     required String materialId,
     required int newStock,
   }) async {
-    if (_isMockMode) {
-      final index = _inMemoryMaterials.indexWhere((m) => m.id == materialId);
-      if (index != -1) {
-        _inMemoryMaterials[index] = _inMemoryMaterials[index].copyWith(
-          stockQuantity: newStock,
-        );
-      }
-      return {'success': true, 'message': 'Đã cập nhật tồn kho (Mock)'};
-    }
     return FailClosedGuard.guard(
       operation: 'updateMaterialStock',
       call: () async {
@@ -384,15 +136,6 @@ class MaterialRepository {
             .eq('id', materialId);
         return {'success': true, 'message': 'Đã cập nhật tồn kho'};
       },
-      mockFallback: () {
-        final index = _inMemoryMaterials.indexWhere((m) => m.id == materialId);
-        if (index != -1) {
-          _inMemoryMaterials[index] = _inMemoryMaterials[index].copyWith(
-            stockQuantity: newStock,
-          );
-        }
-        return {'success': true, 'message': 'Đã cập nhật tồn kho (Mock)'};
-      },
     );
   }
 
@@ -403,20 +146,6 @@ class MaterialRepository {
     required String reason,
     String? staffId,
   }) async {
-    if (_isMockMode) {
-      final index = _inMemoryMaterials.indexWhere((m) => m.id == materialId);
-      if (index != -1) {
-        final current = _inMemoryMaterials[index];
-        final nextStock = (current.stockQuantity + delta).clamp(0, 999999);
-        _inMemoryMaterials[index] = current.copyWith(stockQuantity: nextStock);
-        return {
-          'success': true,
-          'message': 'Đã điều chỉnh tồn kho thành công (Mock)',
-          'new_stock': nextStock,
-        };
-      }
-      throw const AppException('Không tìm thấy vật tư');
-    }
     return FailClosedGuard.guard(
       operation: 'adjustMaterialStockDelta',
       call: () async {
@@ -467,20 +196,6 @@ class MaterialRepository {
           'new_stock': nextStock,
         };
       },
-      mockFallback: () {
-        final index = _inMemoryMaterials.indexWhere((m) => m.id == materialId);
-        if (index != -1) {
-          final current = _inMemoryMaterials[index];
-          final nextStock = (current.stockQuantity + delta).clamp(0, 999999);
-          _inMemoryMaterials[index] = current.copyWith(stockQuantity: nextStock);
-          return {
-            'success': true,
-            'message': 'Đã điều chỉnh tồn kho thành công (Mock)',
-            'new_stock': nextStock,
-          };
-        }
-        throw const AppException('Không tìm thấy vật tư');
-      },
     );
   }
 
@@ -488,10 +203,6 @@ class MaterialRepository {
   Future<MaintenanceMaterialModel> createMaterial(
     MaintenanceMaterialModel material,
   ) async {
-    if (_isMockMode) {
-      _inMemoryMaterials.add(material);
-      return material;
-    }
     return FailClosedGuard.guard(
       operation: 'createMaterial',
       call: () async {
@@ -501,10 +212,6 @@ class MaterialRepository {
             .select()
             .single();
         return MaintenanceMaterialModel.fromJson(res);
-      },
-      mockFallback: () {
-        _inMemoryMaterials.add(material);
-        return material;
       },
     );
   }

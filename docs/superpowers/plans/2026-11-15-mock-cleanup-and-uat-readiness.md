@@ -93,3 +93,4 @@
 - [ ] **Step 6.1:** Chạy `dart analyze lib test` đảm bảo 0 lỗi.
 - [ ] **Step 6.2:** Chạy `flutter test` đảm bảo toàn bộ test pass.
 - [ ] **Step 6.3:** Push commit lên nhánh `main`.
+

@@ -1,16 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pka_home/data/models/apartment_asset_model.dart';
 import 'package:pka_home/data/models/apartment_handover_model.dart';
 import 'package:pka_home/data/models/handover_item_model.dart';
+import 'package:pka_home/data/models/user_model.dart';
+import 'package:pka_home/data/providers/auth_provider.dart';
 import 'package:pka_home/data/providers/handover_provider.dart';
 import 'package:pka_home/data/repositories/handover_repository.dart';
 import 'package:pka_home/features/management/screens/handover_management_screen.dart';
 import 'package:pka_home/features/management/screens/inspection_workstation_screen.dart';
 
+class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeHandoverRepository extends Fake implements HandoverRepository {
+  final ApartmentHandoverModel? handoverDetail;
+
+  FakeHandoverRepository({this.handoverDetail});
+
+  @override
+  Future<ApartmentHandoverModel?> fetchHandoverDetail(String handoverId) async => handoverDetail;
+
+  @override
+  Future<List<ApartmentHandoverModel>> fetchHandoversByBuilding(
+    String buildingId, {
+    String? status,
+    String? type,
+  }) async =>
+      handoverDetail != null ? [handoverDetail!] : [];
+
+  @override
+  Future<List<ApartmentAssetModel>> fetchAssetsByApartment(String apartmentId) async => [];
+}
+
 void main() {
   group('HandoverManagement & Inspection Responsive & Anti-RenderFlex Tests', () {
-    late HandoverRepository repository;
+    final adminUser = UserModel(
+      id: 'admin-01',
+      fullName: 'Quản Lý Trưởng',
+      role: 'admin',
+    );
 
     final mockHandover = ApartmentHandoverModel(
       id: 'ho-01',
@@ -51,14 +85,11 @@ void main() {
       ],
     );
 
-    setUp(() {
-      repository = HandoverRepository(null, true);
-    });
-
     Widget buildTestWidget(Widget screen, {double textScale = 1.0}) {
       return ProviderScope(
         overrides: [
-          handoverRepositoryProvider.overrideWithValue(repository),
+          authProvider.overrideWith((ref) => FakeAuthNotifier(adminUser)),
+          handoverRepositoryProvider.overrideWithValue(FakeHandoverRepository(handoverDetail: mockHandover)),
           buildingHandoversProvider.overrideWith((ref, buildingId) async => [mockHandover]),
           handoverDetailProvider.overrideWith((ref, id) async => mockHandover),
         ],
