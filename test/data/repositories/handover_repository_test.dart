@@ -84,6 +84,50 @@ void main() {
       expect(confirmed.isConfirmed, isTrue);
     });
 
+    test('createHandoverWithStaffSignature atomically creates handover and staff signature', () async {
+      final newHandover = ApartmentHandoverModel(
+        id: 'ho-atomic-01',
+        apartmentId: 'apt-01',
+        buildingId: 'bld-01',
+        residentId: 'res-01',
+        handoverType: 'move_in',
+        reportCode: 'HO-202611-00088',
+        handoverDate: DateTime.now(),
+        conductedBy: 'staff-01',
+        initialElectricityReading: 1300.0,
+        initialWaterReading: 60.0,
+        depositHeld: 5000000.0,
+        totalDeduction: 0.0,
+        depositRefund: 5000000.0,
+        status: 'draft',
+        lookupCode: 'HK-ATOMIC01',
+      );
+
+      final items = [
+        const HandoverItemModel(
+          id: 'item-atomic-1',
+          handoverId: 'ho-atomic-01',
+          itemName: 'Bàn ăn 4 ghế',
+          roomArea: 'kitchen',
+          condition: 'good',
+        ),
+      ];
+
+      final dummySig = Uint8List.fromList([9, 10, 11, 12]);
+      final created = await repository.createHandoverWithStaffSignature(
+        handover: newHandover,
+        items: items,
+        signatureBytes: dummySig,
+        notes: 'Kiểm tra hiện trường hoàn tất',
+      );
+
+      expect(created.id, 'ho-atomic-01');
+      expect(created.isPendingResident, isTrue);
+      expect(created.staffSignatureUrl, contains('signatures/'));
+      expect(created.staffNotes, 'Kiểm tra hiện trường hoàn tất');
+      expect(created.items.length, 1);
+    });
+
     test('disputeByResident records dispute notes and moves to disputed', () async {
       final disputed = await repository.disputeByResident('ho-01', 'Bồn rửa bị rò rỉ nhưng chưa ghi nhận');
       expect(disputed.status, 'disputed');

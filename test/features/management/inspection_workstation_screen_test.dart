@@ -48,10 +48,35 @@ void main() {
 
       expect(find.text('Trạm kiểm kê & bàn giao'), findsOneWidget);
       expect(find.text('Căn hộ A0110'), findsOneWidget);
-      expect(find.text('Chỉ số điện (kWh)'), findsOneWidget);
-      expect(find.text('Chỉ số nước (m³)'), findsOneWidget);
+      expect(find.textContaining('Chỉ số điện (kWh)'), findsOneWidget);
+      expect(find.textContaining('Chỉ số nước (m³)'), findsOneWidget);
       expect(find.text('Khóa cửa thông minh vân tay'), findsOneWidget);
       expect(find.text('Ký tên BQL'), findsOneWidget);
+    });
+
+    testWidgets('Khóa chỉnh sửa và hiển thị huy hiệu bất biến khi isReadOnly = true', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            handoverRepositoryProvider.overrideWithValue(repository),
+            apartmentAssetsProvider.overrideWith((ref, apartmentId) async => []),
+          ],
+          child: const MaterialApp(
+            home: InspectionWorkstationScreen(
+              buildingId: 'bld-01',
+              apartmentId: 'apt-01',
+              apartmentCode: 'A0110',
+              isReadOnly: true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Đã duyệt (Bất biến)'), findsOneWidget);
+      expect(find.text('Gửi cư dân'), findsNothing);
+      expect(find.text('Ký tên BQL'), findsNothing);
     });
   });
 }

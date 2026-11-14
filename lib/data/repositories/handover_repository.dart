@@ -321,6 +321,80 @@ class HandoverRepository {
     );
   }
 
+  /// Tạo mới biên bản bàn giao kèm các hạng mục và chữ ký BQL nguyên tử (Atomic)
+  Future<ApartmentHandoverModel> createHandoverWithStaffSignature({
+    required ApartmentHandoverModel handover,
+    required List<HandoverItemModel> items,
+    required Uint8List signatureBytes,
+    String? notes,
+  }) async {
+    if (_isMockMode) {
+      final fileName = 'signatures/${handover.id}_staff.png';
+      final signedHandover = handover.copyWith(
+        staffSignatureUrl: fileName,
+        staffSignedAt: DateTime.now(),
+        staffNotes: notes ?? handover.staffNotes,
+        status: 'pending_resident',
+        items: items,
+      );
+      _mockHandovers.removeWhere((h) => h.id == handover.id);
+      _mockHandovers.insert(0, signedHandover);
+      return signedHandover;
+    }
+    return FailClosedGuard.guard(
+      operation: 'createHandoverWithStaffSignature',
+      call: () async {
+        // 1. Upload chữ ký BQL lên storage
+        final fileName = 'signatures/${handover.id}_staff_${DateTime.now().millisecondsSinceEpoch}.png';
+        await _supabase.storage.from('handover-docs').uploadBinary(fileName, signatureBytes);
+
+        // 2. Chuẩn bị dữ liệu handover hoàn chỉnh
+        final data = handover.toJson()..remove('items');
+        data['staff_signature_url'] = fileName;
+        data['staff_signed_at'] = DateTime.now().toIso8601String();
+        data['status'] = 'pending_resident';
+        if (notes != null && notes.isNotEmpty) {
+          data['staff_notes'] = notes;
+        }
+
+        // 3. Upsert / Insert handover
+        final response = await _supabase.from('apartment_handovers').upsert(data).select().single();
+        final createdHandover = ApartmentHandoverModel.fromJson(Map<String, dynamic>.from(response as Map));
+
+        // 4. Insert handover items
+        if (items.isNotEmpty) {
+          final itemsData = items.map((item) {
+            final itemMap = item.toJson();
+            itemMap['handover_id'] = createdHandover.id;
+            return itemMap;
+          }).toList();
+
+          final itemsResp = await _supabase.from('handover_items').upsert(itemsData).select();
+          final createdItems = (itemsResp as List)
+              .map((json) => HandoverItemModel.fromJson(Map<String, dynamic>.from(json as Map)))
+              .toList();
+
+          return createdHandover.copyWith(items: createdItems);
+        }
+
+        return createdHandover;
+      },
+      mockFallback: () {
+        final fileName = 'signatures/${handover.id}_staff.png';
+        final signedHandover = handover.copyWith(
+          staffSignatureUrl: fileName,
+          staffSignedAt: DateTime.now(),
+          staffNotes: notes ?? handover.staffNotes,
+          status: 'pending_resident',
+          items: items,
+        );
+        _mockHandovers.removeWhere((h) => h.id == handover.id);
+        _mockHandovers.insert(0, signedHandover);
+        return signedHandover;
+      },
+    );
+  }
+
   /// Cập nhật một hạng mục kiểm kê (tình trạng, ảnh, chi phí)
   Future<HandoverItemModel> updateHandoverItem(HandoverItemModel item) async {
     if (_isMockMode) {

@@ -83,5 +83,29 @@ void main() {
       final updated = afterUpdate.firstWhere((m) => m.id == firstMat.id);
       expect(updated.stockQuantity, currentStock + 10);
     });
+
+    test('6. adjustMaterialStockDelta cho phép điều chỉnh tăng/giảm tồn kho an toàn kèm lý do', () async {
+      final materials = await repository.fetchMaterials();
+      final mat = materials.first;
+      final currentStock = mat.stockQuantity;
+
+      // 6.1 Nhập thêm +15 cái
+      final resImport = await repository.adjustMaterialStockDelta(
+        materialId: mat.id,
+        delta: 15,
+        reason: 'Nhập lô hàng bổ sung đợt 1',
+      );
+      expect(resImport['success'], isTrue);
+      expect(resImport['new_stock'], currentStock + 15);
+
+      // 6.2 Xuất giảm / Hao hụt -5 cái
+      final resLoss = await repository.adjustMaterialStockDelta(
+        materialId: mat.id,
+        delta: -5,
+        reason: 'Hao hụt kiểm kê cuối tháng',
+      );
+      expect(resLoss['success'], isTrue);
+      expect(resLoss['new_stock'], currentStock + 10);
+    });
   });
 }

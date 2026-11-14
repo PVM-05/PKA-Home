@@ -89,7 +89,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      final err = tester.takeException();
+      expect(err, isNull);
       expect(find.text('Quản lý bàn giao & kiểm kê'), findsOneWidget);
       expect(find.text('HO-202611-00001'), findsOneWidget);
     });
@@ -107,7 +108,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      final err = tester.takeException();
+      expect(err, isNull);
       expect(find.text('Quản lý bàn giao & kiểm kê'), findsOneWidget);
       expect(find.text('HO-202611-00001'), findsOneWidget);
       expect(find.text('Mở trạm kiểm kê'), findsOneWidget);
@@ -132,7 +134,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      final err = tester.takeException();
+      expect(err, isNull);
       expect(find.text('Trạm kiểm kê & bàn giao'), findsOneWidget);
       expect(find.textContaining('A0110'), findsWidgets);
     });
@@ -155,7 +158,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      final err = tester.takeException();
+      expect(err, isNull);
       expect(find.text('Trạm kiểm kê & bàn giao'), findsOneWidget);
       expect(find.textContaining('A0110'), findsWidgets);
     });

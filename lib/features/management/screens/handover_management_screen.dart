@@ -5,7 +5,10 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/handover_pdf_builder.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/apartment_handover_model.dart';
+import '../../../data/models/apartment_model.dart';
+import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/handover_provider.dart';
+import '../../../data/providers/management_provider.dart';
 import 'inspection_workstation_screen.dart';
 
 class HandoverManagementScreen extends ConsumerStatefulWidget {
@@ -44,8 +47,12 @@ class _HandoverManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final activeBuilding = ref.watch(activeBuildingProvider).valueOrNull;
+    final effectiveBuildingId = (activeBuilding?.id != null && activeBuilding!.id.isNotEmpty)
+        ? activeBuilding.id
+        : widget.buildingId;
     final handoversAsync =
-        ref.watch(buildingHandoversProvider(widget.buildingId));
+        ref.watch(buildingHandoversProvider(effectiveBuildingId));
     final isDesktop = MediaQuery.sizeOf(context).width >= 900;
 
     return Scaffold(
@@ -57,7 +64,7 @@ class _HandoverManagementScreenState
             icon: const Icon(Icons.refresh),
             tooltip: 'Làm mới',
             onPressed: () =>
-                ref.refresh(buildingHandoversProvider(widget.buildingId)),
+                ref.refresh(buildingHandoversProvider(effectiveBuildingId)),
           ),
         ],
       ),
@@ -182,7 +189,8 @@ class _HandoverManagementScreenState
                                 ),
                                 itemCount: filtered.length,
                                 itemBuilder: (context, index) =>
-                                    _buildHandoverCard(filtered[index]),
+                                    _buildHandoverCard(
+                                        filtered[index], effectiveBuildingId),
                               )
                             : ListView.separated(
                                 padding: const EdgeInsets.all(16),
@@ -190,7 +198,8 @@ class _HandoverManagementScreenState
                                 separatorBuilder: (_, index) =>
                                     const SizedBox(height: 12),
                                 itemBuilder: (context, index) =>
-                                    _buildHandoverCard(filtered[index]),
+                                    _buildHandoverCard(
+                                        filtered[index], effectiveBuildingId),
                               ),
                   ),
                 ],
@@ -209,7 +218,7 @@ class _HandoverManagementScreenState
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () =>
-                    ref.refresh(buildingHandoversProvider(widget.buildingId)),
+                    ref.refresh(buildingHandoversProvider(effectiveBuildingId)),
                 child: const Text('Thử lại'),
               ),
             ],
@@ -218,7 +227,7 @@ class _HandoverManagementScreenState
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          _showCreateHandoverDialog(context);
+          _showCreateHandoverDialog(context, effectiveBuildingId);
         },
         icon: const Icon(Icons.add),
         label: const Text('Tạo biên bản mới'),
@@ -374,8 +383,9 @@ class _HandoverManagementScreenState
     );
   }
 
-  Widget _buildHandoverCard(ApartmentHandoverModel item) {
+  Widget _buildHandoverCard(ApartmentHandoverModel item, String effectiveBuildingId) {
     final statusColor = _getStatusColor(item.status);
+    final isConfirmed = item.status == 'confirmed' || item.status == 'completed';
 
     return AppCard(
       child: Column(
@@ -513,16 +523,22 @@ class _HandoverManagementScreenState
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => InspectionWorkstationScreen(
-                          buildingId: widget.buildingId,
+                          buildingId: item.buildingId.isNotEmpty ? item.buildingId : effectiveBuildingId,
                           apartmentId: item.apartmentId,
                           apartmentCode: item.apartmentCode ?? 'A0110',
                           existingHandoverId: item.id,
+                          isReadOnly: isConfirmed,
                         ),
                       ),
                     );
                   },
-                  icon: const Icon(Icons.edit_note, size: 18),
-                  label: const Text('Mở trạm kiểm kê'),
+                  icon: Icon(
+                    isConfirmed ? Icons.verified_user_outlined : Icons.edit_note,
+                    size: 18,
+                  ),
+                  label: Text(
+                    isConfirmed ? 'Xem biên bản đã ký' : 'Mở trạm kiểm kê',
+                  ),
                 ),
               ],
             ),
@@ -532,8 +548,12 @@ class _HandoverManagementScreenState
     );
   }
 
-  void _showCreateHandoverDialog(BuildContext context) {
-    final codeController = TextEditingController(text: 'A0110');
+  void _showCreateHandoverDialog(BuildContext context, String effectiveBuildingId) {
+    final apartmentsAsync = ref.read(apartmentsProvider);
+    final apartments = apartmentsAsync.valueOrNull ?? [];
+    ApartmentModel? selectedApartment = apartments.isNotEmpty ? apartments.first : null;
+    final fallbackCodeController =
+        TextEditingController(text: selectedApartment?.code ?? 'A0110');
     String type = 'move_in';
 
     showDialog(
@@ -541,38 +561,66 @@ class _HandoverManagementScreenState
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Khởi tạo biên bản bàn giao'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: codeController,
-                decoration: const InputDecoration(
-                  labelText: 'Mã căn hộ (VD: A0110)',
-                  prefixIcon: Icon(Icons.home),
-                ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: type,
-                decoration: const InputDecoration(
-                  labelText: 'Loại bàn giao',
-                  prefixIcon: Icon(Icons.swap_horiz),
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'move_in',
-                    child: Text('Nhận nhà (Move-in)'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (apartments.isNotEmpty) ...[
+                  DropdownButtonFormField<ApartmentModel>(
+                    initialValue: selectedApartment,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Chọn căn hộ bàn giao *',
+                      prefixIcon: Icon(Icons.home),
+                    ),
+                    items: apartments.map((apt) {
+                      return DropdownMenuItem<ApartmentModel>(
+                        value: apt,
+                        child: Text('${apt.code} (Tầng ${apt.floorNumber})'),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() {
+                          selectedApartment = val;
+                          fallbackCodeController.text = val.code;
+                        });
+                      }
+                    },
                   ),
-                  DropdownMenuItem(
-                    value: 'move_out',
-                    child: Text('Trả nhà (Move-out)'),
+                ] else ...[
+                  TextField(
+                    controller: fallbackCodeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Mã căn hộ (VD: A0110) *',
+                      prefixIcon: Icon(Icons.home),
+                    ),
                   ),
                 ],
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => type = val);
-                },
-              ),
-            ],
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: type,
+                  decoration: const InputDecoration(
+                    labelText: 'Loại bàn giao',
+                    prefixIcon: Icon(Icons.swap_horiz),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'move_in',
+                      child: Text('Nhận nhà (Move-in)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'move_out',
+                      child: Text('Trả nhà (Move-out)'),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => type = val);
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -581,15 +629,18 @@ class _HandoverManagementScreenState
             ),
             ElevatedButton(
               onPressed: () {
-                final code = codeController.text.trim();
-                if (code.isEmpty) return;
+                final aptId = selectedApartment?.id ?? 'apt-${fallbackCodeController.text.trim()}';
+                final aptCode = selectedApartment?.code ?? fallbackCodeController.text.trim();
+                final bldId = selectedApartment?.buildingId ?? effectiveBuildingId;
+                if (aptCode.isEmpty) return;
+
                 Navigator.of(ctx).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => InspectionWorkstationScreen(
-                      buildingId: widget.buildingId,
-                      apartmentId: 'apt-01',
-                      apartmentCode: code,
+                      buildingId: bldId,
+                      apartmentId: aptId,
+                      apartmentCode: aptCode,
                       initialType: type,
                     ),
                   ),

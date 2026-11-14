@@ -312,9 +312,9 @@
     "semantic_hash": ""
   },
   "lib/core/utils/invoice_fee_helper.dart": {
-    "mtime": 1793887818.9152522,
-    "seen": 1793891612.8321867,
-    "ast_hash": "6edb9b4cfe9eca0be2e0ffd1557a7d9b",
+    "mtime": 1794671663.0149636,
+    "seen": 1794673479.4764519,
+    "ast_hash": "85850426630121b5764d1c26908c36fd",
     "semantic_hash": ""
   },
   "lib/core/utils/meter_ocr_simulator.dart": {
@@ -444,8 +444,8 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/unified_payment_sheet.dart": {
-    "mtime": 1794667485.6828828,
-    "seen": 1794667740.6945221,
+    "mtime": 1794667870.7666776,
+    "seen": 1794673479.4845958,
     "ast_hash": "7121de45ea71affb3f1818b3e2859636",
     "semantic_hash": ""
   },
@@ -564,9 +564,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/invoice_model.dart": {
-    "mtime": 1794326661.0407512,
-    "seen": 1794326715.867232,
-    "ast_hash": "95853ccc76d100240a7f6ec8f9d0544d",
+    "mtime": 1794670634.4504557,
+    "seen": 1794673479.4952722,
+    "ast_hash": "46e2a127cc18ba5f7cd6934ae9a142c0",
     "semantic_hash": ""
   },
   "lib/data/models/issue_comment_model.dart": {
@@ -858,9 +858,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/fee_policy_repository.dart": {
-    "mtime": 1793886319.8859746,
-    "seen": 1793891612.8332055,
-    "ast_hash": "25bf74e8926d37163e9e9ebabcd6f296",
+    "mtime": 1794671394.6409123,
+    "seen": 1794673479.518701,
+    "ast_hash": "526ee64a092d06489a30a746d1a50d71",
     "semantic_hash": ""
   },
   "lib/data/repositories/fee_schedule_repository.dart": {
@@ -888,9 +888,9 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/management_repository.dart": {
-    "mtime": 1793983517.1856277,
-    "seen": 1794055649.9586089,
-    "ast_hash": "a00fca7ccc5af2ad362fd807c2d82393",
+    "mtime": 1794671663.2149475,
+    "seen": 1794673479.5196977,
+    "ast_hash": "db6938e5c9e8aad45ff78676dc930d9e",
     "semantic_hash": ""
   },
   "lib/data/repositories/meter_reading_repository.dart": {
@@ -1014,21 +1014,21 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/create_invoice_screen.dart": {
-    "mtime": 1794241731.5067658,
-    "seen": 1794243578.5042663,
-    "ast_hash": "fe1fae41a9f53d77e8ceaed02c42ea00",
+    "mtime": 1794671663.62301,
+    "seen": 1794673479.528951,
+    "ast_hash": "def4fceb099ec86a318fe044535d1447",
     "semantic_hash": ""
   },
   "lib/features/management/screens/edit_invoice_screen.dart": {
-    "mtime": 1794241731.7802227,
-    "seen": 1794243578.5042663,
-    "ast_hash": "8c04febf2346f502b2d39dde245b19e5",
+    "mtime": 1794671663.7427104,
+    "seen": 1794673479.528951,
+    "ast_hash": "a66eb2f9855b74e575a520996c84f682",
     "semantic_hash": ""
   },
   "lib/features/management/screens/equipment_detail_screen.dart": {
-    "mtime": 1793887618.512408,
-    "seen": 1793891612.8332055,
-    "ast_hash": "be707809f4ef9e9a237c963c92753365",
+    "mtime": 1794672361.6412911,
+    "seen": 1794673479.528951,
+    "ast_hash": "e46fcadf53ea78b33061cdb010363f3a",
     "semantic_hash": ""
   },
   "lib/features/management/screens/equipment_management_screen.dart": {
@@ -1038,9 +1038,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/fee_policy_management_screen.dart": {
-    "mtime": 1793887618.5583372,
-    "seen": 1793891612.8332055,
-    "ast_hash": "0f1196a3b8d557f696e171bf0d1ea65e",
+    "mtime": 1794671611.0214624,
+    "seen": 1794673479.528951,
+    "ast_hash": "0a68c0b2fe55cca68bb08224f1e9eb9f",
     "semantic_hash": ""
   },
   "lib/features/management/screens/handbook_management_screen.dart": {
@@ -1050,9 +1050,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/invoice_management_screen.dart": {
-    "mtime": 1794154479.2481253,
-    "seen": 1794155741.029243,
-    "ast_hash": "2559b9f109e33761dd2ed06ec7dca053",
+    "mtime": 1794671664.7597964,
+    "seen": 1794673479.529956,
+    "ast_hash": "aee77a1e96c350d4b3e4bd8866127132",
     "semantic_hash": ""
   },
   "lib/features/management/screens/issue_management_screen.dart": {
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_invoice_detail_screen.dart": {
-    "mtime": 1794242843.9611266,
-    "seen": 1794243578.5092995,
-    "ast_hash": "44a54886ad418f36fd92f50ded9b5c4c",
+    "mtime": 1794671665.0028083,
+    "seen": 1794673479.5309014,
+    "ast_hash": "1e5cf4bdf2696bc23f000ebe57421ce7",
     "semantic_hash": ""
   },
   "lib/features/management/screens/management_meter_reading_screen.dart": {
@@ -2154,9 +2154,9 @@
     "semantic_hash": ""
   },
   "test/features/management/fee_policy_management_screen_test.dart": {
-    "mtime": 1793886320.2574832,
-    "seen": 1793891612.8332055,
-    "ast_hash": "512683b49305360f3e9c3264506846e9",
+    "mtime": 1794671772.8643177,
+    "seen": 1794673479.6597152,
+    "ast_hash": "cea25a9b21dccb2bc4a9dffeec1306dd",
     "semantic_hash": ""
   },
   "test/features/management/invoice_management_filter_test.dart": {
@@ -5046,9 +5046,9 @@
     "semantic_hash": ""
   },
   "lib/features/management/screens/accounting_web_workstation_screen.dart": {
-    "mtime": 1794137516.668877,
-    "seen": 1794139909.1964087,
-    "ast_hash": "22a3c8b62a89b9b9955e1d683439ee29",
+    "mtime": 1794671663.496787,
+    "seen": 1794673479.526951,
+    "ast_hash": "fb76d9a66c0c0470347b632578c29ad8",
     "semantic_hash": ""
   },
   "test/core/widgets/adaptive_management_scaffold_test.dart": {
@@ -5070,9 +5070,9 @@
     "semantic_hash": ""
   },
   "test/features/management/screens/accounting_web_workstation_screen_test.dart": {
-    "mtime": 1793886329.8735714,
-    "seen": 1793891612.8332055,
-    "ast_hash": "15e794ee061ba530249d0a988a8f4d17",
+    "mtime": 1794671772.915915,
+    "seen": 1794673479.6698053,
+    "ast_hash": "1361b00fcc1e304053d82db8d9dfcfa0",
     "semantic_hash": ""
   },
   "test/integration/web_workstation_responsive_test.dart": {
@@ -5310,15 +5310,15 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/material_repository.dart": {
-    "mtime": 1794326661.5536182,
-    "seen": 1794326715.8945951,
-    "ast_hash": "29ff90e4a85b6e502badb6c0ada9e33d",
+    "mtime": 1794672105.2142537,
+    "seen": 1794673479.5196977,
+    "ast_hash": "fc8f46904db52477f222c75d629190dc",
     "semantic_hash": ""
   },
   "lib/features/management/screens/maintenance_materials_screen.dart": {
-    "mtime": 1794310762.2915313,
-    "seen": 1794326715.9066985,
-    "ast_hash": "d34f03e5cf561777a6cfb505641500b8",
+    "mtime": 1794672404.4223313,
+    "seen": 1794673479.5309014,
+    "ast_hash": "81370f805f96a740380ba9b930327de3",
     "semantic_hash": ""
   },
   "lib/features/management/widgets/resolve_issue_materials_sheet.dart": {
@@ -5352,9 +5352,9 @@
     "semantic_hash": ""
   },
   "test/data/repositories/material_repository_test.dart": {
-    "mtime": 1794326662.2317934,
-    "seen": 1794326715.9699843,
-    "ast_hash": "cd21f52cb1272ea7563917819bf9b7fc",
+    "mtime": 1794672455.0836425,
+    "seen": 1794673479.6362233,
+    "ast_hash": "a0280eae0cc104c3965fa0a044147965",
     "semantic_hash": ""
   },
   "test/features/management/screens/issue_management_sla_test.dart": {
@@ -6528,21 +6528,21 @@
     "semantic_hash": ""
   },
   "lib/data/repositories/handover_repository.dart": {
-    "mtime": 1794061599.9305391,
-    "seen": 1794061624.702206,
-    "ast_hash": "2a2b054e723b61d11858ad7c3787fb46",
+    "mtime": 1794672089.1523416,
+    "seen": 1794673479.5196977,
+    "ast_hash": "c40dd584b84f4330ed0fa3c3daeca101",
     "semantic_hash": ""
   },
   "lib/features/management/screens/handover_management_screen.dart": {
-    "mtime": 1794236609.6902196,
-    "seen": 1794241643.1986904,
-    "ast_hash": "7763ccd9ed866d00cde44a69880e3f74",
+    "mtime": 1794672499.305202,
+    "seen": 1794673479.529956,
+    "ast_hash": "db23118b980f48befbe832aed0da21d9",
     "semantic_hash": ""
   },
   "lib/features/management/screens/inspection_workstation_screen.dart": {
-    "mtime": 1794236609.8136716,
-    "seen": 1794241643.1986904,
-    "ast_hash": "a77b278ed1aad8c470b396682dc5ae1f",
+    "mtime": 1794673409.3758378,
+    "seen": 1794673479.529956,
+    "ast_hash": "d0374dc516b18f4999d96d5988221ace",
     "semantic_hash": ""
   },
   "lib/features/resident/screens/resident_handover_detail_screen.dart": {
@@ -6582,9 +6582,9 @@
     "semantic_hash": ""
   },
   "test/data/repositories/handover_repository_test.dart": {
-    "mtime": 1794061600.707462,
-    "seen": 1794061624.7032042,
-    "ast_hash": "d178dc464b43c6167e7e64b94f38efbb",
+    "mtime": 1794672448.364319,
+    "seen": 1794673479.6336732,
+    "ast_hash": "83d75bdd4fb98c967fc903eb461480ef",
     "semantic_hash": ""
   },
   "test/database/handover_migration_test.dart": {
@@ -6600,9 +6600,9 @@
     "semantic_hash": ""
   },
   "test/features/management/inspection_workstation_screen_test.dart": {
-    "mtime": 1794061220.0565436,
-    "seen": 1794061624.7032042,
-    "ast_hash": "80ebb6edd17d8c1101ddd5ea41036d9d",
+    "mtime": 1794672472.0586014,
+    "seen": 1794673479.661732,
+    "ast_hash": "cfd47665ede9987d3af4b61304b8f861",
     "semantic_hash": ""
   },
   "test/features/resident/resident_handover_screen_test.dart": {
@@ -6624,8 +6624,8 @@
     "semantic_hash": ""
   },
   "lib/data/models/building_payment_config_model.dart": {
-    "mtime": 1794667097.792255,
-    "seen": 1794667740.6982832,
+    "mtime": 1794667870.8329785,
+    "seen": 1794673479.4916837,
     "ast_hash": "16dc21b561b4a9f33146462301ca0f4a",
     "semantic_hash": ""
   },
@@ -6648,8 +6648,8 @@
     "semantic_hash": ""
   },
   "test/data/models/sepay_models_test.dart": {
-    "mtime": 1794667108.2825327,
-    "seen": 1794667740.8316422,
+    "mtime": 1794667871.1715875,
+    "seen": 1794673479.6160507,
     "ast_hash": "9bdfbfc4366367f44b68c33d74826ba3",
     "semantic_hash": ""
   },
@@ -6690,8 +6690,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/sepay-webhook/index.ts": {
-    "mtime": 1794667030.7910929,
-    "seen": 1794667740.7471774,
+    "mtime": 1794667870.9821365,
+    "seen": 1794673479.5504677,
     "ast_hash": "590216a53047d4c7cb9e37d1120e3247",
     "semantic_hash": ""
   },
@@ -6984,9 +6984,9 @@
     "semantic_hash": ""
   },
   "test/features/management/handover_management_responsive_test.dart": {
-    "mtime": 1794236610.1113558,
-    "seen": 1794241643.3663971,
-    "ast_hash": "f4b4514a585e0726fbdb98e496d27f55",
+    "mtime": 1794673245.2873535,
+    "seen": 1794673479.660715,
+    "ast_hash": "26a0292682f17b63ce8b9bfb9050d856",
     "semantic_hash": ""
   },
   "test/features/resident/resident_handover_responsive_test.dart": {
@@ -7896,20 +7896,20 @@
     "semantic_hash": ""
   },
   "supabase/migrations/20261114_01_secure_bank_webhook_and_vnpay.sql": {
-    "mtime": 1794666852.3171463,
-    "seen": 1794667740.7583175,
-    "ast_hash": "7754633b6324977c51f760c062c7a8ed",
+    "mtime": 1794670031.454136,
+    "seen": 1794673479.562542,
+    "ast_hash": "8657540283aa051dc817407a5bcb4de7",
     "semantic_hash": ""
   },
   "test/core/services/vnpay_service_test.dart": {
-    "mtime": 1794667167.2397609,
-    "seen": 1794667740.7990792,
+    "mtime": 1794667871.0427186,
+    "seen": 1794673479.584702,
     "ast_hash": "e25800a2dc4894a43783408cfa8d1634",
     "semantic_hash": ""
   },
   "test/core/widgets/unified_payment_sheet_vnpay_test.dart": {
-    "mtime": 1794667490.1852207,
-    "seen": 1794667740.8143983,
+    "mtime": 1794667871.1048098,
+    "seen": 1794673479.5989482,
     "ast_hash": "80f319c01afddce6feabe671b2e94b66",
     "semantic_hash": ""
   },
@@ -7920,9 +7920,9 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-14-real-payment-and-bank-webhook.md": {
-    "mtime": 1794667543.5497656,
-    "seen": 1794667741.0981345,
-    "ast_hash": "d563c0d615ff866b8bead919b6cedb92",
+    "mtime": 1794667766.4718025,
+    "seen": 1794673479.824214,
+    "ast_hash": "fab15b2f24ec6a7322a8778be9cd9981",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-11-14-real-payment-and-bank-webhook-design.md": {
@@ -7935,6 +7935,24 @@
     "mtime": 1794667150.4284284,
     "seen": 1794667741.116078,
     "ast_hash": "e31da60b0f7d9934a74aea302ff8bb7d",
+    "semantic_hash": ""
+  },
+  "lib/core/utils/action_runner.dart": {
+    "mtime": 1794670294.4583104,
+    "seen": 1794673479.4744525,
+    "ast_hash": "75743f5e67daadf9003bb4584f576fc2",
+    "semantic_hash": ""
+  },
+  "lib/core/utils/money_formatter.dart": {
+    "mtime": 1794670294.5423992,
+    "seen": 1794673479.4774528,
+    "ast_hash": "684516bd86d66c094c4d3f814f4756d7",
+    "semantic_hash": ""
+  },
+  "test/core/utils/money_formatter_test.dart": {
+    "mtime": 1794670294.5729046,
+    "seen": 1794673479.5898664,
+    "ast_hash": "f3fe9abe98db49f3f880fc655088438d",
     "semantic_hash": ""
   }
 }

@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../../core/supabase_config.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/signature_pad_dialog.dart';
 import '../../../data/models/apartment_handover_model.dart';
@@ -14,6 +17,7 @@ class InspectionWorkstationScreen extends ConsumerStatefulWidget {
   final String apartmentCode;
   final String? initialType;
   final String? existingHandoverId;
+  final bool isReadOnly;
 
   const InspectionWorkstationScreen({
     super.key,
@@ -22,6 +26,7 @@ class InspectionWorkstationScreen extends ConsumerStatefulWidget {
     required this.apartmentCode,
     this.initialType = 'move_in',
     this.existingHandoverId,
+    this.isReadOnly = false,
   });
 
   @override
@@ -31,15 +36,24 @@ class InspectionWorkstationScreen extends ConsumerStatefulWidget {
 
 class _InspectionWorkstationScreenState
     extends ConsumerState<InspectionWorkstationScreen> {
-  final _electricityController = TextEditingController(text: '1540.0');
-  final _waterController = TextEditingController(text: '85.0');
-  final _depositController = TextEditingController(text: '10000000.0');
+  // P0-#2: Để trống chỉ số mặc định, bắt buộc nhập số liệu thực tế tại hiện trường
+  final _electricityController = TextEditingController();
+  final _waterController = TextEditingController();
+  final _depositController = TextEditingController();
   final _staffNotesController = TextEditingController();
+
+  final Map<String, TextEditingController> _itemCostControllers = {};
 
   late String _handoverType;
   List<HandoverItemModel> _items = [];
   Uint8List? _staffSignatureBytes;
+  String? _existingStaffSigUrl;
+  String? _existingResidentSigUrl;
+  bool _isConfirmedOrCompleted = false;
   bool _isLoading = false;
+
+  bool get _effectiveReadOnly =>
+      widget.isReadOnly || _isConfirmedOrCompleted;
 
   @override
   void initState() {
@@ -54,6 +68,9 @@ class _InspectionWorkstationScreenState
     _waterController.dispose();
     _depositController.dispose();
     _staffNotesController.dispose();
+    for (final c in _itemCostControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -65,12 +82,23 @@ class _InspectionWorkstationScreenState
       if (existing != null && mounted) {
         setState(() {
           _handoverType = existing.handoverType;
-          _electricityController.text =
-              existing.initialElectricityReading.toString();
-          _waterController.text = existing.initialWaterReading.toString();
-          _depositController.text = existing.depositHeld.toString();
+          _electricityController.text = existing.initialElectricityReading > 0
+              ? existing.initialElectricityReading.toString()
+              : '';
+          _waterController.text = existing.initialWaterReading > 0
+              ? existing.initialWaterReading.toString()
+              : '';
+          _depositController.text = existing.depositHeld > 0
+              ? formatMoney(existing.depositHeld.toInt(), includeSymbol: false)
+              : '';
           _staffNotesController.text = existing.staffNotes ?? '';
           _items = List.from(existing.items);
+          _existingStaffSigUrl = existing.staffSignatureUrl;
+          _existingResidentSigUrl = existing.residentSignatureUrl;
+          if (existing.status == 'confirmed' ||
+              existing.status == 'completed') {
+            _isConfirmedOrCompleted = true;
+          }
         });
         return;
       }
@@ -96,17 +124,21 @@ class _InspectionWorkstationScreenState
     }
   }
 
+  // P0-#4: Sửa lỗi tính khấu trừ - Chỉ cộng khi tình trạng khác 'good' và có chi phí sửa
   double get _totalDeduction {
-    return _items.fold(0.0, (sum, item) => sum + item.repairCost);
+    return _items
+        .where((item) => item.condition != 'good' && item.repairCost > 0)
+        .fold(0.0, (sum, item) => sum + item.repairCost);
   }
 
   double get _depositRefund {
-    final deposit = double.tryParse(_depositController.text) ?? 0.0;
+    final deposit = parseMoney(_depositController.text).toDouble();
     final refund = deposit - _totalDeduction;
     return refund > 0 ? refund : 0.0;
   }
 
   void _openSignaturePad() async {
+    if (_effectiveReadOnly) return;
     final bytes = await showDialog<Uint8List>(
       context: context,
       builder: (_) => const SignaturePadDialog(
@@ -122,11 +154,41 @@ class _InspectionWorkstationScreenState
     }
   }
 
+  // P0-#5: Gộp tạo biên bản và ký BQL thành 1 thao tác nguyên tử chống dữ liệu lửng lơ
   Future<void> _saveAndSendToResident() async {
+    if (_effectiveReadOnly) return;
+
+    final elecStr = _electricityController.text.trim();
+    final waterStr = _waterController.text.trim();
+    if (elecStr.isEmpty || waterStr.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Vui lòng nhập đầy đủ chỉ số đồng hồ điện và nước thực tế tại hiện trường.',
+          ),
+          backgroundColor: AppTheme.warning,
+        ),
+      );
+      return;
+    }
+
+    final depositHeld = parseMoney(_depositController.text).toDouble();
+    if (_handoverType == 'move_out' && depositHeld <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Vui lòng nhập số tiền cọc hiện đang giữ để chiết tính hoàn trả cư dân.',
+          ),
+          backgroundColor: AppTheme.warning,
+        ),
+      );
+      return;
+    }
+
     if (_staffSignatureBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng ký tên đại diện Ban Quản Lý trước khi gửi'),
+          content: Text('Vui lòng ký tên đại diện Ban Quản Lý trước khi gửi.'),
           backgroundColor: AppTheme.warning,
         ),
       );
@@ -136,9 +198,20 @@ class _InspectionWorkstationScreenState
     setState(() => _isLoading = true);
     try {
       final repo = ref.read(handoverRepositoryProvider);
-      final depositHeld = double.tryParse(_depositController.text) ?? 0.0;
-      final elec = double.tryParse(_electricityController.text) ?? 0.0;
-      final water = double.tryParse(_waterController.text) ?? 0.0;
+      final elec = double.tryParse(elecStr) ?? 0.0;
+      final water = double.tryParse(waterStr) ?? 0.0;
+
+      // P0-#2: Lấy auth.uid() thực tế và sinh mã biên bản chuẩn HO-YYYYMM-XXXXX
+      final currentUserId = SupabaseConfig.isConfigured
+          ? SupabaseConfig.client.auth.currentUser?.id
+          : null;
+      final conductedBy = currentUserId ?? 'staff-manager';
+
+      final dateStr = DateFormat('yyyyMM').format(DateTime.now());
+      final randSuffix = (DateTime.now().millisecondsSinceEpoch % 100000)
+          .toString()
+          .padLeft(5, '0');
+      final reportCode = 'HO-$dateStr-$randSuffix';
 
       final handoverModel = ApartmentHandoverModel(
         id: widget.existingHandoverId ??
@@ -146,10 +219,9 @@ class _InspectionWorkstationScreenState
         apartmentId: widget.apartmentId,
         buildingId: widget.buildingId,
         handoverType: _handoverType,
-        reportCode:
-            'HO-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}-0001',
+        reportCode: reportCode,
         handoverDate: DateTime.now(),
-        conductedBy: 'staff-01',
+        conductedBy: conductedBy,
         initialElectricityReading: elec,
         initialWaterReading: water,
         depositHeld: depositHeld,
@@ -164,9 +236,13 @@ class _InspectionWorkstationScreenState
         items: _items,
       );
 
-      await repo.createHandover(handoverModel, _items);
-      await repo.signByStaff(handoverModel.id, _staffSignatureBytes!,
-          notes: _staffNotesController.text);
+      // P0-#5: Atomic RPC/Upsert qua repo
+      await repo.createHandoverWithStaffSignature(
+        handover: handoverModel,
+        items: _items,
+        signatureBytes: _staffSignatureBytes!,
+        notes: _staffNotesController.text,
+      );
 
       ref.invalidate(buildingHandoversProvider(widget.buildingId));
 
@@ -174,7 +250,7 @@ class _InspectionWorkstationScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content:
-                Text('Đã gửi biên bản bàn giao cho cư dân xác nhận thành công!'),
+                Text('Đã lưu và gửi biên bản bàn giao cho cư dân xác nhận!'),
             backgroundColor: AppStatusColors.paid,
           ),
         );
@@ -200,22 +276,62 @@ class _InspectionWorkstationScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trạm kiểm kê & bàn giao'),
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text('Trạm kiểm kê & bàn giao'),
+        ),
         elevation: 0.5,
         actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _saveAndSendToResident,
-              icon: const Icon(Icons.send, size: 18),
-              label: const Text('Gửi cư dân'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
+          // P0-#3: Khóa văn bản nếu biên bản đã xác nhận/hoàn tất
+          if (_effectiveReadOnly)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppStatusColors.paid.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: AppStatusColors.paid.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock, size: 14, color: AppStatusColors.paid),
+                      SizedBox(width: 4),
+                      Text(
+                        'Đã duyệt (Bất biến)',
+                        style: TextStyle(
+                          color: AppStatusColors.paid,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: ElevatedButton.icon(
+                onPressed: _isLoading ? null : _saveAndSendToResident,
+                icon: const Icon(Icons.send, size: 16),
+                label: const Text('Gửi cư dân'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: _isLoading
@@ -364,9 +480,11 @@ class _InspectionWorkstationScreenState
               DropdownMenuItem(
                   value: 'move_out', child: Text('Trả nhà (Move-out)')),
             ],
-            onChanged: (val) {
-              if (val != null) setState(() => _handoverType = val);
-            },
+            onChanged: _effectiveReadOnly
+                ? null
+                : (val) {
+                    if (val != null) setState(() => _handoverType = val);
+                  },
           ),
         ],
       ),
@@ -385,24 +503,30 @@ class _InspectionWorkstationScreenState
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
-              final isNarrow = constraints.maxWidth < 280;
+              final isNarrow = constraints.maxWidth < 360;
               if (isNarrow) {
                 return Column(
                   children: [
                     TextField(
                       controller: _electricityController,
-                      keyboardType: TextInputType.number,
+                      readOnly: _effectiveReadOnly,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(
-                        labelText: 'Chỉ số điện (kWh)',
+                        labelText: 'Chỉ số điện (kWh) *',
+                        hintText: 'Nhập số công tơ điện...',
                         prefixIcon: Icon(Icons.bolt, color: Colors.amber),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _waterController,
-                      keyboardType: TextInputType.number,
+                      readOnly: _effectiveReadOnly,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(
-                        labelText: 'Chỉ số nước (m³)',
+                        labelText: 'Chỉ số nước (m³) *',
+                        hintText: 'Nhập số đồng hồ nước...',
                         prefixIcon: Icon(Icons.water_drop, color: Colors.blue),
                       ),
                     ),
@@ -414,9 +538,12 @@ class _InspectionWorkstationScreenState
                   Expanded(
                     child: TextField(
                       controller: _electricityController,
-                      keyboardType: TextInputType.number,
+                      readOnly: _effectiveReadOnly,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(
-                        labelText: 'Chỉ số điện (kWh)',
+                        labelText: 'Chỉ số điện (kWh) *',
+                        hintText: 'Nhập số điện...',
                         prefixIcon: Icon(Icons.bolt, color: Colors.amber),
                       ),
                     ),
@@ -425,9 +552,12 @@ class _InspectionWorkstationScreenState
                   Expanded(
                     child: TextField(
                       controller: _waterController,
-                      keyboardType: TextInputType.number,
+                      readOnly: _effectiveReadOnly,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(
-                        labelText: 'Chỉ số nước (m³)',
+                        labelText: 'Chỉ số nước (m³) *',
+                        hintText: 'Nhập số nước...',
                         prefixIcon: Icon(Icons.water_drop, color: Colors.blue),
                       ),
                     ),
@@ -453,10 +583,13 @@ class _InspectionWorkstationScreenState
           const SizedBox(height: 12),
           TextField(
             controller: _depositController,
+            readOnly: _effectiveReadOnly,
             keyboardType: TextInputType.number,
+            inputFormatters: [MoneyInputFormatter()],
             onChanged: (_) => setState(() {}),
             decoration: const InputDecoration(
-              labelText: 'Tiền đặt cọc đang giữ (VNĐ)',
+              labelText: 'Tiền đặt cọc đang giữ (VNĐ) *',
+              hintText: 'Nhập số tiền cọc...',
               prefixIcon: Icon(Icons.account_balance_wallet),
             ),
           ),
@@ -526,11 +659,12 @@ class _InspectionWorkstationScreenState
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        TextButton.icon(
-          onPressed: _addNewItem,
-          icon: const Icon(Icons.add_circle_outline, size: 18),
-          label: const Text('Thêm món đồ'),
-        ),
+        if (!_effectiveReadOnly)
+          TextButton.icon(
+            onPressed: _addNewItem,
+            icon: const Icon(Icons.add_circle_outline, size: 18),
+            label: const Text('Thêm món đồ'),
+          ),
       ],
     );
   }
@@ -545,8 +679,9 @@ class _InspectionWorkstationScreenState
           border: Border.all(color: Colors.grey.shade300),
         ),
         child: const Center(
-          child:
-              Text('Chưa có hạng mục kiểm kê nào. Bấm "Thêm món đồ" để tạo mới.'),
+          child: Text(
+            'Chưa có hạng mục kiểm kê nào. Bấm "Thêm món đồ" để tạo mới.',
+          ),
         ),
       );
     }
@@ -564,6 +699,15 @@ class _InspectionWorkstationScreenState
   }
 
   Widget _buildItemCard(HandoverItemModel item, int index) {
+    final costCtrl = _itemCostControllers.putIfAbsent(
+      item.id,
+      () => TextEditingController(
+        text: item.repairCost > 0
+            ? formatMoney(item.repairCost.toInt(), includeSymbol: false)
+            : '',
+      ),
+    );
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,7 +749,7 @@ class _InspectionWorkstationScreenState
             items: const [
               DropdownMenuItem(
                 value: 'good',
-                child: Text('Tốt / Hoạt động'),
+                child: Text('Tốt / Hoạt động bình thường'),
               ),
               DropdownMenuItem(
                 value: 'minor_scratch',
@@ -620,24 +764,38 @@ class _InspectionWorkstationScreenState
                 child: Text('Thất lạc'),
               ),
             ],
-            onChanged: (val) {
-              if (val != null) {
-                setState(() {
-                  _items[index] = item.copyWith(condition: val);
-                });
-              }
-            },
+            // P0-#4: Khi đổi sang 'good', tự động xóa chi phí sửa chữa để tránh trừ cọc sai
+            onChanged: _effectiveReadOnly
+                ? null
+                : (val) {
+                    if (val != null) {
+                      setState(() {
+                        final isNowGood = val == 'good';
+                        if (isNowGood) {
+                          costCtrl.text = '';
+                        }
+                        _items[index] = item.copyWith(
+                          condition: val,
+                          repairCost: isNowGood ? 0.0 : item.repairCost,
+                        );
+                      });
+                    }
+                  },
           ),
           if (item.hasDamage) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             TextField(
+              controller: costCtrl,
+              readOnly: _effectiveReadOnly,
               keyboardType: TextInputType.number,
+              inputFormatters: [MoneyInputFormatter()],
               decoration: const InputDecoration(
-                labelText: 'Chi phí bồi thường (VNĐ)',
+                labelText: 'Chi phí bồi thường / sửa chữa (VNĐ) *',
+                hintText: 'Nhập chi phí...',
                 isDense: true,
               ),
               onChanged: (val) {
-                final cost = double.tryParse(val) ?? 0.0;
+                final cost = parseMoney(val).toDouble();
                 setState(() {
                   _items[index] = item.copyWith(repairCost: cost);
                 });
@@ -661,6 +819,7 @@ class _InspectionWorkstationScreenState
           const SizedBox(height: 12),
           TextField(
             controller: _staffNotesController,
+            readOnly: _effectiveReadOnly,
             maxLines: 2,
             decoration: const InputDecoration(
               labelText: 'Ghi chú thêm của BQL',
@@ -673,16 +832,19 @@ class _InspectionWorkstationScreenState
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              OutlinedButton.icon(
-                onPressed: _openSignaturePad,
-                icon: const Icon(Icons.draw),
-                label: Text(
-                  _staffSignatureBytes != null
-                      ? 'Ký lại BQL'
-                      : 'Ký tên BQL',
+              if (!_effectiveReadOnly)
+                OutlinedButton.icon(
+                  onPressed: _openSignaturePad,
+                  icon: const Icon(Icons.draw),
+                  label: Text(
+                    _staffSignatureBytes != null
+                        ? 'Ký lại BQL'
+                        : 'Ký tên BQL',
+                  ),
                 ),
-              ),
-              if (_staffSignatureBytes != null)
+              if (_staffSignatureBytes != null ||
+                  (_existingStaffSigUrl != null &&
+                      _existingStaffSigUrl!.isNotEmpty))
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -690,18 +852,52 @@ class _InspectionWorkstationScreenState
                     color: AppStatusColors.paid.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.check_circle,
+                      const Icon(Icons.check_circle,
                           color: AppStatusColors.paid, size: 16),
-                      SizedBox(width: 4),
-                      Text(
-                        'Đã có chữ ký',
-                        style: TextStyle(
-                          color: AppStatusColors.paid,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          'Đã có chữ ký BQL',
+                          style: const TextStyle(
+                            color: AppStatusColors.paid,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (_existingResidentSigUrl != null &&
+                  _existingResidentSigUrl!.isNotEmpty)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppStatusColors.paid.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.verified,
+                          color: AppStatusColors.paid, size: 16),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          'Cư dân đã ký nhận',
+                          style: const TextStyle(
+                            color: AppStatusColors.paid,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

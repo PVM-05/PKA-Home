@@ -28,6 +28,7 @@ class EquipmentDetailScreen extends ConsumerStatefulWidget {
 
 class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
   late BuildingEquipmentModel _equipment;
+  final Set<String> _disbursedTaskIds = {};
   final _currencyFormat = NumberFormat.currency(
     locale: 'vi_VN',
     symbol: 'đ',
@@ -66,8 +67,31 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
   }
 
   void _disburseMaintenanceFund(EquipmentMaintenanceTaskModel task) async {
+    if (task.cost <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hạng mục không phát sinh chi phí để lập phiếu chi.'),
+          backgroundColor: AppTheme.warning,
+        ),
+      );
+      return;
+    }
+
     final activeBuilding = ref.read(activeBuildingProvider).valueOrNull;
-    final buildingId = activeBuilding?.id ?? _equipment.building;
+    final buildingId = (activeBuilding?.id != null && activeBuilding!.id.isNotEmpty)
+        ? activeBuilding.id
+        : (_equipment.building.length == 36 ? _equipment.building : null);
+
+    if (buildingId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng chọn tòa nhà hợp lệ trước khi lập phiếu chi Quỹ bảo trì.'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
+
     final vendorName = task.vendorName ?? 'Đơn vị bảo trì thiết bị';
     final desc =
         'Nghiệm thu bảo dưỡng ${_equipment.name} (${_equipment.code}): ${task.title}';
@@ -144,6 +168,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
 
       if (mounted) {
         if (res != null && res['success'] == true) {
+          setState(() {
+            _disbursedTaskIds.add(task.id);
+          });
           ref.invalidate(activeMaintenanceFundProvider);
           ref.invalidate(maintenanceFundLedgerProvider);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -597,22 +624,55 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.error,
-                    side: const BorderSide(color: AppTheme.error),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                  ),
-                  icon: const Icon(Icons.receipt_long_outlined, size: 16),
-                  label: const Text(
-                    'Chi từ Quỹ bảo trì',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  onPressed: () => _disburseMaintenanceFund(task),
-                ),
+                child: _disbursedTaskIds.contains(task.id)
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppStatusColors.paid.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppStatusColors.paid.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              size: 14,
+                              color: AppStatusColors.paid,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Đã giải ngân Quỹ bảo trì',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppStatusColors.paid,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.error,
+                          side: const BorderSide(color: AppTheme.error),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                        ),
+                        icon: const Icon(Icons.receipt_long_outlined, size: 16),
+                        label: const Text(
+                          'Chi từ Quỹ bảo trì',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        onPressed: () => _disburseMaintenanceFund(task),
+                      ),
               ),
             ],
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/maintenance_material_model.dart';
 import '../../../data/providers/material_provider.dart';
@@ -27,23 +28,67 @@ class _MaintenanceMaterialsScreenState
 
   void _showAdjustStockDialog(MaintenanceMaterialModel material) {
     int adjustQuantity = 10;
+    bool isImport = true;
+    final reasonCtrl =
+        TextEditingController(text: 'Nhập bổ sung kho từ nhà cung cấp');
+
     showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
+            final delta = isImport ? adjustQuantity : -adjustQuantity;
+            final resultingStock = material.stockQuantity + delta;
+            final isValid = resultingStock >= 0 && adjustQuantity > 0;
+
             return AlertDialog(
-              title: Text('Nhập kho: ${material.name}'),
+              title: Text('Điều chỉnh kho: ${material.name}'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Hiện có: ${material.stockQuantity} ${material.unit}'),
+                    Text('Hiện tồn: ${material.stockQuantity} ${material.unit}'),
                     const SizedBox(height: 12),
                     const Text(
-                      'Số lượng nhập thêm:',
+                      'Loại biến động kho:',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        ChoiceChip(
+                          label: const Text('Nhập thêm'),
+                          selected: isImport,
+                          onSelected: (_) => setDialogState(() {
+                            isImport = true;
+                            if (reasonCtrl.text.isEmpty ||
+                                reasonCtrl.text.startsWith('Hao hụt') ||
+                                reasonCtrl.text.startsWith('Xuất')) {
+                              reasonCtrl.text =
+                                  'Nhập bổ sung kho từ nhà cung cấp';
+                            }
+                          }),
+                        ),
+                        const SizedBox(width: 8),
+                        ChoiceChip(
+                          label: const Text('Xuất giảm / Hao hụt'),
+                          selected: !isImport,
+                          onSelected: (_) => setDialogState(() {
+                            isImport = false;
+                            if (reasonCtrl.text.isEmpty ||
+                                reasonCtrl.text.startsWith('Nhập')) {
+                              reasonCtrl.text =
+                                  'Hao hụt / kiểm kê phát hiện sai lệch';
+                            }
+                          }),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      isImport ? 'Số lượng nhập thêm:' : 'Số lượng xuất giảm:',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -58,7 +103,7 @@ class _MaintenanceMaterialsScreenState
                           '$adjustQuantity ${material.unit}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                            fontSize: 16,
                           ),
                         ),
                         IconButton(
@@ -67,13 +112,36 @@ class _MaintenanceMaterialsScreenState
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tồn kho sau khi nhập: ${material.stockQuantity + adjustQuantity} ${material.unit}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.success,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: reasonCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Lý do điều chỉnh (Kiểm toán) *',
+                        hintText: 'Nhập căn cứ/chứng từ/lý do điều chỉnh...',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isValid
+                            ? (isImport
+                                ? AppTheme.success.withValues(alpha: 0.1)
+                                : AppTheme.warning.withValues(alpha: 0.1))
+                            : AppTheme.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        isValid
+                            ? 'Tồn kho sau khi điều chỉnh: $resultingStock ${material.unit}'
+                            : 'Lỗi: Tồn kho sau điều chỉnh không thể âm ($resultingStock < 0)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isValid
+                              ? (isImport ? AppTheme.success : AppTheme.warning)
+                              : AppTheme.error,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -85,26 +153,28 @@ class _MaintenanceMaterialsScreenState
                   child: const Text('Hủy'),
                 ),
                 ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pop(ctx);
-                    final repo = ref.read(materialRepositoryProvider);
-                    await repo.updateMaterialStock(
-                      materialId: material.id,
-                      newStock: material.stockQuantity + adjustQuantity,
-                    );
-                    ref.invalidate(maintenanceMaterialsProvider);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Đã nhập thêm $adjustQuantity ${material.unit} cho ${material.name}',
-                          ),
-                          backgroundColor: AppTheme.success,
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text('Xác nhận nhập kho'),
+                  onPressed: !isValid || reasonCtrl.text.trim().isEmpty
+                      ? null
+                      : () async {
+                          Navigator.pop(ctx);
+                          final reason = reasonCtrl.text.trim();
+                          await runAction(
+                            context,
+                            () async {
+                              final repo = ref.read(materialRepositoryProvider);
+                              final res = await repo.adjustMaterialStockDelta(
+                                materialId: material.id,
+                                delta: delta,
+                                reason: reason,
+                              );
+                              ref.invalidate(maintenanceMaterialsProvider);
+                              return res['message']?.toString() ??
+                                  'Đã điều chỉnh $delta ${material.unit} cho ${material.name}';
+                            },
+                            actionName: 'Điều chỉnh tồn kho vật tư',
+                          );
+                        },
+                  child: const Text('Xác nhận điều chỉnh'),
                 ),
               ],
             );
