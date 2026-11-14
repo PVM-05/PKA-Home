@@ -7,7 +7,7 @@ Tài liệu này tổng hợp toàn bộ thông tin đăng nhập và các kịc
 ## 1. Thông Tin Đăng Nhập Chung
 
 > [!IMPORTANT]
-> **Mật khẩu dùng chung cho tất cả tài khoản:** `PkaHome@2026`  
+> **Mật khẩu tài khoản demo:** Vui lòng liên hệ Quản trị viên hệ thống để nhận mật khẩu khởi tạo an toàn (hoặc tra cứu trong tài liệu bảo mật nội bộ). Tuyệt đối không lưu trữ hoặc chia sẻ mật khẩu dạng văn bản thô trên kho mã nguồn công khai.  
 > Toàn bộ tài khoản đều sử dụng định dạng email `@gmail.com` chuẩn để đảm bảo tính thực tế và chuyên nghiệp.
 
 ---
@@ -16,9 +16,9 @@ Tài liệu này tổng hợp toàn bộ thông tin đăng nhập và các kịc
 
 | Vai trò | Email | Mật khẩu | Họ và tên | Số điện thoại | Chức năng nổi bật |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Quản trị viên (Admin)** | `pkahome.admin@gmail.com` | `PkaHome@2026` | Nguyễn Văn An | `0901234567` | Toàn quyền quản trị hệ thống, Dashboard tổng quan, Quản lý tòa nhà & căn hộ, Duyệt thẻ xe, Đăng thông báo khẩn |
-| **Kế toán (Accountant)** | `pkahome.ketoan@gmail.com` | `PkaHome@2026` | Trần Thị Mai | `0902345678` | Quản lý hóa đơn dịch vụ hàng loạt, Đối soát thanh toán, Duyệt chỉ số điện nước cư dân gửi |
-| **Kỹ thuật viên (Technician)** | `pkahome.kythuat@gmail.com` | `PkaHome@2026` | Lê Hoàng Long | `0903456789` | Tiếp nhận & xử lý phản ánh sự cố, Tải ảnh nghiệm thu sau xử lý, Theo dõi lịch bảo trì 5 thiết bị tòa nhà |
+| **Quản trị viên (Admin)** | `pkahome.admin@gmail.com` | `••••••••` *(Liên hệ Quản trị viên)* | Nguyễn Văn An | `0901234567` | Toàn quyền quản trị hệ thống, Dashboard tổng quan, Quản lý tòa nhà & căn hộ, Duyệt thẻ xe, Đăng thông báo khẩn |
+| **Kế toán (Accountant)** | `pkahome.ketoan@gmail.com` | `••••••••` *(Liên hệ Quản trị viên)* | Trần Thị Mai | `0902345678` | Quản lý hóa đơn dịch vụ hàng loạt, Đối soát thanh toán, Duyệt chỉ số điện nước cư dân gửi |
+| **Kỹ thuật viên (Technician)** | `pkahome.kythuat@gmail.com` | `••••••••` *(Liên hệ Quản trị viên)* | Lê Hoàng Long | `0903456789` | Tiếp nhận & xử lý phản ánh sự cố, Tải ảnh nghiệm thu sau xử lý, Theo dõi lịch bảo trì 5 thiết bị tòa nhà |
 
 ---
 
@@ -83,7 +83,7 @@ Hệ thống đã nạp sẵn 25 căn hộ có cư dân sinh sống trên cả 3
 ## 5. Hướng Dẫn Các Luồng Trình Diễn (Demo Flows)
 
 ### Kịch bản 1: Cư Dân Thanh Toán Hóa Đơn Bằng Cổng Thanh Toán Demo
-1. Đăng nhập tài khoản cư dân `cudan.a0101@gmail.com` / `PkaHome@2026`.
+1. Đăng nhập tài khoản cư dân `cudan.a0101@gmail.com` / `••••••••` (mật khẩu cấp phát).
 2. Vào tab **Hóa đơn & Thanh toán**.
 3. Chọn hóa đơn tháng **10/2026** (trạng thái Chưa thanh toán).
 4. Xem chi tiết bảng phân bổ chi phí (quản lý, điện, nước, gửi xe).

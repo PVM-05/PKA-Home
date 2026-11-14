@@ -4,7 +4,7 @@
 - **Mục tiêu:** Khắc phục triệt để 40 lỗi tồn đọng từ đợt rà soát mã nguồn (ưu tiên toàn bộ P0, P1 và các điểm P2 trọng yếu), loại bỏ hoàn toàn tình trạng xung đột migration CSDL, chuẩn hóa 100% email tài khoản demo về tên miền `@gmail.com`, và đồng bộ toàn bộ tài liệu dự án trong thư mục `docs/` khớp hoàn toàn với kiến trúc và schema thực tế.
 - **Phạm vi xử lý:**
   1. **Cơ sở dữ liệu (Supabase/PostgreSQL):** Tạo bản migration hợp nhất `20261024_01_system_audit_consolidation.sql` định nghĩa chuẩn tắc và duy nhất cho các RPC `simulate_unified_payment`, `book_amenity_slot`, `generate_valid_bulk_invoices`, `approve_meter_reading`, `reject_meter_reading`, `record_manual_payment`, `validate_monthly_bulk_invoices`, `create_invoice_with_items`. Xóa bỏ các trigger trùng lặp.
-  2. **Dữ liệu mẫu (`seed.sql`):** Khử trùng lặp biển số xe, đảm bảo 40 phương tiện độc bản hợp lệ, loại bỏ lệnh vô hiệu hóa trigger `trg_check_vehicle_limits`, chuẩn hóa toàn bộ email về `@gmail.com` với mật khẩu chung `PkaHome@2026`.
+  2. **Dữ liệu mẫu (`seed.sql`):** Khử trùng lặp biển số xe, đảm bảo 40 phương tiện độc bản hợp lệ, loại bỏ lệnh vô hiệu hóa trigger `trg_check_vehicle_limits`, chuẩn hóa toàn bộ email về `@gmail.com` với mật khẩu khởi tạo an toàn.
   3. **Mã nguồn Client (Flutter/Dart):** Xử lý luồng `pending_payment` trên màn hình đặt tiện ích, sửa biến `guestsCount` trong dialog, sửa phím tắt FocusNode trong `OtpInputBoxes`, đóng thẻ XML trong `ios/Runner/Info.plist`, loại bỏ `.env` khỏi `pubspec.yaml` assets.
   4. **Tài liệu dự án (`docs/`):** Cập nhật `ERD.dbml`, `test-plan.md`, `RLS-policy.md`, `bao-cao-tien-do-tuan 1.md`, `errors.md`, `demo_accounts.md` khớp 100% thực tế.
 
@@ -103,7 +103,7 @@
      - `pkahome.ketoan@gmail.com`
      - `pkahome.kythuat@gmail.com`
      - `cudan.a0101@gmail.com`, `cudan.b0101@gmail.com`, `cudan.c0101@gmail.com`, `test1@gmail.com`
-   - Cập nhật mật khẩu chuẩn `PkaHome@2026`.
+   - Chuẩn hóa thông tin mật khẩu bảo mật trong tài liệu nội bộ.
 2. **`docs/ERD.dbml`:**
    - Sửa tên bảng `amenities` -> `building_amenities`.
    - Bổ sung bảng `amenity_maintenance_windows`, `user_fcm_tokens`.

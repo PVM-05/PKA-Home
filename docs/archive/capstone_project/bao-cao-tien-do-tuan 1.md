@@ -61,7 +61,7 @@ Luồng Cư dân đã được nâng cấp lên mức **Smart Dashboard** (Giao 
 - **Bảo toàn phản ánh sự cố khi upload ảnh gián đoạn:** Khi mạng yếu, việc tải ảnh lên Supabase Storage có thể thất bại sau khi bản ghi `issue_reports` đã được tạo, gây ra tình trạng ném ngoại lệ toàn phần và người dùng bấm gửi lại gây trùng lặp bản ghi.
   - **Giải pháp:** Phân tách khối upload ảnh bằng cơ chế bọc lỗi độc lập (`CreateIssueResult(imageUploadFailed: true)`). Nếu upload ảnh lỗi, hệ thống vẫn bảo toàn nội dung mô tả phản ánh trong DB và thông báo rõ ràng cho cư dân: *"Đã gửi phản ánh nhưng ảnh tải lên thất bại, vui lòng thử đính kèm lại sau"*.
 - **Xung đột RPC và dữ liệu Seeding:** Trải qua nhiều đợt phát triển, các hàm RPC thanh toán và đặt tiện ích có nhiều phiên bản nạp chồng và seed dữ liệu xe máy vượt quá hạn mức.
-  - **Giải pháp:** Tạo Migration hợp nhất tập trung (`20261024_01_system_audit_consolidation.sql`) xóa bỏ mọi phiên bản cũ không an toàn, chuẩn hóa toàn bộ tài khoản sang định dạng `@gmail.com` với mật khẩu bảo mật `PkaHome@2026`, đồng thời chuẩn hóa bộ dữ liệu mẫu xe không vi phạm trigger.
+  - **Giải pháp:** Tạo Migration hợp nhất tập trung (`20261024_01_system_audit_consolidation.sql`) xóa bỏ mọi phiên bản cũ không an toàn, chuẩn hóa toàn bộ tài khoản sang định dạng `@gmail.com` với mật khẩu khởi tạo quản trị nội bộ an toàn, đồng thời chuẩn hóa bộ dữ liệu mẫu xe không vi phạm trigger.
 
 ## 4. Hướng phát triển tiếp theo (Next Steps)
 1. **Push Notifications:** Triển khai gửi thông báo đẩy thực tế qua Firebase Cloud Messaging (Edge Function Supabase).

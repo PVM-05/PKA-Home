@@ -9,7 +9,7 @@
 ## 1. Yêu Cầu Cốt Lõi & Quy Ước Dữ Liệu
 
 1. **Email người dùng**: 100% sử dụng đuôi `@gmail.com` theo chỉ định của người dùng.
-2. **Mật khẩu dùng chung cho mọi tài khoản demo**: `PkaHome@2026` (được mã hóa blowfish `crypt('PkaHome@2026', gen_salt('bf'))` tương thích hoàn toàn với Supabase Auth).
+2. **Mật khẩu dùng chung cho mọi tài khoản demo**: Cấu hình an toàn qua biến môi trường/mã hóa blowfish `crypt(..., gen_salt('bf'))` tương thích hoàn toàn với Supabase Auth; liên hệ quản trị viên để lấy mật khẩu thử nghiệm.
 3. **Quy mô dữ liệu (Theo yêu cầu người dùng)**:
    - **3 Tòa nhà**: Block A (Tòa A), Block B (Tòa B), Block C (Tòa C).
    - **25 Căn hộ có người ở**: Mã căn chuẩn `A0101` - `A0502`, `B0101` - `B0403`, `C0101` - `C0305`.
@@ -32,12 +32,12 @@
 
 | Vai trò | Họ và tên | Email đăng nhập | Mật khẩu | Chức năng demo chính |
 | :--- | :--- | :--- | :--- | :--- |
-| **Trưởng Ban Quản Lý (Admin)** | Nguyễn Văn An | `pkahome.admin@gmail.com` | `PkaHome@2026` | Toàn quyền Dashboard, phân công kỹ thuật, duyệt hóa đơn hàng loạt, xem KPI |
-| **Kế toán viên (Accountant)** | Trần Thị Mai | `pkahome.ketoan@gmail.com` | `PkaHome@2026` | Lập hóa đơn, đối soát VietQR, duyệt thanh toán, báo cáo nợ đọng |
-| **Kỹ thuật viên (Technician)** | Lê Hoàng Long | `pkahome.kythuat@gmail.com` | `PkaHome@2026` | Tiếp nhận sự cố, tải ảnh nghiệm thu sau sửa chữa, kiểm tra bảo trì thiết bị |
-| **Cư dân chủ hộ (A0101)** | Phạm Minh Đức | `cudan.a0101@gmail.com` | `PkaHome@2026` | Xem hóa đơn, quét VietQR, gửi phản ánh sự cố, đặt sân Tennis, quản lý 2 xe máy |
-| **Cư dân thuê nhà (B0202)** | Hoàng Thùy Linh | `cudan.b0202@gmail.com` | `PkaHome@2026` | Báo số điện nước qua ảnh quét OCR, đăng ký thẻ ô tô, đặt tiệc nướng BBQ |
-| **Cư dân (C0301)** | Đỗ Quang Hải | `cudan.c0301@gmail.com` | `PkaHome@2026` | Nhận thông báo bảo trì khẩn cấp, tra cứu danh bạ khẩn cấp, đánh giá chất lượng dịch vụ |
+| **Trưởng Ban Quản Lý (Admin)** | Nguyễn Văn An | `pkahome.admin@gmail.com` | `••••••••` (Bảo mật) | Toàn quyền Dashboard, phân công kỹ thuật, duyệt hóa đơn hàng loạt, xem KPI |
+| **Kế toán viên (Accountant)** | Trần Thị Mai | `pkahome.ketoan@gmail.com` | `••••••••` (Bảo mật) | Lập hóa đơn, đối soát VietQR, duyệt thanh toán, báo cáo nợ đọng |
+| **Kỹ thuật viên (Technician)** | Lê Hoàng Long | `pkahome.kythuat@gmail.com` | `••••••••` (Bảo mật) | Tiếp nhận sự cố, tải ảnh nghiệm thu sau sửa chữa, kiểm tra bảo trì thiết bị |
+| **Cư dân chủ hộ (A0101)** | Phạm Minh Đức | `cudan.a0101@gmail.com` | `••••••••` (Bảo mật) | Xem hóa đơn, quét VietQR, gửi phản ánh sự cố, đặt sân Tennis, quản lý 2 xe máy |
+| **Cư dân thuê nhà (B0202)** | Hoàng Thùy Linh | `cudan.b0202@gmail.com` | `••••••••` (Bảo mật) | Báo số điện nước qua ảnh quét OCR, đăng ký thẻ ô tô, đặt tiệc nướng BBQ |
+| **Cư dân (C0301)** | Đỗ Quang Hải | `cudan.c0301@gmail.com` | `••••••••` (Bảo mật) | Nhận thông báo bảo trì khẩn cấp, tra cứu danh bạ khẩn cấp, đánh giá chất lượng dịch vụ |
 
 ---
 

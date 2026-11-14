@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Xây dựng và thực thi bộ dữ liệu demo sống động, đầy đủ mọi module (3 tòa nhà, 25 căn hộ, 38 cư dân, 40 xe, 3 tháng hóa đơn, 20 giao dịch, 10 sự cố, 10 tiện ích, 10 thông báo, 5 thiết bị) với 100% email `@gmail.com` và mật khẩu `PkaHome@2026`, phục vụ thuyết trình bảo vệ đồ án.
+**Goal:** Xây dựng và thực thi bộ dữ liệu demo sống động, đầy đủ mọi module (3 tòa nhà, 25 căn hộ, 38 cư dân, 40 xe, 3 tháng hóa đơn, 20 giao dịch, 10 sự cố, 10 tiện ích, 10 thông báo, 5 thiết bị) với 100% email `@gmail.com` và mật khẩu quản trị/demo nội bộ, phục vụ kiểm thử và nghiệm thu hệ thống.
 
 **Architecture:** Đồng bộ các DDL migrations còn thiếu lên Supabase -> Xây dựng script `supabase/seed.sql` toàn diện, idempotent -> Thực thi seed dữ liệu qua MCP `execute_sql` -> Xác minh số lượng bản ghi -> Soạn tài liệu tra cứu tài khoản demo `docs/demo_accounts.md`.
 
@@ -10,7 +10,7 @@
 
 ## Global Constraints
 - 100% email người dùng kết thúc bằng `@gmail.com`.
-- Mật khẩu đăng nhập thống nhất: `PkaHome@2026` (sử dụng `crypt('PkaHome@2026', gen_salt('bf'))`).
+- Mật khẩu đăng nhập demo thống nhất theo cấu hình môi trường test (mã hóa bcrypt qua `crypt(...)`).
 - Mã căn hộ chuẩn định dạng `A0101` - `C0305`.
 - Script seed phải mang tính Idempotent (`ON CONFLICT DO NOTHING` hoặc `ON CONFLICT DO UPDATE`) để có thể chạy nhiều lần mà không sinh lỗi trùng lặp.
 - 100% text giao diện và mô tả tiếng Việt chuẩn mực, không emoji.

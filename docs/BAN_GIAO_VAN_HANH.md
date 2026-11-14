@@ -43,7 +43,7 @@ Gửi mẫu Excel 6 sheet chuẩn này cho đơn vị quản lý trước ngày 
 
 ## 4. Danh Sách Tài Khoản Mẫu Cho Đơn Vị Thử Nghiệm (UAT Testing)
 
-> **Mật khẩu dùng chung cho môi trường thử nghiệm:** `PkaHome@2026`
+> **Mật khẩu truy cập:** *Liên hệ Quản trị viên hệ thống để nhận thông tin mật khẩu tạm thời cho tài khoản thử nghiệm.*
 
 | Vai Trò | Email Đăng Nhập | Mục Đích Thử Nghiệm (UAT Scenario) |
 | :--- | :--- | :--- |

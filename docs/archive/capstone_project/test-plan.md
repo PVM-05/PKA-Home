@@ -74,7 +74,7 @@ Kiểm tra tính toàn vẹn của khảo sát đa tiêu chí và tự động t
 
 ## 8. Danh Sách Tài Khoản & Dữ Liệu Mẫu Thử Nghiệm
 
-Hệ thống đã nạp sẵn bộ dữ liệu mẫu chuẩn trực tiếp vào cơ sở dữ liệu Supabase, dùng mật khẩu chung là **`PkaHome@2026`**:
+Hệ thống đã nạp sẵn bộ dữ liệu mẫu chuẩn trực tiếp vào cơ sở dữ liệu Supabase (mật khẩu đăng nhập cấp riêng trong môi trường test nội bộ hoặc liên hệ Quản trị viên):
 
 | Email | Họ và Tên | Vai trò | Căn hộ | Dữ liệu mẫu sẵn có & Kịch bản áp dụng |
 | :--- | :--- | :--- | :--- | :--- |

@@ -69,7 +69,7 @@ BEGIN
         RAISE EXCEPTION 'Email % đã tồn tại trong hệ thống', p_email;
     END IF;
 
-    v_pwd := COALESCE(NULLIF(TRIM(p_password), ''), 'PkaHome@2026');
+    v_pwd := COALESCE(NULLIF(TRIM(p_password), ''), substr(md5(random()::text), 1, 12));
     v_role := p_role::public.user_role;
 
     -- Tạo bản ghi trong auth.users

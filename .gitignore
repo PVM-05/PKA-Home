@@ -129,14 +129,24 @@ migrate_working_dir/
 *.zip
 
 # ==========================================
-# 5. AGENTS & LOCAL OVERRIDES
+# 5. AGENTS, BINARIES & GENERATED DATA
 # ==========================================
 .agents/plugins/
 .agents/mcp_config.json
 .superpowers/
 
-# Graphify Local Cache
-graphify-out/cache/
-graphify-out/converted/
-graphify-out/.graphify_*
+# Binary Executables & Compiled Assets
+*.exe
+*.dll
+*.dylib
+*.so
+**/bin/
+
+# Office & Slide Documents in archive
+*.docx
+*.pptx
+
+# Graphify Local Output & Cache
+graphify-out/
+
 

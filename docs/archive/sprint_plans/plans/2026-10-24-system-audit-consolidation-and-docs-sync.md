@@ -12,7 +12,7 @@
 - Commit trực tiếp trên nhánh `main`, không tạo branch/worktree phụ.
 - 100% tiếng Việt chuẩn trên giao diện người dùng, không hardcode mã màu rời rạc, hỗ trợ Dark Mode an toàn.
 - Tuân thủ nghiêm ngặt quy tắc enum CSDL (`invoice_status`: `'unpaid'`, `'pending_confirmation'`, `'paid'`; `user_role`: `'admin'`, `'management'`, `'accountant'`, `'technician'`, `'resident'`).
-- Mọi email tài khoản dùng trong hệ thống và tài liệu đều thuộc tên miền `@gmail.com`, mật khẩu `PkaHome@2026`.
+- Mọi email tài khoản dùng trong hệ thống và tài liệu đều thuộc tên miền `@gmail.com` với mật khẩu khởi tạo an toàn.
 
 ---
 
@@ -80,7 +80,7 @@
   - Xóa dòng `ALTER TABLE public.vehicles DISABLE TRIGGER trg_check_vehicle_limits;`.
   - Đảm bảo mỗi căn hộ không vượt quá 2 xe máy và 1 ô tô.
 - [ ] **Step 3: Kiểm tra toàn bộ email tài khoản trong `seed.sql`**
-  - Đảm bảo 100% email có đuôi `@gmail.com` và mật khẩu `PkaHome@2026`.
+  - Đảm bảo 100% email có đuôi `@gmail.com` và mật khẩu mã hóa an toàn.
 - [ ] **Step 4: Commit `seed.sql` vào git**
   - Chạy: `git add supabase/seed.sql`
   - Chạy: `git commit -m "fix(seed): deduplicate vehicle plates, remove trigger bypass and verify gmail accounts"`
@@ -149,7 +149,7 @@
     - `pkahome.ketoan@gmail.com`
     - `pkahome.kythuat@gmail.com`
     - `cudan.a0101@gmail.com`, `cudan.b0101@gmail.com`, `cudan.c0101@gmail.com`, `test1@gmail.com`
-  - Đổi mật khẩu demo thành `PkaHome@2026`.
+  - Chuẩn hóa hướng dẫn tài khoản mật khẩu demo an toàn (không để lộ thô trong git).
   - Cập nhật kịch bản kiểm thử khớp với luồng thanh toán PENDING và chỉ số điện nước.
 - [ ] **Step 2: Cập nhật `docs/ERD.dbml`**
   - Đổi tên bảng `amenities` -> `building_amenities`.

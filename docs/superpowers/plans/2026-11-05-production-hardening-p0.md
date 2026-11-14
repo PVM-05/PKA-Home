@@ -55,12 +55,12 @@
 **Files:**
 - Modify: `pubspec.yaml` (loại bỏ `.env` và `.env.*` khỏi assets)
 - Modify: `lib/core/services/operational_alert_service.dart` (vô hiệu hóa gọi webhook trực tiếp từ client khi ở production)
-- Modify: `lib/data/repositories/management_repository.dart` (xóa mật khẩu mặc định `PkaHome@2026`)
+- Modify: `lib/data/repositories/management_repository.dart` (xóa mật khẩu mặc định hardcode)
 - Modify: `lib/core/utils/document_pdf_builder.dart` (xóa STK hardcode MB 888888888888)
 - Modify: `docs/BAN_GIAO_VAN_HANH.md` (xóa tài khoản/mật khẩu mẫu)
 
 - [x] **Bước 1.3.1:** Gỡ bỏ `.env` khỏi `assets:` trong `pubspec.yaml`.
-- [x] **Bước 1.3.2:** Xóa mật khẩu hardcode `PkaHome@2026` trong `ManagementRepository.createUser`.
+- [x] **Bước 1.3.2:** Xóa mật khẩu hardcode trong `ManagementRepository.createUser`.
 - [x] **Bước 1.3.3:** Xóa STK MB `888888888888` trong `DocumentPdfBuilder`.
 - [x] **Bước 1.3.4:** Chuyển `OperationalAlertService` client sang chế độ ghi log/an toàn, không phát tán token.
 - [x] **Bước 1.3.5:** Commit: `fix(security): go bo env asset mat khau mac dinh va credentials hardcode p0`.
