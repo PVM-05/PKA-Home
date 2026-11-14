@@ -444,9 +444,9 @@
     "semantic_hash": ""
   },
   "lib/core/widgets/unified_payment_sheet.dart": {
-    "mtime": 1794137516.2653964,
-    "seen": 1794139909.1964087,
-    "ast_hash": "045ab687e06438bf75fdcf9e42b5ce4c",
+    "mtime": 1794667485.6828828,
+    "seen": 1794667740.6945221,
+    "ast_hash": "7121de45ea71affb3f1818b3e2859636",
     "semantic_hash": ""
   },
   "lib/data/models/accounting_period_model.dart": {
@@ -924,9 +924,9 @@
     "semantic_hash": ""
   },
   "lib/data/services/payment_service.dart": {
-    "mtime": 1794137516.5824974,
-    "seen": 1794139909.1964087,
-    "ast_hash": "3a773e32725707e706b9fb54b5cda5f9",
+    "mtime": 1794667282.5325701,
+    "seen": 1794667740.718755,
+    "ast_hash": "7fbb226b914ba9dc66fd239e1e896802",
     "semantic_hash": ""
   },
   "lib/features/auth/screens/change_password_screen.dart": {
@@ -5178,9 +5178,9 @@
     "semantic_hash": ""
   },
   "test/integration/resident_lifecycle_workflow_integration_test.dart": {
-    "mtime": 1793886320.0520692,
-    "seen": 1793891612.8332055,
-    "ast_hash": "c7142a8ca96dce65eb83499f4b83d539",
+    "mtime": 1794408007.7547438,
+    "seen": 1794667740.9420958,
+    "ast_hash": "f7286727465810b6983561c437417d1f",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-10-30-resident-lifecycle-and-contracts.md": {
@@ -5268,9 +5268,9 @@
     "semantic_hash": ""
   },
   "test/integration/parking_workflow_integration_test.dart": {
-    "mtime": 1793886320.047475,
-    "seen": 1793891612.8332055,
-    "ast_hash": "f349b854a04af246ab52b1d17be7e29b",
+    "mtime": 1794408007.6677284,
+    "seen": 1794667740.9409673,
+    "ast_hash": "73e72a95af54e733a2b23444861992c5",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-02-parking-management-and-capacity.md": {
@@ -5502,9 +5502,9 @@
     "semantic_hash": ""
   },
   "test/integration/visitor_and_parcel_workflow_integration_test.dart": {
-    "mtime": 1793886320.056632,
-    "seen": 1793891612.8332055,
-    "ast_hash": "c653661f85be9655de177d356f11451c",
+    "mtime": 1794408007.9308474,
+    "seen": 1794667740.9440925,
+    "ast_hash": "e5ca865ca6fbbdf2cfc2139a3499965f",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-03-visitor-and-parcel-hub.md": {
@@ -5634,9 +5634,9 @@
     "semantic_hash": ""
   },
   "test/integration/digital_voting_and_petitions_workflow_integration_test.dart": {
-    "mtime": 1793886320.036891,
-    "seen": 1793891612.8332055,
-    "ast_hash": "bc7af506ce30f29e7656498e8136ff77",
+    "mtime": 1794408007.5901978,
+    "seen": 1794667740.937833,
+    "ast_hash": "c98a91bcf37a968ac37ab5f2c16ef1f6",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-11-03-digital-voting-and-petitions.md": {
@@ -6624,9 +6624,9 @@
     "semantic_hash": ""
   },
   "lib/data/models/building_payment_config_model.dart": {
-    "mtime": 1794139122.9224846,
-    "seen": 1794139909.1964087,
-    "ast_hash": "0cb438707e0cc14a58aafe9e86c8b37e",
+    "mtime": 1794667097.792255,
+    "seen": 1794667740.6982832,
+    "ast_hash": "16dc21b561b4a9f33146462301ca0f4a",
     "semantic_hash": ""
   },
   "lib/data/models/sepay_webhook_payload_model.dart": {
@@ -6648,9 +6648,9 @@
     "semantic_hash": ""
   },
   "test/data/models/sepay_models_test.dart": {
-    "mtime": 1794139122.9274857,
-    "seen": 1794139909.1974075,
-    "ast_hash": "e2d924824d842a7ff63fce671b0bfc90",
+    "mtime": 1794667108.2825327,
+    "seen": 1794667740.8316422,
+    "ast_hash": "9bdfbfc4366367f44b68c33d74826ba3",
     "semantic_hash": ""
   },
   "test/data/services/payment_service_sepay_test.dart": {
@@ -6690,9 +6690,9 @@
     "semantic_hash": ""
   },
   "supabase/functions/sepay-webhook/index.ts": {
-    "mtime": 1794139122.924484,
-    "seen": 1794139909.1974075,
-    "ast_hash": "eebab61ddb5ff13480010e2ac63a7c7b",
+    "mtime": 1794667030.7910929,
+    "seen": 1794667740.7471774,
+    "ast_hash": "590216a53047d4c7cb9e37d1120e3247",
     "semantic_hash": ""
   },
   "supabase/migrations/20261108_02_amenity_lifecycle_and_deposit.sql": {
@@ -7881,6 +7881,60 @@
     "mtime": 1794407057.1577246,
     "seen": 1794407409.0946891,
     "ast_hash": "f0fef11d6528dd0f1f7268f331da39f0",
+    "semantic_hash": ""
+  },
+  "lib/core/services/vnpay_service.dart": {
+    "mtime": 1794667652.0534072,
+    "seen": 1794667740.6869795,
+    "ast_hash": "f6b8822b0417582e28f11546c77e0141",
+    "semantic_hash": ""
+  },
+  "supabase/functions/vnpay-ipn/index.ts": {
+    "mtime": 1794667653.810082,
+    "seen": 1794667740.7471774,
+    "ast_hash": "ed4e66fc58db764eb70bd64b2468997b",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261114_01_secure_bank_webhook_and_vnpay.sql": {
+    "mtime": 1794666852.3171463,
+    "seen": 1794667740.7583175,
+    "ast_hash": "7754633b6324977c51f760c062c7a8ed",
+    "semantic_hash": ""
+  },
+  "test/core/services/vnpay_service_test.dart": {
+    "mtime": 1794667167.2397609,
+    "seen": 1794667740.7990792,
+    "ast_hash": "e25800a2dc4894a43783408cfa8d1634",
+    "semantic_hash": ""
+  },
+  "test/core/widgets/unified_payment_sheet_vnpay_test.dart": {
+    "mtime": 1794667490.1852207,
+    "seen": 1794667740.8143983,
+    "ast_hash": "80f319c01afddce6feabe671b2e94b66",
+    "semantic_hash": ""
+  },
+  "test/integration/secure_bank_webhook_migration_test.dart": {
+    "mtime": 1794666852.3667476,
+    "seen": 1794667740.9431076,
+    "ast_hash": "869a6c2e6d6892c336e6b1ec315c34ae",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-11-14-real-payment-and-bank-webhook.md": {
+    "mtime": 1794667543.5497656,
+    "seen": 1794667741.0981345,
+    "ast_hash": "d563c0d615ff866b8bead919b6cedb92",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-11-14-real-payment-and-bank-webhook-design.md": {
+    "mtime": 1794666852.2657413,
+    "seen": 1794667741.116078,
+    "ast_hash": "d8c0e833bd7c886de3826dc8d0e8191d",
+    "semantic_hash": ""
+  },
+  "error.md": {
+    "mtime": 1794667150.4284284,
+    "seen": 1794667741.116078,
+    "ast_hash": "e31da60b0f7d9934a74aea302ff8bb7d",
     "semantic_hash": ""
   }
 }

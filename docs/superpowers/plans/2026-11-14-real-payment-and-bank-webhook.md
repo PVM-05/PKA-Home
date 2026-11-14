@@ -69,8 +69,8 @@
 ---
 
 ### Task 5: Rà Soát Toàn Bộ, Static Analysis & Cập Nhật Tri Thức
-- [ ] **Step 1:** Chạy `dart analyze lib test` (đảm bảo 0 issues).
-- [ ] **Step 2:** Chạy toàn bộ các tệp test liên quan đến thanh toán.
-- [ ] **Step 3:** Cập nhật đồ thị tri thức `graphify update .`.
-- [ ] **Step 4:** Commit hoàn tất kế hoạch vào `main`: `chore: hoan thanh he thong dong tien that vnpay va webhook ngan hang`.
+- [x] **Step 1:** Chạy `dart analyze lib test` (đảm bảo 0 issues).
+- [x] **Step 2:** Chạy toàn bộ các tệp test liên quan đến thanh toán.
+- [x] **Step 3:** Cập nhật đồ thị tri thức `graphify update .`.
+- [x] **Step 4:** Commit hoàn tất kế hoạch vào `main`: `chore: hoan thanh he thong dong tien that vnpay va webhook ngan hang`.
 
