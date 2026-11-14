@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/action_runner.dart';
+import '../../../data/models/payment_transaction_model.dart';
 import '../../../data/providers/accounting_workstation_provider.dart';
 import '../../../data/providers/payment_provider.dart';
+import '../../../data/providers/management_provider.dart';
+import '../../../data/providers/building_provider.dart';
 
 class AccountingWebWorkstationScreen extends ConsumerStatefulWidget {
   const AccountingWebWorkstationScreen({super.key});
@@ -16,9 +21,263 @@ class AccountingWebWorkstationScreen extends ConsumerStatefulWidget {
 class _AccountingWebWorkstationScreenState
     extends ConsumerState<AccountingWebWorkstationScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final int _sortColumnIndex = 0;
-  final bool _sortAscending = true;
+  int? _sortColumnIndex;
+  bool _sortAscending = true;
   int _currentTab = 0; // 0: Sổ công nợ, 1: Đối soát SePay
+
+  void _handleSort(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+    });
+  }
+
+  List<InvoiceTableRowItem> _getSortedRows(List<InvoiceTableRowItem> rows) {
+    if (_sortColumnIndex == null) return rows;
+    final sorted = List<InvoiceTableRowItem>.from(rows);
+    sorted.sort((a, b) {
+      int cmp = 0;
+      switch (_sortColumnIndex) {
+        case 0:
+          cmp = a.apartmentCode.compareTo(b.apartmentCode);
+          break;
+        case 1:
+          cmp = a.residentName.compareTo(b.residentName);
+          break;
+        case 2:
+          cmp = a.period.compareTo(b.period);
+          break;
+        case 3:
+          cmp = a.totalAmount.compareTo(b.totalAmount);
+          break;
+        case 4:
+          cmp = a.status.compareTo(b.status);
+          break;
+        case 6:
+          final aDue = a.dueDate ?? DateTime(0);
+          final bDue = b.dueDate ?? DateTime(0);
+          cmp = aDue.compareTo(bDue);
+          break;
+        case 7:
+          final aPaid = a.paidAt ?? DateTime(0);
+          final bPaid = b.paidAt ?? DateTime(0);
+          cmp = aPaid.compareTo(bPaid);
+          break;
+        default:
+          cmp = 0;
+      }
+      return _sortAscending ? cmp : -cmp;
+    });
+    return sorted;
+  }
+
+  Future<void> _confirmSendReminders(
+    BuildContext context,
+    Set<String> selectedIds,
+    List<InvoiceTableRowItem> rows,
+  ) async {
+    final targetRows = rows.where((r) => selectedIds.contains(r.id)).toList();
+    if (targetRows.isEmpty) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.notifications_active_outlined, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Xác nhận gửi nhắc nợ'),
+          ],
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn gửi thông báo nhắc nợ tới ${targetRows.length} căn hộ đã chọn?\n\n'
+          'Cư dân các căn hộ này sẽ nhận được thông báo về kỳ thu và số tiền cần thanh toán.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange.shade700),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Xác nhận gửi'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    await runAction(
+      this.context,
+      () async {
+        final activeBuilding = ref.read(activeBuildingProvider).value;
+        final allInvoices = ref.read(invoicesProvider).value ?? [];
+        final invMap = {for (var inv in allInvoices) inv.id: inv};
+
+        int sentCount = 0;
+        for (final row in targetRows) {
+          final inv = invMap[row.id];
+          final aptId = inv?.apartmentId;
+
+          await Supabase.instance.client.from('notifications').insert({
+            'apartment_id': ?aptId,
+            'building_id': ?activeBuilding?.id,
+            'title': 'Nhắc nợ hóa đơn kỳ ${row.period}',
+            'body': 'Hóa đơn căn hộ ${row.apartmentCode} kỳ ${row.period} trị giá ${row.formattedAmount} đến hạn thanh toán. Kính đề nghị Quý cư dân thanh toán sớm.',
+            'type': 'invoice_reminder',
+            'payload': {
+              'invoice_id': row.id,
+              'period': row.period,
+              'amount': row.totalAmount,
+            },
+          });
+          sentCount++;
+        }
+
+        ref.read(selectedInvoiceIdsProvider.notifier).clear();
+        return 'Đã gửi thành công $sentCount thông báo nhắc nợ đến cư dân.';
+      },
+      actionName: 'Gửi thông báo nhắc nợ',
+    );
+  }
+
+  Future<void> _showManualMatchDialog(
+    BuildContext context,
+    PaymentTransactionModel tx,
+  ) async {
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+    final allInvoices = ref.read(invoicesProvider).value ?? [];
+    final unpaidInvoices = allInvoices
+        .where((inv) => inv.status != 'paid' && inv.status != 'cancelled')
+        .toList()
+      ..sort((a, b) {
+        final diffA = (a.totalAmount - tx.amount).abs();
+        final diffB = (b.totalAmount - tx.amount).abs();
+        return diffA.compareTo(diffB);
+      });
+
+    String? selectedInvoiceId = unpaidInvoices.isNotEmpty ? unpaidInvoices.first.id : null;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.link, color: AppTheme.primary),
+                SizedBox(width: 8),
+                Text('Khớp Nợ Thủ Công'),
+              ],
+            ),
+            content: SizedBox(
+              width: 500,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Mã GD: ${tx.transactionCode}',
+                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text('Số tiền: ${currencyFormat.format(tx.amount)}',
+                              style: const TextStyle(
+                                  color: AppTheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15)),
+                          const SizedBox(height: 4),
+                          Text('Nội dung CK: ${tx.title ?? tx.failureReason ?? "Không có nội dung"}',
+                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                          const SizedBox(height: 4),
+                          Text('Cổng / Phương thức: ${tx.paymentMethod}',
+                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Chọn Hóa Đơn Cần Gạch Nợ:',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    if (unpaidInvoices.isEmpty)
+                      const Text(
+                        'Không có hóa đơn nào đang chờ thanh toán.',
+                        style: TextStyle(color: Colors.red),
+                      )
+                    else
+                      DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        initialValue: selectedInvoiceId,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        items: unpaidInvoices.map((inv) {
+                          final aptCode = inv.apartment?.code ?? inv.apartmentId;
+                          final isExactAmount = (inv.totalAmount - tx.amount).abs() < 1;
+                          final badge = isExactAmount ? ' [Khớp tiền]' : '';
+                          return DropdownMenuItem<String>(
+                            value: inv.id,
+                            child: Text(
+                              'Căn $aptCode - Kỳ ${inv.period} - ${currencyFormat.format(inv.totalAmount)}$badge',
+                              style: TextStyle(
+                                fontWeight: isExactAmount ? FontWeight.bold : FontWeight.normal,
+                                color: isExactAmount ? Colors.teal.shade800 : AppTheme.textPrimary,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setDialogState(() => selectedInvoiceId = val);
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Hủy'),
+              ),
+              FilledButton(
+                onPressed: selectedInvoiceId == null ? null : () => Navigator.of(ctx).pop(true),
+                child: const Text('Xác nhận gạch nợ'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (confirmed != true || selectedInvoiceId == null || !mounted) return;
+
+    await runAction(
+      this.context,
+      () async {
+        await ref.read(managementRepositoryProvider).matchUnmatchedTransaction(
+              transactionId: tx.id,
+              invoiceId: selectedInvoiceId!,
+            );
+        ref.invalidate(paymentTransactionsProvider);
+        ref.invalidate(invoicesProvider);
+        ref.invalidate(accountingWorkstationRowsProvider);
+        return 'Đã khớp nợ thủ công thành công giao dịch vào hóa đơn!';
+      },
+      actionName: 'Khớp nợ thủ công',
+    );
+  }
 
   @override
   void dispose() {
@@ -62,7 +321,7 @@ class _AccountingWebWorkstationScreenState
 
               // 4. Bulk Action Bar (hien khi co it nhat 1 row duoc chon)
               if (selectedIds.isNotEmpty) ...[
-                _buildBulkActionBar(selectedIds.length),
+                _buildBulkActionBar(selectedIds, rowsAsync.value ?? []),
                 const SizedBox(height: 16),
               ],
 
@@ -308,13 +567,7 @@ class _AccountingWebWorkstationScreenState
                                   DataCell(
                                     tx.isUnmatched
                                         ? FilledButton.tonal(
-                                            onPressed: () {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('Mở hộp thoại gán hóa đơn thủ công cho giao dịch chưa khớp.'),
-                                                ),
-                                              );
-                                            },
+                                            onPressed: () => _showManualMatchDialog(context, tx),
                                             style: FilledButton.styleFrom(
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                             ),
@@ -749,7 +1002,11 @@ class _AccountingWebWorkstationScreenState
     );
   }
 
-  Widget _buildBulkActionBar(int selectedCount) {
+  Widget _buildBulkActionBar(
+    Set<String> selectedIds,
+    List<InvoiceTableRowItem> rows,
+  ) {
+    final selectedCount = selectedIds.length;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -770,16 +1027,7 @@ class _AccountingWebWorkstationScreenState
           ),
           const Spacer(),
           FilledButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Đã gửi thông báo nhắc nợ tới $selectedCount căn hộ được chọn.',
-                  ),
-                  backgroundColor: AppTheme.primary,
-                ),
-              );
-            },
+            onPressed: () => _confirmSendReminders(context, selectedIds, rows),
             icon: const Icon(Icons.notifications_active_outlined, size: 18),
             label: const Text('Gửi Nhắc Nợ'),
             style: FilledButton.styleFrom(
@@ -849,6 +1097,8 @@ class _AccountingWebWorkstationScreenState
             );
           }
 
+          final sortedRows = _getSortedRows(rows);
+
           return ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SingleChildScrollView(
@@ -864,62 +1114,69 @@ class _AccountingWebWorkstationScreenState
                     if (val == true) {
                       ref
                           .read(selectedInvoiceIdsProvider.notifier)
-                          .selectAll(rows.map((e) => e.id));
+                          .selectAll(sortedRows.map((e) => e.id));
                     } else {
                       ref.read(selectedInvoiceIdsProvider.notifier).clear();
                     }
                   },
-                  columns: const [
+                  columns: [
                     DataColumn(
-                      label: Text(
+                      label: const Text(
                         'Căn Hộ',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      onSort: (col, asc) => _handleSort(col, asc),
                     ),
                     DataColumn(
-                      label: Text(
+                      label: const Text(
                         'Cư Dân',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      onSort: (col, asc) => _handleSort(col, asc),
                     ),
                     DataColumn(
-                      label: Text(
+                      label: const Text(
                         'Kỳ Thu',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      onSort: (col, asc) => _handleSort(col, asc),
                     ),
                     DataColumn(
-                      label: Text(
+                      label: const Text(
                         'Tổng Tiền',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      onSort: (col, asc) => _handleSort(col, asc),
                     ),
                     DataColumn(
-                      label: Text(
+                      label: const Text(
                         'Trạng Thái',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      onSort: (col, asc) => _handleSort(col, asc),
                     ),
-                    DataColumn(
+                    const DataColumn(
                       label: Text(
                         'Mã VietQR',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                     DataColumn(
-                      label: Text(
+                      label: const Text(
                         'Hạn Nộp',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      onSort: (col, asc) => _handleSort(col, asc),
                     ),
                     DataColumn(
-                      label: Text(
+                      label: const Text(
                         'Ngày Nộp / Thu',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      onSort: (col, asc) => _handleSort(col, asc),
                     ),
                   ],
-                  rows: rows.map((row) {
+                  rows: sortedRows.map((row) {
                     final isRowSelected = selectedIds.contains(row.id);
 
                     return DataRow(

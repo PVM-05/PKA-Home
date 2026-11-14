@@ -58,11 +58,12 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
               }
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppTheme.error),
-            tooltip: 'Xóa hóa đơn',
-            onPressed: () => _confirmDeleteInvoice(context, ref),
-          ),
+          if (!invoice.isPaid)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: AppTheme.error),
+              tooltip: 'Xóa hóa đơn',
+              onPressed: () => _confirmDeleteInvoice(context, ref),
+            ),
         ],
       ),
       body: detailState.when(
@@ -956,6 +957,19 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
+    if (invoice.isPaid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Hóa đơn đã thanh toán là bất biến. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn phí, vui lòng tạo Phiếu giảm trừ (Credit Note).',
+          ),
+          backgroundColor: AppTheme.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

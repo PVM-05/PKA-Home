@@ -40,3 +40,4 @@ String formatMoney(int amount, {bool includeSymbol = true}) {
   final formatted = formatter.format(amount);
   return includeSymbol ? '$formatted đ' : formatted;
 }
+

@@ -104,5 +104,43 @@ void main() {
     // Bulk bar xuat hien
     expect(find.textContaining('Đã chọn 1'), findsOneWidget);
     expect(find.text('Gửi Nhắc Nợ'), findsOneWidget);
+
+    // Nhan nut Gui Nhac No phai hien thi Dialog xac nhan that su
+    await tester.tap(find.text('Gửi Nhắc Nợ'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Xác nhận gửi nhắc nợ'), findsOneWidget);
+    expect(find.text('Xác nhận gửi'), findsOneWidget);
+    expect(find.text('Hủy'), findsOneWidget);
+
+    // Bam Huy dong dialog an toan
+    await tester.tap(find.text('Hủy'));
+    await tester.pumpAndSettle();
+    expect(find.text('Xác nhận gửi nhắc nợ'), findsNothing);
+  });
+
+  testWidgets('AccountingWebWorkstationScreen ho tro sap xep bang du lieu theo cot', (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    // Nhan vao tieu de cot Can Ho de trigger sap xep
+    final canHoHeader = find.text('Căn Hộ');
+    expect(canHoHeader, findsOneWidget);
+    await tester.tap(canHoHeader);
+    await tester.pumpAndSettle();
+
+    // Nhan tiep lan nua de dao chieu sort
+    await tester.tap(canHoHeader);
+    await tester.pumpAndSettle();
+
+    expect(find.text('A0110'), findsOneWidget);
+    expect(find.text('A0201'), findsOneWidget);
   });
 }

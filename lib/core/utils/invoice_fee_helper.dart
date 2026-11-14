@@ -22,10 +22,36 @@ class InvoiceFeeHelper {
         lower == 'phí gửi ô tô' ||
         lower == 'parking') {
       return 'Phí gửi ô tô';
-    } else if (lower == 'internet') {
+    } else if (lower == 'internet' || lower == 'phí internet') {
       return 'Phí Internet';
     }
     return rawFeeType;
+  }
+
+  /// Chuẩn hóa tên hoặc chuỗi tự do về mã khóa kỹ thuật chuẩn (Database Technical Key)
+  static String getFeeKey(String? nameOrKey) {
+    if (nameOrKey == null || nameOrKey.trim().isEmpty) {
+      return 'other';
+    }
+    final lower = nameOrKey.toLowerCase().trim();
+    if (lower == 'management' || lower == 'phí quản lý') {
+      return 'management';
+    } else if (lower == 'electricity' || lower == 'tiền điện') {
+      return 'electricity';
+    } else if (lower == 'water' || lower == 'tiền nước') {
+      return 'water';
+    } else if (lower == 'parking_motorbike' ||
+        lower == 'phí gửi xe máy' ||
+        lower.contains('xe_may')) {
+      return 'parking_motorbike';
+    } else if (lower == 'parking_car' ||
+        lower == 'phí gửi ô tô' ||
+        lower == 'parking') {
+      return 'parking_car';
+    } else if (lower == 'internet' || lower == 'phí internet') {
+      return 'internet';
+    }
+    return nameOrKey;
   }
 
   static String getFeeUnit(String? rawFeeType) {

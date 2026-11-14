@@ -222,24 +222,59 @@ class ManagementRepository {
     await _client.from('invoices').update({'status': status}).eq('id', id);
   }
 
-  Future<void> createInvoice(
+  Future<String> createInvoice(
     String apartmentId,
     String period,
     DateTime dueDate,
-    List<Map<String, dynamic>> items,
-  ) async {
-    await _client.rpc(
+    List<Map<String, dynamic>> items, {
+    String status = 'unpaid',
+  }) async {
+    final response = await _client.rpc(
       'create_invoice_with_items',
       params: {
         'p_apartment_id': apartmentId,
-
         'p_period': period,
-
         'p_due_date': dueDate.toIso8601String().split('T')[0],
-
         'p_items': items,
       },
     );
+    final invoiceId = response is Map ? response['invoice_id'] as String? : null;
+    if (invoiceId != null && status != 'unpaid') {
+      await _client
+          .from('invoices')
+          .update({'status': status, 'updated_at': DateTime.now().toIso8601String()})
+          .eq('id', invoiceId);
+    }
+    return invoiceId ?? '';
+  }
+
+  Future<void> matchUnmatchedTransaction({
+    required String transactionId,
+    required String invoiceId,
+    String? note,
+  }) async {
+    final now = DateTime.now().toIso8601String();
+    final invRes = await _client
+        .from('invoices')
+        .select('id, apartment_id, total_amount, status')
+        .eq('id', invoiceId)
+        .single();
+    final aptId = invRes['apartment_id'];
+
+    await _client.from('invoices').update({
+      'status': 'paid',
+      'paid_at': now,
+      'payment_method': 'VietQR',
+      'payment_reference': 'MANUAL_MATCH_$transactionId',
+      'updated_at': now,
+    }).eq('id', invoiceId);
+
+    await _client.from('payment_transactions').update({
+      'status': 'SUCCESS',
+      'invoice_id': invoiceId,
+      'apartment_id': aptId,
+      'updated_at': now,
+    }).eq('id', transactionId);
   }
 
   Future<void> deleteInvoice(String invoiceId) async {

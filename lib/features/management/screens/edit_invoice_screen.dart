@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/utils/money_formatter.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/app_card.dart';
@@ -23,20 +24,20 @@ class EditInvoiceScreen extends ConsumerStatefulWidget {
 }
 
 class _EditableFeeItem {
+  String feeKey;
   final TextEditingController feeTypeController;
   final TextEditingController unitPriceController;
   final TextEditingController quantityController;
 
   _EditableFeeItem({
-    required String feeType,
+    required this.feeKey,
+    required String feeName,
     required double unitPrice,
     required double quantity,
     required VoidCallback onChanged,
-  })  : feeTypeController = TextEditingController(text: feeType),
+  })  : feeTypeController = TextEditingController(text: feeName),
         unitPriceController = TextEditingController(
-          text: unitPrice % 1 == 0
-              ? unitPrice.toInt().toString()
-              : unitPrice.toString(),
+          text: formatMoney(unitPrice.toInt(), includeSymbol: false),
         ),
         quantityController = TextEditingController(
           text: quantity % 1 == 0
@@ -48,7 +49,7 @@ class _EditableFeeItem {
     quantityController.addListener(onChanged);
   }
 
-  double get unitPrice => double.tryParse(unitPriceController.text) ?? 0.0;
+  double get unitPrice => parseMoney(unitPriceController.text).toDouble();
   double get quantity => double.tryParse(quantityController.text) ?? 0.0;
   double get subtotal => unitPrice * quantity;
 
@@ -99,12 +100,14 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   void _initializeItems(List<Map<String, dynamic>> rawItems) {
     if (_isItemsInitialized) return;
     for (final raw in rawItems) {
-      final feeType = InvoiceFeeHelper.getFeeName(raw['fee_type'] as String?);
+      final rawKey = raw['fee_type'] as String? ?? 'other';
+      final feeName = InvoiceFeeHelper.getFeeName(rawKey);
       final unitPrice = (raw['unit_price'] as num?)?.toDouble() ?? 0.0;
       final quantity = (raw['quantity'] as num?)?.toDouble() ?? 1.0;
       _items.add(
         _EditableFeeItem(
-          feeType: feeType,
+          feeKey: InvoiceFeeHelper.getFeeKey(rawKey),
+          feeName: feeName,
           unitPrice: unitPrice,
           quantity: quantity,
           onChanged: _onItemChanged,
@@ -118,7 +121,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
     setState(() {
       _items.add(
         _EditableFeeItem(
-          feeType: 'Phí khác',
+          feeKey: 'other',
+          feeName: 'Phí khác',
           unitPrice: 0.0,
           quantity: 1.0,
           onChanged: _onItemChanged,
@@ -178,10 +182,11 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
     final formattedItems = <Map<String, dynamic>>[];
     for (final item in _items) {
-      final type = item.feeTypeController.text.trim();
+      final displayName = item.feeTypeController.text.trim();
+      final key = InvoiceFeeHelper.getFeeKey(displayName);
       final price = item.unitPrice;
       final qty = item.quantity;
-      if (type.isEmpty) {
+      if (displayName.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Tên loại phí không được để trống.'),
@@ -191,7 +196,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
         return;
       }
       formattedItems.add({
-        'fee_type': type,
+        'fee_type': key,
         'unit_price': price,
         'quantity': qty,
       });
@@ -337,11 +342,38 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
   Widget _buildGeneralInfoCard(BoxConstraints constraints) {
     final isCompact = constraints.maxWidth < 420;
+    final isPaid = widget.invoice.isPaid || widget.invoice.status == 'paid';
 
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (isPaid)
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: AppTheme.radiusSm,
+                border: Border.all(color: Colors.amber.shade700),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.lock_rounded, color: Colors.amber.shade900, size: 22),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Hóa đơn đã thanh toán. Theo chuẩn mực kế toán, số liệu đã hạch toán là bất biến. Để điều chỉnh, vui lòng tạo Phiếu giảm trừ (Credit Note).',
+                      style: TextStyle(
+                        color: Colors.amber.shade900,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Row(
             children: [
               Container(
@@ -415,6 +447,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
           if (isCompact) ...[
             TextFormField(
               controller: _periodController,
+              enabled: !isPaid,
               decoration: const InputDecoration(
                 labelText: 'Kỳ hóa đơn',
                 prefixIcon: Icon(Icons.calendar_today_outlined),
@@ -425,7 +458,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             ),
             const SizedBox(height: 12),
             InkWell(
-              onTap: _selectDueDate,
+              onTap: isPaid ? null : _selectDueDate,
               child: InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Hạn thanh toán',
@@ -440,6 +473,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _periodController,
+                    enabled: !isPaid,
                     decoration: const InputDecoration(
                       labelText: 'Kỳ hóa đơn',
                       prefixIcon: Icon(Icons.calendar_today_outlined),
@@ -452,7 +486,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: InkWell(
-                    onTap: _selectDueDate,
+                    onTap: isPaid ? null : _selectDueDate,
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'Hạn thanh toán',
@@ -466,28 +500,40 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             ),
           ],
           const SizedBox(height: 14),
-          DropdownButtonFormField<String>(
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Trạng thái hóa đơn',
-              prefixIcon: Icon(Icons.info_outline),
+          if (isPaid)
+            InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Trạng thái hóa đơn',
+                prefixIcon: Icon(Icons.check_circle_rounded, color: AppTheme.success),
+              ),
+              child: const Text('Đã thanh toán (Khóa sổ kế toán)', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.success)),
+            )
+          else
+            DropdownButtonFormField<String>(
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: 'Trạng thái hóa đơn',
+                prefixIcon: Icon(Icons.info_outline),
+              ),
+              initialValue: _status,
+              items: const [
+                DropdownMenuItem(
+                  value: 'unpaid',
+                  child: Text('Chưa thanh toán'),
+                ),
+                DropdownMenuItem(
+                  value: 'pending_confirmation',
+                  child: Text('Chờ xác nhận'),
+                ),
+                DropdownMenuItem(
+                  value: 'cancelled',
+                  child: Text('Đã hủy'),
+                ),
+              ],
+              onChanged: (val) {
+                if (val != null) setState(() => _status = val);
+              },
             ),
-            initialValue: _status,
-            items: const [
-              DropdownMenuItem(
-                value: 'unpaid',
-                child: Text('Chưa thanh toán'),
-              ),
-              DropdownMenuItem(
-                value: 'pending_confirmation',
-                child: Text('Chờ xác nhận'),
-              ),
-              DropdownMenuItem(value: 'paid', child: Text('Đã thanh toán')),
-            ],
-            onChanged: (val) {
-              if (val != null) setState(() => _status = val);
-            },
-          ),
         ],
       ),
     );
@@ -495,6 +541,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
   Widget _buildFeeItemsCard(BoxConstraints constraints) {
     final isCompact = constraints.maxWidth < 420;
+    final isPaid = widget.invoice.isPaid;
 
     return AppCard(
       child: Column(
@@ -573,7 +620,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                   if (isCompact) ...[
                     TextFormField(
                       controller: item.unitPriceController,
+                      enabled: !isPaid,
                       keyboardType: TextInputType.number,
+                      inputFormatters: [MoneyInputFormatter()],
                       decoration: const InputDecoration(
                         labelText: 'Đơn giá (đ)',
                         isDense: true,
@@ -583,7 +632,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                         ),
                       ),
                       validator: (val) =>
-                          validatePositiveNumber(val, 'Đơn giá', true),
+                          parseMoney(val ?? '') <= 0 ? 'Vui lòng nhập đơn giá' : null,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                     const SizedBox(height: 8),
@@ -636,7 +685,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           flex: 3,
                           child: TextFormField(
                             controller: item.unitPriceController,
+                            enabled: !isPaid,
                             keyboardType: TextInputType.number,
+                            inputFormatters: [MoneyInputFormatter()],
                             decoration: const InputDecoration(
                               labelText: 'Đơn giá (đ)',
                               isDense: true,
@@ -646,7 +697,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                               ),
                             ),
                             validator: (val) =>
-                                validatePositiveNumber(val, 'Đơn giá', true),
+                                parseMoney(val ?? '') <= 0 ? 'Vui lòng nhập đơn giá' : null,
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
                           ),
@@ -656,6 +707,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           flex: 2,
                           child: TextFormField(
                             controller: item.quantityController,
+                            enabled: !isPaid,
                             keyboardType:
                                 const TextInputType.numberWithOptions(
                               decimal: true,
@@ -717,6 +769,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   }
 
   Widget _buildTotalAndSubmitCard() {
+    final isPaid = widget.invoice.isPaid || widget.invoice.status == 'paid';
+
     return AppCard(
       color: AppTheme.primary.withValues(alpha: 0.05),
       borderColor: AppTheme.primary.withValues(alpha: 0.25),
@@ -755,12 +809,12 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: AppTheme.primary,
+              backgroundColor: isPaid ? Colors.grey.shade400 : AppTheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: AppTheme.radiusMd,
               ),
             ),
-            onPressed: _isSubmitting ? null : _submit,
+            onPressed: (_isSubmitting || isPaid) ? null : _submit,
             child: _isSubmitting
                 ? const SizedBox(
                     height: 20,
@@ -770,9 +824,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                       color: Colors.white,
                     ),
                   )
-                : const Text(
-                    'LƯU THAY ĐỔI',
-                    style: TextStyle(
+                : Text(
+                    isPaid ? 'HÓA ĐƠN ĐÃ KHÓA SỔ (BẤT BIẾN)' : 'LƯU THAY ĐỔI',
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

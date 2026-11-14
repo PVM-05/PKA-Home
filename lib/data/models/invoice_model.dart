@@ -37,6 +37,8 @@ class InvoiceModel {
     this.paymentCode,
   });
 
+  bool get isPaid => status == 'paid';
+
   String get effectivePaymentCode => paymentCode ?? '';
 
   String get displayReceiptNumber {

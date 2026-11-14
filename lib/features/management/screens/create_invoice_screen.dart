@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/utils/money_formatter.dart';
+import '../../../core/utils/utility_fee_calculator.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/app_card.dart';
@@ -36,15 +38,16 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   DateTime _dueDate = DateTime.now().add(const Duration(days: 5));
 
   // Tiền quản lý
-  final _managementPriceController = TextEditingController(text: '16500');
+  final _managementPriceController = TextEditingController(text: '16.500');
 
   // Tiền điện
   final _elecQtyController = TextEditingController();
-  final _elecPriceController = TextEditingController(text: '3500');
+  final _elecPriceController = TextEditingController(text: '3.500');
+  bool _isTieredElectricity = false; // true: EVN 6 bậc, false: Đơn giá cố định
 
   // Tiền nước
   final _waterQtyController = TextEditingController();
-  final _waterPriceController = TextEditingController(text: '18000');
+  final _waterPriceController = TextEditingController(text: '18.000');
 
   // Phí gửi xe (Theo quy định tòa nhà: 100.000đ/xe máy, 1.200.000đ/ô tô)
   final _motorbikeQtyController = TextEditingController();
@@ -54,6 +57,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   double _carFee = AppConstants.kCarFee;
   bool _hasLoadedRates = false;
   bool _isFixedRent = false;
+  bool _isDraft = false; // true: Lưu nháp (pending), false: Phát hành ngay (unpaid)
 
   bool _isSubmitting = false;
 
@@ -92,35 +96,40 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   }
 
   double _getManagementTotal() {
+    final price = parseMoney(_managementPriceController.text).toDouble();
     if (_isFixedRent) {
-      return double.tryParse(_managementPriceController.text) ?? 0.0;
+      return price;
     }
     final area = _selectedApartment?.area ?? 0.0;
-    final price = double.tryParse(_managementPriceController.text) ?? 0.0;
     return area * price;
   }
 
   double _getElecTotal() {
     final qty = double.tryParse(_elecQtyController.text) ?? 0.0;
-    final price = double.tryParse(_elecPriceController.text) ?? 0.0;
+    if (_isTieredElectricity) {
+      if (qty <= 0) return 0.0;
+      final result = UtilityFeeCalculator.calculateElectricityEVN6Tiers(qty);
+      return result.totalAmount.toDouble();
+    }
+    final price = parseMoney(_elecPriceController.text).toDouble();
     return qty * price;
   }
 
   double _getWaterTotal() {
     final qty = double.tryParse(_waterQtyController.text) ?? 0.0;
-    final price = double.tryParse(_waterPriceController.text) ?? 0.0;
+    final price = parseMoney(_waterPriceController.text).toDouble();
     return qty * price;
   }
 
   void _applyFeeRates(Map<String, double> rates) {
     if (rates.containsKey('management')) {
-      _managementPriceController.text = rates['management']!.toInt().toString();
+      _managementPriceController.text = formatMoney(rates['management']!.round());
     }
     if (rates.containsKey('electricity')) {
-      _elecPriceController.text = rates['electricity']!.toInt().toString();
+      _elecPriceController.text = formatMoney(rates['electricity']!.round());
     }
     if (rates.containsKey('water')) {
-      _waterPriceController.text = rates['water']!.toInt().toString();
+      _waterPriceController.text = formatMoney(rates['water']!.round());
     }
     if (rates.containsKey('parking_motorcycle')) {
       _motorbikeFee = rates['parking_motorcycle']!;
@@ -176,20 +185,28 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       // Phí quản lý / Tiền thuê phòng
       if (_getManagementTotal() > 0) {
         items.add({
-          'fee_type': _isFixedRent ? 'Tiền thuê phòng' : 'Phí quản lý',
+          'fee_type': _isFixedRent ? 'rent' : 'management',
           'unit_price': _isFixedRent
               ? _getManagementTotal()
-              : (double.tryParse(_managementPriceController.text) ?? 0),
+              : parseMoney(_managementPriceController.text),
           'quantity': _isFixedRent ? 1.0 : (_selectedApartment!.area ?? 0),
         });
       }
 
-      // Phí điện
+      // Phí điện (Đơn giá phẳng hoặc EVN 6 bậc)
       final elecQty = double.tryParse(_elecQtyController.text) ?? 0;
       if (elecQty > 0) {
+        final double elecUnitPrice;
+        if (_isTieredElectricity) {
+          final totalElec = _getElecTotal();
+          elecUnitPrice = (totalElec / elecQty).roundToDouble();
+        } else {
+          elecUnitPrice = parseMoney(_elecPriceController.text).toDouble();
+        }
+
         items.add({
-          'fee_type': 'Tiền điện',
-          'unit_price': double.tryParse(_elecPriceController.text) ?? 0,
+          'fee_type': 'electricity',
+          'unit_price': elecUnitPrice,
           'quantity': elecQty,
         });
       }
@@ -198,8 +215,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       final waterQty = double.tryParse(_waterQtyController.text) ?? 0;
       if (waterQty > 0) {
         items.add({
-          'fee_type': 'Tiền nước',
-          'unit_price': double.tryParse(_waterPriceController.text) ?? 0,
+          'fee_type': 'water',
+          'unit_price': parseMoney(_waterPriceController.text),
           'quantity': waterQty,
         });
       }
@@ -208,7 +225,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       final mbQty = double.tryParse(_motorbikeQtyController.text) ?? 0;
       if (mbQty > 0) {
         items.add({
-          'fee_type': 'Phí gửi xe máy',
+          'fee_type': 'parking_motorbike',
           'unit_price': _motorbikeFee,
           'quantity': mbQty,
         });
@@ -218,7 +235,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       final carQty = double.tryParse(_carQtyController.text) ?? 0;
       if (carQty > 0) {
         items.add({
-          'fee_type': 'Phí gửi ô tô',
+          'fee_type': 'parking_car',
           'unit_price': _carFee,
           'quantity': carQty,
         });
@@ -240,14 +257,18 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             _periodController.text.trim(),
             _dueDate,
             items,
+            status: _isDraft ? 'pending' : 'unpaid',
           );
 
       ref.invalidate(invoicesProvider); // Làm mới danh sách hóa đơn
 
       if (mounted) {
+        final successMsg = _isDraft
+            ? 'Đã lưu bản nháp hóa đơn thành công (Chờ soát xét, chưa phát hành cho cư dân)!'
+            : 'Lập và phát hành hóa đơn thành công!';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lập hóa đơn thành công!'),
+          SnackBar(
+            content: Text(successMsg),
             backgroundColor: AppTheme.success,
           ),
         );
@@ -752,7 +773,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     if (selected) {
                       setState(() {
                         _isFixedRent = false;
-                        _managementPriceController.text = '16500';
+                        _managementPriceController.text = '16.500';
                       });
                     }
                   },
@@ -769,10 +790,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                         _isFixedRent = true;
                         if (_selectedApartment?.rentPrice != null &&
                             _selectedApartment!.rentPrice! > 0) {
-                          _managementPriceController.text = _selectedApartment!
-                              .rentPrice!
-                              .toInt()
-                              .toString();
+                          _managementPriceController.text =
+                              formatMoney(_selectedApartment!.rentPrice!.round());
                         }
                       });
                     }
@@ -801,13 +820,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 labelText: _isFixedRent
                     ? 'Tiền thuê (đ/tháng)'
                     : 'Đơn giá (đ/m²)',
+                suffixText: 'đ',
               ),
               keyboardType: TextInputType.number,
-              validator: (v) => validatePositiveNumber(
-                v,
-                _isFixedRent ? 'Tiền thuê phòng' : 'Đơn giá quản lý',
-                true,
-              ),
+              inputFormatters: [MoneyInputFormatter()],
+              validator: (v) => (v == null || parseMoney(v) <= 0)
+                  ? 'Vui lòng nhập ${_isFixedRent ? "tiền thuê phòng" : "đơn giá quản lý"} hợp lệ'
+                  : null,
               autovalidateMode: AutovalidateMode.onUserInteraction,
             ),
           ] else ...[
@@ -834,13 +853,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                       labelText: _isFixedRent
                           ? 'Tiền thuê (đ/tháng)'
                           : 'Đơn giá (đ/m²)',
+                      suffixText: 'đ',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (v) => validatePositiveNumber(
-                      v,
-                      _isFixedRent ? 'Tiền thuê phòng' : 'Đơn giá quản lý',
-                      true,
-                    ),
+                    inputFormatters: [MoneyInputFormatter()],
+                    validator: (v) => (v == null || parseMoney(v) <= 0)
+                        ? 'Vui lòng nhập ${_isFixedRent ? "tiền thuê phòng" : "đơn giá quản lý"} hợp lệ'
+                        : null,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
                 ),
@@ -854,6 +873,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
   Widget _buildElectricityFeeCard(BoxConstraints constraints) {
     final isCompact = constraints.maxWidth < 420;
+    final elecQty = double.tryParse(_elecQtyController.text) ?? 0.0;
+    final tieredResult = _isTieredElectricity && elecQty > 0
+        ? UtilityFeeCalculator.calculateElectricityEVN6Tiers(elecQty)
+        : null;
 
     return AppCard(
       child: Column(
@@ -882,12 +905,103 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ChoiceChip(
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  label: const Text('Đơn giá phẳng'),
+                  selected: !_isTieredElectricity,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() => _isTieredElectricity = false);
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  label: const Text('Biểu giá EVN 6 bậc'),
+                  selected: _isTieredElectricity,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() => _isTieredElectricity = true);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 12),
-          if (isCompact) ...[
+          if (_isTieredElectricity) ...[
             TextFormField(
               controller: _elecQtyController,
               decoration: const InputDecoration(
                 labelText: 'Số điện tiêu thụ (kWh)',
+                suffixText: 'kWh',
+                prefixIcon: Icon(Icons.bolt),
+              ),
+              keyboardType: TextInputType.number,
+              validator: (v) => validateNonNegativeNumber(v, 'Số điện'),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.info_outline, size: 16, color: Colors.orange),
+                      SizedBox(width: 6),
+                      Text(
+                        'Tính tự động theo biểu giá điện sinh hoạt 6 bậc EVN',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (tieredResult != null && tieredResult.breakdown.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    ...tieredResult.breakdown.map((b) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${b.name}: ${b.formattedUnits} kWh × ${_currencyFormat.format(b.rate)}',
+                                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                              ),
+                              Text(
+                                _currencyFormat.format(b.amount),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ],
+                ],
+              ),
+            ),
+          ] else if (isCompact) ...[
+            TextFormField(
+              controller: _elecQtyController,
+              decoration: const InputDecoration(
+                labelText: 'Số điện tiêu thụ (kWh)',
+                suffixText: 'kWh',
               ),
               keyboardType: TextInputType.number,
               validator: (v) =>
@@ -899,10 +1013,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               controller: _elecPriceController,
               decoration: const InputDecoration(
                 labelText: 'Đơn giá (đ/kWh)',
+                suffixText: 'đ',
               ),
               keyboardType: TextInputType.number,
-              validator: (v) =>
-                  validatePositiveNumber(v, 'Đơn giá điện', true),
+              inputFormatters: [MoneyInputFormatter()],
+              validator: (v) => (v == null || parseMoney(v) <= 0)
+                  ? 'Vui lòng nhập đơn giá điện hợp lệ'
+                  : null,
               autovalidateMode: AutovalidateMode.onUserInteraction,
             ),
           ] else ...[
@@ -913,6 +1030,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     controller: _elecQtyController,
                     decoration: const InputDecoration(
                       labelText: 'Số điện tiêu thụ (kWh)',
+                      suffixText: 'kWh',
                     ),
                     keyboardType: TextInputType.number,
                     validator: (v) =>
@@ -926,10 +1044,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     controller: _elecPriceController,
                     decoration: const InputDecoration(
                       labelText: 'Đơn giá (đ/kWh)',
+                      suffixText: 'đ',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        validatePositiveNumber(v, 'Đơn giá điện', true),
+                    inputFormatters: [MoneyInputFormatter()],
+                    validator: (v) => (v == null || parseMoney(v) <= 0)
+                        ? 'Vui lòng nhập đơn giá điện hợp lệ'
+                        : null,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
                 ),
@@ -977,6 +1098,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               controller: _waterQtyController,
               decoration: const InputDecoration(
                 labelText: 'Số khối nước (m³)',
+                suffixText: 'm³',
               ),
               keyboardType: TextInputType.number,
               validator: (v) =>
@@ -988,10 +1110,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               controller: _waterPriceController,
               decoration: const InputDecoration(
                 labelText: 'Đơn giá (đ/m³)',
+                suffixText: 'đ',
               ),
               keyboardType: TextInputType.number,
-              validator: (v) =>
-                  validatePositiveNumber(v, 'Đơn giá nước', true),
+              inputFormatters: [MoneyInputFormatter()],
+              validator: (v) => (v == null || parseMoney(v) <= 0)
+                  ? 'Vui lòng nhập đơn giá nước hợp lệ'
+                  : null,
               autovalidateMode: AutovalidateMode.onUserInteraction,
             ),
           ] else ...[
@@ -1002,6 +1127,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     controller: _waterQtyController,
                     decoration: const InputDecoration(
                       labelText: 'Số khối nước (m³)',
+                      suffixText: 'm³',
                     ),
                     keyboardType: TextInputType.number,
                     validator: (v) =>
@@ -1015,10 +1141,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     controller: _waterPriceController,
                     decoration: const InputDecoration(
                       labelText: 'Đơn giá (đ/m³)',
+                      suffixText: 'đ',
                     ),
                     keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        validatePositiveNumber(v, 'Đơn giá nước', true),
+                    inputFormatters: [MoneyInputFormatter()],
+                    validator: (v) => (v == null || parseMoney(v) <= 0)
+                        ? 'Vui lòng nhập đơn giá nước hợp lệ'
+                        : null,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
                 ),
@@ -1172,10 +1301,78 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           const SizedBox(height: 16),
           const Divider(height: 1),
           const SizedBox(height: 16),
+          // Tùy chọn trạng thái hóa đơn
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppTheme.border),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Trạng thái phát hành:',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.send_rounded, size: 16),
+                            SizedBox(width: 6),
+                            Text('Phát hành ngay'),
+                          ],
+                        ),
+                        selected: !_isDraft,
+                        onSelected: (val) {
+                          if (val) setState(() => _isDraft = false);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.drafts_outlined, size: 16),
+                            SizedBox(width: 6),
+                            Text('Lưu bản nháp'),
+                          ],
+                        ),
+                        selected: _isDraft,
+                        onSelected: (val) {
+                          if (val) setState(() => _isDraft = true);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _isDraft
+                      ? 'Bản nháp được lưu để soát xét nội bộ, cư dân chưa nhìn thấy hóa đơn này.'
+                      : 'Hóa đơn sẽ được phát hành ngay lập tức tới cư dân kèm thông báo thanh toán.',
+                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: AppTheme.primary,
+              backgroundColor: _isDraft ? Colors.blueGrey.shade700 : AppTheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: AppTheme.radiusMd,
               ),
@@ -1190,9 +1387,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                       strokeWidth: 2,
                     ),
                   )
-                : const Text(
-                    'XÁC NHẬN LẬP HÓA ĐƠN',
-                    style: TextStyle(
+                : Text(
+                    _isDraft ? 'LƯU BẢN NHÁP HÓA ĐƠN' : 'XÁC NHẬN PHÁT HÀNH HÓA ĐƠN',
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

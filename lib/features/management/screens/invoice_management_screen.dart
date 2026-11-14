@@ -634,15 +634,16 @@ class _InvoiceManagementScreenState
                               );
                             },
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              size: 20,
-                              color: AppTheme.error,
+                          if (!invoice.isPaid)
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: AppTheme.error,
+                              ),
+                              tooltip: 'Xóa hóa đơn',
+                              onPressed: () => _confirmDeleteInvoice(invoice),
                             ),
-                            tooltip: 'Xóa hóa đơn',
-                            onPressed: () => _confirmDeleteInvoice(invoice),
-                          ),
                         ],
                       ),
                     ),
@@ -775,25 +776,26 @@ class _InvoiceManagementScreenState
                               ],
                             ),
                           ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.delete,
-                                  color: AppTheme.error,
-                                  size: 18,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Xóa',
-                                  style: TextStyle(
+                          if (!invoice.isPaid)
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete,
                                     color: AppTheme.error,
+                                    size: 18,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Xóa',
+                                    style: TextStyle(
+                                      color: AppTheme.error,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ],
@@ -982,6 +984,19 @@ class _InvoiceManagementScreenState
   }
 
   Future<void> _confirmDeleteInvoice(InvoiceModel invoice) async {
+    if (invoice.isPaid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Hóa đơn đã thanh toán là bất biến và đã hạch toán kế toán. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn tiền, vui lòng lập Phiếu giảm trừ (Credit Note).',
+          ),
+          backgroundColor: AppTheme.warning,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

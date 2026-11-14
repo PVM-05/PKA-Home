@@ -86,6 +86,25 @@ class FeePolicyRepository {
     }
   }
 
+  /// Lưu hoặc cập nhật chính sách biểu giá cho tòa nhà
+  Future<FeeTierPolicyModel> upsertPolicy(FeeTierPolicyModel policy) async {
+    final client = _client;
+    if (client == null) throw StateError('Supabase client chưa được khởi tạo.');
+
+    final data = policy.toJson();
+    if (policy.id.isEmpty || policy.id.startsWith('default-')) {
+      data.remove('id');
+    }
+    data['updated_at'] = DateTime.now().toIso8601String();
+
+    final response = await client
+        .from('fee_tier_policies')
+        .upsert(data)
+        .select()
+        .single();
+    return FeeTierPolicyModel.fromJson(response);
+  }
+
   /// Tính tiền điện sinh hoạt theo 6 bậc lũy tiến chuẩn EVN
   /// Gọi RPC `calculate_progressive_electricity_fee` trên Supabase với fallback tự động sang [UtilityFeeCalculator]
   Future<TieredCalculationResultModel> calculateElectricityFee(

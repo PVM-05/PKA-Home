@@ -118,10 +118,13 @@ void main() {
       expect(find.textContaining('3.302'), findsWidgets);
 
       // Nhấn mở chính sách Nước sinh hoạt
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('policy_tile_water')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       final waterTile = find.byKey(const Key('policy_tile_water'));
       expect(waterTile, findsOneWidget);
-      await tester.ensureVisible(waterTile);
-      await tester.pumpAndSettle();
       await tester.tap(waterTile);
       await tester.pumpAndSettle();
 
