@@ -17,13 +17,13 @@
 - Tạo mới: `supabase/migrations/20261114_01_secure_bank_webhook_and_vnpay.sql`
 - Kiểm thử: `test/integration/secure_bank_webhook_migration_test.dart`
 
-- [ ] **Step 1:** Viết file migration SQL:
+- [x] **Step 1:** Viết file migration SQL:
   - Thu hồi quyền `EXECUTE` trên `process_bank_payment_webhook` và `process_sepay_webhook` khỏi `PUBLIC`, `anon`, `authenticated`.
   - Cấp quyền `EXECUTE` duy nhất cho `service_role`.
   - Mở rộng bảng `building_payment_configs` thêm các cột: `vnpay_tmn_code TEXT`, `vnpay_hash_secret TEXT`, `vnpay_is_active BOOLEAN DEFAULT false`.
-- [ ] **Step 2:** Viết test `test/integration/secure_bank_webhook_migration_test.dart` xác nhận file migration tồn tại, có đầy đủ lệnh REVOKE/GRANT và cột VNPay.
-- [ ] **Step 3:** Chạy test kiểm tra: `flutter test test/integration/secure_bank_webhook_migration_test.dart`.
-- [ ] **Step 4:** Commit vào `main`: `feat(finance): migration bao ve rpc webhook ngan hang va bo sung vnpay`.
+- [x] **Step 2:** Viết test `test/integration/secure_bank_webhook_migration_test.dart` xác nhận file migration tồn tại, có đầy đủ lệnh REVOKE/GRANT và cột VNPay.
+- [x] **Step 3:** Chạy test kiểm tra: `flutter test test/integration/secure_bank_webhook_migration_test.dart`.
+- [x] **Step 4:** Commit vào `main`: `feat(finance): migration bao ve rpc webhook ngan hang va bo sung vnpay`.
 
 ---
 
@@ -73,3 +73,4 @@
 - [ ] **Step 2:** Chạy toàn bộ các tệp test liên quan đến thanh toán.
 - [ ] **Step 3:** Cập nhật đồ thị tri thức `graphify update .`.
 - [ ] **Step 4:** Commit hoàn tất kế hoạch vào `main`: `chore: hoan thanh he thong dong tien that vnpay va webhook ngan hang`.
+

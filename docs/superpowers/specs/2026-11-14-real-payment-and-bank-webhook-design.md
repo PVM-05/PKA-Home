@@ -121,3 +121,4 @@ Ngoài hình thức chuyển khoản VietQR Napas 247, PKA-Home tích hợp cổ
    - `VnpayServiceTest`: Kiểm tra URL sinh ra có sắp xếp đúng alphabet và tạo đúng chữ ký HMAC-SHA512.
    - `PaymentServiceTest`: Đảm bảo `createPaymentIntent` tạo giao dịch PENDING và không tự ý gọi RPC gạch nợ từ client.
 4. **Static Analysis:** `dart analyze lib test` đạt `0 issues`.
+

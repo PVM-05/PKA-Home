@@ -6,7 +6,7 @@ void main() {
     late CommunityRepository repository;
 
     setUp(() {
-      repository = CommunityRepository();
+      repository = CommunityRepository(null, true);
     });
 
     test('Toan ven luong bieu quyet theo dien tich va kien nghi dong thuan', () async {

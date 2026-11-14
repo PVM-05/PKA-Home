@@ -71,7 +71,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Gia nhập bằng mã mời (Tự phục vụ)'), findsOneWidget);
+    expect(find.text('Gia nhập bằng mã mời'), findsOneWidget);
     expect(find.byIcon(Icons.qr_code_scanner_rounded), findsOneWidget);
   });
 

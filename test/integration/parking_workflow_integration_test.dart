@@ -7,7 +7,7 @@ void main() {
     late ParkingRepository repository;
 
     setUp(() {
-      repository = ParkingRepository();
+      repository = ParkingRepository(null, true);
     });
 
     test('1. Luong check-in xe vang lai, tinh phi theo gio va check-out thanh toan', () async {

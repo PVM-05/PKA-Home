@@ -6,7 +6,7 @@ void main() {
     late FrontDeskRepository repository;
 
     setUp(() {
-      repository = FrontDeskRepository();
+      repository = FrontDeskRepository(null, true);
     });
 
     test('Toan ven quy trinh Don khach QR va Giao nhan buu kien PIN', () async {
