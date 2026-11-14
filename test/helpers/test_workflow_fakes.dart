@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:pka_home/data/models/poll_model.dart';
 import 'package:pka_home/data/models/poll_result_model.dart';
 import 'package:pka_home/data/models/petition_model.dart';

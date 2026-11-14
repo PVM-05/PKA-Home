@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pka_home/core/utils/guard_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/data/models/visitor_parking_ticket_model.dart';
 import 'package:pka_home/data/repositories/parking_repository.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
