@@ -263,4 +263,61 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.process_sepay_webhook(JSONB, TEXT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.process_sepay_webhook(JSONB, TEXT) TO service_role;
 
+-- 6. Sửa trigger audit fn_audit_invoice_changes (lấy building_id từ apartments thay vì NEW.building_id không tồn tại)
+CREATE OR REPLACE FUNCTION public.fn_audit_invoice_changes()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_action TEXT;
+    v_actor_id UUID;
+    v_building_id UUID;
+BEGIN
+    v_actor_id := auth.uid();
+
+    -- Lấy building_id từ căn hộ liên kết
+    SELECT building_id INTO v_building_id
+    FROM public.apartments
+    WHERE id = NEW.apartment_id;
+
+    IF v_actor_id IS NULL THEN
+        SELECT id INTO v_actor_id FROM public.users WHERE role IN ('admin', 'management') LIMIT 1;
+    END IF;
+    
+    IF TG_OP = 'INSERT' THEN
+        v_action := 'CREATE_INVOICE';
+        INSERT INTO public.audit_logs (
+            building_id, actor_id, action, entity_name, entity_id, new_values
+        ) VALUES (
+            v_building_id,
+            v_actor_id,
+            v_action,
+            'invoices',
+            NEW.id,
+            jsonb_build_object('period', NEW.period, 'total_amount', NEW.total_amount, 'status', NEW.status)
+        );
+    ELSIF TG_OP = 'UPDATE' AND (OLD.status IS DISTINCT FROM NEW.status OR OLD.total_amount IS DISTINCT FROM NEW.total_amount) THEN
+        v_action := 'UPDATE_INVOICE_STATUS';
+        IF NEW.status = 'paid' THEN
+            v_action := 'CONFIRM_PAYMENT';
+        END IF;
+
+        INSERT INTO public.audit_logs (
+            building_id, actor_id, action, entity_name, entity_id, old_values, new_values
+        ) VALUES (
+            v_building_id,
+            v_actor_id,
+            v_action,
+            'invoices',
+            NEW.id,
+            jsonb_build_object('status', OLD.status, 'total_amount', OLD.total_amount),
+            jsonb_build_object('status', NEW.status, 'total_amount', NEW.total_amount, 'payment_method', NEW.payment_method)
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
 
