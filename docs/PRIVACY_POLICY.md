@@ -81,3 +81,4 @@ Trong trường hợp bất khả kháng phát hiện nguy cơ rò rỉ hoặc m
 - **Đơn vị phát triển nền tảng**: Ban Dự án PKA-Home PropTech Solutions.
 - **Email tiếp nhận yêu cầu DPO (Data Protection Officer)**: `security@pkahome.vn`
 - **Địa chỉ văn phòng**: Tòa nhà Điều hành PKA-Home, Hà Nội, Việt Nam.
+

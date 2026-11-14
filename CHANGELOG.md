@@ -57,3 +57,4 @@ Tất cả các thay đổi đáng chú ý của dự án **PKA-Home - Nền T�
 - Lập hóa đơn chi phí hàng tháng (điện, nước bậc thang EVN, phí quản lý, phí gửi xe).
 - Tích hợp cổng thanh toán VietQR chuyển khoản tự động.
 - Tiếp nhận và theo dõi tiến độ xử lý phản ánh kiến nghị của cư dân.
+

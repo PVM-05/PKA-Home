@@ -72,3 +72,4 @@ PKA-Home không chịu trách nhiệm bồi thường thiệt hại đối với
 1. Thỏa thuận này được điều chỉnh và giải thích theo pháp luật nước Cộng hòa Xã hội Chủ nghĩa Việt Nam.
 2. Mọi tranh chấp phát sinh từ hoặc liên quan đến Thỏa thuận này trước hết sẽ được thương lượng hòa giải trên tinh thần hợp tác và bình đẳng.
 3. Nếu không đạt được thỏa thuận hòa giải trong vòng 30 ngày kể từ ngày phát sinh tranh chấp, một trong các bên có quyền đưa vụ việc ra Trung tâm Trọng tài Quốc tế Việt Nam (VIAC) hoặc Tòa án nhân dân có thẩm quyền tại Thành phố Hà Nội để giải quyết theo luật định.
+
