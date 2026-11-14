@@ -4,6 +4,8 @@ import 'package:printing/printing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/handover_pdf_builder.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/apartment_handover_model.dart';
 import '../../../data/models/apartment_model.dart';
 import '../../../data/providers/building_provider.dart';
@@ -55,7 +57,9 @@ class _HandoverManagementScreenState
         ref.watch(buildingHandoversProvider(effectiveBuildingId));
     final isDesktop = MediaQuery.sizeOf(context).width >= 900;
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.handoverManagement,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Quản lý bàn giao & kiểm kê'),
         elevation: 0.5,
@@ -234,8 +238,9 @@ class _HandoverManagementScreenState
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildKpiHeader({
     required int totalCount,

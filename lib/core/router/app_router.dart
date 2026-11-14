@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../constants/permissions.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/link_request_provider.dart';
 import '../../data/models/invoice_model.dart';
@@ -82,6 +83,47 @@ void navigateToRoute(String route) {
   }
 }
 
+/// Bản đồ ánh xạ tuyến đường quản trị (/management/*) sang quyền hạn tương ứng (RBAC)
+final Map<String, PermissionItem> _managementRoutePermissions = {
+  AppRoutes.managementInvoices: AppPermissions.invoiceManagement,
+  AppRoutes.managementPaymentTransactions: AppPermissions.paymentTransactions,
+  AppRoutes.managementAccountingWorkstation: AppPermissions.accountingWorkstation,
+  AppRoutes.managementMaintenanceFundLedger: AppPermissions.maintenanceFundLedger,
+  AppRoutes.managementFinancialReport: AppPermissions.financialReport,
+  AppRoutes.managementMeterReading: AppPermissions.meterReadingManagement,
+
+  AppRoutes.managementIssues: AppPermissions.issueManagement,
+  AppRoutes.managementEquipment: AppPermissions.equipmentManagement,
+  AppRoutes.managementMaterials: AppPermissions.materialsManagement,
+  AppRoutes.managementHandovers: AppPermissions.handoverManagement,
+
+  AppRoutes.managementResidents: AppPermissions.residentManagement,
+  AppRoutes.managementApartments: AppPermissions.apartmentManagement,
+  AppRoutes.managementLinkRequests: AppPermissions.linkRequestManagement,
+  AppRoutes.managementVehicleApproval: AppPermissions.vehicleApproval,
+  AppRoutes.managementBatchImport: AppPermissions.batchImport,
+  AppRoutes.managementParking: AppPermissions.parkingManagement,
+
+  AppRoutes.managementAmenities: AppPermissions.amenityManagement,
+  AppRoutes.managementHandbook: AppPermissions.handbookManagement,
+  AppRoutes.managementAuditTrail: AppPermissions.auditTrail,
+  AppRoutes.managementRoleDelegation: AppPermissions.roleDelegation,
+  AppRoutes.managementPermissionMatrix: AppPermissions.permissionMatrix,
+  AppRoutes.managementSubscription: AppPermissions.subscriptionManagement,
+};
+
+PermissionItem? _findRoutePermission(String location) {
+  if (_managementRoutePermissions.containsKey(location)) {
+    return _managementRoutePermissions[location];
+  }
+  for (final entry in _managementRoutePermissions.entries) {
+    if (entry.key != AppRoutes.managementHome && location.startsWith(entry.key)) {
+      return entry.value;
+    }
+  }
+  return null;
+}
+
 /// Provider cho GoRouter, lắng nghe auth state để redirect tự động.
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -118,6 +160,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Cư dân không được phép truy cập vào khu vực quản trị (/management/*)
       if (isLoggedIn && !user.isManagement && state.matchedLocation.startsWith('/management')) {
         return AppRoutes.residentHome;
+      }
+
+      // Quản lý/Nhân viên: Kiểm tra quyền hạn chi tiết (RBAC) theo tuyến đường
+      if (isLoggedIn && user.isManagement && state.matchedLocation.startsWith('/management')) {
+        final requiredPerm = _findRoutePermission(state.matchedLocation);
+        if (requiredPerm != null && !requiredPerm.allows(user.role)) {
+          return AppRoutes.managementHome;
+        }
       }
 
       return null;

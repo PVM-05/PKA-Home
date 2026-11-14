@@ -134,6 +134,78 @@ class AppPermissions {
     allowedRoles: ['admin', 'management'],
   );
 
+  static const parkingManagement = PermissionItem(
+    key: 'parking_management',
+    name: 'Quản lý bãi đỗ xe & Ô đỗ',
+    category: 'Cư dân & Căn hộ',
+    description: 'Quản lý sơ đồ bãi xe, gán và thu hồi ô đỗ xe của cư dân.',
+    allowedRoles: ['admin', 'management'],
+  );
+
+  static const handoverManagement = PermissionItem(
+    key: 'handover_management',
+    name: 'Kiểm kê & Bàn giao căn hộ',
+    category: 'Sự cố & Kỹ thuật',
+    description: 'Lập và ký biên bản bàn giao căn hộ, kiểm kê tài sản và công tơ.',
+    allowedRoles: ['admin', 'management', 'technician'],
+  );
+
+  static const materialsManagement = PermissionItem(
+    key: 'materials_management',
+    name: 'Quản lý kho vật tư bảo trì',
+    category: 'Sự cố & Kỹ thuật',
+    description: 'Theo dõi xuất nhập tồn vật tư kỹ thuật và điều chỉnh định mức.',
+    allowedRoles: ['admin', 'management', 'technician'],
+  );
+
+  static const maintenanceFundLedger = PermissionItem(
+    key: 'maintenance_fund_ledger',
+    name: 'Sổ cái quỹ bảo trì 2%',
+    category: 'Tài chính & Hóa đơn',
+    description: 'Theo dõi biến động và chứng từ chi tiêu quỹ bảo trì chung cư.',
+    allowedRoles: ['admin', 'management', 'accountant'],
+  );
+
+  static const financialReport = PermissionItem(
+    key: 'financial_report',
+    name: 'Báo cáo tài chính & Doanh thu',
+    category: 'Tài chính & Hóa đơn',
+    description: 'Xem tổng quan doanh thu, tỷ lệ thu hồi công nợ và số liệu tài chính.',
+    allowedRoles: ['admin', 'management', 'accountant'],
+  );
+
+  static const accountingWorkstation = PermissionItem(
+    key: 'accounting_workstation',
+    name: 'Trạm kế toán web chuyên sâu',
+    category: 'Tài chính & Hóa đơn',
+    description: 'Bảng đối soát công nợ chi tiết và khớp giao dịch ngân hàng.',
+    allowedRoles: ['admin', 'management', 'accountant'],
+  );
+
+  static const batchImport = PermissionItem(
+    key: 'batch_import',
+    name: 'Nhập dữ liệu hàng loạt (Excel)',
+    category: 'Cư dân & Căn hộ',
+    description: 'Nhập danh sách căn hộ, cư dân và phương tiện từ file Excel.',
+    allowedRoles: ['admin', 'management'],
+  );
+
+  static const subscriptionManagement = PermissionItem(
+    key: 'subscription_management',
+    name: 'Quản lý gói phần mềm SaaS',
+    category: 'Hệ thống & Phân quyền',
+    description: 'Quản lý thời hạn bản quyền phần mềm và hạn mức vận hành tòa nhà.',
+    allowedRoles: ['admin'],
+  );
+
+  static const permissionMatrix = PermissionItem(
+    key: 'permission_matrix',
+    name: 'Ma trận phân quyền hệ thống',
+    category: 'Hệ thống & Phân quyền',
+    description: 'Cấu hình và kiểm tra chi tiết ma trận quyền hạn cho từng vai trò.',
+    allowedRoles: ['admin'],
+  );
+
   static const List<PermissionItem> all = [
     invoiceManagement,
     issueManagement,
@@ -148,5 +220,14 @@ class AppPermissions {
     paymentTransactions,
     amenityManagement,
     auditTrail,
+    parkingManagement,
+    handoverManagement,
+    materialsManagement,
+    maintenanceFundLedger,
+    financialReport,
+    accountingWorkstation,
+    batchImport,
+    subscriptionManagement,
+    permissionMatrix,
   ];
 }

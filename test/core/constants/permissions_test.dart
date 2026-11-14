@@ -68,8 +68,31 @@ void main() {
       );
     });
 
-    test('AppPermissions.all contains all 13 permissions with valid metadata', () {
-      expect(AppPermissions.all.length, equals(13));
+    test('new management permissions allow appropriate roles', () {
+      expect(AppPermissions.parkingManagement.allows('management'), isTrue);
+      expect(AppPermissions.parkingManagement.allows('resident'), isFalse);
+
+      expect(AppPermissions.handoverManagement.allows('technician'), isTrue);
+      expect(AppPermissions.handoverManagement.allows('resident'), isFalse);
+
+      expect(AppPermissions.materialsManagement.allows('technician'), isTrue);
+      expect(AppPermissions.materialsManagement.allows('resident'), isFalse);
+
+      expect(AppPermissions.maintenanceFundLedger.allows('accountant'), isTrue);
+      expect(AppPermissions.maintenanceFundLedger.allows('technician'), isFalse);
+
+      expect(AppPermissions.financialReport.allows('accountant'), isTrue);
+      expect(AppPermissions.financialReport.allows('resident'), isFalse);
+
+      expect(AppPermissions.subscriptionManagement.allows('admin'), isTrue);
+      expect(AppPermissions.subscriptionManagement.allows('accountant'), isFalse);
+
+      expect(AppPermissions.permissionMatrix.allows('admin'), isTrue);
+      expect(AppPermissions.permissionMatrix.allows('technician'), isFalse);
+    });
+
+    test('AppPermissions.all contains all 22 permissions with valid metadata', () {
+      expect(AppPermissions.all.length, equals(22));
       for (final item in AppPermissions.all) {
         expect(item.key.isNotEmpty, isTrue);
         expect(item.name.isNotEmpty, isTrue);

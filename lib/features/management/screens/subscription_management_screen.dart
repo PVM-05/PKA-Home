@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/subscription_model.dart';
 import '../../../data/models/subscription_plan_model.dart';
 import '../../../data/providers/building_provider.dart';
@@ -33,7 +35,9 @@ class _SubscriptionManagementScreenState
     final statusAsync = ref.watch(subscriptionStatusProvider);
     final plansAsync = ref.watch(availablePlansProvider);
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.subscriptionManagement,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Gói Dịch Vụ & Hạn Mức'),
         actions: [
@@ -129,8 +133,9 @@ class _SubscriptionManagementScreenState
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildCurrentSubscriptionCard(SubscriptionStatusModel status) {
     final dateFormat = DateFormat('dd/MM/yyyy');

@@ -6,6 +6,8 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/accounting_voucher_dialog.dart';
 import '../../../core/widgets/building_switcher_dropdown.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/providers/maintenance_fund_provider.dart';
 import '../../../data/providers/building_provider.dart';
 
@@ -292,7 +294,9 @@ class _MaintenanceFundLedgerScreenState
     final ledgerAsync = ref.watch(maintenanceFundLedgerProvider);
     final currentFilter = ref.watch(maintenanceFundLedgerFilterProvider);
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.maintenanceFundLedger,
+      child: Scaffold(
       appBar: AppBar(
         title: const FittedBox(
           fit: BoxFit.scaleDown,
@@ -412,8 +416,9 @@ class _MaintenanceFundLedgerScreenState
           },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildFundBalanceCard(
     AsyncValue<dynamic> fundAsync,

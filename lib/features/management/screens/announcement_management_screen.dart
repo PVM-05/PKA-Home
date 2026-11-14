@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/action_runner.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_card.dart';
@@ -466,60 +467,171 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     WidgetRef ref,
     AnnouncementModel announcement,
   ) async {
-    try {
-      final res = await ref
-          .read(announcementRepositoryProvider)
-          .broadcastAnnouncement(announcement.id);
-      if (context.mounted) {
-        final count = res['broadcast_count'] ?? 0;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              res['message']?.toString() ??
-                  'Đã phát lại thông báo đẩy tới $count cư dân.',
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.send_rounded, color: AppTheme.primary),
+            SizedBox(width: 8),
+            Text('Phát lại thông báo đẩy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Bạn có chắc chắn muốn phát lại thông báo:', style: const TextStyle(fontWeight: FontWeight.w500)),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                announcement.title,
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+              ),
             ),
-            backgroundColor: AppTheme.success,
+            const SizedBox(height: 12),
+            Text(
+              'Tiến độ hiện tại: Đã phát ${announcement.broadcastCount} lần • Đã đọc ${announcement.readCount} (${announcement.readRatioPercentageText})',
+              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, color: AppTheme.warning, size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Hệ thống sẽ gửi Push Notification mới tới tất cả cư dân. Vui lòng không phát lại liên tục.',
+                      style: TextStyle(fontSize: 11.5, color: Colors.brown),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
           ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.send_rounded, size: 16),
+            label: const Text('Xác nhận phát lại'),
+            onPressed: () => Navigator.pop(ctx, true),
           ),
-        );
-      }
-    }
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    await runAction(
+      context,
+      () async {
+        final res = await ref
+            .read(announcementRepositoryProvider)
+            .broadcastAnnouncement(announcement.id);
+        final count = res['broadcast_count'] ?? 0;
+        return res['message']?.toString() ?? 'Đã phát lại thông báo đẩy tới $count cư dân.';
+      },
+      actionName: 'Phát lại thông báo đẩy',
+    );
   }
 
   void _triggerRemindersScan(BuildContext context, WidgetRef ref) async {
-    try {
-      final activeBuilding = ref.read(activeBuildingProvider).value;
-      final count = await ref
-          .read(notificationRepositoryProvider)
-          .triggerInvoiceRemindersScan(buildingId: activeBuilding?.id);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Đã quét và phát sinh $count thông báo nhắc nợ thành công.',
+    final activeBuilding = ref.read(activeBuildingProvider).value;
+    final buildingName = activeBuilding?.name ?? 'Tòa nhà hiện tại';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.schedule_send_rounded, color: AppTheme.primary),
+            SizedBox(width: 8),
+            Text('Quét nhắc nợ hóa đơn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Hệ thống sẽ quét toàn bộ các hóa đơn chưa thanh toán hoặc quá hạn trong $buildingName và gửi thông báo nhắc nợ tự động tới từng cư dân có công nợ.',
+              style: const TextStyle(fontSize: 13.5),
             ),
-            backgroundColor: AppTheme.success,
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.notifications_active_outlined, color: AppTheme.primary, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Mỗi cư dân có hóa đơn cần thanh toán sẽ nhận được thông báo đẩy trên ứng dụng kèm chi tiết công nợ.',
+                      style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
           ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.send_rounded, size: 16),
+            label: const Text('Bắt đầu quét & gửi'),
+            onPressed: () => Navigator.pop(ctx, true),
           ),
-        );
-      }
-    }
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    await runAction(
+      context,
+      () async {
+        final count = await ref
+            .read(notificationRepositoryProvider)
+            .triggerInvoiceRemindersScan(buildingId: activeBuilding?.id);
+        return 'Đã quét và phát sinh $count thông báo nhắc nợ thành công.';
+      },
+      actionName: 'Quét nhắc nợ hóa đơn',
+    );
   }
 
   void _confirmDelete(
@@ -586,7 +698,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     String targetType = 'all';
     bool isUrgent = false;
     bool isPinned = false;
-    bool autoBroadcast = true;
+    bool autoBroadcast = false;
     bool isSubmitting = false;
     bool showLivePreview = false;
 
@@ -861,7 +973,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               SwitchListTile.adaptive(
                                 contentPadding: EdgeInsets.zero,
                                 title: const Text('Phát sóng thông báo tức thì (Push Broadcast)', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold)),
-                                subtitle: const Text('Tự động gửi thông báo nổi và rung chuông tới điện thoại cư dân', style: TextStyle(fontSize: 11.5)),
+                                subtitle: const Text('Mặc định tắt. Bật nếu muốn gửi thông báo đẩy tới thiết bị cư dân ngay khi tạo.', style: TextStyle(fontSize: 11.5)),
                                 value: autoBroadcast,
                                 activeTrackColor: AppTheme.primary,
                                 onChanged: (val) => setState(() => autoBroadcast = val),

@@ -7,6 +7,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/signature_pad_dialog.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/apartment_handover_model.dart';
 import '../../../data/models/handover_item_model.dart';
 import '../../../data/providers/handover_provider.dart';
@@ -274,8 +276,10 @@ class _InspectionWorkstationScreenState
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 900;
 
-    return Scaffold(
-      appBar: AppBar(
+    return RoleGuard(
+      permission: AppPermissions.handoverManagement,
+      child: Scaffold(
+        appBar: AppBar(
         title: const FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
@@ -344,6 +348,7 @@ class _InspectionWorkstationScreenState
                     : _buildMobileLayout(),
               ),
             ),
+      ),
     );
   }
 

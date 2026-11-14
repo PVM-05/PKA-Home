@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/excel_export_helper.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/financial_aging_report_model.dart';
 import '../../../data/providers/financial_report_provider.dart';
 import '../../../data/models/debt_risk_score_model.dart';
@@ -107,9 +109,11 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     final filter = ref.watch(financialReportFilterProvider);
     final debtors = ref.watch(filteredDebtorsProvider);
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.financialReport,
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
         appBar: AppBar(
           title: const Text(
             'Báo cáo Tài chính & Tuổi nợ',
@@ -294,8 +298,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildFilterSection(FinancialReportFilter filter) {
     return AppCard(

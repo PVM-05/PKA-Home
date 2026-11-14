@@ -47,10 +47,12 @@ class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<St
           .from('apartment_link_requests')
           .select('''
             id,
+            user_id,
+            apartment_id,
             requested_relation_role,
             created_at,
-            users ( full_name ),
-            apartments ( code )
+            users ( id, full_name, phone ),
+            apartments ( id, code )
           ''')
           .eq('status', 'pending')
           .order('created_at');
@@ -73,11 +75,21 @@ class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<St
     }
   }
 
-  Future<void> rejectRequest(String requestId) async {
+  Future<void> rejectRequest(String requestId, {required String reason, String? reviewedBy}) async {
     try {
+      final currentUserId = reviewedBy ?? SupabaseConfig.client.auth.currentUser?.id;
+      final updateData = <String, dynamic>{
+        'status': 'rejected',
+        'rejection_reason': reason,
+        'reviewed_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+      if (currentUserId != null) {
+        updateData['reviewed_by'] = currentUserId;
+      }
       await SupabaseConfig.client
           .from('apartment_link_requests')
-          .update({'status': 'rejected', 'updated_at': DateTime.now().toIso8601String()})
+          .update(updateData)
           .eq('id', requestId);
       await fetchRequests();
       ref.invalidate(pendingLinkRequestsCountProvider);

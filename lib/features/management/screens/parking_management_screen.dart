@@ -5,6 +5,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/apartment_model.dart';
 import '../../../data/models/parking_slot_model.dart';
 import '../../../data/models/vehicle_model.dart';
@@ -515,8 +517,10 @@ class _ParkingManagementScreenState
   Widget build(BuildContext context) {
     final statsAsync = ref.watch(parkingCapacityStatsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
+    return RoleGuard(
+      permission: AppPermissions.parkingManagement,
+      child: Scaffold(
+        appBar: AppBar(
         title: const FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
@@ -654,8 +658,9 @@ class _ParkingManagementScreenState
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildKpiBox({
     required IconData icon,

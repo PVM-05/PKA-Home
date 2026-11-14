@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/batch_import_model.dart';
 import '../../../data/providers/batch_import_provider.dart';
 import '../../../data/providers/building_provider.dart';
@@ -47,7 +49,9 @@ class _BatchImportCenterScreenState
       }
     });
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.batchImport,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Nhập Liệu Hàng Loạt'),
         actions: [
@@ -201,8 +205,9 @@ class _BatchImportCenterScreenState
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildIntroductionBanner() {
     return Container(

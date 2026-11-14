@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/action_runner.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/app_card.dart';
@@ -99,291 +100,10 @@ class _ResidentManagementScreenState
     BuildContext context,
     List<ApartmentModel> apartments,
   ) {
-    String generateSecurePassword() {
-      final rand = Random.secure();
-      const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-      const lower = 'abcdefghjkmnpqrstuvwxyz';
-      const digits = '23456789';
-      const specials = '@#%&*!';
-      final p1 = List.generate(3, (_) => upper[rand.nextInt(upper.length)]).join();
-      final p2 = List.generate(4, (_) => lower[rand.nextInt(lower.length)]).join();
-      final p3 = List.generate(2, (_) => digits[rand.nextInt(digits.length)]).join();
-      final p4 = specials[rand.nextInt(specials.length)];
-      final list = (p1 + p2 + p3 + p4).split('')..shuffle(rand);
-      return list.join();
-    }
-
-    final nameCtrl = TextEditingController();
-    final emailCtrl = TextEditingController();
-    final phoneCtrl = TextEditingController();
-    final passCtrl = TextEditingController(text: generateSecurePassword());
-    String role = 'resident';
-    String? apartmentId;
-    String relationRole = 'owner';
-    bool isSubmitting = false;
-    final formKey = GlobalKey<FormState>();
-
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Row(
-              children: [
-                Icon(Icons.person_add_alt_1, color: AppTheme.primary),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Tạo tài khoản mới',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                ),
-              ],
-            ),
-            content: SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextFormField(
-                      controller: nameCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Họ và tên *',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Vui lòng nhập họ tên'
-                          : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: emailCtrl,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email đăng nhập *',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Vui lòng nhập email';
-                        }
-                        if (!v.contains('@') || !v.contains('.')) {
-                          return 'Email không hợp lệ';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: phoneCtrl,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Số điện thoại',
-                        prefixIcon: Icon(Icons.phone_outlined),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: passCtrl,
-                      decoration: InputDecoration(
-                        labelText: 'Mật khẩu khởi tạo *',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        helperText:
-                            'Mật khẩu ngẫu nhiên bảo mật. Vui lòng sao chép gửi cho người dùng.',
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.refresh, size: 20),
-                          tooltip: 'Tạo mật khẩu ngẫu nhiên khác',
-                          onPressed: () {
-                            setDialogState(() {
-                              passCtrl.text = generateSecurePassword();
-                            });
-                          },
-                        ),
-                      ),
-                      validator: (v) => (v == null || v.length < 6)
-                          ? 'Mật khẩu ít nhất 6 ký tự'
-                          : null,
-                    ),
-                    const SizedBox(height: 14),
-                    DropdownButtonFormField<String>(
-                      initialValue: role,
-                      decoration: const InputDecoration(
-                        labelText: 'Vai trò tài khoản',
-                        prefixIcon: Icon(Icons.badge_outlined),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'resident',
-                          child: Text('Cư dân'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'admin',
-                          child: Text('Quản trị viên'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'accountant',
-                          child: Text('Kế toán'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'technician',
-                          child: Text('Kỹ thuật viên'),
-                        ),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          setDialogState(() {
-                            role = val;
-                            if (role != 'resident') {
-                              apartmentId = null;
-                            }
-                          });
-                        }
-                      },
-                    ),
-                    if (role == 'resident') ...[
-                      const SizedBox(height: 14),
-                      DropdownButtonFormField<String?>(
-                        initialValue: apartmentId,
-                        decoration: const InputDecoration(
-                          labelText: 'Căn hộ ban đầu (tùy chọn)',
-                          prefixIcon: Icon(Icons.domain),
-                        ),
-                        items: [
-                          const DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text('Không gán căn hộ ngay'),
-                          ),
-                          ...apartments.map(
-                            (apt) => DropdownMenuItem<String?>(
-                              value: apt.id,
-                              child: Text(
-                                'Căn hộ ${apt.code} (${apt.isEmpty ? 'Trống' : 'Đang ở'})',
-                              ),
-                            ),
-                          ),
-                        ],
-                        onChanged: (val) =>
-                            setDialogState(() => apartmentId = val),
-                      ),
-                      if (apartmentId != null) ...[
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          initialValue: relationRole,
-                          decoration: const InputDecoration(
-                            labelText: 'Quan hệ với căn hộ',
-                            prefixIcon: Icon(Icons.home_outlined),
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'owner',
-                              child: Text('Chủ hộ'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'member',
-                              child: Text('Thành viên'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'tenant',
-                              child: Text('Người thuê'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) {
-                              setDialogState(() => relationRole = val);
-                            }
-                          },
-                        ),
-                      ],
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.upload_file),
-                tooltip: 'Nhập Excel',
-                onPressed: () => context.push(AppRoutes.managementBatchImport),
-              ),
-              TextButton(
-                onPressed: isSubmitting ? null : () => Navigator.pop(context),
-                child: const Text(
-                  'Hủy',
-                  style: TextStyle(color: AppTheme.textSecondary),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                ),
-                onPressed: isSubmitting
-                    ? null
-                    : () async {
-                        if (!formKey.currentState!.validate()) return;
-                        setDialogState(() => isSubmitting = true);
-                        try {
-                          await ref
-                              .read(managementRepositoryProvider)
-                              .createUser(
-                                email: emailCtrl.text.trim(),
-                                password: passCtrl.text,
-                                fullName: nameCtrl.text.trim(),
-                                phone: phoneCtrl.text.trim().isNotEmpty
-                                    ? phoneCtrl.text.trim()
-                                    : null,
-                                role: role,
-                                apartmentId: apartmentId,
-                                relationRole: relationRole,
-                              );
-                          ref.invalidate(residentsProvider);
-                          ref.invalidate(apartmentsProvider);
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Đã tạo tài khoản cho ${nameCtrl.text.trim()} thành công!',
-                                ),
-                                backgroundColor: AppTheme.success,
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          setDialogState(() => isSubmitting = false);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(formatErrorMessage(e)),
-                                backgroundColor: AppTheme.error,
-                              ),
-                            );
-                          }
-                        }
-                      },
-                child: isSubmitting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Tạo tài khoản',
-                        style: TextStyle(color: Colors.white),
-                      ),
-              ),
-            ],
-          );
-        },
-      ),
+      builder: (ctx) => _CreateUserDialog(apartments: apartments),
     );
   }
 
@@ -1991,6 +1711,345 @@ class _ResidentManagementScreenState
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+}
+
+class _CreateUserDialog extends ConsumerStatefulWidget {
+  final List<ApartmentModel> apartments;
+
+  const _CreateUserDialog({required this.apartments});
+
+  @override
+  ConsumerState<_CreateUserDialog> createState() => _CreateUserDialogState();
+}
+
+class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  final _adminPassCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  String _role = 'resident';
+  String? _apartmentId;
+  String _relationRole = 'owner';
+  bool _obscurePass = true;
+  bool _obscureAdminPass = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _passCtrl.text = _generateSecurePassword();
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
+    _passCtrl.dispose();
+    _adminPassCtrl.dispose();
+    super.dispose();
+  }
+
+  String _generateSecurePassword() {
+    final rand = Random.secure();
+    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lower = 'abcdefghjkmnpqrstuvwxyz';
+    const digits = '23456789';
+    const specials = '@#%&*!';
+    final p1 = List.generate(3, (_) => upper[rand.nextInt(upper.length)]).join();
+    final p2 = List.generate(4, (_) => lower[rand.nextInt(lower.length)]).join();
+    final p3 = List.generate(2, (_) => digits[rand.nextInt(digits.length)]).join();
+    final p4 = specials[rand.nextInt(specials.length)];
+    final list = (p1 + p2 + p3 + p4).split('')..shuffle(rand);
+    return list.join();
+  }
+
+  bool get _isPrivilegedRole =>
+      _role == 'admin' || _role == 'accountant' || _role == 'technician';
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Row(
+        children: [
+          Icon(Icons.person_add_alt_1, color: AppTheme.primary),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Tạo tài khoản mới',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextFormField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Họ và tên *',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Vui lòng nhập họ tên'
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email đăng nhập *',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Vui lòng nhập email';
+                  }
+                  if (!v.contains('@') || !v.contains('.')) {
+                    return 'Email không hợp lệ';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _passCtrl,
+                obscureText: _obscurePass,
+                decoration: InputDecoration(
+                  labelText: 'Mật khẩu khởi tạo *',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  helperText:
+                      'Mật khẩu tạm thời. Cư dân có thể đổi sau khi đăng nhập.',
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _obscurePass ? Icons.visibility_off : Icons.visibility,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscurePass = !_obscurePass),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh, size: 20),
+                        tooltip: 'Tạo mật khẩu ngẫu nhiên mới',
+                        onPressed: () => setState(
+                          () => _passCtrl.text = _generateSecurePassword(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                validator: (v) =>
+                    (v == null || v.length < 6) ? 'Mật khẩu ít nhất 6 ký tự' : null,
+              ),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                initialValue: _role,
+                decoration: const InputDecoration(
+                  labelText: 'Vai trò tài khoản',
+                  prefixIcon: Icon(Icons.badge_outlined),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'resident', child: Text('Cư dân')),
+                  DropdownMenuItem(
+                      value: 'admin', child: Text('Quản trị viên (Admin)')),
+                  DropdownMenuItem(value: 'accountant', child: Text('Kế toán')),
+                  DropdownMenuItem(
+                      value: 'technician', child: Text('Kỹ thuật viên')),
+                ],
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _role = val;
+                      if (_role != 'resident') {
+                        _apartmentId = null;
+                      }
+                    });
+                  }
+                },
+              ),
+              if (_role == 'resident') ...[
+                const SizedBox(height: 14),
+                DropdownButtonFormField<String?>(
+                  initialValue: _apartmentId,
+                  decoration: const InputDecoration(
+                    labelText: 'Căn hộ ban đầu (tùy chọn)',
+                    prefixIcon: Icon(Icons.domain),
+                  ),
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('Không gán căn hộ ngay'),
+                    ),
+                    ...widget.apartments.map(
+                      (apt) => DropdownMenuItem<String?>(
+                        value: apt.id,
+                        child: Text(
+                          'Căn hộ ${apt.code} (${apt.isEmpty ? 'Trống' : 'Đang ở'})',
+                        ),
+                      ),
+                    ),
+                  ],
+                  onChanged: (val) => setState(() => _apartmentId = val),
+                ),
+                if (_apartmentId != null) ...[
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _relationRole,
+                    decoration: const InputDecoration(
+                      labelText: 'Quan hệ với căn hộ',
+                      prefixIcon: Icon(Icons.home_outlined),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'owner', child: Text('Chủ hộ')),
+                      DropdownMenuItem(value: 'member', child: Text('Thành viên')),
+                      DropdownMenuItem(value: 'tenant', child: Text('Người thuê')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => _relationRole = val);
+                      }
+                    },
+                  ),
+                ],
+              ],
+              if (_isPrivilegedRole) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border:
+                        Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.security, color: AppTheme.warning, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'Xác thực quyền quản trị',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: Colors.brown,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Tài khoản này có đặc quyền quản trị hệ thống. Vui lòng nhập mật khẩu xác nhận của Quản trị viên hiện tại.',
+                        style: TextStyle(fontSize: 11.5, color: Colors.brown),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _adminPassCtrl,
+                        obscureText: _obscureAdminPass,
+                        decoration: InputDecoration(
+                          labelText: 'Mật khẩu quản trị viên xác thực *',
+                          prefixIcon: const Icon(Icons.admin_panel_settings),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureAdminPass
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              size: 18,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscureAdminPass = !_obscureAdminPass,
+                            ),
+                          ),
+                          isDense: true,
+                        ),
+                        validator: (v) {
+                          if (_isPrivilegedRole &&
+                              (v == null || v.trim().isEmpty)) {
+                            return 'Bắt buộc xác thực mật khẩu quản trị';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.upload_file),
+          tooltip: 'Nhập Excel',
+          onPressed: () => context.push(AppRoutes.managementBatchImport),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy', style: TextStyle(color: AppTheme.textSecondary)),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+          onPressed: () async {
+            if (!_formKey.currentState!.validate()) return;
+            final fullName = _nameCtrl.text.trim();
+            final email = _emailCtrl.text.trim();
+            final password = _passCtrl.text;
+            final phone =
+                _phoneCtrl.text.trim().isNotEmpty ? _phoneCtrl.text.trim() : null;
+            final role = _role;
+            final apartmentId = _apartmentId;
+            final relationRole = _relationRole;
+
+            Navigator.pop(context);
+
+            await runAction(
+              context,
+              () async {
+                await ref.read(managementRepositoryProvider).createUser(
+                      email: email,
+                      password: password,
+                      fullName: fullName,
+                      phone: phone,
+                      role: role,
+                      apartmentId: apartmentId,
+                      relationRole: relationRole,
+                    );
+                ref.invalidate(residentsProvider);
+                ref.invalidate(apartmentsProvider);
+                return 'Đã tạo tài khoản cho $fullName thành công!';
+              },
+              actionName: 'Tạo tài khoản người dùng',
+            );
+          },
+          child: const Text('Tạo tài khoản', style: TextStyle(color: Colors.white)),
+        ),
+      ],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/role_guard.dart';
 
 class PermissionMatrixScreen extends StatelessWidget {
   const PermissionMatrixScreen({super.key});
@@ -14,7 +15,9 @@ class PermissionMatrixScreen extends StatelessWidget {
       grouped.putIfAbsent(item.category, () => []).add(item);
     }
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.permissionMatrix,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Bảng Ma Trận Phân Quyền'),
         leading: IconButton(
@@ -237,6 +240,7 @@ class PermissionMatrixScreen extends StatelessWidget {
         ),
       ),
     ),
+  ),
   ),
 );
   }

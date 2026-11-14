@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/maintenance_material_model.dart';
 import '../../../data/providers/material_provider.dart';
 
@@ -343,7 +345,9 @@ class _MaintenanceMaterialsScreenState
   Widget build(BuildContext context) {
     final materialsAsync = ref.watch(maintenanceMaterialsProvider(null));
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.materialsManagement,
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Kho Vật Tư Kỹ Thuật'),
         actions: [
@@ -703,8 +707,9 @@ class _MaintenanceMaterialsScreenState
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildCategoryFilterChip(String key, String label) {
     final isSelected = _selectedCategory == key;

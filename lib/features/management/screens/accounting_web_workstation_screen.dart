@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/action_runner.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/payment_transaction_model.dart';
 import '../../../data/providers/accounting_workstation_provider.dart';
 import '../../../data/providers/payment_provider.dart';
@@ -293,7 +295,9 @@ class _AccountingWebWorkstationScreenState
     final selectedIds = ref.watch(selectedInvoiceIdsProvider);
     final periods = ref.watch(accountingWorkstationAvailablePeriodsProvider);
 
-    return Scaffold(
+    return RoleGuard(
+      permission: AppPermissions.accountingWorkstation,
+      child: Scaffold(
       backgroundColor: AppTheme.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -334,8 +338,9 @@ class _AccountingWebWorkstationScreenState
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTabBar() {
     return Container(
