@@ -70,10 +70,17 @@ class BookAmenitySlotResponseDto {
 // -------------------------------------------------------------
 class CancelAmenityBookingRequestDto {
   final String bookingId;
+  final String? reason;
 
-  const CancelAmenityBookingRequestDto({required this.bookingId});
+  const CancelAmenityBookingRequestDto({
+    required this.bookingId,
+    this.reason,
+  });
 
-  Map<String, dynamic> toRpcParams() => {'p_booking_id': bookingId};
+  Map<String, dynamic> toRpcParams() => {
+    'p_booking_id': bookingId,
+    if (reason != null && reason!.isNotEmpty) 'p_reason': reason,
+  };
 }
 
 class CancelAmenityBookingResponseDto {

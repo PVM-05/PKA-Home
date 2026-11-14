@@ -3,10 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../data/models/apartment_model.dart';
 import '../../../data/models/parking_slot_model.dart';
+import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/visitor_parking_ticket_model.dart';
+import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/parking_provider.dart';
+import '../../../data/providers/vehicle_provider.dart';
 
 class ParkingManagementScreen extends ConsumerStatefulWidget {
   const ParkingManagementScreen({super.key});
@@ -299,61 +304,209 @@ class _ParkingManagementScreenState
   }
 
   void _showAssignSlotDialog(ParkingSlotModel slot) {
+    VehicleModel? selectedVehicle;
+    ApartmentModel? selectedApartment;
     final plateController = TextEditingController();
-    final aptController = TextEditingController();
+    final customAptCodeController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Gán Ô Đỗ ${slot.slotNumber}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: plateController,
-              decoration: const InputDecoration(
-                labelText: 'Biển số xe',
-                hintText: 'Ví dụ: 30A-123.45',
-              ),
-              textCapitalization: TextCapitalization.characters,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: aptController,
-              decoration: const InputDecoration(
-                labelText: 'Mã căn hộ',
-                hintText: 'Ví dụ: A0101',
-              ),
-              textCapitalization: TextCapitalization.characters,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final plate = plateController.text.trim().toUpperCase();
-              final apt = aptController.text.trim().toUpperCase();
-              if (plate.isEmpty) return;
-              Navigator.pop(ctx);
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final approvedVehiclesAsync = ref.watch(allVehiclesProvider('approved'));
+          final apartmentsAsync = ref.watch(apartmentsProvider);
 
-              final repo = ref.read(parkingRepositoryProvider);
-              await repo.assignSlot(
-                slotId: slot.id,
-                vehicleId: 'veh-${slot.id}',
-                apartmentId: 'apt-${slot.id}',
-                licensePlate: plate,
-                apartmentCode: apt,
-              );
-              ref.invalidate(parkingSlotsProvider);
-              ref.invalidate(parkingCapacityStatsProvider);
-            },
-            child: const Text('Xác nhận gán'),
-          ),
-        ],
+          return AlertDialog(
+            title: Text('Gán Ô Đỗ ${slot.slotNumber}'),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 450),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Loại ô đỗ: ${slot.slotType == 'car' ? 'Ô tô' : 'Xe máy'} | Khu vực: ${slot.zone}',
+                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 1. Chọn từ danh sách xe đã phê duyệt
+                    approvedVehiclesAsync.when(
+                      data: (vehicles) {
+                        // Lọc xe cùng loại với ô đỗ (car hoặc motorbike) nếu có
+                        final matchedVehicles = vehicles.where((v) {
+                          if (slot.slotType == 'car') return v.vehicleType == 'car';
+                          return v.vehicleType != 'car';
+                        }).toList();
+
+                        return DropdownButtonFormField<VehicleModel>(
+                          initialValue: selectedVehicle,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Chọn xe đã duyệt (Khuyến nghị)',
+                            prefixIcon: Icon(Icons.directions_car),
+                          ),
+                          hint: const Text('-- Hoặc chọn xe từ danh sách --'),
+                          items: [
+                            const DropdownMenuItem<VehicleModel>(
+                              value: null,
+                              child: Text('Tự nhập biển số / gắn căn hộ'),
+                            ),
+                            ...matchedVehicles.map(
+                              (v) => DropdownMenuItem(
+                                value: v,
+                                child: Text(
+                                  '${v.licensePlate} (${v.brandModel ?? v.vehicleType})',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            setDialogState(() {
+                              selectedVehicle = val;
+                              if (val != null) {
+                                plateController.text = val.licensePlate;
+                                final apartments = apartmentsAsync.valueOrNull ?? [];
+                                final aptMatch = apartments.where((a) => a.id == val.apartmentId).firstOrNull;
+                                if (aptMatch != null) {
+                                  selectedApartment = aptMatch;
+                                  customAptCodeController.text = aptMatch.code;
+                                }
+                              }
+                            });
+                          },
+                        );
+                      },
+                      loading: () => const LinearProgressIndicator(),
+                      error: (err, st) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 2. Chọn căn hộ sở hữu từ danh mục thực tế
+                    apartmentsAsync.when(
+                      data: (apartments) {
+                        return DropdownButtonFormField<ApartmentModel>(
+                          initialValue: selectedApartment,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Căn hộ sở hữu *',
+                            prefixIcon: Icon(Icons.apartment),
+                          ),
+                          hint: const Text('Chọn căn hộ...'),
+                          items: apartments.map((apt) {
+                            return DropdownMenuItem(
+                              value: apt,
+                              child: Text('Căn hộ ${apt.code} (${apt.buildingCode})'),
+                            );
+                          }).toList(),
+                          onChanged: selectedVehicle != null
+                              ? null // Đã khóa theo xe
+                              : (apt) {
+                                  setDialogState(() {
+                                    selectedApartment = apt;
+                                    if (apt != null) {
+                                      customAptCodeController.text = apt.code;
+                                    }
+                                  });
+                                },
+                        );
+                      },
+                      loading: () => const LinearProgressIndicator(),
+                      error: (err, st) => TextField(
+                        controller: customAptCodeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Mã căn hộ *',
+                          hintText: 'Ví dụ: A0110',
+                        ),
+                        textCapitalization: TextCapitalization.characters,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 3. Biển số xe
+                    TextField(
+                      controller: plateController,
+                      readOnly: selectedVehicle != null,
+                      decoration: InputDecoration(
+                        labelText: 'Biển số xe *',
+                        hintText: 'Ví dụ: 30A-123.45',
+                        prefixIcon: const Icon(Icons.pin),
+                        suffixIcon: selectedVehicle != null
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                tooltip: 'Bỏ chọn xe mẫu để tự nhập',
+                                onPressed: () {
+                                  setDialogState(() {
+                                    selectedVehicle = null;
+                                    plateController.clear();
+                                  });
+                                },
+                              )
+                            : null,
+                      ),
+                      textCapitalization: TextCapitalization.characters,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Hủy'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  final plate = plateController.text.trim().toUpperCase();
+                  final aptCode = selectedApartment?.code ?? customAptCodeController.text.trim().toUpperCase();
+                  final aptId = selectedApartment?.id ?? '';
+
+                  if (plate.isEmpty || aptCode.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Vui lòng nhập đầy đủ biển số xe và chọn căn hộ!'),
+                        backgroundColor: AppTheme.error,
+                      ),
+                    );
+                    return;
+                  }
+
+                  Navigator.pop(ctx);
+
+                  final vehicleId = selectedVehicle?.id ?? '';
+                  final targetApartmentId = aptId.isNotEmpty ? aptId : aptCode;
+
+                  final repo = ref.read(parkingRepositoryProvider);
+                  await runAction(
+                    context,
+                    () async {
+                      await repo.assignSlot(
+                        slotId: slot.id,
+                        vehicleId: vehicleId,
+                        apartmentId: targetApartmentId,
+                        slotNumber: slot.slotNumber,
+                        licensePlate: plate,
+                        apartmentCode: aptCode,
+                      );
+                      return 'Đã gán ô đỗ ${slot.slotNumber} cho xe $plate (Căn $aptCode) thành công!';
+                    },
+                    actionName: 'Gán ô đỗ xe',
+                  );
+
+                  ref.invalidate(parkingSlotsProvider);
+                  ref.invalidate(parkingCapacityStatsProvider);
+                },
+                child: const Text('Xác nhận gán'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

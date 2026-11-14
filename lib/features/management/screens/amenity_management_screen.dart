@@ -303,12 +303,73 @@ class _AmenityManagementScreenState
                   },
                 ),
                 const SizedBox(height: 10),
+                if (currentStatus == 'refunded') ...[
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: booking.inspectionResult == 'passed'
+                          ? Colors.green.shade50
+                          : Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: booking.inspectionResult == 'passed'
+                            ? Colors.green.shade200
+                            : Colors.amber.shade300,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              booking.inspectionResult == 'passed'
+                                  ? Icons.verified_outlined
+                                  : Icons.info_outline,
+                              size: 16,
+                              color: booking.inspectionResult == 'passed'
+                                  ? Colors.green.shade800
+                                  : Colors.amber.shade900,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                booking.inspectionResult == 'passed'
+                                    ? 'Đã có biên bản nghiệm thu: Đạt chuẩn'
+                                    : (booking.inspectionResult == 'violated'
+                                        ? 'Cảnh báo: Có vi phạm/khấu trừ (${_currencyFormat.format(booking.forfeitedAmount)})'
+                                        : 'Lưu ý: Chưa lập biên bản nghiệm thu hiện trường'),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: booking.inspectionResult == 'passed'
+                                      ? Colors.green.shade800
+                                      : Colors.amber.shade900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Tiền cọc là quỹ ký quỹ hoàn trả, không gộp vào doanh thu tòa nhà. Bắt buộc ghi nhận chứng từ/mã giao dịch hoàn tiền.',
+                          style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 TextField(
                   controller: notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Ghi chú thu/hoàn cọc',
-                    hintText: 'VD: Đã hoàn tiền mặt lúc 21h',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: currentStatus == 'refunded'
+                        ? 'Chứng từ / Mã GD hoàn cọc / Lý do *'
+                        : 'Ghi chú thu/hoàn cọc',
+                    hintText: currentStatus == 'refunded'
+                        ? 'VD: Chuyển khoản hoàn cọc mã FT26... sau khi kiểm tra mặt sàn'
+                        : 'VD: Đã hoàn tiền mặt lúc 21h',
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ],
@@ -325,6 +386,15 @@ class _AmenityManagementScreenState
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
+                if (currentStatus == 'refunded' && notesController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Vui lòng nhập ghi chú chứng từ hoặc mã giao dịch hoàn cọc!'),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                  return;
+                }
                 Navigator.pop(ctx);
                 try {
                   await ref
@@ -431,21 +501,16 @@ class _AmenityManagementScreenState
               Navigator.pop(ctx);
 
               try {
-                Map<String, dynamic> result;
-                if (token.startsWith('TK-')) {
+                final Map<String, dynamic> result;
+                final bool isTicketToken = token.startsWith('TK-') || token.toUpperCase().startsWith('TICKET');
+                if (isTicketToken) {
                   result = await ref
                       .read(amenityBookingRepositoryProvider)
                       .checkInTicket(token);
                 } else {
-                  try {
-                    result = await ref
-                        .read(amenityBookingRepositoryProvider)
-                        .checkInTicket(token);
-                  } catch (_) {
-                    result = await ref
-                        .read(amenityBookingRepositoryProvider)
-                        .checkInBooking(token);
-                  }
+                  result = await ref
+                      .read(amenityBookingRepositoryProvider)
+                      .checkInBooking(token);
                 }
 
                 if (_selectedAmenityId != null) {
@@ -528,11 +593,12 @@ class _AmenityManagementScreenState
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
+              final reason = reasonController.text.trim();
               Navigator.pop(ctx);
               try {
                 await ref
                     .read(amenityBookingRepositoryProvider)
-                    .cancelBooking(b.id);
+                    .cancelBooking(b.id, reason: reason.isNotEmpty ? reason : null);
                 ref.invalidate(allAmenityBookingsProvider);
                 if (_selectedAmenityId != null) {
                   ref.invalidate(
@@ -1705,19 +1771,30 @@ class _AmenityManagementScreenState
                   icon: const Icon(Icons.qr_code_scanner, size: 15),
                   label: const Text('Check-in'),
                   onPressed: () async {
-                    await ref
-                        .read(amenityBookingRepositoryProvider)
-                        .checkInBooking(b.id);
-                    ref.invalidate(allAmenityBookingsProvider);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Check-in thành công cho căn hộ ${b.apartmentCode ?? ""}!',
+                    try {
+                      await ref
+                          .read(amenityBookingRepositoryProvider)
+                          .checkInBooking(b.id);
+                      ref.invalidate(allAmenityBookingsProvider);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Check-in thành công cho căn hộ ${b.apartmentCode ?? ""}!',
+                            ),
+                            backgroundColor: AppStatusColors.paid,
                           ),
-                          backgroundColor: AppStatusColors.paid,
-                        ),
-                      );
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(formatErrorMessage(e)),
+                            backgroundColor: AppTheme.error,
+                          ),
+                        );
+                      }
                     }
                   },
                 ),

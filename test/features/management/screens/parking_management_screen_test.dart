@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/models/parking_capacity_stats_model.dart';
 import 'package:pka_home/data/models/parking_slot_model.dart';
 import 'package:pka_home/data/models/visitor_parking_ticket_model.dart';
+import 'package:pka_home/data/providers/management_provider.dart';
 import 'package:pka_home/data/providers/parking_provider.dart';
+import 'package:pka_home/data/providers/vehicle_provider.dart';
 import 'package:pka_home/data/repositories/parking_repository.dart';
 import 'package:pka_home/features/management/screens/parking_management_screen.dart';
 
@@ -37,6 +39,25 @@ class FakeParkingRepo extends ParkingRepository {
   @override
   Future<List<VisitorParkingTicketModel>> fetchActiveVisitorTickets({String? buildingId}) async {
     return mockTickets;
+  }
+
+  String? lastAssignedSlotId;
+  String? lastAssignedVehicleId;
+  String? lastAssignedApartmentId;
+
+  @override
+  Future<Map<String, dynamic>> assignSlot({
+    required String slotId,
+    required String vehicleId,
+    required String apartmentId,
+    String? slotNumber,
+    String? licensePlate,
+    String? apartmentCode,
+  }) async {
+    lastAssignedSlotId = slotId;
+    lastAssignedVehicleId = vehicleId;
+    lastAssignedApartmentId = apartmentId;
+    return {'success': true, 'message': 'Gán thành công'};
   }
 }
 
@@ -86,16 +107,19 @@ void main() {
     visitorCount: 1,
   );
 
-  Widget createTestWidget() {
+  Widget createTestWidget({FakeParkingRepo? customRepo}) {
     return ProviderScope(
       overrides: [
         parkingRepositoryProvider.overrideWithValue(
-          FakeParkingRepo(
-            mockSlots: mockSlots,
-            mockTickets: mockTickets,
-            mockStats: mockStats,
-          ),
+          customRepo ??
+              FakeParkingRepo(
+                mockSlots: mockSlots,
+                mockTickets: mockTickets,
+                mockStats: mockStats,
+              ),
         ),
+        allVehiclesProvider('approved').overrideWith((ref) async => []),
+        apartmentsProvider.overrideWith((ref) async => []),
       ],
       child: const MaterialApp(
         home: ParkingManagementScreen(),
@@ -131,5 +155,26 @@ void main() {
     expect(find.text('Loại xe: Xe máy'), findsOneWidget);
     expect(find.text('Đang gửi'), findsWidgets);
     expect(find.text('Check-out & Thu tiền'), findsOneWidget);
+  });
+
+  testWidgets('ParkingManagementScreen mo hop thoai gan o do voi du lieu that', (tester) async {
+    final fakeRepo = FakeParkingRepo(
+      mockSlots: mockSlots,
+      mockTickets: mockTickets,
+      mockStats: mockStats,
+    );
+
+    await tester.pumpWidget(createTestWidget(customRepo: fakeRepo));
+    await tester.pumpAndSettle();
+
+    // Tap vào nút "Gán xe" của ô còn trống P-B1-02
+    await tester.tap(find.text('Gán xe'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Gán Ô Đỗ P-B1-02'), findsOneWidget);
+    expect(find.textContaining('Loại ô đỗ: Ô tô'), findsOneWidget);
+    expect(find.text('Biển số xe *'), findsOneWidget);
+    expect(find.text('Xác nhận gán'), findsOneWidget);
   });
 }

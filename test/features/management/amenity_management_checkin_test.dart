@@ -74,7 +74,7 @@ class MockAmenityBookingRepo implements AmenityBookingRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> cancelBooking(String bookingId) async => {'success': true};
+  Future<Map<String, dynamic>> cancelBooking(String bookingId, {String? reason}) async => {'success': true};
 
   @override
   Future<void> updateDepositStatus(String bookingId, String depositStatus, {String? notes}) async {}

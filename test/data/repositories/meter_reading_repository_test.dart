@@ -60,6 +60,9 @@ class MockMeterReadingRepository implements MeterReadingRepository {
     String? electricImageUrl,
     String? waterImageUrl,
     double ocrConfidence = 0.95,
+    bool isAnomaly = false,
+    String anomalySeverity = 'normal',
+    String? anomalyReason,
   }) async {
     submitCalled = true;
     final item = MeterReadingSubmissionModel(

@@ -224,6 +224,28 @@ class _ResidentMeterReadingScreenState
     );
   }
 
+  double _calculateDynamicAverageUsage(
+    List<MeterReadingSubmissionModel> history,
+    MeterType type,
+  ) {
+    final valid = history.where((r) => !r.isRejected).toList();
+    if (valid.isEmpty) {
+      return type == MeterType.electric ? 130.0 : 12.0;
+    }
+    final recent = valid.take(6).toList();
+    final usages = <double>[];
+    for (final r in recent) {
+      final val = type == MeterType.electric ? r.electricConsumed : r.waterConsumed;
+      if (val != null && val > 0) {
+        usages.add(val);
+      }
+    }
+    if (usages.isEmpty) {
+      return type == MeterType.electric ? 130.0 : 12.0;
+    }
+    return usages.reduce((a, b) => a + b) / usages.length;
+  }
+
   Future<void> _submit(double oldElec, double oldWater) async {
     if (_isSubmitting) return;
 
@@ -234,18 +256,23 @@ class _ResidentMeterReadingScreenState
     final elecVal = double.tryParse(_electricController.text.trim()) ?? 0.0;
     final waterVal = double.tryParse(_waterController.text.trim()) ?? 0.0;
 
-    // Phân tích bất thường
+    final existingReadings =
+        ref.read(residentMeterReadingsProvider).valueOrNull ?? [];
+    final avgElec = _calculateDynamicAverageUsage(existingReadings, MeterType.electric);
+    final avgWater = _calculateDynamicAverageUsage(existingReadings, MeterType.water);
+
+    // Phân tích bất thường dựa trên mức trung bình động của căn hộ (P0-#17)
     final elecAnalysis = UtilityAnomalyDetector.analyzeReading(
       currentReading: elecVal,
       previousReading: oldElec,
-      averageUsage: 130.0, // Mức trung bình tham chiếu
+      averageUsage: avgElec,
       meterType: MeterType.electric,
     );
 
     final waterAnalysis = UtilityAnomalyDetector.analyzeReading(
       currentReading: waterVal,
       previousReading: oldWater,
-      averageUsage: 12.0, // Mức trung bình tham chiếu
+      averageUsage: avgWater,
       meterType: MeterType.water,
     );
 
@@ -273,13 +300,43 @@ class _ResidentMeterReadingScreenState
       return;
     }
 
+    // P0-#17: Bắt buộc đính kèm ảnh công tơ thật khi chỉ số ở mức danger
+    if (elecAnalysis.severity == AnomalySeverity.danger && _electricImagePath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Mức tiêu thụ điện tăng vọt ở mức NGUY HIỂM (>300% trung bình). Bạn bắt buộc phải chụp ảnh mặt công tơ thật để gửi BQL đối soát.',
+          ),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
+
+    if (waterAnalysis.severity == AnomalySeverity.danger && _waterImagePath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Mức tiêu thụ nước tăng vọt ở mức NGUY HIỂM (>300% trung bình). Bạn bắt buộc phải chụp ảnh mặt đồng hồ nước thật để gửi BQL đối soát.',
+          ),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
+
     // Nếu phát hiện tiêu thụ tăng cao bất thường (warning hoặc danger), hiển thị dialog xác nhận
+    final bool isDanger = elecAnalysis.severity == AnomalySeverity.danger ||
+        waterAnalysis.severity == AnomalySeverity.danger;
+
     final bool hasSevereAnomaly = (elecAnalysis.isAnomaly &&
             (elecAnalysis.severity == AnomalySeverity.warning ||
                 elecAnalysis.severity == AnomalySeverity.danger)) ||
         (waterAnalysis.isAnomaly &&
             (waterAnalysis.severity == AnomalySeverity.warning ||
                 waterAnalysis.severity == AnomalySeverity.danger));
+
+    String? residentExplanation;
 
     if (hasSevereAnomaly) {
       final reasons = <String>[];
@@ -296,51 +353,77 @@ class _ResidentMeterReadingScreenState
         reasons.add(waterAnalysis.reason!);
       }
 
+      final explanationController = TextEditingController();
+
       final proceed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
-              SizedBox(width: 8),
+              Icon(
+                isDanger ? Icons.error_outline : Icons.warning_amber_rounded,
+                color: isDanger ? AppTheme.error : Colors.orange,
+                size: 28,
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Cảnh Báo Tiêu Thụ Bất Thường',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  isDanger
+                      ? 'Cảnh Báo Tiêu Thụ Tăng Vọt Nguy Hiểm'
+                      : 'Cảnh Báo Tiêu Thụ Bất Thường',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Hệ thống AI/OCR phát hiện mức tiêu thụ kỳ này có dấu hiệu tăng cao bất thường so với tháng trước:',
-                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-              ),
-              const SizedBox(height: 10),
-              ...reasons.map(
-                (r) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Text(
-                    '• $r',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isDanger
+                      ? 'Hệ thống AI phát hiện mức tiêu thụ tăng vọt bất thường (>300% so với trung bình các kỳ trước):'
+                      : 'Hệ thống AI/OCR phát hiện mức tiêu thụ kỳ này có dấu hiệu tăng cao bất thường so với tháng trước:',
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 10),
+                ...reasons.map(
+                  (r) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      '• $r',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDanger ? AppTheme.error : null,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Bạn đã kiểm tra đối chiếu kỹ chữ số trên mặt công tơ thực tế chưa?',
-                style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
-              ),
-            ],
+                if (isDanger) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: explanationController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'Giải trình lý do tăng cao (Bắt buộc) *',
+                      hintText: 'VD: Lắp thêm thiết bị, gia đình có khách đông, sửa chữa...',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Bạn đã kiểm tra đối chiếu kỹ chữ số trên mặt công tơ thực tế chưa?',
+                    style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -349,10 +432,22 @@ class _ResidentMeterReadingScreenState
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
+                backgroundColor: isDanger ? AppTheme.error : AppTheme.primary,
                 foregroundColor: Colors.white,
               ),
-              onPressed: () => Navigator.pop(ctx, true),
+              onPressed: () {
+                if (isDanger && explanationController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Vui lòng nhập giải trình lý do tiêu thụ tăng cao đột biến.'),
+                      backgroundColor: AppTheme.error,
+                    ),
+                  );
+                  return;
+                }
+                residentExplanation = explanationController.text.trim();
+                Navigator.pop(ctx, true);
+              },
               child: const Text('Tôi đã kiểm tra & Tiếp tục gửi'),
             ),
           ],
@@ -365,8 +460,6 @@ class _ResidentMeterReadingScreenState
     }
 
     final period = _periodController.text.trim();
-    final existingReadings =
-        ref.read(residentMeterReadingsProvider).valueOrNull ?? [];
     final alreadySubmitted = existingReadings.any(
       (r) => r.period == period && !r.isRejected,
     );
@@ -414,28 +507,55 @@ class _ResidentMeterReadingScreenState
     setState(() => _isSubmitting = true);
 
     try {
+      final repo = ref.read(meterReadingRepositoryProvider);
+
+      // P0-#16: Upload ảnh công tơ lên Storage thật trước khi lưu URL
+      String? uploadedElectricUrl = _electricImagePath;
+      if (_electricImagePath != null) {
+        uploadedElectricUrl = await repo.uploadMeterImage(
+          _electricImagePath!,
+          apartmentId: aptId,
+          meterType: 'electric',
+        );
+      }
+
+      String? uploadedWaterUrl = _waterImagePath;
+      if (_waterImagePath != null) {
+        uploadedWaterUrl = await repo.uploadMeterImage(
+          _waterImagePath!,
+          apartmentId: aptId,
+          meterType: 'water',
+        );
+      }
+
       final double confidence =
           (_electricImagePath != null || _waterImagePath != null) ? 1.0 : 0.85;
 
-      await ref
-          .read(meterReadingRepositoryProvider)
-          .submitReading(
-            apartmentId: aptId,
+      final bool isAnomaly = elecAnalysis.isAnomaly || waterAnalysis.isAnomaly;
+      final String severity = isDanger
+          ? 'danger'
+          : ((elecAnalysis.severity == AnomalySeverity.warning ||
+                  waterAnalysis.severity == AnomalySeverity.warning)
+              ? 'warning'
+              : 'normal');
 
-            userId: user.id,
+      final anomalyReason = residentExplanation != null && residentExplanation!.isNotEmpty
+          ? residentExplanation
+          : (elecAnalysis.reason ?? waterAnalysis.reason);
 
-            period: _periodController.text.trim(),
-
-            electricReading: elecVal,
-
-            waterReading: waterVal,
-
-            electricImageUrl: _electricImagePath,
-
-            waterImageUrl: _waterImagePath,
-
-            ocrConfidence: confidence,
-          );
+      await repo.submitReading(
+        apartmentId: aptId,
+        userId: user.id,
+        period: _periodController.text.trim(),
+        electricReading: elecVal,
+        waterReading: waterVal,
+        electricImageUrl: uploadedElectricUrl,
+        waterImageUrl: uploadedWaterUrl,
+        ocrConfidence: confidence,
+        isAnomaly: isAnomaly,
+        anomalySeverity: severity,
+        anomalyReason: anomalyReason,
+      );
 
       ref.invalidate(residentMeterReadingsProvider);
 
@@ -555,14 +675,15 @@ class _ResidentMeterReadingScreenState
             _waterController.text.trim(),
           );
 
+          final historyList = historyAsync.valueOrNull ?? [];
+          final avgElec = _calculateDynamicAverageUsage(historyList, MeterType.electric);
+          final avgWater = _calculateDynamicAverageUsage(historyList, MeterType.water);
+
           final elecAnalysis = currentElecInput != null
               ? UtilityAnomalyDetector.analyzeReading(
                   currentReading: currentElecInput,
-
                   previousReading: oldElec,
-
-                  averageUsage: 130.0,
-
+                  averageUsage: avgElec,
                   meterType: MeterType.electric,
                 )
               : null;
@@ -570,11 +691,8 @@ class _ResidentMeterReadingScreenState
           final waterAnalysis = currentWaterInput != null
               ? UtilityAnomalyDetector.analyzeReading(
                   currentReading: currentWaterInput,
-
                   previousReading: oldWater,
-
-                  averageUsage: 12.0,
-
+                  averageUsage: avgWater,
                   meterType: MeterType.water,
                 )
               : null;

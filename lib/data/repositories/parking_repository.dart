@@ -247,7 +247,7 @@ class ParkingRepository {
     );
   }
 
-  /// 3. Gán ô đỗ cho phương tiện / căn hộ
+  /// 3. Gán ô đỗ cho phương tiện / căn hộ (P0-#6: Sử dụng ID thật, an toàn ngoại khóa)
   Future<Map<String, dynamic>> assignSlot({
     required String slotId,
     required String vehicleId,
@@ -256,12 +256,16 @@ class ParkingRepository {
     String? licensePlate,
     String? apartmentCode,
   }) async {
+    final bool isRealVehicle = vehicleId.isNotEmpty && !vehicleId.startsWith('veh-');
+    final String? cleanVehicleId = isRealVehicle ? vehicleId : null;
+    final bool isRealApartment = apartmentId.isNotEmpty && !apartmentId.startsWith('apt-');
+
     if (_isMockMode) {
       final index = _inMemorySlots.indexWhere((s) => s.id == slotId);
       if (index != -1) {
         _inMemorySlots[index] = _inMemorySlots[index].copyWith(
           status: 'occupied',
-          assignedVehicleId: vehicleId,
+          assignedVehicleId: cleanVehicleId,
           assignedApartmentId: apartmentId,
           licensePlate: licensePlate,
           apartmentCode: apartmentCode,
@@ -282,25 +286,38 @@ class ParkingRepository {
           targetSlotNumber = slotRes?['slot_number'] as String?;
         }
 
-        await _supabase
-            .from('parking_slots')
-            .update({
-              'assigned_vehicle_id': vehicleId,
-              'assigned_apartment_id': apartmentId,
-              'status': 'occupied',
-              'license_plate': licensePlate,
-              'apartment_id': apartmentId,
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .eq('id', slotId);
+        final updateData = <String, dynamic>{
+          'status': 'occupied',
+          'license_plate': licensePlate,
+          'apartment_code': apartmentCode,
+          'updated_at': DateTime.now().toIso8601String(),
+        };
+
+        if (cleanVehicleId != null) {
+          updateData['assigned_vehicle_id'] = cleanVehicleId;
+        } else {
+          updateData['assigned_vehicle_id'] = null;
+        }
+
+        if (isRealApartment) {
+          updateData['assigned_apartment_id'] = apartmentId;
+          updateData['apartment_id'] = apartmentId;
+        }
 
         await _supabase
-            .from('vehicles')
-            .update({
-              'parking_slot_id': slotId,
-              'parking_slot_number': targetSlotNumber,
-            })
-            .eq('id', vehicleId);
+            .from('parking_slots')
+            .update(updateData)
+            .eq('id', slotId);
+
+        if (cleanVehicleId != null) {
+          await _supabase
+              .from('vehicles')
+              .update({
+                'parking_slot_id': slotId,
+                'parking_slot_number': targetSlotNumber,
+              })
+              .eq('id', cleanVehicleId);
+        }
 
         return {'success': true, 'message': 'Đã gán ô đỗ thành công'};
       },
@@ -309,7 +326,7 @@ class ParkingRepository {
         if (index != -1) {
           _inMemorySlots[index] = _inMemorySlots[index].copyWith(
             status: 'occupied',
-            assignedVehicleId: vehicleId,
+            assignedVehicleId: cleanVehicleId,
             assignedApartmentId: apartmentId,
             licensePlate: licensePlate,
             apartmentCode: apartmentCode,

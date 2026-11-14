@@ -21,7 +21,7 @@ class MockAmenityBookingRepository implements AmenityBookingRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Future<Map<String, dynamic>> cancelBooking(String bookingId) async {
+  Future<Map<String, dynamic>> cancelBooking(String bookingId, {String? reason}) async {
     cancelCalled = true;
     cancelledId = bookingId;
     return {'success': true, 'booking_id': bookingId};
