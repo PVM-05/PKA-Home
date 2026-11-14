@@ -63,6 +63,9 @@ void main() {
         'bank_bin': '970422',
         'qr_template': 'compact',
         'is_active': true,
+        'vnpay_tmn_code': 'PKAHOME01',
+        'vnpay_hash_secret': 'SECRETKEY1234567890',
+        'vnpay_is_active': true,
       };
 
       final model = BuildingPaymentConfigModel.fromJson(json);
@@ -74,6 +77,9 @@ void main() {
       expect(model.bankAccountName, 'BAN QUAN LY PKA HOME');
       expect(model.bankBin, '970422');
       expect(model.isActive, isTrue);
+      expect(model.vnpayTmnCode, 'PKAHOME01');
+      expect(model.vnpayHashSecret, 'SECRETKEY1234567890');
+      expect(model.vnpayIsActive, isTrue);
 
       final qrUrl = model.generateSepayQrUrl(amount: 1500000, memo: 'INV2611A0110');
       expect(qrUrl, contains('https://qr.sepay.vn/img'));
@@ -85,6 +91,9 @@ void main() {
       final serialized = model.toJson();
       expect(serialized['bank_name'], 'MBBank');
       expect(serialized['bank_account_number'], '0388888888');
+      expect(serialized['vnpay_tmn_code'], 'PKAHOME01');
+      expect(serialized['vnpay_hash_secret'], 'SECRETKEY1234567890');
+      expect(serialized['vnpay_is_active'], isTrue);
     });
   });
 }

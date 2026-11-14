@@ -9,6 +9,9 @@ class BuildingPaymentConfigModel {
   final String bankBin;
   final String qrTemplate; // compact, default
   final bool isActive;
+  final String? vnpayTmnCode;
+  final String? vnpayHashSecret;
+  final bool vnpayIsActive;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -22,6 +25,9 @@ class BuildingPaymentConfigModel {
     required this.bankBin,
     this.qrTemplate = 'compact',
     this.isActive = true,
+    this.vnpayTmnCode,
+    this.vnpayHashSecret,
+    this.vnpayIsActive = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -47,6 +53,9 @@ class BuildingPaymentConfigModel {
       bankBin: json['bank_bin'] as String? ?? '',
       qrTemplate: json['qr_template'] as String? ?? 'compact',
       isActive: json['is_active'] as bool? ?? true,
+      vnpayTmnCode: json['vnpay_tmn_code'] as String?,
+      vnpayHashSecret: json['vnpay_hash_secret'] as String?,
+      vnpayIsActive: json['vnpay_is_active'] as bool? ?? false,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
       updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'] as String) : null,
     );
@@ -63,6 +72,9 @@ class BuildingPaymentConfigModel {
       'bank_bin': bankBin,
       'qr_template': qrTemplate,
       'is_active': isActive,
+      'vnpay_tmn_code': vnpayTmnCode,
+      'vnpay_hash_secret': vnpayHashSecret,
+      'vnpay_is_active': vnpayIsActive,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
@@ -78,6 +90,9 @@ class BuildingPaymentConfigModel {
     String? bankBin,
     String? qrTemplate,
     bool? isActive,
+    String? vnpayTmnCode,
+    String? vnpayHashSecret,
+    bool? vnpayIsActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -91,6 +106,9 @@ class BuildingPaymentConfigModel {
       bankBin: bankBin ?? this.bankBin,
       qrTemplate: qrTemplate ?? this.qrTemplate,
       isActive: isActive ?? this.isActive,
+      vnpayTmnCode: vnpayTmnCode ?? this.vnpayTmnCode,
+      vnpayHashSecret: vnpayHashSecret ?? this.vnpayHashSecret,
+      vnpayIsActive: vnpayIsActive ?? this.vnpayIsActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

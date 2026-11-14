@@ -44,11 +44,11 @@
 - Tạo mới: `lib/core/services/vnpay_service.dart`
 - Kiểm thử: `test/core/services/vnpay_service_test.dart`
 
-- [ ] **Step 1:** Cập nhật `BuildingPaymentConfigModel` hỗ trợ `vnpayTmnCode`, `vnpayHashSecret`, `vnpayIsActive`.
-- [ ] **Step 2:** Viết kịch bản test TDD cho `VnpayService`: kiểm tra thuật toán sắp xếp URL params theo ASCII, băm chữ ký HMAC-SHA512 chuẩn xác, và kiểm tra tính toàn vẹn khi callback.
-- [ ] **Step 3:** Hiện thực hóa `VnpayService` trong `lib/core/services/vnpay_service.dart`.
-- [ ] **Step 4:** Chạy test: `flutter test test/core/services/vnpay_service_test.dart`.
-- [ ] **Step 5:** Commit vào `main`: `feat(finance): trien khai vnpay service ky so hmac sha512`.
+- [x] **Step 1:** Cập nhật `BuildingPaymentConfigModel` hỗ trợ `vnpayTmnCode`, `vnpayHashSecret`, `vnpayIsActive`.
+- [x] **Step 2:** Viết kịch bản test TDD cho `VnpayService`: kiểm tra thuật toán sắp xếp URL params theo ASCII, băm chữ ký HMAC-SHA512 chuẩn xác, và kiểm tra tính toàn vẹn khi callback.
+- [x] **Step 3:** Hiện thực hóa `VnpayService` trong `lib/core/services/vnpay_service.dart`.
+- [x] **Step 4:** Chạy test: `flutter test test/core/services/vnpay_service_test.dart`.
+- [x] **Step 5:** Commit vào `main`: `feat(finance): trien khai vnpay service ky so hmac sha512`.
 
 ---
 
