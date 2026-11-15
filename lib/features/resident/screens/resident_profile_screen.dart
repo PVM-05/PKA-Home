@@ -15,9 +15,227 @@ import '../../../core/theme/theme_mode_provider.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../core/widgets/app_avatar.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/pdpl_consent_dialog.dart';
+import '../../../data/services/data_privacy_service.dart';
 
 class ResidentProfileScreen extends ConsumerWidget {
   const ResidentProfileScreen({super.key});
+
+  Future<void> _handleExportData(
+    BuildContext context,
+    WidgetRef ref,
+    UserModel user,
+  ) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(
+        child: AppCard(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 14),
+              Text(
+                'Đang trích xuất và ký số dữ liệu...',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final privacyService = ref.read(dataPrivacyServiceProvider);
+      final exportData = await privacyService.exportUserData(user: user);
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      await privacyService.saveAndShareExportFile(
+        exportData: exportData,
+        userName: user.fullName,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Đã tạo tệp sao kê dữ liệu cá nhân theo Luật 91/2025/QH15 thành công!',
+            ),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể xuất dữ liệu: ${formatErrorMessage(e)}'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleRequestAnonymization(
+    BuildContext context,
+    WidgetRef ref,
+    UserModel user,
+  ) async {
+    String selectedReason = 'Đã chuyển nhượng căn hộ và chuyển nơi cư trú';
+    final notesController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.person_remove_outlined, color: AppTheme.warning),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Yêu Cầu Đóng Băng Dữ Liệu',
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Thực thi quyền của chủ thể dữ liệu (Điều 16 & 17 Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15):',
+                      style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Lý do yêu cầu đóng băng / xóa dữ liệu:',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 6),
+                    DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      value: selectedReason,
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'Đã chuyển nhượng căn hộ và chuyển nơi cư trú',
+                          child: Text(
+                            'Đã chuyển nhượng căn hộ & rời đi',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Đã chấm dứt hợp đồng thuê căn hộ',
+                          child: Text(
+                            'Đã kết thúc hợp đồng thuê nhà',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Không còn nhu cầu sử dụng dịch vụ tòa nhà',
+                          child: Text(
+                            'Không còn nhu cầu sử dụng dịch vụ',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setModalState(() => selectedReason = val);
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: notesController,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: 'Ghi chú thêm (tùy chọn)',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.all(10),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppTheme.slate100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Lưu ý: Dữ liệu hóa đơn và chứng từ kế toán được lưu giữ tối thiểu 5 năm theo Luật Kế toán 2015. Ban Quản Lý sẽ xác minh và đóng băng danh tính PII trong vòng 72 giờ làm việc.',
+                        style: TextStyle(fontSize: 11, color: AppTheme.slate700, height: 1.35),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Hủy'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.warning,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    try {
+                      final privacyService = ref.read(dataPrivacyServiceProvider);
+                      await privacyService.requestDataAnonymization(
+                        userId: user.id,
+                        reason: selectedReason,
+                        notes: notesController.text.trim(),
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Đã gửi yêu cầu đóng băng dữ liệu tới Ban Quản Lý và DPO (SLA 72 giờ).',
+                            ),
+                            backgroundColor: AppTheme.primary,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Không thể gửi yêu cầu: ${formatErrorMessage(e)}',
+                            ),
+                            backgroundColor: AppTheme.error,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Gửi yêu cầu'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   void _showEditProfileDialog(
     BuildContext context,
@@ -329,6 +547,96 @@ class ResidentProfileScreen extends ConsumerWidget {
                     onTap: () {
                       context.push(AppRoutes.residentPaymentHistory);
                     },
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // Quyền riêng tư & Dữ liệu (PDPL 2026)
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Quyền riêng tư & Dữ liệu (PDPL)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                AppCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.shield_outlined,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        title: const Text(
+                          'Chính sách quyền riêng tư',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: const Text(
+                          'Căn cứ Luật 91/2025/QH15 & NĐ 356/2025/NĐ-CP',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => showPrivacyPolicyBottomSheet(context),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.download_for_offline_outlined,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        title: const Text(
+                          'Xuất dữ liệu cá nhân (Data Portability)',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: const Text(
+                          'Trích xuất bản sao kê hồ sơ, căn hộ, xe, hóa đơn dạng JSON',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _handleExportData(context, ref, user),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.warning.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.person_remove_outlined,
+                            color: AppTheme.warning,
+                          ),
+                        ),
+                        title: const Text(
+                          'Yêu cầu xóa / đóng băng dữ liệu',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.slate800,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          'Quyền được lãng quên khi chấm dứt hợp đồng thuê / chuyển đi',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _handleRequestAnonymization(context, ref, user),
+                      ),
+                    ],
                   ),
                 ),
 
