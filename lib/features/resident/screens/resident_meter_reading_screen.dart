@@ -25,6 +25,7 @@ import '../../../core/utils/network_error_handler.dart';
 import '../../../core/utils/validators.dart';
 
 import '../../../data/models/meter_reading_submission_model.dart';
+import '../../../data/services/meter_ocr_service.dart';
 
 class ResidentMeterReadingScreen extends ConsumerStatefulWidget {
   const ResidentMeterReadingScreen({super.key});
@@ -48,6 +49,8 @@ class _ResidentMeterReadingScreenState
 
   String? _electricImagePath;
   String? _waterImagePath;
+  bool _isElectricOcrScanning = false;
+  bool _isWaterOcrScanning = false;
 
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
@@ -82,11 +85,8 @@ class _ResidentMeterReadingScreenState
 
       final XFile? image = await picker.pickImage(
         source: source,
-
         imageQuality: 85,
-
         maxWidth: 1600,
-
         maxHeight: 1600,
       );
 
@@ -95,28 +95,72 @@ class _ResidentMeterReadingScreenState
       setState(() {
         if (type == MeterType.electric) {
           _electricImagePath = image.path;
+          _isElectricOcrScanning = true;
         } else {
           _waterImagePath = image.path;
+          _isWaterOcrScanning = true;
         }
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Đã đính kèm ảnh công tơ ${type == MeterType.electric ? "điện" : "nước"}. Vui lòng nhập chỉ số thực tế trên đồng hồ.',
-            ),
+      // Tự động quét và nhận diện chỉ số bằng Real OCR Service
+      final ocrService = ref.read(meterOcrServiceProvider);
+      final ocrResult = await ocrService.recognizeMeterReading(
+        imagePath: image.path,
+        meterType: type,
+      );
 
-            backgroundColor: AppTheme.primary,
-          ),
-        );
+      if (mounted) {
+        setState(() {
+          if (type == MeterType.electric) {
+            _isElectricOcrScanning = false;
+            if (ocrResult.isValid) {
+              final valStr = ocrResult.detectedReading ==
+                      ocrResult.detectedReading.roundToDouble()
+                  ? ocrResult.detectedReading.toInt().toString()
+                  : ocrResult.detectedReading.toString();
+              _electricController.text = valStr;
+            }
+          } else {
+            _isWaterOcrScanning = false;
+            if (ocrResult.isValid) {
+              final valStr = ocrResult.detectedReading ==
+                      ocrResult.detectedReading.roundToDouble()
+                  ? ocrResult.detectedReading.toInt().toString()
+                  : ocrResult.detectedReading.toString();
+              _waterController.text = valStr;
+            }
+          }
+        });
+
+        if (ocrResult.isValid) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'OCR nhận diện thành công: ${ocrResult.detectedReading} ${ocrResult.unit} (Độ tin cậy: ${(ocrResult.confidence * 100).toInt()}%). Đã tự động điền vào ô chỉ số.',
+              ),
+              backgroundColor: AppTheme.primary,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Đã đính kèm ảnh công tơ ${type == MeterType.electric ? "điện" : "nước"}. ${ocrResult.errorMessage} Vui lòng tự nhập số hiển thị trên đồng hồ.',
+              ),
+              backgroundColor: AppTheme.warning,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isElectricOcrScanning = false;
+          _isWaterOcrScanning = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Không thể chụp/chọn ảnh: $e'),
-
             backgroundColor: AppTheme.error,
           ),
         );
@@ -1097,6 +1141,27 @@ class _ResidentMeterReadingScreenState
               ),
             ),
           ],
+          if (_isElectricOcrScanning) ...[
+            const SizedBox(height: 8),
+            const Row(
+              children: [
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Đang xử lý OCR bóc tách chỉ số từ ảnh công tơ...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.primary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           TextFormField(
             controller: _electricController,
@@ -1238,6 +1303,27 @@ class _ResidentMeterReadingScreenState
                   ),
                 ],
               ),
+            ),
+          ],
+          if (_isWaterOcrScanning) ...[
+            const SizedBox(height: 8),
+            const Row(
+              children: [
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Đang xử lý OCR bóc tách chỉ số từ ảnh công tơ...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.primary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
           ],
           const SizedBox(height: 12),
