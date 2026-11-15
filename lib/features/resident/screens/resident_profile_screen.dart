@@ -126,7 +126,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       isExpanded: true,
-                      value: selectedReason,
+                      initialValue: selectedReason,
                       items: const [
                         DropdownMenuItem(
                           value: 'Đã chuyển nhượng căn hộ và chuyển nơi cư trú',

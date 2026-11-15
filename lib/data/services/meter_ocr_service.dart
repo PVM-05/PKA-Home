@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import '../../core/utils/utility_meter_ocr_engine.dart';
-import '../models/meter_reading_submission_model.dart';
 
 export '../../core/utils/utility_meter_ocr_engine.dart'
     show MeterOcrParsedResult, MeterType;
@@ -17,8 +16,9 @@ abstract class MeterTextRecognizer {
 class MlKitMeterTextRecognizer implements MeterTextRecognizer {
   TextRecognizer? _recognizer;
 
-  MlKitMeterTextRecognizer({TextRecognizer? recognizer})
-      : _recognizer = recognizer;
+  MlKitMeterTextRecognizer({TextRecognizer? recognizer}) {
+    _recognizer = recognizer;
+  }
 
   TextRecognizer _getOrCreateRecognizer() {
     return _recognizer ??= TextRecognizer(script: TextRecognitionScript.latin);

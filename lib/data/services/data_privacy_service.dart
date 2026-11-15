@@ -205,10 +205,12 @@ class DataPrivacyService {
     final file = File(filePath);
     await file.writeAsString(prettyJson, flush: true);
 
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'application/json')],
-      subject: 'Sao kê dữ liệu cá nhân PKA-Home (PDPL)',
-      text: 'Bản sao kê dữ liệu cá nhân cư dân theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15.',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: 'application/json')],
+        subject: 'Sao kê dữ liệu cá nhân PKA-Home (PDPL)',
+        text: 'Bản sao kê dữ liệu cá nhân cư dân theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15.',
+      ),
     );
 
     return filePath;
