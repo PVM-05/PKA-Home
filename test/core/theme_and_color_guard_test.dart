@@ -6,11 +6,12 @@ void main() {
     /// Danh sách các file màn hình đã được chuẩn hóa theo Design Tokens (Whitelist)
     /// Khi một module hoàn thành refactor, thêm file của module đó vào danh sách này.
     final targetModulesWhitelist = <String>[
-      // Sẽ được kích hoạt lần lượt trong Task 3 và Task 4:
-      // 'lib/features/resident/screens/resident_invoice_screen.dart',
-      // 'lib/features/resident/screens/resident_invoice_detail_screen.dart',
-      // 'lib/features/management/screens/invoice_management_screen.dart',
-      // 'lib/features/management/screens/management_invoice_detail_screen.dart',
+      // Module 1: Tài chính & Hóa đơn (Đã hoàn thiện chuẩn Design System)
+      'lib/features/resident/screens/resident_invoice_screen.dart',
+      'lib/features/resident/screens/resident_invoice_detail_screen.dart',
+      'lib/features/management/screens/invoice_management_screen.dart',
+      'lib/features/management/screens/management_invoice_detail_screen.dart',
+      // Sẽ được kích hoạt trong Task 4:
       // 'lib/features/resident/screens/resident_issue_screen.dart',
       // 'lib/features/resident/screens/issue_detail_screen.dart',
       // 'lib/features/management/screens/issue_management_screen.dart',

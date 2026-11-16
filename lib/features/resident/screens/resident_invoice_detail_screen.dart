@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/utils/vietnamese_currency_words.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/unified_payment_sheet.dart';
@@ -139,11 +142,10 @@ class _ResidentInvoiceDetailScreenState
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'CHI TIẾT CÁC KHOẢN PHÍ',
-                                      style: TextStyle(
+                                      style: context.titleSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 14,
                                         color: AppTheme.textSecondary,
                                         letterSpacing: 1.2,
                                       ),
@@ -174,11 +176,10 @@ class _ResidentInvoiceDetailScreenState
                             formatDate,
                           ),
                           const SizedBox(height: 28),
-                          const Text(
+                          Text(
                             'CHI TIẾT CÁC KHOẢN PHÍ',
-                            style: TextStyle(
+                            style: context.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
                               color: AppTheme.textSecondary,
                               letterSpacing: 1.2,
                             ),
@@ -200,7 +201,12 @@ class _ResidentInvoiceDetailScreenState
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
+          ],
+        ),
         error: (error, stack) => Center(
           child: Text(
             formatErrorMessage(error),
@@ -403,12 +409,15 @@ class _ResidentInvoiceDetailScreenState
               const SizedBox(height: 8),
               FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(
-                  formatCurrency.format(_invoice.totalAmount),
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w900,
-                    color: statusColor,
+                child: Semantics(
+                  label:
+                      'Tổng tiền ${VietnameseCurrencyWords.toVietnameseWords(_invoice.totalAmount.toDouble())}',
+                  child: Text(
+                    formatCurrency.format(_invoice.totalAmount),
+                    style: context.displayMedium?.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),
@@ -481,7 +490,7 @@ class _ResidentInvoiceDetailScreenState
           flex: 5,
           child: Text(
             label,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -491,7 +500,7 @@ class _ResidentInvoiceDetailScreenState
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -526,12 +535,11 @@ class _ResidentInvoiceDetailScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Cảnh báo trễ hạn',
-                      style: TextStyle(
+                      style: context.titleSmall?.copyWith(
                         color: AppTheme.error,
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
                       ),
                     ),
                     Container(
@@ -545,9 +553,8 @@ class _ResidentInvoiceDetailScreenState
                       ),
                       child: Text(
                         'Quá hạn ${penalty.daysOverdue} ngày',
-                        style: const TextStyle(
+                        style: context.labelSmall?.copyWith(
                           color: Colors.white,
-                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -557,8 +564,7 @@ class _ResidentInvoiceDetailScreenState
                 const SizedBox(height: 6),
                 Text(
                   'Hóa đơn đã quá hạn thanh toán. Tiền lãi phạt trễ hạn ước tính: ${penalty.formattedPenaltyAmount} (0.05%/ngày).',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: context.bodySmall?.copyWith(
                     color: AppTheme.textPrimary,
                   ),
                 ),
@@ -566,8 +572,7 @@ class _ResidentInvoiceDetailScreenState
                   const SizedBox(height: 4),
                   Text(
                     'Tổng cộng kèm tiền phạt: ${formatCurrency.format(penalty.totalWithPenalty)}',
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: context.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.error,
                     ),
@@ -636,16 +641,14 @@ class _ResidentInvoiceDetailScreenState
               children: [
                 Text(
                   feeDisplayName,
-                  style: const TextStyle(
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${formatCurrency.format(item['unit_price'] ?? 0)} x $qtyStr$feeUnit',
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: context.bodySmall?.copyWith(
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -683,8 +686,7 @@ class _ResidentInvoiceDetailScreenState
                             const SizedBox(width: 4),
                             Text(
                               'Chi tiết bậc thang',
-                              style: TextStyle(
-                                fontSize: 11,
+                              style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: feeColor,
                               ),
@@ -715,7 +717,7 @@ class _ResidentInvoiceDetailScreenState
                         color: Colors.teal.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const FittedBox(
+                    child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Row(
@@ -729,8 +731,7 @@ class _ResidentInvoiceDetailScreenState
                           SizedBox(width: 4),
                           Text(
                             'Phí theo ngày lẻ',
-                            style: TextStyle(
-                              fontSize: 11,
+                            style: context.labelSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.teal,
                             ),
@@ -750,7 +751,7 @@ class _ResidentInvoiceDetailScreenState
               alignment: Alignment.centerRight,
               child: Text(
                 formatCurrency.format(item['subtotal'] ?? 0),
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                style: context.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
             ),
           ),
@@ -834,10 +835,9 @@ class _ResidentInvoiceDetailScreenState
             ),
           ),
           icon: const Icon(Icons.payment_rounded, size: 22),
-          label: const Text(
+          label: Text(
             'THANH TOÁN NGAY',
-            style: TextStyle(
-              fontSize: 16,
+            style: context.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
             ),
@@ -862,10 +862,9 @@ class _ResidentInvoiceDetailScreenState
             Icons.hourglass_top_rounded,
             color: Colors.orange,
           ),
-          label: const Text(
+          label: Text(
             'ĐANG CHỜ BQL XÁC NHẬN (CHI TIẾT)',
-            style: TextStyle(
-              fontSize: 14,
+            style: context.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.orange,
             ),
@@ -890,10 +889,9 @@ class _ResidentInvoiceDetailScreenState
             Icons.receipt_outlined,
             color: AppTheme.primary,
           ),
-          label: const Text(
+          label: Text(
             'XEM BIÊN NHẬN ĐIỆN TỬ',
-            style: TextStyle(
-              fontSize: 15,
+            style: context.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppTheme.primary,
             ),
@@ -1025,15 +1023,14 @@ class _ResidentInvoiceDetailScreenState
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+          style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
         ),
         const Spacer(),
         Flexible(
           child: Text(
             value,
-            style: TextStyle(
+            style: context.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 14,
               color: isHighlight ? AppTheme.primary : AppTheme.textPrimary,
             ),
             textAlign: TextAlign.right,
@@ -1110,9 +1107,8 @@ class _ResidentInvoiceDetailScreenState
                   const SizedBox(width: 10),
                   Text(
                     isPaid ? 'BIÊN NHẬN THANH TOÁN' : 'XÁC NHẬN CHUYỂN KHOẢN',
-                    style: const TextStyle(
+                    style: context.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
                     ),
                   ),
                 ],
@@ -1122,8 +1118,7 @@ class _ResidentInvoiceDetailScreenState
                 isPaid
                     ? 'Giao dịch đã được Ban Quản Lý phê duyệt hợp lệ'
                     : 'Đã gửi yêu cầu đối soát, BQL đang kiểm tra giao dịch',
-                style: const TextStyle(
-                  fontSize: 12,
+                style: context.bodySmall?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
@@ -1134,7 +1129,7 @@ class _ResidentInvoiceDetailScreenState
                 decoration: BoxDecoration(
                   color: isDark
                       ? Theme.of(context).colorScheme.surface
-                      : const Color(0xFFF9FAFB),
+                      : AppTheme.background,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isDark ? Colors.white12 : Colors.grey.shade200,

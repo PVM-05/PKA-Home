@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_state_view.dart';
@@ -370,31 +372,12 @@ class _InvoiceManagementScreenState
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.4,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.08),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.receipt_long_outlined,
-                      size: 48,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Không có hóa đơn nào phù hợp với bộ lọc.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
-                  ),
-                ],
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: const Center(
+              child: AppEmptyState(
+                icon: Icons.search_off_outlined,
+                title: 'Không tìm thấy hóa đơn nào',
+                description: 'Không có hóa đơn nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm hiện tại.',
               ),
             ),
           ),
@@ -440,41 +423,41 @@ class _InvoiceManagementScreenState
               dataRowMaxHeight: 64,
               horizontalMargin: 20,
               columnSpacing: 24,
-              columns: const [
+              columns: [
                 DataColumn(
                   label: Text(
                     'CĂN HỘ',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     'KỲ PHÍ',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     'TỔNG TIỀN',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     'HẠN THANH TOÁN',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     'TRẠNG THÁI',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     'THAO TÁC',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -513,9 +496,8 @@ class _InvoiceManagementScreenState
                           const SizedBox(width: 10),
                           Text(
                             invoice.apartment?.code ?? 'N/A',
-                            style: const TextStyle(
+                            style: context.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -580,10 +562,9 @@ class _InvoiceManagementScreenState
                             const SizedBox(width: 6),
                             Text(
                               statusText,
-                              style: TextStyle(
+                              style: context.labelSmall?.copyWith(
                                 color: statusColor,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -710,11 +691,10 @@ class _InvoiceManagementScreenState
                             Flexible(
                               child: Text(
                                 'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
-                                style: TextStyle(
+                                style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 15,
                                   color: isPending
-                                      ? AppStatusColors.pendingConfirmation
+                                      ? AppStatusColors.getPendingConfirmation(context)
                                       : null,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -728,15 +708,15 @@ class _InvoiceManagementScreenState
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppStatusColors.paid,
+                                  color: AppStatusColors.getPaid(context),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'MỚI',
-                                  style: TextStyle(
+                                  style: context.labelSmall?.copyWith(
                                     color: Colors.white,
-                                    fontSize: 9,
                                     fontWeight: FontWeight.bold,
+                                    letterSpacing: -0.2,
                                   ),
                                 ),
                               ),
@@ -824,9 +804,8 @@ class _InvoiceManagementScreenState
                           ),
                           child: Text(
                             statusText,
-                            style: TextStyle(
+                            style: context.labelSmall?.copyWith(
                               color: statusColor,
-                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -838,9 +817,9 @@ class _InvoiceManagementScreenState
                       Flexible(
                         child: Text(
                           'Kỳ: ${invoice.period}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style: context.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -858,10 +837,9 @@ class _InvoiceManagementScreenState
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}',
-                            style: const TextStyle(
+                            style: context.titleSmall?.copyWith(
                               color: AppTheme.error,
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
                             ),
                           ),
                         ),
@@ -873,12 +851,11 @@ class _InvoiceManagementScreenState
                           alignment: Alignment.centerRight,
                           child: Text(
                             isPending ? 'Duyệt →' : 'Xem >',
-                            style: TextStyle(
+                            style: context.labelSmall?.copyWith(
                               color: isPending
-                                  ? AppStatusColors.pendingConfirmation
+                                  ? AppStatusColors.getPendingConfirmation(context)
                                   : AppTheme.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -929,10 +906,9 @@ class _InvoiceManagementScreenState
           ],
         ],
       ),
-      labelStyle: TextStyle(
+      labelStyle: context.labelSmall?.copyWith(
         color: isSelected ? Colors.white : AppTheme.textPrimary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
       ),
       backgroundColor: isDark
           ? (Theme.of(context).cardTheme.color ??

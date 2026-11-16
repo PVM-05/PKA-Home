@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/utils/vietnamese_currency_words.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/invoice_model.dart';
@@ -73,7 +76,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           }
           return _buildMobileLayout(context, ref, items, formatCurrency, formatDate);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Padding(
+          padding: const EdgeInsets.all(16),
+          child: AppSkeletonShimmer.cardList(count: 4, itemHeight: 90),
+        ),
         error: (error, stack) => Center(
           child: Text(
             formatErrorMessage(error),
@@ -104,7 +110,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                 width: 440,
                 child: ListView(
                   children: [
-                    _buildSummaryCard(formatCurrency, formatDate),
+                    _buildSummaryCard(context, formatCurrency, formatDate),
                     const SizedBox(height: 16),
                     _buildDesktopActionPanel(context, ref, items),
                     const SizedBox(height: 40),
@@ -127,12 +133,11 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                             color: AppTheme.primary,
                           ),
                           const SizedBox(width: 8),
-                          const Expanded(
+                          Expanded(
                             child: Text(
                               'CHI TIẾT CÁC KHOẢN PHÍ',
-                              style: TextStyle(
+                              style: context.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 15,
                                 color: AppTheme.textPrimary,
                               ),
                             ),
@@ -148,10 +153,9 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                             ),
                             child: Text(
                               '${items.length} mục',
-                              style: const TextStyle(
+                              style: context.labelSmall?.copyWith(
                                 color: AppTheme.primary,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -162,7 +166,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                       Expanded(
                         child: ListView(
                           children: items
-                              .map((item) => _buildFeeItem(item, formatCurrency))
+                              .map((item) => _buildFeeItem(context, item, formatCurrency))
                               .toList(),
                         ),
                       ),
@@ -193,27 +197,26 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _buildSummaryCard(formatCurrency, formatDate),
+                  _buildSummaryCard(context, formatCurrency, formatDate),
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.receipt_long_outlined,
                               size: 18,
                               color: AppTheme.textSecondary,
                             ),
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Expanded(
                               child: Text(
                                 'CHI TIẾT CÁC KHOẢN PHÍ',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: context.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
                                   color: AppTheme.textSecondary,
                                 ),
                               ),
@@ -224,8 +227,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         '${items.length} mục',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           color: AppTheme.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
@@ -233,7 +235,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ...items.map((item) => _buildFeeItem(item, formatCurrency)),
+                  ...items.map((item) => _buildFeeItem(context, item, formatCurrency)),
                   const SizedBox(height: 80),
                 ],
               ),
@@ -245,21 +247,21 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCard(NumberFormat formatCurrency, DateFormat formatDate) {
+  Widget _buildSummaryCard(BuildContext context, NumberFormat formatCurrency, DateFormat formatDate) {
     Color statusColor;
     String statusText;
 
     switch (invoice.status) {
       case 'paid':
-        statusColor = AppTheme.success;
+        statusColor = AppStatusColors.getPaid(context);
         statusText = 'Đã thanh toán';
         break;
       case 'pending_confirmation':
-        statusColor = AppTheme.warning;
+        statusColor = AppStatusColors.getPendingConfirmation(context);
         statusText = 'Chờ xác nhận';
         break;
       default:
-        statusColor = AppTheme.error;
+        statusColor = AppStatusColors.getUnpaid(context);
         statusText = 'Chưa thanh toán';
     }
 
@@ -277,14 +279,16 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              formatCurrency.format(invoice.totalAmount),
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: statusColor,
+          Semantics(
+            label: 'Tổng tiền ${formatCurrency.format(invoice.totalAmount)}, tức ${VietnameseCurrencyWords.toVietnameseWords(invoice.totalAmount)}',
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                formatCurrency.format(invoice.totalAmount),
+                style: (context.headlineMedium ?? const TextStyle()).copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: statusColor,
+                ),
               ),
             ),
           ),
@@ -330,7 +334,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFeeItem(Map<String, dynamic> item, NumberFormat formatCurrency) {
+  Widget _buildFeeItem(BuildContext context, Map<String, dynamic> item, NumberFormat formatCurrency) {
     final rawFeeType = item['fee_type'] as String?;
     final feeDisplayName = InvoiceFeeHelper.getFeeName(rawFeeType);
     final feeIcon = InvoiceFeeHelper.getFeeIcon(rawFeeType);
@@ -369,9 +373,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   feeDisplayName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: context.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -379,8 +382,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   '${formatCurrency.format(item['unit_price'] ?? 0)} x $qtyStr$feeUnit',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: context.labelSmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -394,9 +396,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
               textAlign: TextAlign.right,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: context.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
               ),
             ),
           ),
@@ -419,10 +420,9 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'THAO TÁC NGHIỆP VỤ',
-            style: TextStyle(
-              fontSize: 13,
+            style: context.labelMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppTheme.textSecondary,
               letterSpacing: 0.5,
@@ -553,9 +553,9 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     icon: const Icon(Icons.receipt_long, size: 20),
-                    label: const Text(
+                    label: Text(
                       'XEM BIÊN LAI THU TIỀN',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: context.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     onPressed: () => showElectronicReceiptSheet(
@@ -620,9 +620,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       buttonLabel,
-                      style: const TextStyle(
+                      style: context.labelLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -695,7 +694,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                         Text(
                           '• Cư dân đã báo: ${isCashRequest ? "Nộp tiền mặt tại BQL" : "Chuyển khoản (VietQR)"}',
                           style: TextStyle(
-                            color: Colors.orange.shade800,
+                            color: AppTheme.warning,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -704,9 +703,9 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Text(
+                Text(
                   'Hình thức thanh toán thực thu:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: context.labelMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 // ignore: deprecated_member_use
@@ -829,22 +828,20 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Tùy chọn In ấn & Xuất chứng từ',
-                            style: TextStyle(
-                              fontSize: 17,
+                            style: context.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
                             ),
                           ),
                           Text(
                             'Chọn mẫu định dạng tài liệu cần xuất hoặc in',
-                            style: TextStyle(
-                              fontSize: 13,
+                            style: context.bodySmall?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                           ),

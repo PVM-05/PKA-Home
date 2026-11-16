@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/vietnamese_currency_words.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
@@ -184,12 +186,12 @@ class ResidentInvoiceScreen extends ConsumerWidget {
 
     switch (invoice.status) {
       case 'paid':
-        statusColor = AppStatusColors.paid;
+        statusColor = AppStatusColors.getPaid(context);
         statusText = 'Đã thanh toán';
         statusIcon = Icons.check_circle_outline;
         break;
       case 'pending_confirmation':
-        statusColor = AppStatusColors.pending;
+        statusColor = AppStatusColors.getPendingConfirmation(context);
         statusText = 'Chờ xác nhận';
         statusIcon = Icons.schedule;
         break;
@@ -203,7 +205,7 @@ class ResidentInvoiceScreen extends ConsumerWidget {
           statusText = 'Đến hạn hôm nay';
           statusIcon = Icons.access_time_filled;
         } else {
-          statusColor = AppStatusColors.unpaid;
+          statusColor = AppStatusColors.getUnpaid(context);
           statusText = 'Chưa thanh toán';
           statusIcon = Icons.error_outline;
         }
@@ -213,129 +215,132 @@ class ResidentInvoiceScreen extends ConsumerWidget {
         ? AppTheme.error.withValues(alpha: isDark ? 0.7 : 0.5)
         : null;
 
-    return AppCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      borderColor: borderColor,
-      onTap: () {
-        context.push(AppRoutes.residentInvoiceDetail, extra: invoice);
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  'Kỳ ${invoice.period}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+    final spokenAmount =
+        VietnameseCurrencyWords.toVietnameseWords(invoice.totalAmount.toDouble());
+
+    return Semantics(
+      label:
+          'Hóa đơn kỳ ${invoice.period}, hạn thanh toán ${formatDate.format(invoice.dueDate)}, số tiền $spokenAmount, trạng thái $statusText',
+      button: true,
+      child: AppCard(
+        margin: const EdgeInsets.only(bottom: 12),
+        borderColor: borderColor,
+        onTap: () {
+          context.push(AppRoutes.residentInvoiceDetail, extra: invoice);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Kỳ ${invoice.period}',
+                    style: context.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: isDark ? 0.35 : 0.2),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: statusColor.withValues(alpha: isDark ? 0.35 : 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(statusIcon, size: 14, color: statusColor),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            statusText,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: context.labelSmall?.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(statusIcon, size: 14, color: statusColor),
-                      const SizedBox(width: 4),
-                      Flexible(
+                      Text(
+                        'Hạn thanh toán',
+                        style: context.labelSmall?.copyWith(
+                          color: isOverdue
+                              ? AppTheme.error
+                              : isDark
+                                  ? Colors.white60
+                                  : AppTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        formatDate.format(invoice.dueDate),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: isOverdue ? AppTheme.error : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Tổng tiền',
+                        style: context.labelSmall?.copyWith(
+                          color: isDark ? Colors.white60 : AppTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
                         child: Text(
-                          statusText,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontSize: 11,
+                          formatCurrency.format(invoice.totalAmount),
+                          style: context.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: isOverdue
+                                ? AppTheme.error
+                                : AppTheme.primary,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Hạn thanh toán',
-                      style: TextStyle(
-                        color: isOverdue
-                            ? AppTheme.error
-                            : isDark
-                                ? Colors.white60
-                                : AppTheme.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      formatDate.format(invoice.dueDate),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: isOverdue ? AppTheme.error : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Tổng tiền',
-                      style: TextStyle(
-                        color: isDark ? Colors.white60 : AppTheme.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        formatCurrency.format(invoice.totalAmount),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: isOverdue
-                              ? AppTheme.error
-                              : AppTheme.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
