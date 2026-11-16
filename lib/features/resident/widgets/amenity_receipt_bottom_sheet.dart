@@ -280,3 +280,4 @@ Widget _buildReceiptRow(
     ],
   );
 }
+
