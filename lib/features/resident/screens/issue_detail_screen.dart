@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../core/widgets/app_storage_image.dart';
@@ -260,10 +262,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
           color: AppTheme.primary,
         ),
         const SizedBox(width: 8),
-        const Text(
+        Text(
           'Trao đổi',
-          style: TextStyle(
-            fontSize: 18,
+          style: context.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -280,10 +281,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
             ),
             child: Text(
               '${comments.length}',
-              style: const TextStyle(
+              style: context.labelSmall?.copyWith(
                 color: AppTheme.primary,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
               ),
             ),
           ),
@@ -342,11 +342,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
           }).toList(),
         );
       },
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24.0),
-          child: CircularProgressIndicator(),
-        ),
+      loading: () => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: AppSkeletonShimmer.cardList(count: 3, itemHeight: 64),
       ),
       error: (e, _) => Padding(
         padding: const EdgeInsets.all(16.0),
@@ -394,9 +392,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     const SizedBox(width: 4),
                     Text(
                       statusInfo.label,
-                      style: TextStyle(
+                      style: context.labelSmall?.copyWith(
                         color: statusInfo.color,
-                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -414,9 +411,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 ),
                 child: Text(
                   priorityInfo.label,
-                  style: TextStyle(
+                  style: context.labelSmall?.copyWith(
                     color: priorityInfo.color,
-                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -444,9 +440,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     const SizedBox(width: 4),
                     Text(
                       issue.categoryDisplayName,
-                      style: const TextStyle(
+                      style: context.labelSmall?.copyWith(
                         color: AppTheme.primary,
-                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -499,13 +494,12 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           Text(
                             issue.slaRemainingFormatted,
                             maxLines: 1,
-                            style: TextStyle(
+                            style: context.labelSmall?.copyWith(
                               color: issue.isSlaBreached
                                   ? AppTheme.error
                                   : (issue.isSlaWarning
                                         ? Colors.orange.shade800
                                         : Colors.blue.shade800),
-                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -521,7 +515,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
           // Mô tả
           Text(
             issue.description,
-            style: const TextStyle(fontSize: 15, height: 1.5),
+            style: (context.bodyLarge ?? const TextStyle()).copyWith(height: 1.5),
           ),
           const SizedBox(height: 12),
 
@@ -568,8 +562,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
             const SizedBox(width: 4),
             Text(
               text,
-              style: const TextStyle(
-                fontSize: 12,
+              style: context.labelSmall?.copyWith(
                 color: AppTheme.textSecondary,
               ),
             ),
@@ -585,8 +578,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 14,
+          style: context.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
           ),
@@ -656,13 +648,13 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(Icons.timeline, size: 20, color: AppTheme.primary),
-            SizedBox(width: 8),
+            const Icon(Icons.timeline, size: 20, color: AppTheme.primary),
+            const SizedBox(width: 8),
             Text(
               'Tiến trình xử lý',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -729,8 +721,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           const SizedBox(height: 2),
                           Text(
                             DateFormat('dd/MM/yyyy HH:mm').format(step.date!),
-                            style: const TextStyle(
-                              fontSize: 12,
+                            style: context.labelSmall?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                           ),
@@ -757,10 +748,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     final isReporter = currentUser?.id == widget.issue.reporterId;
 
     return ratingAsync.when(
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          child: CircularProgressIndicator(),
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: AppSkeletonShimmer.rectangular(
+          height: 72,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
       error: (e, _) => const SizedBox.shrink(),
@@ -790,21 +782,19 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Đánh giá chất lượng dịch vụ',
-                            style: TextStyle(
+                            style: context.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
                             ),
                           ),
                           Text(
                             'Sự cố đã hoàn thành. Hãy chia sẻ cảm nhận của bạn!',
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: context.labelSmall?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                           ),
@@ -861,19 +851,18 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.verified_outlined,
                         color: AppTheme.success,
                         size: 20,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
                         'Đánh giá dịch vụ',
-                        style: TextStyle(
+                        style: context.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
                     ],
@@ -928,9 +917,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                         const SizedBox(width: 4),
                         Text(
                           '${rating.overallRating.toStringAsFixed(1)} / 5.0',
-                          style: const TextStyle(
+                          style: context.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
                             color: Colors.amber,
                           ),
                         ),
@@ -940,9 +928,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   const SizedBox(width: 10),
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: context.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
                     ),
                   ),
                 ],
@@ -969,9 +956,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   ),
                   child: Text(
                     '"${rating.comment}"',
-                    style: TextStyle(
+                    style: (context.bodySmall ?? const TextStyle()).copyWith(
                       fontStyle: FontStyle.italic,
-                      fontSize: 13,
                       color: isDark ? Colors.white70 : Colors.grey.shade800,
                     ),
                   ),
@@ -999,11 +985,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         children: [
           Text(
             '$title: ',
-            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
           ),
           Text(
             '$stars',
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const Icon(Icons.star_rate_rounded, size: 13, color: Colors.amber),
         ],
@@ -1032,7 +1018,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isMe) ...[
-            AppAvatar(name: userName, size: 32, fontSize: 12),
+            AppAvatar(name: userName, size: 32),
             const SizedBox(width: 8),
           ],
           Flexible(
@@ -1050,8 +1036,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           userName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.labelSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: comment.isManagement
                                 ? AppTheme.primary
@@ -1072,8 +1057,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           ),
                           child: Text(
                             comment.roleDisplayName,
-                            style: const TextStyle(
-                              fontSize: 10,
+                            style: context.labelSmall?.copyWith(
                               color: AppTheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1104,7 +1088,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   ),
                   child: Text(
                     comment.content,
-                    style: const TextStyle(fontSize: 14, height: 1.4),
+                    style: (context.bodyMedium ?? const TextStyle()).copyWith(height: 1.4),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1113,8 +1097,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     timeago.format(comment.createdAt, locale: 'vi'),
-                    style: TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       color: isDark ? Colors.white38 : Colors.grey.shade500,
                     ),
                   ),
@@ -1124,7 +1107,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
           ),
           if (isMe) ...[
             const SizedBox(width: 8),
-            AppAvatar(name: userName, size: 32, fontSize: 12),
+            AppAvatar(name: userName, size: 32),
           ],
         ],
       ),
@@ -1266,11 +1249,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     color: AppTheme.primary,
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Vật tư kỹ thuật đã sử dụng',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: context.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -1288,10 +1270,9 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     ),
                     child: Text(
                       '${materials.length} mục',
-                      style: const TextStyle(
+                      style: context.labelSmall?.copyWith(
                         color: AppTheme.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -1320,16 +1301,14 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           children: [
                             Text(
                               item.materialName,
-                              style: const TextStyle(
+                              style: context.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 14,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Số lượng: ${item.quantity} ${item.unit} x ${currencyFormat.format(item.unitPrice)} đ',
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: context.labelSmall?.copyWith(
                                 color: AppTheme.textSecondary,
                               ),
                             ),
@@ -1338,8 +1317,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                               const SizedBox(height: 2),
                               Text(
                                 'Ghi chú: ${item.note}',
-                                style: const TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   fontStyle: FontStyle.italic,
                                   color: AppTheme.textSecondary,
                                 ),
@@ -1354,9 +1332,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                         children: [
                           Text(
                             '${currencyFormat.format(item.totalAmount)} đ',
-                            style: const TextStyle(
+                            style: context.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
                               color: AppTheme.primary,
                             ),
                           ),
@@ -1374,8 +1351,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                             ),
                             child: Text(
                               item.chargeableDisplayName,
-                              style: TextStyle(
-                                fontSize: 10,
+                              style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: item.isChargeable
                                     ? Colors.orange.shade800
@@ -1394,12 +1370,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Tổng tính vào hóa đơn kỳ tới:',
-                        style: TextStyle(
+                        style: context.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1407,9 +1382,8 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     const SizedBox(width: 8),
                     Text(
                       '${currencyFormat.format(chargeableAmount)} đ',
-                      style: const TextStyle(
+                      style: context.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
                         color: Colors.orange,
                       ),
                     ),

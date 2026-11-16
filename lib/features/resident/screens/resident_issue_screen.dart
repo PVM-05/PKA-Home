@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
@@ -238,8 +239,7 @@ class ResidentIssueScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           formatDate.format(issue.createdAt),
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: context.labelSmall?.copyWith(
                             color: AppTheme.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -268,9 +268,8 @@ class ResidentIssueScreen extends ConsumerWidget {
                       ),
                       child: Text(
                         statusText,
-                        style: TextStyle(
+                        style: context.labelSmall?.copyWith(
                           color: statusColor,
-                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -339,7 +338,7 @@ class ResidentIssueScreen extends ConsumerWidget {
               ],
             ),
               const SizedBox(height: 12),
-              Text(issue.description, style: const TextStyle(fontSize: 14)),
+              Text(issue.description, style: context.bodyMedium),
 
               if (issue.reportImages.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -377,11 +376,10 @@ class ResidentIssueScreen extends ConsumerWidget {
                             color: Colors.black.withValues(alpha: 0.6),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Ảnh lúc báo cáo',
-                            style: TextStyle(
+                            style: context.labelSmall?.copyWith(
                               color: Colors.white,
-                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -411,9 +409,8 @@ class ResidentIssueScreen extends ConsumerWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   '+${issue.reportImages.length - 1} ảnh',
-                                  style: const TextStyle(
+                                  style: context.labelSmall?.copyWith(
                                     color: Colors.white,
-                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -440,19 +437,18 @@ class ResidentIssueScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.verified,
                             size: 16,
                             color: AppStatusColors.paid,
                           ),
-                          SizedBox(width: 6),
+                          const SizedBox(width: 6),
                           Text(
                             'Ảnh minh chứng đã khắc phục (Sau khi sửa)',
-                            style: TextStyle(
+                            style: context.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
                               color: AppStatusColors.paid,
                             ),
                           ),
@@ -505,15 +501,13 @@ class ResidentIssueScreen extends ConsumerWidget {
                     child: Text.rich(
                       TextSpan(
                         text: 'Mức độ: ',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                         children: [
                           TextSpan(
                             text: priorityText,
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: context.labelSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: priorityColor,
                             ),
@@ -536,8 +530,7 @@ class ResidentIssueScreen extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Text(
                         'Chi tiết',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           color: AppTheme.primary.withValues(alpha: 0.7),
                           fontWeight: FontWeight.w500,
                         ),

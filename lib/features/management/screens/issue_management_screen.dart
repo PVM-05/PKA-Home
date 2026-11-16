@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/app_card.dart';
@@ -452,8 +454,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 11,
+                  style: context.labelSmall?.copyWith(
                     color: color,
                     fontWeight: FontWeight.w600,
                   ),
@@ -468,8 +469,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               count,
-              style: TextStyle(
-                fontSize: 14,
+              style: context.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -600,31 +600,13 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.border.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.report_problem_outlined,
-                    size: 48,
-                    color: AppTheme.textSecondary.withValues(alpha: 0.6),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Không có phản ánh nào ở trạng thái này.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary,
-                      ),
-                ),
-              ],
+          SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+          const Center(
+            child: AppEmptyState(
+              icon: Icons.search_off_outlined,
+              title: 'Không tìm thấy phản ánh nào',
+              description:
+                  'Không có phản ánh sự cố nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm hiện tại.',
             ),
           ),
         ],
@@ -654,7 +636,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                   headingRowColor: WidgetStateProperty.all(
                     Theme.of(context).brightness == Brightness.dark
                         ? Colors.white.withValues(alpha: 0.05)
-                        : const Color(0xFFF8FAFC),
+                        : AppTheme.background,
                   ),
                   columns: const [
                     DataColumn(
@@ -733,11 +715,10 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                     color: AppStatusColors.paid,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'MỚI',
-                                    style: TextStyle(
+                                    style: context.labelSmall?.copyWith(
                                       color: Colors.white,
-                                      fontSize: 9,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -754,11 +735,10 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                     color: AppTheme.error,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'NGUY HIỂM',
-                                    style: TextStyle(
+                                    style: context.labelSmall?.copyWith(
                                       color: Colors.white,
-                                      fontSize: 9,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -784,29 +764,30 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                 ),
                                 child: Text(
                                   issue.categoryDisplayName,
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                  style: context.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: AppTheme.primary,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: priorityColor.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  issue.priorityDisplayName,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: priorityColor,
+                              Semantics(
+                                label: 'Mức độ ưu tiên: ${issue.priorityDisplayName}',
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: priorityColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    issue.priorityDisplayName,
+                                    style: context.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: priorityColor,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -822,7 +803,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                               issue.description,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 13),
+                              style: context.bodySmall,
                             ),
                           ),
                         ),
@@ -862,8 +843,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                       const SizedBox(width: 4),
                                       Text(
                                         issue.slaRemainingFormatted,
-                                        style: TextStyle(
-                                          fontSize: 12,
+                                        style: context.labelSmall?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: issue.isSlaBreached
                                               ? AppTheme.error
@@ -889,8 +869,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                             children: [
                               Text(
                                 issue.reporter?.fullName ?? 'Cư dân',
-                                style: const TextStyle(
-                                  fontSize: 12,
+                                style: context.labelSmall?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -898,8 +877,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                                 issue.assignedStaff != null
                                     ? 'KT: ${issue.assignedStaff!.fullName}'
                                     : 'Chưa phân công',
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   color: issue.assignedStaff != null
                                       ? AppTheme.primary
                                       : AppTheme.textSecondary,
@@ -1023,18 +1001,20 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(
-                      isHighPriority ? Icons.warning : Icons.info_outline,
-                      color: priorityColor,
-                      size: 18,
+                    Semantics(
+                      label: 'Mức độ ưu tiên: ${issue.priorityDisplayName}',
+                      child: Icon(
+                        isHighPriority ? Icons.warning : Icons.info_outline,
+                        color: priorityColor,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         'Căn hộ ${issue.apartment?.code ?? 'N/A'}',
-                        style: TextStyle(
+                        style: context.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
                           color: isHighPriority
                               ? AppStatusColors.priorityHigh
                               : AppTheme.textPrimary,
@@ -1053,11 +1033,10 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                           color: AppStatusColors.paid,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'MỚI',
-                          style: TextStyle(
+                          style: context.labelSmall?.copyWith(
                             color: Colors.white,
-                            fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1074,11 +1053,10 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                           color: AppTheme.error,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'NGUY HIỂM',
-                          style: TextStyle(
+                          style: context.labelSmall?.copyWith(
                             color: Colors.white,
-                            fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1092,8 +1070,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   dateFormat.format(issue.createdAt),
-                  style: const TextStyle(
-                    fontSize: 11,
+                  style: context.labelSmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -1125,8 +1102,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                     const SizedBox(width: 4),
                     Text(
                       issue.categoryDisplayName,
-                      style: const TextStyle(
-                        fontSize: 11,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppTheme.primary,
                       ),
@@ -1155,8 +1131,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                       const SizedBox(width: 4),
                       Text(
                         'AI: ${issue.aiSuggestedCategoryDisplayName} (${(issue.aiCategoryConfidence * 100).toInt()}%)',
-                        style: const TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Colors.purple,
                         ),
@@ -1201,8 +1176,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                       const SizedBox(width: 4),
                       Text(
                         issue.slaRemainingFormatted,
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: issue.isSlaBreached
                               ? AppTheme.error
@@ -1224,10 +1198,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
 
           if (issue.reportImages.isNotEmpty) ...[
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Ảnh báo cáo sự cố (Trước khi sửa):',
-              style: TextStyle(
-                fontSize: 12,
+              style: context.labelSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textSecondary,
               ),
@@ -1270,19 +1243,18 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.verified,
                         size: 16,
                         color: AppStatusColors.paid,
                       ),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           'Ảnh nghiệm thu hoàn thành (Sau khi sửa):',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.labelSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppStatusColors.paid,
                           ),
@@ -1334,8 +1306,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
             const SizedBox(height: 8),
             Text(
               'Người gửi: ${issue.reporter!.fullName}',
-              style: const TextStyle(
-                fontSize: 12,
+              style: context.labelSmall?.copyWith(
                 color: AppTheme.textSecondary,
               ),
             ),
@@ -1354,8 +1325,7 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                 Expanded(
                   child: Text(
                     'Phụ trách: ${issue.assignedStaff!.fullName}',
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: context.labelSmall?.copyWith(
                       color: AppTheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1389,9 +1359,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                             Icons.auto_awesome,
                             size: 16,
                           ),
-                          label: const Text(
+                          label: Text(
                             'Gán theo AI',
-                            style: TextStyle(fontSize: 12),
+                            style: context.labelSmall,
                           ),
                         ),
                       ),
@@ -1407,9 +1377,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                             Icons.person_add_outlined,
                             size: 16,
                           ),
-                          label: const Text(
+                          label: Text(
                             'Phân công',
-                            style: TextStyle(fontSize: 12),
+                            style: context.labelSmall,
                           ),
                         ),
                       ),
@@ -1432,9 +1402,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                           Icons.auto_awesome,
                           size: 16,
                         ),
-                        label: const Text(
+                        label: Text(
                           'Gán theo AI',
-                          style: TextStyle(fontSize: 12),
+                          style: context.labelSmall,
                         ),
                       ),
                     ),
@@ -1449,9 +1419,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                           Icons.person_add_outlined,
                           size: 16,
                         ),
-                        label: const Text(
+                        label: Text(
                           'Phân công',
-                          style: TextStyle(fontSize: 12),
+                          style: context.labelSmall,
                         ),
                       ),
                     ),
@@ -1473,9 +1443,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                   Icons.check_circle_outline,
                   size: 18,
                 ),
-                label: const Text(
+                label: Text(
                   'Nghiệm thu & Kê khai vật tư',
-                  style: TextStyle(fontSize: 12),
+                  style: context.labelSmall,
                 ),
               ),
             ),
@@ -1491,9 +1461,9 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                 Icons.forum_outlined,
                 size: 16,
               ),
-              label: const Text(
+              label: Text(
                 'Chi tiết & Trao đổi',
-                style: TextStyle(fontSize: 13),
+                style: context.bodySmall,
               ),
             ),
           ),
@@ -1540,9 +1510,8 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: context.labelSmall?.copyWith(
           color: color,
-          fontSize: 11,
           fontWeight: FontWeight.bold,
         ),
       ),
