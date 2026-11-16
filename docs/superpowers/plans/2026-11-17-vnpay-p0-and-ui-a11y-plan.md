@@ -33,13 +33,13 @@
 - Consumes: Bảng `invoices` (`total_amount`, `payment_code`, `status`, `apartment_id`), `apartments` (`building_id`), `building_payment_configs` (`vnpay_tmn_code`, `vnpay_is_active`), `building_payment_secrets` (`vnpay_hash_secret`).
 - Produces: Edge Function `create-vnpay-url` trả về `{ payment_url: string, txn_ref: string }`; `PaymentService.createVnpayPaymentUrl(invoiceId)` trả về `Future<String?>`.
 
-- [ ] **Step 1: Viết test failing cho quy trình gọi VNPay server-side**
+- [x] **Step 1: Viết test failing cho quy trình gọi VNPay server-side**
 Tạo file `test/core/services/vnpay_server_flow_test.dart` kiểm tra `PaymentService.createVnpayPaymentUrl` gọi Supabase Functions với `invoice_id` và nhận URL hợp lệ.
 
-- [ ] **Step 2: Chạy test để xác nhận fail**
+- [x] **Step 2: Chạy test để xác nhận fail**
 Chạy `flutter test test/core/services/vnpay_server_flow_test.dart` để xác nhận test thất bại do chưa cập nhật `PaymentService`.
 
-- [ ] **Step 3: Tạo Edge Function `supabase/functions/create-vnpay-url/index.ts`**
+- [x] **Step 3: Tạo Edge Function `supabase/functions/create-vnpay-url/index.ts`**
 Viết mã TypeScript cho Deno Edge Function:
 1. Thẩm định JWT lấy `user_id`.
 2. Kiểm tra RBAC (role `admin`, `management` từ bảng `users` HOẶC cư dân liên kết với `invoices.apartment_id` qua bảng `residents_apartments`).
@@ -49,21 +49,21 @@ Viết mã TypeScript cho Deno Edge Function:
 6. Lấy `vnp_IpAddr` từ `x-forwarded-for`, `vnp_ReturnUrl` từ env `VNPAY_RETURN_URL`.
 7. Sắp xếp tham số, tính HMAC-SHA512 và tạo payment URL trả về JSON `{ payment_url, txn_ref }`.
 
-- [ ] **Step 4: Cập nhật Edge Function `supabase/functions/vnpay-ipn/index.ts`**
+- [x] **Step 4: Cập nhật Edge Function `supabase/functions/vnpay-ipn/index.ts`**
 Sửa truy vấn lấy secret thành 2 bước nối tiếp:
 1. Query `building_payment_configs` theo `vnp_TmnCode` lấy `building_id`.
 2. Query `building_payment_secrets` theo `building_id` lấy `vnpay_hash_secret` (kèm fallback `Deno.env.get("VNPAY_HASH_SECRET")`).
 
-- [ ] **Step 5: Dọn dẹp Model & Client Service**
+- [x] **Step 5: Dọn dẹp Model & Client Service**
 1. Trong `BuildingPaymentConfigModel`: Xóa bỏ 2 trường chết `vnpayHashSecret` và `sepayApiKey`.
 2. Trong `VnpayService`: Xóa bỏ logic ký số HMAC-SHA512 phía client (chuyển sang dead code cleanup).
 3. Trong `PaymentService`: Viết lại `createVnpayPaymentUrl({required String invoiceId})` gọi `supabase.functions.invoke('create-vnpay-url', body: {'invoice_id': invoiceId})`.
 4. Trong `UnifiedPaymentSheet`: Cập nhật gọi `paymentService.createVnpayPaymentUrl(invoiceId: widget.invoice.id)` không cần truyền `vnpayHashSecret`.
 
-- [ ] **Step 6: Chạy lại test xác nhận pass**
+- [x] **Step 6: Chạy lại test xác nhận pass**
 Chạy `flutter test test/core/services/vnpay_server_flow_test.dart` $\rightarrow$ Pass 100%.
 
-- [ ] **Step 7: Commit Task 1**
+- [x] **Step 7: Commit Task 1**
 Commit với message: `fix(vnpay): chuyen logic tao link va ky so vnpay ve server edge function`
 
 ---
@@ -224,3 +224,4 @@ Tạo tài liệu hướng dẫn nghiệm thu deploy 2 Edge Functions và test s
 
 - [ ] **Step 5: Push lên nhánh `main`**
 Đẩy toàn bộ thay đổi an toàn lên `origin/main`.
+

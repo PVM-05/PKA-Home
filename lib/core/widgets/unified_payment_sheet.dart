@@ -207,6 +207,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
       final paymentService = ref.read(paymentServiceProvider);
       final memo = widget.referenceCode.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
       final paymentUrl = await paymentService.createVnpayPaymentUrl(
+        invoiceId: widget.referenceId,
         buildingId: bldId,
         amount: widget.amount,
         txnRef: memo,

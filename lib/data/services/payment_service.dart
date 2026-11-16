@@ -1,5 +1,4 @@
 import '../../core/supabase_config.dart';
-import '../../core/services/vnpay_service.dart';
 import '../models/building_payment_config_model.dart';
 import '../models/sepay_webhook_payload_model.dart';
 
@@ -188,36 +187,41 @@ class PaymentService {
     }
   }
 
-  /// Tạo URL thanh toán VNPay trực tuyến dựa trên cấu hình tòa nhà
+  /// Tạo URL thanh toán VNPay trực tuyến server-authoritative qua Edge Function
   Future<String?> createVnpayPaymentUrl({
-    required String buildingId,
-    required double amount,
-    required String txnRef,
-    required String orderInfo,
-    required String returnUrl,
+    required String invoiceId,
     String? bankCode,
+    String? buildingId,
+    double? amount,
+    String? txnRef,
+    String? orderInfo,
+    String? returnUrl,
     bool isSandbox = true,
   }) async {
-    final config = await fetchBuildingPaymentConfig(buildingId);
-    if (config == null ||
-        !config.vnpayIsActive ||
-        config.vnpayTmnCode == null ||
-        config.vnpayTmnCode!.isEmpty ||
-        config.vnpayHashSecret == null ||
-        config.vnpayHashSecret!.isEmpty) {
-      return null;
+    if (isMockMode) {
+      final code = txnRef ?? invoiceId;
+      return 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=180000000&vnp_Command=pay&vnp_CreateDate=20261117000000&vnp_CurrCode=VND&vnp_IpAddr=127.0.0.1&vnp_Locale=vn&vnp_OrderInfo=Thanh+toan+hoa+don+$code&vnp_OrderType=billpayment&vnp_ReturnUrl=https%3A%2F%2Fpka-home.web.app%2Fpayment-result&vnp_TmnCode=PKASUNRISE01&vnp_TxnRef=$code&vnp_Version=2.1.0&vnp_SecureHash=mockhash128chars';
     }
 
-    return VnpayService.createPaymentUrl(
-      tmnCode: config.vnpayTmnCode!,
-      hashSecret: config.vnpayHashSecret!,
-      amount: amount,
-      txnRef: txnRef,
-      orderInfo: orderInfo,
-      returnUrl: returnUrl,
-      bankCode: bankCode,
-      isSandbox: isSandbox,
-    );
+    try {
+      final res = await SupabaseConfig.client.functions.invoke(
+        'create-vnpay-url',
+        body: {
+          'invoice_id': invoiceId,
+          if (bankCode != null && bankCode.trim().isNotEmpty) 'bank_code': bankCode.trim(),
+        },
+      );
+
+      if (res.status == 200 && res.data != null) {
+        final data = res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null;
+        if (data != null && data['payment_url'] != null) {
+          return data['payment_url'] as String;
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Xử lý Webhook biến động số dư ngân hàng chung

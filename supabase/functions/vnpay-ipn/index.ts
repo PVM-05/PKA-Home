@@ -113,20 +113,28 @@ serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 3. Tìm cấu hình Secret Key tương ứng với TMN Code
+    // 3. Tìm cấu hình Secret Key tương ứng với TMN Code (2 bước độc lập qua building_id)
     let hashSecret = Deno.env.get("VNPAY_HASH_SECRET") || "";
 
     if (tmnCode) {
       const { data: configData } = await supabase
         .from("building_payment_configs")
-        .select("vnpay_hash_secret")
+        .select("building_id, vnpay_is_active")
         .eq("vnpay_tmn_code", tmnCode)
         .eq("vnpay_is_active", true)
         .limit(1)
         .maybeSingle();
 
-      if (configData && configData.vnpay_hash_secret) {
-        hashSecret = configData.vnpay_hash_secret;
+      if (configData && configData.building_id) {
+        const { data: secretData } = await supabase
+          .from("building_payment_secrets")
+          .select("vnpay_hash_secret")
+          .eq("building_id", configData.building_id)
+          .maybeSingle();
+
+        if (secretData && secretData.vnpay_hash_secret) {
+          hashSecret = secretData.vnpay_hash_secret;
+        }
       }
     }
 
