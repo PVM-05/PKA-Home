@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pka_home/core/theme/app_theme.dart';
+import 'package:pka_home/core/widgets/pdpl_consent_dialog.dart';
 import 'package:pka_home/data/models/user_model.dart';
 import 'package:pka_home/data/providers/auth_provider.dart';
 import 'package:pka_home/data/providers/resident_apartment_provider.dart';
@@ -55,6 +56,7 @@ void main() {
       // Kiểm tra tiêu đề mục PDPL
       expect(find.text('Quyền riêng tư & Dữ liệu (PDPL)'), findsOneWidget);
       expect(find.text('Chính sách quyền riêng tư'), findsOneWidget);
+      expect(find.text('Thỏa thuận xử lý dữ liệu (Consent)'), findsOneWidget);
       expect(find.text('Xuất dữ liệu cá nhân (Data Portability)'), findsOneWidget);
       expect(find.text('Yêu cầu xóa / đóng băng dữ liệu'), findsOneWidget);
 
@@ -66,6 +68,26 @@ void main() {
       // Kiểm tra sheet mở ra
       expect(find.text('Chính Sách Bảo Mật Dữ Liệu (PDPL)'), findsOneWidget);
       expect(find.text('Tôn Chỉ & Phạm Vi Áp Dụng'), findsOneWidget);
+    });
+
+    testWidgets('Mở hộp thoại Thỏa thuận xử lý dữ liệu (Consent) ở chế độ xem lại', (tester) async {
+      await tester.pumpWidget(createWidget(privacyService: mockPrivacyService));
+      await tester.pumpAndSettle();
+
+      // Cuộn tới và bấm vào Thỏa thuận xử lý dữ liệu
+      await tester.ensureVisible(find.text('Thỏa thuận xử lý dữ liệu (Consent)'));
+      await tester.tap(find.text('Thỏa thuận xử lý dữ liệu (Consent)'));
+      await tester.pumpAndSettle();
+
+      // Kiểm tra dialog mở ra với tiêu đề và nút Đóng (Review mode)
+      expect(find.byType(PdplConsentDialog), findsOneWidget);
+      expect(find.text('Bảo Vệ Dữ Liệu Cá Nhân'), findsOneWidget);
+      expect(find.text('Đóng'), findsOneWidget);
+
+      // Bấm đóng dialog
+      await tester.tap(find.text('Đóng'));
+      await tester.pumpAndSettle();
+      expect(find.text('Bảo Vệ Dữ Liệu Cá Nhân'), findsNothing);
     });
 
     testWidgets('Mở hộp thoại Yêu cầu xóa/đóng băng dữ liệu', (tester) async {

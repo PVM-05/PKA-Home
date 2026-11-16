@@ -596,6 +596,35 @@ class ResidentProfileScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
+                            Icons.fact_check_outlined,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        title: const Text(
+                          'Thỏa thuận xử lý dữ liệu (Consent)',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: const Text(
+                          'Xem lại phạm vi chấp thuận và quyền chủ thể dữ liệu',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) =>
+                                const PdplConsentDialog(isReviewMode: true),
+                          );
+                        },
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
                             Icons.download_for_offline_outlined,
                             color: AppTheme.primary,
                           ),

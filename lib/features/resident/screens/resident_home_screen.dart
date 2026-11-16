@@ -26,6 +26,7 @@ import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/link_request_provider.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
+import '../../../core/widgets/pdpl_consent_dialog.dart';
 import '../../../data/providers/notification_provider.dart';
 import '../widgets/equipment_interruption_banner.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -41,6 +42,16 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
   int _selectedIndex = 0;
   String? _lastNotifiedApartmentId;
   Set<String> _knownInvoiceIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        PdplConsentManager.showConsentDialogIfNeeded(context);
+      }
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {

@@ -31,6 +31,7 @@ import '../../../core/constants/permissions.dart';
 import '../../../data/providers/role_delegation_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/services/push_notification_service.dart';
+import '../../../core/widgets/pdpl_consent_dialog.dart';
 import '../../../data/providers/notification_provider.dart';
 import '../../../data/models/notification_model.dart';
 import '../../../data/providers/payment_provider.dart';
@@ -63,6 +64,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      PdplConsentManager.showConsentDialogIfNeeded(context);
       final currentUser = ref.read(authProvider).valueOrNull;
       if (currentUser != null && mounted) {
         RoleOnboardingDialog.checkAndShow(context, currentUser);

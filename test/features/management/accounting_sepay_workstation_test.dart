@@ -4,12 +4,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pka_home/data/models/apartment_model.dart';
 import 'package:pka_home/data/models/invoice_model.dart';
 import 'package:pka_home/data/models/payment_transaction_model.dart';
+import 'package:pka_home/data/models/user_model.dart';
 import 'package:pka_home/data/providers/accounting_workstation_provider.dart';
+import 'package:pka_home/data/providers/auth_provider.dart';
 import 'package:pka_home/data/providers/payment_provider.dart';
 import 'package:pka_home/features/management/screens/accounting_web_workstation_screen.dart';
 
+class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>>
+    implements AuthNotifier {
+  FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   final now = DateTime(2026, 11, 8, 10, 0);
+
+  final adminUser = UserModel(
+    id: 'user-admin-1',
+    fullName: 'Kế Toán Trưởng',
+    phone: '0900000001',
+    role: 'accountant',
+  );
 
   final mockInvoices = [
     InvoiceModel(
@@ -60,6 +77,7 @@ void main() {
   Widget createTestWidget() {
     return ProviderScope(
       overrides: [
+        authProvider.overrideWith((ref) => FakeAuthNotifier(adminUser)),
         accountingWorkstationRawInvoicesProvider.overrideWith((ref) => Future.value(mockInvoices)),
         paymentTransactionsProvider.overrideWith((ref) => Future.value(mockTransactions)),
       ],

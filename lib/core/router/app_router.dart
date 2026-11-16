@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/permissions.dart';
+import '../widgets/pdpl_consent_dialog.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/link_request_provider.dart';
 import '../../data/models/invoice_model.dart';
@@ -728,6 +729,12 @@ class _ResidentShellWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        PdplConsentManager.showConsentDialogIfNeeded(context);
+      }
+    });
+
     final linkState = ref.watch(residentLinkProvider);
 
     if (linkState.status == LinkStatus.loading) {

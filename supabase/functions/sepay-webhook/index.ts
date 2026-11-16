@@ -1,6 +1,6 @@
 // Supabase Edge Function: sepay-webhook
 // Nhiệm vụ: Tiếp nhận Webhook thông báo biến động số dư ngân hàng 24/7 từ SePay (sepay.vn).
-// Chuyển tiếp payload vào hàm RPC ACID `process_sepay_webhook` trong PostgreSQL để tự động gạch nợ.
+// Bảo mật: Thẩm định nghiêm ngặt API Key (Fail-Closed) trước khi chuyển tiếp vào RPC PostgreSQL.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -18,13 +18,14 @@ serve(async (req: Request) => {
 
   if (req.method !== "POST") {
     return new Response(
-      JSON.stringify({ error: "Chỉ hỗ trợ phương thức POST cho Webhook SePay" }),
+      JSON.stringify({ success: false, error: "Chỉ hỗ trợ phương thức POST cho Webhook SePay" }),
       { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 
   try {
-    // 1. Trích xuất SePay API Key từ Header hoặc Query Param
+    // 1. Trích xuất SePay API Key từ Header hoặc Query Param theo chuẩn SePay
+    // SePay gửi header: `Authorization: Apikey <api_key>`
     const authHeader = req.headers.get("Authorization") || req.headers.get("authorization") || "";
     let apiKey = "";
 
@@ -45,8 +46,41 @@ serve(async (req: Request) => {
       apiKey = url.searchParams.get("api_key") || "";
     }
 
+    // Chặn đứng ngay tại vành đai Edge nếu thiếu API Key (Fail-Closed)
+    if (!apiKey) {
+      console.warn("[SePay Webhook Security]: Bị từ chối do thiếu API Key xác thực.");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "401 Unauthorized: Thiếu API Key xác thực Webhook SePay. Vui lòng cấu hình Authorization header.",
+        }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Thẩm định với biến môi trường SEPAY_WEBHOOK_API_KEY nếu đã được thiết lập trong Secrets
+    const expectedEnvKey = Deno.env.get("SEPAY_WEBHOOK_API_KEY");
+    if (expectedEnvKey && apiKey !== expectedEnvKey) {
+      console.warn("[SePay Webhook Security]: API Key không khớp với SEPAY_WEBHOOK_API_KEY.");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "401 Unauthorized: Chữ ký / API Key xác thực Webhook không hợp lệ.",
+        }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // 2. Parse JSON Payload từ SePay
-    const payload = await req.json();
+    let payload: Record<string, any>;
+    try {
+      payload = await req.json();
+    } catch (_e) {
+      return new Response(
+        JSON.stringify({ success: false, error: "400 Bad Request: Dữ liệu JSON không hợp lệ." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // 3. Khởi tạo Supabase Client với Service Role Key để gọi RPC nội bộ
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -62,17 +96,18 @@ serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 4. Gọi RPC `process_sepay_webhook` đã được tối ưu ACID & RLS
+    // 4. Gọi RPC `process_sepay_webhook` với p_api_key bắt buộc để thẩm định đối chiếu trong DB
     const { data, error } = await supabase.rpc("process_sepay_webhook", {
       p_payload: payload,
-      p_api_key: apiKey || null,
+      p_api_key: apiKey,
     });
 
     if (error) {
       console.error("[SePay Webhook RPC Error]:", error);
+      const isAuthError = error.message?.includes("401") || error.message?.includes("API Key");
       return new Response(
         JSON.stringify({ success: false, error: error.message }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: isAuthError ? 401 : 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
