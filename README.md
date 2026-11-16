@@ -212,7 +212,13 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
    ```
    > **Cảnh báo An ninh**: Chỉ đưa `SUPABASE_ANON_KEY` lên ứng dụng client. **Tuyệt đối không** nhúng `service_role key` vào ứng dụng client hoặc commit lên Git. Khóa `service_role key` và `SEPAY_WEBHOOK_API_KEY` chỉ được cấu hình trong phần Secrets của Supabase Dashboard / Edge Functions.
 
-4. **Khởi tạo Cơ sở dữ liệu (40 Migrations)**:
+4. **Cấu hình Thông Báo Đẩy Firebase FCM (Tùy chọn cho Môi trường Local)**:
+   Để kích hoạt tính năng nhận thông báo đẩy thời gian thực trên thiết bị thật:
+   - **Android**: Tải `google-services.json` từ Firebase Console và đặt vào `android/app/google-services.json` (tham khảo mẫu `android/app/google-services.example.json`).
+   - **iOS**: Tải `GoogleService-Info.plist` từ Firebase Console và đặt vào `ios/Runner/GoogleService-Info.plist` (tham khảo mẫu `ios/Runner/GoogleService-Info.example.plist`).
+   > **Cơ chế Fail-Safe**: Nếu chưa bổ sung 2 tệp trên, bộ máy khởi chạy của PKA-Home tự động bọc khối Try/Catch bảo vệ và kích hoạt chế độ Fallback thông báo nội bộ (In-app Notification Center), bảo đảm ứng dụng vẫn khởi chạy bình thường mà không bị crash.
+
+5. **Khởi tạo Cơ sở dữ liệu (40 Migrations)**:
    Áp dụng tuần tự các tệp migration trong thư mục `supabase/migrations/` trên Supabase SQL Editor:
    - Các bảng cốt lõi: người dùng, căn hộ, hóa đơn, sự cố, phương tiện.
    - Migration bãi đỗ xe & ô đỗ hầm: `20261106_01_parking_slots_and_vehicle_approval.sql`
@@ -221,7 +227,7 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
    - Migration gia cố bảo mật Webhook SePay: `20261116_01_sepay_webhook_security_hardening.sql`
    - Migration cách ly bí mật & kiểm soát tenant: `20261116_02_separate_payment_secrets_and_scope_webhook.sql`
 
-5. **Chạy ứng dụng**:
+6. **Chạy ứng dụng**:
    - Chạy trên điện thoại di động (Android / iOS):
      ```bash
      flutter run

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_storage_image.dart';
 import '../../../data/models/building_utility_rate_model.dart';
 import '../../../data/models/meter_reading_submission_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -800,36 +801,31 @@ class _ManagementMeterReadingScreenState
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(16),
                 ),
-                child: Image.network(
-                  imageUrl,
+                child: AppStorageImage(
+                  imageUrl: imageUrl,
                   fit: BoxFit.contain,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return const Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: CircularProgressIndicator(),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.broken_image,
-                            size: 48,
-                            color: AppTheme.textSecondary,
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Không thể tải ảnh minh chứng',
-                            style: TextStyle(color: AppTheme.textSecondary),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  placeholder: const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: const Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.broken_image,
+                          size: 48,
+                          color: AppTheme.textSecondary,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Không thể tải ảnh minh chứng',
+                          style: TextStyle(color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],

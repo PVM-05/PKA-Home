@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/route_names.dart';
-import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
@@ -69,10 +70,8 @@ class ResidentIssueScreen extends ConsumerWidget {
             },
             loading: () => ListView(
               padding: const EdgeInsets.all(16),
-              children: const [
-                IssueCardSkeleton(),
-                IssueCardSkeleton(),
-                IssueCardSkeleton(),
+              children: [
+                AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
               ],
             ),
             error: (error, stack) => Center(
@@ -97,51 +96,13 @@ class ResidentIssueScreen extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.chat_bubble_outline,
-                size: 56,
-                color: AppTheme.primary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Bạn chưa gửi phản ánh nào',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Khi căn hộ gặp sự cố (điện, nước, cơ sở vật chất), hãy gửi phản ánh để Ban Quản Lý hỗ trợ xử lý kịp thời.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 14,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.push(AppRoutes.residentCreateIssue);
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Gửi phản ánh ngay'),
-            ),
-          ],
-        ),
+      child: AppEmptyState(
+        icon: Icons.chat_bubble_outline,
+        title: 'Bạn chưa gửi phản ánh nào',
+        description:
+            'Khi căn hộ gặp sự cố (điện, nước, cơ sở vật chất), hãy gửi phản ánh để Ban Quản Lý hỗ trợ xử lý kịp thời.',
+        actionLabel: 'Gửi phản ánh ngay',
+        onAction: () => context.push(AppRoutes.residentCreateIssue),
       ),
     );
   }

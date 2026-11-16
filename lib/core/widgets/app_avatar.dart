@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_storage_image.dart';
 
 /// Widget Avatar hiển thị ảnh đại diện hoặc chữ cái đầu (Initials) với dải màu gradient hiện đại.
 class AppAvatar extends StatelessWidget {
@@ -56,55 +57,59 @@ class AppAvatar extends StatelessWidget {
     final gradient = _getGradientForName(name);
     final computedFontSize = fontSize ?? (size * 0.38);
 
-    Widget avatarWidget = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: gradient,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: gradient[0].withValues(alpha: 0.25),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+    Widget avatarWidget = Semantics(
+      label: 'Ảnh đại diện của ${name.trim().isNotEmpty ? name : "người dùng"}',
+      image: true,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: gradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      child: imageUrl != null && imageUrl!.isNotEmpty
-          ? ClipOval(
-              child: Image.network(
-                imageUrl!,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Center(
-                  child: Text(
-                    initials,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: computedFontSize,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
+          boxShadow: [
+            BoxShadow(
+              color: gradient[0].withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: imageUrl != null && imageUrl!.isNotEmpty
+            ? ClipOval(
+                child: AppStorageImage(
+                  imageUrl: imageUrl!,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  errorWidget: Center(
+                    child: Text(
+                      initials,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: computedFontSize,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            )
-          : Center(
-              child: Text(
-                initials,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: computedFontSize,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+              )
+            : Center(
+                child: Text(
+                  initials,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: computedFontSize,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
-            ),
+      ),
     );
 
     if (badge != null) {

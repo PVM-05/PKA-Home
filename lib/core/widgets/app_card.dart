@@ -14,6 +14,7 @@ class AppCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double elevation;
   final bool showSoftShadow;
+  final String? semanticLabel;
 
   const AppCard({
     super.key,
@@ -26,6 +27,7 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.elevation = 0,
     this.showSoftShadow = true,
+    this.semanticLabel,
   });
 
   @override
@@ -65,20 +67,29 @@ class AppCard extends StatelessWidget {
           : content,
     );
 
-    if (showSoftShadow && elevation == 0 && !isDark) {
-      return Container(
-        margin: margin ?? EdgeInsets.zero,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: AppShadows.softSm,
-        ),
-        child: cardWidget,
+    Widget result = showSoftShadow && elevation == 0 && !isDark
+        ? Container(
+            margin: margin ?? EdgeInsets.zero,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              boxShadow: AppShadows.softSm,
+            ),
+            child: cardWidget,
+          )
+        : Padding(
+            padding: margin ?? EdgeInsets.zero,
+            child: cardWidget,
+          );
+
+    if (semanticLabel != null || onTap != null) {
+      result = Semantics(
+        label: semanticLabel,
+        button: onTap != null,
+        enabled: onTap != null,
+        child: result,
       );
     }
 
-    return Padding(
-      padding: margin ?? EdgeInsets.zero,
-      child: cardWidget,
-    );
+    return result;
   }
 }

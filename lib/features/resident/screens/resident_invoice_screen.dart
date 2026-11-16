@@ -5,11 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/route_names.dart';
-import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/models/invoice_model.dart';
-import '../../../core/utils/error_formatter.dart';
 
 class ResidentInvoiceScreen extends ConsumerWidget {
   const ResidentInvoiceScreen({super.key});
@@ -95,16 +96,17 @@ class ResidentInvoiceScreen extends ConsumerWidget {
           },
           loading: () => ListView(
             padding: const EdgeInsets.all(16),
-            children: const [
-              InvoiceCardSkeleton(),
-              InvoiceCardSkeleton(),
-              InvoiceCardSkeleton(),
+            children: [
+              AppSkeletonShimmer.cardList(count: 4, itemHeight: 110),
             ],
           ),
-          error: (error, stack) => Center(
-            child: Text(
-              formatErrorMessage(error),
-              style: const TextStyle(color: AppTheme.error),
+          error: (error, stack) => Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: AppErrorCard(
+                error: error,
+                onRetry: () => ref.invalidate(residentInvoiceProvider),
+              ),
             ),
           ),
         ),
@@ -120,8 +122,6 @@ class ResidentInvoiceScreen extends ConsumerWidget {
     required IconData emptyIcon,
     required Color emptyColor,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return RefreshIndicator(
       color: AppTheme.primary,
       onRefresh: () async {
@@ -138,31 +138,10 @@ class ResidentInvoiceScreen extends ConsumerWidget {
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.6,
                       child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  color: emptyColor.withValues(alpha: isDark ? 0.16 : 0.08),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(emptyIcon, size: 56, color: emptyColor),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                emptyMessage,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: isDark ? Colors.white70 : Colors.grey.shade700,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+                        child: AppEmptyState(
+                          icon: emptyIcon,
+                          title: 'Danh sách trống',
+                          description: emptyMessage,
                         ),
                       ),
                     ),
