@@ -6,6 +6,18 @@ Tất cả các thay đổi đáng chú ý của dự án **PKA-Home - Nền T�
 
 ---
 
+## [2.1.1] - 2026-11-16
+
+### Đã thêm (Added) - Kích hoạt PDPL & Gia cố Bảo mật SePay Webhook
+- **Kích hoạt Hộp thoại Chấp thuận PDPL (Consent Modal)**: Tự động kích hoạt `PdplConsentDialog` khi mở ứng dụng lần đầu tại `ResidentHomeScreen`, `ManagementHomeScreen` và shell điều hướng `_ResidentShellWrapper` theo Luật 91/2025/QH15 & NĐ 356/2025/NĐ-CP.
+- **Minh bạch Quyền Chủ thể Dữ liệu**: Bổ sung mục "Thỏa thuận xử lý dữ liệu (Consent)" trong màn hình Hồ sơ cư dân (`ResidentProfileScreen`), cho phép xem lại toàn văn phạm vi thu thập và con dấu thời gian chấp thuận (`isReviewMode: true`), loại bỏ hoàn toàn import chết.
+- **Bảo mật 2 Lớp SePay Webhook**:
+  - Lớp vành đai Edge Function: Bắt buộc xác thực API key từ Authorization header hoặc query param, trả về `HTTP 401 Unauthorized` nếu không hợp lệ.
+  - Lớp Database RPC: Hàm `process_sepay_webhook` đối chiếu bắt buộc `p_api_key` với `building_payment_configs.sepay_api_key`, ghi nhận audit log `SEPAY_WEBHOOK_UNAUTHORIZED` và từ chối giao dịch nếu vi phạm. Thu hồi quyền thực thi từ public/anon, chỉ cấp quyền cho `service_role`.
+- **Chuẩn hóa Tài liệu B2B SaaS**: Viết lại toàn diện `README.md` theo chuẩn thương mại B2B SaaS PropTech Platform và công bố lộ trình phát triển mở rộng (Roadmap).
+
+---
+
 ## [2.1.0] - 2026-11-15
 
 ### Đã thay đổi (Changed) - Kiên cố hóa Enterprise Fail-Closed
