@@ -6,6 +6,16 @@ Tất cả các thay đổi đáng chú ý của dự án **PKA-Home - Nền T�
 
 ---
 
+## [2.1.2] - 2026-11-16
+
+### Đã sửa (Fixed) - Cách ly Bí mật Thanh toán & Khắc phục Lỗ hổng Cross-Tenant Spoofing
+- **Cách ly Khóa Bí mật Bảng riêng (`building_payment_secrets`)**: Tạo bảng riêng biệt có RLS khắt khe chỉ cho phép `service_role` và `admin` truy cập. Xóa bỏ vĩnh viễn cột `sepay_api_key` và `vnpay_hash_secret` khỏi bảng công khai `building_payment_configs`, ngăn chặn triệt để nguy cơ cư dân đọc trộm khóa qua API.
+- **Xoay vòng Khóa Bí mật (Secret Rotation)**: Tự động đổi toàn bộ khóa API SePay cũ đã từng bị lộ sáng qua cơ chế băm ngẫu nhiên bảo mật (`sec_pka_*`).
+- **Thẩm định Webhook Ràng buộc Tòa nhà (Tenant-Scoped Verification)**: Nâng cấp hàm RPC `process_sepay_webhook`, đối chiếu khóa API bắt buộc theo đúng tòa nhà của hóa đơn (`invoice_building_id`), loại bỏ hoàn toàn khả năng dùng khóa của tòa nhà A để gạch nợ hóa đơn tòa nhà B.
+- **Thẩm định Tài khoản Ngân hàng Thụ hưởng**: Với giao dịch `UNMATCHED`, RPC tự động tra cứu số tài khoản nhận tiền và chỉ chấp nhận khi API Key khớp với đúng tòa nhà sở hữu tài khoản.
+
+---
+
 ## [2.1.1] - 2026-11-16
 
 ### Đã thêm (Added) - Kích hoạt PDPL & Gia cố Bảo mật SePay Webhook

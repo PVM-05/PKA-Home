@@ -383,8 +383,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
 
     final hasVnpayConfig = sepayConfig != null &&
         sepayConfig.vnpayIsActive &&
-        (sepayConfig.vnpayTmnCode?.isNotEmpty ?? false) &&
-        (sepayConfig.vnpayHashSecret?.isNotEmpty ?? false);
+        (sepayConfig.vnpayTmnCode?.isNotEmpty ?? false);
 
     // Chuẩn hóa memo chữ-số thuần túy (loại bỏ #, -, ký tự đặc biệt)
     final cleanMemo = widget.referenceCode

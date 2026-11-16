@@ -48,7 +48,7 @@ graph TD
     Repo["Repository Layer (Fail-Closed Engine)"]
 
     SubAuth["Supabase Auth (JWT, Role Claims & OTP Verification)"]
-    SubDB["PostgreSQL 15+ (39 Migrations, ACID RPCs, RLS Tenant Isolation)"]
+    SubDB["PostgreSQL 15+ (40 Migrations, ACID RPCs, RLS Tenant Isolation)"]
     SubRT["Supabase Realtime (CDC WebSocket Engine)"]
     SubStorage["Supabase Storage (handover-docs, vehicle-docs, issue-images)"]
     SePay["SePay Gateway (VietQR Napas 247 & Webhook 2 Lớp)"]
@@ -124,9 +124,10 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
 ### 4.2. Cổng Thanh Toán VietQR SePay & Bàn Kế Toán (Accounting Workstation)
 - **Bàn Làm Việc Kế Toán Web (`AccountingWebWorkstationScreen`)**: Giao diện dạng bảng chuyên nghiệp dành riêng cho kế toán trên máy tính: lọc căn hộ, đối soát sao kê, theo dõi dòng tiền và đóng sổ kỳ kế toán.
 - **Thanh Toán VietQR Động Chuẩn NAPAS**: Tự động sinh mã VietQR động chứa mã hóa đơn và số tiền chính xác, hỗ trợ quét thanh toán qua tất cả các ứng dụng ngân hàng tại Việt Nam.
-- **Webhook Tự Động Gạch Nợ Bảo Mật 2 Lớp**:
-  - *Lớp Edge Function*: Kiểm tra bắt buộc API key từ header `Authorization: Apikey <key>` hoặc query param. Nếu thiếu hoặc sai, từ chối ngay với mã `HTTP 401 Unauthorized`.
-  - *Lớp Database RPC*: Hàm `process_sepay_webhook` đối chiếu bắt buộc `p_api_key` với cấu hình tòa nhà đang hoạt động `building_payment_configs.sepay_api_key`. Nếu vi phạm, ghi ngay audit log `SEPAY_WEBHOOK_UNAUTHORIZED` và chặn giao dịch.
+- **Webhook Tự Động Gạch Nợ Bảo Mật 2 Lớp & Cách Ly Bí Mật (Tenant-Scoped)**:
+  - *Lớp Edge Function*: Kiểm tra bắt buộc API key từ header `Authorization: Apikey <key>` hoặc query param. Nếu thiếu, từ chối ngay với mã `HTTP 401 Unauthorized`.
+  - *Cách ly Bí mật (Secret Isolation)*: Toàn bộ khóa bí mật (`sepay_api_key`, `vnpay_hash_secret`) được tách sang bảng riêng `building_payment_secrets` với RLS cấm tuyệt đối `anon` và `resident`. Bảng công khai `building_payment_configs` bị xóa bỏ các cột bí mật, ngăn chặn 100% rò rỉ qua client.
+  - *Lớp Database RPC*: Hàm `process_sepay_webhook` đối chiếu bắt buộc `p_api_key` với `building_payment_secrets` của **chính tòa nhà chứa hóa đơn (`invoice_building_id`)**, loại bỏ hoàn toàn lỗ hổng Cross-Tenant Spoofing. Nếu vi phạm, ghi ngay audit log `SEPAY_WEBHOOK_CROSS_TENANT_UNAUTHORIZED` và chặn giao dịch.
   - *Gạch nợ tức thì*: Đổi trạng thái hóa đơn sang `paid`, lưu vết `payment_transactions`, bắn tín hiệu Realtime CDC cập nhật giao diện cư dân sau 2-3 giây.
 - **Quản Lý Quỹ Bảo Trì 2% (`maintenance_fund_ledger`)**: Tách bạch sổ cái thu chi quỹ bảo trì tòa nhà theo đúng quy định của Luật Nhà ở 2023.
 
@@ -211,13 +212,14 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
    ```
    > **Cảnh báo An ninh**: Chỉ đưa `SUPABASE_ANON_KEY` lên ứng dụng client. **Tuyệt đối không** nhúng `service_role key` vào ứng dụng client hoặc commit lên Git. Khóa `service_role key` và `SEPAY_WEBHOOK_API_KEY` chỉ được cấu hình trong phần Secrets của Supabase Dashboard / Edge Functions.
 
-4. **Khởi tạo Cơ sở dữ liệu (39 Migrations)**:
+4. **Khởi tạo Cơ sở dữ liệu (40 Migrations)**:
    Áp dụng tuần tự các tệp migration trong thư mục `supabase/migrations/` trên Supabase SQL Editor:
    - Các bảng cốt lõi: người dùng, căn hộ, hóa đơn, sự cố, phương tiện.
    - Migration bãi đỗ xe & ô đỗ hầm: `20261106_01_parking_slots_and_vehicle_approval.sql`
    - Migration bàn giao & kiểm kê tài sản: `20261107_02_digital_asset_handover_and_inspection.sql`
    - Migration cổng thanh toán thật SePay: `20261108_01_sepay_real_payment_and_webhook.sql`
    - Migration gia cố bảo mật Webhook SePay: `20261116_01_sepay_webhook_security_hardening.sql`
+   - Migration cách ly bí mật & kiểm soát tenant: `20261116_02_separate_payment_secrets_and_scope_webhook.sql`
 
 5. **Chạy ứng dụng**:
    - Chạy trên điện thoại di động (Android / iOS):
@@ -239,9 +241,9 @@ Dự án duy trì quy chuẩn kiểm thử nghiêm ngặt cấp độ doanh nghi
   ```bash
   dart analyze lib test
   ```
-  *(Kết quả xác minh: **`No issues found!`** — 0 lỗi, 0 cảnh báo trên toàn bộ 307 file `lib/` và 380 file `test/`).*
+  *(Kết quả xác minh: **`No issues found!`** — 0 lỗi, 0 cảnh báo trên toàn bộ 307 file `lib/` và 381 file `test/`).*
 
-- **Chạy Toàn Bộ Test Suite Tự Động (Hơn 1.200 bài kiểm thử trên 380 test files)**:
+- **Chạy Toàn Bộ Test Suite Tự Động (Hơn 1.200 bài kiểm thử trên 381 test files)**:
   ```bash
   flutter test
   ```

@@ -58,10 +58,10 @@ serve(async (req: Request) => {
       );
     }
 
-    // Thẩm định với biến môi trường SEPAY_WEBHOOK_API_KEY nếu đã được thiết lập trong Secrets
-    const expectedEnvKey = Deno.env.get("SEPAY_WEBHOOK_API_KEY");
-    if (expectedEnvKey && apiKey !== expectedEnvKey) {
-      console.warn("[SePay Webhook Security]: API Key không khớp với SEPAY_WEBHOOK_API_KEY.");
+    // Tùy chọn kiểm tra Master Key ở vành đai (nếu môi trường yêu cầu khóa bảo vệ cổng chung)
+    const masterEnvKey = Deno.env.get("SEPAY_WEBHOOK_MASTER_KEY");
+    if (masterEnvKey && apiKey !== masterEnvKey) {
+      console.warn("[SePay Webhook Security]: API Key không khớp với SEPAY_WEBHOOK_MASTER_KEY.");
       return new Response(
         JSON.stringify({
           success: false,
