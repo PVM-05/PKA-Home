@@ -79,26 +79,26 @@ Commit với message: `fix(vnpay): chuyen logic tao link va ky so vnpay ve serve
 - Consumes: `Theme.of(context).textTheme`, `Theme.of(context).brightness`.
 - Produces: `context.textTheme` extension, `AppStatusColors.get*()` adaptive getters, CI test quét chống mã màu và font size cứng trên các module đã chuẩn hóa.
 
-- [ ] **Step 1: Viết test failing cho CI Guardrail**
+- [x] **Step 1: Viết test failing cho CI Guardrail**
 Tạo file `test/core/theme_and_color_guard_test.dart` quét danh sách file whitelist. Kiểm tra assertion ném lỗi nếu có file trong whitelist vi phạm `Color(0x` hoặc `fontSize:`.
 
-- [ ] **Step 2: Chạy test để xác nhận hoạt động**
+- [x] **Step 2: Chạy test để xác nhận hoạt động**
 Chạy `flutter test test/core/theme_and_color_guard_test.dart`.
 
-- [ ] **Step 3: Tạo `lib/core/theme/app_typography.dart`**
+- [x] **Step 3: Tạo `lib/core/theme/app_typography.dart`**
 Định nghĩa extension `AppTypographyExtension` trên `BuildContext`:
 - `textTheme`, `displayLarge`, `titleLarge`, `titleMedium`, `titleSmall`, `bodyLarge`, `bodyMedium`, `bodySmall`, `labelLarge`, `labelSmall`.
 
-- [ ] **Step 4: Bổ sung Dark Mode Adaptive Getters vào `AppStatusColors` trong `app_theme.dart`**
+- [x] **Step 4: Bổ sung Dark Mode Adaptive Getters vào `AppStatusColors` trong `app_theme.dart`**
 Giữ nguyên toàn bộ mã màu Light hiện tại:
 - `paid (0xFF4CAF50)`, `unpaid (0xFFF44336)`, `pendingConfirmation (0xFFFFB300)`, `priorityHigh (0xFFD32F2F)`, `priorityMedium (0xFFFF9800)`, `priorityLow (0xFF64B5F6)`.
 Thêm các hàm getter thích ứng Dark Mode:
 - `getPaid(context)`, `getUnpaid(context)`, `getPendingConfirmation(context)`, `getPriorityHigh(context)`, `getPriorityMedium(context)`, `getPriorityLow(context)`.
 
-- [ ] **Step 5: Kiểm tra static analyze**
+- [x] **Step 5: Kiểm tra static analyze**
 Chạy `dart analyze lib test` xác nhận 0 lỗi.
 
-- [ ] **Step 6: Commit Task 2**
+- [x] **Step 6: Commit Task 2**
 Commit với message: `feat(design-system): bo sung typography extension dark mode colors va ci guard test`
 
 ---

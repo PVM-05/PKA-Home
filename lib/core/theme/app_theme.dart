@@ -12,6 +12,24 @@ class AppStatusColors {
   
   static const Color pending = Color(0xFFFF9800); // Cam
   static const Color rejected = Color(0xFFE57373); // Đỏ nhạt
+
+  // Adaptive Dark Mode Getters (WCAG AA Compliance)
+  static Color getPaid(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFF34D399) : paid;
+  static Color getUnpaid(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFFB7185) : unpaid;
+  static Color getPendingConfirmation(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFFBBF24) : pendingConfirmation;
+  static Color getPriorityHigh(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFF87171) : priorityHigh;
+  static Color getPriorityMedium(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFFBBF24) : priorityMedium;
+  static Color getPriorityLow(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFF60A5FA) : priorityLow;
+  static Color getPending(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFFBBF24) : pending;
+  static Color getRejected(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFFFCA5A5) : rejected;
 }
 
 class AppGradients {
