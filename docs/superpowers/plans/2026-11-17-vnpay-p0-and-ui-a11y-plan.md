@@ -117,16 +117,16 @@ Commit với message: `feat(design-system): bo sung typography extension dark mo
 - Consumes: `AppTypographyExtension`, `AppStatusColors`, `AppSkeletonShimmer`, `AppEmptyState`, `VietnameseCurrencyWords`.
 - Produces: 4 màn hình hóa đơn đạt chuẩn Design Tokens, phủ Shimmer Loading, Empty State và nhãn giọng đọc Semantics tiếng Việt.
 
-- [ ] **Step 1: Viết test failing cho Resident Invoice A11y & Shimmer**
+- [x] **Step 1: Viết test failing cho Resident Invoice A11y & Shimmer**
 Tạo file `test/features/resident/resident_invoice_a11y_and_shimmer_test.dart` kiểm tra Shimmer khi loading, Empty State khi không có hóa đơn, và nhãn Semantics giọng đọc tiếng Việt cho số tiền hóa đơn (`VietnameseCurrencyWords.toVietnameseWords`).
 
-- [ ] **Step 2: Viết test failing cho Invoice Management A11y & Shimmer**
+- [x] **Step 2: Viết test failing cho Invoice Management A11y & Shimmer**
 Tạo file `test/features/management/invoice_management_a11y_and_shimmer_test.dart` kiểm tra giao diện quản lý hóa đơn BQL.
 
-- [ ] **Step 3: Chạy test xác nhận failing**
+- [x] **Step 3: Chạy test xác nhận failing**
 Chạy 2 test vừa tạo để xác nhận fail do màn hình chưa có đủ Semantics/Shimmer.
 
-- [ ] **Step 4: Chuẩn hóa 2 màn hình Resident Invoice**
+- [x] **Step 4: Chuẩn hóa 2 màn hình Resident Invoice**
 1. `resident_invoice_screen.dart`:
    - Thay thế toàn bộ mã màu cứng và `fontSize:` bằng `context.textTheme` và `AppStatusColors.get*()`.
    - Bọc `Semantics` cho thẻ hóa đơn với `semanticLabel` đọc số tiền tự nhiên: `"${invoice.paymentCode}, số tiền ${VietnameseCurrencyWords.toVietnameseWords(invoice.totalAmount)}, trạng thái ${invoice.statusVietnamese}"`.
@@ -136,7 +136,7 @@ Chạy 2 test vừa tạo để xác nhận fail do màn hình chưa có đủ S
    - Dọn dẹp mã màu cứng và `fontSize:`.
    - Bổ sung `Semantics` cho bảng kê chi tiết dịch vụ và số tiền tổng.
 
-- [ ] **Step 5: Chuẩn hóa 2 màn hình Management Invoice**
+- [x] **Step 5: Chuẩn hóa 2 màn hình Management Invoice**
 1. `invoice_management_screen.dart`:
    - Thay thế `CircularProgressIndicator` bằng `AppSkeletonShimmer.cardList()`.
    - Thêm `AppEmptyState` khi danh sách lọc rỗng.
@@ -146,13 +146,13 @@ Chạy 2 test vừa tạo để xác nhận fail do màn hình chưa có đủ S
    - Thay `CircularProgressIndicator` bằng Shimmer.
    - Chuẩn hóa typography và adaptive colors.
 
-- [ ] **Step 6: Cập nhật whitelist trong CI Guardrail Test**
+- [x] **Step 6: Cập nhật whitelist trong CI Guardrail Test**
 Thêm 4 màn hình Hóa đơn vào `targetModulesWhitelist` của `test/core/theme_and_color_guard_test.dart`.
 
-- [ ] **Step 7: Chạy toàn bộ test xác nhận pass**
+- [x] **Step 7: Chạy toàn bộ test xác nhận pass**
 Chạy `flutter test test/features/resident/resident_invoice_a11y_and_shimmer_test.dart test/features/management/invoice_management_a11y_and_shimmer_test.dart test/core/theme_and_color_guard_test.dart` $\rightarrow$ Passed!
 
-- [ ] **Step 8: Commit Task 3**
+- [x] **Step 8: Commit Task 3**
 Commit với message: `refactor(finance-ui): chuan hoa design tokens shimmer empty state va semantics cho module hoa don`
 
 ---
@@ -169,13 +169,13 @@ Commit với message: `refactor(finance-ui): chuan hoa design tokens shimmer emp
 - Consumes: `AppTypographyExtension`, `AppStatusColors`, `AppSkeletonShimmer`, `AppEmptyState`.
 - Produces: 3 màn hình sự cố loại bỏ 100% `CircularProgressIndicator`, bọc Shimmer, Empty State và nhãn Semantics phân công/mức ưu tiên.
 
-- [ ] **Step 1: Viết test failing cho Issue Management A11y & Shimmer**
+- [x] **Step 1: Viết test failing cho Issue Management A11y & Shimmer**
 Tạo file `test/features/management/issue_management_a11y_and_shimmer_test.dart` kiểm tra `AppSkeletonShimmer` khi loading, `AppEmptyState` khi rỗng và nhãn Semantics cho độ ưu tiên và nút điều phối.
 
-- [ ] **Step 2: Chạy test xác nhận failing**
+- [x] **Step 2: Chạy test xác nhận failing**
 Chạy test để xác nhận fail do `issue_management_screen.dart` đang dùng `CircularProgressIndicator`.
 
-- [ ] **Step 3: Chuẩn hóa 2 màn hình Resident Issue**
+- [x] **Step 3: Chuẩn hóa 2 màn hình Resident Issue**
 1. `resident_issue_screen.dart`:
    - Dọn sạch các mã màu cứng và `fontSize:` còn sót lại.
    - Bọc `Semantics` cho thẻ sự cố với tiêu đề, mức độ ưu tiên và trạng thái.
@@ -184,19 +184,19 @@ Chạy test để xác nhận fail do `issue_management_screen.dart` đang dùng
    - Dọn dẹp mã màu cứng và font size cứng.
    - Bọc `Semantics(image: true)` cho danh sách ảnh hiện trường sự cố và các mốc thời gian xử lý SLA.
 
-- [ ] **Step 4: Chuẩn hóa `issue_management_screen.dart` (BQL)**
+- [x] **Step 4: Chuẩn hóa `issue_management_screen.dart` (BQL)**
 - Xóa bỏ triệt để `CircularProgressIndicator`, thay bằng `AppSkeletonShimmer.cardList()`.
 - Thêm `AppEmptyState` chuẩn mực cho các tab sự cố (Chờ xử lý, Đang xử lý, Đã hoàn thành).
 - Dọn dẹp mã màu cứng và `fontSize:` bằng `context.textTheme` và `AppStatusColors.getPriority*()`.
 - Bọc `Semantics` cho nút phân công kỹ thuật viên và badge SLA.
 
-- [ ] **Step 5: Cập nhật whitelist trong CI Guardrail Test**
+- [x] **Step 5: Cập nhật whitelist trong CI Guardrail Test**
 Thêm 3 màn hình Sự cố vào `targetModulesWhitelist` của `test/core/theme_and_color_guard_test.dart` (tổng cộng đủ 7 màn hình).
 
-- [ ] **Step 6: Chạy test xác nhận pass**
+- [x] **Step 6: Chạy test xác nhận pass**
 Chạy `flutter test test/features/management/issue_management_a11y_and_shimmer_test.dart test/core/theme_and_color_guard_test.dart` $\rightarrow$ Passed!
 
-- [ ] **Step 7: Commit Task 4**
+- [x] **Step 7: Commit Task 4**
 Commit với message: `refactor(issue-ui): chuan hoa design tokens shimmer empty state va semantics cho module su co`
 
 ---
@@ -207,21 +207,21 @@ Commit với message: `refactor(issue-ui): chuan hoa design tokens shimmer empty
 - Test: Toàn bộ test suite liên quan (`test/core/...`, `test/features/resident/...`, `test/features/management/...`)
 - Documentation: `docs/superpowers/plans/2026-11-17-vnpay-p0-and-ui-a11y-plan.md`
 
-- [ ] **Step 1: Chạy toàn bộ static analyze**
+- [x] **Step 1: Chạy toàn bộ static analyze**
 Chạy `dart analyze lib test` đảm bảo:
 `No issues found!` (0 error, 0 warning).
 
-- [ ] **Step 2: Chạy toàn bộ test suites của 2 module và core**
+- [x] **Step 2: Chạy toàn bộ test suites của 2 module và core**
 Chạy Flutter test trọn gói:
 `flutter test test/core/services/vnpay_server_flow_test.dart test/core/theme_and_color_guard_test.dart test/features/resident/resident_invoice_a11y_and_shimmer_test.dart test/features/management/invoice_management_a11y_and_shimmer_test.dart test/features/management/issue_management_a11y_and_shimmer_test.dart`
 Xác nhận 100% Passed.
 
-- [ ] **Step 3: Chạy graphify update**
+- [x] **Step 3: Chạy graphify update**
 Cập nhật đồ thị tri thức mã nguồn: `graphify update .`
 
-- [ ] **Step 4: Hoàn thiện Checklist Nghiệm thu QA Thủ công & Deploy**
+- [x] **Step 4: Hoàn thiện Checklist Nghiệm thu QA Thủ công & Deploy**
 Tạo tài liệu hướng dẫn nghiệm thu deploy 2 Edge Functions và test sandbox VNPay.
 
-- [ ] **Step 5: Push lên nhánh `main`**
+- [x] **Step 5: Push lên nhánh `main`**
 Đẩy toàn bộ thay đổi an toàn lên `origin/main`.
 

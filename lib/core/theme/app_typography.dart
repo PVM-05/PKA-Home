@@ -50,3 +50,4 @@ class AppTypography {
   static const double labelSmallSize = 12.0;
   static const double captionSize = 11.0;
 }
+
