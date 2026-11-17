@@ -15,6 +15,11 @@ void main() {
       'lib/features/resident/screens/resident_issue_screen.dart',
       'lib/features/resident/screens/issue_detail_screen.dart',
       'lib/features/management/screens/issue_management_screen.dart',
+      // Module 3: Xác thực & Định danh (Auth Module)
+      'lib/features/auth/screens/login_screen.dart',
+      'lib/features/auth/screens/register_screen.dart',
+      'lib/features/auth/screens/first_time_activation_screen.dart',
+      'lib/features/auth/screens/forgot_password_screen.dart',
     ];
 
     test('Guardrail: Các màn hình trong whitelist không được chứa mã màu cứng Color(0x...)', () {

@@ -34,7 +34,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should display brand showcase elements
-      expect(find.textContaining('PKA'), findsWidgets);
+      expect(find.textContaining('Vivona'), findsWidgets);
       expect(find.text('Thư điện tử'), findsOneWidget);
       expect(find.text('Mật khẩu'), findsOneWidget);
       expect(find.text('Đăng nhập'), findsOneWidget);
@@ -49,7 +49,7 @@ void main() {
       await tester.pumpWidget(buildTestApp(width: 1024, height: 580));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('PKA'), findsWidgets);
+      expect(find.textContaining('Vivona'), findsWidgets);
       expect(find.text('Đăng nhập'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

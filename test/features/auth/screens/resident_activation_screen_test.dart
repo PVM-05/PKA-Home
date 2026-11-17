@@ -6,6 +6,46 @@ import 'package:vivona/data/providers/resident_activation_provider.dart';
 import 'package:vivona/data/repositories/resident_activation_repository.dart';
 import 'package:vivona/features/auth/screens/resident_activation_screen.dart';
 
+class FakeResidentActivationRepository extends ResidentActivationRepository {
+  @override
+  Future<Map<String, dynamic>> verifyActivationCode({
+    required String phone,
+    required String activationCode,
+  }) async {
+    return {
+      'success': true,
+      'full_name': 'Nguyễn Văn An',
+      'apartment_code': 'A0110',
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyActivationOtp({
+    required String phone,
+    required String activationCode,
+    required String otpCode,
+  }) async {
+    return {
+      'success': true,
+      'auth_user_id': 'mock-auth-id-123',
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> completeActivation({
+    required String phone,
+    required String activationCode,
+    required String otpCode,
+    required String authUserId,
+    String? email,
+  }) async {
+    return {
+      'success': true,
+      'message': 'Kích hoạt thành công',
+    };
+  }
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -14,7 +54,7 @@ void main() {
     return ProviderScope(
       overrides: [
         residentActivationRepositoryProvider.overrideWithValue(
-          ResidentActivationRepository(),
+          FakeResidentActivationRepository(),
         ),
       ],
       child: const MaterialApp(
@@ -57,6 +97,10 @@ void main() {
       expect(find.textContaining('Hồ sơ gắn liền Căn hộ A0110'), findsOneWidget);
       expect(find.text('Mã xác thực OTP'), findsOneWidget);
 
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Mã xác thực OTP'),
+        '123456',
+      );
       await tester.tap(find.text('Xác thực OTP & Thiết lập mật khẩu'));
       await tester.pumpAndSettle();
 

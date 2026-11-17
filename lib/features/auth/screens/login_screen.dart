@@ -172,19 +172,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                             color: AppTheme.sapphire.withValues(alpha: 0.4),
                                           ),
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.verified_rounded, size: 14, color: Color(0xFF60A5FA)),
-                                            SizedBox(width: 6),
+                                            const Icon(Icons.verified_rounded, size: 14, color: AppTheme.secondary),
+                                            const SizedBox(width: 6),
                                             Flexible(
                                               child: Text(
                                                 'Commercial PropTech SaaS Platform',
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  color: Color(0xFF93C5FD),
-                                                  fontSize: 12,
+                                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                  color: AppTheme.secondary,
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                               ),
@@ -195,19 +194,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       const SizedBox(height: 20),
                                       Text(
                                         'Vận Hành Tòa Nhà\nThông Minh & Chuẩn Mực',
-                                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
                                           color: Colors.white,
-                                          fontSize: 36,
                                           height: 1.25,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       const SizedBox(height: 16),
-                                      const Text(
+                                      Text(
                                         'Giải pháp quản trị bất động sản toàn diện: đối soát ngân hàng VietQR tự động, sổ cái công nợ bất biến, điều phối sự cố SLA đa tầng và kết nối cư dân số hóa.',
-                                        style: TextStyle(
-                                          color: Color(0xFF94A3B8),
-                                          fontSize: 15,
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                          color: Colors.white70,
                                           height: 1.5,
                                         ),
                                       ),
@@ -233,11 +230,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
 
                                   // Footer
-                                  const Padding(
-                                    padding: EdgeInsets.only(top: 24),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 24),
                                     child: Text(
                                       '© 2026 Vivona Commercial SaaS. Tất cả các quyền được bảo lưu.',
-                                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: AppTheme.textSecondary,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -334,7 +333,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
-          child: Icon(icon, size: 18, color: const Color(0xFF60A5FA)),
+          child: Icon(icon, size: 18, color: AppTheme.secondary),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -343,18 +342,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13.5,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 desc,
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 12,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white70,
                 ),
               ),
             ],
@@ -399,10 +396,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 Icon(Icons.lock_outline, color: Colors.red.shade800, size: 20),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Ban Quản Lý để được hỗ trợ.',
-                    style: TextStyle(fontSize: 13, color: Colors.black87),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textPrimary),
                   ),
                 ),
               ],
@@ -423,10 +420,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 Icon(Icons.info_outline, color: Colors.amber.shade800, size: 20),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục sử dụng.',
-                    style: TextStyle(fontSize: 13, color: Colors.black87),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textPrimary),
                   ),
                 ),
               ],
@@ -519,11 +516,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const FittedBox(
+                    : FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
                           'Đăng nhập',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
               ),
@@ -534,11 +534,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Center(
                 child: TextButton(
                   onPressed: () => context.push(AppRoutes.forgotPassword),
-                  child: const Text(
+                  child: Text(
                     'Quên mật khẩu?',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppTheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
@@ -554,8 +553,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       'HOẶC',
-                      style: TextStyle(
-                        fontSize: 11,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.grey.shade500,
                       ),
