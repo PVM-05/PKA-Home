@@ -32,6 +32,9 @@ import '../widgets/home/resident_home_quick_actions_row.dart';
 import '../widgets/home/resident_home_services_section.dart';
 import '../widgets/home/resident_home_latest_issue_card.dart';
 import '../widgets/home/resident_home_announcements_card.dart';
+import '../widgets/home/resident_utility_consumption_chart_card.dart';
+import '../../../core/utils/app_haptics.dart';
+import '../../../core/widgets/bounceable.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   const ResidentHomeScreen({super.key});
@@ -56,9 +59,12 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (_selectedIndex != index) {
+      AppHaptics.light();
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   void _showNotificationToast({
@@ -374,10 +380,12 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                           children: [
                             Row(
                               children: [
-                                AppAvatar(
-                                  name: fullName,
-                                  size: 40,
+                                Bounceable(
                                   onTap: () => _onItemTapped(3),
+                                  child: AppAvatar(
+                                    name: fullName,
+                                    size: 40,
+                                  ),
                                 ),
                                 AppSpacing.w8,
                                 Expanded(
@@ -507,6 +515,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                   ),
                                   AppSpacing.h24,
                                   const ResidentHomeServicesSection(),
+                                  AppSpacing.h24,
+                                  const ResidentUtilityConsumptionChartCard(),
                                 ],
                               ),
                             ),
@@ -568,6 +578,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                           ),
                           AppSpacing.h24,
                           const ResidentHomeServicesSection(),
+                          AppSpacing.h24,
+                          const ResidentUtilityConsumptionChartCard(),
                           AppSpacing.h24,
                           ResidentHomeLatestIssueCard(
                             issueAsync: issueAsync,

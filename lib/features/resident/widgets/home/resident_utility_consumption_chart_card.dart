@@ -69,44 +69,46 @@ class _ResidentUtilityConsumptionChartCardState
           children: [
             // Header: Tiêu đề + Chuyển tab
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: AppSpacing.p8,
-                      decoration: BoxDecoration(
-                        color: primaryAccent.withValues(alpha: 0.12),
-                        borderRadius: AppRadius.rSm,
-                      ),
-                      child: Icon(
-                        isElectricity
-                            ? Icons.electric_bolt_rounded
-                            : Icons.water_drop_rounded,
-                        color: primaryAccent,
-                        size: 20,
-                      ),
-                    ),
-                    AppSpacing.w12,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Tiêu thụ điện & nước',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Xu hướng 6 tháng gần nhất',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Container(
+                  padding: AppSpacing.p8,
+                  decoration: BoxDecoration(
+                    color: primaryAccent.withValues(alpha: 0.12),
+                    borderRadius: AppRadius.rSm,
+                  ),
+                  child: Icon(
+                    isElectricity
+                        ? Icons.electric_bolt_rounded
+                        : Icons.water_drop_rounded,
+                    color: primaryAccent,
+                    size: 20,
+                  ),
                 ),
+                AppSpacing.w12,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tiêu thụ điện & nước',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Xu hướng 6 tháng',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                AppSpacing.w8,
                 // Toggle Tab Buttons
                 Container(
                   padding: AppSpacing.p4,
@@ -115,6 +117,7 @@ class _ResidentUtilityConsumptionChartCardState
                     borderRadius: AppRadius.rFull,
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildTabButton(
                         label: 'Điện',
@@ -156,39 +159,41 @@ class _ResidentUtilityConsumptionChartCardState
                   ),
                 ),
                 const Spacer(),
-                Container(
-                  padding: AppSpacing.px8 + AppSpacing.py4,
-                  decoration: BoxDecoration(
-                    color: isReduced
-                        ? colorScheme.primary.withValues(alpha: 0.12)
-                        : colorScheme.error.withValues(alpha: 0.12),
-                    borderRadius: AppRadius.rFull,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isReduced
-                            ? Icons.trending_down_rounded
-                            : Icons.trending_up_rounded,
-                        size: 16,
-                        color: isReduced
-                            ? colorScheme.primary
-                            : colorScheme.error,
-                      ),
-                      AppSpacing.w4,
-                      Text(
-                        isReduced
-                            ? '$percentChange% so với tháng trước'
-                            : '+$percentChange% so với tháng trước',
-                        style: textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Container(
+                    padding: AppSpacing.px8 + AppSpacing.py4,
+                    decoration: BoxDecoration(
+                      color: isReduced
+                          ? colorScheme.primary.withValues(alpha: 0.12)
+                          : colorScheme.error.withValues(alpha: 0.12),
+                      borderRadius: AppRadius.rFull,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isReduced
+                              ? Icons.trending_down_rounded
+                              : Icons.trending_up_rounded,
+                          size: 16,
                           color: isReduced
                               ? colorScheme.primary
                               : colorScheme.error,
                         ),
-                      ),
-                    ],
+                        AppSpacing.w4,
+                        Text(
+                          isReduced
+                              ? '$percentChange%'
+                              : '+$percentChange%',
+                          style: textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isReduced
+                                ? colorScheme.primary
+                                : colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

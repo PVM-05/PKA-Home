@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:vivona/core/theme/app_radius.dart';
-import 'package:vivona/core/theme/app_spacing.dart';
-import 'package:vivona/core/theme/app_theme.dart';
-import 'package:vivona/core/widgets/app_card.dart';
-import 'package:vivona/core/widgets/app_error_card.dart';
-import 'package:vivona/core/widgets/app_skeleton_shimmer.dart';
-import 'package:vivona/data/models/invoice_model.dart';
+import '../../../../core/motion/app_spring_motion.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_error_card.dart';
+import '../../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../../core/widgets/bounceable.dart';
+import '../../../../data/models/invoice_model.dart';
 
 class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
   final AsyncValue<List<InvoiceModel>> invoiceAsync;
@@ -140,33 +141,33 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                       ),
                     ),
                     AppSpacing.h16,
-                    ElevatedButton.icon(
-                      onPressed: onNavigateToInvoices,
-                      icon: const Icon(
-                        Icons.qr_code_scanner,
-                        size: 18,
-                      ),
-                      label: Text(
-                        'THANH TOÁN NGAY',
-                        style: textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                    Bounceable(
+                      onTap: onNavigateToInvoices,
+                      child: ElevatedButton.icon(
+                        onPressed: onNavigateToInvoices,
+                        icon: const Icon(
+                          Icons.qr_code_scanner,
+                          size: 18,
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppTheme.sapphire,
-                        elevation: 0,
-                        padding: AppSpacing.py12,
-                        shape: AppRadius.shape12,
+                        label: Text(
+                          'THANH TOÁN NGAY',
+                          style: textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppTheme.sapphire,
+                          elevation: 0,
+                          padding: AppSpacing.py12,
+                          shape: AppRadius.shape12,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              )
-                  .animate()
-                  .fade(duration: 400.ms, delay: 100.ms)
-                  .slideX(begin: 0.1, curve: Curves.easeOut);
+              ).animateSpringEntry();
             }
 
             return AppCard(
@@ -248,10 +249,7 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                   ),
                 ],
               ),
-            )
-                .animate()
-                .fade(duration: 400.ms, delay: 100.ms)
-                .slideX(begin: 0.1, curve: Curves.easeOut);
+            ).animateSpringEntry();
           },
           loading: () => AppSkeletonShimmer.rectangular(
             width: double.infinity,
