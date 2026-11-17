@@ -28,17 +28,17 @@
 - Consumes: Flutter `material.dart`
 - Produces: `AppSpacing.xs` .. `AppSpacing.huge`, `AppSpacing.p4` .. `AppSpacing.p32`, `AppSpacing.h4` .. `AppSpacing.h32`, `AppRadius.xsValue` .. `AppRadius.fullValue`, `AppRadius.rSm` .. `AppRadius.rFull`, `AppRadius.shapeSm` .. `AppRadius.shapeLg`, `AppRadius.bottomSheet`.
 
-- [ ] **Step 1: Viết test kiểm tra tính toàn vẹn của Tokens**
+- [x] **Step 1: Viết test kiểm tra tính toàn vẹn của Tokens**
   - Tạo `test/core/theme/app_tokens_test.dart`: kiểm tra các giá trị kích thước, tính bất biến, tỷ lệ khoảng cách 4-8-12-16-24-32, và các hình khối `RoundedRectangleBorder`.
-- [ ] **Step 2: Chạy test để xác nhận test fail**
+- [x] **Step 2: Chạy test để xác nhận test fail**
   - Chạy `flutter test test/core/theme/app_tokens_test.dart`.
-- [ ] **Step 3: Triển khai `AppSpacing`**
+- [x] **Step 3: Triển khai `AppSpacing`**
   - Viết `lib/core/theme/app_spacing.dart` với đầy đủ hằng số khoảng cách, `EdgeInsets` helpers (`p*`, `px*`, `py*`), và `SizedBox` spacers (`h*`, `w*`).
-- [ ] **Step 4: Triển khai `AppRadius`**
+- [x] **Step 4: Triển khai `AppRadius`**
   - Viết `lib/core/theme/app_radius.dart` với đầy đủ giá trị double, `Radius`, `BorderRadius`, `RoundedRectangleBorder`, và bo góc chuyên dụng cho `bottomSheet`.
-- [ ] **Step 5: Chạy lại test xác nhận pass**
+- [x] **Step 5: Chạy lại test xác nhận pass**
   - Chạy `flutter test test/core/theme/app_tokens_test.dart`.
-- [ ] **Step 6: Commit code**
+- [x] **Step 6: Commit code**
   - Commit message: `feat(design-system): khoi tao he thong tokens app_spacing va app_radius`
 
 ---
@@ -52,20 +52,20 @@
 - Consumes: `AppSpacing`, `AppRadius`, `GoogleFonts.inter`
 - Produces: `AppTheme.lightTheme`, `AppTheme.darkTheme` với đầy đủ 15 `TextTheme` styles và 6 component themes mới.
 
-- [ ] **Step 1: Viết test kiểm tra cấu hình theme**
+- [x] **Step 1: Viết test kiểm tra cấu hình theme**
   - Tạo `test/core/theme/app_theme_tokens_and_components_test.dart`:
     - Kiểm tra `lightTheme.textTheme` và `darkTheme.textTheme` có đủ 15 styles non-null (`display*`, `headline*`, `title*`, `body*`, `label*`).
     - Kiểm tra các component themes: `filledButtonTheme`, `chipTheme`, `dialogTheme`, `bottomSheetTheme`, `switchTheme`, `floatingActionButtonTheme`, `navigationBarTheme` có cấu hình hợp lệ trên cả 2 theme mode.
-- [ ] **Step 2: Chạy test để xác nhận test fail**
+- [x] **Step 2: Chạy test để xác nhận test fail**
   - Chạy `flutter test test/core/theme/app_theme_tokens_and_components_test.dart`.
-- [ ] **Step 3: Cập nhật `AppTheme.lightTheme` & `AppTheme.darkTheme`**
+- [x] **Step 3: Cập nhật `AppTheme.lightTheme` & `AppTheme.darkTheme`**
   - Bổ sung 10 kiểu chữ còn thiếu vào `baseTextTheme.copyWith(...)` cho cả Light và Dark.
   - Thêm cấu hình `filledButtonTheme`, `chipTheme`, `dialogTheme`, `bottomSheetTheme`, `switchTheme`, `floatingActionButtonTheme` ứng dụng `AppRadius` và `AppSpacing`.
-- [ ] **Step 4: Chạy test xác nhận pass**
+- [x] **Step 4: Chạy test xác nhận pass**
   - Chạy `flutter test test/core/theme/app_theme_tokens_and_components_test.dart`.
-- [ ] **Step 5: Chạy toàn bộ test theme hiện có**
+- [x] **Step 5: Chạy toàn bộ test theme hiện có**
   - Chạy `flutter test test/core/theme/`.
-- [ ] **Step 6: Commit code**
+- [x] **Step 6: Commit code**
   - Commit message: `feat(design-system): hoan thien textTheme 15 styles va 6 component themes`
 
 ---
@@ -78,19 +78,19 @@
 - Modify: `lib/features/auth/screens/forgot_password_screen.dart`
 - Modify: `test/core/theme_and_color_guard_test.dart`
 
-- [ ] **Step 1: Thêm 4 file Auth vào whitelist của `theme_and_color_guard_test.dart`**
+- [x] **Step 1: Thêm 4 file Auth vào whitelist của `theme_and_color_guard_test.dart`**
   - Thêm các đường dẫn file Auth vào danh sách `targetModulesWhitelist`.
-- [ ] **Step 2: Chạy guard test để xác nhận phát hiện vi phạm màu & fontSize cứng**
+- [x] **Step 2: Chạy guard test để xác nhận phát hiện vi phạm màu & fontSize cứng**
   - Chạy `flutter test test/core/theme_and_color_guard_test.dart`.
-- [ ] **Step 3: Refactor `login_screen.dart`**
+- [x] **Step 3: Refactor `login_screen.dart`**
   - Xóa 6 màu cứng `Color(0x...)`, thay thế bằng `AppTheme.primary`, `AppTheme.border`, `AppTheme.textSecondary`.
   - Thay thế `fontSize:` bằng `context.titleLarge`, `context.bodyMedium`,...
   - Thay thế padding và radius bằng `AppSpacing` và `AppRadius`.
-- [ ] **Step 4: Refactor `register_screen.dart`, `first_time_activation_screen.dart`, `forgot_password_screen.dart`**
+- [x] **Step 4: Refactor `register_screen.dart`, `first_time_activation_screen.dart`, `forgot_password_screen.dart`**
   - Chuẩn hóa tokens cho toàn bộ các màn hình Auth còn lại.
-- [ ] **Step 5: Chạy guard test và auth tests xác nhận 100% pass**
+- [x] **Step 5: Chạy guard test và auth tests xác nhận 100% pass**
   - Chạy `flutter test test/core/theme_and_color_guard_test.dart test/features/auth/`.
-- [ ] **Step 6: Commit code**
+- [x] **Step 6: Commit code**
   - Commit message: `refactor(auth): chuan hoa design tokens loai bo mau cung va mo rong guard whitelist`
 
 ---
@@ -105,19 +105,19 @@
 - Modify: `lib/features/resident/screens/resident_profile_screen.dart`
 - Modify: `test/core/theme_and_color_guard_test.dart`
 
-- [ ] **Step 1: Tách các widget con độc lập từ `resident_home_screen.dart`**
+- [x] **Step 1: Tách các widget con độc lập từ `resident_home_screen.dart`**
   - Trích xuất Header, Quick Actions, Upcoming Invoice Card, Recent Issues Card sang thư mục `lib/features/resident/widgets/home/`.
   - Giảm dung lượng file `resident_home_screen.dart` từ 1.247 dòng xuống < 400 dòng.
-- [ ] **Step 2: Chuẩn hóa Tokens & Thay thế Spinner**
+- [x] **Step 2: Chuẩn hóa Tokens & Thay thế Spinner**
   - Sử dụng `AppSpacing`, `AppRadius`, `AppSkeletonShimmer`, `AppEmptyState`.
   - Loại bỏ toàn bộ `fontSize:` và `Color(0x...)` cứng.
-- [ ] **Step 3: Chuẩn hóa `resident_profile_screen.dart`**
+- [x] **Step 3: Chuẩn hóa `resident_profile_screen.dart`**
   - Thay thế tokens, loại bỏ màu và cỡ chữ cứng.
-- [ ] **Step 4: Thêm cả 2 file vào whitelist của `theme_and_color_guard_test.dart`**
+- [x] **Step 4: Thêm cả 2 file vào whitelist của `theme_and_color_guard_test.dart`**
   - Thêm `resident_home_screen.dart` và `resident_profile_screen.dart`.
-- [ ] **Step 5: Chạy tests màn hình Trang chủ và Hồ sơ**
+- [x] **Step 5: Chạy tests màn hình Trang chủ và Hồ sơ**
   - Chạy `flutter test test/core/theme_and_color_guard_test.dart test/features/resident/resident_home* test/features/resident/resident_profile*`.
-- [ ] **Step 6: Commit code**
+- [x] **Step 6: Commit code**
   - Commit message: `refactor(resident): phan ra trang chu cu dan thanh 4 widgets va chuan hoa tokens`
 
 ---
@@ -132,16 +132,16 @@
 - Modify: `lib/features/resident/screens/resident_meter_reading_screen.dart`
 - Modify: `test/core/theme_and_color_guard_test.dart`
 
-- [ ] **Step 1: Phân rã `vehicle_management_screen.dart` (1.914 dòng)**
+- [x] **Step 1: Phân rã `vehicle_management_screen.dart` (1.914 dòng)**
   - Tách thẻ phương tiện và modal đăng ký thành widget độc lập.
-- [ ] **Step 2: Phân rã `resident_meter_reading_screen.dart` (1.805 dòng)**
+- [x] **Step 2: Phân rã `resident_meter_reading_screen.dart` (1.805 dòng)**
   - Tách form chỉ số công tơ và lịch sử thành widget độc lập.
-- [ ] **Step 3: Chuẩn hóa Design Tokens & Mở rộng Guard Whitelist**
+- [x] **Step 3: Chuẩn hóa Design Tokens & Mở rộng Guard Whitelist**
   - Loại bỏ hoàn toàn `fontSize` và `Color(0x...)` cứng.
   - Thêm 2 file vào `theme_and_color_guard_test.dart`.
-- [ ] **Step 4: Chạy tests kiểm thử**
+- [x] **Step 4: Chạy tests kiểm thử**
   - Chạy `flutter test test/features/resident/vehicle* test/features/resident/resident_meter* test/core/theme_and_color_guard_test.dart`.
-- [ ] **Step 5: Commit code**
+- [x] **Step 5: Commit code**
   - Commit message: `refactor(resident): phan ra man hinh xe va dong ho thanh cac widgets doc lap`
 
 ---
@@ -156,25 +156,25 @@
 - Modify: `lib/features/management/screens/management_meter_reading_screen.dart` (1.636 dòng)
 - Modify: `test/core/theme_and_color_guard_test.dart`
 
-- [ ] **Step 1: Phân rã `management_home_screen.dart`**
+- [x] **Step 1: Phân rã `management_home_screen.dart`**
   - Tách các khối KPI, Biểu đồ và Lưới tác vụ nhanh.
-- [ ] **Step 2: Phân rã các màn hình BQL còn lại**
+- [x] **Step 2: Phân rã các màn hình BQL còn lại**
   - Trích xuất component con sang `lib/features/management/widgets/`.
-- [ ] **Step 3: Chuẩn hóa Tokens & Mở rộng Guard Whitelist**
+- [x] **Step 3: Chuẩn hóa Tokens & Mở rộng Guard Whitelist**
   - Loại bỏ màu và fontSize cứng, cập nhật whitelist guard test.
-- [ ] **Step 4: Chạy tests quản trị BQL**
+- [x] **Step 4: Chạy tests quản trị BQL**
   - Chạy `flutter test test/features/management/ test/core/theme_and_color_guard_test.dart`.
-- [ ] **Step 5: Commit code**
+- [x] **Step 5: Commit code**
   - Commit message: `refactor(management): phan ra 4 man hinh bql lon thanh modular widgets va chuan hoa tokens`
 
 ---
 
 ### Task 7: Kiểm Thử Toàn Diện, Static Analysis & Cập Nhật Tri Thức
-- [ ] **Step 1: Chạy kiểm tra tĩnh toàn bộ dự án**
+- [x] **Step 1: Chạy kiểm tra tĩnh toàn bộ dự án**
   - Chạy `dart analyze lib test`. Đảm bảo `No issues found!`.
-- [ ] **Step 2: Chạy toàn bộ test suites**
+- [x] **Step 2: Chạy toàn bộ test suites**
   - Chạy `flutter test`. Đảm bảo 100% tests passed.
-- [ ] **Step 3: Cập nhật tài liệu & tri thức AST**
+- [x] **Step 3: Cập nhật tài liệu & tri thức AST**
   - Chạy `graphify update .` để đồng bộ đồ thị kiến trúc codebase mới.
-- [ ] **Step 4: Báo cáo kết quả hoàn thành Giai đoạn 0**
+- [x] **Step 4: Báo cáo kết quả hoàn thành Giai đoạn 0**
 
