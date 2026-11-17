@@ -86,6 +86,7 @@ class ResidentIssueScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'resident_issue_fab',
+        tooltip: 'Tạo phản ánh sự cố mới',
         onPressed: () {
           context.push(AppRoutes.residentCreateIssue);
         },
@@ -216,77 +217,84 @@ class ResidentIssueScreen extends ConsumerWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AppCard(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.residentIssueDetail, extra: issue),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.access_time,
-                        size: 14,
-                        color: AppTheme.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          formatDate.format(issue.createdAt),
-                          style: context.labelSmall?.copyWith(
-                            color: AppTheme.textSecondary,
+    return Semantics(
+      label: 'Phản ánh sự cố: ${issue.description}, trạng thái $statusText, mức độ ưu tiên $priorityText, ngày tạo ${formatDate.format(issue.createdAt)}',
+      button: true,
+      child: AppCard(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        child: InkWell(
+          onTap: () => context.push(AppRoutes.residentIssueDetail, extra: issue),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: AppTheme.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            formatDate.format(issue.createdAt),
+                            style: context.labelSmall?.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: statusColor.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        statusText,
-                        style: context.labelSmall?.copyWith(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      ],
                     ),
-                    if (issue.status == 'pending') ...[
-                      const SizedBox(width: 2),
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          iconSize: 18,
-                          icon: const Icon(
-                            Icons.more_vert,
-                            size: 18,
-                            color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Semantics(
+                        label: 'Trạng thái: $statusText',
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 3,
                           ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: context.labelSmall?.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (issue.status == 'pending') ...[
+                        const SizedBox(width: 2),
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: PopupMenuButton<String>(
+                            tooltip: 'Thao tác phản ánh',
+                            padding: EdgeInsets.zero,
+                            iconSize: 18,
+                            icon: const Icon(
+                              Icons.more_vert,
+                              size: 18,
+                              color: AppTheme.textSecondary,
+                            ),
                           onSelected: (value) {
                             if (value == 'edit') {
                               context.push(
@@ -498,24 +506,27 @@ class ResidentIssueScreen extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        text: 'Mức độ: ',
-                        style: context.labelSmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: priorityText,
-                            style: context.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: priorityColor,
-                            ),
+                    child: Semantics(
+                      label: 'Mức độ ưu tiên: $priorityText',
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'Mức độ: ',
+                          style: context.labelSmall?.copyWith(
+                            color: AppTheme.textSecondary,
                           ),
-                        ],
+                          children: [
+                            TextSpan(
+                              text: priorityText,
+                              style: context.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: priorityColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -547,6 +558,7 @@ class ResidentIssueScreen extends ConsumerWidget {
             ],
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
   }

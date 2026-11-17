@@ -1,6 +1,7 @@
 // Supabase Edge Function: create-vnpay-url
 // Nhiệm vụ: Khởi tạo URL thanh toán VNPay 2.1.0 phía server bảo mật (Server-Authoritative).
-// Kiểm soát toàn vẹn tài chính từ DB, thẩm định quyền RBAC, đọc secret an toàn từ building_payment_secrets.
+// Kiểm soát toàn vẹn tài chính từ DB, thẩm định quyền RBAC (kèm ủy quyền get_effective_user_role),
+// tính trừ số tiền đã trả từng phần, đọc secret an toàn từ building_payment_secrets.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -124,17 +125,50 @@ serve(async (req: Request) => {
       });
     }
 
-    // 4. Kiểm tra phân quyền RBAC
-    const { data: appUser } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", userId)
+    // Bắt buộc hóa đơn phải có mã thanh toán hợp lệ để làm vnp_TxnRef
+    if (!invoice.payment_code || invoice.payment_code.trim().length === 0) {
+      return new Response(JSON.stringify({ error: "Hóa đơn chưa có mã thanh toán hợp lệ (payment_code)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // 4. Lấy building_id từ apartment
+    const { data: apartment } = await supabase
+      .from("apartments")
+      .select("building_id")
+      .eq("id", invoice.apartment_id)
       .maybeSingle();
 
-    const role = appUser?.role ?? "resident";
-    const isManagement = role === "admin" || role === "management";
+    const buildingId = apartment?.building_id;
+    if (!buildingId) {
+      return new Response(JSON.stringify({ error: "Căn hộ không gắn với tòa nhà hợp lệ" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    if (!isManagement) {
+    // 5. Kiểm tra phân quyền RBAC (bao gồm vai trò ủy quyền qua RPC get_effective_user_role)
+    let effectiveRole = "resident";
+    const { data: rpcRole } = await supabase.rpc("get_effective_user_role", {
+      p_user_id: userId,
+      p_building_id: buildingId,
+    });
+
+    if (rpcRole) {
+      effectiveRole = rpcRole;
+    } else {
+      const { data: appUser } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+      effectiveRole = appUser?.role ?? "resident";
+    }
+
+    const isStaffOrManagement = ["admin", "management", "accountant"].includes(effectiveRole);
+
+    if (!isStaffOrManagement) {
       // Nếu là cư dân, bắt buộc phải thuộc căn hộ của hóa đơn
       const { data: linkRecord } = await supabase
         .from("residents_apartments")
@@ -152,22 +186,28 @@ serve(async (req: Request) => {
       }
     }
 
-    // 5. Lấy building_id từ apartment
-    const { data: apartment } = await supabase
-      .from("apartments")
-      .select("building_id")
-      .eq("id", invoice.apartment_id)
-      .maybeSingle();
+    // 6. Tính toán số tiền còn lại cần thanh toán (hỗ trợ thanh toán từng phần)
+    const { data: successTxns } = await supabase
+      .from("payment_transactions")
+      .select("amount")
+      .eq("invoice_id", invoiceId)
+      .eq("status", "SUCCESS");
 
-    const buildingId = apartment?.building_id;
-    if (!buildingId) {
-      return new Response(JSON.stringify({ error: "Căn hộ không gắn với tòa nhà hợp lệ" }), {
+    const paidAmount = (successTxns || []).reduce(
+      (sum: number, tx: { amount?: number | string }) => sum + (Number(tx.amount) || 0),
+      0
+    );
+    const totalAmount = Number(invoice.total_amount) || 0;
+    const remainingAmount = Math.max(0, totalAmount - paidAmount);
+
+    if (remainingAmount <= 0) {
+      return new Response(JSON.stringify({ error: "Hóa đơn này đã được thanh toán toàn bộ" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 6. Lấy cấu hình VNPay (2 bước độc lập)
+    // 7. Lấy cấu hình VNPay (2 bước độc lập)
     const { data: paymentConfig } = await supabase
       .from("building_payment_configs")
       .select("vnpay_tmn_code, vnpay_is_active")
@@ -200,13 +240,12 @@ serve(async (req: Request) => {
       });
     }
 
-    // 7. Tạo các tham số VNPay 2.1.0
+    // 8. Tạo các tham số VNPay 2.1.0
     const rawIp = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "127.0.0.1";
     const ipAddr = rawIp.split(",")[0].trim();
 
     const returnUrl = Deno.env.get("VNPAY_RETURN_URL") || "https://pka-home.web.app/payment-result";
-    const totalAmount = Number(invoice.total_amount) || 0;
-    const vnpAmount = Math.round(totalAmount * 100).toString();
+    const vnpAmount = Math.round(remainingAmount * 100).toString();
     const txnRef = invoice.payment_code;
     const createDate = formatVnpayDate(new Date());
 
@@ -258,6 +297,7 @@ serve(async (req: Request) => {
         success: true,
         payment_url: paymentUrl,
         txn_ref: txnRef,
+        amount: remainingAmount,
       }),
       {
         status: 200,
@@ -275,4 +315,3 @@ serve(async (req: Request) => {
     );
   }
 });
-

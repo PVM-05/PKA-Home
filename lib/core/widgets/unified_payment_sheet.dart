@@ -391,8 +391,9 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')
         .toUpperCase();
     final hasValidMemo = cleanMemo.isNotEmpty;
+    final isInvoicePayment = widget.type == PaymentType.invoice;
     final canUseBankTransfer = hasBankConfig && hasValidMemo;
-    final canUseVnpay = hasVnpayConfig && hasValidMemo;
+    final canUseVnpay = hasVnpayConfig && hasValidMemo && isInvoicePayment;
 
     final String vietQrString;
     if (canUseBankTransfer) {
@@ -1028,146 +1029,148 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
           const SizedBox(height: 10),
         ],
 
-        // Lựa chọn 2: Cổng thanh toán trực tuyến VNPay
-        InkWell(
-          onTap: () {
-            setState(() {
-              _selectedMethod = 'vnpay';
-            });
-          },
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: _selectedMethod == 'vnpay'
-                  ? AppTheme.primary.withValues(alpha: 0.06)
-                  : (isDark
-                        ? Colors.white.withValues(alpha: 0.03)
-                        : Colors.grey.shade50),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: _selectedMethod == 'vnpay'
-                    ? AppTheme.primary
-                    : (isDark ? Colors.white12 : Colors.grey.shade200),
-                width: _selectedMethod == 'vnpay' ? 1.5 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _selectedMethod == 'vnpay'
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_off,
-                  color: _selectedMethod == 'vnpay'
-                      ? AppTheme.primary
-                      : Colors.grey,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Cổng thanh toán trực tuyến VNPay',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        'Hỗ trợ thẻ ATM nội địa, Visa/Mastercard và ví VNPAY',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.credit_card,
-                  color: AppTheme.primary,
-                  size: 24,
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 10),
-
-        // Thông tin VNPay nếu chọn cổng trực tuyến
-        if (_selectedMethod == 'vnpay') ...[
-          if (!hasVnpayConfig) ...[
-            Container(
-              padding: const EdgeInsets.all(16),
+        // Lựa chọn 2: Cổng thanh toán trực tuyến VNPay (chỉ áp dụng cho hóa đơn căn hộ)
+        if (isInvoicePayment) ...[
+          InkWell(
+            onTap: () {
+              setState(() {
+                _selectedMethod = 'vnpay';
+              });
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.amber.shade900.withValues(alpha: 0.2)
-                    : Colors.amber.shade50,
+                color: _selectedMethod == 'vnpay'
+                    ? AppTheme.primary.withValues(alpha: 0.06)
+                    : (isDark
+                          ? Colors.white.withValues(alpha: 0.03)
+                          : Colors.grey.shade50),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isDark
-                      ? Colors.amber.shade700
-                      : Colors.amber.shade300,
+                  color: _selectedMethod == 'vnpay'
+                      ? AppTheme.primary
+                      : (isDark ? Colors.white12 : Colors.grey.shade200),
+                  width: _selectedMethod == 'vnpay' ? 1.5 : 1,
                 ),
               ),
               child: Row(
                 children: [
                   Icon(
-                    Icons.info_outline,
-                    color: Colors.amber.shade800,
-                    size: 24,
+                    _selectedMethod == 'vnpay'
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    color: _selectedMethod == 'vnpay'
+                        ? AppTheme.primary
+                        : Colors.grey,
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Tòa nhà hiện chưa kích hoạt cổng thanh toán trực tuyến VNPay. Quý cư dân vui lòng sử dụng phương thức chuyển khoản VietQR hoặc nộp tiền mặt.',
-                      style: TextStyle(fontSize: 13, height: 1.4),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Cổng thanh toán trực tuyến VNPay',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Hỗ trợ thẻ ATM nội địa, Visa/Mastercard và ví VNPAY',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  const Icon(
+                    Icons.credit_card,
+                    color: AppTheme.primary,
+                    size: 24,
                   ),
                 ],
               ),
             ),
-          ] else ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF1E293B)
-                    : Colors.blue.shade50.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: AppTheme.primary.withValues(alpha: 0.2),
+          ),
+
+          const SizedBox(height: 10),
+
+          // Thông tin VNPay nếu chọn cổng trực tuyến
+          if (_selectedMethod == 'vnpay') ...[
+            if (!hasVnpayConfig) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.amber.shade900.withValues(alpha: 0.2)
+                      : Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.amber.shade700
+                        : Colors.amber.shade300,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.amber.shade800,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Tòa nhà hiện chưa kích hoạt cổng thanh toán trực tuyến VNPay. Quý cư dân vui lòng sử dụng phương thức chuyển khoản VietQR hoặc nộp tiền mặt.',
+                        style: TextStyle(fontSize: 13, height: 1.4),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.verified_user, color: AppTheme.primary, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Cổng thanh toán bảo mật VNPay 2.1.0',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                      ),
-                    ],
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : Colors.blue.shade50.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppTheme.primary.withValues(alpha: 0.2),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Giao dịch được bảo mật bởi chữ ký số HMAC-SHA512 và xác thực mã OTP qua ngân hàng. Hệ thống tự động gạch nợ ngay khi giao dịch thành công.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                      height: 1.4,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.verified_user, color: AppTheme.primary, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Cổng thanh toán bảo mật VNPay 2.1.0',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'Giao dịch được bảo mật bởi chữ ký số HMAC-SHA512 và xác thực mã OTP qua ngân hàng. Hệ thống tự động gạch nợ ngay khi giao dịch thành công.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
+            const SizedBox(height: 10),
           ],
-          const SizedBox(height: 10),
         ],
 
         // Lựa chọn 3: Tiền mặt tại quầy
@@ -1318,9 +1321,11 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
                           ? 'BQL CHƯA CẤU HÌNH TÀI KHOẢN'
                           : 'CHƯA CÓ MÃ THANH TOÁN HỢP LỆ')
                       : (_selectedMethod == 'vnpay' && !canUseVnpay)
-                          ? (!hasVnpayConfig
-                              ? 'BQL CHƯA KÍCH HOẠT VNPAY'
-                              : 'CHƯA CÓ MÃ THANH TOÁN HỢP LỆ')
+                          ? (!isInvoicePayment
+                              ? 'CHƯA HỖ TRỢ VNPAY CHO DỊCH VỤ NÀY'
+                              : (!hasVnpayConfig
+                                  ? 'BQL CHƯA KÍCH HOẠT VNPAY'
+                                  : 'CHƯA CÓ MÃ THANH TOÁN HỢP LỆ'))
                           : (_selectedMethod == 'vnpay'
                               ? 'MỞ CỔNG VNPAY'
                               : 'GỬI THÔNG BÁO THANH TOÁN'),

@@ -1,8 +1,9 @@
-/// Model cấu hình tài khoản ngân hàng & cổng SePay của từng tòa nhà B2B SaaS
+/// Model cấu hình tài khoản ngân hàng & cổng thanh toán của từng tòa nhà B2B SaaS
+/// Lưu ý bảo mật: Khóa bí mật (sepay_api_key, vnpay_hash_secret) đã được cách ly hoàn toàn
+/// sang bảng building_payment_secrets phía máy chủ và tuyệt đối không xuất hiện ở client model.
 class BuildingPaymentConfigModel {
   final String id;
   final String buildingId;
-  final String? sepayApiKey;
   final String bankName;
   final String bankAccountNumber;
   final String bankAccountName;
@@ -10,7 +11,6 @@ class BuildingPaymentConfigModel {
   final String qrTemplate; // compact, default
   final bool isActive;
   final String? vnpayTmnCode;
-  final String? vnpayHashSecret;
   final bool vnpayIsActive;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -18,7 +18,6 @@ class BuildingPaymentConfigModel {
   const BuildingPaymentConfigModel({
     required this.id,
     required this.buildingId,
-    this.sepayApiKey,
     required this.bankName,
     required this.bankAccountNumber,
     required this.bankAccountName,
@@ -26,7 +25,6 @@ class BuildingPaymentConfigModel {
     this.qrTemplate = 'compact',
     this.isActive = true,
     this.vnpayTmnCode,
-    this.vnpayHashSecret,
     this.vnpayIsActive = false,
     this.createdAt,
     this.updatedAt,
@@ -46,7 +44,6 @@ class BuildingPaymentConfigModel {
     return BuildingPaymentConfigModel(
       id: json['id'] as String? ?? '',
       buildingId: json['building_id'] as String? ?? '',
-      sepayApiKey: json['sepay_api_key'] as String?,
       bankName: json['bank_name'] as String? ?? '',
       bankAccountNumber: json['bank_account_number'] as String? ?? '',
       bankAccountName: json['bank_account_name'] as String? ?? '',
@@ -54,7 +51,6 @@ class BuildingPaymentConfigModel {
       qrTemplate: json['qr_template'] as String? ?? 'compact',
       isActive: json['is_active'] as bool? ?? true,
       vnpayTmnCode: json['vnpay_tmn_code'] as String?,
-      vnpayHashSecret: json['vnpay_hash_secret'] as String?,
       vnpayIsActive: json['vnpay_is_active'] as bool? ?? false,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
       updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'] as String) : null,
@@ -65,7 +61,6 @@ class BuildingPaymentConfigModel {
     return {
       'id': id,
       'building_id': buildingId,
-      'sepay_api_key': sepayApiKey,
       'bank_name': bankName,
       'bank_account_number': bankAccountNumber,
       'bank_account_name': bankAccountName,
@@ -73,7 +68,6 @@ class BuildingPaymentConfigModel {
       'qr_template': qrTemplate,
       'is_active': isActive,
       'vnpay_tmn_code': vnpayTmnCode,
-      'vnpay_hash_secret': vnpayHashSecret,
       'vnpay_is_active': vnpayIsActive,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
@@ -83,7 +77,6 @@ class BuildingPaymentConfigModel {
   BuildingPaymentConfigModel copyWith({
     String? id,
     String? buildingId,
-    String? sepayApiKey,
     String? bankName,
     String? bankAccountNumber,
     String? bankAccountName,
@@ -91,7 +84,6 @@ class BuildingPaymentConfigModel {
     String? qrTemplate,
     bool? isActive,
     String? vnpayTmnCode,
-    String? vnpayHashSecret,
     bool? vnpayIsActive,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -99,7 +91,6 @@ class BuildingPaymentConfigModel {
     return BuildingPaymentConfigModel(
       id: id ?? this.id,
       buildingId: buildingId ?? this.buildingId,
-      sepayApiKey: sepayApiKey ?? this.sepayApiKey,
       bankName: bankName ?? this.bankName,
       bankAccountNumber: bankAccountNumber ?? this.bankAccountNumber,
       bankAccountName: bankAccountName ?? this.bankAccountName,
@@ -107,7 +98,6 @@ class BuildingPaymentConfigModel {
       qrTemplate: qrTemplate ?? this.qrTemplate,
       isActive: isActive ?? this.isActive,
       vnpayTmnCode: vnpayTmnCode ?? this.vnpayTmnCode,
-      vnpayHashSecret: vnpayHashSecret ?? this.vnpayHashSecret,
       vnpayIsActive: vnpayIsActive ?? this.vnpayIsActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

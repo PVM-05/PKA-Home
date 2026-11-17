@@ -38,7 +38,6 @@ void main() {
         bankAccountName: 'BQL TOA NHA PKA CENTRAL',
         bankName: 'MBBank',
         bankBin: '970422',
-        sepayApiKey: 'SEPAY_TEST_KEY_123',
         isActive: true,
       );
 

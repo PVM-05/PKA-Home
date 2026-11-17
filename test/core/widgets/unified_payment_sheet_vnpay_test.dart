@@ -51,7 +51,6 @@ void main() {
         bankBin: '970422',
         isActive: true,
         vnpayTmnCode: 'PKASUNRISE01',
-        vnpayHashSecret: 'SECRETKEYRAZYKXM450NWHAUZGUP81RS',
         vnpayIsActive: true,
       );
 
@@ -150,6 +149,55 @@ void main() {
       // Kiểm tra nút bị disabled
       final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
       expect(button.onPressed, isNull);
+    });
+
+    testWidgets('khi thanh toán tiện ích dịch vụ (PaymentType.service) không hiển thị tùy chọn VNPay', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final activeVnpayConfig = BuildingPaymentConfigModel(
+        id: 'cfg-vnpay-01',
+        buildingId: 'bld-vnpay-01',
+        bankAccountNumber: '0988776655',
+        bankAccountName: 'BQL TOA NHA PKA SUNRISE',
+        bankName: 'MBBank',
+        bankBin: '970422',
+        isActive: true,
+        vnpayTmnCode: 'PKASUNRISE01',
+        vnpayIsActive: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            activeBuildingProvider.overrideWith((ref) => Future.value(testBuilding)),
+            buildingByIdProvider('bld-vnpay-01').overrideWith((ref) => Future.value(testBuilding)),
+            buildingPaymentConfigProvider('bld-vnpay-01').overrideWith((ref) => Future.value(activeVnpayConfig)),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: UnifiedPaymentSheet(
+                type: PaymentType.service,
+                referenceId: 'bk-vnpay-001',
+                buildingId: 'bld-vnpay-01',
+                title: 'Đặt sân Tennis',
+                referenceCode: 'BK2611001',
+                amount: 200000,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Không được hiển thị tùy chọn VNPay vì VNPay server hiện chỉ tra cứu invoices
+      expect(find.text('Cổng thanh toán trực tuyến VNPay'), findsNothing);
+      expect(find.text('Chuyển khoản VietQR (Napas 247)'), findsOneWidget);
     });
   });
 }

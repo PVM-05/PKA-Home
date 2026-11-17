@@ -30,6 +30,26 @@ void main() {
       expect(url, isNotNull);
       expect(url, contains('sandbox.vnpayment.vn'));
     });
+
+    test('createVnpayPaymentUrl trong chế độ thật (isMockMode: false) xử lý lỗi mạng an toàn và trả về null (Fail-Closed)', () async {
+      // Khi không có phiên Supabase hợp lệ hoặc gặp sự cố mạng, hàm không được crash ứng dụng mà phải trả về null
+      const paymentService = PaymentService(isMockMode: false);
+
+      final url = await paymentService.createVnpayPaymentUrl(
+        invoiceId: 'inv-network-error-001',
+      );
+
+      expect(url, isNull);
+    });
+
+    test('createVnpayPaymentUrl với invoice_id rỗng hoặc không tồn tại trả về null trong chế độ thật', () async {
+      const paymentService = PaymentService(isMockMode: false);
+
+      final url = await paymentService.createVnpayPaymentUrl(
+        invoiceId: '',
+      );
+
+      expect(url, isNull);
+    });
   });
 }
-
