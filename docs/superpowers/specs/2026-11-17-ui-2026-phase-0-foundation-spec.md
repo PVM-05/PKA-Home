@@ -219,3 +219,4 @@ Bổ sung đầy đủ 15 style theo tiêu chuẩn Material 3 kết hợp Google
 Sau khi tài liệu đặc tả này được rà soát và xác nhận:
 1. Tạo Kế hoạch Triển khai Chi tiết (`docs/superpowers/plans/2026-11-17-ui-2026-phase-0-foundation-plan.md`).
 2. Triển khai từng task theo mô hình TDD và kiểm tra chốt chặn CI.
+

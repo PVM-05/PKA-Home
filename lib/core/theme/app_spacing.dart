@@ -38,12 +38,14 @@ class AppSpacing {
 
   // SizedBox Khoảng đệm Chiều Cao (Vertical Spacers)
   static const SizedBox h4 = SizedBox(height: xs);
+  static const SizedBox h6 = SizedBox(height: 6.0);
   static const SizedBox h8 = SizedBox(height: sm);
   static const SizedBox h12 = SizedBox(height: md);
   static const SizedBox h16 = SizedBox(height: lg);
   static const SizedBox h20 = SizedBox(height: xl);
   static const SizedBox h24 = SizedBox(height: xxl);
   static const SizedBox h32 = SizedBox(height: xxxl);
+  static const SizedBox h40 = SizedBox(height: 40.0);
 
   // SizedBox Khoảng đệm Chiều Rộng (Horizontal Spacers)
   static const SizedBox w4 = SizedBox(width: xs);
@@ -54,3 +56,4 @@ class AppSpacing {
   static const SizedBox w24 = SizedBox(width: xxl);
   static const SizedBox w32 = SizedBox(width: xxxl);
 }
+

@@ -20,6 +20,9 @@ void main() {
       'lib/features/auth/screens/register_screen.dart',
       'lib/features/auth/screens/first_time_activation_screen.dart',
       'lib/features/auth/screens/forgot_password_screen.dart',
+      // Module 4: Cư dân - Trang chủ & Hồ sơ cá nhân (Resident Portal Foundation)
+      'lib/features/resident/screens/resident_home_screen.dart',
+      'lib/features/resident/screens/resident_profile_screen.dart',
     ];
 
     test('Guardrail: Các màn hình trong whitelist không được chứa mã màu cứng Color(0x...)', () {

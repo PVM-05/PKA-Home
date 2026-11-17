@@ -39,7 +39,7 @@ class ResidentProfileScreen extends ConsumerWidget {
               SizedBox(height: 14),
               Text(
                 'Đang trích xuất và ký số dữ liệu...',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -104,7 +104,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       'Yêu Cầu Đóng Băng Dữ Liệu',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -116,12 +116,12 @@ class ResidentProfileScreen extends ConsumerWidget {
                   children: [
                     const Text(
                       'Thực thi quyền của chủ thể dữ liệu (Điều 16 & 17 Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15):',
-                      style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                      style: TextStyle(color: AppTheme.textSecondary),
                     ),
                     const SizedBox(height: 12),
                     const Text(
                       'Lý do yêu cầu đóng băng / xóa dữ liệu:',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
@@ -179,7 +179,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                       ),
                       child: const Text(
                         'Lưu ý: Dữ liệu hóa đơn và chứng từ kế toán được lưu giữ tối thiểu 5 năm theo Luật Kế toán 2015. Ban Quản Lý sẽ xác minh và đóng băng danh tính PII trong vòng 72 giờ làm việc.',
-                        style: TextStyle(fontSize: 11, color: AppTheme.slate700, height: 1.35),
+                        style: TextStyle(color: AppTheme.slate700, height: 1.35),
                       ),
                     ),
                   ],
@@ -345,12 +345,11 @@ class ResidentProfileScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                 const SizedBox(height: 16),
-                AppAvatar(name: user.fullName, size: 92, fontSize: 34),
+                AppAvatar(name: user.fullName, size: 92),
                 const SizedBox(height: 14),
                 Text(
                   user.fullName,
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -369,7 +368,6 @@ class ResidentProfileScreen extends ConsumerWidget {
                           ? user.phone!
                           : 'Chưa cập nhật SĐT',
                       style: const TextStyle(
-                        fontSize: 14,
                         color: AppTheme.textSecondary,
                       ),
                     ),
@@ -399,7 +397,6 @@ class ResidentProfileScreen extends ConsumerWidget {
                       child: Text(
                         'Căn hộ của bạn',
                         style: TextStyle(
-                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -479,7 +476,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Phương tiện & Gửi xe',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -518,7 +515,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Tài chính & Thanh toán',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -557,7 +554,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Quyền riêng tư & Dữ liệu (PDPL)',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -676,7 +673,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Cài đặt & Bảo mật',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -706,7 +703,6 @@ class ResidentProfileScreen extends ConsumerWidget {
                           FontSizeOption.fromScale(
                             ref.watch(fontSizeScaleProvider),
                           ).label,
-                          style: const TextStyle(fontSize: 12),
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => showFontSizeBottomSheet(context, ref),
@@ -724,7 +720,6 @@ class ResidentProfileScreen extends ConsumerWidget {
                         title: const Text('Giao diện'),
                         subtitle: Text(
                           _themeModeLabel(ref.watch(themeModeProvider)),
-                          style: const TextStyle(fontSize: 12),
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => _showThemeModeSheet(context, ref),
@@ -848,7 +843,7 @@ void _showThemeModeSheet(BuildContext context, WidgetRef ref) {
                 const SizedBox(height: 16),
                 const Text(
                   'Chọn giao diện',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 ...entries.map(
@@ -876,7 +871,6 @@ void _showThemeModeSheet(BuildContext context, WidgetRef ref) {
                         ),
                         subtitle: Text(
                           entry.$4,
-                          style: const TextStyle(fontSize: 12),
                         ),
                         activeColor: AppTheme.primary,
                       ),
@@ -933,14 +927,12 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                       'Căn hộ ${apartment?['code'] ?? 'N/A'}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Diện tích: ${apartment?['area'] ?? 'N/A'} m²',
                       style: const TextStyle(
-                        fontSize: 13,
                         color: AppTheme.textSecondary,
                       ),
                     ),
@@ -962,7 +954,6 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                     role,
                     style: const TextStyle(
                       color: AppTheme.primary,
-                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -983,7 +974,6 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                 child: Text(
                   'Thành viên cùng căn hộ:',
                   style: TextStyle(
-                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textSecondary,
                   ),
@@ -1002,7 +992,6 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                   child: Text(
                     'Chưa có thành viên khác.',
                     style: TextStyle(
-                      fontSize: 13,
                       color: AppTheme.textSecondary,
                     ),
                   ),
@@ -1036,7 +1025,6 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                               Text(
                                 memberName,
                                 style: const TextStyle(
-                                  fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 maxLines: 1,
@@ -1047,7 +1035,6 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                                 Text(
                                   memberPhone,
                                   style: const TextStyle(
-                                    fontSize: 12,
                                     color: AppTheme.textSecondary,
                                   ),
                                 ),
@@ -1073,7 +1060,6 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
                             child: Text(
                               memberRole,
                               style: TextStyle(
-                                fontSize: 11,
                                 color:
                                     Theme.of(context).brightness ==
                                         Brightness.dark
@@ -1099,7 +1085,7 @@ class _ApartmentCardWithCoResidents extends ConsumerWidget {
             ),
             error: (_, _) => const Text(
               'Không thể tải danh sách thành viên',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              style: TextStyle(color: AppTheme.textSecondary),
             ),
           ),
         ],

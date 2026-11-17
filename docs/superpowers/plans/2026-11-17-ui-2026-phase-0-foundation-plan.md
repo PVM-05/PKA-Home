@@ -177,3 +177,4 @@
 - [ ] **Step 3: Cập nhật tài liệu & tri thức AST**
   - Chạy `graphify update .` để đồng bộ đồ thị kiến trúc codebase mới.
 - [ ] **Step 4: Báo cáo kết quả hoàn thành Giai đoạn 0**
+

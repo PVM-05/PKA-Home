@@ -32,6 +32,15 @@ class AppRadius {
   static final BorderRadius rXxl = BorderRadius.circular(xxlValue);
   static final BorderRadius rFull = BorderRadius.circular(fullValue);
 
+  // Alias số trực quan theo dp phổ biến
+  static final BorderRadius r4 = rXs;
+  static final BorderRadius r8 = rSm;
+  static final BorderRadius r12 = rMd;
+  static final BorderRadius r16 = rLg;
+  static final BorderRadius r20 = BorderRadius.circular(20.0);
+  static final BorderRadius r24 = rXl;
+  static final BorderRadius r32 = rXxl;
+
   // Bo góc chuyên dụng cho Modal BottomSheet (chỉ bo phía trên)
   static const BorderRadius bottomSheet = BorderRadius.vertical(top: radXl);
 
@@ -42,4 +51,9 @@ class AppRadius {
   static final RoundedRectangleBorder shapeLg = RoundedRectangleBorder(borderRadius: rLg);
   static final RoundedRectangleBorder shapeXl = RoundedRectangleBorder(borderRadius: rXl);
   static final RoundedRectangleBorder shapeFull = RoundedRectangleBorder(borderRadius: rFull);
+
+  // Shapes alias theo dp
+  static final RoundedRectangleBorder shape12 = shapeMd;
+  static final RoundedRectangleBorder shape16 = shapeLg;
 }
+
