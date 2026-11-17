@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/security/visitor_pass_token_service.dart';
-import 'package:pka_home/data/contracts/community_rpc_contracts.dart';
-import 'package:pka_home/data/contracts/operations_rpc_contracts.dart';
+import 'package:vivona/core/security/visitor_pass_token_service.dart';
+import 'package:vivona/data/contracts/community_rpc_contracts.dart';
+import 'package:vivona/data/contracts/operations_rpc_contracts.dart';
 
 void main() {
   group('Security Contracts & Replay Protection Tests (P0/P1)', () {

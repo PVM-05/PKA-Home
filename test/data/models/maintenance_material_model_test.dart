@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/maintenance_material_model.dart';
+import 'package:vivona/data/models/maintenance_material_model.dart';
 
 void main() {
   group('MaintenanceMaterialModel Tests', () {

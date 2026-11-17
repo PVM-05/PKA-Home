@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_amenity_model.dart';
-import 'package:pka_home/data/models/amenity_booking_model.dart';
-import 'package:pka_home/data/models/amenity_inspection_model.dart';
+import 'package:vivona/data/models/building_amenity_model.dart';
+import 'package:vivona/data/models/amenity_booking_model.dart';
+import 'package:vivona/data/models/amenity_inspection_model.dart';
 
 void main() {
   group('Amenity Lifecycle Models Tests', () {
@@ -59,7 +59,7 @@ void main() {
         'forfeited_amount': 0.0,
         'refund_amount': 500000.0,
         'inspection_notes': 'Sân nướng sạch sẽ, vỉ nướng nguyên vẹn.',
-        'inspection_image_urls': ['https://storage.pka-home.vn/bbq_done.jpg'],
+        'inspection_image_urls': ['https://storage.vivona.vn/bbq_done.jpg'],
         'created_at': '2026-11-08T10:00:00Z',
       };
 
@@ -84,7 +84,7 @@ void main() {
         inspectionResult: 'violated',
         forfeitedAmount: 200000,
         notes: 'Làm cháy hỏng vỉ than và không dọn rác.',
-        imageUrls: ['https://storage.pka-home.vn/violation_1.jpg'],
+        imageUrls: ['https://storage.vivona.vn/violation_1.jpg'],
       );
 
       final rpcParams = dto.toRpcParams();
@@ -93,7 +93,7 @@ void main() {
       expect(rpcParams['p_inspection_result'], 'violated');
       expect(rpcParams['p_forfeited_amount'], 200000);
       expect(rpcParams['p_notes'], contains('Làm cháy hỏng'));
-      expect(rpcParams['p_image_urls'], contains('https://storage.pka-home.vn/violation_1.jpg'));
+      expect(rpcParams['p_image_urls'], contains('https://storage.vivona.vn/violation_1.jpg'));
     });
   });
 }

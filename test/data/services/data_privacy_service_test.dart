@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/services/data_privacy_service.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/services/data_privacy_service.dart';
 
 class MockDataPrivacySource extends Mock implements DataPrivacySource {}
 
@@ -47,7 +47,7 @@ void main() {
       final exportResult = await service.exportUserData(user: testUser);
 
       expect(exportResult['export_metadata']['export_standard'], 'PDPL_VN_91_2025_QH15_ART15');
-      expect(exportResult['export_metadata']['platform'], contains('PKA-Home'));
+      expect(exportResult['export_metadata']['platform'], contains('Vivona'));
       expect(exportResult['subject_identity']['user_id'], 'user-pdpl-123');
       expect(exportResult['subject_identity']['full_name'], 'Trần Cư Dân');
       expect(exportResult['subject_identity']['account_status'], 'ACTIVE');

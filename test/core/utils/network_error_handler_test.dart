@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/errors/app_exception.dart';
-import 'package:pka_home/core/utils/network_error_handler.dart';
+import 'package:vivona/core/errors/app_exception.dart';
+import 'package:vivona/core/utils/network_error_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {

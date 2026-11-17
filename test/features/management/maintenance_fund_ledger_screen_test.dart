@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/features/management/screens/maintenance_fund_ledger_screen.dart';
-import 'package:pka_home/data/models/maintenance_fund_model.dart';
-import 'package:pka_home/data/models/maintenance_fund_transaction_model.dart';
-import 'package:pka_home/data/providers/maintenance_fund_provider.dart';
+import 'package:vivona/features/management/screens/maintenance_fund_ledger_screen.dart';
+import 'package:vivona/data/models/maintenance_fund_model.dart';
+import 'package:vivona/data/models/maintenance_fund_transaction_model.dart';
+import 'package:vivona/data/providers/maintenance_fund_provider.dart';
 
 void main() {
   testWidgets('MaintenanceFundLedgerScreen displays fund balance, filters, and transaction list', (tester) async {

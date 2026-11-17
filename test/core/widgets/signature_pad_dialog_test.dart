@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/widgets/signature_pad_dialog.dart';
+import 'package:vivona/core/widgets/signature_pad_dialog.dart';
 
 void main() {
   group('SignaturePadDialog Widget Tests', () {

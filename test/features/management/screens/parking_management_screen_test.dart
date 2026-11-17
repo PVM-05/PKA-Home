@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/parking_capacity_stats_model.dart';
-import 'package:pka_home/data/models/parking_slot_model.dart';
-import 'package:pka_home/data/models/visitor_parking_ticket_model.dart';
-import 'package:pka_home/data/providers/management_provider.dart';
-import 'package:pka_home/data/providers/parking_provider.dart';
-import 'package:pka_home/data/providers/vehicle_provider.dart';
-import 'package:pka_home/data/repositories/parking_repository.dart';
-import 'package:pka_home/features/management/screens/parking_management_screen.dart';
+import 'package:vivona/data/models/parking_capacity_stats_model.dart';
+import 'package:vivona/data/models/parking_slot_model.dart';
+import 'package:vivona/data/models/visitor_parking_ticket_model.dart';
+import 'package:vivona/data/providers/management_provider.dart';
+import 'package:vivona/data/providers/parking_provider.dart';
+import 'package:vivona/data/providers/vehicle_provider.dart';
+import 'package:vivona/data/repositories/parking_repository.dart';
+import 'package:vivona/features/management/screens/parking_management_screen.dart';
 
 class FakeParkingRepo extends ParkingRepository {
   final List<ParkingSlotModel> mockSlots;

@@ -80,8 +80,8 @@ class MfaService {
     try {
       final response = await _effectiveClient.auth.mfa.enroll(
         factorType: FactorType.totp,
-        issuer: 'PKA-Home',
-        friendlyName: friendlyName ?? 'Ban Quản Lý PKA',
+        issuer: 'Vivona',
+        friendlyName: friendlyName ?? 'Ban Quản Lý Vivona',
       );
 
       return MfaEnrollData(

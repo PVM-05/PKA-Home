@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/data/providers/resident_activation_provider.dart';
-import 'package:pka_home/data/repositories/resident_activation_repository.dart';
-import 'package:pka_home/features/auth/screens/resident_activation_screen.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/data/providers/resident_activation_provider.dart';
+import 'package:vivona/data/repositories/resident_activation_repository.dart';
+import 'package:vivona/features/auth/screens/resident_activation_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_invitation_model.dart';
+import 'package:vivona/data/models/apartment_invitation_model.dart';
 
 void main() {
   group('ApartmentInvitationModel Tests', () {
@@ -36,7 +36,7 @@ void main() {
       expect(model.isExpired, isFalse);
       expect(model.displayTargetRole, 'Thành viên ở cùng');
       expect(model.displayStatus, 'Còn hiệu lực');
-      expect(model.shareableUrl, 'https://pkahome.vn/invite?code=PKAA0110X');
+      expect(model.shareableUrl, 'https://vivona.vn/invite?code=PKAA0110X');
     });
 
     test('isUsable and isExpired handle expired or exhausted invites', () {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/providers/invoice_items_provider.dart';
-import 'package:pka_home/features/management/screens/management_invoice_detail_screen.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/providers/invoice_items_provider.dart';
+import 'package:vivona/features/management/screens/management_invoice_detail_screen.dart';
 
 void main() {
   final apt = ApartmentModel(

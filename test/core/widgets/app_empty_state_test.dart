@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/widgets/app_empty_state.dart';
+import 'package:vivona/core/widgets/app_empty_state.dart';
 
 void main() {
   group('AppEmptyState Widget Tests', () {

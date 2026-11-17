@@ -634,7 +634,7 @@ class _MaintenanceFundLedgerScreenState
                     context,
                     transaction: tx,
                     buildingName:
-                        activeBuilding?.name ?? 'Tòa nhà PKA-Home',
+                        activeBuilding?.name ?? 'Tòa nhà Vivona',
                   );
                 },
                 child: Row(

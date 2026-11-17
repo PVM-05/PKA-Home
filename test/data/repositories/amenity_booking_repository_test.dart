@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/data/repositories/amenity_booking_repository.dart';
+import 'package:vivona/data/repositories/amenity_booking_repository.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 

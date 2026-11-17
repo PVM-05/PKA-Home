@@ -1,7 +1,7 @@
 # Quy Trình Vận Hành Chuẩn Ban Quản Lý (SOP - Standard Operating Procedure)
-## Hệ Thống Quản Trị Vận Hành Bất Động Sản & Tòa Nhà Chung Cư PKA-Home (B2B SaaS)
+## Hệ Thống Quản Trị Vận Hành Bất Động Sản & Tòa Nhà Chung Cư Vivona (B2B SaaS)
 
-- **Mã tài liệu:** SOP-BQL-PKA-01
+- **Mã tài liệu:** SOP-BQL-VIVONA-01
 - **Phiên bản:** 2.0 (Commercial Production Edition)
 - **Áp dụng cho:** Ban Quản Trị, Trưởng Ban Quản Lý, Bộ Phận Kế Toán, Đội Ngũ Kỹ Thuật, Bộ Phận Lễ Tân & An Ninh Tòa Nhà
 - **Căn cứ pháp lý:** Luật Nhà ở 2023, Luật Bảo vệ dữ liệu cá nhân 2026, Nghị định số 123/2020/NĐ-CP về Hóa đơn điện tử và Thông tư số 05/2024/TT-BXD Quy chế quản lý sử dụng nhà chung cư.
@@ -25,7 +25,7 @@
 
 ## 1. Quy Định Chung & Cơ Cấu Phân Quyền Vận Hành (RBAC)
 
-Hệ thống PKA-Home phân quyền kiểm soát truy cập dựa trên vai trò (Role-Based Access Control) nhằm bảo đảm nguyên tắc phân nhiệm và bảo mật dữ liệu tuyệt đối:
+Hệ thống Vivona phân quyền kiểm soát truy cập dựa trên vai trò (Role-Based Access Control) nhằm bảo đảm nguyên tắc phân nhiệm và bảo mật dữ liệu tuyệt đối:
 
 | Vai Trò | Mã Hệ Thống | Phạm Vi Quyền Hạn Nghiệp Vụ | Trách Nhiệm Chính |
 | :--- | :--- | :--- | :--- |
@@ -93,7 +93,7 @@ sequenceDiagram
     autonumber
     actor Resident as Cư Dân
     actor Staff as Ban Quản Lý (Vận Hành)
-    participant System as Hệ Thống PKA-Home
+    participant System as Hệ Thống Vivona
     participant Parking as Quản Lý Bãi Xe Hầm
 
     Resident->>System: Gửi hồ sơ đăng ký xe (Biển số, Cà vẹt, Loại xe)
@@ -230,7 +230,7 @@ Hệ thống tự động kích hoạt cảnh báo bảo trì trước 07 ngày 
 
 ### 8.2. Kiểm Soát Khách Viếng Thăm Qua Mã QR Đã Ký (Signed QR Pass)
 1. Cư dân chủ động đăng ký vé khách trên app (Họ tên khách, số điện thoại, biển số xe, thời gian dự kiến đến).
-2. Hệ thống sinh mã QR động được ký số chuẩn `PKAPASS.v1.<payload>.<signature>` có thời hạn hiệu lực cụ thể.
+2. Hệ thống sinh mã QR động được ký số chuẩn `VIVONAPASS.v1.<payload>.<signature>` có thời hạn hiệu lực cụ thể.
 3. Khách xuất trình mã QR tại bàn lễ tân hoặc cổng an ninh:
    - Nhân viên quét mã bằng ứng dụng BQL.
    - Hệ thống đối soát chữ ký số mật mã; nếu hợp lệ, chuyển trạng thái sang `checked_in`.

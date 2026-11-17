@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/core/widgets/electronic_receipt_sheet.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/building_model.dart';
-import 'package:pka_home/data/providers/building_provider.dart';
+import 'package:vivona/core/widgets/electronic_receipt_sheet.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/building_model.dart';
+import 'package:vivona/data/providers/building_provider.dart';
 
 void main() {
   group('ElectronicReceiptSheet Tests', () {

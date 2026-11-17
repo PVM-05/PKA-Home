@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/vietnamese_currency_words.dart';
+import 'package:vivona/core/utils/vietnamese_currency_words.dart';
 
 void main() {
   group('VietnameseCurrencyWords Tests', () {

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/providers/resident_activation_provider.dart';
-import 'package:pka_home/data/repositories/resident_activation_repository.dart';
+import 'package:vivona/data/providers/resident_activation_provider.dart';
+import 'package:vivona/data/repositories/resident_activation_repository.dart';
 
 void main() {
   group('ResidentActivationNotifier State Machine Tests', () {

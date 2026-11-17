@@ -1,7 +1,7 @@
 # Hướng Dẫn Tích Hợp Cổng Thanh Toán SePay & Tự Động Gạch Nợ Webhook
 
 > **Tài liệu SOP Vận hành B2B SaaS**  
-> Dành cho: Quản trị viên hệ thống (Admin), Ban Quản Lý (BQL) & Kỹ sư triển khai dự án PKA-Home.
+> Dành cho: Quản trị viên hệ thống (Admin), Ban Quản Lý (BQL) & Kỹ sư triển khai dự án Vivona.
 
 ---
 
@@ -22,7 +22,7 @@
 sequenceDiagram
     autonumber
     actor Resident as Cư Dân
-    participant App as Ứng Dụng PKA-Home
+    participant App as Ứng Dụng Vivona
     participant Bank as Ngân Hàng BQL (MB/VCB/TCB...)
     participant SePay as SePay Gateway (sepay.vn)
     participant EdgeFn as Supabase Edge Function (sepay-webhook)
@@ -53,8 +53,8 @@ sequenceDiagram
 
 ### Bước 2: Triển Khai Supabase Edge Function Đón Webhook
 
-Hệ thống PKA-Home đã chuẩn bị sẵn mã nguồn Edge Function tại:  
-[`supabase/functions/sepay-webhook/index.ts`](file:///c:/Users/ADMIN/StudioProjects/pka_home/supabase/functions/sepay-webhook/index.ts)
+Hệ thống Vivona đã chuẩn bị sẵn mã nguồn Edge Function tại:  
+[`supabase/functions/sepay-webhook/index.ts`](file:///c:/Users/ADMIN/StudioProjects/Vivona/supabase/functions/sepay-webhook/index.ts)
 
 Mở terminal tại thư mục gốc dự án và chạy lệnh sau để deploy lên Supabase:
 
@@ -104,7 +104,7 @@ INSERT INTO public.building_payment_configs (
     'b0000000-0000-0000-0000-000000000001',   -- ID của tòa nhà (lấy trong bảng buildings)
     'MBBank',                                  -- Tên ngân hàng nhận tiền
     '0988776655',                              -- Số tài khoản ngân hàng BQL
-    'BAN QUAN LY TOA NHA PKA',                -- Tên chủ tài khoản (in hoa không dấu)
+    'BAN QUAN LY TOA NHA VIVONA',              -- Tên chủ tài khoản (in hoa không dấu)
     '970422',                                  -- Mã BIN ngân hàng (MBBank: 970422, Vietcombank: 970436, ACB: 970416...)
     'sepay_sec_YOUR_API_KEY_HERE',             -- API Key lấy từ Bước 3
     true

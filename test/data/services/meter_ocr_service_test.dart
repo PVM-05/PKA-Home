@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/services/meter_ocr_service.dart';
+import 'package:vivona/data/services/meter_ocr_service.dart';
 
 class MockMeterTextRecognizer implements MeterTextRecognizer {
   final String textToReturn;

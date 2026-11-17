@@ -1,4 +1,4 @@
-# Đặc Tả Tính Năng Sản Phẩm PKA-Home (Product Specification)
+# Đặc Tả Tính Năng Sản Phẩm Vivona (Product Specification)
 
 > **Phiên bản:** 2.0 (Production-Ready)  
 > **Phạm vi ứng dụng:** Khu Đô Thị, Chung Cư Cao Tầng, Khu Căn Hộ Dịch Vụ, Hệ Thống Chuỗi Nhà Trọ Cho Thuê Đa Cơ Sở.  
@@ -70,9 +70,9 @@ graph TD
 
 ## 3. Khả Năng Thích Ứng: Chung Cư Cao Tầng vs Nhà Trọ Cho Thuê
 
-PKA-Home xử lý tinh tế sự khác biệt giữa 2 loại hình bất động sản mà không cần chia đôi mã nguồn:
+Vivona xử lý tinh tế sự khác biệt giữa 2 loại hình bất động sản mà không cần chia đôi mã nguồn:
 
-| Tiêu Chí Nghiệp Vụ | Mô Hình Chung Cư (Condominium) | Mô Hình Nhà Trọ (Boarding House) | Cách PKA-Home Xử Lý Tự Động |
+| Tiêu Chí Nghiệp Vụ | Mô Hình Chung Cư (Condominium) | Mô Hình Nhà Trọ (Boarding House) | Cách Vivona Xử Lý Tự Động |
 | :--- | :--- | :--- | :--- |
 | **Mã căn hộ / phòng** | Chuẩn hóa `A0110` (Block + Tầng + Phòng) | `P101`, `Phòng 3`, `101`, v.v. | `validateApartmentCode` nới lỏng thông minh, cho phép tùy chọn `strictApartmentFormat`. |
 | **Cơ cấu tính tiền nhà** | Tính theo diện tích m² nhân đơn giá | Giá thuê phòng cố định (`rent_price`) | Form tạo hóa đơn tự động chọn `rent_price` làm mặc định và ẩn/hiện trường diện tích. |

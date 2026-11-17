@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Tiện ích mở rộng Typography giúp truy xuất TextTheme nhất quán và thích ứng
-/// theo tiêu chuẩn Design System Modern Enterprise SaaS B2B của PKA-Home.
+/// theo tiêu chuẩn Design System Modern Enterprise SaaS B2B của Vivona.
 extension AppTypographyExtension on BuildContext {
   /// Theme gốc của ứng dụng
   ThemeData get theme => Theme.of(this);

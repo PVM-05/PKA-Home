@@ -1,5 +1,5 @@
 /// Nguồn sự thật duy nhất (Single Source of Truth) định nghĩa toàn bộ quyền hạn
-/// trong ứng dụng PKA-Home theo chuẩn RBAC và nguyên tắc Least Privilege.
+/// trong ứng dụng Vivona theo chuẩn RBAC và nguyên tắc Least Privilege.
 class PermissionItem {
   final String key;
   final String name;

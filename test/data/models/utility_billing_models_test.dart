@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_utility_rate_model.dart';
-import 'package:pka_home/data/models/meter_reading_submission_model.dart';
+import 'package:vivona/data/models/building_utility_rate_model.dart';
+import 'package:vivona/data/models/meter_reading_submission_model.dart';
 
 void main() {
   group('Utility Billing Models Tests', () {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/security/mfa_service.dart';
+import 'package:vivona/core/security/mfa_service.dart';
 
 void main() {
   group('MfaService Tests', () {
@@ -11,7 +11,7 @@ void main() {
         enrollHandler: () async => const MfaEnrollData(
           factorId: 'factor-123',
           secret: 'JBSWY3DPEHPK3PXP',
-          qrCodeUri: 'otpauth://totp/PKA-Home:admin@pka.vn?secret=JBSWY3DPEHPK3PXP',
+          qrCodeUri: 'otpauth://totp/Vivona:admin@pka.vn?secret=JBSWY3DPEHPK3PXP',
         ),
         verifyHandler: (factorId, code) async => code == '123456',
         unenrollHandler: (factorId) async {},

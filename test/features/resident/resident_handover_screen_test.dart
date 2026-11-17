@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_handover_model.dart';
-import 'package:pka_home/data/models/handover_item_model.dart';
-import 'package:pka_home/data/providers/handover_provider.dart';
-import 'package:pka_home/data/repositories/handover_repository.dart';
-import 'package:pka_home/features/resident/screens/resident_handover_detail_screen.dart';
-import 'package:pka_home/features/resident/screens/resident_handover_screen.dart';
+import 'package:vivona/data/models/apartment_handover_model.dart';
+import 'package:vivona/data/models/handover_item_model.dart';
+import 'package:vivona/data/providers/handover_provider.dart';
+import 'package:vivona/data/repositories/handover_repository.dart';
+import 'package:vivona/features/resident/screens/resident_handover_detail_screen.dart';
+import 'package:vivona/features/resident/screens/resident_handover_screen.dart';
 
 void main() {
   group('ResidentHandoverScreen Widget Tests', () {

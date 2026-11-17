@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:pka_home/features/document/screens/document_preview_screen.dart';
+import 'package:vivona/features/document/screens/document_preview_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

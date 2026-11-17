@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/document_lookup_result_model.dart';
+import 'package:vivona/data/models/document_lookup_result_model.dart';
 
 void main() {
   group('DocumentLookupResultModel Tests', () {
@@ -22,7 +22,7 @@ void main() {
         'paid_date': '2026-10-28T14:30:00.000Z',
         'payment_method': 'Chuyển khoản VietQR',
         'issuer': 'Ban Quản Lý Tòa Nhà Landmark PKA',
-        'message': 'Chứng từ hợp lệ và có nguồn gốc chính thức từ hệ thống PKA-Home',
+        'message': 'Chứng từ hợp lệ và có nguồn gốc chính thức từ hệ thống Vivona',
       };
 
       final model = DocumentLookupResultModel.fromJson(json);
@@ -43,7 +43,7 @@ void main() {
       expect(model.paidDate, equals(DateTime.parse('2026-10-28T14:30:00.000Z')));
       expect(model.paymentMethod, equals('Chuyển khoản VietQR'));
       expect(model.issuer, equals('Ban Quản Lý Tòa Nhà Landmark PKA'));
-      expect(model.message, equals('Chứng từ hợp lệ và có nguồn gốc chính thức từ hệ thống PKA-Home'));
+      expect(model.message, equals('Chứng từ hợp lệ và có nguồn gốc chính thức từ hệ thống Vivona'));
     });
 
     test('fromJson parses RPC verify_document_lookup response keys (due_date, paid_at)', () {
@@ -63,7 +63,7 @@ void main() {
         'building_name': 'Tòa Tháp B',
         'organization_name': 'Công ty Quản lý PKA',
         'issuer': 'Tòa Tháp B',
-        'message': 'Chứng từ hợp lệ và có nguồn gốc chính thức từ hệ thống PKA-Home',
+        'message': 'Chứng từ hợp lệ và có nguồn gốc chính thức từ hệ thống Vivona',
       };
 
       final model = DocumentLookupResultModel.fromJson(rpcJson);

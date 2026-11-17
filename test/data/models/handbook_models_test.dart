@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/emergency_contact_model.dart';
-import 'package:pka_home/data/models/building_rule_model.dart';
-import 'package:pka_home/data/models/building_amenity_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
+import 'package:vivona/data/models/emergency_contact_model.dart';
+import 'package:vivona/data/models/building_rule_model.dart';
+import 'package:vivona/data/models/building_amenity_model.dart';
+import 'package:vivona/data/models/user_model.dart';
 
 void main() {
   group('EmergencyContactModel Tests', () {

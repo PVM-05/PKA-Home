@@ -128,7 +128,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Hệ thống Quản lý Chung cư PKA-Home',
+                      'Hệ thống Quản lý Chung cư Vivona',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                     ),

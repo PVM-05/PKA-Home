@@ -1,5 +1,5 @@
 ---
-name: PKA-Home PropTech Design System
+name: Vivona PropTech Design System
 description: Modern Enterprise PropTech SaaS Design System adhering to pbakaus/impeccable standards
 colors:
   primary: "#2563EB"
@@ -70,7 +70,7 @@ components:
 
 ## Overview
 
-PKA-Home áp dụng hệ thống thiết kế hiện đại, thanh lịch theo tiêu chuẩn **`pbakaus/impeccable`**, phục vụ nền tảng thương mại B2B SaaS quản lý chung cư & bất động sản. Hệ thống triệt tiêu hoàn toàn hiện tượng "AI slop" (card lồng card, gradient tím xanh, văn bản tràn viền), thiết lập trải nghiệm trực quan, chuẩn xác và tinh tế trên cả Web Enterprise Desktop lẫn Thiết bị di động hiện trường.
+Vivona áp dụng hệ thống thiết kế hiện đại, thanh lịch theo tiêu chuẩn **`pbakaus/impeccable`**, phục vụ nền tảng thương mại B2B SaaS quản lý chung cư & bất động sản. Hệ thống triệt tiêu hoàn toàn hiện tượng "AI slop" (card lồng card, gradient tím xanh, văn bản tràn viền), thiết lập trải nghiệm trực quan, chuẩn xác và tinh tế trên cả Web Enterprise Desktop lẫn Thiết bị di động hiện trường.
 
 ## Colors
 

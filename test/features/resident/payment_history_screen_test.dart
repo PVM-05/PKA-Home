@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/payment_transaction_model.dart';
-import 'package:pka_home/data/providers/payment_provider.dart';
-import 'package:pka_home/features/resident/screens/payment_history_screen.dart';
+import 'package:vivona/data/models/payment_transaction_model.dart';
+import 'package:vivona/data/providers/payment_provider.dart';
+import 'package:vivona/features/resident/screens/payment_history_screen.dart';
 
 void main() {
   testWidgets('PaymentHistoryScreen hiển thị danh sách giao dịch và lọc theo tab Hóa đơn / Dịch vụ', (tester) async {

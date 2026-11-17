@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/features/management/widgets/bulk_invoice_dialog.dart';
+import 'package:vivona/features/management/widgets/bulk_invoice_dialog.dart';
 
 void main() {
   testWidgets('BulkInvoiceDialog hiển thị đầy đủ các trường cấu hình tạo hóa đơn hàng loạt', (tester) async {

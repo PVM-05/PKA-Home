@@ -109,7 +109,7 @@ class SubscriptionRepository {
     return {
       'success': true,
       'message':
-          'Hệ thống đã tiếp nhận yêu cầu nâng cấp gói của bạn. Đội ngũ PKA-Home sẽ liên hệ hỗ trợ trong vòng 24 giờ làm việc.',
+          'Hệ thống đã tiếp nhận yêu cầu nâng cấp gói của bạn. Đội ngũ Vivona sẽ liên hệ hỗ trợ trong vòng 24 giờ làm việc.',
       'target_plan': targetPlanCode,
     };
   }

@@ -1,15 +1,15 @@
-import 'package:pka_home/data/models/poll_model.dart';
-import 'package:pka_home/data/models/poll_result_model.dart';
-import 'package:pka_home/data/models/petition_model.dart';
-import 'package:pka_home/data/models/parking_slot_model.dart';
-import 'package:pka_home/data/models/parking_capacity_stats_model.dart';
-import 'package:pka_home/data/models/visitor_parking_ticket_model.dart';
-import 'package:pka_home/data/models/visitor_pass_model.dart';
-import 'package:pka_home/data/models/parcel_model.dart';
-import 'package:pka_home/data/models/front_desk_stats_model.dart';
-import 'package:pka_home/data/repositories/community_repository.dart';
-import 'package:pka_home/data/repositories/parking_repository.dart';
-import 'package:pka_home/data/repositories/front_desk_repository.dart';
+import 'package:vivona/data/models/poll_model.dart';
+import 'package:vivona/data/models/poll_result_model.dart';
+import 'package:vivona/data/models/petition_model.dart';
+import 'package:vivona/data/models/parking_slot_model.dart';
+import 'package:vivona/data/models/parking_capacity_stats_model.dart';
+import 'package:vivona/data/models/visitor_parking_ticket_model.dart';
+import 'package:vivona/data/models/visitor_pass_model.dart';
+import 'package:vivona/data/models/parcel_model.dart';
+import 'package:vivona/data/models/front_desk_stats_model.dart';
+import 'package:vivona/data/repositories/community_repository.dart';
+import 'package:vivona/data/repositories/parking_repository.dart';
+import 'package:vivona/data/repositories/front_desk_repository.dart';
 
 /// Fake repository phục vụ các integration workflow tests độc lập
 class FakeCommunityWorkflowRepository extends CommunityRepository {

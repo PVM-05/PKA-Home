@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/fee_tier_policy_model.dart';
-import 'package:pka_home/data/models/tiered_calculation_result_model.dart';
-import 'package:pka_home/data/providers/fee_policy_providers.dart';
-import 'package:pka_home/data/repositories/fee_policy_repository.dart';
+import 'package:vivona/data/models/fee_tier_policy_model.dart';
+import 'package:vivona/data/models/tiered_calculation_result_model.dart';
+import 'package:vivona/data/providers/fee_policy_providers.dart';
+import 'package:vivona/data/repositories/fee_policy_repository.dart';
 
 class FakeFeePolicyRepository extends FeePolicyRepository {
   @override

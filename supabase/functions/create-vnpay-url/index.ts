@@ -244,7 +244,7 @@ serve(async (req: Request) => {
     const rawIp = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "127.0.0.1";
     const ipAddr = rawIp.split(",")[0].trim();
 
-    const returnUrl = Deno.env.get("VNPAY_RETURN_URL") || "https://pka-home.web.app/payment-result";
+    const returnUrl = Deno.env.get("VNPAY_RETURN_URL") || "https://vivona.web.app/payment-result";
     const vnpAmount = Math.round(remainingAmount * 100).toString();
     const txnRef = invoice.payment_code;
     const createDate = formatVnpayDate(new Date());

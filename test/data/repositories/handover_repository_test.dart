@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/guard_helper.dart';
-import 'package:pka_home/data/models/apartment_handover_model.dart';
-import 'package:pka_home/data/repositories/handover_repository.dart';
+import 'package:vivona/core/utils/guard_helper.dart';
+import 'package:vivona/data/models/apartment_handover_model.dart';
+import 'package:vivona/data/repositories/handover_repository.dart';
 
 void main() {
   group('HandoverRepository Fail-Closed Tests', () {

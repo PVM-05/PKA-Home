@@ -1,6 +1,6 @@
 ﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/amenity_booking_model.dart';
+import 'package:vivona/data/models/amenity_booking_model.dart';
 
 void main() {
   group('P1 & P2 System Audit Migration Tests (20261024_02)', () {

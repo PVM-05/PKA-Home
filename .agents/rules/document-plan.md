@@ -4,7 +4,7 @@ trigger: always_on
 
 # Kế Hoạch Tài Liệu Kỹ Thuật & Vận Hành Chuẩn (Production Commercial SaaS)
 
-PKA-Home là sản phẩm thương mại B2B SaaS phục vụ vận hành thực tế tại các tòa nhà/chuỗi căn hộ với người dùng thật và hướng tới bán thương mại. Toàn bộ tài liệu kỹ thuật, vận hành và triển khai phải được chuẩn hóa theo tiêu chuẩn công nghiệp:
+Vivona là sản phẩm thương mại B2B SaaS phục vụ vận hành thực tế tại các tòa nhà/chuỗi căn hộ với người dùng thật và hướng tới bán thương mại. Toàn bộ tài liệu kỹ thuật, vận hành và triển khai phải được chuẩn hóa theo tiêu chuẩn công nghiệp:
 
 | STT | Tên Tài Liệu | Nội Dung Chính | Thời Điểm Thực Hiện |
 | :--- | :--- | :--- | :--- |

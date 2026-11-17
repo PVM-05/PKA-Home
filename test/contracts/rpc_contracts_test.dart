@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/contracts/contracts.dart';
+import 'package:vivona/data/contracts/contracts.dart';
 
 void main() {
   group('1. Finance RPC Contracts Tests', () {

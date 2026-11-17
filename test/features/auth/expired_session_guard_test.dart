@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 
 void main() {
   group('Expired Session Guard Tests', () {

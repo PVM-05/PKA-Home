@@ -31,7 +31,7 @@ class ApartmentInvitationModel {
 
   bool get isUsable => status == 'active' && !isExpired && usedCount < maxUses;
 
-  String get shareableUrl => 'https://pkahome.vn/invite?code=$inviteCode';
+  String get shareableUrl => 'https://vivona.vn/invite?code=$inviteCode';
 
   String get formattedExpiresAt => DateFormat('dd/MM/yyyy HH:mm').format(expiresAt);
 

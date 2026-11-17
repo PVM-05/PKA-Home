@@ -657,7 +657,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
-                    'PKA HOME',
+                    'VIVONA',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Text(

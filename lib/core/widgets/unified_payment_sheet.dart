@@ -212,7 +212,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         amount: widget.amount,
         txnRef: memo,
         orderInfo: 'Thanh toan $memo',
-        returnUrl: 'https://pka-home.web.app/payment-result',
+        returnUrl: 'https://vivona.web.app/payment-result',
         isSandbox: true,
       );
 

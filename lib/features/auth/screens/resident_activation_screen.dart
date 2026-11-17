@@ -222,7 +222,7 @@ class _ResidentActivationScreenState
               ),
               const SizedBox(width: 14),
               Text(
-                'PKA-Home',
+                'Vivona',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -680,7 +680,7 @@ class _ResidentActivationScreenState
           ),
           const SizedBox(height: 6),
           const Text(
-            'Mật khẩu này sẽ được dùng để đăng nhập vào ứng dụng PKA-Home trong các lần tiếp theo.',
+            'Mật khẩu này sẽ được dùng để đăng nhập vào ứng dụng Vivona trong các lần tiếp theo.',
             style: TextStyle(fontSize: 12.5, color: AppTheme.textSecondary),
           ),
           const Divider(height: 24),
@@ -750,7 +750,7 @@ class _ResidentActivationScreenState
                 child: Padding(
                   padding: EdgeInsets.only(top: 12.0),
                   child: Text(
-                    'Tôi đã đọc, hiểu rõ và đồng ý tuân thủ Nội quy & Quy chế quản lý sử dụng chung cư PKA-Home.',
+                    'Tôi đã đọc, hiểu rõ và đồng ý tuân thủ Nội quy & Quy chế quản lý sử dụng chung cư Vivona.',
                     style: TextStyle(fontSize: 12.5, height: 1.3),
                   ),
                 ),

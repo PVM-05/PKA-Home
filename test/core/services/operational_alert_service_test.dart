@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
-import 'package:pka_home/core/config/app_environment.dart';
-import 'package:pka_home/core/services/operational_alert_service.dart';
+import 'package:vivona/core/config/app_environment.dart';
+import 'package:vivona/core/services/operational_alert_service.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 
@@ -42,7 +42,7 @@ void main() {
 
       final html = service.formatTelegramHtml(alert);
 
-      expect(html, contains('<b>[PKA-HOME] CẢNH BÁO: CRITICAL</b>'));
+      expect(html, contains('<b>[VIVONA] CẢNH BÁO: CRITICAL</b>'));
       expect(html, contains('<b>Môi trường:</b> Sản phẩm (Production)'));
       expect(html, contains('<b>Mã lỗi:</b> MAINT_FUND_MISMATCH'));
       expect(html, contains('<b>Tiêu đề:</b> Lỗi ghi nhận quỹ bảo trì'));
@@ -64,7 +64,7 @@ void main() {
 
       final payload = service.formatSlackPayload(alert);
 
-      expect(payload['text'], contains('[PKA-HOME - WARNING]'));
+      expect(payload['text'], contains('[VIVONA - WARNING]'));
       expect(payload['blocks'], isList);
       final blocks = payload['blocks'] as List;
       expect(blocks.isNotEmpty, isTrue);

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/core/router/route_names.dart';
-import 'package:pka_home/data/providers/dashboard_providers.dart';
-import 'package:pka_home/data/providers/management_provider.dart';
-import 'package:pka_home/data/providers/meter_reading_provider.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/router/route_names.dart';
+import 'package:vivona/data/providers/dashboard_providers.dart';
+import 'package:vivona/data/providers/management_provider.dart';
+import 'package:vivona/data/providers/meter_reading_provider.dart';
 
 void showAllQuickActionsSheet(
   BuildContext context, {

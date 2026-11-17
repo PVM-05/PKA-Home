@@ -148,7 +148,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 onSubmitted: (_) => _submit(),
                                 decoration: const InputDecoration(
                                   labelText: 'Thư điện tử',
-                                  hintText: 'vidu@pka-home.vn',
+                                  hintText: 'vidu@vivona.vn',
                                   prefixIcon: Icon(Icons.email_outlined),
                                 ),
                               ),

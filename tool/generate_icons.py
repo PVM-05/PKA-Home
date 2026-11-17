@@ -1,5 +1,5 @@
 """
-Generator script to render high-resolution PKA-Home App Icons and Notification Icons.
+Generator script to render high-resolution Vivona App Icons and Notification Icons.
 Rendered with 4x supersampling for ultra-crisp anti-aliasing.
 """
 
@@ -19,9 +19,9 @@ def create_gradient(width, height, color_top, color_bottom):
         draw.line([(0, y), (width, y)], fill=(r, g, b, 255))
     return base
 
-def draw_pka_home_symbol(draw, center_x, center_y, scale, is_monochrome=False):
+def draw_vivona_symbol(draw, center_x, center_y, scale, is_monochrome=False):
     """
-    Renders the PKA-Home architectural emblem:
+    Renders the Vivona architectural emblem:
     - Smart Home Roofline / Chevron apex
     - Modern Multi-tier residential towers
     - Illuminated window matrix
@@ -177,7 +177,7 @@ def generate_master_app_icon(output_path, size=1024):
 
     # 2. Draw the building symbol
     draw = ImageDraw.Draw(canvas)
-    draw_pka_home_symbol(draw, render_size // 2, int(render_size * 0.52), scale=ss * 1.05)
+    draw_vivona_symbol(draw, render_size // 2, int(render_size * 0.52), scale=ss * 1.05)
 
     # 3. Downsample with Lanczos for anti-aliasing
     final_img = canvas.resize((size, size), Image.Resampling.LANCZOS)
@@ -196,7 +196,7 @@ def generate_foreground_app_icon(output_path, size=1024):
     draw = ImageDraw.Draw(canvas)
 
     # Safe zone scale (0.75 of full canvas ensures safe 66dp area)
-    draw_pka_home_symbol(draw, render_size // 2, int(render_size * 0.52), scale=ss * 0.82)
+    draw_vivona_symbol(draw, render_size // 2, int(render_size * 0.52), scale=ss * 0.82)
 
     final_img = canvas.resize((size, size), Image.Resampling.LANCZOS)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -207,7 +207,7 @@ def generate_notification_icon(output_path, size=512):
     """
     Generates Android status bar notification icon:
     100% white monochrome on transparent background.
-    Tạo hình: Chuông thông báo kết hợp mái nhà PKA.
+    Tạo hình: Chuông thông báo kết hợp mái nhà Vivona.
     """
     ss = 4
     render_size = size * ss

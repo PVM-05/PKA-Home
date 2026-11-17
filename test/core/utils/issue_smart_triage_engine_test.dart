@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/issue_smart_triage_engine.dart';
+import 'package:vivona/core/utils/issue_smart_triage_engine.dart';
 
 void main() {
   group('IssueSmartTriageEngine Unit Tests', () {

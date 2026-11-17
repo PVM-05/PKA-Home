@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/features/auth/widgets/otp_input_boxes.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/features/auth/widgets/otp_input_boxes.dart';
 
 void main() {
   group('OtpInputBoxes Responsive & Anti-Overflow Tests', () {

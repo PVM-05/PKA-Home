@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/fee_tier_policy_model.dart';
-import 'package:pka_home/data/models/tiered_calculation_result_model.dart';
+import 'package:vivona/data/models/fee_tier_policy_model.dart';
+import 'package:vivona/data/models/tiered_calculation_result_model.dart';
 
 void main() {
   group('FeePolicyType Enum Tests', () {

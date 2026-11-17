@@ -148,7 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                       const SizedBox(width: 14),
                                       Text(
-                                        'PKA-Home',
+                                        'Vivona',
                                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -236,7 +236,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   const Padding(
                                     padding: EdgeInsets.only(top: 24),
                                     child: Text(
-                                      '© 2026 PKA-Home Commercial SaaS. Tất cả các quyền được bảo lưu.',
+                                      '© 2026 Vivona Commercial SaaS. Tất cả các quyền được bảo lưu.',
                                       style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
                                     ),
                                   ),
@@ -292,7 +292,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        'PKA-Home',
+                        'Vivona',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
@@ -378,7 +378,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Chào mừng bạn đến với hệ sinh thái quản lý tòa nhà PKA-Home',
+            'Chào mừng bạn đến với hệ sinh thái quản lý tòa nhà Vivona',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondary,
             ),

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_model.dart';
-import 'package:pka_home/data/models/debt_risk_score_model.dart';
-import 'package:pka_home/data/models/financial_aging_report_model.dart';
-import 'package:pka_home/data/models/maintenance_fund_model.dart';
-import 'package:pka_home/data/models/maintenance_fund_transaction_model.dart';
-import 'package:pka_home/data/providers/building_provider.dart';
-import 'package:pka_home/data/providers/debt_prediction_provider.dart';
-import 'package:pka_home/data/providers/financial_report_provider.dart';
-import 'package:pka_home/data/providers/maintenance_fund_provider.dart';
-import 'package:pka_home/features/management/screens/financial_report_screen.dart';
-import 'package:pka_home/features/management/screens/maintenance_fund_ledger_screen.dart';
+import 'package:vivona/data/models/building_model.dart';
+import 'package:vivona/data/models/debt_risk_score_model.dart';
+import 'package:vivona/data/models/financial_aging_report_model.dart';
+import 'package:vivona/data/models/maintenance_fund_model.dart';
+import 'package:vivona/data/models/maintenance_fund_transaction_model.dart';
+import 'package:vivona/data/providers/building_provider.dart';
+import 'package:vivona/data/providers/debt_prediction_provider.dart';
+import 'package:vivona/data/providers/financial_report_provider.dart';
+import 'package:vivona/data/providers/maintenance_fund_provider.dart';
+import 'package:vivona/features/management/screens/financial_report_screen.dart';
+import 'package:vivona/features/management/screens/maintenance_fund_ledger_screen.dart';
 
 void main() {
   final mockReport = FinancialAgingReportModel(

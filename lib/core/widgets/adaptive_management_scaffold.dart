@@ -138,7 +138,7 @@ class AdaptiveManagementScaffold extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'PKA-Home',
+                                    'Vivona',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,

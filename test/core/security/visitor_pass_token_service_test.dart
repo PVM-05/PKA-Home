@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/security/visitor_pass_token_service.dart';
+import 'package:vivona/core/security/visitor_pass_token_service.dart';
 
 void main() {
   group('VisitorPassTokenService', () {
@@ -16,7 +16,7 @@ void main() {
         secretKey: testSecret,
       );
 
-      expect(token.startsWith('PKAPASS.v1.'), isTrue);
+      expect(token.startsWith('VIVONAPASS.v1.'), isTrue);
 
       final result = VisitorPassTokenService.verifyAndParseQrPayload(
         token,
@@ -87,6 +87,27 @@ void main() {
       expect(result.isValid, isTrue);
       expect(result.isLegacyFormat, isTrue);
       expect(result.passCode, 'VP-202611-00005');
+      expect(result.errorMessage, isNull);
+    });
+
+    test('nhận diện và xác thực hợp lệ với định dạng legacy PKAPASS.v1.', () {
+      final token = VisitorPassTokenService.generateSignedQrPayload(
+        passCode: 'VP-202611-00006',
+        issuedAt: now,
+        expiresAt: expiresAt,
+        nonce: 'nonce-legacy-1',
+        secretKey: testSecret,
+      );
+      final legacyToken = token.replaceFirst('VIVONAPASS.v1.', 'PKAPASS.v1.');
+
+      final result = VisitorPassTokenService.verifyAndParseQrPayload(
+        legacyToken,
+        now: now,
+        secretKey: testSecret,
+      );
+
+      expect(result.isValid, isTrue);
+      expect(result.passCode, 'VP-202611-00006');
       expect(result.errorMessage, isNull);
     });
 

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/constants/permissions.dart';
+import 'package:vivona/core/constants/permissions.dart';
 
 void main() {
   group('AppPermissions Tests', () {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/issue_model.dart';
-import 'package:pka_home/features/resident/screens/edit_issue_screen.dart';
+import 'package:vivona/data/models/issue_model.dart';
+import 'package:vivona/features/resident/screens/edit_issue_screen.dart';
 
 void main() {
   final now = DateTime.now();

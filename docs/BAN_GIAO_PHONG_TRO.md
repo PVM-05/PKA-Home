@@ -1,6 +1,6 @@
-# Tài Liệu Bàn Giao Hệ Thống PKA-Home Cho Đơn Vị Quản Lý Phòng Trọ
+# Tài Liệu Bàn Giao Hệ Thống Vivona Cho Đơn Vị Quản Lý Phòng Trọ
 
-> **Phiên bản áp dụng:** PKA-Home v2.1 (Hỗ trợ cấu hình song song Chung cư và Phòng trọ)  
+> **Phiên bản áp dụng:** Vivona v2.1 (Hỗ trợ cấu hình song song Chung cư và Phòng trọ)  
 > **Ngày chuẩn bị:** 28/10/2026  
 > **Mô hình triển khai khuyến nghị:** Phương án A (Managed SaaS - Đội ngũ kỹ thuật vận hành hạ tầng Supabase, Đơn vị sử dụng app quản lý)
 
@@ -8,7 +8,7 @@
 
 ## 1. Tổng Quan Sự Khác Biệt & Cơ Chế Hoạt Động
 
-PKA-Home hỗ trợ linh hoạt 2 chế độ tài sản thông qua trường `property_type` trong bảng `buildings`:
+Vivona hỗ trợ linh hoạt 2 chế độ tài sản thông qua trường `property_type` trong bảng `buildings`:
 1. **`apartment` (Chung cư tiêu chuẩn):** Mã căn chuẩn `A0110`, phí quản lý tính theo diện tích `m²`, hiển thị Quỹ bảo trì 2% theo Điều 108 Luật Nhà ở, tiện ích hồ bơi/BBQ.
 2. **`boarding_house` (Phòng trọ / Nhà trọ):** 
    - Mã phòng linh hoạt: Chấp nhận `P101`, `101`, `Phòng 3`, `P.201`, `T2-05`.
@@ -128,4 +128,4 @@ Gửi file Excel mẫu có 6 sheet sau cho chủ trọ/đơn vị quản lý đi
 ## 5. Hướng Dẫn Vận Hành Song Song (Parallel Run)
 
 - **Tháng thứ 1:** Chủ trọ tiếp tục ghi sổ tay / file Excel cũ song song với việc thao tác trên app (nhập chỉ số, phát hành hóa đơn, bấm gạch nợ khi nhận chuyển khoản).
-- **Cuối tháng thứ 1:** So khớp số tiền thu được giữa sổ cũ và báo cáo trên app. Nếu khớp 100%, chuyển hoàn toàn sang vận hành trên PKA-Home từ tháng thứ 2.
+- **Cuối tháng thứ 1:** So khớp số tiền thu được giữa sổ cũ và báo cáo trên app. Nếu khớp 100%, chuyển hoàn toàn sang vận hành trên Vivona từ tháng thứ 2.

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/poll_model.dart';
-import 'package:pka_home/data/models/petition_model.dart';
-import 'package:pka_home/data/providers/community_provider.dart';
-import 'package:pka_home/features/management/screens/community_management_screen.dart';
+import 'package:vivona/data/models/poll_model.dart';
+import 'package:vivona/data/models/petition_model.dart';
+import 'package:vivona/data/providers/community_provider.dart';
+import 'package:vivona/features/management/screens/community_management_screen.dart';
 
 void main() {
   testWidgets('CommunityManagementScreen hien thi day du 2 tabs va thong tin KPI', (tester) async {

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/services/push_notification_service.dart';
-import 'package:pka_home/data/models/notification_model.dart';
-import 'package:pka_home/data/repositories/notification_repository.dart';
+import 'package:vivona/core/services/push_notification_service.dart';
+import 'package:vivona/data/models/notification_model.dart';
+import 'package:vivona/data/repositories/notification_repository.dart';
 
 class MockNotificationRepository extends NotificationRepository {
   final StreamController<List<NotificationModel>> controller =

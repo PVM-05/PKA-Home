@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/utility_meter_ocr_engine.dart';
+import 'package:vivona/core/utils/utility_meter_ocr_engine.dart';
 
 void main() {
   group('UtilityMeterOcrEngine Unit Tests', () {

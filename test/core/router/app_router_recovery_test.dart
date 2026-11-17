@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/router/app_router.dart';
-import 'package:pka_home/core/router/route_names.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
+import 'package:vivona/core/router/app_router.dart';
+import 'package:vivona/core/router/route_names.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 
 void main() {
   group('AppRouter Redirect Tests', () {

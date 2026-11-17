@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/user_model.dart';
+import 'package:vivona/data/models/user_model.dart';
 
 void main() {
   group('Task 5 Enhancements Tests', () {

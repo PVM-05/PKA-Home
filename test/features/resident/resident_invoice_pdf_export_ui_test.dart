@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/providers/resident_invoice_provider.dart';
-import 'package:pka_home/features/document/screens/document_preview_screen.dart';
-import 'package:pka_home/features/resident/screens/resident_invoice_detail_screen.dart';
-import 'package:pka_home/features/management/screens/management_invoice_detail_screen.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/providers/resident_invoice_provider.dart';
+import 'package:vivona/features/document/screens/document_preview_screen.dart';
+import 'package:vivona/features/resident/screens/resident_invoice_detail_screen.dart';
+import 'package:vivona/features/management/screens/management_invoice_detail_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

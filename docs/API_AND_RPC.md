@@ -1,6 +1,6 @@
-# Danh Mục Stored Procedures & API Contracts (PKA-Home)
+# Danh Mục Stored Procedures & API Contracts (Vivona)
 
-> Toàn bộ các thao tác tài chính, đặt lịch tiện ích, phát hành hóa đơn hàng loạt và hủy lịch trong PKA-Home đều được đóng gói thành các **PostgreSQL Remote Procedure Calls (RPC)** thực thi nguyên tử (ACID Transactions). Nếu có bất kỳ lỗi nào xảy ra trong chuỗi xử lý, PostgreSQL sẽ tự động Rollback toàn bộ trạng thái, ngăn ngừa tuyệt đối rác dữ liệu.
+> Toàn bộ các thao tác tài chính, đặt lịch tiện ích, phát hành hóa đơn hàng loạt và hủy lịch trong Vivona đều được đóng gói thành các **PostgreSQL Remote Procedure Calls (RPC)** thực thi nguyên tử (ACID Transactions). Nếu có bất kỳ lỗi nào xảy ra trong chuỗi xử lý, PostgreSQL sẽ tự động Rollback toàn bộ trạng thái, ngăn ngừa tuyệt đối rác dữ liệu.
 
 ---
 

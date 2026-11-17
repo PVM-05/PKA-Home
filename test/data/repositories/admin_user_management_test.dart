@@ -1,6 +1,6 @@
 ﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/resident_model.dart';
+import 'package:vivona/data/models/resident_model.dart';
 
 void main() {
   group('Admin User Management & Multi-Apartment Tests (20261024_03)', () {
@@ -43,7 +43,7 @@ void main() {
         'id': 'user-multi-01',
         'full_name': 'Nguyễn Văn Đa Căn Hộ',
         'phone': '0901234567',
-        'email': 'dacanho@pka-home.vn',
+        'email': 'dacanho@vivona.vn',
         'role': 'resident',
         'is_locked': false,
         'is_active': true,
@@ -81,7 +81,7 @@ void main() {
       // Kiểm tra thông tin cơ bản
       expect(resident.id, 'user-multi-01');
       expect(resident.fullName, 'Nguyễn Văn Đa Căn Hộ');
-      expect(resident.email, 'dacanho@pka-home.vn');
+      expect(resident.email, 'dacanho@vivona.vn');
       expect(resident.phone, '0901234567');
       expect(resident.isActive, isTrue);
       expect(resident.isLocked, isFalse);

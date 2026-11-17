@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/equipment_maintenance_task_model.dart';
-import 'package:pka_home/data/providers/equipment_provider.dart';
-import 'package:pka_home/data/providers/resident_apartment_provider.dart';
-import 'package:pka_home/features/resident/widgets/equipment_interruption_banner.dart';
+import 'package:vivona/data/models/equipment_maintenance_task_model.dart';
+import 'package:vivona/data/providers/equipment_provider.dart';
+import 'package:vivona/data/providers/resident_apartment_provider.dart';
+import 'package:vivona/features/resident/widgets/equipment_interruption_banner.dart';
 
 void main() {
   final sampleTask1 = EquipmentMaintenanceTaskModel(

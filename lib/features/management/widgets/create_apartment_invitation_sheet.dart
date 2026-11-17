@@ -170,7 +170,7 @@ class _CreateApartmentInvitationSheetState
                         border: Border.all(color: AppTheme.border),
                       ),
                       child: QrImageView(
-                        data: 'https://pkahome.vn/invite?code=${_createdInvite!['invite_code']}',
+                        data: 'https://vivona.vn/invite?code=${_createdInvite!['invite_code']}',
                         version: QrVersions.auto,
                         size: 160.0,
                       ),
@@ -219,7 +219,7 @@ class _CreateApartmentInvitationSheetState
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () {
-                        final link = 'https://pkahome.vn/invite?code=${_createdInvite!['invite_code']}';
+                        final link = 'https://vivona.vn/invite?code=${_createdInvite!['invite_code']}';
                         Clipboard.setData(ClipboardData(text: link));
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Đã sao chép liên kết mời')),

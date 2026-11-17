@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/utility_fee_calculator.dart';
+import 'package:vivona/core/utils/utility_fee_calculator.dart';
 
 void main() {
   group('UtilityFeeCalculator.calculateElectricityEVN6Tiers Tests', () {

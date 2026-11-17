@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/invoice_fee_helper.dart';
+import 'package:vivona/core/utils/invoice_fee_helper.dart';
 
 void main() {
   group('InvoiceFeeHelper Tests', () {

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_utility_rate_model.dart';
-import 'package:pka_home/data/models/meter_reading_submission_model.dart';
-import 'package:pka_home/data/repositories/meter_reading_repository.dart';
+import 'package:vivona/data/models/building_utility_rate_model.dart';
+import 'package:vivona/data/models/meter_reading_submission_model.dart';
+import 'package:vivona/data/repositories/meter_reading_repository.dart';
 
 class MockMeterReadingRepository implements MeterReadingRepository {
   bool submitCalled = false;

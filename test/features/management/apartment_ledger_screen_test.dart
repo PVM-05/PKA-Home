@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_ledger_entry_model.dart';
-import 'package:pka_home/data/providers/accounting_providers.dart';
-import 'package:pka_home/data/repositories/accounting_repository.dart';
-import 'package:pka_home/features/management/screens/apartment_ledger_screen.dart';
+import 'package:vivona/data/models/apartment_ledger_entry_model.dart';
+import 'package:vivona/data/providers/accounting_providers.dart';
+import 'package:vivona/data/repositories/accounting_repository.dart';
+import 'package:vivona/features/management/screens/apartment_ledger_screen.dart';
 
 class MockAccountingRepoForUI extends AccountingRepository {
   @override

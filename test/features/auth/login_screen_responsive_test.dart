@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/features/auth/screens/login_screen.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/features/auth/screens/login_screen.dart';
 
 void main() {
   Widget buildTestApp({

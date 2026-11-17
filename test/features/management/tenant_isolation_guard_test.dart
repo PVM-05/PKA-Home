@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/constants/permissions.dart';
-import 'package:pka_home/core/widgets/role_guard.dart';
-import 'package:pka_home/data/models/building_membership_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
-import 'package:pka_home/data/providers/role_delegation_provider.dart';
-import 'package:pka_home/data/repositories/membership_repository.dart';
+import 'package:vivona/core/constants/permissions.dart';
+import 'package:vivona/core/widgets/role_guard.dart';
+import 'package:vivona/data/models/building_membership_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/role_delegation_provider.dart';
+import 'package:vivona/data/repositories/membership_repository.dart';
 
 class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
   FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));

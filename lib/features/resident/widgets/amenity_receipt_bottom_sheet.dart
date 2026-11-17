@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/data/models/amenity_booking_model.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/data/models/amenity_booking_model.dart';
 
 void showAmenityReceiptBottomSheet({
   required BuildContext context,
@@ -200,7 +200,7 @@ void showAmenityReceiptBottomSheet({
               ),
               onPressed: () {
                 final summary =
-                    'BIÊN NHẬN THANH TOÁN TIỆN ÍCH PKA-HOME\n'
+                    'BIÊN NHẬN THANH TOÁN TIỆN ÍCH VIVONA\n'
                     'Mã biên nhận: $receiptCode\n'
                     'Căn hộ: ${booking.apartmentCode ?? "N/A"}\n'
                     'Dịch vụ: ${booking.amenityName ?? fallbackAmenityName ?? "Dịch vụ"}\n'

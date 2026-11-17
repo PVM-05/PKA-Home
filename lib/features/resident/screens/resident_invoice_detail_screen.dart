@@ -1216,7 +1216,7 @@ class _ResidentInvoiceDetailScreenState
                 ),
                 onPressed: () {
                   final summary =
-                      'BIÊN NHẬN THANH TOÁN PKA-HOME\n'
+                      'BIÊN NHẬN THANH TOÁN VIVONA\n'
                       'Mã: $receiptCode\n'
                       'Căn hộ: ${_invoice.apartment?.code ?? "N/A"}\n'
                       'Kỳ: ${_invoice.period}\n'

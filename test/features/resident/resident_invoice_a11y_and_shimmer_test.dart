@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/core/widgets/app_empty_state.dart';
-import 'package:pka_home/core/widgets/app_skeleton_shimmer.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/providers/resident_invoice_provider.dart';
-import 'package:pka_home/features/resident/screens/resident_invoice_screen.dart';
+import 'package:vivona/core/widgets/app_empty_state.dart';
+import 'package:vivona/core/widgets/app_skeleton_shimmer.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/providers/resident_invoice_provider.dart';
+import 'package:vivona/features/resident/screens/resident_invoice_screen.dart';
 
 void main() {
   group('ResidentInvoiceScreen A11y & Shimmer Tests', () {

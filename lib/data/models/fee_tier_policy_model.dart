@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-/// Các loại chính sách biểu giá phí trong hệ thống PKA-Home
+/// Các loại chính sách biểu giá phí trong hệ thống Vivona
 enum FeePolicyType {
   electricityTier,
   waterQuotaTier,

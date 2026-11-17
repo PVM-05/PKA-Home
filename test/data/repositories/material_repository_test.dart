@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/guard_helper.dart';
-import 'package:pka_home/data/models/maintenance_material_model.dart';
-import 'package:pka_home/data/repositories/material_repository.dart';
+import 'package:vivona/core/utils/guard_helper.dart';
+import 'package:vivona/data/models/maintenance_material_model.dart';
+import 'package:vivona/data/repositories/material_repository.dart';
 
 void main() {
   group('MaterialRepository Fail-Closed Tests', () {

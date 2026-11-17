@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/announcement_model.dart';
-import 'package:pka_home/data/providers/announcement_provider.dart';
+import 'package:vivona/data/models/announcement_model.dart';
+import 'package:vivona/data/providers/announcement_provider.dart';
 
 void main() {
   group('activeEmergencyAnnouncementsProvider Tests', () {

@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_model.dart';
-import 'package:pka_home/data/providers/building_provider.dart';
-import 'package:pka_home/data/repositories/building_repository.dart';
+import 'package:vivona/data/models/building_model.dart';
+import 'package:vivona/data/providers/building_provider.dart';
+import 'package:vivona/data/repositories/building_repository.dart';
 
 void main() {
   group('BuildingRepository & Providers Tests', () {

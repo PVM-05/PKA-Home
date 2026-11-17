@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/announcement_model.dart';
-import 'package:pka_home/data/providers/announcement_provider.dart';
-import 'package:pka_home/data/repositories/announcement_repository.dart';
-import 'package:pka_home/features/management/screens/announcement_management_screen.dart';
+import 'package:vivona/data/models/announcement_model.dart';
+import 'package:vivona/data/providers/announcement_provider.dart';
+import 'package:vivona/data/repositories/announcement_repository.dart';
+import 'package:vivona/features/management/screens/announcement_management_screen.dart';
 
 class MockAnnouncementRepository implements AnnouncementRepository {
   bool createCalled = false;

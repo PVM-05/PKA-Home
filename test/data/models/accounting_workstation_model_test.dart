@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/accounting_workstation_model.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
+import 'package:vivona/data/models/accounting_workstation_model.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
 
 void main() {
   group('AccountingWorkstationFilter', () {

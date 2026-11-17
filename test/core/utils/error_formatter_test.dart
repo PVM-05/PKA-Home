@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/core/utils/error_formatter.dart';
+import 'package:vivona/core/utils/error_formatter.dart';
 
 void main() {
   group('formatErrorMessage Tests', () {

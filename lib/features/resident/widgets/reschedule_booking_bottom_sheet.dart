@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/core/utils/amenity_slot_helper.dart';
-import 'package:pka_home/core/utils/error_formatter.dart';
-import 'package:pka_home/data/models/amenity_booking_model.dart';
-import 'package:pka_home/data/models/building_amenity_model.dart';
-import 'package:pka_home/data/providers/amenity_booking_provider.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/utils/amenity_slot_helper.dart';
+import 'package:vivona/core/utils/error_formatter.dart';
+import 'package:vivona/data/models/amenity_booking_model.dart';
+import 'package:vivona/data/models/building_amenity_model.dart';
+import 'package:vivona/data/providers/amenity_booking_provider.dart';
 
 void showRescheduleBookingBottomSheet({
   required BuildContext context,

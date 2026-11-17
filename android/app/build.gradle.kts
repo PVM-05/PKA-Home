@@ -23,7 +23,7 @@ if (targetKeystoreFile != null) {
 }
 
 android {
-    namespace = "com.example.pka_home"
+    namespace = "vn.vivona.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -34,8 +34,8 @@ android {
     }
 
     defaultConfig {
-        // Unique Application ID for PKA-Home
-        applicationId = "vn.pka.home"
+        // Unique Application ID for Vivona PropTech Platform
+        applicationId = "vn.vivona.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

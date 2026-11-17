@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/resident_model.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/features/management/widgets/resident_360_detail_sheet.dart';
+import 'package:vivona/data/models/resident_model.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/features/management/widgets/resident_360_detail_sheet.dart';
 
 void main() {
   testWidgets('Resident360DetailSheet hiển thị thông tin cư dân và nút khóa/mở khóa tài khoản', (tester) async {

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/providers/resident_invoice_provider.dart';
+import 'package:vivona/data/providers/resident_invoice_provider.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 class MockWidgetRef extends Mock implements WidgetRef {}

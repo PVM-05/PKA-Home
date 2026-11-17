@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_ledger_entry_model.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/providers/accounting_providers.dart';
-import 'package:pka_home/data/providers/resident_invoice_provider.dart';
-import 'package:pka_home/data/repositories/accounting_repository.dart';
-import 'package:pka_home/features/resident/screens/resident_invoice_detail_screen.dart';
-import 'package:pka_home/features/resident/widgets/resident_ledger_history_sheet.dart';
+import 'package:vivona/data/models/apartment_ledger_entry_model.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/providers/accounting_providers.dart';
+import 'package:vivona/data/providers/resident_invoice_provider.dart';
+import 'package:vivona/data/repositories/accounting_repository.dart';
+import 'package:vivona/features/resident/screens/resident_invoice_detail_screen.dart';
+import 'package:vivona/features/resident/widgets/resident_ledger_history_sheet.dart';
 
 class MockAccountingRepoForResident extends AccountingRepository {
   @override

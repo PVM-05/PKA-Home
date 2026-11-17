@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/services/payment_service.dart';
-import 'package:pka_home/data/providers/payment_provider.dart';
+import 'package:vivona/data/services/payment_service.dart';
+import 'package:vivona/data/providers/payment_provider.dart';
 
 class MockPaymentService extends PaymentService {
   final bool shouldSucceed;

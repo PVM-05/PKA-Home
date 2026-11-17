@@ -1,4 +1,4 @@
-# Đặc Tả Cơ Sở Dữ Liệu PKA-Home (Database Schema)
+# Đặc Tả Cơ Sở Dữ Liệu Vivona (Database Schema)
 
 > **Hệ quản trị CSDL:** PostgreSQL 15+ trên nền tảng Supabase  
 > **Cơ chế bảo vệ dữ liệu:** Row Level Security (RLS) bắt buộc trên 100% các bảng  

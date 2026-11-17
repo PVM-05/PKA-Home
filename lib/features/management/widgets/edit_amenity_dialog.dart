@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/core/utils/error_formatter.dart';
-import 'package:pka_home/data/models/building_amenity_model.dart';
-import 'package:pka_home/data/providers/handbook_provider.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/utils/error_formatter.dart';
+import 'package:vivona/data/models/building_amenity_model.dart';
+import 'package:vivona/data/providers/handbook_provider.dart';
 
 void showEditAmenityDialog({
   required BuildContext context,

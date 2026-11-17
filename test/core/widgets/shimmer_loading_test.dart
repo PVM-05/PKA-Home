@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/widgets/shimmer_loading.dart';
+import 'package:vivona/core/widgets/shimmer_loading.dart';
 
 void main() {
   group('ShimmerLoading Widget Tests', () {

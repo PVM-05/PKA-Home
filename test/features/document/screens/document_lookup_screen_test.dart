@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/document_lookup_result_model.dart';
-import 'package:pka_home/data/providers/document_providers.dart';
-import 'package:pka_home/data/repositories/document_repository.dart';
-import 'package:pka_home/features/document/screens/document_lookup_screen.dart';
+import 'package:vivona/data/models/document_lookup_result_model.dart';
+import 'package:vivona/data/providers/document_providers.dart';
+import 'package:vivona/data/repositories/document_repository.dart';
+import 'package:vivona/features/document/screens/document_lookup_screen.dart';
 
 class MockDocumentRepositoryForUI extends DocumentRepository {
   final Map<String, DocumentLookupResultModel> cannedResponses;
@@ -49,8 +49,8 @@ void main() {
           status: 'paid',
           statusText: 'Đã thanh toán / Đã thu tiền',
           paymentMethod: 'Chuyển khoản QR VietQR',
-          issuer: 'Ban Quản Lý Chung Cư PKA-Home',
-          message: 'Chứng từ hợp lệ và tồn tại trên hệ thống quản lý PKA-Home',
+          issuer: 'Ban Quản Lý Chung Cư Vivona',
+          message: 'Chứng từ hợp lệ và tồn tại trên hệ thống quản lý Vivona',
         ),
       };
     });

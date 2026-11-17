@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/repositories/front_desk_repository.dart';
+import 'package:vivona/data/repositories/front_desk_repository.dart';
 import '../helpers/test_workflow_fakes.dart';
 
 void main() {

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/sepay_webhook_payload_model.dart';
-import 'package:pka_home/data/services/payment_service.dart';
+import 'package:vivona/data/models/sepay_webhook_payload_model.dart';
+import 'package:vivona/data/services/payment_service.dart';
 
 void main() {
   group('PaymentService SePay Tests', () {

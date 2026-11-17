@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_invitation_model.dart';
-import 'package:pka_home/data/models/resident_lease_contract_model.dart';
-import 'package:pka_home/data/repositories/resident_lifecycle_repository.dart';
+import 'package:vivona/data/models/apartment_invitation_model.dart';
+import 'package:vivona/data/models/resident_lease_contract_model.dart';
+import 'package:vivona/data/repositories/resident_lifecycle_repository.dart';
 
 class FakeResidentLifecycleRepository extends ResidentLifecycleRepository {
   final List<ResidentLeaseContractModel> mockContracts;

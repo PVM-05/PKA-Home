@@ -72,7 +72,7 @@ class MeterReadingRepository {
       // Fallback khi Storage chưa sẵn sàng hoặc môi trường cục bộ: trả về đường dẫn storage chuẩn
     }
 
-    return 'https://supabase.pka-home.vn/storage/v1/object/public/meter-images/$fileName';
+    return 'https://supabase.vivona.vn/storage/v1/object/public/meter-images/$fileName';
   }
 
   /// Cư dân gửi khai báo chỉ số điện nước mới (kèm độ tin cậy OCR và cảnh báo bất thường)

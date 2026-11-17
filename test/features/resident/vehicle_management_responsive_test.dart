@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/vehicle_model.dart';
-import 'package:pka_home/data/models/parking_slot_model.dart';
-import 'package:pka_home/data/providers/vehicle_provider.dart';
-import 'package:pka_home/data/providers/parking_provider.dart';
-import 'package:pka_home/features/resident/screens/vehicle_management_screen.dart';
+import 'package:vivona/data/models/vehicle_model.dart';
+import 'package:vivona/data/models/parking_slot_model.dart';
+import 'package:vivona/data/providers/vehicle_provider.dart';
+import 'package:vivona/data/providers/parking_provider.dart';
+import 'package:vivona/features/resident/screens/vehicle_management_screen.dart';
 
 void main() {
   group('VehicleManagementScreen Responsive & Anti-RenderFlex Tests', () {

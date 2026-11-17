@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/core/utils/utility_anomaly_detector.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/utils/utility_anomaly_detector.dart';
 
 void main() {
   group('Meter Reading Anomaly UI Component Tests', () {

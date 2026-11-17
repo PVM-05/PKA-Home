@@ -157,7 +157,7 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'PKA-Home cam kết bảo mật tuyệt đối dữ liệu cá nhân của cư dân và ban quản trị. Vui lòng đọc kỹ phạm vi và mục đích thu thập thông tin:',
+                        'Vivona cam kết bảo mật tuyệt đối dữ liệu cá nhân của cư dân và ban quản trị. Vui lòng đọc kỹ phạm vi và mục đích thu thập thông tin:',
                         style: TextStyle(
                           fontSize: 13,
                           height: 1.5,
@@ -272,7 +272,7 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                           setState(() => _agreed = !_agreed);
                         },
                         child: const Text(
-                          'Tôi đã đọc, hiểu rõ quyền chủ thể dữ liệu và tự nguyện đồng ý cho phép PKA-Home thu thập, xử lý thông tin cá nhân phục vụ vận hành tòa nhà.',
+                          'Tôi đã đọc, hiểu rõ quyền chủ thể dữ liệu và tự nguyện đồng ý cho phép Vivona thu thập, xử lý thông tin cá nhân phục vụ vận hành tòa nhà.',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppTheme.textPrimary,
@@ -441,7 +441,7 @@ void showPrivacyPolicyBottomSheet(BuildContext context) {
                         number: '1',
                         title: 'Tôn Chỉ & Phạm Vi Áp Dụng',
                         body:
-                            'PKA-Home cam kết bảo vệ an toàn tính riêng tư dữ liệu cá nhân cho Ban Quản Lý, Chủ căn hộ, Cư dân và Khách thuê theo nguyên tắc đặc quyền tối thiểu (Least Privilege) và bảo mật theo thiết kế (Privacy by Design).',
+                            'Vivona cam kết bảo vệ an toàn tính riêng tư dữ liệu cá nhân cho Ban Quản Lý, Chủ căn hộ, Cư dân và Khách thuê theo nguyên tắc đặc quyền tối thiểu (Least Privilege) và bảo mật theo thiết kế (Privacy by Design).',
                       ),
                       _PolicySectionCard(
                         number: '2',
@@ -477,7 +477,7 @@ void showPrivacyPolicyBottomSheet(BuildContext context) {
                         number: '7',
                         title: 'Liên Hệ Bộ Phận Bảo Vệ Dữ Liệu (DPO)',
                         body:
-                            'Email tiếp nhận: security@pkahome.vn\nĐơn vị vận hành: Ban Quản Trị & Giải Pháp PropTech PKA-Home.',
+                            'Email tiếp nhận: security@vivona.vn\nĐơn vị vận hành: Ban Quản Trị & Giải Pháp PropTech Vivona.',
                       ),
                     ],
                   ),

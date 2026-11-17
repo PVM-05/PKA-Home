@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/theme/accessibility_provider.dart';
+import 'package:vivona/core/theme/accessibility_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

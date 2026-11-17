@@ -3,10 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/data/repositories/auth_repository.dart';
-import 'package:pka_home/features/auth/screens/forgot_password_screen.dart';
-import 'package:pka_home/features/auth/screens/verify_otp_screen.dart';
-import 'package:pka_home/features/auth/screens/reset_password_screen.dart';
+import 'package:vivona/data/repositories/auth_repository.dart';
+import 'package:vivona/features/auth/screens/forgot_password_screen.dart';
+import 'package:vivona/features/auth/screens/verify_otp_screen.dart';
+import 'package:vivona/features/auth/screens/reset_password_screen.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 class MockUser extends Mock implements User {}

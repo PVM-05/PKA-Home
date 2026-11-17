@@ -12,9 +12,9 @@ import '../../data/repositories/notification_repository.dart';
 import '../router/route_names.dart';
 
 /// Kênh thông báo Android ưu tiên cao nhất: Có chuông, rung và banner nổi
-const AndroidNotificationChannel pkaHomeNotificationChannel = AndroidNotificationChannel(
-  'pka_home_high_importance_channel',
-  'Thông báo PKA-Home',
+const AndroidNotificationChannel vivonaNotificationChannel = AndroidNotificationChannel(
+  'vivona_high_importance_channel',
+  'Thông báo Vivona',
   description: 'Kênh nhận thông báo hóa đơn, sự cố và bảo trì tòa nhà có âm thanh và rung chuông.',
   importance: Importance.max,
   playSound: true,
@@ -255,7 +255,7 @@ class PushNotificationService {
       final androidImplementation = _localNotifications
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
-        await androidImplementation.createNotificationChannel(pkaHomeNotificationChannel);
+        await androidImplementation.createNotificationChannel(vivonaNotificationChannel);
         await androidImplementation.requestNotificationsPermission();
       }
     } catch (e) {
@@ -280,9 +280,9 @@ class PushNotificationService {
         notification.body,
         NotificationDetails(
           android: AndroidNotificationDetails(
-            pkaHomeNotificationChannel.id,
-            pkaHomeNotificationChannel.name,
-            channelDescription: pkaHomeNotificationChannel.description,
+            vivonaNotificationChannel.id,
+            vivonaNotificationChannel.name,
+            channelDescription: vivonaNotificationChannel.description,
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,
@@ -330,9 +330,9 @@ class PushNotificationService {
         body,
         NotificationDetails(
           android: AndroidNotificationDetails(
-            pkaHomeNotificationChannel.id,
-            pkaHomeNotificationChannel.name,
-            channelDescription: pkaHomeNotificationChannel.description,
+            vivonaNotificationChannel.id,
+            vivonaNotificationChannel.name,
+            channelDescription: vivonaNotificationChannel.description,
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,

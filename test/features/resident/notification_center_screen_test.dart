@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/notification_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
-import 'package:pka_home/data/providers/notification_provider.dart';
-import 'package:pka_home/features/resident/screens/notification_center_screen.dart';
+import 'package:vivona/data/models/notification_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/notification_provider.dart';
+import 'package:vivona/features/resident/screens/notification_center_screen.dart';
 
 class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
   FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));

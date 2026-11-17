@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/guard_helper.dart';
-import 'package:pka_home/data/repositories/resident_activation_repository.dart';
+import 'package:vivona/core/utils/guard_helper.dart';
+import 'package:vivona/data/repositories/resident_activation_repository.dart';
 
 void main() {
   group('ResidentActivationRepository Tests (Fail-Closed)', () {

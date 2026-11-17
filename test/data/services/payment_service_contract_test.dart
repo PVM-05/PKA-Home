@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/services/payment_service.dart';
+import 'package:vivona/data/services/payment_service.dart';
 
 void main() {
   group('PaymentResult Model Contract Tests', () {

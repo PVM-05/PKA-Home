@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/widgets/accounting_voucher_dialog.dart';
-import 'package:pka_home/data/models/maintenance_fund_transaction_model.dart';
+import 'package:vivona/core/widgets/accounting_voucher_dialog.dart';
+import 'package:vivona/data/models/maintenance_fund_transaction_model.dart';
 
 void main() {
   testWidgets('AccountingVoucherDialog displays standard voucher fields and Vietnamese words', (tester) async {

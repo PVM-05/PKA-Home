@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pka_home/core/utils/guard_helper.dart';
-import 'package:pka_home/data/models/debt_risk_score_model.dart';
-import 'package:pka_home/data/models/dunning_action_model.dart';
-import 'package:pka_home/data/repositories/debt_prediction_repository.dart';
-import 'package:pka_home/data/services/debt_prediction_engine.dart';
+import 'package:vivona/core/utils/guard_helper.dart';
+import 'package:vivona/data/models/debt_risk_score_model.dart';
+import 'package:vivona/data/models/dunning_action_model.dart';
+import 'package:vivona/data/repositories/debt_prediction_repository.dart';
+import 'package:vivona/data/services/debt_prediction_engine.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}

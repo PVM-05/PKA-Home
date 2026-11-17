@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/subscription_plan_model.dart';
-import 'package:pka_home/data/models/subscription_model.dart';
+import 'package:vivona/data/models/subscription_plan_model.dart';
+import 'package:vivona/data/models/subscription_model.dart';
 
 void main() {
   group('Subscription & Quota Models Tests', () {

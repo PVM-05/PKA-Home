@@ -51,7 +51,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                 ExcelExportHelper.shareFile(
                   filePath,
                   subject: 'Báo cáo Tuổi nợ và Tài chính',
-                  text: 'Báo cáo đối soát công nợ tòa nhà PKA-Home',
+                  text: 'Báo cáo đối soát công nợ tòa nhà Vivona',
                 );
               },
             ),

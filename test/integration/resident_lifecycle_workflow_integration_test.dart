@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/resident_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
-import 'package:pka_home/data/providers/link_request_provider.dart';
-import 'package:pka_home/data/providers/resident_lifecycle_provider.dart';
-import 'package:pka_home/data/repositories/resident_lifecycle_repository.dart';
-import 'package:pka_home/features/management/widgets/resident_360_detail_sheet.dart';
-import 'package:pka_home/features/management/widgets/apartment_contract_sheet.dart';
-import 'package:pka_home/features/resident/screens/link_request_screen.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/resident_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/link_request_provider.dart';
+import 'package:vivona/data/providers/resident_lifecycle_provider.dart';
+import 'package:vivona/data/repositories/resident_lifecycle_repository.dart';
+import 'package:vivona/features/management/widgets/resident_360_detail_sheet.dart';
+import 'package:vivona/features/management/widgets/apartment_contract_sheet.dart';
+import 'package:vivona/features/resident/screens/link_request_screen.dart';
 
 class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
   FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));

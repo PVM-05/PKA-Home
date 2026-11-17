@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/providers/resident_lifecycle_provider.dart';
-import 'package:pka_home/data/repositories/resident_lifecycle_repository.dart';
-import 'package:pka_home/features/management/widgets/apartment_contract_sheet.dart';
+import 'package:vivona/data/providers/resident_lifecycle_provider.dart';
+import 'package:vivona/data/repositories/resident_lifecycle_repository.dart';
+import 'package:vivona/features/management/widgets/apartment_contract_sheet.dart';
 
 class FakeLifecycleRepo extends ResidentLifecycleRepository {
   final List<ResidentLeaseContractModel> contracts;

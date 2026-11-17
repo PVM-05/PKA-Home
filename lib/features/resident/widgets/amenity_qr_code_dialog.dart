@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/data/models/amenity_booking_model.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/data/models/amenity_booking_model.dart';
 
 void showAmenityQrCodeDialog({
   required BuildContext context,

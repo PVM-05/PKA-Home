@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/core/utils/network_error_handler.dart';
+import 'package:vivona/core/utils/network_error_handler.dart';
 
 void main() {
   group('Booking Concurrency & Anti-Double-Click Resilience Tests', () {

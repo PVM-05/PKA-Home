@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/guard_helper.dart';
-import 'package:pka_home/data/repositories/front_desk_repository.dart';
+import 'package:vivona/core/utils/guard_helper.dart';
+import 'package:vivona/data/repositories/front_desk_repository.dart';
 
 void main() {
   group('FrontDeskRepository Fail-Closed Tests', () {

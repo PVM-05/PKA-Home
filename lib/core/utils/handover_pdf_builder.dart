@@ -34,11 +34,11 @@ class _HandoverPdfContext {
   }
 }
 
-/// Bộ máy dựng tài liệu PDF vector cho Biên bản bàn giao & kiểm kê tài sản (PKA-Home)
+/// Bộ máy dựng tài liệu PDF vector cho Biên bản bàn giao & kiểm kê tài sản (Vivona)
 /// Tuân thủ chuẩn in A4 B2B SaaS, pháp lý bàn giao căn hộ chung cư / căn hộ dịch vụ
 class HandoverPdfBuilder {
-  static const String defaultBuildingName = 'BAN QUẢN LÝ TÒA NHÀ PKA-HOME';
-  static const String defaultLookupBaseUrl = 'https://pka-home.vn/tra-cuu/bien-ban';
+  static const String defaultBuildingName = 'BAN QUẢN LÝ TÒA NHÀ VIVONA';
+  static const String defaultLookupBaseUrl = 'https://vivona.vn/tra-cuu/bien-ban';
 
   /// Khởi tạo theme PDF với font Roboto Unicode hoặc fallback sang Helvetica
   static Future<_HandoverPdfContext> _getPdfTheme({
@@ -184,7 +184,7 @@ class HandoverPdfBuilder {
                   style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.grey800),
                 ),
                 pw.Text(
-                  ctx.t('HỆ THỐNG VẬN HÀNH PKA-HOME SAAS'),
+                  ctx.t('HỆ THỐNG VẬN HÀNH VIVONA SAAS'),
                   style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
                 ),
               ],

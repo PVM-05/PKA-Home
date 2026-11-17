@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'sync_action_model.dart';
 
 class OfflineSyncQueueStorage {
-  static const String _storageKey = 'pka_home_offline_sync_queue';
+  static const String _storageKey = 'vivona_offline_sync_queue';
   final SharedPreferences? _prefs;
 
   OfflineSyncQueueStorage({this._prefs});

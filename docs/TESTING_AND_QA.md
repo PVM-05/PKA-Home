@@ -1,6 +1,6 @@
 # Bộ Quy Chuẩn Kiểm Thử Chất Lượng & Kịch Bản Nghiệm Thu (QA & UAT Testing)
 
-> **ĐỊNH HƯỚNG TỐI THƯỢNG:** PKA-Home là sản phẩm thương mại B2B SaaS phục vụ vận hành thực tế tại các tòa nhà/chuỗi căn hộ với người dùng thật. Toàn bộ kiến trúc và chức năng hệ thống được bảo chứng bằng quy trình **Test-Driven Development (TDD)** đa tầng, kiểm thử an ninh nghiêm ngặt và kịch bản nghiệm thu thực địa (User Acceptance Testing - UAT) chuẩn hóa.
+> **ĐỊNH HƯỚNG TỐI THƯỢNG:** Vivona là sản phẩm thương mại B2B SaaS phục vụ vận hành thực tế tại các tòa nhà/chuỗi căn hộ với người dùng thật. Toàn bộ kiến trúc và chức năng hệ thống được bảo chứng bằng quy trình **Test-Driven Development (TDD)** đa tầng, kiểm thử an ninh nghiêm ngặt và kịch bản nghiệm thu thực địa (User Acceptance Testing - UAT) chuẩn hóa.
 
 ---
 

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/bulk_invoice_validation_model.dart';
-import 'package:pka_home/data/models/vehicle_model.dart';
+import 'package:vivona/data/models/bulk_invoice_validation_model.dart';
+import 'package:vivona/data/models/vehicle_model.dart';
 
 void main() {
   test('ValidApartmentBillingItem đọc đúng estimated_total từ cả estimated_total và total_amount', () {

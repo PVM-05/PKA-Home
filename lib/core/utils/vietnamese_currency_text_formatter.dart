@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-/// Tiện ích đọc và định dạng số tiền bằng chữ tiếng Việt chuẩn mực cho Hóa đơn & Biên lai (PKA-Home)
+/// Tiện ích đọc và định dạng số tiền bằng chữ tiếng Việt chuẩn mực cho Hóa đơn & Biên lai (Vivona)
 class VietnameseCurrencyTextFormatter {
   static const List<String> _digits = [
     'không',

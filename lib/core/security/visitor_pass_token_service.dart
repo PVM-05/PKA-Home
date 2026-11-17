@@ -56,9 +56,10 @@ class VisitorPassTokenResult {
 class VisitorPassTokenService {
   VisitorPassTokenService._();
 
-  static const String _tokenPrefix = 'PKAPASS.v1.';
+  static const String _tokenPrefix = 'VIVONAPASS.v1.';
+  static const String _legacyV1Prefix = 'PKAPASS.v1.';
   static const String _legacyPrefix = 'PKAPASS:';
-  static const String _defaultPepper = 'PkaHome@SecurityPassSignaturePepper#2026';
+  static const String _defaultPepper = 'Vivona@SecurityPassSignaturePepper#2026';
 
   /// Sinh chuỗi QR đã ký mật mã học cho vé khách
   static String generateSignedQrPayload({
@@ -102,12 +103,16 @@ class VisitorPassTokenService {
       return VisitorPassTokenResult.invalid('Mã vé legacy không hợp lệ');
     }
 
-    // 2. Kiểm tra định dạng V1 Token: PKAPASS.v1.<passCode>.<issuedAt>.<expiresAt>.<nonce>.<sig>
-    if (!trimmed.startsWith(_tokenPrefix)) {
+    // 2. Kiểm tra định dạng V1 Token: VIVONAPASS.v1.<passCode>.<issuedAt>.<expiresAt>.<nonce>.<sig> (hoặc legacy PKAPASS.v1.)
+    final bool isV1 = trimmed.startsWith(_tokenPrefix);
+    final bool isLegacyV1 = !isV1 && trimmed.startsWith(_legacyV1Prefix);
+
+    if (!isV1 && !isLegacyV1) {
       return VisitorPassTokenResult.invalid('Mã QR không đúng định dạng vé khách của tòa nhà');
     }
 
-    final payloadWithoutPrefix = trimmed.substring(_tokenPrefix.length);
+    final prefixLength = isV1 ? _tokenPrefix.length : _legacyV1Prefix.length;
+    final payloadWithoutPrefix = trimmed.substring(prefixLength);
     final parts = payloadWithoutPrefix.split('.');
 
     if (parts.length != 5) {

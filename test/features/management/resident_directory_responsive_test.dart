@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/models/resident_model.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
-import 'package:pka_home/data/providers/management_provider.dart';
-import 'package:pka_home/data/providers/dashboard_providers.dart';
-import 'package:pka_home/data/providers/role_delegation_provider.dart';
-import 'package:pka_home/features/management/screens/resident_management_screen.dart';
-import 'package:pka_home/features/management/screens/apartment_management_screen.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/models/resident_model.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/management_provider.dart';
+import 'package:vivona/data/providers/dashboard_providers.dart';
+import 'package:vivona/data/providers/role_delegation_provider.dart';
+import 'package:vivona/features/management/screens/resident_management_screen.dart';
+import 'package:vivona/features/management/screens/apartment_management_screen.dart';
 
 class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>>
     implements AuthNotifier {
@@ -57,7 +57,7 @@ void main() {
     ResidentModel(
       id: 'res-1',
       fullName: 'Nguyễn Văn Cư Dân',
-      email: 'nguyen.van.a@pka-home.vn',
+      email: 'nguyen.van.a@vivona.vn',
       phone: '0901234567',
       role: 'resident',
       isActive: true,
@@ -67,7 +67,7 @@ void main() {
     ResidentModel(
       id: 'res-2',
       fullName: 'Trần Thị Thuê Nhà',
-      email: 'tran.thi.b@pka-home.vn',
+      email: 'tran.thi.b@vivona.vn',
       phone: '0909876543',
       role: 'resident',
       isActive: false,
@@ -77,7 +77,7 @@ void main() {
     ResidentModel(
       id: 'res-3',
       fullName: 'Phạm Kỹ Thuật Viên',
-      email: 'pham.kythuat@pka-home.vn',
+      email: 'pham.kythuat@vivona.vn',
       phone: '0912345678',
       role: 'technician',
       isActive: true,

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/repositories/maintenance_fund_repository.dart';
+import 'package:vivona/data/repositories/maintenance_fund_repository.dart';
 
 void main() {
   group('MaintenanceFundRepository Unit Tests', () {

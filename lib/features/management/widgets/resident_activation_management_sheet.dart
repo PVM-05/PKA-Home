@@ -542,10 +542,10 @@ class _ResidentActivationManagementSheetState
 
   void _copyInviteMessage(ResidentActivationModel item) {
     final inviteMsg =
-        '[PKA-Home] Ban Quản Lý trân trọng gửi mã kích hoạt tài khoản căn hộ ${item.apartmentCode} cho cư dân ${item.fullName}:\n'
+        '[Vivona] Ban Quản Lý trân trọng gửi mã kích hoạt tài khoản căn hộ ${item.apartmentCode} cho cư dân ${item.fullName}:\n'
         '• Số điện thoại: ${item.phone}\n'
         '• Mã kích hoạt: ${item.activationCode}\n'
-        'Vui lòng tải ứng dụng PKA-Home và chọn "Kích hoạt tài khoản lần đầu" để đăng nhập và nhận thông báo từ tòa nhà.';
+        'Vui lòng tải ứng dụng Vivona và chọn "Kích hoạt tài khoản lần đầu" để đăng nhập và nhận thông báo từ tòa nhà.';
 
     Clipboard.setData(ClipboardData(text: inviteMsg));
     ScaffoldMessenger.of(context).showSnackBar(

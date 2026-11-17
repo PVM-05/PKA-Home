@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/data/repositories/issue_repository.dart';
-import 'package:pka_home/data/repositories/management_repository.dart';
+import 'package:vivona/data/repositories/issue_repository.dart';
+import 'package:vivona/data/repositories/management_repository.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 class MockSupabaseQueryBuilder extends Mock implements SupabaseQueryBuilder {}

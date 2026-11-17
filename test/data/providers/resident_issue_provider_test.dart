@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/repositories/issue_repository.dart';
-import 'package:pka_home/data/repositories/auth_repository.dart';
-import 'package:pka_home/data/providers/resident_issue_provider.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/repositories/issue_repository.dart';
+import 'package:vivona/data/repositories/auth_repository.dart';
+import 'package:vivona/data/providers/resident_issue_provider.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockIssueRepository extends Mock implements IssueRepository {}

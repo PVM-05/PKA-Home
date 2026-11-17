@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/financial_aging_report_model.dart';
-import 'package:pka_home/data/providers/financial_report_provider.dart';
-import 'package:pka_home/features/management/screens/financial_report_screen.dart';
+import 'package:vivona/data/models/financial_aging_report_model.dart';
+import 'package:vivona/data/providers/financial_report_provider.dart';
+import 'package:vivona/features/management/screens/financial_report_screen.dart';
 
 void main() {
   testWidgets('FinancialReportScreen displays KPI cards, aging buckets, and debtors list', (tester) async {

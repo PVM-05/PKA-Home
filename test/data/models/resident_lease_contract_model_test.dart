@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/resident_lease_contract_model.dart';
+import 'package:vivona/data/models/resident_lease_contract_model.dart';
 
 void main() {
   group('ResidentLeaseContractModel Tests', () {

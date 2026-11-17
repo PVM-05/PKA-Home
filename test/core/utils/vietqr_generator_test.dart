@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/vietqr_generator.dart';
+import 'package:vivona/core/utils/vietqr_generator.dart';
 
 void main() {
   group('VietQrGenerator Tests', () {

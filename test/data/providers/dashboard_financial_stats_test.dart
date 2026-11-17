@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/providers/dashboard_providers.dart';
+import 'package:vivona/data/providers/dashboard_providers.dart';
 
 void main() {
   group('FinancialStats Calculation Tests', () {

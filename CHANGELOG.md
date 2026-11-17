@@ -1,8 +1,21 @@
 # Nhật Ký Thay Đổi (Changelog)
 
-Tất cả các thay đổi đáng chú ý của dự án **PKA-Home - Nền Tảng Quản Lý Vận Hành Bất Động Sản & Chung Cư Thương Mại (Commercial PropTech SaaS)** sẽ được ghi chép tại tài liệu này.
+Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tảng Quản Lý Vận Hành Bất Động Sản & Chung Cư Thương Mại (Commercial PropTech SaaS)** sẽ được ghi chép tại tài liệu này.
 
 Định dạng tuân thủ tiêu chuẩn [Keep a Changelog](https://keepachangelog.com/vi/1.0.0/) và quy tắc đánh số phiên bản [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [2.2.0] - 2026-11-17
+
+### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
+- **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.
+- **Định Danh Nền Tảng Di Động (Native Identifiers)**:
+  - **Android**: Chuyển đổi `applicationId` và `namespace` sang `vn.vivona.app`. Di chuyển `MainActivity.kt` sang package `vn.vivona.app`, đổi Notification Channel sang `vivona_high_importance_channel` ("Thông báo Vivona").
+  - **iOS**: Chuyển đổi `PRODUCT_BUNDLE_IDENTIFIER` sang `vn.vivona.app`, cập nhật `CFBundleDisplayName` thành `Vivona` và bổ sung URL Scheme `vivona://`.
+  - **Web**: Cập nhật tiêu đề web và Web App Manifest sang `Vivona - Nền Tảng Quản Lý Chung Cư`.
+- **Đồng Bộ Chuỗi Nhãn & Hằng Số Bảo Mật**: Cập nhật toàn bộ nhãn hiển thị trong ứng dụng (100% tiếng Việt chuẩn mực), muối băm thẻ khách thăm `Vivona@SecurityPassSignaturePepper#2026`, khóa Offline Storage `vivona_offline_sync_queue`, domain `vivona.vn`, email tiếp nhận `security@vivona.vn` và thông báo nhật ký vận hành `[VIVONA]`.
+- **Đồng Bộ Toàn Diện Hồ Sơ Pháp Lý & Tài Liệu**: Cập nhật `README.md`, `CHANGELOG.md`, `DESIGN.md`, `PRODUCT.md` và các tài liệu kỹ thuật liên quan.
 
 ---
 

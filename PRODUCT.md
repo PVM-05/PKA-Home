@@ -20,7 +20,7 @@ Flutter 3.x, Dart 3.x, Riverpod 2.6, Supabase, PostgreSQL RLS, Printing / PDF
 
 ## Product Purpose
 
-PKA-Home là nền tảng thương mại **B2B SaaS & PropTech Platform** toàn diện phục vụ quản lý, vận hành và số hóa trải nghiệm cư dân tại các chung cư, cụm nhà cao tầng và khu đô thị thông minh tại Việt Nam. Sản phẩm giải quyết triệt để các bài toán thực tế: thất thoát chỉ số điện nước, chậm trễ thu phí quản lý, tắc nghẽn xử lý phản ánh sự cố và rủi ro tranh chấp tài sản bàn giao.
+Vivona là nền tảng thương mại **B2B SaaS & PropTech Platform** toàn diện phục vụ quản lý, vận hành và số hóa trải nghiệm cư dân tại các chung cư, cụm nhà cao tầng và khu đô thị thông minh tại Việt Nam. Sản phẩm giải quyết triệt để các bài toán thực tế: thất thoát chỉ số điện nước, chậm trễ thu phí quản lý, tắc nghẽn xử lý phản ánh sự cố và rủi ro tranh chấp tài sản bàn giao.
 
 ## Positioning
 
@@ -42,7 +42,7 @@ Sản phẩm thương mại PropTech thế hệ mới tuân thủ nghiêm ngặt
 
 ## Brand Commitments
 
-- **Thương hiệu**: PKA-Home - Vận hành Thông minh, An cư Thịnh vượng.
+- **Thương hiệu**: Vivona — Nơi chung cư sống động hơn (Quản lý tòa nhà, chạm là xong).
 - **Hình ảnh**: Chuyên nghiệp, tin cậy, sắc nét, hiện đại, mang đẳng cấp quốc tế nhưng gắn chặt với chuẩn mực văn hóa và nghiệp vụ Việt Nam.
 
 ## Product Principles

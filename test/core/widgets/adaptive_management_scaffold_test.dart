@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/widgets/adaptive_management_scaffold.dart';
+import 'package:vivona/core/widgets/adaptive_management_scaffold.dart';
 
 void main() {
   const testDestinations = [
@@ -70,13 +70,13 @@ void main() {
         buildScaffold(
           selectedIndex: selectedIdx,
           onDestinationSelected: (idx) => selectedIdx = idx,
-          sidebarHeader: const Text('PKA-HOME BQL'),
+          sidebarHeader: const Text('VIVONA BQL'),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(find.byType(NavigationBar), findsNothing);
-      expect(find.text('PKA-HOME BQL'), findsOneWidget);
+      expect(find.text('VIVONA BQL'), findsOneWidget);
       expect(find.text('Nội dung trang'), findsOneWidget);
       expect(find.text('Tổng quan'), findsOneWidget);
       expect(find.text('Kế toán'), findsOneWidget);

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/issue_comment_model.dart';
+import 'package:vivona/data/models/issue_comment_model.dart';
 
 void main() {
   group('IssueCommentModel Tests', () {

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/providers/accounting_workstation_provider.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
-import 'package:pka_home/data/providers/dashboard_providers.dart';
-import 'package:pka_home/data/providers/management_provider.dart';
-import 'package:pka_home/data/providers/role_delegation_provider.dart';
-import 'package:pka_home/features/management/screens/management_home_screen.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/accounting_workstation_provider.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/dashboard_providers.dart';
+import 'package:vivona/data/providers/management_provider.dart';
+import 'package:vivona/data/providers/role_delegation_provider.dart';
+import 'package:vivona/features/management/screens/management_home_screen.dart';
 
 class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>>
     implements AuthNotifier {
@@ -91,8 +91,8 @@ void main() {
 
     // Phai co NavigationBar o duoi
     expect(find.byType(NavigationBar), findsOneWidget);
-    // Khong duoc co sidebar PKA HOME header ben trai
-    expect(find.text('PKA HOME'), findsNothing);
+    // Khong duoc co sidebar VIVONA header ben trai
+    expect(find.text('VIVONA'), findsNothing);
   });
 
   testWidgets('Desktop view (>=900dp) renders Sidebar and allows navigation to Accounting Workstation', (tester) async {
@@ -109,8 +109,8 @@ void main() {
 
     // Khong duoc co NavigationBar o duoi
     expect(find.byType(NavigationBar), findsNothing);
-    // Phai co Sidebar co dinh ben trai voi tieu de PKA HOME
-    expect(find.text('PKA HOME'), findsOneWidget);
+    // Phai co Sidebar co dinh ben trai voi tieu de VIVONA
+    expect(find.text('VIVONA'), findsOneWidget);
 
     // Chon tab "Đối soát" tren sidebar
     final workstationItem = find.text('Đối soát');

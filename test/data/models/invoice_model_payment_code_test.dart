@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
 
 void main() {
   group('InvoiceModel Payment Code & VietQR Tests', () {

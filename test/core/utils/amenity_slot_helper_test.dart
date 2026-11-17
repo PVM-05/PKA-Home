@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/amenity_slot_helper.dart';
-import 'package:pka_home/data/models/amenity_maintenance_model.dart';
+import 'package:vivona/core/utils/amenity_slot_helper.dart';
+import 'package:vivona/data/models/amenity_maintenance_model.dart';
 
 void main() {
   group('AmenitySlotHelper.generateSlots', () {

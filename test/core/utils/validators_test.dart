@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/validators.dart';
+import 'package:vivona/core/utils/validators.dart';
 
 void main() {
   group('validators Unit Tests', () {

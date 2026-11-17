@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/core/widgets/app_card.dart';
-import 'package:pka_home/features/management/widgets/stat_card.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/widgets/app_card.dart';
+import 'package:vivona/features/management/widgets/stat_card.dart';
 
 void main() {
   group('AppTheme Impeccable Design Tokens', () {

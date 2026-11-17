@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/emergency_contact_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/core/constants/app_constants.dart';
+import 'package:vivona/data/models/emergency_contact_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/core/constants/app_constants.dart';
 
 void main() {
   group('DisplayName and Constants Tests', () {

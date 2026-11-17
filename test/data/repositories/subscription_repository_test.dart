@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/subscription_model.dart';
-import 'package:pka_home/data/repositories/subscription_repository.dart';
+import 'package:vivona/data/models/subscription_model.dart';
+import 'package:vivona/data/repositories/subscription_repository.dart';
 
 void main() {
   group('SubscriptionRepository Tests', () {

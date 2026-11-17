@@ -28,10 +28,10 @@ class _PdfContext {
   }
 }
 
-/// Engine dựng tài liệu PDF vector cho Hóa đơn & Biên lai (PKA-Home)
+/// Engine dựng tài liệu PDF vector cho Hóa đơn & Biên lai (Vivona)
 /// Hỗ trợ chuẩn A4 Hóa đơn, A4 Biên lai điện tử và Phiếu in nhiệt cuộn 80mm
 class DocumentPdfBuilder {
-  static const String defaultBuildingName = 'BAN QUẢN LÝ CHUNG CƯ PKA-HOME';
+  static const String defaultBuildingName = 'BAN QUẢN LÝ CHUNG CƯ VIVONA';
   static const String defaultBuildingAddress =
       'Khu Đô Thị Sáng Tạo PKA, TP. Hà Nội';
   static const String defaultHotline = '1900 8888 - 0987 654 321';
@@ -39,7 +39,7 @@ class DocumentPdfBuilder {
   static const String defaultBankName = '';
   static const String defaultBankAccount = '';
   static const String defaultAccountName = '';
-  static const String defaultLookupBaseUrl = 'https://pka-home.vn/tra-cuu';
+  static const String defaultLookupBaseUrl = 'https://vivona.vn/tra-cuu';
 
   /// Khởi tạo theme PDF với font Roboto Unicode hoặc fallback sang Helvetica
   static Future<_PdfContext> _getPdfTheme({
@@ -476,7 +476,7 @@ class DocumentPdfBuilder {
                 children: [
                   pw.Text(
                     ctx.t(
-                      'Chứng từ điện tử tạo từ Hệ thống Quản trị PKA-Home | Tra cứu: $defaultLookupBaseUrl',
+                      'Chứng từ điện tử tạo từ Hệ thống Quản trị Vivona | Tra cứu: $defaultLookupBaseUrl',
                     ),
                     style: const pw.TextStyle(
                       fontSize: 7.5,
@@ -835,7 +835,7 @@ class DocumentPdfBuilder {
                               crossAxisAlignment: pw.CrossAxisAlignment.center,
                               children: [
                                 pw.Text(
-                                  ctx.t('★ BAN QUẢN LÝ CHUNG CƯ PKA-HOME ★'),
+                                  ctx.t('★ BAN QUẢN LÝ CHUNG CƯ VIVONA ★'),
                                   style: pw.TextStyle(
                                     fontSize: 8,
                                     fontWeight: pw.FontWeight.bold,
@@ -859,7 +859,7 @@ class DocumentPdfBuilder {
                                 ),
                                 pw.SizedBox(height: 3),
                                 pw.Text(
-                                  ctx.t('Ký số: HỆ THỐNG TÀI CHÍNH PKA-HOME'),
+                                  ctx.t('Ký số: HỆ THỐNG TÀI CHÍNH VIVONA'),
                                   style: pw.TextStyle(
                                     fontSize: 6.8,
                                     color: stampColor,

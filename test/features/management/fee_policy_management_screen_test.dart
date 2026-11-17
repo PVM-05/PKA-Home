@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/fee_tier_policy_model.dart';
-import 'package:pka_home/data/providers/fee_policy_providers.dart';
-import 'package:pka_home/data/repositories/fee_policy_repository.dart';
-import 'package:pka_home/features/management/screens/fee_policy_management_screen.dart';
-import 'package:pka_home/features/management/widgets/quick_fee_calculator_sheet.dart';
+import 'package:vivona/data/models/fee_tier_policy_model.dart';
+import 'package:vivona/data/providers/fee_policy_providers.dart';
+import 'package:vivona/data/repositories/fee_policy_repository.dart';
+import 'package:vivona/features/management/screens/fee_policy_management_screen.dart';
+import 'package:vivona/features/management/widgets/quick_fee_calculator_sheet.dart';
 
 class MockFeePolicyRepositoryForUI extends FeePolicyRepository {
   @override

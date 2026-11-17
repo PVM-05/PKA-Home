@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/notification_model.dart';
+import 'package:vivona/data/models/notification_model.dart';
 
 void main() {
   group('NotificationModel Phase E1 Tests', () {

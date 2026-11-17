@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/building_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/providers/resident_apartment_provider.dart';
+import 'package:vivona/data/models/building_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/providers/resident_apartment_provider.dart';
 
 void main() {
   group('BuildingModel Bank Account Tests (Fail-Closed)', () {

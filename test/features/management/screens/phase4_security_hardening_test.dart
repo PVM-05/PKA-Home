@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/constants/permissions.dart';
-import 'package:pka_home/core/router/route_names.dart';
-import 'package:pka_home/data/models/resident_model.dart';
+import 'package:vivona/core/constants/permissions.dart';
+import 'package:vivona/core/router/route_names.dart';
+import 'package:vivona/data/models/resident_model.dart';
 
 void main() {
   group('Giai Đoạn 4: Hardening Bảo Mật, Phân Quyền & An Toàn Thao Tác Tests', () {

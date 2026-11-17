@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_amenity_model.dart';
-import 'package:pka_home/data/models/building_rule_model.dart';
-import 'package:pka_home/data/models/emergency_contact_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
-import 'package:pka_home/data/providers/handbook_provider.dart';
-import 'package:pka_home/data/repositories/auth_repository.dart';
-import 'package:pka_home/data/repositories/handbook_repository.dart';
-import 'package:pka_home/features/management/screens/handbook_management_screen.dart';
-import 'package:pka_home/features/resident/screens/resident_handbook_screen.dart';
+import 'package:vivona/data/models/building_amenity_model.dart';
+import 'package:vivona/data/models/building_rule_model.dart';
+import 'package:vivona/data/models/emergency_contact_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/handbook_provider.dart';
+import 'package:vivona/data/repositories/auth_repository.dart';
+import 'package:vivona/data/repositories/handbook_repository.dart';
+import 'package:vivona/features/management/screens/handbook_management_screen.dart';
+import 'package:vivona/features/resident/screens/resident_handbook_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _MockHandbookRepository implements HandbookRepository {

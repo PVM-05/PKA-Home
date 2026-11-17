@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/features/auth/widgets/mfa_setup_dialog.dart';
-import 'package:pka_home/features/auth/widgets/mfa_verification_dialog.dart';
+import 'package:vivona/features/auth/widgets/mfa_setup_dialog.dart';
+import 'package:vivona/features/auth/widgets/mfa_verification_dialog.dart';
 
 void main() {
   group('MfaVerificationDialog Widget Tests', () {

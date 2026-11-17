@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/issue_rating_model.dart';
+import 'package:vivona/data/models/issue_rating_model.dart';
 
 void main() {
   group('IssueRatingModel TDD Tests', () {

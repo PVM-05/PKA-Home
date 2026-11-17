@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/widgets/maintenance_fund_card.dart';
-import 'package:pka_home/data/models/maintenance_fund_model.dart';
-import 'package:pka_home/data/providers/maintenance_fund_provider.dart';
+import 'package:vivona/core/widgets/maintenance_fund_card.dart';
+import 'package:vivona/data/models/maintenance_fund_model.dart';
+import 'package:vivona/data/providers/maintenance_fund_provider.dart';
 
 void main() {
   testWidgets('MaintenanceFundCard renders fund title and expands details on click with real provider data', (tester) async {

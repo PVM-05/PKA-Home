@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/security/auth_rate_limiter.dart';
+import 'package:vivona/core/security/auth_rate_limiter.dart';
 
 void main() {
   group('AuthRateLimiter Tests', () {

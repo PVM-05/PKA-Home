@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_model.dart';
-import 'package:pka_home/data/models/resident_activation_model.dart';
-import 'package:pka_home/data/providers/building_provider.dart';
-import 'package:pka_home/data/providers/resident_activation_provider.dart';
-import 'package:pka_home/data/repositories/resident_activation_repository.dart';
-import 'package:pka_home/features/management/widgets/resident_activation_management_sheet.dart';
+import 'package:vivona/data/models/building_model.dart';
+import 'package:vivona/data/models/resident_activation_model.dart';
+import 'package:vivona/data/providers/building_provider.dart';
+import 'package:vivona/data/providers/resident_activation_provider.dart';
+import 'package:vivona/data/repositories/resident_activation_repository.dart';
+import 'package:vivona/features/management/widgets/resident_activation_management_sheet.dart';
 
 class FakeResidentActivationRepository extends ResidentActivationRepository {
   @override

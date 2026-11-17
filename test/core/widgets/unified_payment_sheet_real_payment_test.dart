@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/core/widgets/unified_payment_sheet.dart';
-import 'package:pka_home/data/models/building_model.dart';
-import 'package:pka_home/data/models/building_payment_config_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
-import 'package:pka_home/data/providers/building_provider.dart';
-import 'package:pka_home/data/providers/payment_provider.dart';
-import 'package:pka_home/data/providers/resident_invoice_provider.dart';
-import 'package:pka_home/data/services/payment_service.dart';
+import 'package:vivona/core/widgets/unified_payment_sheet.dart';
+import 'package:vivona/data/models/building_model.dart';
+import 'package:vivona/data/models/building_payment_config_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
+import 'package:vivona/data/providers/building_provider.dart';
+import 'package:vivona/data/providers/payment_provider.dart';
+import 'package:vivona/data/providers/resident_invoice_provider.dart';
+import 'package:vivona/data/services/payment_service.dart';
 
 void main() {
   group('UnifiedPaymentSheet Real Payment Tests', () {

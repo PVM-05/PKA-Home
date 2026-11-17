@@ -139,10 +139,10 @@ class DataPrivacyService {
     // 5. Đóng gói payload xuất dữ liệu cá nhân theo quy chuẩn PDPL
     final rawPayload = {
       'export_metadata': {
-        'platform': 'PKA-Home Commercial PropTech SaaS',
+        'platform': 'Vivona Commercial PropTech SaaS',
         'export_standard': 'PDPL_VN_91_2025_QH15_ART15',
         'exported_at': DateTime.now().toIso8601String(),
-        'dpo_contact': 'security@pkahome.vn',
+        'dpo_contact': 'security@vivona.vn',
       },
       'subject_identity': {
         'user_id': user.id,
@@ -200,7 +200,7 @@ class DataPrivacyService {
     final directory = await getTemporaryDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final sanitizedName = userName.toLowerCase().replaceAll(RegExp(r'\s+'), '_');
-    final filePath = '${directory.path}/pkahome_pdpl_data_${sanitizedName}_$timestamp.json';
+    final filePath = '${directory.path}/vivona_pdpl_data_${sanitizedName}_$timestamp.json';
 
     final file = File(filePath);
     await file.writeAsString(prettyJson, flush: true);
@@ -208,7 +208,7 @@ class DataPrivacyService {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/json')],
-        subject: 'Sao kê dữ liệu cá nhân PKA-Home (PDPL)',
+        subject: 'Sao kê dữ liệu cá nhân Vivona (PDPL)',
         text: 'Bản sao kê dữ liệu cá nhân cư dân theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15.',
       ),
     );

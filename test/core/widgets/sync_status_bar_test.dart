@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/sync/offline_sync_manager.dart';
-import 'package:pka_home/core/sync/sync_providers.dart';
-import 'package:pka_home/core/widgets/sync_status_bar.dart';
+import 'package:vivona/core/sync/offline_sync_manager.dart';
+import 'package:vivona/core/sync/sync_providers.dart';
+import 'package:vivona/core/widgets/sync_status_bar.dart';
 
 void main() {
   group('SyncStatusBar Widget Tests', () {

@@ -1,4 +1,4 @@
-# Kiến Trúc Kỹ Thuật Hệ Thống PKA-Home (Architecture)
+# Kiến Trúc Kỹ Thuật Hệ Thống Vivona (Architecture)
 
 > **Mục tiêu kiến trúc:** Xây dựng hệ thống có tính ổn định cao (High Availability), phản hồi thời gian thực (Realtime), an toàn dữ liệu tài chính (Financial Integrity) và dễ dàng mở rộng từ 1 tòa nhà lên hàng trăm tòa nhà/khu nhà trọ (Multi-tenancy Scale).
 
@@ -6,7 +6,7 @@
 
 ## 1. Kiến Trúc Tổng Thể (System Architecture)
 
-PKA-Home áp dụng mô hình **Client - Cloud Backend (BaaS)** kết hợp với kiến trúc **Event-Driven & Reactive State**:
+Vivona áp dụng mô hình **Client - Cloud Backend (BaaS)** kết hợp với kiến trúc **Event-Driven & Reactive State**:
 
 ```mermaid
 graph TD
@@ -77,7 +77,7 @@ lib/
 
 ## 3. Quản Lý Trạng Thái Phản Ứng (Riverpod 2.0 Reactive Flow)
 
-PKA-Home triệt để tuân thủ nguyên tắc: **Widget không bao giờ gọi trực tiếp cơ sở dữ liệu**. Mọi tương tác dữ liệu đều tuân theo chu trình phản ứng 4 bước:
+Vivona triệt để tuân thủ nguyên tắc: **Widget không bao giờ gọi trực tiếp cơ sở dữ liệu**. Mọi tương tác dữ liệu đều tuân theo chu trình phản ứng 4 bước:
 
 1. **Widget:** Lắng nghe Provider thông qua `ref.watch(someProvider)`. Khi Provider cập nhật dữ liệu, Widget tự động render lại một cách tối ưu mà không giật lag.
 2. **Provider:** Sử dụng `AsyncNotifierProvider` cho các dữ liệu bất đồng bộ (tự động xử lý 3 trạng thái: `loading`, `error`, `data`) hoặc `StreamProvider` cho dữ liệu thời gian thực.
@@ -88,7 +88,7 @@ PKA-Home triệt để tuân thủ nguyên tắc: **Widget không bao giờ gọ
 
 ## 4. Cơ Chế Thông Báo Realtime & Database Triggers
 
-Thay vì yêu cầu Client liên tục gửi request thăm dò (Polling) gây tốn pin và băng thông máy chủ, PKA-Home sử dụng mô hình **PostgreSQL Change Data Capture (CDC)**:
+Thay vì yêu cầu Client liên tục gửi request thăm dò (Polling) gây tốn pin và băng thông máy chủ, Vivona sử dụng mô hình **PostgreSQL Change Data Capture (CDC)**:
 
 ```mermaid
 sequenceDiagram

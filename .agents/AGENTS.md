@@ -1,7 +1,7 @@
 # Quy định Bắt buộc cho Agent
 
 ## 1. Định Vị Sản Phẩm & Tuân thủ Quy tắc Dự Án
-> **ĐỊNH HƯỚNG TỐI THƯỢNG:** PKA-Home là **sản phẩm phần mềm thương mại thực tế (Commercial Production SaaS & PropTech Platform)**, phục vụ người dùng thật (Ban Quản Lý, Chủ tòa nhà, Đơn vị vận hành, Kế toán, Kỹ thuật viên, Cư dân và Khách thuê). Sản phẩm được thiết kế và xây dựng để **kinh doanh thương mại hóa B2B SaaS** và bán giải pháp cho các đơn vị quản lý vận hành bất động sản.
+> **ĐỊNH HƯỚNG TỐI THƯỢNG:** Vivona là **sản phẩm phần mềm thương mại thực tế (Commercial Production SaaS & PropTech Platform)**, phục vụ người dùng thật (Ban Quản Lý, Chủ tòa nhà, Đơn vị vận hành, Kế toán, Kỹ thuật viên, Cư dân và Khách thuê). Sản phẩm được thiết kế và xây dựng để **kinh doanh thương mại hóa B2B SaaS** và bán giải pháp cho các đơn vị quản lý vận hành bất động sản.
 > 
 > **TUYỆT ĐỐI KHÔNG** xem đây là đồ án môn học, bài tập sinh viên hay sản phẩm demo thử nghiệm. Mọi giải pháp kỹ thuật, thiết kế giao diện, bảo mật dữ liệu, tài liệu và quy trình nghiệp vụ phải tuân thủ tiêu chuẩn sản xuất (production-ready), bảo mật cao, tuân thủ pháp luật Việt Nam (Luật Bảo vệ dữ liệu cá nhân 2026, Luật Nhà ở 2023, Nghị định hóa đơn điện tử) và giải quyết triệt để nỗi đau vận hành thực tế.
 

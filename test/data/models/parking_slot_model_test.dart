@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/parking_slot_model.dart';
-import 'package:pka_home/data/models/parking_capacity_stats_model.dart';
+import 'package:vivona/data/models/parking_slot_model.dart';
+import 'package:vivona/data/models/parking_capacity_stats_model.dart';
 
 void main() {
   group('ParkingSlotModel Tests', () {

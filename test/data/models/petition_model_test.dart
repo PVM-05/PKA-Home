@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/petition_model.dart';
+import 'package:vivona/data/models/petition_model.dart';
 
 void main() {
   group('PetitionModel Tests (D7)', () {

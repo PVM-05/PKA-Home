@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/notification_model.dart';
-import 'package:pka_home/data/providers/notification_provider.dart';
+import 'package:vivona/data/models/notification_model.dart';
+import 'package:vivona/data/providers/notification_provider.dart';
 
 void main() {
   group('NotificationProvider Phase E1 Filter Tests', () {

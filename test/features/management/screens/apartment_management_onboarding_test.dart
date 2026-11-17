@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/providers/auth_provider.dart';
-import 'package:pka_home/data/providers/batch_import_provider.dart';
-import 'package:pka_home/data/providers/management_provider.dart';
-import 'package:pka_home/data/providers/role_delegation_provider.dart';
-import 'package:pka_home/data/repositories/batch_import_repository.dart';
-import 'package:pka_home/features/management/screens/apartment_management_screen.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
+import 'package:vivona/data/providers/batch_import_provider.dart';
+import 'package:vivona/data/providers/management_provider.dart';
+import 'package:vivona/data/providers/role_delegation_provider.dart';
+import 'package:vivona/data/repositories/batch_import_repository.dart';
+import 'package:vivona/features/management/screens/apartment_management_screen.dart';
 
 class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>>
     implements AuthNotifier {

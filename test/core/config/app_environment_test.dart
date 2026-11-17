@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/config/app_environment.dart';
+import 'package:vivona/core/config/app_environment.dart';
 
 void main() {
   group('AppEnvironmentType enum tests', () {
@@ -23,8 +23,8 @@ void main() {
     test('tạo môi trường development với cấu hình mặc định', () {
       final env = AppEnvironment.fromMap({
         'APP_ENV': 'dev',
-        'API_BASE_URL': 'https://dev-api.pkahome.vn',
-        'SUPABASE_URL': 'https://dev-supabase.pkahome.vn',
+        'API_BASE_URL': 'https://dev-api.vivona.vn',
+        'SUPABASE_URL': 'https://dev-supabase.vivona.vn',
         'SUPABASE_ANON_KEY': 'dev_anon_key_mock_123',
         'TELEGRAM_BOT_TOKEN': 'dev_bot_token',
         'TELEGRAM_CHAT_ID': '-100123456789',
@@ -37,8 +37,8 @@ void main() {
       expect(env.isProduction, isFalse);
       expect(env.enableDebugLogging, isTrue);
       expect(env.displayName, equals('Phát triển (Dev)'));
-      expect(env.apiBaseUrl, equals('https://dev-api.pkahome.vn'));
-      expect(env.supabaseUrl, equals('https://dev-supabase.pkahome.vn'));
+      expect(env.apiBaseUrl, equals('https://dev-api.vivona.vn'));
+      expect(env.supabaseUrl, equals('https://dev-supabase.vivona.vn'));
       expect(env.supabaseAnonKey, equals('dev_anon_key_mock_123'));
       expect(env.telegramBotToken, equals('dev_bot_token'));
       expect(env.telegramChatId, equals('-100123456789'));
@@ -48,8 +48,8 @@ void main() {
     test('tạo môi trường staging', () {
       final env = AppEnvironment.fromMap({
         'APP_ENV': 'staging',
-        'API_BASE_URL': 'https://staging-api.pkahome.vn',
-        'SUPABASE_URL': 'https://staging-supabase.pkahome.vn',
+        'API_BASE_URL': 'https://staging-api.vivona.vn',
+        'SUPABASE_URL': 'https://staging-supabase.vivona.vn',
         'SUPABASE_ANON_KEY': 'staging_anon_key_mock_456',
       });
 
@@ -64,8 +64,8 @@ void main() {
     test('tạo môi trường production: tắt debug logging theo mặc định', () {
       final env = AppEnvironment.fromMap({
         'APP_ENV': 'prod',
-        'API_BASE_URL': 'https://api.pkahome.vn',
-        'SUPABASE_URL': 'https://db.pkahome.vn',
+        'API_BASE_URL': 'https://api.vivona.vn',
+        'SUPABASE_URL': 'https://db.vivona.vn',
         'SUPABASE_ANON_KEY': 'prod_anon_key_mock_789',
       });
 

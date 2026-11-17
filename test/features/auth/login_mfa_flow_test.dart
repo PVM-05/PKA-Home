@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/security/mfa_service.dart';
+import 'package:vivona/core/security/mfa_service.dart';
 
 void main() {
   group('Login MFA Flow Logic Tests', () {

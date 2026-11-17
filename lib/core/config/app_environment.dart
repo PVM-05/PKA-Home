@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Định nghĩa các loại môi trường triển khai của hệ thống PKA-Home
+/// Định nghĩa các loại môi trường triển khai của hệ thống Vivona
 enum AppEnvironmentType {
   dev,
   staging,

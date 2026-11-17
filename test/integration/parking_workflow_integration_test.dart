@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/visitor_parking_ticket_model.dart';
-import 'package:pka_home/data/repositories/parking_repository.dart';
+import 'package:vivona/data/models/visitor_parking_ticket_model.dart';
+import 'package:vivona/data/repositories/parking_repository.dart';
 import '../helpers/test_workflow_fakes.dart';
 
 void main() {

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/data/models/amenity_inspection_model.dart';
-import 'package:pka_home/data/repositories/amenity_booking_repository.dart';
+import 'package:vivona/data/models/amenity_inspection_model.dart';
+import 'package:vivona/data/repositories/amenity_booking_repository.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 
@@ -65,7 +65,7 @@ void main() {
         inspectionResult: 'passed',
         forfeitedAmount: 0.0,
         notes: 'Sạch sẽ, đầy đủ thiết bị.',
-        imageUrls: ['https://storage.pka-home.vn/bbq.jpg'],
+        imageUrls: ['https://storage.vivona.vn/bbq.jpg'],
       );
 
       when(() => mockClient.rpc('inspect_and_settle_amenity_deposit', params: {
@@ -73,7 +73,7 @@ void main() {
         'p_inspection_result': 'passed',
         'p_forfeited_amount': 0.0,
         'p_notes': 'Sạch sẽ, đầy đủ thiết bị.',
-        'p_image_urls': ['https://storage.pka-home.vn/bbq.jpg'],
+        'p_image_urls': ['https://storage.vivona.vn/bbq.jpg'],
       })).thenAnswer((_) => fakeBuilder);
 
       final result = await repository.inspectAndSettleDeposit(inspection);

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/financial_aging_report_model.dart';
-import 'package:pka_home/data/repositories/accounting_repository.dart';
+import 'package:vivona/data/models/financial_aging_report_model.dart';
+import 'package:vivona/data/repositories/accounting_repository.dart';
 
 void main() {
   group('AccountingRepository - Financial Aging Report Tests', () {

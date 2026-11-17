@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/meter_reading_submission_model.dart';
+import 'package:vivona/data/models/meter_reading_submission_model.dart';
 
 void main() {
   group('MeterReadingSubmissionModel Tests with Anomaly & OCR fields', () {

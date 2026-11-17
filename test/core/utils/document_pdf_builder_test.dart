@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:pka_home/core/utils/document_pdf_builder.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/invoice_model.dart';
+import 'package:vivona/core/utils/document_pdf_builder.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/invoice_model.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -188,9 +188,9 @@ void main() {
     });
 
     test('7. stripDiacritics safely strips accents and currency symbols', () {
-      const input = 'BAN QUẢN LÝ CHUNG CƯ PKA-HOME 1.250.000 đ';
+      const input = 'BAN QUẢN LÝ CHUNG CƯ VIVONA 1.250.000 đ';
       final output = DocumentPdfBuilder.stripDiacritics(input);
-      expect(output, equals('BAN QUAN LY CHUNG CU PKA-HOME 1.250.000 d'));
+      expect(output, equals('BAN QUAN LY CHUNG CU VIVONA 1.250.000 d'));
     });
   });
 }

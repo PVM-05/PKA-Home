@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/theme/app_theme.dart';
-import 'package:pka_home/data/models/apartment_model.dart';
-import 'package:pka_home/data/models/issue_model.dart';
-import 'package:pka_home/features/resident/screens/create_issue_screen.dart';
+import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/data/models/apartment_model.dart';
+import 'package:vivona/data/models/issue_model.dart';
+import 'package:vivona/features/resident/screens/create_issue_screen.dart';
 
 void main() {
   group('Issue Smart Triage UI Tests', () {

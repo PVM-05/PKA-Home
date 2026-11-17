@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/batch_import_model.dart';
-import 'package:pka_home/data/repositories/batch_import_repository.dart';
+import 'package:vivona/data/models/batch_import_model.dart';
+import 'package:vivona/data/repositories/batch_import_repository.dart';
 
 void main() {
   group('BatchImportRepository Tests', () {

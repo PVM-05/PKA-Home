@@ -1,6 +1,6 @@
 # Hồ Sơ Đề Xuất Giải Pháp & Bản Giới Thiệu Thương Mại (Pitch Deck & Commercial Proposal)
 
-> **PKA-HOME PROPTECH SAAS PLATFORM**
+> **VIVONA PROPTECH SAAS PLATFORM**
 > *Nền Tảng Quản Lý & Vận Hành Chung Cư Thông Minh Thế Hệ Mới*
 > Chuẩn Hóa Vận Hành • Tự Động Thu Phí VietQR • Minh Bạch Tài Chính
 
@@ -30,13 +30,13 @@ Ngành quản lý vận hành bất động sản tại Việt Nam đang đối 
 
 ---
 
-## 2. Giải Pháp Toàn Diện PKA-Home PropTech B2B SaaS
+## 2. Giải Pháp Toàn Diện Vivona PropTech B2B SaaS
 
-PKA-Home cung cấp hệ sinh thái khép kín kết nối đồng thời **Ban Quản Lý - Ban Quản Trị - Cư Dân - Khách Thuê** trên nền tảng đám mây:
+Vivona cung cấp hệ sinh thái khép kín kết nối đồng thời **Ban Quản Lý - Ban Quản Trị - Cư Dân - Khách Thuê** trên nền tảng đám mây:
 
 ```mermaid
 flowchart LR
-    subgraph PKA["HỆ SINH THÁI PKA-HOME B2B SAAS"]
+    subgraph VIVONA["HỆ SINH THÁI VIVONA B2B SAAS"]
         direction TB
         M1["Cổng Thu Phí VietQR 247 Tự Động"]
         M2["Phân Tích Bất Thường Điện Nước"]
@@ -45,16 +45,16 @@ flowchart LR
         M5["Biểu Quyết Hội Nghị Số"]
     end
     
-    BQL["Ban Quản Lý & Kế Toán"] <--> PKA
-    CD["Cư Dân & Khách Thuê"] <--> PKA
-    BQT["Ban Quản Trị & Chủ Đầu Tư"] <--> PKA
+    BQL["Ban Quản Lý & Kế Toán"] <--> VIVONA
+    CD["Cư Dân & Khách Thuê"] <--> VIVONA
+    BQT["Ban Quản Trị & Chủ Đầu Tư"] <--> VIVONA
 ```
 
 ---
 
 ## 3. Ma Trận So Sánh Năng Lực Cạnh Tranh (Feature Matrix)
 
-| Tiêu Chí & Tính Năng | Phần Mềm Cũ / Excel | Các Ứng Dụng Đối Thủ | **PKA-Home SaaS** |
+| Tiêu Chí & Tính Năng | Phần Mềm Cũ / Excel | Các Ứng Dụng Đối Thủ | **Vivona SaaS** |
 | :--- | :---: | :---: | :---: |
 | **Gạch nợ VietQR Napas 247** | Thủ công | Thu phí cổng trung gian (1.1 - 2.2%) | **Tự động 3s trực tiếp tài khoản BQL (0% phí chiết khấu)** |
 | **Bằng chứng ghi chỉ số điện nước** | Sổ tay / Ghi nhớ | Nhập số thô | **Bắt buộc chụp ảnh công tơ thật & Phát hiện bất thường 150%** |
@@ -86,7 +86,7 @@ Mô hình định giá linh hoạt theo tháng hoặc theo năm, phù hợp vớ
 Ví dụ tính toán cho một tòa nhà chung cư tiêu chuẩn quy mô **350 căn hộ**:
 
 ```text
-[CHI PHÍ ĐẦU TƯ PKA-HOME]
+[CHI PHÍ ĐẦU TƯ VIVONA]
 - Gói Tiêu Chuẩn: 3.500.000 VNĐ/tháng -> 42.000.000 VNĐ / Năm.
 
 [LỢI ÍCH KINH TẾ TIẾT KIỆM MỖI NĂM]
@@ -109,8 +109,8 @@ THỜI GIAN HOÀN VỐN ĐẦU TƯ: 1.8 Tháng
 
 ## 6. Thông Tin Liên Hệ & Đăng Ký Trải Nghiệm Giải Pháp
 
-- **Đơn vị phát triển:** PKA-Home PropTech Solutions JSC
+- **Đơn vị phát triển:** Vivona PropTech Solutions JSC
 - **Đường dây nóng tư vấn B2B:** 1900 xxxx (Nhánh 1 - Bộ phận Doanh Nghiệp)
-- **Thư điện tử:** enterprise@pkahome.vn
-- **Cổng thông tin giải pháp:** https://pkahome.vn
+- **Thư điện tử:** enterprise@vivona.vn
+- **Cổng thông tin giải pháp:** https://vivona.vn
 

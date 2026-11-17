@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/providers/meter_reading_provider.dart';
-import 'package:pka_home/data/providers/vehicle_provider.dart';
+import 'package:vivona/data/providers/meter_reading_provider.dart';
+import 'package:vivona/data/providers/vehicle_provider.dart';
 
 void main() {
   group('currentApartmentReadingsProvider Tests', () {

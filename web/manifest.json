@@ -1,11 +1,11 @@
 {
-    "name": "pka_home",
-    "short_name": "pka_home",
+    "name": "Vivona - Nền Tảng Quản Lý Chung Cư",
+    "short_name": "Vivona",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Vivona - Nền Tảng Quản Lý Vận Hành Chung Cư & Bất Động Sản Thương Mại.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

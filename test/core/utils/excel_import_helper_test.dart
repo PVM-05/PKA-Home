@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:excel/excel.dart';
-import 'package:pka_home/core/utils/excel_import_helper.dart';
-import 'package:pka_home/data/models/batch_import_model.dart';
+import 'package:vivona/core/utils/excel_import_helper.dart';
+import 'package:vivona/data/models/batch_import_model.dart';
 
 void main() {
   group('ExcelImportHelper Tests', () {

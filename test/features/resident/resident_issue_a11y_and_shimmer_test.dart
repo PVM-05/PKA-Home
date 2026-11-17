@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/core/widgets/app_empty_state.dart';
-import 'package:pka_home/core/widgets/app_skeleton_shimmer.dart';
-import 'package:pka_home/data/models/issue_model.dart';
-import 'package:pka_home/data/providers/resident_issue_provider.dart';
-import 'package:pka_home/features/resident/screens/resident_issue_screen.dart';
+import 'package:vivona/core/widgets/app_empty_state.dart';
+import 'package:vivona/core/widgets/app_skeleton_shimmer.dart';
+import 'package:vivona/data/models/issue_model.dart';
+import 'package:vivona/data/providers/resident_issue_provider.dart';
+import 'package:vivona/features/resident/screens/resident_issue_screen.dart';
 
 void main() {
   group('ResidentIssueScreen A11y & Shimmer Tests', () {

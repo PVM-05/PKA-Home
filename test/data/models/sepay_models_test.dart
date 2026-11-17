@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/sepay_webhook_payload_model.dart';
-import 'package:pka_home/data/models/building_payment_config_model.dart';
+import 'package:vivona/data/models/sepay_webhook_payload_model.dart';
+import 'package:vivona/data/models/building_payment_config_model.dart';
 
 void main() {
   group('SePay Models Tests', () {
@@ -58,11 +58,11 @@ void main() {
         'building_id': 'bld-01',
         'bank_name': 'MBBank',
         'bank_account_number': '0388888888',
-        'bank_account_name': 'BAN QUAN LY PKA HOME',
+        'bank_account_name': 'BAN QUAN LY VIVONA',
         'bank_bin': '970422',
         'qr_template': 'compact',
         'is_active': true,
-        'vnpay_tmn_code': 'PKAHOME01',
+        'vnpay_tmn_code': 'VIVONA01',
         'vnpay_is_active': true,
       };
 
@@ -72,10 +72,10 @@ void main() {
       expect(model.buildingId, 'bld-01');
       expect(model.bankName, 'MBBank');
       expect(model.bankAccountNumber, '0388888888');
-      expect(model.bankAccountName, 'BAN QUAN LY PKA HOME');
+      expect(model.bankAccountName, 'BAN QUAN LY VIVONA');
       expect(model.bankBin, '970422');
       expect(model.isActive, isTrue);
-      expect(model.vnpayTmnCode, 'PKAHOME01');
+      expect(model.vnpayTmnCode, 'VIVONA01');
       expect(model.vnpayIsActive, isTrue);
 
       final qrUrl = model.generateSepayQrUrl(amount: 1500000, memo: 'INV2611A0110');
@@ -88,7 +88,7 @@ void main() {
       final serialized = model.toJson();
       expect(serialized['bank_name'], 'MBBank');
       expect(serialized['bank_account_number'], '0388888888');
-      expect(serialized['vnpay_tmn_code'], 'PKAHOME01');
+      expect(serialized['vnpay_tmn_code'], 'VIVONA01');
       expect(serialized['vnpay_is_active'], isTrue);
     });
   });

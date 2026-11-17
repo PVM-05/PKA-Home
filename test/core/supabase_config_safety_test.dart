@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/supabase_config.dart';
+import 'package:vivona/core/supabase_config.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() {

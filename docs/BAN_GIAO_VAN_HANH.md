@@ -1,7 +1,7 @@
-# Hướng Dẫn Bàn Giao & Vận Hành Hệ Thống PKA-Home (Operations & Onboarding)
+# Hướng Dẫn Bàn Giao & Vận Hành Hệ Thống Vivona (Operations & Onboarding)
 
 > **Phạm vi áp dụng:** Triển khai thương mại B2B SaaS cho Ban Quản Lý Chung Cư hoặc Đơn Vị Quản Lý Chuỗi Căn Hộ / Phòng Trọ.  
-> **Phiên bản:** PKA-Home Enterprise v2.1.0 (Production Release).  
+> **Phiên bản:** Vivona Enterprise v2.1.0 (Production Release).  
 > **Mô hình triển khai:** Cloud SaaS trên nền tảng Supabase Enterprise hoặc On-Premise High-Availability Docker Cluster.
 
 ---
@@ -48,9 +48,9 @@ Gửi mẫu Excel 6 sheet chuẩn này cho đơn vị quản lý trước ngày 
 
 | Vai Trò | Email Đăng Nhập | Mục Đích Thử Nghiệm (UAT Scenario) |
 | :--- | :--- | :--- |
-| **Quản trị viên (Admin)** | `pkahome.admin@gmail.com` | Toàn quyền quản trị tòa nhà, xem Dashboard KPIs, cấu hình biểu giá, phân quyền RBAC. |
-| **Kế toán (Accountant)** | `pkahome.ketoan@gmail.com` | Lập hóa đơn hàng loạt, quản lý sổ cái kép, phân tích tuổi nợ, xác nhận thanh toán. |
-| **Kỹ thuật viên (Technician)** | `pkahome.kythuat@gmail.com` | Tiếp nhận phản ánh sự cố, xuất kho vật tư thay thế, tải ảnh nghiệm thu thực tế. |
+| **Quản trị viên (Admin)** | `vivona.admin@gmail.com` | Toàn quyền quản trị tòa nhà, xem Dashboard KPIs, cấu hình biểu giá, phân quyền RBAC. |
+| **Kế toán (Accountant)** | `vivona.ketoan@gmail.com` | Lập hóa đơn hàng loạt, quản lý sổ cái kép, phân tích tuổi nợ, xác nhận thanh toán. |
+| **Kỹ thuật viên (Technician)** | `vivona.kythuat@gmail.com` | Tiếp nhận phản ánh sự cố, xuất kho vật tư thay thế, tải ảnh nghiệm thu thực tế. |
 | **Cư dân mẫu** | `cudan.a0101@gmail.com` | Nhận thông báo Realtime, thanh toán VietQR Napas247, tạo mã khách thăm PIN/QR. |
 
 ---

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pka_home/data/models/issue_rating_model.dart';
-import 'package:pka_home/features/resident/widgets/issue_rating_bottom_sheet.dart';
+import 'package:vivona/data/models/issue_rating_model.dart';
+import 'package:vivona/features/resident/widgets/issue_rating_bottom_sheet.dart';
 
 void main() {
   group('IssueRatingBottomSheet Widget Tests', () {

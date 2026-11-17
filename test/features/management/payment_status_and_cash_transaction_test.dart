@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/payment_transaction_model.dart';
+import 'package:vivona/data/models/payment_transaction_model.dart';
 
 void main() {
   group('PaymentTransactionModel Status Display Tests', () {

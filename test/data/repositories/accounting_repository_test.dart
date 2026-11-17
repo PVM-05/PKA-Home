@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/accounting_period_model.dart';
-import 'package:pka_home/data/models/apartment_ledger_entry_model.dart';
-import 'package:pka_home/data/models/credit_note_model.dart';
-import 'package:pka_home/data/repositories/accounting_repository.dart';
+import 'package:vivona/data/models/accounting_period_model.dart';
+import 'package:vivona/data/models/apartment_ledger_entry_model.dart';
+import 'package:vivona/data/models/credit_note_model.dart';
+import 'package:vivona/data/repositories/accounting_repository.dart';
 
 void main() {
   group('AccountingRepository Unit Tests', () {

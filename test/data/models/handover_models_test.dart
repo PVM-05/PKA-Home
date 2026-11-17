@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/apartment_asset_model.dart';
-import 'package:pka_home/data/models/apartment_handover_model.dart';
-import 'package:pka_home/data/models/handover_item_model.dart';
+import 'package:vivona/data/models/apartment_asset_model.dart';
+import 'package:vivona/data/models/apartment_handover_model.dart';
+import 'package:vivona/data/models/handover_item_model.dart';
 
 void main() {
   group('Handover Models Tests', () {

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_amenity_model.dart';
-import 'package:pka_home/data/models/amenity_booking_model.dart';
-import 'package:pka_home/data/models/amenity_maintenance_model.dart';
+import 'package:vivona/data/models/building_amenity_model.dart';
+import 'package:vivona/data/models/amenity_booking_model.dart';
+import 'package:vivona/data/models/amenity_maintenance_model.dart';
 
 void main() {
   group('BuildingAmenityModel v2', () {

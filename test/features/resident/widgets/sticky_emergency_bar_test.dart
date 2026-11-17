@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/announcement_model.dart';
-import 'package:pka_home/data/providers/announcement_provider.dart';
-import 'package:pka_home/features/resident/widgets/sticky_emergency_bar.dart';
+import 'package:vivona/data/models/announcement_model.dart';
+import 'package:vivona/data/providers/announcement_provider.dart';
+import 'package:vivona/features/resident/widgets/sticky_emergency_bar.dart';
 
 void main() {
   group('StickyEmergencyBar Widget Tests', () {

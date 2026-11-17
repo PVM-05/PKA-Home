@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/utils/money_formatter.dart';
+import 'package:vivona/core/utils/money_formatter.dart';
 
 void main() {
   group('MoneyInputFormatter & parseMoney Tests', () {

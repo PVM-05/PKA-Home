@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/poll_model.dart';
+import 'package:vivona/data/models/poll_model.dart';
 
 void main() {
   group('Tuân thủ Điều 102 Luật Nhà ở 2023 & Phân quyền Biểu quyết', () {

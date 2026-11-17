@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pka_home/data/models/vehicle_model.dart';
-import 'package:pka_home/data/repositories/vehicle_repository.dart';
+import 'package:vivona/data/models/vehicle_model.dart';
+import 'package:vivona/data/repositories/vehicle_repository.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 class MockStorageFileApi extends Mock implements StorageFileApi {}

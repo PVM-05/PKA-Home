@@ -1,5 +1,6 @@
-# PKA-Home — Nền Tảng Quản Trị & Vận Hành Bất Động Sản B2B SaaS (PropTech Platform)
+# Vivona — Nền Tảng Quản Trị & Vận Hành Bất Động Sản B2B SaaS (PropTech Platform)
 
+> **Vivona — Nơi chung cư sống động hơn** | *Quản lý tòa nhà, chạm là xong*  
 > **Commercial Production SaaS & PropTech Platform**  
 > Giải pháp chuyển đổi số toàn diện dành cho Ban Quản Lý, Chủ đầu tư và các Đơn vị quản lý vận hành tòa nhà, chuỗi chung cư, căn hộ dịch vụ cao cấp. Kết nối liền mạch giữa Bộ máy Quản trị (Ban Quản Lý, Kế toán, Kỹ thuật viên, Lễ tân) và Khách hàng (Cư dân, Khách thuê) với độ tin cậy cấp doanh nghiệp, dữ liệu đồng bộ thời gian thực (Realtime), bảo mật đa tầng tuân thủ Luật Nhà ở 2023 & Luật Bảo vệ dữ liệu cá nhân 2026.
 
@@ -7,7 +8,7 @@
 
 ## 🏢 1. Định Vị Sản Phẩm & Giá Trị Thương Mại B2B SaaS
 
-**PKA-Home** là nền tảng phần mềm thương mại thực tế (SaaS B2B) được thiết kế và xây dựng chuyên biệt để giải quyết triệt để các bài toán nhức nhối nhất trong vận hành bất động sản hiện đại:
+**Vivona** là nền tảng phần mềm thương mại thực tế (SaaS B2B) được thiết kế và xây dựng chuyên biệt để giải quyết triệt để các bài toán nhức nhối nhất trong vận hành bất động sản hiện đại:
 
 - **Bàn giao & Kiểm kê tài sản số hóa (Digital Move-in/Move-out)**: Xóa bỏ hoàn toàn biên bản giấy và nguy cơ tranh chấp tiền cọc khi cư dân nhận nhà hoặc trả phòng. Tích hợp trạm kiểm kê hiện trường, chốt chỉ số điện/nước, chiết tính cấn trừ tiền cọc tự động, ký số cảm ứng hai bên trực tiếp trên màn hình và tự động kết xuất biên bản PDF chuẩn pháp lý có mã tra cứu bảo mật.
 - **Cổng thanh toán tự động VietQR SePay & Gạch nợ Webhook 2 lớp**: Tích hợp cổng chuyển khoản VietQR Napas 247 động theo chuẩn gateway SePay (`sepay.vn`), tự động xử lý biến động số dư ngân hàng qua Webhook, gạch nợ hóa đơn tức thì sau 2-3 giây qua Supabase Realtime CDC, cơ chế chống thanh toán trùng lặp (Idempotency Key), tự động bóc tách mã hóa đơn chuẩn mực và lưu vết đối soát giao dịch chưa khớp (`UNMATCHED`) tại Bàn làm việc Kế toán Web. Loại bỏ 100% mã nguồn và cơ chế demo/giả lập.
@@ -42,7 +43,7 @@
 
 ```mermaid
 graph TD
-    Client["Ứng Dụng Đa Nền Tảng (PKA-Home Mobile / Tablet / Web Workstation)"]
+    Client["Ứng Dụng Đa Nền Tảng (Vivona Mobile / Tablet / Web Workstation)"]
     Router["GoRouter (Role Guard & Tenant Redirect & PDPL Wrapper)"]
     State["Riverpod State Management (Reactive Stream & AsyncNotifier)"]
     Repo["Repository Layer (Fail-Closed Engine)"]
@@ -132,7 +133,7 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
 - **Quản Lý Quỹ Bảo Trì 2% (`maintenance_fund_ledger`)**: Tách bạch sổ cái thu chi quỹ bảo trì tòa nhà theo đúng quy định của Luật Nhà ở 2023.
 
 ### 4.3. Bảo Mật Dữ Liệu Cá Nhân PDPL (Luật 91/2025/QH15 & NĐ 356/2025/NĐ-CP)
-- **Hộp thoại Chấp thuận Bắt buộc (PDPL Consent Modal)**: Khi người dùng mở ứng dụng lần đầu, modal [PdplConsentDialog](file:///c:/Users/ADMIN/StudioProjects/pka_home/lib/core/widgets/pdpl_consent_dialog.dart) yêu cầu đọc và chấp thuận điều khoản thu thập thông tin (CCCD, SĐT, biển số xe, công tơ, giao dịch) trước khi sử dụng hệ thống.
+- **Hộp thoại Chấp thuận Bắt buộc (PDPL Consent Modal)**: Khi người dùng mở ứng dụng lần đầu, modal [PdplConsentDialog](file:///c:/Users/ADMIN/StudioProjects/Vivona/lib/core/widgets/pdpl_consent_dialog.dart) yêu cầu đọc và chấp thuận điều khoản thu thập thông tin (CCCD, SĐT, biển số xe, công tơ, giao dịch) trước khi sử dụng hệ thống.
 - **Minh Bạch Quyền Chủ Thể Dữ Liệu**: Màn hình Hồ sơ cư dân tích hợp mục xem lại thỏa thuận bất kỳ lúc nào, hiển thị chi tiết căn cứ pháp lý và con dấu thời gian đã đồng ý.
 - **Trích Xuất Dữ Liệu Cá Nhân (Data Portability)**: Cho phép cư dân tải về bản sao kê thông tin cá nhân, danh sách căn hộ, phương tiện và lịch sử thanh toán định dạng JSON có mã băm bảo mật.
 - **Quyền Đóng Băng / Yêu Cầu Xóa Dữ Liệu**: Cư dân có thể gửi yêu cầu đóng băng thông tin khi kết thúc hợp đồng thuê hoặc chuyển đi nơi khác.
@@ -191,8 +192,8 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
 
 1. **Clone mã nguồn dự án**:
    ```bash
-   git clone https://github.com/PVM-05/PKA-Home.git
-   cd pka_home
+   git clone https://github.com/PVM-05/Vivona.git
+   cd Vivona
    ```
 
 2. **Cài đặt các gói phụ thuộc (Dependencies)**:
@@ -216,7 +217,7 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
    Để kích hoạt tính năng nhận thông báo đẩy thời gian thực trên thiết bị thật:
    - **Android**: Tải `google-services.json` từ Firebase Console và đặt vào `android/app/google-services.json` (tham khảo mẫu `android/app/google-services.example.json`).
    - **iOS**: Tải `GoogleService-Info.plist` từ Firebase Console và đặt vào `ios/Runner/GoogleService-Info.plist` (tham khảo mẫu `ios/Runner/GoogleService-Info.example.plist`).
-   > **Cơ chế Fail-Safe**: Nếu chưa bổ sung 2 tệp trên, bộ máy khởi chạy của PKA-Home tự động bọc khối Try/Catch bảo vệ và kích hoạt chế độ Fallback thông báo nội bộ (In-app Notification Center), bảo đảm ứng dụng vẫn khởi chạy bình thường mà không bị crash.
+   > **Cơ chế Fail-Safe**: Nếu chưa bổ sung 2 tệp trên, bộ máy khởi chạy của Vivona tự động bọc khối Try/Catch bảo vệ và kích hoạt chế độ Fallback thông báo nội bộ (In-app Notification Center), bảo đảm ứng dụng vẫn khởi chạy bình thường mà không bị crash.
 
 5. **Khởi tạo Cơ sở dữ liệu (40 Migrations)**:
    Áp dụng tuần tự các tệp migration trong thư mục `supabase/migrations/` trên Supabase SQL Editor:
@@ -294,4 +295,4 @@ Dự án duy trì quy chuẩn kiểm thử nghiêm ngặt cấp độ doanh nghi
 
 ---
 
-*Bản quyền © 2026 PKA-Home PropTech Platform. Được xây dựng và phát triển chuyên nghiệp với Flutter & Supabase Enterprise PostgreSQL.*
+*Bản quyền © 2026 Vivona PropTech Platform. Được xây dựng và phát triển chuyên nghiệp với Flutter & Supabase Enterprise PostgreSQL.*

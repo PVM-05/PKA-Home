@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/building_equipment_model.dart';
-import 'package:pka_home/data/models/equipment_maintenance_task_model.dart';
-import 'package:pka_home/data/providers/equipment_provider.dart';
-import 'package:pka_home/features/management/screens/equipment_detail_screen.dart';
+import 'package:vivona/data/models/building_equipment_model.dart';
+import 'package:vivona/data/models/equipment_maintenance_task_model.dart';
+import 'package:vivona/data/providers/equipment_provider.dart';
+import 'package:vivona/features/management/screens/equipment_detail_screen.dart';
 
 void main() {
   testWidgets('EquipmentDetailScreen displays action to disburse maintenance fund when task completed with cost', (tester) async {

@@ -120,7 +120,7 @@ class OperationalAlertService {
   /// Định dạng nội dung HTML gửi Telegram Bot
   String formatTelegramHtml(OperationalAlert alert) {
     final buffer = StringBuffer();
-    buffer.writeln('<b>[PKA-HOME] CẢNH BÁO: ${alert.severity.label}</b>');
+    buffer.writeln('<b>[VIVONA] CẢNH BÁO: ${alert.severity.label}</b>');
     buffer.writeln('<b>Môi trường:</b> ${environment.displayName}');
     if (alert.errorCode != null && alert.errorCode!.isNotEmpty) {
       buffer.writeln('<b>Mã lỗi:</b> ${alert.errorCode}');
@@ -139,7 +139,7 @@ class OperationalAlertService {
 
   /// Định dạng payload JSON gửi Slack/Discord Webhook
   Map<String, dynamic> formatSlackPayload(OperationalAlert alert) {
-    final textFallback = '[PKA-HOME - ${alert.severity.label}]: ${alert.title}';
+    final textFallback = '[VIVONA - ${alert.severity.label}]: ${alert.title}';
     final metadataFormatted = alert.metadata != null && alert.metadata!.isNotEmpty
         ? alert.metadata!.entries.map((e) => '• *${e.key}:* ${e.value}').join('\n')
         : 'Không có';
@@ -151,7 +151,7 @@ class OperationalAlertService {
           'type': 'header',
           'text': {
             'type': 'plain_text',
-            'text': 'CẢNH BÁO HỆ THỐNG PKA-HOME [${alert.severity.label}]',
+            'text': 'CẢNH BÁO HỆ THỐNG VIVONA [${alert.severity.label}]',
           },
         },
         {

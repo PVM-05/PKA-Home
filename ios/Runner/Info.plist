@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Pka Home</string>
+	<string>Vivona</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>pka_home</string>
+	<string>vivona</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -67,9 +67,22 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>PKA-Home cần quyền truy cập máy ảnh để chụp ảnh hóa đơn, công tơ điện nước và hiện trường sự cố.</string>
+	<string>Vivona cần quyền truy cập máy ảnh để chụp ảnh hóa đơn, công tơ điện nước và hiện trường sự cố.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>PKA-Home cần quyền truy cập thư viện ảnh để đính kèm hình ảnh phản ánh và chỉ số điện nước.</string>
+	<string>Vivona cần quyền truy cập thư viện ảnh để đính kèm hình ảnh phản ánh và chỉ số điện nước.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>vn.vivona.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>vivona</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tel</string>

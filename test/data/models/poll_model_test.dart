@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/poll_model.dart';
-import 'package:pka_home/data/models/poll_result_model.dart';
+import 'package:vivona/data/models/poll_model.dart';
+import 'package:vivona/data/models/poll_result_model.dart';
 
 void main() {
   group('PollModel & PollResultModel Tests (D7)', () {

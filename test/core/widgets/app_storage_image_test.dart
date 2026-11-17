@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/core/widgets/app_storage_image.dart';
+import 'package:vivona/core/widgets/app_storage_image.dart';
 
 void main() {
   group('Kiểm thử xử lý đường dẫn ảnh trong AppStorageImage', () {

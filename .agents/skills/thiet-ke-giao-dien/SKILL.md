@@ -1,6 +1,6 @@
 ---
 name: thiet-ke-giao-dien
-description: Kích hoạt khi phát triển, chỉnh sửa hoặc kiểm thử giao diện người dùng cho ứng dụng Quản lý Chung cư (PKA-Home).
+description: Kích hoạt khi phát triển, chỉnh sửa hoặc kiểm thử giao diện người dùng cho ứng dụng Quản lý Chung cư (Vivona).
 ---
 
 # Quy trình Thiết kế và Phát triển Giao diện

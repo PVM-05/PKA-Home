@@ -1,12 +1,12 @@
 # Sổ Tay Triển Khai & Onboarding Khách Hàng (Deployment Playbook)
 
-> **DÀNH CHO:** Đội ngũ Chuyên viên Triển khai (Onboarding Specialists), Quản trị viên Dự án (Project Managers) và Ban Quản Lý Vận Hành Tòa Nhà khi tiếp nhận và đưa PKA-Home B2B SaaS vào hoạt động thương mại thực tế.
+> **DÀNH CHO:** Đội ngũ Chuyên viên Triển khai (Onboarding Specialists), Quản trị viên Dự án (Project Managers) và Ban Quản Lý Vận Hành Tòa Nhà khi tiếp nhận và đưa Vivona B2B SaaS vào hoạt động thương mại thực tế.
 
 ---
 
 ## Chương 1: Kiến Trúc Phân Cấp Đa Cơ Sở (Multi-Tenant Hierarchy)
 
-PKA-Home được thiết kế theo mô hình điện toán đám mây đa khách thuê bảo mật cao (Row Level Security & Organization Isolation). Mỗi đơn vị khách hàng được phân cấp quản trị như sau:
+Vivona được thiết kế theo mô hình điện toán đám mây đa khách thuê bảo mật cao (Row Level Security & Organization Isolation). Mỗi đơn vị khách hàng được phân cấp quản trị như sau:
 
 ```mermaid
 graph TD
@@ -70,7 +70,7 @@ graph TD
 
 ## Chương 3: Ma Trận Phân Quyền Vai Trò Hệ Thống (RBAC Matrix)
 
-PKA-Home cung cấp 6 nhóm quyền truy cập độc lập nhằm đảm bảo kiểm soát nội bộ và tính minh bạch nghiệp vụ:
+Vivona cung cấp 6 nhóm quyền truy cập độc lập nhằm đảm bảo kiểm soát nội bộ và tính minh bạch nghiệp vụ:
 
 | Nhóm Quyền (Role) | Phạm Vi Hoạt Động | Quyền Hạn Trọng Yếu |
 | :--- | :--- | :--- |

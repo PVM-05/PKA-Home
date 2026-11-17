@@ -1,5 +1,5 @@
 # Chính Sách Bảo Mật & Quyền Riêng Tư Dữ Liệu (Privacy Policy)
-**Nền Tảng Quản Lý Vận Hành Bất Động Sản Thương Mại PKA-Home**
+**Nền Tảng Quản Lý Vận Hành Bất Động Sản Thương Mại Vivona**
 
 *Ban hành và có hiệu lực từ ngày: 15/11/2026*  
 *Căn cứ pháp lý tuân thủ: Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định số 356/2025/NĐ-CP của Chính phủ nước CHXHCN Việt Nam.*
@@ -7,7 +7,7 @@
 ---
 
 ## 1. Tôn Chỉ & Phạm Vi Áp Dụng
-PKA-Home cam kết bảo vệ tuyệt đối an toàn và tính riêng tư của dữ liệu cá nhân cho mọi chủ thể dữ liệu tham gia sử dụng nền tảng, bao gồm:
+Vivona cam kết bảo vệ tuyệt đối an toàn và tính riêng tư của dữ liệu cá nhân cho mọi chủ thể dữ liệu tham gia sử dụng nền tảng, bao gồm:
 - **Ban Quản Lý & Đơn vị vận hành tòa nhà** (Người điều hành, Kế toán, Lễ tân, Kỹ thuật viên).
 - **Chủ sở hữu căn hộ & Người đại diện hợp pháp**.
 - **Cư dân thường trú, tạm trú & Khách thuê căn hộ**.
@@ -31,7 +31,7 @@ Chính sách này công khai minh bạch toàn bộ quy trình thu thập, lưu 
 ---
 
 ## 3. Căn Cứ Xử Lý Dữ Liệu Hợp Pháp
-Việc xử lý dữ liệu cá nhân trên nền tảng PKA-Home được thực hiện dựa trên các căn cứ pháp lý sau:
+Việc xử lý dữ liệu cá nhân trên nền tảng Vivona được thực hiện dựa trên các căn cứ pháp lý sau:
 1. **Sự đồng thuận của chủ thể dữ liệu**: Cư dân đồng ý khi kích hoạt tài khoản hoặc ký biên bản bàn giao lưu trú.
 2. **Thực hiện nghĩa vụ hợp đồng**: Cung cấp dịch vụ quản lý vận hành tòa nhà giữa Ban Quản Lý và Cư dân/Chủ sở hữu.
 3. **Tuân thủ nghĩa vụ pháp luật**:
@@ -42,7 +42,7 @@ Việc xử lý dữ liệu cá nhân trên nền tảng PKA-Home được thự
 ---
 
 ## 4. Biện Pháp Kỹ Thuật Bảo Vệ An Toàn Dữ Liệu
-Hệ thống PKA-Home áp dụng giải pháp kỹ thuật phòng thủ đa lớp (Defense-in-depth):
+Hệ thống Vivona áp dụng giải pháp kỹ thuật phòng thủ đa lớp (Defense-in-depth):
 
 1. **Mã hóa dữ liệu toàn trình (End-to-End Encryption)**:
    - Dữ liệu truyền tải giữa thiết bị người dùng (Mobile App / Web) và máy chủ được mã hóa qua giao thức an toàn `TLS 1.3 / HTTPS`.
@@ -60,7 +60,7 @@ Hệ thống PKA-Home áp dụng giải pháp kỹ thuật phòng thủ đa lớ
 ---
 
 ## 5. Quyền Của Chủ Thể Dữ Liệu
-Theo quy định của Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15, người dùng PKA-Home có đầy đủ các quyền:
+Theo quy định của Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15, người dùng Vivona có đầy đủ các quyền:
 - **Quyền được biết**: Được thông báo rõ ràng về mục đích và phạm vi xử lý dữ liệu của mình.
 - **Quyền truy cập & Chỉnh sửa**: Xem lại toàn bộ thông tin cá nhân trên màn hình Hồ sơ cư dân và gửi yêu cầu đính chính sai lệch đến Ban Quản Lý.
 - **Quyền yêu cầu xóa dữ liệu (Right to be forgotten)**: Khi cư dân chấm dứt hợp đồng thuê nhà hoặc chuyển quyền sở hữu căn hộ, cư dân có quyền yêu cầu Ban Quản Lý hủy kích hoạt tài khoản và đóng băng dữ liệu cá nhân theo quy định lưu trữ kế toán bắt buộc.
@@ -71,14 +71,14 @@ Theo quy định của Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15, ng�
 
 ## 6. Quy Trình Ứng Phó Sự Cố Dữ Liệu
 Trong trường hợp bất khả kháng phát hiện nguy cơ rò rỉ hoặc mất mát an toàn thông tin:
-1. Đội ngũ kỹ thuật PKA-Home lập tức kích hoạt quy trình cô lập hệ thống trong vòng **60 phút**.
+1. Đội ngũ kỹ thuật Vivona lập tức kích hoạt quy trình cô lập hệ thống trong vòng **60 phút**.
 2. Báo cáo Ban Quản Trị và gửi thông báo chính thức đến Cục An ninh mạng và phòng, chống tội phạm sử dụng công nghệ cao (Bộ Công an) trong thời hạn **72 giờ** theo Luật định.
 3. Gửi cảnh báo khẩn cấp đến toàn bộ cư dân bị ảnh hưởng qua kênh thông báo Push Notification và SMS/Email.
 
 ---
 
 ## 7. Thông Tin Liên Hệ Bộ Phận Pháp Chế & An Ninh Dữ Liệu
-- **Đơn vị phát triển nền tảng**: Ban Dự án PKA-Home PropTech Solutions.
-- **Email tiếp nhận yêu cầu DPO (Data Protection Officer)**: `security@pkahome.vn`
-- **Địa chỉ văn phòng**: Tòa nhà Điều hành PKA-Home, Hà Nội, Việt Nam.
+- **Đơn vị phát triển nền tảng**: Ban Dự án Vivona PropTech Solutions.
+- **Email tiếp nhận yêu cầu DPO (Data Protection Officer)**: `security@vivona.vn`
+- **Địa chỉ văn phòng**: Tòa nhà Điều hành Vivona, Hà Nội, Việt Nam.
 

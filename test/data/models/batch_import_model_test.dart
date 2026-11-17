@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/batch_import_model.dart';
+import 'package:vivona/data/models/batch_import_model.dart';
 
 void main() {
   group('Batch Import Models Tests', () {

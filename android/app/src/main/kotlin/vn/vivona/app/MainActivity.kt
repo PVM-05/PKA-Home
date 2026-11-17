@@ -1,5 +1,6 @@
-package com.example.pka_home
+package vn.vivona.app
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity()
+

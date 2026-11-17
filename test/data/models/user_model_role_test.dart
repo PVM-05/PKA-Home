@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pka_home/data/models/user_model.dart';
-import 'package:pka_home/data/models/resident_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/models/resident_model.dart';
 
 void main() {
   group('UserModel RBAC Role Tests', () {
