@@ -11,7 +11,7 @@ Tất cả các thay đổi đáng chú ý của dự án **PKA-Home - Nền T�
 ### Đã sửa (Fixed) - Khắc Phục Triệt Để P0 VNPay & Xử Lý Hồi Quy Tiện Ích
 - **Chuyển Toàn Bộ Ký Số VNPay Sang Server-Authoritative (`create-vnpay-url`)**: Triển khai Deno Edge Function khởi tạo link thanh toán VNPay 2.1.0 phía máy chủ. Thẩm định JWT, kiểm soát RBAC kết hợp ủy quyền vai trò động (`get_effective_user_role`), đọc số tiền và `payment_code` trực tiếp từ database (zero-trust client), tra cứu khóa bí mật 2 bước độc lập từ `building_payment_secrets`.
 - **Khắc phục Lỗi Hồi quy Tiện ích (`PaymentType.service`)**: Giới hạn cổng VNPay chỉ kích hoạt đối với hóa đơn căn hộ (`PaymentType.invoice`), ngăn chặn hoàn toàn lỗi 404 khi đặt tiện ích thể thao/phòng họp.
-- **Hỗ trợ Thanh toán Từng phần & Kiểm tra Toàn vẹn**: Tự động khấu trừ các giao dịch thành công trong `payment_transactions`, từ chối tạo URL nếu `payment_code` chưa hợp lệ hoặc hóa đơn đã trả hết nợ.
+- **Hỗ trợ Thanh toán Từng phần & Khấu trừ Toàn diện**: Tự động khấu trừ các khoản giao dịch thành công hoặc nộp thiếu (`status IN ('SUCCESS', 'PARTIAL_PAID')`) từ `payment_transactions`, từ chối tạo URL nếu `payment_code` chưa hợp lệ hoặc hóa đơn đã trả hết nợ.
 - **Khắc phục Lỗi PGRST200 tại `vnpay-ipn`**: Tra cứu cấu hình và khóa bí mật theo 2 truy vấn nối tiếp độc lập qua `building_id`, loại bỏ sự phụ thuộc vào Foreign Key trực tiếp giữa 2 bảng.
 - **Dọn dẹp Dead Code**: Xóa bỏ `VnpayService` (logic băm client-side) và 2 trường nhạy cảm `sepayApiKey`, `vnpayHashSecret` khỏi `BuildingPaymentConfigModel`.
 

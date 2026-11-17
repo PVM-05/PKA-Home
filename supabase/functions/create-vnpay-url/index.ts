@@ -186,14 +186,14 @@ serve(async (req: Request) => {
       }
     }
 
-    // 6. Tính toán số tiền còn lại cần thanh toán (hỗ trợ thanh toán từng phần)
-    const { data: successTxns } = await supabase
+    // 6. Tính toán số tiền còn lại cần thanh toán (hỗ trợ thanh toán từng phần qua cả SUCCESS và PARTIAL_PAID)
+    const { data: paidTxns } = await supabase
       .from("payment_transactions")
       .select("amount")
       .eq("invoice_id", invoiceId)
-      .eq("status", "SUCCESS");
+      .in("status", ["SUCCESS", "PARTIAL_PAID"]);
 
-    const paidAmount = (successTxns || []).reduce(
+    const paidAmount = (paidTxns || []).reduce(
       (sum: number, tx: { amount?: number | string }) => sum + (Number(tx.amount) || 0),
       0
     );
