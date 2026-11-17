@@ -152,3 +152,4 @@ class ResidentHomeLatestIssueCard extends StatelessWidget {
     );
   }
 }
+

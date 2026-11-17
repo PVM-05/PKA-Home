@@ -23,6 +23,11 @@ void main() {
       // Module 4: Cư dân - Trang chủ & Hồ sơ cá nhân (Resident Portal Foundation)
       'lib/features/resident/screens/resident_home_screen.dart',
       'lib/features/resident/screens/resident_profile_screen.dart',
+      // Module 5: Cư dân - Phương tiện & Khai báo chỉ số đồng hồ (Vehicle & Meter Reading)
+      'lib/features/resident/screens/vehicle_management_screen.dart',
+      'lib/features/resident/screens/resident_meter_reading_screen.dart',
+      'lib/features/resident/widgets/vehicle/resident_vehicle_card.dart',
+      'lib/features/resident/widgets/meter/resident_meter_card.dart',
     ];
 
     test('Guardrail: Các màn hình trong whitelist không được chứa mã màu cứng Color(0x...)', () {

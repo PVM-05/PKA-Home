@@ -23,6 +23,7 @@ import '../../../data/providers/vehicle_provider.dart';
 import '../../../core/utils/network_error_handler.dart';
 
 import '../../../core/utils/validators.dart';
+import '../widgets/meter/resident_meter_card.dart';
 
 import '../../../data/models/meter_reading_submission_model.dart';
 import '../../../data/services/meter_ocr_service.dart';
@@ -245,7 +246,6 @@ class _ResidentMeterReadingScreenState
                   'Cảnh báo: ${analysis.severityDisplayName}',
 
                   style: TextStyle(
-                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: textColor,
                   ),
@@ -257,7 +257,7 @@ class _ResidentMeterReadingScreenState
                   Text(
                     analysis.reason!,
 
-                    style: TextStyle(fontSize: 12, color: textColor),
+                    style: TextStyle(color: textColor),
                   ),
                 ],
               ],
@@ -418,7 +418,7 @@ class _ResidentMeterReadingScreenState
                   isDanger
                       ? 'Cảnh Báo Tiêu Thụ Tăng Vọt Nguy Hiểm'
                       : 'Cảnh Báo Tiêu Thụ Bất Thường',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -432,7 +432,7 @@ class _ResidentMeterReadingScreenState
                   isDanger
                       ? 'Hệ thống AI phát hiện mức tiêu thụ tăng vọt bất thường (>300% so với trung bình các kỳ trước):'
                       : 'Hệ thống AI/OCR phát hiện mức tiêu thụ kỳ này có dấu hiệu tăng cao bất thường so với tháng trước:',
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                  style: const TextStyle(color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 10),
                 ...reasons.map(
@@ -441,7 +441,6 @@ class _ResidentMeterReadingScreenState
                     child: Text(
                       '• $r',
                       style: TextStyle(
-                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: isDanger ? AppTheme.error : null,
                       ),
@@ -463,7 +462,7 @@ class _ResidentMeterReadingScreenState
                   const SizedBox(height: 10),
                   const Text(
                     'Bạn đã kiểm tra đối chiếu kỹ chữ số trên mặt công tơ thực tế chưa?',
-                    style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
+                    style: TextStyle(fontStyle: FontStyle.italic),
                   ),
                 ],
               ],
@@ -673,7 +672,6 @@ class _ResidentMeterReadingScreenState
                       'Chưa có dữ liệu căn hộ liên kết.',
 
                       style: TextStyle(
-                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -864,7 +862,6 @@ class _ResidentMeterReadingScreenState
                   'Lưu ý: Đã quá hạn chốt số tháng này (Hạn chót: ngày 25)',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
                     color: Colors.amber.shade900,
                   ),
                 ),
@@ -872,7 +869,6 @@ class _ResidentMeterReadingScreenState
                 const Text(
                   'Vui lòng gửi chỉ số sớm nhất có thể để tránh bị tạm tính chỉ số theo mức trung bình của căn hộ.',
                   style: TextStyle(
-                    fontSize: 12,
                     color: Colors.black87,
                   ),
                 ),
@@ -889,140 +885,10 @@ class _ResidentMeterReadingScreenState
     double oldElec,
     double oldWater,
   ) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.history_toggle_off,
-                color: AppTheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Chỉ số kỳ trước • Căn hộ $aptCode',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.amber.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.bolt,
-                            color: Colors.amber.shade800,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          const Expanded(
-                            child: Text(
-                              'Điện cũ',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '$oldElec kWh',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.blue.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.water_drop,
-                            color: Colors.blue.shade800,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          const Expanded(
-                            child: Text(
-                              'Nước cũ',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '$oldWater m³',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return ResidentPreviousMeterCard(
+      aptCode: aptCode,
+      oldElec: oldElec,
+      oldWater: oldWater,
     );
   }
 
@@ -1037,18 +903,17 @@ class _ResidentMeterReadingScreenState
             spacing: 8,
             runSpacing: 8,
             children: [
-              const Row(
+              Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.bolt, color: Colors.amber),
-                  SizedBox(width: 6),
+                  const Icon(Icons.bolt, color: Colors.amber),
+                  const SizedBox(width: 6),
                   Flexible(
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         'Công tơ Điện (kWh)',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1115,8 +980,7 @@ class _ResidentMeterReadingScreenState
                   Expanded(
                     child: Text(
                       'Đã đính kèm ảnh công tơ điện: ${_electricImagePath!.split(r'/').last.split(r'\\').last}',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppTheme.success,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1143,18 +1007,17 @@ class _ResidentMeterReadingScreenState
           ],
           if (_isElectricOcrScanning) ...[
             const SizedBox(height: 8),
-            const Row(
+            Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Đang xử lý OCR bóc tách chỉ số từ ảnh công tơ...',
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.primary,
                     fontStyle: FontStyle.italic,
                   ),
@@ -1202,18 +1065,17 @@ class _ResidentMeterReadingScreenState
             spacing: 8,
             runSpacing: 8,
             children: [
-              const Row(
+              Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.water_drop, color: Colors.blue),
-                  SizedBox(width: 6),
+                  const Icon(Icons.water_drop, color: Colors.blue),
+                  const SizedBox(width: 6),
                   Flexible(
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         'Công tơ Nước (m³)',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1280,8 +1142,7 @@ class _ResidentMeterReadingScreenState
                   Expanded(
                     child: Text(
                       'Đã đính kèm ảnh công tơ nước: ${_waterImagePath!.split(r'/').last.split(r'\\').last}',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppTheme.success,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1307,18 +1168,17 @@ class _ResidentMeterReadingScreenState
           ],
           if (_isWaterOcrScanning) ...[
             const SizedBox(height: 8),
-            const Row(
+            Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Đang xử lý OCR bóc tách chỉ số từ ảnh công tơ...',
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.primary,
                     fontStyle: FontStyle.italic,
                   ),
@@ -1400,8 +1260,7 @@ class _ResidentMeterReadingScreenState
               _isSubmitting
                   ? 'Đang gửi...'
                   : 'Gửi chỉ số cho Ban Quản Lý',
-              style: const TextStyle(
-                fontSize: 16,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1420,10 +1279,9 @@ class _ResidentMeterReadingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Lịch Sử Khai Báo Chỉ Số',
-          style: TextStyle(
-            fontSize: 17,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -1466,9 +1324,8 @@ class _ResidentMeterReadingScreenState
                           Expanded(
                             child: Text(
                               'Kỳ: ${item.period}',
-                              style: const TextStyle(
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1494,8 +1351,7 @@ class _ResidentMeterReadingScreenState
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   item.statusDisplayName,
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: statusColor,
                                   ),
@@ -1534,8 +1390,7 @@ class _ResidentMeterReadingScreenState
                       const SizedBox(height: 6),
                       Text(
                         'Gửi lúc: ${_dateFormat.format(item.createdAt)}',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -1574,8 +1429,7 @@ class _ResidentMeterReadingScreenState
                               Expanded(
                                 child: Text(
                                   'Lưu ý BQL: ${item.anomalyReason}',
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: item.isDangerAnomaly
                                         ? AppTheme.error
                                         : Colors.orange.shade900,
@@ -1608,8 +1462,7 @@ class _ResidentMeterReadingScreenState
                               Expanded(
                                 child: Text(
                                   'Lý do từ chối: ${item.rejectReason}',
-                                  style: const TextStyle(
-                                    fontSize: 13,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: AppTheme.error,
                                   ),
                                 ),
@@ -1732,11 +1585,10 @@ class _ResidentMeterReadingScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  const Text(
+                  Text(
                     'Bạn có thể điều chỉnh lại chỉ số điện nước khi phiếu đang chờ Ban Quản Lý phê duyệt.',
 
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: Theme.of(dialogCtx).textTheme.bodyMedium?.copyWith(
                       color: AppTheme.textSecondary,
                     ),
                   ),
@@ -1813,9 +1665,9 @@ class _ResidentMeterReadingScreenState
 
                       dense: true,
 
-                      title: const Text(
+                      title: Text(
                         'Xóa ảnh công tơ điện đã gửi',
-                        style: TextStyle(fontSize: 13),
+                        style: Theme.of(dialogCtx).textTheme.bodyMedium,
                       ),
 
                       value: clearElectricImg,
@@ -1830,9 +1682,9 @@ class _ResidentMeterReadingScreenState
 
                       dense: true,
 
-                      title: const Text(
+                      title: Text(
                         'Xóa ảnh công tơ nước đã gửi',
-                        style: TextStyle(fontSize: 13),
+                        style: Theme.of(dialogCtx).textTheme.bodyMedium,
                       ),
 
                       value: clearWaterImg,
@@ -1868,8 +1720,7 @@ class _ResidentMeterReadingScreenState
                           child: Text(
                             'Hệ thống sẽ giữ nguyên ảnh công tơ trước đó nếu bạn không chủ động xóa.',
 
-                            style: TextStyle(
-                              fontSize: 11,
+                            style: Theme.of(dialogCtx).textTheme.labelSmall?.copyWith(
                               color: Colors.blue.shade900,
                             ),
                           ),

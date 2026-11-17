@@ -129,3 +129,4 @@ class ResidentHomeQuickActionsRow extends StatelessWidget {
     );
   }
 }
+
