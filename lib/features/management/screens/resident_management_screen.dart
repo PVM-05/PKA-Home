@@ -21,6 +21,7 @@ import '../../../core/widgets/role_guard.dart';
 import 'link_request_management_screen.dart';
 import '../widgets/resident_360_detail_sheet.dart';
 import '../widgets/resident_activation_management_sheet.dart';
+import '../widgets/resident/management_resident_list_card.dart';
 
 class ResidentManagementScreen extends ConsumerStatefulWidget {
   const ResidentManagementScreen({super.key});
@@ -147,7 +148,9 @@ class _ResidentManagementScreenState
             ),
             title: Text(
               'Phân quyền cho ${resident.fullName}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -168,22 +171,24 @@ class _ResidentManagementScreenState
                           ),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.shield_outlined,
                             color: AppStatusColors.priorityHigh,
                             size: 20,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Đây là tài khoản của bạn. Không thể tự hạ quyền Quản trị viên để tránh mất quyền quản trị.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppStatusColors.priorityHigh,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppStatusColors.priorityHigh,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
                           ),
                         ],
@@ -253,25 +258,29 @@ class _ResidentManagementScreenState
                                       children: [
                                         Text(
                                           r['label']!,
-                                          style: TextStyle(
-                                            fontWeight: isSelected
-                                                ? FontWeight.bold
-                                                : FontWeight.w500,
-                                            color: isSelected
-                                                ? roleColor
-                                                : AppTheme.textPrimary,
-                                            fontSize: 14,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? roleColor
+                                                    : AppTheme.textPrimary,
+                                              ),
                                         ),
                                         if (isDisabled) ...[
                                           const SizedBox(width: 6),
-                                          const Text(
+                                          Text(
                                             '(Bị khóa)',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: AppTheme.error,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall
+                                                ?.copyWith(
+                                                  color: AppTheme.error,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ],
                                       ],
@@ -279,10 +288,12 @@ class _ResidentManagementScreenState
                                     const SizedBox(height: 2),
                                     Text(
                                       r['desc']!,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppTheme.textSecondary,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppTheme.textSecondary,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -336,27 +347,29 @@ class _ResidentManagementScreenState
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        title: const Row(
+                        title: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.warning_amber_rounded,
                               color: AppTheme.warning,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Xác nhận đổi vai trò',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(confirmContext)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             ),
                           ],
                         ),
                         content: Text(
                           'Bạn có chắc chắn muốn thay đổi vai trò của "${resident.fullName}" từ "$oldRoleLabel" sang "$newRoleLabel"? Thao tác này sẽ cập nhật ngay quyền truy cập và chức năng của tài khoản.',
-                          style: const TextStyle(fontSize: 14),
+                          style: Theme.of(confirmContext).textTheme.bodyMedium,
                         ),
                         actions: [
                           TextButton(
@@ -442,7 +455,9 @@ class _ResidentManagementScreenState
         return AlertDialog(
           title: Text(
             'Gán căn hộ cho ${resident.fullName}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -556,13 +571,15 @@ class _ResidentManagementScreenState
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'Bộ lọc người dùng',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -576,12 +593,11 @@ class _ResidentManagementScreenState
                     const SizedBox(height: 12),
 
                     // Nhóm: Vai trò
-                    const Text(
+                    Text(
                       'Vai trò',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Wrap(
@@ -624,12 +640,11 @@ class _ResidentManagementScreenState
                     const SizedBox(height: 16),
 
                     // Nhóm: Trạng thái
-                    const Text(
+                    Text(
                       'Trạng thái',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Wrap(
@@ -669,12 +684,11 @@ class _ResidentManagementScreenState
                     const SizedBox(height: 16),
 
                     // Nhóm: Căn hộ
-                    const Text(
+                    Text(
                       'Căn hộ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Wrap(
@@ -769,11 +783,10 @@ class _ResidentManagementScreenState
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? Colors.white : AppTheme.textPrimary,
-      ),
+      labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Colors.white : AppTheme.textPrimary,
+          ),
       selectedColor: AppTheme.primary,
       backgroundColor: AppTheme.background,
       onSelected: (_) => onSelected(),
@@ -1004,11 +1017,10 @@ class _ResidentManagementScreenState
                     hasData
                         ? 'Hiển thị $filteredCount/$totalCount người dùng'
                         : 'Đang tải người dùng...',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textSecondary,
+                        ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -1085,11 +1097,10 @@ class _ResidentManagementScreenState
                         hasData
                             ? 'Hiển thị $filteredCount/$totalCount người dùng'
                             : 'Đang tải người dùng...',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textSecondary,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSecondary,
+                            ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -1130,7 +1141,7 @@ class _ResidentManagementScreenState
                         _activeFilterCount > 0
                             ? 'Bộ lọc ($_activeFilterCount)'
                             : 'Bộ lọc',
-                        style: const TextStyle(fontSize: 12),
+                        style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ),
                   ],
@@ -1152,7 +1163,7 @@ class _ResidentManagementScreenState
               child: InputChip(
                 label: Text(
                   'Vai trò: ${_getRoleLabel(_selectedRoleFilter)}',
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
                 onDeleted: () {
                   setState(() => _selectedRoleFilter = 'all');
@@ -1166,7 +1177,7 @@ class _ResidentManagementScreenState
               child: InputChip(
                 label: Text(
                   'Trạng thái: ${_getStatusLabel(_selectedStatusFilter)}',
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
                 onDeleted: () {
                   setState(() => _selectedStatusFilter = 'all');
@@ -1180,7 +1191,7 @@ class _ResidentManagementScreenState
               child: InputChip(
                 label: Text(
                   'Căn hộ: ${_selectedApartmentFilter == 'assigned' ? 'Đã gán' : 'Chưa gán'}',
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
                 onDeleted: () {
                   setState(() => _selectedApartmentFilter = 'all');
@@ -1190,9 +1201,9 @@ class _ResidentManagementScreenState
             ),
           if (_activeFilterCount > 1)
             ActionChip(
-              label: const Text(
+              label: Text(
                 'Xóa tất cả',
-                style: TextStyle(fontSize: 12),
+                style: Theme.of(context).textTheme.labelSmall,
               ),
               avatar: const Icon(Icons.close, size: 14),
               onPressed: () {
@@ -1279,7 +1290,10 @@ class _ResidentManagementScreenState
                   headingRowColor: WidgetStateProperty.all(
                     Theme.of(context).brightness == Brightness.dark
                         ? Colors.white.withValues(alpha: 0.05)
-                        : const Color(0xFFF8FAFC),
+                        : Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.3),
                   ),
                   columns: const [
                     DataColumn(
@@ -1335,11 +1349,13 @@ class _ResidentManagementScreenState
                                   resident.fullName.isNotEmpty
                                       ? resident.fullName[0].toUpperCase()
                                       : '?',
-                                  style: TextStyle(
-                                    color: roleColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: roleColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -1381,16 +1397,18 @@ class _ResidentManagementScreenState
                                   resident.email!.isNotEmpty)
                                 Text(
                                   resident.email!,
-                                  style: const TextStyle(fontSize: 12),
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               if (resident.phone != null &&
                                   resident.phone!.isNotEmpty)
                                 Text(
                                   resident.phone!,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppTheme.textSecondary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: AppTheme.textSecondary,
+                                      ),
                                 ),
                             ],
                           ),
@@ -1478,12 +1496,11 @@ class _ResidentManagementScreenState
         itemCount: residents.length,
         itemBuilder: (context, index) {
           final resident = residents[index];
-          final hasApartments =
-              resident.apartments.isNotEmpty || resident.apartment != null;
 
-          return AppCard(
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            padding: const EdgeInsets.all(12.0),
+          return ManagementResidentListCard(
+            resident: resident,
+            apartments: apartments,
+            isCurrentUserAdmin: isCurrentUserAdmin,
             onTap: () async {
               await showModalBottomSheet(
                 context: context,
@@ -1493,168 +1510,15 @@ class _ResidentManagementScreenState
               ref.invalidate(residentsProvider);
               ref.invalidate(apartmentsProvider);
             },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor:
-                          _getRoleColor(resident.role).withValues(alpha: 0.15),
-                      child: Text(
-                        resident.fullName.isNotEmpty
-                            ? resident.fullName[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          color: _getRoleColor(resident.role),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            resident.fullName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 3),
-                          if (resident.email != null &&
-                              resident.email!.isNotEmpty)
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.email_outlined,
-                                  size: 13,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    resident.email!,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          if (resident.phone != null &&
-                              resident.phone!.isNotEmpty)
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.phone_outlined,
-                                  size: 13,
-                                  color: AppTheme.textSecondary,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    resident.phone!,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              Icon(
-                                hasApartments
-                                    ? Icons.domain
-                                    : Icons.domain_disabled_outlined,
-                                size: 14,
-                                color: hasApartments
-                                    ? AppTheme.success
-                                    : AppTheme.textSecondary,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  resident.apartmentSummary,
-                                  style: TextStyle(
-                                    color: hasApartments
-                                        ? AppTheme.success
-                                        : AppTheme.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isCurrentUserAdmin)
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 32,
-                              minHeight: 32,
-                            ),
-                            iconSize: 20,
-                            tooltip: 'Phân quyền vai trò',
-                            icon: const Icon(
-                              Icons.manage_accounts_outlined,
-                              color: AppTheme.secondary,
-                            ),
-                            onPressed: () =>
-                                _showChangeRoleDialog(context, resident),
-                          ),
-                        IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          iconSize: 20,
-                          tooltip: 'Gán căn hộ',
-                          icon: const Icon(
-                            Icons.add_home_work_outlined,
-                            color: AppTheme.primary,
-                          ),
-                          onPressed: () => _showAssignApartmentDialog(
-                            context,
-                            resident,
-                            apartments,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    _buildRoleChip(resident),
-                    _buildStatusChip(resident),
-                  ],
-                ),
-              ],
+            onChangeRole: () => _showChangeRoleDialog(context, resident),
+            onAssignApartment: () => _showAssignApartmentDialog(
+              context,
+              resident,
+              apartments,
             ),
+            roleColor: _getRoleColor(resident.role),
+            roleChip: _buildRoleChip(resident),
+            statusChip: _buildStatusChip(resident),
           );
         },
       ),
@@ -1673,11 +1537,10 @@ class _ResidentManagementScreenState
       ),
       child: Text(
         resident.roleDisplayName,
-        style: TextStyle(
-          color: _getRoleColor(resident.role),
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: _getRoleColor(resident.role),
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
@@ -1705,11 +1568,10 @@ class _ResidentManagementScreenState
       ),
       child: Text(
         text,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
@@ -1775,14 +1637,16 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.person_add_alt_1, color: AppTheme.primary),
-          SizedBox(width: 8),
+          const Icon(Icons.person_add_alt_1, color: AppTheme.primary),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Tạo tài khoản mới',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
         ],
@@ -1948,24 +1812,28 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.security, color: AppTheme.warning, size: 18),
-                          SizedBox(width: 8),
+                          const Icon(Icons.security, color: AppTheme.warning, size: 18),
+                          const SizedBox(width: 8),
                           Text(
                             'Xác thực quyền quản trị',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: Colors.brown,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.brown,
+                                ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'Tài khoản này có đặc quyền quản trị hệ thống. Vui lòng nhập mật khẩu xác nhận của Quản trị viên hiện tại.',
-                        style: TextStyle(fontSize: 11.5, color: Colors.brown),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.brown,
+                            ),
                       ),
                       const SizedBox(height: 10),
                       TextFormField(

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/shimmer_loading.dart';
@@ -25,17 +24,17 @@ import '../widgets/role_onboarding_dialog.dart';
 import '../widgets/revenue_trend_chart.dart';
 import '../widgets/all_quick_actions_sheet.dart';
 import '../widgets/management_theme_mode_sheet.dart';
+import '../widgets/home/management_financial_progress_card.dart';
+import '../widgets/home/management_recent_transactions_card.dart';
 import '../../../core/widgets/maintenance_fund_card.dart';
 import '../../../core/widgets/building_switcher_dropdown.dart';
 import '../../../core/widgets/font_size_sheet.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../data/providers/role_delegation_provider.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../../../core/services/push_notification_service.dart';
 import '../../../core/widgets/pdpl_consent_dialog.dart';
 import '../../../data/providers/notification_provider.dart';
 import '../../../data/models/notification_model.dart';
-import '../../../data/providers/payment_provider.dart';
 import '../../../data/providers/meter_reading_provider.dart';
 
 class ManagementHomeScreen extends ConsumerStatefulWidget {
@@ -124,10 +123,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
                 ),
               ),
             ),
@@ -437,9 +435,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                           currentUser.roleDisplayName,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: _getRoleBadgeColor(currentUser.role),
-                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -508,7 +505,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                             Icon(
                               Icons.speed_outlined,
                               size: 20,
-                              color: Color(0xFFE65100),
+                              color: AppStatusColors.pendingConfirmation,
                             ),
                             SizedBox(width: 8),
                             Text('Duyệt số điện nước'),
@@ -656,15 +653,16 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'VIVONA',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     currentUser?.roleDisplayName ?? 'Ban Quản Lý',
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: _getRoleBadgeColor(currentUser?.role ?? ''),
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -814,7 +812,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           context,
           icon: Icons.speed_outlined,
           label: 'Duyệt điện nước',
-          color: const Color(0xFFE65100),
+          color: AppStatusColors.pendingConfirmation,
           onTap: () async {
             await context.push(AppRoutes.managementMeterReading);
             ref.invalidate(pendingMeterReadingsCountProvider);
@@ -1005,7 +1003,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              _buildFinancialProgressCard(),
+                              const ManagementFinancialProgressCard(),
                               const SizedBox(height: 16),
                               const RevenueTrendChart(),
                               const SizedBox(height: 24),
@@ -1105,7 +1103,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _buildFinancialProgressCard(),
+                      const ManagementFinancialProgressCard(),
                       const SizedBox(height: 16),
                       const RevenueTrendChart(),
                       const SizedBox(height: 16),
@@ -1325,7 +1323,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 if (pendingMeterCount > 0 && canManageMeterReadings)
                   _buildUrgentCard(
                     icon: Icons.speed_outlined,
-                    color: const Color(0xFFE65100),
+                    color: AppStatusColors.pendingConfirmation,
                     title: 'Chỉ số điện nước chờ duyệt ($pendingMeterCount)',
                     subtitle: 'Cần xác nhận chỉ số để chốt kỳ thanh toán',
                     actionLabel: 'Duyệt ngay',
@@ -1379,7 +1377,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             onPressed: onAction,
             child: Text(
               actionLabel,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           );
 
@@ -1394,11 +1394,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     Expanded(
                       child: Text(
                         title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                          fontSize: 13,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1408,10 +1407,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1431,21 +1429,19 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                        fontSize: 14,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textSecondary,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1654,291 +1650,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        _buildRecentTransactionsCard(),
+        const ManagementRecentTransactionsCard(),
       ],
-    );
-  }
-
-  Widget _buildRecentTransactionsCard() {
-    final transactionsAsync = ref.watch(paymentTransactionsProvider);
-    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
-
-    return transactionsAsync.when(
-      data: (transactions) {
-        if (transactions.isEmpty) {
-          return const AppCard(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: Text(
-                'Chưa có giao dịch thanh toán nào.',
-                style: TextStyle(color: AppTheme.textSecondary),
-              ),
-            ),
-          );
-        }
-
-        final recent = transactions.take(4).toList();
-        return AppCard(
-          padding: EdgeInsets.zero,
-          child: ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: recent.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final tx = recent[index];
-              return ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppStatusColors.paid.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.check_circle_outline,
-                    color: AppStatusColors.paid,
-                    size: 20,
-                  ),
-                ),
-                title: Text(
-                  tx.title ?? 'Giao dịch thanh toán',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                subtitle: Text(
-                  '${tx.transactionCode} • ${DateFormat('dd/MM HH:mm').format(tx.createdAt)}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                trailing: Text(
-                  formatCurrency.format(tx.amount),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                    fontSize: 14,
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
-      loading: () => AppSkeletonShimmer.cardList(
-        count: 3,
-        itemHeight: 64,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      error: (_, _) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildFinancialProgressCard() {
-    final statsAsync = ref.watch(financialStatsProvider);
-    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
-
-    return statsAsync.when(
-      data: (stats) {
-        final percent = (stats.collectionRate * 100).toInt();
-        final textScale = MediaQuery.textScalerOf(context).scale(1.0);
-        final chartHeight = (120.0 * textScale).clamp(120.0, 160.0);
-
-        return AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: const [
-                        Icon(
-                          Icons.pie_chart_outline,
-                          color: AppTheme.primary,
-                          size: 20,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Tiến độ thu phí tòa nhà',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppStatusColors.paid.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '$percent% Đã thu',
-                      style: const TextStyle(
-                        color: AppStatusColors.paid,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: chartHeight,
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: PieChart(
-                        PieChartData(
-                          sectionsSpace: 2,
-                          centerSpaceRadius: 30,
-                          sections: [
-                            PieChartSectionData(
-                              color: AppStatusColors.paid,
-                              value: stats.paidTotal,
-                              title: '',
-                              radius: 25,
-                            ),
-                            PieChartSectionData(
-                              color: AppStatusColors.unpaid,
-                              value: stats.unpaidTotal,
-                              title: '',
-                              radius: 25,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLegendItem(
-                            color: AppStatusColors.paid,
-                            label:
-                                'Đã thu: ${formatCurrency.format(stats.paidTotal)}',
-                          ),
-                          const SizedBox(height: 8),
-                          _buildLegendItem(
-                            color: AppStatusColors.unpaid,
-                            label:
-                                'Còn nợ: ${formatCurrency.format(stats.unpaidTotal)}',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Đã thu',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          formatCurrency.format(stats.paidTotal),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppStatusColors.paid,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Còn nợ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          formatCurrency.format(stats.unpaidTotal),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppStatusColors.unpaid,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text(
-                          'Căn đã đóng',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${stats.paidCount}/${stats.paidCount + stats.unpaidCount}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => AppSkeletonShimmer.rectangular(
-        width: double.infinity,
-        height: 140,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      error: (e, _) => const SizedBox.shrink(),
     );
   }
 
@@ -1994,9 +1707,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                         child: Text(
                           '$badgeCount',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: Colors.white,
-                            fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -2011,10 +1723,9 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: color,
                     fontWeight: FontWeight.bold,
-                    fontSize: 11.5,
                   ),
                 ),
               ),
@@ -2022,27 +1733,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLegendItem({required Color color, required String label}) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }

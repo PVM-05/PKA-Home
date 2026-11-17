@@ -28,6 +28,16 @@ void main() {
       'lib/features/resident/screens/resident_meter_reading_screen.dart',
       'lib/features/resident/widgets/vehicle/resident_vehicle_card.dart',
       'lib/features/resident/widgets/meter/resident_meter_card.dart',
+      // Module 6: Ban Quản Lý - Trang chủ, Cư dân, Căn hộ & Duyệt điện nước
+      'lib/features/management/screens/management_home_screen.dart',
+      'lib/features/management/screens/resident_management_screen.dart',
+      'lib/features/management/screens/apartment_management_screen.dart',
+      'lib/features/management/screens/management_meter_reading_screen.dart',
+      'lib/features/management/widgets/home/management_financial_progress_card.dart',
+      'lib/features/management/widgets/home/management_recent_transactions_card.dart',
+      'lib/features/management/widgets/resident/management_resident_list_card.dart',
+      'lib/features/management/widgets/apartment/management_apartment_grid_card.dart',
+      'lib/features/management/widgets/meter/management_submission_card.dart',
     ];
 
     test('Guardrail: Các màn hình trong whitelist không được chứa mã màu cứng Color(0x...)', () {

@@ -15,6 +15,7 @@ import '../../../data/models/batch_import_model.dart';
 import '../../../data/providers/batch_import_provider.dart';
 import '../widgets/apartment_contract_sheet.dart';
 import '../widgets/create_apartment_invitation_sheet.dart';
+import '../widgets/apartment/management_apartment_grid_card.dart';
 
 class ApartmentManagementScreen extends ConsumerStatefulWidget {
   const ApartmentManagementScreen({super.key});
@@ -139,13 +140,15 @@ class _ApartmentManagementScreenState
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 8),
-                              const Text(
+                              Text(
                                 'Hạ tầng tòa nhà đang trống. Bạn có thể tải file mẫu Excel hoặc CSV để nhập nhanh danh sách căn hộ theo lô.',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: AppTheme.textSecondary,
-                                  fontSize: 14,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: AppTheme.textSecondary,
+                                    ),
                               ),
                               const SizedBox(height: 24),
                               Wrap(
@@ -276,13 +279,15 @@ class _ApartmentManagementScreenState
                               // Cấp 1: Chọn Tòa nhà
                               Row(
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Tòa nhà:',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.textSecondary,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.textSecondary,
+                                        ),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -347,13 +352,15 @@ class _ApartmentManagementScreenState
                               if (floors.isNotEmpty) ...[
                                 Row(
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Số tầng: ',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.textSecondary,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.textSecondary,
+                                          ),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
@@ -503,13 +510,12 @@ class _ApartmentManagementScreenState
                   color: AppTheme.textSecondary.withValues(alpha: 0.5),
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'Không tìm thấy căn hộ phù hợp bộ lọc',
-                  style: TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
@@ -660,13 +666,12 @@ class _ApartmentManagementScreenState
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       'Tòa nhà: ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: AppTheme.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textSecondary,
+                          ),
                     ),
                     Expanded(
                       child: SingleChildScrollView(
@@ -737,7 +742,10 @@ class _ApartmentManagementScreenState
                   headingRowColor: WidgetStateProperty.all(
                     Theme.of(context).brightness == Brightness.dark
                         ? Colors.white.withValues(alpha: 0.05)
-                        : const Color(0xFFF8FAFC),
+                        : Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.3),
                   ),
                   columns: const [
                     DataColumn(
@@ -813,11 +821,13 @@ class _ApartmentManagementScreenState
                             ),
                             child: Text(
                               statusText,
-                              style: TextStyle(
-                                color: statusColor,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ),
                         ),
@@ -896,11 +906,10 @@ class _ApartmentManagementScreenState
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -912,11 +921,10 @@ class _ApartmentManagementScreenState
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
             ),
           ),
         ],
@@ -931,11 +939,10 @@ class _ApartmentManagementScreenState
       label: Text(label),
       selected: isSelected,
       selectedColor: color.withValues(alpha: 0.15),
-      labelStyle: TextStyle(
-        color: isSelected ? color : AppTheme.textSecondary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
-      ),
+      labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: isSelected ? color : AppTheme.textSecondary,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
       backgroundColor: Colors.transparent,
       side: BorderSide(color: isSelected ? color : Colors.grey.shade300),
       onSelected: (selected) {
@@ -959,156 +966,12 @@ class _ApartmentManagementScreenState
       itemCount: apartments.length,
       itemBuilder: (context, index) {
         final apt = apartments[index];
-        final statusColor =
-            apt.isEmpty ? AppStatusColors.paid : AppTheme.primary;
-        final statusText = apt.isEmpty ? 'Còn trống' : 'Đã có chủ';
 
-        return Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(
-              color: apt.isEmpty
-                  ? Colors.grey.shade200
-                  : AppTheme.primary.withValues(alpha: 0.25),
-              width: apt.isEmpty ? 1 : 1.5,
-            ),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: () => _showApartmentDetailsModal(context, ref, apt),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          apt.code,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: statusColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 5,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            statusText,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: statusColor,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.square_foot,
-                            size: 13,
-                            color: AppTheme.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${apt.area ?? 0} m²',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppTheme.textSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.layers_outlined,
-                            size: 13,
-                            color: AppTheme.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              'Tòa ${apt.buildingCode} - Tầng ${apt.floorNumber.toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppTheme.textSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      InkWell(
-                        onTap: () =>
-                            _showApartmentDialog(context, ref, apartment: apt),
-                        borderRadius: BorderRadius.circular(20),
-                        child: const Padding(
-                          padding: EdgeInsets.all(3.0),
-                          child: Icon(
-                            Icons.edit_outlined,
-                            size: 17,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      InkWell(
-                        onTap: () => _deleteApartment(context, ref, apt),
-                        borderRadius: BorderRadius.circular(20),
-                        child: const Padding(
-                          padding: EdgeInsets.all(3.0),
-                          child: Icon(
-                            Icons.delete_outline,
-                            size: 17,
-                            color: AppTheme.error,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return ManagementApartmentGridCard(
+          apartment: apt,
+          onTap: () => _showApartmentDetailsModal(context, ref, apt),
+          onEdit: () => _showApartmentDialog(context, ref, apartment: apt),
+          onDelete: () => _deleteApartment(context, ref, apt),
         );
       },
     );
@@ -1149,10 +1012,10 @@ class _ApartmentManagementScreenState
                       children: [
                         Text(
                           'Căn ${apt.code}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(width: 6),
                         Container(
@@ -1166,11 +1029,13 @@ class _ApartmentManagementScreenState
                           ),
                           child: Text(
                             statusText,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: statusColor,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: statusColor,
+                                ),
                           ),
                         ),
                       ],
@@ -1178,10 +1043,9 @@ class _ApartmentManagementScreenState
                     const SizedBox(height: 2),
                     Text(
                       'Tòa ${apt.buildingCode} • Tầng ${apt.floorNumber.toString().padLeft(2, '0')} • ${apt.area ?? 0} m²',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textSecondary,
+                          ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -1266,10 +1130,12 @@ class _ApartmentManagementScreenState
                           const SizedBox(width: 10),
                           Text(
                             'Chi tiết Căn hộ ${apt.code}',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ],
                       ),
@@ -1286,13 +1152,15 @@ class _ApartmentManagementScreenState
                         ),
                         child: Text(
                           apt.isEmpty ? 'Còn trống' : 'Đã có chủ',
-                          style: TextStyle(
-                            color: apt.isEmpty
-                                ? AppStatusColors.paid
-                                : AppTheme.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: apt.isEmpty
+                                    ? AppStatusColors.paid
+                                    : AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -1324,9 +1192,11 @@ class _ApartmentManagementScreenState
                     ],
                   ),
                   const Divider(height: 24),
-                  const Text(
+                  Text(
                     'Cư dân đang sinh sống:',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   if (isLoading)
@@ -1477,17 +1347,18 @@ class _ApartmentManagementScreenState
             const SizedBox(width: 4),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppTheme.textSecondary,
-              ),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );
@@ -1783,20 +1654,24 @@ class _ApartmentManagementScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
+            Text(
               'Chọn định dạng file mẫu',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'File mẫu bao gồm các cột chuẩn hóa: Mã Căn Hộ (*), Diện Tích (m2) (*), Trạng Thái Trống.',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
             ),
             const SizedBox(height: 16),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE8F5E9),
-                child: Icon(Icons.table_view, color: AppTheme.success),
+              leading: CircleAvatar(
+                backgroundColor: AppTheme.success.withValues(alpha: 0.12),
+                child: const Icon(Icons.table_view, color: AppTheme.success),
               ),
               title: const Text(
                 'File mẫu Excel (.xlsx)',
@@ -1810,9 +1685,9 @@ class _ApartmentManagementScreenState
             ),
             const Divider(),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE3F2FD),
-                child: Icon(Icons.description, color: AppTheme.primary),
+              leading: CircleAvatar(
+                backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
+                child: const Icon(Icons.description, color: AppTheme.primary),
               ),
               title: const Text(
                 'File mẫu CSV (.csv)',

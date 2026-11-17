@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_storage_image.dart';
 import '../../../data/models/building_utility_rate_model.dart';
@@ -12,6 +11,7 @@ import '../../../data/providers/meter_reading_provider.dart';
 import '../../../core/utils/network_error_handler.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/constants/permissions.dart';
+import '../widgets/meter/management_submission_card.dart';
 
 class ManagementMeterReadingScreen extends ConsumerStatefulWidget {
   const ManagementMeterReadingScreen({super.key});
@@ -72,17 +72,16 @@ class _ManagementMeterReadingScreenState
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.flash_on, color: AppTheme.primary, size: 26),
-                  SizedBox(width: 8),
+                  const Icon(Icons.flash_on, color: AppTheme.primary, size: 26),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Trạm Chốt Số Tiện Ích Theo Tầng',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                 ],
@@ -96,12 +95,11 @@ class _ManagementMeterReadingScreenState
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Kỹ thuật viên nhập đồng thời chỉ số điện và nước cho các căn hộ trong kỳ chốt số:',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppTheme.textSecondary,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppTheme.textSecondary,
+                              ),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
@@ -123,12 +121,14 @@ class _ManagementMeterReadingScreenState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Danh sách căn hộ',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                             TextButton.icon(
                               icon: const Icon(Icons.add, size: 18),
@@ -459,10 +459,9 @@ class _ManagementMeterReadingScreenState
                   Expanded(
                     child: Text(
                       'Phê Duyệt Chỉ Số - Căn ${item.apartmentCode ?? ''}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                 ],
@@ -509,13 +508,15 @@ class _ManagementMeterReadingScreenState
                             Expanded(
                               child: Text(
                                 'Cảnh báo ${item.anomalySeverityDisplayName}: ${item.anomalyReason ?? ''}. Đề nghị kỹ thuật kiểm tra thực tế trước khi phát hành hóa đơn!',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: item.isDangerAnomaly
-                                      ? AppTheme.error
-                                      : Colors.orange.shade900,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: item.isDangerAnomaly
+                                          ? AppTheme.error
+                                          : Colors.orange.shade900,
+                                    ),
                               ),
                             ),
                           ],
@@ -547,23 +548,27 @@ class _ManagementMeterReadingScreenState
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Ước tính phí tiện ích:',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                               Text(
                                 NumberFormat.currency(
                                   locale: 'vi_VN',
                                   symbol: 'đ',
                                 ).format(estTotal),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primary,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primary,
+                                    ),
                               ),
                             ],
                           ),
@@ -573,19 +578,19 @@ class _ManagementMeterReadingScreenState
                     const SizedBox(height: 16),
                     CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text(
+                      title: Text(
                         'Tự động tạo hóa đơn tháng cho căn hộ này',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
-                      subtitle: const Text(
+                      subtitle: Text(
                         'Tính phí điện, nước theo chỉ số mới và phát hành công nợ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppTheme.textSecondary,
+                                ),
                       ),
                       value: generateInvoice,
                       activeColor: AppTheme.primary,
@@ -676,10 +681,9 @@ class _ManagementMeterReadingScreenState
               Expanded(
                 child: Text(
                   'Từ Chối Chỉ Số - Căn ${item.apartmentCode ?? ''}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
             ],
@@ -690,9 +694,11 @@ class _ManagementMeterReadingScreenState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Vui lòng nhập lý do từ chối để cư dân nắm được và thực hiện khai báo lại:',
-                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -784,10 +790,9 @@ class _ManagementMeterReadingScreenState
               AppBar(
                 title: Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 automaticallyImplyLeading: false,
                 actions: [
@@ -844,17 +849,21 @@ class _ManagementMeterReadingScreenState
       permission: AppPermissions.meterReadingManagement,
       child: Scaffold(
         appBar: AppBar(
-          title: const Column(
+          title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Duyệt Chỉ Số Điện Nước',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               Text(
                 'Quản Lý Chỉ Số Tiện Ích',
-                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
               ),
             ],
           ),
@@ -897,11 +906,13 @@ class _ManagementMeterReadingScreenState
                               ),
                               child: Text(
                                 '$count',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             )
                           : const SizedBox.shrink(),
@@ -930,11 +941,13 @@ class _ManagementMeterReadingScreenState
                               ),
                               child: Text(
                                 '$count',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                             )
                           : const SizedBox.shrink(),
@@ -970,22 +983,21 @@ class _ManagementMeterReadingScreenState
       child: anomaliesAsync.when(
         data: (items) {
           if (items.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.verified_outlined,
                     size: 64,
                     color: AppStatusColors.paid,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     'Không có chỉ số nào bị gắn cờ bất thường.',
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 15,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -1027,13 +1039,12 @@ class _ManagementMeterReadingScreenState
                     size: 64,
                     color: AppTheme.textSecondary,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     emptyMessage,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 15,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -1204,30 +1215,27 @@ class _ManagementMeterReadingScreenState
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     value,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: iconColor,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: iconColor,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1244,449 +1252,13 @@ class _ManagementMeterReadingScreenState
     MeterReadingSubmissionModel item,
     String currentTabStatus,
   ) {
-    Color statusColor = AppTheme.warning;
-    if (item.isApproved) statusColor = AppStatusColors.paid;
-    if (item.isRejected) statusColor = AppTheme.error;
-
-    return AppCard(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.apartment,
-                  color: AppTheme.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Căn hộ ${item.apartmentCode ?? ''}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      'Kỳ: ${item.period} • Gửi lúc ${_dateFormat.format(item.createdAt)}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 90),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      item.statusDisplayName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          // Huy hiệu đã xuất hóa đơn
-          if (item.hasGeneratedInvoice) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green.shade300),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.receipt_long, size: 16, color: Colors.green.shade700),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'Đã xuất hóa đơn ${item.invoiceId != null ? "(${item.invoiceId})" : ""}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade800,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          // Banner cảnh báo bất thường AI/OCR nếu có
-          if (item.hasAnomaly) ...[
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: item.isDangerAnomaly
-                    ? AppTheme.error.withValues(alpha: 0.08)
-                    : Colors.orange.withValues(alpha: 0.08),
-                border: Border.all(
-                  color: item.isDangerAnomaly ? AppTheme.error : Colors.orange,
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        item.isDangerAnomaly
-                            ? Icons.error_outline
-                            : Icons.warning_amber_rounded,
-                        size: 16,
-                        color: item.isDangerAnomaly
-                            ? AppTheme.error
-                            : Colors.orange.shade800,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Phát hiện bất thường: ${item.anomalySeverityDisplayName}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: item.isDangerAnomaly
-                                ? AppTheme.error
-                                : Colors.orange.shade900,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (item.anomalyReason != null &&
-                      item.anomalyReason!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      item.anomalyReason!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: item.isDangerAnomaly
-                            ? AppTheme.error
-                            : Colors.orange.shade900,
-                      ),
-                    ),
-                  ],
-                  if (item.previousElectricReading != null ||
-                      item.previousWaterReading != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      '• Đối chiếu cũ: Điện ${item.previousElectricReading ?? '—'} kWh (TB: ${item.avgElectricUsage ?? '—'}) | Nước ${item.previousWaterReading ?? '—'} m³ (TB: ${item.avgWaterUsage ?? '—'})',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-
-          const SizedBox(height: 12),
-          const Divider(height: 1),
-          const SizedBox(height: 12),
-
-          // Chỉ số điện và nước
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.amber.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.bolt,
-                            color: Colors.amber.shade800,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 4),
-                          const Expanded(
-                            child: Text(
-                              'Điện (kWh)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${item.electricReading} kWh',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade900,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.electricImageUrl != null) ...[
-                        const SizedBox(height: 6),
-                        GestureDetector(
-                          onTap: () => _showImageDialog(
-                            'Ảnh công tơ điện - Căn ${item.apartmentCode}',
-                            item.electricImageUrl!,
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.image,
-                                size: 14,
-                                color: AppTheme.primary,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'Xem ảnh',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppTheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.water_drop,
-                            color: Colors.blue.shade800,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 4),
-                          const Expanded(
-                            child: Text(
-                              'Nước (m³)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${item.waterReading} m³',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.waterImageUrl != null) ...[
-                        const SizedBox(height: 6),
-                        GestureDetector(
-                          onTap: () => _showImageDialog(
-                            'Ảnh công tơ nước - Căn ${item.apartmentCode}',
-                            item.waterImageUrl!,
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.image,
-                                size: 14,
-                                color: AppTheme.primary,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'Xem ảnh',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppTheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          if (item.submitterName != null) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Người gửi: ${item.submitterName}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textSecondary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    'Độ tin cậy OCR: ${(item.ocrConfidence * 100).toStringAsFixed(1)}%',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppTheme.textSecondary,
-                    ),
-                    textAlign: TextAlign.end,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ],
-
-          if (item.isRejected && item.rejectReason != null) ...[
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppTheme.error.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: AppTheme.error,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      'Lý do từ chối: ${item.rejectReason}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppTheme.error,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          // Hành động nếu là Tab Chờ duyệt hoặc Bất thường có status pending
-          if (currentTabStatus == 'pending') ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.error,
-                      side: const BorderSide(color: AppTheme.error),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    icon: const Icon(Icons.close, size: 18),
-                    label: const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text('Từ chối'),
-                    ),
-                    onPressed: () => _showRejectDialog(item),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    icon: const Icon(Icons.check, size: 18),
-                    label: const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text('Phê duyệt'),
-                    ),
-                    onPressed: () => _showApproveDialog(item),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
+    return ManagementSubmissionCard(
+      item: item,
+      currentTabStatus: currentTabStatus,
+      onShowImage: _showImageDialog,
+      onApprove: () => _showApproveDialog(item),
+      onReject: () => _showRejectDialog(item),
+      dateFormat: _dateFormat,
     );
   }
 }
