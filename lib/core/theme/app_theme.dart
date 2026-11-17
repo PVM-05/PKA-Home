@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'app_radius.dart';
+import 'app_spacing.dart';
 
 class AppStatusColors {
   static const Color paid = Color(0xFF4CAF50); // Xanh lá
@@ -158,12 +160,22 @@ class AppTheme {
         ),
       ),
 
-      // Cấu hình Text
+      // Cấu hình Text (Đầy đủ 15 styles theo chuẩn Material 3)
       textTheme: baseTextTheme.copyWith(
+        displayLarge: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold, color: textPrimary),
+        displayMedium: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w600, color: textPrimary),
+        displaySmall: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w600, color: textPrimary),
         headlineLarge: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: textPrimary),
         headlineMedium: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: textPrimary),
+        headlineSmall: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
         titleLarge: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: textPrimary),
+        titleMedium: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
+        titleSmall: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: textPrimary),
+        bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.normal, color: textPrimary),
         bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.normal, color: textPrimary),
+        bodySmall: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.normal, color: textSecondary),
+        labelLarge: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary),
+        labelMedium: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: textSecondary),
         labelSmall: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.normal, color: textSecondary),
       ),
 
@@ -230,6 +242,69 @@ class AppTheme {
         margin: const EdgeInsets.only(bottom: 16),
       ),
 
+      // Cấu hình Nút Filled (FilledButton)
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          shape: AppRadius.shapeMd,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
+          textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+
+      // Cấu hình Chip
+      chipTheme: ChipThemeData(
+        backgroundColor: slate100,
+        disabledColor: slate100.withValues(alpha: 0.5),
+        selectedColor: primary.withValues(alpha: 0.15),
+        secondarySelectedColor: primary,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+        shape: AppRadius.shapeSm,
+        side: const BorderSide(color: border),
+        labelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: textPrimary),
+        secondaryLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: primary),
+      ),
+
+      // Cấu hình Dialog
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        elevation: 4,
+        shape: AppRadius.shapeLg,
+        titleTextStyle: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
+        contentTextStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.normal, color: textSecondary),
+      ),
+
+      // Cấu hình BottomSheet
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: surface,
+        modalBackgroundColor: surface,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
+        showDragHandle: true,
+        dragHandleColor: border,
+      ),
+
+      // Cấu hình Switch
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return primary;
+          return slate700;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return primary.withValues(alpha: 0.35);
+          return slate100;
+        }),
+      ),
+
+      // Cấu hình FloatingActionButton
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        elevation: 3,
+        shape: AppRadius.shapeLg,
+      ),
+
       // Cấu hình NavigationBar Material 3
       navigationBarTheme: NavigationBarThemeData(
         indicatorColor: primary.withValues(alpha: 0.15),
@@ -274,11 +349,22 @@ class AppTheme {
         ),
       ),
 
+      // Cấu hình Text (Đầy đủ 15 styles theo chuẩn Material 3)
       textTheme: baseTextTheme.copyWith(
+        displayLarge: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.bold, color: darkTextPrimary),
+        displayMedium: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w600, color: darkTextPrimary),
+        displaySmall: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w600, color: darkTextPrimary),
         headlineLarge: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, color: darkTextPrimary),
         headlineMedium: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: darkTextPrimary),
+        headlineSmall: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: darkTextPrimary),
         titleLarge: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: darkTextPrimary),
+        titleMedium: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: darkTextPrimary),
+        titleSmall: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: darkTextPrimary),
+        bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.normal, color: darkTextPrimary),
         bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.normal, color: darkTextPrimary),
+        bodySmall: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.normal, color: darkTextSecondary),
+        labelLarge: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: darkTextPrimary),
+        labelMedium: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: darkTextSecondary),
         labelSmall: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.normal, color: darkTextSecondary),
       ),
 
@@ -339,6 +425,69 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
         ),
         margin: const EdgeInsets.only(bottom: 16),
+      ),
+
+      // Cấu hình Nút Filled (FilledButton)
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          shape: AppRadius.shapeMd,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
+          textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+
+      // Cấu hình Chip
+      chipTheme: ChipThemeData(
+        backgroundColor: const Color(0xFF2A2A2A),
+        disabledColor: const Color(0xFF2A2A2A).withValues(alpha: 0.5),
+        selectedColor: primary.withValues(alpha: 0.25),
+        secondarySelectedColor: primary,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+        shape: AppRadius.shapeSm,
+        side: const BorderSide(color: Color(0xFF333333)),
+        labelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: darkTextPrimary),
+        secondaryLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: primary),
+      ),
+
+      // Cấu hình Dialog
+      dialogTheme: DialogThemeData(
+        backgroundColor: darkSurface,
+        elevation: 4,
+        shape: AppRadius.shapeLg,
+        titleTextStyle: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: darkTextPrimary),
+        contentTextStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.normal, color: darkTextSecondary),
+      ),
+
+      // Cấu hình BottomSheet
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: darkSurface,
+        modalBackgroundColor: darkSurface,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
+        showDragHandle: true,
+        dragHandleColor: Color(0xFF444444),
+      ),
+
+      // Cấu hình Switch
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return primary;
+          return Colors.white70;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return primary.withValues(alpha: 0.45);
+          return const Color(0xFF333333);
+        }),
+      ),
+
+      // Cấu hình FloatingActionButton
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        elevation: 3,
+        shape: AppRadius.shapeLg,
       ),
 
       // Cấu hình NavigationBar Material 3
