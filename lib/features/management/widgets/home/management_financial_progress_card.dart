@@ -8,6 +8,7 @@ import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../../core/motion/app_spring_motion.dart';
 import '../../../../data/providers/dashboard_providers.dart';
 
 /// Card thể hiện tiến độ thu phí tòa nhà (biểu đồ tròn + chỉ số chi tiết)
@@ -247,7 +248,7 @@ class ManagementFinancialProgressCard extends ConsumerWidget {
               ),
             ],
           ),
-        );
+        ).animateSpringEntry();
       },
       loading: () => AppSkeletonShimmer.rectangular(
         width: double.infinity,

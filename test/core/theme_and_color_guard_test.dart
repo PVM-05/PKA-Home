@@ -38,6 +38,12 @@ void main() {
       'lib/features/management/widgets/resident/management_resident_list_card.dart',
       'lib/features/management/widgets/apartment/management_apartment_grid_card.dart',
       'lib/features/management/widgets/meter/management_submission_card.dart',
+      // Module 7: Ngôn ngữ thị giác 2026 (Visual Language 2026 - Bento & Motion)
+      'lib/core/widgets/app_glass.dart',
+      'lib/core/widgets/bounceable.dart',
+      'lib/features/resident/widgets/home/resident_utility_consumption_chart_card.dart',
+      'lib/features/resident/widgets/home/resident_home_upcoming_invoice_card.dart',
+      'lib/features/resident/widgets/home/resident_home_quick_actions_row.dart',
     ];
 
     test('Guardrail: Các màn hình trong whitelist không được chứa mã màu cứng Color(0x...)', () {

@@ -98,3 +98,4 @@ class FrostedBackground extends StatelessWidget {
     );
   }
 }
+

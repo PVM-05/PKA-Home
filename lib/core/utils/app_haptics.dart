@@ -37,3 +37,4 @@ abstract final class AppHaptics {
     await HapticFeedback.heavyImpact();
   }
 }
+
