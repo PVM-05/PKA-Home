@@ -192,7 +192,7 @@ Hệ thống tuân thủ nghiêm ngặt nguyên tắc đặc quyền tối thi�
 
 1. **Clone mã nguồn dự án**:
    ```bash
-   git clone https://github.com/PVM-05/Vivona.git
+   git clone https://github.com/PVM-05/PKA-Home.git
    cd Vivona
    ```
 
