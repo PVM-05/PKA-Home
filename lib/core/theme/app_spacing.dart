@@ -27,6 +27,7 @@ class AppSpacing {
 
   // EdgeInsets Theo Chiều Ngang (Horizontal)
   static const EdgeInsets px8 = EdgeInsets.symmetric(horizontal: sm);
+  static const EdgeInsets px12 = EdgeInsets.symmetric(horizontal: md);
   static const EdgeInsets px16 = EdgeInsets.symmetric(horizontal: lg);
   static const EdgeInsets px24 = EdgeInsets.symmetric(horizontal: xxl);
 
