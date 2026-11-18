@@ -26,8 +26,13 @@ import '../../../core/utils/error_formatter.dart';
 /// - Mobile (< 900dp): Bố cục dọc tối ưu chống tràn 100% trên 320dp (Text Zoom 1.3x).
 class IssueDetailScreen extends ConsumerStatefulWidget {
   final IssueModel issue;
+  final bool isEmbedded;
 
-  const IssueDetailScreen({super.key, required this.issue});
+  const IssueDetailScreen({
+    super.key,
+    required this.issue,
+    this.isEmbedded = false,
+  });
 
   @override
   ConsumerState<IssueDetailScreen> createState() => _IssueDetailScreenState();
@@ -102,10 +107,11 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     final currentUser = ref.watch(authProvider).valueOrNull;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth >= 900;
+    final isDesktop = !widget.isEmbedded && screenWidth >= 900;
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: !widget.isEmbedded,
         title: const Text('Chi tiết phản ánh'),
       ),
       body: isDesktop
@@ -262,13 +268,14 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
           color: AppTheme.primary,
         ),
         const SizedBox(width: 8),
-        Text(
-          'Trao đổi',
-          style: context.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            'Trao đổi',
+            style: context.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        const Spacer(),
         commentsAsync.whenOrNull(
           data: (comments) => Container(
             padding: const EdgeInsets.symmetric(

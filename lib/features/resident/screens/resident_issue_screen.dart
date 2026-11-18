@@ -16,21 +16,73 @@ import '../../../core/widgets/app_storage_image.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/adaptive_master_detail_layout.dart';
+import '../../../core/utils/app_haptics.dart';
+import 'issue_detail_screen.dart';
 
-class ResidentIssueScreen extends ConsumerWidget {
+class ResidentIssueScreen extends ConsumerStatefulWidget {
   const ResidentIssueScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResidentIssueScreen> createState() => _ResidentIssueScreenState();
+}
+
+class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
+  IssueModel? _selectedIssue;
+
+  @override
+  Widget build(BuildContext context) {
     final issueState = ref.watch(residentIssueProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Phản ánh sự cố')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: issueState.when(
-            data: (issues) {
+      body: issueState.when(
+        data: (issues) {
+          return AdaptiveMasterDetailLayout<IssueModel>(
+            selectedItem: _selectedIssue,
+            masterWidth: 420.0,
+            emptyDetailBuilder: (ctx) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Theme.of(ctx).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.engineering_outlined,
+                        size: 48,
+                        color: Theme.of(ctx).colorScheme.primary.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Chưa chọn sự cố nào',
+                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Chọn một phản ánh từ danh sách bên trái để theo dõi tiến độ xử lý và trao đổi với kỹ thuật viên.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            detailBuilder: (ctx, item) => IssueDetailScreen(
+              issue: item,
+              isEmbedded: true,
+            ),
+            masterBuilder: (ctx, isMasterOnly) {
               if (issues.isEmpty) {
                 return RefreshIndicator(
                   color: AppTheme.primary,
@@ -42,8 +94,8 @@ class ResidentIssueScreen extends ConsumerWidget {
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.6,
-                        child: _buildEmptyState(context),
+                        height: MediaQuery.of(ctx).size.height * 0.6,
+                        child: _buildEmptyState(ctx),
                       ),
                     ],
                   ),
@@ -64,23 +116,31 @@ class ResidentIssueScreen extends ConsumerWidget {
                   ),
                   itemCount: issues.length,
                   itemBuilder: (context, index) {
-                    return _buildIssueCard(context, ref, issues[index]);
+                    final issue = issues[index];
+                    final isSelected = !isMasterOnly && issue.id == _selectedIssue?.id;
+                    return _buildIssueCard(
+                      context,
+                      ref,
+                      issue,
+                      isMasterOnly: isMasterOnly,
+                      isSelected: isSelected,
+                    );
                   },
                 ),
               );
             },
-            loading: () => ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
-              ],
-            ),
-            error: (error, stack) => Center(
-              child: AppErrorCard(
-                error: error,
-                onRetry: () => ref.invalidate(residentIssueProvider),
-              ),
-            ),
+          );
+        },
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
+          ],
+        ),
+        error: (error, stack) => Center(
+          child: AppErrorCard(
+            error: error,
+            onRetry: () => ref.invalidate(residentIssueProvider),
           ),
         ),
       ),
@@ -179,8 +239,10 @@ class ResidentIssueScreen extends ConsumerWidget {
   Widget _buildIssueCard(
     BuildContext context,
     WidgetRef ref,
-    IssueModel issue,
-  ) {
+    IssueModel issue, {
+    bool isMasterOnly = true,
+    bool isSelected = false,
+  }) {
     final formatDate = DateFormat('dd/MM/yyyy HH:mm');
 
     Color statusColor;
@@ -222,71 +284,75 @@ class ResidentIssueScreen extends ConsumerWidget {
       button: true,
       child: AppCard(
         margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        borderColor: isSelected ? AppTheme.primary : null,
         child: InkWell(
-          onTap: () => context.push(AppRoutes.residentIssueDetail, extra: issue),
+          onTap: () {
+            if (isMasterOnly) {
+              context.push(AppRoutes.residentIssueDetail, extra: issue);
+            } else {
+              AppHaptics.selection();
+              setState(() {
+                _selectedIssue = issue;
+              });
+            }
+          },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  const Icon(
+                    Icons.access_time,
+                    size: 14,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(width: 4),
                   Expanded(
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          size: 14,
-                          color: AppTheme.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            formatDate.format(issue.createdAt),
-                            style: context.labelSmall?.copyWith(
-                              color: AppTheme.textSecondary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      formatDate.format(issue.createdAt),
+                      style: context.labelSmall?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Semantics(
-                        label: 'Trạng thái: $statusText',
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: statusColor.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            statusText,
-                            style: context.labelSmall?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  Flexible(
+                    child: Semantics(
+                      label: 'Trạng thái: $statusText',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: statusColor.withValues(alpha: 0.3),
+                            width: 1,
                           ),
                         ),
+                        child: Text(
+                          statusText,
+                          style: context.labelSmall?.copyWith(
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      if (issue.status == 'pending') ...[
-                        const SizedBox(width: 2),
-                        SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: PopupMenuButton<String>(
+                    ),
+                  ),
+                  if (issue.status == 'pending') ...[
+                    const SizedBox(width: 2),
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: PopupMenuButton<String>(
                             tooltip: 'Thao tác phản ánh',
                             padding: EdgeInsets.zero,
                             iconSize: 18,
@@ -343,10 +409,8 @@ class ResidentIssueScreen extends ConsumerWidget {
                     ],
                   ],
                 ),
-              ],
-            ),
-              const SizedBox(height: 12),
-              Text(issue.description, style: context.bodyMedium),
+                const SizedBox(height: 12),
+                Text(issue.description, style: context.bodyMedium),
 
               if (issue.reportImages.isNotEmpty) ...[
                 const SizedBox(height: 12),
