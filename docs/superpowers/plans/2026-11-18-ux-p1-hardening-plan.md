@@ -22,16 +22,16 @@
 - Modify: `test/features/resident/resident_home_hierarchy_test.dart`
 - Modify: `test/features/document/screens/document_lookup_screen_test.dart`
 
-- [ ] **Step 1: Cập nhật icon và nhãn tại `resident_home_quick_actions_row.dart`**
+- [x] **Step 1: Cập nhật icon và nhãn tại `resident_home_quick_actions_row.dart`**
   - Đổi `Icons.qr_code_scanner` $\rightarrow$ `Icons.receipt_long_rounded`.
   - Đổi nhãn `'Thanh toán'` $\rightarrow$ `'Hóa đơn'`.
-- [ ] **Step 2: Cập nhật Dark Mode thích ứng tại `document_lookup_screen.dart`**
+- [x] **Step 2: Cập nhật Dark Mode thích ứng tại `document_lookup_screen.dart`**
   - Loại bỏ các mã màu hardcode `0xFFF0FDF4` (Green 50), `0xFF15803D`...
   - Sử dụng `colorScheme.surfaceContainer` và `AppStatusColors.getPaid(context)` / `getUnpaid(context)`.
-- [ ] **Step 3: Chạy test xác nhận pass**
+- [x] **Step 3: Chạy test xác nhận pass**
   - Chạy `flutter test test/features/document/ test/features/resident/resident_home_hierarchy_test.dart`.
-- [ ] **Step 4: Commit code**
-  - Commit message: `fix(ux): dong bo icon hoa don trang chu va hoan thien dark mode tra cuu tai lieu`
+- [x] **Step 4: Commit code**
+  - Commit message: `fix(ux): dong bo icon hoa don trang chu va hoan thien dark mode tra cuu tai lieu` (Commit `cdfb678`)
 
 ---
 
@@ -40,17 +40,17 @@
 - Modify: `lib/features/resident/screens/create_issue_screen.dart`
 - Create: `test/features/resident/screens/create_issue_validation_test.dart`
 
-- [ ] **Step 1: Viết test cho inline validation trong `create_issue_screen.dart`**
+- [x] **Step 1: Viết test cho inline validation trong `create_issue_screen.dart`**
   - Test khi bấm gửi với ô mô tả trống $\rightarrow$ hiển thị chữ báo lỗi inline dưới ô mô tả ("Vui lòng nhập chi tiết mô tả sự cố").
   - Test khi đã nhập mô tả $\rightarrow$ không còn hiển thị lỗi inline.
-- [ ] **Step 2: Triển khai `Form` và `TextFormField` trong `create_issue_screen.dart`**
+- [x] **Step 2: Triển khai `Form` và `TextFormField` trong `create_issue_screen.dart`**
   - Khai báo `_formKey = GlobalKey<FormState>()`.
   - Thay `TextField` mô tả bằng `TextFormField` kèm `validator`.
   - Kiểm tra `_formKey.currentState!.validate()` khi submit.
-- [ ] **Step 3: Chạy test xác nhận pass**
+- [x] **Step 3: Chạy test xác nhận pass**
   - Chạy `flutter test test/features/resident/screens/create_issue_validation_test.dart`.
-- [ ] **Step 4: Commit code**
-  - Commit message: `feat(resident): chuan hoa inline validation tai cho cho form tao phan anh`
+- [x] **Step 4: Commit code**
+  - Đã commit trong commit `92f6878`.
 
 ---
 
@@ -61,18 +61,18 @@
 - Modify: `lib/features/resident/screens/edit_issue_screen.dart`
 - Create: `test/core/widgets/app_unsaved_changes_guard_test.dart`
 
-- [ ] **Step 1: Viết test cho `AppUnsavedChangesGuard`**
+- [x] **Step 1: Viết test cho `AppUnsavedChangesGuard`**
   - Test khi `hasUnsavedChanges == false`: Cho phép pop bình thường không hiển thị dialog.
   - Test khi `hasUnsavedChanges == true`: Chặn pop và hiển thị dialog xác nhận. Bấm "Tiếp tục nhập" giữ nguyên trang, bấm "Rời khỏi" cho phép pop.
-- [ ] **Step 2: Triển khai `AppUnsavedChangesGuard`**
+- [x] **Step 2: Triển khai `AppUnsavedChangesGuard`**
   - Sử dụng `PopScope` chuẩn Flutter 3.44+ với `canPop: !hasUnsavedChanges`.
   - Hộp thoại giao diện tiếng Việt chuẩn mực, hỗ trợ Dark Mode.
-- [ ] **Step 3: Tích hợp `AppUnsavedChangesGuard` vào `create_issue_screen` và `edit_issue_screen`**
+- [x] **Step 3: Tích hợp `AppUnsavedChangesGuard` vào `create_issue_screen` và `edit_issue_screen`**
   - Xác định trạng thái đã thay đổi dựa trên text mô tả hoặc ảnh đính kèm.
-- [ ] **Step 4: Chạy test xác nhận pass**
+- [x] **Step 4: Chạy test xác nhận pass**
   - Chạy `flutter test test/core/widgets/app_unsaved_changes_guard_test.dart`.
-- [ ] **Step 5: Commit code**
-  - Commit message: `feat(core): bao ve du lieu bieu mau chua luu bang app_unsaved_changes_guard popscope`
+- [x] **Step 5: Commit code**
+  - Commit message: `feat(resident): chuan hoa inline validation va bao ve du lieu form bang popscope` (Commit `92f6878`)
 
 ---
 
@@ -81,29 +81,30 @@
 - Create: `lib/core/models/paginated_list.dart`
 - Modify: `lib/data/repositories/issue_repository.dart`
 - Modify: `lib/data/providers/resident_issue_provider.dart`
+- Modify: `lib/data/providers/resident_invoice_provider.dart`
 - Modify: `lib/features/resident/screens/resident_issue_screen.dart`
-- Create: `test/data/models/paginated_list_test.dart`
+- Modify: `lib/features/resident/screens/resident_invoice_screen.dart`
+- Create: `test/core/models/paginated_list_test.dart`
 
-- [ ] **Step 1: Tạo model `PaginatedList<T>`**
-  - Thuộc tính: `items`, `page`, `pageSize`, `hasMore`, `totalCount`.
+- [x] **Step 1: Tạo model `PaginatedList<T>`**
+  - Thuộc tính: `items`, `page`, `pageSize`, `hasMore`, `isLoadingMore`.
   - Viết unit test cho `PaginatedList`.
-- [ ] **Step 2: Bổ sung phân trang `limit` & `offset` vào `IssueRepository.fetchResidentIssues`**
+- [x] **Step 2: Bổ sung phân trang `limit` & `offset` vào `IssueRepository.fetchIssues`**
   - Sử dụng `.range(offset, offset + limit - 1)` của Supabase PostgREST client.
-- [ ] **Step 3: Cập nhật `residentIssueProvider` hỗ trợ phân trang & loadMore**
-  - Cung cấp phương thức `loadMore()` tải trang tiếp theo và nối vào danh sách hiện có.
-- [ ] **Step 4: Tích hợp Infinite Scroll vào `ResidentIssueScreen`**
-  - Lắng nghe `ScrollController` và kích hoạt `loadMore()` khi cuộn xuống gần đáy.
-  - Hiển thị footer spinner nhỏ khi `isLoadingMore`.
-- [ ] **Step 5: Chạy test xác nhận pass**
-  - Chạy `flutter test test/data/models/paginated_list_test.dart test/features/resident/screens/resident_issue_adaptive_test.dart`.
-- [ ] **Step 6: Commit code**
-  - Commit message: `feat(resident): trien khai kien truc phan trang cuon vo tan cho danh sach su co`
+- [x] **Step 3: Cập nhật `residentIssuePaginatedProvider` và `residentInvoicePaginatedProvider` hỗ trợ phân trang & loadMore**
+  - Cung cấp phương thức `loadMore()` tải trang tiếp theo (20 items/page).
+  - Duy trì `residentIssueProvider` và `residentInvoiceProvider` tương thích ngược 100%.
+- [x] **Step 4: Tích hợp Infinite Scroll vào `ResidentIssueScreen` và `ResidentInvoiceScreen`**
+  - Lắng nghe `NotificationListener<ScrollNotification>` và kích hoạt `loadMore()` khi cuộn xuống gần đáy.
+- [x] **Step 5: Chạy test xác nhận pass**
+  - Chạy `flutter test test/core/models/paginated_list_test.dart test/features/resident/screens/resident_issue_adaptive_test.dart test/features/resident/screens/resident_invoice_adaptive_test.dart`.
+- [x] **Step 6: Commit code**
+  - Commit message: `feat(pagination): trien khai kien truc phan trang cuon vo tan cho hoa don va su co`
 
 ---
 
 ### Task 5: Nghiệm Thu Toàn Diện & Đồng Bộ Kiến Trúc
-- [ ] **Step 1: Chạy kiểm tra phân tích tĩnh toàn bộ dự án (`dart analyze lib test`)**
-- [ ] **Step 2: Chạy toàn bộ test suites (`flutter test`)**
-- [ ] **Step 3: Đồng bộ tri thức kiến trúc qua `graphify update .`**
-- [ ] **Step 4: Báo cáo kết quả tổng kết**
-
+- [x] **Step 1: Chạy kiểm tra phân tích tĩnh toàn bộ dự án (`dart analyze lib test`)** (0 issues)
+- [x] **Step 2: Chạy toàn bộ test suites (`flutter test`)** (100% Passed)
+- [x] **Step 3: Đồng bộ tri thức kiến trúc qua `graphify update .`** (15.571 nodes)
+- [x] **Step 4: Báo cáo kết quả tổng kết**

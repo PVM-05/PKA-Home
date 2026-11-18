@@ -108,24 +108,35 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                   HapticFeedback.lightImpact();
                   ref.invalidate(residentIssueProvider);
                 },
-                child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 16,
-                  ),
-                  itemCount: issues.length,
-                  itemBuilder: (context, index) {
-                    final issue = issues[index];
-                    final isSelected = !isMasterOnly && issue.id == _selectedIssue?.id;
-                    return _buildIssueCard(
-                      context,
-                      ref,
-                      issue,
-                      isMasterOnly: isMasterOnly,
-                      isSelected: isSelected,
-                    );
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (scrollInfo) {
+                    if (scrollInfo.metrics.pixels >=
+                        scrollInfo.metrics.maxScrollExtent - 200) {
+                      try {
+                        ref.read(residentIssuePaginatedProvider.notifier).loadMore();
+                      } catch (_) {}
+                    }
+                    return false;
                   },
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 16,
+                    ),
+                    itemCount: issues.length,
+                    itemBuilder: (context, index) {
+                      final issue = issues[index];
+                      final isSelected = !isMasterOnly && issue.id == _selectedIssue?.id;
+                      return _buildIssueCard(
+                        context,
+                        ref,
+                        issue,
+                        isMasterOnly: isMasterOnly,
+                        isSelected: isSelected,
+                      );
+                    },
+                  ),
                 ),
               );
             },

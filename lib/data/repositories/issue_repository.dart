@@ -147,14 +147,26 @@ class IssueRepository {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchIssues({String? apartmentId}) async {
+  Future<List<Map<String, dynamic>>> fetchIssues({
+    String? apartmentId,
+    int? limit,
+    int? offset,
+  }) async {
     var query = _client
         .from('issue_reports')
         .select('*, apartments(*), users:reporter_id(*), issue_images(image_url, image_role)');
     if (apartmentId != null && apartmentId.isNotEmpty) {
       query = query.eq('apartment_id', apartmentId);
     }
-    final response = await query.order('created_at', ascending: false);
+    final orderedQuery = query.order('created_at', ascending: false);
+    if (limit != null && offset != null) {
+      final response = await orderedQuery.range(offset, offset + limit - 1);
+      return List<Map<String, dynamic>>.from(response);
+    } else if (limit != null) {
+      final response = await orderedQuery.limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    }
+    final response = await orderedQuery;
     return List<Map<String, dynamic>>.from(response);
   }
 

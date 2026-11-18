@@ -207,19 +207,30 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                 ),
               ],
             )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: invoices.length,
-              itemBuilder: (context, index) {
-                final invoice = invoices[index];
-                final isSelected = !isMasterOnly && invoice.id == _selectedInvoice?.id;
-                return _buildInvoiceCard(
-                  context,
-                  invoice,
-                  isMasterOnly: isMasterOnly,
-                  isSelected: isSelected,
-                );
+          : NotificationListener<ScrollNotification>(
+              onNotification: (scrollInfo) {
+                if (scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent - 200) {
+                  try {
+                    ref.read(residentInvoicePaginatedProvider.notifier).loadMore();
+                  } catch (_) {}
+                }
+                return false;
               },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: invoices.length,
+                itemBuilder: (context, index) {
+                  final invoice = invoices[index];
+                  final isSelected = !isMasterOnly && invoice.id == _selectedInvoice?.id;
+                  return _buildInvoiceCard(
+                    context,
+                    invoice,
+                    isMasterOnly: isMasterOnly,
+                    isSelected: isSelected,
+                  );
+                },
+              ),
             ),
     );
   }
