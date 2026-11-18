@@ -12,6 +12,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/app_theme.dart';
+import '../config/app_environment.dart';
 
 import '../../data/models/invoice_model.dart';
 
@@ -213,7 +214,7 @@ class _UnifiedPaymentSheetState extends ConsumerState<UnifiedPaymentSheet> {
         txnRef: memo,
         orderInfo: 'Thanh toan $memo',
         returnUrl: 'https://vivona.web.app/payment-result',
-        isSandbox: true,
+        isSandbox: !AppEnvironment.current.isProduction,
       );
 
       if (paymentUrl != null && paymentUrl.isNotEmpty) {

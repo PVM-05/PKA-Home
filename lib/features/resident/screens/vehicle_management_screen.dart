@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/parking_slot_model.dart';
@@ -1176,7 +1177,12 @@ class _VehicleManagementScreenState
                 child: content,
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
+              ],
+            ),
             error: (e, _) => Center(
               child: AppErrorCard(
                 error: e,
@@ -1186,7 +1192,12 @@ class _VehicleManagementScreenState
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
+          ],
+        ),
         error: (e, _) => Center(
           child: AppErrorCard(
             error: e,

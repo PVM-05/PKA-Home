@@ -199,5 +199,21 @@ void main() {
       expect(find.text('Cổng thanh toán trực tuyến VNPay'), findsNothing);
       expect(find.text('Chuyển khoản VietQR (Napas 247)'), findsOneWidget);
     });
+
+    test('PaymentService sinh URL sandbox hoặc production dựa trên cấu hình isSandbox', () async {
+      const paymentService = PaymentService(isMockMode: true);
+
+      final sandboxUrl = await paymentService.createVnpayPaymentUrl(
+        invoiceId: 'inv-test-01',
+        isSandbox: true,
+      );
+      expect(sandboxUrl, contains('https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'));
+
+      final prodUrl = await paymentService.createVnpayPaymentUrl(
+        invoiceId: 'inv-test-01',
+        isSandbox: false,
+      );
+      expect(prodUrl, contains('https://pay.vnpayment.vn/paymentv2/vpcpay.html'));
+    });
   });
 }

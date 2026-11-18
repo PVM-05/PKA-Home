@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 
 import '../../../core/widgets/app_error_card.dart';
 
@@ -830,7 +831,12 @@ class _ResidentMeterReadingScreenState
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 140),
+          ],
+        ),
         error: (e, _) => Center(child: AppErrorCard(error: e)),
       ),
     );
@@ -1528,8 +1534,7 @@ class _ResidentMeterReadingScreenState
               },
             );
           },
-          loading: () =>
-              const Center(child: CircularProgressIndicator()),
+          loading: () => AppSkeletonShimmer.cardList(count: 2, itemHeight: 90),
           error: (e, _) => AppErrorCard(error: e),
         ),
       ],

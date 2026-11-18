@@ -38,6 +38,7 @@ import '../widgets/home/meter_reading_reminder_banner.dart';
 import '../providers/home_personalization_provider.dart';
 import '../../../core/utils/app_haptics.dart';
 import '../../../core/widgets/bounceable.dart';
+import '../widgets/resident_onboarding_dialog.dart';
 
 class ResidentHomeScreen extends ConsumerStatefulWidget {
   const ResidentHomeScreen({super.key});
@@ -54,9 +55,13 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        PdplConsentManager.showConsentDialogIfNeeded(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await PdplConsentManager.showConsentDialogIfNeeded(context);
+      if (!mounted) return;
+      final user = ref.read(authProvider).value;
+      if (user != null && user.isResident) {
+        ResidentOnboardingDialog.checkAndShow(context, user);
       }
     });
   }

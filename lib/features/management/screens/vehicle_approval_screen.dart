@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../data/models/parking_slot_model.dart';
 import '../../../data/models/vehicle_model.dart';
@@ -593,8 +594,12 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                       ),
                     );
                   },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      AppSkeletonShimmer.cardList(count: 4, itemHeight: 110),
+                    ],
+                  ),
                   error: (e, _) => Center(child: AppErrorCard(error: e)),
                 ),
               ),

@@ -11,6 +11,7 @@ import '../../../core/supabase_config.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/batch_import_model.dart';
 import '../../../data/providers/batch_import_provider.dart';
 import '../widgets/apartment_contract_sheet.dart';
@@ -471,8 +472,12 @@ class _ApartmentManagementScreenState
                       ],
                     );
                   },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      AppSkeletonShimmer.cardList(count: 4, itemHeight: 96),
+                    ],
+                  ),
                   error: (e, _) => Center(
                     child: Text(
                       formatErrorMessage(e),

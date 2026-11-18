@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'app_skeleton_shimmer.dart';
 
 class _CachedUrl {
   final String url;
@@ -98,14 +99,31 @@ class _AppStorageImageState extends State<AppStorageImage> {
   @override
   void initState() {
     super.initState();
-    _loadUrl();
+    final trimmed = widget.imageUrl.trim();
+    final cached = AppStorageImage._cache[trimmed];
+    if (cached != null && cached.isValid) {
+      _resolvedUrl = cached.url;
+      _isLoading = false;
+    } else {
+      _loadUrl();
+    }
   }
 
   @override
   void didUpdateWidget(covariant AppStorageImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.imageUrl != widget.imageUrl) {
-      _loadUrl();
+      final trimmed = widget.imageUrl.trim();
+      final cached = AppStorageImage._cache[trimmed];
+      if (cached != null && cached.isValid) {
+        setState(() {
+          _resolvedUrl = cached.url;
+          _isLoading = false;
+          _hasError = false;
+        });
+      } else {
+        _loadUrl();
+      }
     }
   }
 
@@ -143,40 +161,44 @@ class _AppStorageImageState extends State<AppStorageImage> {
   Widget build(BuildContext context) {
     Widget content;
 
+    final defaultPlaceholder = AppSkeletonShimmer.rectangular(
+      width: widget.width,
+      height: widget.height,
+      borderRadius: widget.borderRadius ?? BorderRadius.zero,
+    );
+
     if (_isLoading) {
-      content = widget.placeholder ??
-          Container(
-            width: widget.width,
-            height: widget.height,
-            color: Colors.grey.shade200,
-            child: const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          );
+      content = widget.placeholder ?? defaultPlaceholder;
     } else if (_hasError || _resolvedUrl == null || _resolvedUrl!.isEmpty) {
       content = widget.errorWidget ??
           Container(
             width: widget.width,
             height: widget.height,
-            color: Colors.grey.shade200,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
             child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
           );
     } else {
+      final dpr = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 2.0;
+      final cacheW = widget.width != null && widget.width!.isFinite ? (widget.width! * dpr).round() : null;
+      final cacheH = widget.height != null && widget.height!.isFinite ? (widget.height! * dpr).round() : null;
+
       content = Image.network(
         _resolvedUrl!,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
+        cacheWidth: cacheW,
+        cacheHeight: cacheH,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return widget.placeholder ?? defaultPlaceholder;
+        },
         errorBuilder: (context, error, stackTrace) =>
             widget.errorWidget ??
             Container(
               width: widget.width,
               height: widget.height,
-              color: Colors.grey.shade200,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
               child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
             ),
       );

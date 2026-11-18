@@ -7,6 +7,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/providers/building_provider.dart';
@@ -445,7 +446,12 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
+          ],
+        ),
         error: (error, stack) => Center(
           child: AppErrorCard(
             error: error,
