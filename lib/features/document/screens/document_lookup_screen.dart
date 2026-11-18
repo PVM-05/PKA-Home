@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../data/models/document_lookup_result_model.dart';
 import '../../../data/providers/document_providers.dart';
 
@@ -204,8 +206,21 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
   }
 
   Widget _buildValidCard(BuildContext context, DocumentLookupResultModel result) {
-    const successColor = Color(0xFF15803D); // Green 700
-    const successBg = Color(0xFFF0FDF4); // Green 50
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final successColor = AppStatusColors.getPaid(context);
+    final successBg = isDark
+        ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+        : const Color(0xFFF0FDF4);
+    final borderColor = isDark
+        ? successColor.withValues(alpha: 0.4)
+        : const Color(0xFF15803D);
+    final dividerColor = isDark
+        ? theme.dividerColor.withValues(alpha: 0.2)
+        : const Color(0xFFBBF7D0);
+    final messageColor = isDark
+        ? theme.colorScheme.onSurfaceVariant
+        : const Color(0xFF166534);
 
     final dateFormat = DateFormat('dd/MM/yyyy');
     final dateTimeFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -214,8 +229,8 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
       elevation: 0,
       color: successBg,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: successColor, width: 1.5),
+        borderRadius: AppRadius.rLg,
+        side: BorderSide(color: borderColor, width: 1.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -225,7 +240,7 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
+                Icon(
                   Icons.check_circle,
                   color: successColor,
                   size: 32,
@@ -235,7 +250,7 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'CHỨNG TỪ HỢP LỆ & XÁC THỰC',
                         style: TextStyle(
                           color: successColor,
@@ -247,8 +262,8 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
                       Text(
                         result.message ??
                             'Chứng từ đã được phát hành và lưu trữ hợp lệ trên hệ thống.',
-                        style: const TextStyle(
-                          color: Color(0xFF166534),
+                        style: TextStyle(
+                          color: messageColor,
                           fontSize: 13,
                         ),
                       ),
@@ -257,26 +272,26 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
                 ),
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
-              child: Divider(color: Color(0xFFBBF7D0)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Divider(color: dividerColor),
             ),
-            _buildDetailRow('Mã tra cứu:', result.lookupCode ?? '---', isHighlight: true),
-            _buildDetailRow('Loại chứng từ:', result.documentType ?? 'Hóa đơn dịch vụ'),
-            _buildDetailRow('Mã căn hộ:', result.apartmentCode ?? '---'),
-            _buildDetailRow('Kỳ thanh toán:', result.period ?? '---'),
-            _buildDetailRow('Tổng số tiền:', result.formattedAmount ?? '---', isHighlight: true),
-            _buildDetailRow('Trạng thái:', result.statusText ?? '---'),
+            _buildDetailRow(context, 'Mã tra cứu:', result.lookupCode ?? '---', isHighlight: true),
+            _buildDetailRow(context, 'Loại chứng từ:', result.documentType ?? 'Hóa đơn dịch vụ'),
+            _buildDetailRow(context, 'Mã căn hộ:', result.apartmentCode ?? '---'),
+            _buildDetailRow(context, 'Kỳ thanh toán:', result.period ?? '---'),
+            _buildDetailRow(context, 'Tổng số tiền:', result.formattedAmount ?? '---', isHighlight: true),
+            _buildDetailRow(context, 'Trạng thái:', result.statusText ?? '---'),
             if (result.buildingName != null && result.buildingName!.isNotEmpty)
-              _buildDetailRow('Tòa nhà / Dự án:', result.buildingName!),
+              _buildDetailRow(context, 'Tòa nhà / Dự án:', result.buildingName!),
             if (result.issuedDate != null)
-              _buildDetailRow('Hạn nộp / Ngày lập:', dateFormat.format(result.issuedDate!)),
+              _buildDetailRow(context, 'Hạn nộp / Ngày lập:', dateFormat.format(result.issuedDate!)),
             if (result.paidDate != null)
-              _buildDetailRow('Thời gian thanh toán:', dateTimeFormat.format(result.paidDate!)),
+              _buildDetailRow(context, 'Thời gian thanh toán:', dateTimeFormat.format(result.paidDate!)),
             if (result.paymentMethod != null && result.paymentMethod!.isNotEmpty)
-              _buildDetailRow('Hình thức thanh toán:', result.paymentMethod!),
+              _buildDetailRow(context, 'Hình thức thanh toán:', result.paymentMethod!),
             if (result.issuer != null && result.issuer!.isNotEmpty)
-              _buildDetailRow('Đơn vị phát hành:', result.issuer!),
+              _buildDetailRow(context, 'Đơn vị phát hành:', result.issuer!),
           ],
         ),
       ),
@@ -284,22 +299,35 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
   }
 
   Widget _buildInvalidCard(BuildContext context, DocumentLookupResultModel result) {
-    const errorColor = Color(0xFFB91C1C); // Red 700
-    const errorBg = Color(0xFFFEF2F2); // Red 50
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final errorColor = AppStatusColors.getUnpaid(context);
+    final errorBg = isDark
+        ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+        : const Color(0xFFFEF2F2);
+    final borderColor = isDark
+        ? errorColor.withValues(alpha: 0.4)
+        : const Color(0xFFB91C1C);
+    final messageColor = isDark
+        ? theme.colorScheme.onSurfaceVariant
+        : const Color(0xFF991B1B);
+    final codeColor = isDark
+        ? theme.colorScheme.error
+        : const Color(0xFF7F1D1D);
 
     return Card(
       elevation: 0,
       color: errorBg,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: errorColor, width: 1.5),
+        borderRadius: AppRadius.rLg,
+        side: BorderSide(color: borderColor, width: 1.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               color: errorColor,
               size: 32,
@@ -309,7 +337,7 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'CHỨNG TỪ KHÔNG HỢP LỆ',
                     style: TextStyle(
                       color: errorColor,
@@ -321,8 +349,8 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
                   Text(
                     result.message ??
                         'Không tìm thấy chứng từ với mã tra cứu tương ứng hoặc chứng từ đã bị hủy.',
-                    style: const TextStyle(
-                      color: Color(0xFF991B1B),
+                    style: TextStyle(
+                      color: messageColor,
                       fontSize: 14,
                     ),
                   ),
@@ -330,9 +358,9 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Mã tra cứu: ${result.lookupCode}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF7F1D1D),
+                        color: codeColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -346,7 +374,14 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isHighlight = false}) {
+  Widget _buildDetailRow(BuildContext context, String label, String value, {bool isHighlight = false}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final labelColor = isDark ? theme.colorScheme.onSurfaceVariant : const Color(0xFF374151);
+    final valueColor = isHighlight
+        ? (isDark ? theme.colorScheme.primary : const Color(0xFF0F172A))
+        : (isDark ? theme.colorScheme.onSurface : const Color(0xFF1F2937));
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -356,8 +391,8 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
             width: 130,
             child: Text(
               label,
-              style: const TextStyle(
-                color: Color(0xFF374151),
+              style: TextStyle(
+                color: labelColor,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -368,7 +403,7 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
             child: Text(
               value,
               style: TextStyle(
-                color: isHighlight ? const Color(0xFF0F172A) : const Color(0xFF1F2937),
+                color: valueColor,
                 fontSize: 13,
                 fontWeight: isHighlight ? FontWeight.bold : FontWeight.w500,
               ),

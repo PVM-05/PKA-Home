@@ -78,8 +78,8 @@ class ResidentHomeQuickActionsRow extends StatelessWidget {
         Expanded(
           child: _buildQuickAction(
             context,
-            Icons.qr_code_scanner,
-            'Thanh toán',
+            Icons.receipt_long_rounded,
+            'Hóa đơn',
             onPaymentTap,
             accentColor: AppTheme.sapphire,
           ).animateStaggeredItem(index: 0),

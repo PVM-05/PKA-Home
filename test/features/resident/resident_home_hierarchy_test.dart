@@ -14,6 +14,7 @@ import 'package:vivona/data/providers/notification_provider.dart';
 import 'package:vivona/data/providers/resident_apartment_provider.dart';
 import 'package:vivona/features/resident/screens/resident_home_screen.dart';
 import 'package:vivona/features/resident/widgets/equipment_interruption_banner.dart';
+import 'package:vivona/features/resident/widgets/home/resident_home_quick_actions_row.dart';
 
 class FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
   FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
@@ -84,8 +85,11 @@ void main() {
     final interruptionFinder = find.byType(EquipmentInterruptionBanner);
     expect(interruptionFinder, findsOneWidget);
 
-    // 04 Thao tác: 4 nút (Thanh toán, Báo sự cố, Hotline, Cẩm nang)
-    final quickPayFinder = find.text('Thanh toán');
+    // 04 Thao tác: 4 nút (Hóa đơn, Báo sự cố, Hotline, Cẩm nang)
+    final quickPayFinder = find.descendant(
+      of: find.byType(ResidentHomeQuickActionsRow),
+      matching: find.text('Hóa đơn'),
+    );
     final quickReportFinder = find.text('Báo sự cố');
     expect(quickPayFinder, findsOneWidget);
     expect(quickReportFinder, findsOneWidget);
