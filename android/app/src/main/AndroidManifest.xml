@@ -7,7 +7,8 @@
     <application
         android:label="Vivona"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:roundIcon="@mipmap/launcher_icon">
 
         <!-- Kênh thông báo mặc định có âm thanh & rung chuông cho Android (FCM) -->
         <meta-data
