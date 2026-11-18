@@ -507,6 +507,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                   ],
                                   ResidentHomeUpcomingInvoiceCard(
                                     invoiceAsync: invoiceAsync,
+                                    mostUrgentInvoice: personalization.mostUrgentInvoice,
+                                    daysUntilDueDate: personalization.daysUntilDueDate,
                                     onNavigateToInvoices: () => _onItemTapped(1),
                                     onRetry: () => ref.invalidate(residentInvoiceProvider),
                                   ),
@@ -527,6 +529,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                   if (isIssuePriority) ...[
                                     ResidentHomeLatestIssueCard(
                                       issueAsync: issueAsync,
+                                      activeIssue: personalization.activeIssue,
                                       onNavigateToIssues: () => _onItemTapped(2),
                                       onRetry: () => ref.invalidate(residentIssueProvider),
                                     ),
@@ -553,6 +556,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                     AppSpacing.h24,
                                     ResidentHomeLatestIssueCard(
                                       issueAsync: issueAsync,
+                                      activeIssue: personalization.activeIssue,
                                       onNavigateToIssues: () => _onItemTapped(2),
                                       onRetry: () => ref.invalidate(residentIssueProvider),
                                     ),
@@ -580,6 +584,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                           ],
                           ResidentHomeUpcomingInvoiceCard(
                             invoiceAsync: invoiceAsync,
+                            mostUrgentInvoice: personalization.mostUrgentInvoice,
+                            daysUntilDueDate: personalization.daysUntilDueDate,
                             onNavigateToInvoices: () => _onItemTapped(1),
                             onRetry: () => ref.invalidate(residentInvoiceProvider),
                           ),
@@ -604,6 +610,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                           if (isIssuePriority) ...[
                             ResidentHomeLatestIssueCard(
                               issueAsync: issueAsync,
+                              activeIssue: personalization.activeIssue,
                               onNavigateToIssues: () => _onItemTapped(2),
                               onRetry: () => ref.invalidate(residentIssueProvider),
                             ),
@@ -616,6 +623,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                             AppSpacing.h24,
                             ResidentHomeLatestIssueCard(
                               issueAsync: issueAsync,
+                              activeIssue: personalization.activeIssue,
                               onNavigateToIssues: () => _onItemTapped(2),
                               onRetry: () => ref.invalidate(residentIssueProvider),
                             ),

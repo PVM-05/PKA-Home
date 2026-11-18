@@ -128,6 +128,36 @@ void main() {
       expect(state.priority, HomePriority.allPeaceful);
       expect(state.showMeterReadingReminder, isFalse);
     });
+
+    test('phát hiện chính xác hóa đơn quá hạn nằm ngoài trang 1 qua residentUnpaidInvoicesProvider', () {
+      final overdueOldInvoice = InvoiceModel(
+        id: 'inv-overdue-page2',
+        apartmentId: 'apt-1',
+        period: '09/2026',
+        dueDate: DateTime(2026, 10, 15), // Quá hạn hơn 1 tháng so với ngày 22/11/2026
+        totalAmount: 2500000.0,
+        status: 'unpaid',
+        createdAt: DateTime(2026, 9, 1),
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          currentTimeProvider.overrideWithValue(nowFixed),
+          // Trang 1 chỉ có các hóa đơn đã thanh toán
+          residentInvoiceProvider.overrideWith((ref) => [testPaidInvoice]),
+          // Dedicated unpaid provider chứa hóa đơn nợ quá hạn ngoài trang 1
+          residentUnpaidInvoicesProvider.overrideWith((ref) => [overdueOldInvoice]),
+          residentIssueProvider.overrideWith((ref) => [testResolvedIssue]),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final state = container.read(homePersonalizationProvider);
+
+      expect(state.priority, HomePriority.urgentInvoice);
+      expect(state.mostUrgentInvoice?.id, 'inv-overdue-page2');
+      expect(state.daysUntilDueDate, lessThan(0)); // Âm do đã quá hạn
+    });
   });
 }
 

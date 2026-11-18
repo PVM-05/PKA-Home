@@ -23,11 +23,6 @@ class StickyEmergencyBar extends ConsumerWidget {
     final isElevator = topEmergency.category == 'elevator_maintenance';
     final isUtility = topEmergency.category == 'utility_outage';
 
-    final Color bgColor = isEmergency
-        ? Colors.red.shade50
-        : (isElevator
-            ? Colors.orange.shade50
-            : (isUtility ? Colors.deepOrange.shade50 : Colors.amber.shade50));
     final Color borderColor = isEmergency
         ? Colors.red.shade400
         : (isElevator

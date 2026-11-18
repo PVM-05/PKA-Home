@@ -15,12 +15,16 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
   final AsyncValue<List<InvoiceModel>> invoiceAsync;
   final VoidCallback onNavigateToInvoices;
   final VoidCallback onRetry;
+  final InvoiceModel? mostUrgentInvoice;
+  final int daysUntilDueDate;
 
   const ResidentHomeUpcomingInvoiceCard({
     super.key,
     required this.invoiceAsync,
     required this.onNavigateToInvoices,
     required this.onRetry,
+    this.mostUrgentInvoice,
+    this.daysUntilDueDate = 0,
   });
 
   @override
@@ -82,20 +86,31 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: (daysUntilDueDate < 0)
+                                ? Colors.red.shade900.withValues(alpha: 0.5)
+                                : Colors.white.withValues(alpha: 0.2),
                             borderRadius: AppRadius.r20,
+                            border: (daysUntilDueDate < 0)
+                                ? Border.all(color: Colors.red.shade300, width: 1)
+                                : null,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
-                                Icons.warning_amber_rounded,
+                              Icon(
+                                (daysUntilDueDate < 0)
+                                    ? Icons.error_outline_rounded
+                                    : Icons.warning_amber_rounded,
                                 color: Colors.white,
                                 size: 14,
                               ),
                               AppSpacing.w4,
                               Text(
-                                'Đến hạn thanh toán',
+                                (daysUntilDueDate < 0)
+                                    ? 'Quá hạn ${-daysUntilDueDate} ngày'
+                                    : (daysUntilDueDate <= 5
+                                        ? 'Đến hạn sau $daysUntilDueDate ngày'
+                                        : 'Đến hạn thanh toán'),
                                 style: textTheme.labelSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,

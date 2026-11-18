@@ -13,12 +13,14 @@ class ResidentHomeLatestIssueCard extends StatelessWidget {
   final AsyncValue<List<IssueModel>> issueAsync;
   final VoidCallback onNavigateToIssues;
   final VoidCallback onRetry;
+  final IssueModel? activeIssue;
 
   const ResidentHomeLatestIssueCard({
     super.key,
     required this.issueAsync,
     required this.onNavigateToIssues,
     required this.onRetry,
+    this.activeIssue,
   });
 
   @override
@@ -86,7 +88,7 @@ class ResidentHomeLatestIssueCard extends StatelessWidget {
                 ),
               );
             }
-            final latestIssue = issues.first;
+            final latestIssue = activeIssue ?? issues.first;
             Color statusColor;
             String statusText;
             IconData statusIcon;

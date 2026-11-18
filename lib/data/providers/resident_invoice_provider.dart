@@ -126,6 +126,22 @@ final residentInvoiceProvider = FutureProvider<List<InvoiceModel>>((ref) async {
   );
 });
 
+/// Toàn bộ hóa đơn chưa thanh toán của căn hộ (không bị cắt ở limit 20 của phân trang)
+final residentUnpaidInvoicesProvider = FutureProvider<List<InvoiceModel>>((ref) async {
+  ref.watch(_invoicesStreamProvider);
+  final selectedAptId = ref.watch(selectedApartmentIdProvider);
+  if (selectedAptId == null || selectedAptId.isEmpty) return [];
+
+  final response = await SupabaseConfig.client
+      .from('invoices')
+      .select('*, apartments(*)')
+      .eq('apartment_id', selectedAptId)
+      .inFilter('status', ['unpaid', 'pending_confirmation'])
+      .order('due_date', ascending: true);
+
+  return (response as List).map((e) => InvoiceModel.fromJson(e)).toList();
+});
+
 /// Delegate sang provider trung lập
 final residentInvoiceDetailProvider = invoiceItemsDetailProvider;
 

@@ -61,28 +61,35 @@ class HomePersonalizationState {
 
 final homePersonalizationProvider = Provider<HomePersonalizationState>((ref) {
   final now = ref.watch(currentTimeProvider);
-  final invoicesAsync = ref.watch(residentInvoiceProvider);
+  final dedicatedUnpaidAsync = ref.watch(residentUnpaidInvoicesProvider);
+  final paginatedInvoicesAsync = ref.watch(residentInvoiceProvider);
   final issuesAsync = ref.watch(residentIssueProvider);
 
-  final invoices = invoicesAsync.valueOrNull ?? [];
+  // Ưu tiên danh sách hóa đơn chưa thanh toán đầy đủ không bị giới hạn trang 1;
+  // nếu chưa sẵn sàng hoặc trong test chỉ override residentInvoiceProvider thì fallback về danh sách paginated
+  final dedicatedList = dedicatedUnpaidAsync.valueOrNull;
+  final unpaidInvoices = (dedicatedList != null && dedicatedList.isNotEmpty)
+      ? dedicatedList
+      : (paginatedInvoicesAsync.valueOrNull ?? [])
+          .where((i) => i.status == 'unpaid' || i.status == 'pending_confirmation')
+          .toList();
+
   final issues = issuesAsync.valueOrNull ?? [];
 
   // 1. Cửa sổ ghi chỉ số điện nước (ngày 20 đến hết tháng)
   final isMeterReadingWindow = now.day >= 20;
 
-  // 2. Tìm hóa đơn chưa thanh toán có hạn gần nhất
+  // 2. Tìm hóa đơn chưa thanh toán có hạn gần nhất (hoặc quá hạn xa nhất)
   final today = DateTime(now.year, now.month, now.day);
   InvoiceModel? mostUrgentInvoice;
   int minDaysUntilDue = 999999;
 
-  for (final inv in invoices) {
-    if (inv.status == 'unpaid') {
-      final due = DateTime(inv.dueDate.year, inv.dueDate.month, inv.dueDate.day);
-      final days = due.difference(today).inDays;
-      if (days < minDaysUntilDue) {
-        minDaysUntilDue = days;
-        mostUrgentInvoice = inv;
-      }
+  for (final inv in unpaidInvoices) {
+    final due = DateTime(inv.dueDate.year, inv.dueDate.month, inv.dueDate.day);
+    final days = due.difference(today).inDays;
+    if (days < minDaysUntilDue) {
+      minDaysUntilDue = days;
+      mostUrgentInvoice = inv;
     }
   }
 

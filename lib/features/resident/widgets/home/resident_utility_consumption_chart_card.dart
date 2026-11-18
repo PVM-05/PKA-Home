@@ -319,7 +319,7 @@ class _ResidentUtilityConsumptionChartCardState
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (e, st) => const SizedBox.shrink(),
     );
   }
 
