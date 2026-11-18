@@ -241,16 +241,15 @@ class _ResidentActivationScreenState
                 color: AppTheme.sapphire.withValues(alpha: 0.4),
               ),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFF60A5FA)),
-                SizedBox(width: 6),
+                const Icon(Icons.verified_user_rounded, size: 14, color: AppTheme.sapphire),
+                const SizedBox(width: 6),
                 Text(
                   'Cổng Kích Hoạt Cư Dân Số Hóa',
-                  style: TextStyle(
-                    color: Color(0xFF93C5FD),
-                    fontSize: 12,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -267,11 +266,10 @@ class _ResidentActivationScreenState
                 ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Kích hoạt tài khoản để tiếp nhận mã căn hộ số hóa, tra cứu chỉ số điện nước minh bạch, nhận thông báo kịp thời và thanh toán phí dịch vụ tiện lợi.',
-            style: TextStyle(
-              color: Color(0xFF94A3B8),
-              fontSize: 13.5,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white70,
               height: 1.5,
             ),
           ),
@@ -319,7 +317,7 @@ class _ResidentActivationScreenState
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
-          child: Icon(icon, size: 18, color: const Color(0xFF60A5FA)),
+          child: Icon(icon, size: 18, color: AppTheme.sapphire),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -328,18 +326,16 @@ class _ResidentActivationScreenState
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 desc,
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 11.5,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Colors.white70,
                 ),
               ),
             ],
@@ -393,8 +389,7 @@ class _ResidentActivationScreenState
                     ? const Icon(Icons.check, size: 15, color: Colors.white)
                     : Text(
                         '${stepIndex + 1}',
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isActive ? Colors.white : Colors.grey.shade700,
                         ),
@@ -406,8 +401,7 @@ class _ResidentActivationScreenState
                 child: Text(
                   stepItem['title'] as String,
                   maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 11,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
                     color: isCurrent ? AppTheme.primary : AppTheme.textSecondary,
                   ),
@@ -441,17 +435,21 @@ class _ResidentActivationScreenState
                 child: const Icon(Icons.key_rounded, color: AppTheme.primary, size: 24),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Kích hoạt lần đầu',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       'Dành cho cư dân mới nhận bàn giao nhà',
-                      style: TextStyle(fontSize: 12.5, color: AppTheme.textSecondary),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -459,9 +457,12 @@ class _ResidentActivationScreenState
             ],
           ),
           const Divider(height: 28),
-          const Text(
+          Text(
             'Nhập Số điện thoại đã đăng ký với Ban Quản Lý và Mã kích hoạt trong thư mời hoặc phiếu bàn giao căn hộ.',
-            style: TextStyle(fontSize: 13, height: 1.4, color: AppTheme.textPrimary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              height: 1.4,
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 20),
 
@@ -518,10 +519,10 @@ class _ResidentActivationScreenState
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Hướng dẫn nhận mã kích hoạt'),
-                    content: const Text(
+                    content: Text(
                       'Mã kích hoạt (Activation Code) được cấp riêng cho từng cư dân khi nhận bàn giao căn hộ hoặc gửi qua tin nhắn SMS/Zalo từ Ban Quản Lý.\n\n'
                       'Nếu bạn chưa nhận được mã, vui lòng liên hệ trực tiếp Văn phòng Quản lý hoặc Hotline tòa nhà.',
-                      style: TextStyle(fontSize: 13.5, height: 1.4),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
                     ),
                     actions: [
                       TextButton(
@@ -532,17 +533,17 @@ class _ResidentActivationScreenState
                   ),
                 );
               },
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.help_outline, size: 16),
-                  SizedBox(width: 6),
+                  const Icon(Icons.help_outline, size: 16),
+                  const SizedBox(width: 6),
                   Flexible(
                     child: Text(
                       'Chưa có mã kích hoạt? Liên hệ BQL',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.5),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                 ],
@@ -582,13 +583,14 @@ class _ResidentActivationScreenState
                     children: [
                       Text(
                         'Chào mừng, ${state.fullName ?? "Cư dân"}!',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Hồ sơ gắn liền Căn hộ ${state.apartmentCode ?? ""}',
-                        style: const TextStyle(
-                          fontSize: 12.5,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppTheme.success,
                           fontWeight: FontWeight.w600,
                         ),
@@ -603,7 +605,7 @@ class _ResidentActivationScreenState
 
           Text(
             'Mã OTP 6 chữ số đã được gửi đến số điện thoại ${state.phone}. Vui lòng nhập mã để xác nhận quyền sử dụng.',
-            style: const TextStyle(fontSize: 13, height: 1.4),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
           ),
           const SizedBox(height: 20),
 
@@ -612,8 +614,7 @@ class _ResidentActivationScreenState
             keyboardType: TextInputType.number,
             maxLength: 6,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 24,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               letterSpacing: 8,
               fontWeight: FontWeight.bold,
             ),
@@ -632,7 +633,9 @@ class _ResidentActivationScreenState
               if (!_canResendOtp)
                 Text(
                   'Gửi lại mã sau ${_secondsRemaining}s',
-                  style: const TextStyle(fontSize: 12.5, color: AppTheme.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
                 )
               else
                 TextButton.icon(
@@ -674,14 +677,18 @@ class _ResidentActivationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Thiết lập mật khẩu đăng nhập',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Mật khẩu này sẽ được dùng để đăng nhập vào ứng dụng Vivona trong các lần tiếp theo.',
-            style: TextStyle(fontSize: 12.5, color: AppTheme.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.textSecondary,
+            ),
           ),
           const Divider(height: 24),
 
@@ -725,13 +732,17 @@ class _ResidentActivationScreenState
           // Cờ bật sinh trắc học
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
-            title: const Text(
+            title: Text(
               'Bật đăng nhập Sinh trắc học (Face ID / Vân tay)',
-              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            subtitle: const Text(
+            subtitle: Text(
               'Cho phép mở khóa nhanh và bảo mật cho thiết bị này',
-              style: TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
             ),
             value: state.isBiometricEnabled,
             onChanged: (val) => notifier.setBiometricEnabled(val),
@@ -746,12 +757,14 @@ class _ResidentActivationScreenState
                 value: state.agreedToTerms,
                 onChanged: (val) => notifier.setAgreedToTerms(val ?? false),
               ),
-              const Expanded(
+              Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(top: 12.0),
+                  padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
                     'Tôi đã đọc, hiểu rõ và đồng ý tuân thủ Nội quy & Quy chế quản lý sử dụng chung cư Vivona.',
-                    style: TextStyle(fontSize: 12.5, height: 1.3),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      height: 1.3,
+                    ),
                   ),
                 ),
               ),
@@ -801,16 +814,21 @@ class _ResidentActivationScreenState
           ),
           const SizedBox(height: 20),
 
-          const Text(
+          Text(
             'Kích Hoạt Thành Công!',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Tài khoản của cư dân ${state.fullName ?? ""} đã được kết nối chính thức với Căn hộ ${state.apartmentCode ?? ""}.',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13.5, height: 1.4, color: AppTheme.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              height: 1.4,
+              color: AppTheme.textSecondary,
+            ),
           ),
           const SizedBox(height: 24),
 
@@ -859,8 +877,7 @@ class _ResidentActivationScreenState
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 12.5,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppTheme.textSecondary,
             ),
           ),
@@ -868,13 +885,14 @@ class _ResidentActivationScreenState
         const SizedBox(width: 8),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
           ),
         ),
       ],
+    );
+  }
     );
   }
 }

@@ -18,7 +18,7 @@ void main() {
       // Module 3: Xác thực & Định danh (Auth Module)
       'lib/features/auth/screens/login_screen.dart',
       'lib/features/auth/screens/register_screen.dart',
-      'lib/features/auth/screens/first_time_activation_screen.dart',
+      'lib/features/auth/screens/resident_activation_screen.dart',
       'lib/features/auth/screens/forgot_password_screen.dart',
       // Module 4: Cư dân - Trang chủ & Hồ sơ cá nhân (Resident Portal Foundation)
       'lib/features/resident/screens/resident_home_screen.dart',
@@ -51,13 +51,30 @@ void main() {
       'lib/features/resident/widgets/home/meter_reading_reminder_banner.dart',
     ];
 
+    test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {
+      final missingFiles = <String>[];
+      for (final filePath in targetModulesWhitelist) {
+        final file = File(filePath);
+        if (!file.existsSync()) {
+          missingFiles.add(filePath);
+        }
+      }
+      expect(
+        missingFiles,
+        isEmpty,
+        reason: 'Có file nằm trong Whitelist nhưng không tồn tại trên đĩa:\n${missingFiles.join('\n')}',
+      );
+    });
+
     test('Guardrail: Các màn hình trong whitelist không được chứa mã màu cứng Color(0x...)', () {
       final hardcodedColorRegex = RegExp(r'Color\(0x[0-9a-fA-F]+\)');
       final violations = <String>[];
 
       for (final filePath in targetModulesWhitelist) {
         final file = File(filePath);
-        if (!file.existsSync()) continue;
+        if (!file.existsSync()) {
+          fail('File nằm trong Whitelist nhưng không tồn tại: $filePath');
+        }
 
         final lines = file.readAsLinesSync();
         for (int i = 0; i < lines.length; i++) {
@@ -83,7 +100,9 @@ void main() {
 
       for (final filePath in targetModulesWhitelist) {
         final file = File(filePath);
-        if (!file.existsSync()) continue;
+        if (!file.existsSync()) {
+          fail('File nằm trong Whitelist nhưng không tồn tại: $filePath');
+        }
 
         final lines = file.readAsLinesSync();
         for (int i = 0; i < lines.length; i++) {
