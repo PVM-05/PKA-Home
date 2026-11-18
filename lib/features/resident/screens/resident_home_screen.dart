@@ -15,6 +15,7 @@ import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/providers/resident_issue_provider.dart';
+import '../../../data/providers/meter_reading_provider.dart';
 import 'resident_invoice_screen.dart';
 import 'resident_issue_screen.dart';
 import 'resident_profile_screen.dart';
@@ -346,8 +347,12 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
       color: AppTheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
+        ref.invalidate(residentInvoicePaginatedProvider);
         ref.invalidate(residentInvoiceProvider);
+        ref.invalidate(residentUnpaidInvoicesProvider);
+        ref.invalidate(residentIssuePaginatedProvider);
         ref.invalidate(residentIssueProvider);
+        ref.invalidate(residentUtilityConsumptionHistoryProvider);
         ref.invalidate(announcementsStreamProvider);
       },
       child: CustomScrollView(

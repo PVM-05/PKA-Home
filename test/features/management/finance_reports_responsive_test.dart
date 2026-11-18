@@ -6,12 +6,21 @@ import 'package:vivona/data/models/debt_risk_score_model.dart';
 import 'package:vivona/data/models/financial_aging_report_model.dart';
 import 'package:vivona/data/models/maintenance_fund_model.dart';
 import 'package:vivona/data/models/maintenance_fund_transaction_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 import 'package:vivona/data/providers/building_provider.dart';
 import 'package:vivona/data/providers/debt_prediction_provider.dart';
 import 'package:vivona/data/providers/financial_report_provider.dart';
 import 'package:vivona/data/providers/maintenance_fund_provider.dart';
 import 'package:vivona/features/management/screens/financial_report_screen.dart';
 import 'package:vivona/features/management/screens/maintenance_fund_ledger_screen.dart';
+
+class _FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  _FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 void main() {
   final mockReport = FinancialAgingReportModel(
@@ -151,6 +160,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            authProvider.overrideWith(
+              (ref) => _FakeAuthNotifier(
+                UserModel(id: 'admin-01', fullName: 'BQL', role: 'admin'),
+              ),
+            ),
             financialAgingReportProvider.overrideWith((ref) async => mockReport),
             buildingDebtRadarProvider.overrideWith((ref, arg) async => mockRadar),
             filteredDebtRiskApartmentsProvider.overrideWith((ref, arg) => []),
@@ -192,6 +206,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            authProvider.overrideWith(
+              (ref) => _FakeAuthNotifier(
+                UserModel(id: 'admin-01', fullName: 'BQL', role: 'admin'),
+              ),
+            ),
             financialAgingReportProvider.overrideWith((ref) async => mockReport),
             buildingDebtRadarProvider.overrideWith((ref, arg) async => mockRadar),
             filteredDebtRiskApartmentsProvider.overrideWith((ref, arg) => []),
@@ -227,6 +246,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            authProvider.overrideWith(
+              (ref) => _FakeAuthNotifier(
+                UserModel(id: 'admin-01', fullName: 'BQL', role: 'admin'),
+              ),
+            ),
             activeMaintenanceFundProvider.overrideWith((ref) => Future.value(mockFund)),
             maintenanceFundLedgerProvider.overrideWith((ref) => Future.value(mockTxs)),
             activeBuildingProvider.overrideWith((ref) => Future.value(mockBuilding)),
@@ -262,6 +286,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            authProvider.overrideWith(
+              (ref) => _FakeAuthNotifier(
+                UserModel(id: 'admin-01', fullName: 'BQL', role: 'admin'),
+              ),
+            ),
             activeMaintenanceFundProvider.overrideWith((ref) => Future.value(mockFund)),
             maintenanceFundLedgerProvider.overrideWith((ref) => Future.value(mockTxs)),
             activeBuildingProvider.overrideWith((ref) => Future.value(mockBuilding)),

@@ -88,6 +88,7 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                   color: AppTheme.primary,
                   onRefresh: () async {
                     HapticFeedback.lightImpact();
+                    ref.invalidate(residentIssuePaginatedProvider);
                     ref.invalidate(residentIssueProvider);
                   },
                   child: ListView(
@@ -106,6 +107,7 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                 color: AppTheme.primary,
                 onRefresh: () async {
                   HapticFeedback.lightImpact();
+                  ref.invalidate(residentIssuePaginatedProvider);
                   ref.invalidate(residentIssueProvider);
                 },
                 child: NotificationListener<ScrollNotification>(
@@ -151,7 +153,10 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
         error: (error, stack) => Center(
           child: AppErrorCard(
             error: error,
-            onRetry: () => ref.invalidate(residentIssueProvider),
+            onRetry: () {
+              ref.invalidate(residentIssuePaginatedProvider);
+              ref.invalidate(residentIssueProvider);
+            },
           ),
         ),
       ),
@@ -225,6 +230,7 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
         );
 
         ref.invalidate(residentIssueProvider);
+        ref.invalidate(residentIssuePaginatedProvider);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

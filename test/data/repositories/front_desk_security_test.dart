@@ -62,14 +62,14 @@ void main() {
       expect(params.containsKey('p_user_id'), isFalse);
     });
 
-    test('VisitorPassTokenService sinh mã QR đã ký chuẩn PKAPASS.v1 thay cho fake random', () {
+    test('VisitorPassTokenService sinh mã QR đã ký chuẩn VIVONAPASS.v1 thay cho fake random', () {
       final qrPayload = VisitorPassTokenService.generateSignedQrPayload(
         passCode: 'VP-202611-00001',
         issuedAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(hours: 24)),
       );
 
-      expect(qrPayload.startsWith('PKAPASS.v1.'), isTrue);
+      expect(qrPayload.startsWith('VIVONAPASS.v1.'), isTrue);
       expect(VisitorPassTokenService.verifyAndParseQrPayload(qrPayload).isValid, isTrue);
     });
 

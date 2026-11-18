@@ -169,7 +169,10 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
           child: Center(
             child: AppErrorCard(
               error: error,
-              onRetry: () => ref.invalidate(residentInvoiceProvider),
+              onRetry: () {
+                ref.invalidate(residentInvoicePaginatedProvider);
+                ref.invalidate(residentInvoiceProvider);
+              },
             ),
           ),
         ),
@@ -189,6 +192,7 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
       color: AppTheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
+        ref.invalidate(residentInvoicePaginatedProvider);
         ref.invalidate(residentInvoiceProvider);
       },
       child: invoices.isEmpty

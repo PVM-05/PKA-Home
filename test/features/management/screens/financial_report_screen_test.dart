@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vivona/data/models/financial_aging_report_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 import 'package:vivona/data/providers/financial_report_provider.dart';
 import 'package:vivona/features/management/screens/financial_report_screen.dart';
+
+class _FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  _FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 void main() {
   testWidgets('FinancialReportScreen displays KPI cards, aging buckets, and debtors list', (tester) async {
@@ -59,6 +68,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          authProvider.overrideWith(
+            (ref) => _FakeAuthNotifier(
+              UserModel(id: 'acc-01', fullName: 'Kế toán trưởng', role: 'accountant'),
+            ),
+          ),
           financialAgingReportProvider.overrideWith((ref) async => mockReport),
         ],
         child: const MaterialApp(

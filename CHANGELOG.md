@@ -6,7 +6,28 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
 
 ---
 
-## [2.2.0] - 2026-11-17
+## [2.2.0] - 2026-11-18
+
+### Đã thêm (Added) - Hiện Đại Hóa Giao Diện UI 2026 & Cá Nhân Hóa Theo Ngữ Cảnh
+- **Bento Grid & Motion Hiện Đại Cho Trang Chủ Cư Dân (`ResidentHomeScreen`)**: Bố cục thẻ trực quan theo phong cách Bento Grid hiện đại (Upcoming Invoice, Quick Actions, Announcements, Utility Chart, Services Section), tích hợp hiệu ứng chuyển cảnh mềm (`flutter_animate`), phản hồi xúc giác (`AppHaptics`) và co giãn responsive linh hoạt (< 380px tự động xếp dọc).
+- **Hệ Thống Token Thiết Kế & Hiệu Ứng Kính Kỷ Nguyên Mới**: Bổ sung `AppSpacing`, `AppRadius`, hệ màu nhận diện phong phú (`sapphire`, `emerald`, `amethyst`, `coral`) và thành phần hiệu ứng kính cao cấp `AppGlassCard` tích hợp trên thanh khẩn cấp nổi (`StickyEmergencyBar`) và bộ chuyển căn hộ (`ApartmentSwitcherChip`).
+- **Động Cơ Cá Nhân Hóa Ngữ Cảnh (`HomePersonalizationProvider`)**: Tự động nhận diện trạng thái căn hộ theo thời gian thực (hóa đơn sắp đến hạn/quá hạn, tiến độ phản ánh sự cố đang mở, cửa sổ khai báo chỉ số điện nước cuối chu kỳ) để ưu tiên thông tin cấp thiết nhất lên đầu màn hình.
+- **Adaptive Master-Detail Layout Cho Tablet & Web**: Triển khai bố cục 2 cột thích ứng (`AdaptiveMasterDetailLayout`) trên màn hình Danh sách Hóa đơn (`ResidentInvoiceScreen`) và Danh sách Phản ánh (`ResidentIssueScreen`), giúp tối ưu không gian hiển thị trên màn hình lớn.
+- **Bộ Kiểm Thử Toàn Diện UI 2026**: Bổ sung kiểm thử tự động, golden tests (`resident_home_screen_golden_test.dart`, `app_glass_card_test.dart`) và ghim phiên bản Flutter SDK CI 3.44.0 đảm bảo tính ổn định tuyệt đối của quy trình tích hợp liên tục.
+
+### Đã sửa (Fixed) - Khắc Phục Triệt Để 5 Vấn Đề P1 UX & Toàn Bộ Hạng Mục Kiểm Toán (A1 - A7)
+- **P0 Dữ Liệu Biểu Đồ Tiêu Thụ Điện Nước Thật**: Xóa bỏ toàn bộ mảng số liệu hardcode tĩnh; chuyển sang truy vấn chỉ số đo lường thực tế từ `meter_reading_submissions` theo từng căn hộ (`residentUtilityConsumptionHistoryProvider`), tự động tính toán chênh lệch % và ẩn thẻ an toàn khi dữ liệu chưa đủ 2 kỳ đo.
+- **P1.1 Cơ Chế Phân Trang Cuộn Vô Hạn (Infinite Pagination)**: Triển khai phân trang `residentInvoicePaginatedProvider` và `residentIssuePaginatedProvider` theo kích thước 20 bản ghi/trang kèm trạng thái `loadMore` và `hasMore`, loại bỏ tải toàn bộ dữ liệu cục bộ gây nghẽn bộ nhớ.
+- **P1.2 Bảo Vệ Dữ Liệu Chưa Lưu (Unsaved Changes Guard)**: Tích hợp `AppUnsavedChangesGuard` / `PopScope` trên màn hình tạo phản ánh sự cố (`CreateIssueScreen`), cảnh báo xác nhận khi người dùng vuốt back hoặc đóng màn hình lúc đã điền mô tả, đính kèm ảnh hoặc đổi danh mục/ưu tiên.
+- **P1.3 / A1 Chuẩn Hóa Điều Hướng & Biểu Tượng Hóa Đơn**: Đổi biểu tượng nút thanh toán từ `Icons.qr_code_scanner` gây hiểu lầm sang `Icons.receipt_long_rounded` trên thẻ hóa đơn sắp tới, thể hiện chính xác hành động chuyển tab hóa đơn.
+- **P1.4 / A2 Cuộn Tự Động Đến Trường Lỗi (Auto-Scroll Form Validation)**: Tích hợp `Scrollable.ensureVisible` tự động cuộn màn hình đến ô mô tả sự cố bị bỏ trống khi người dùng bấm nút gửi ở cuối form.
+- **P1.5 Khắc Phục Chói Dark Mode Màn Hình Tra Cứu Tài Liệu (`DocumentLookupScreen`)**: Loại bỏ mã màu cứng nền xanh sáng (`Green 50`), đồng bộ bảng màu ngữ nghĩa `AppStatusColors` và `colorScheme` tương thích hoàn hảo chế độ sáng/tối theo tiêu chuẩn WCAG AA.
+- **A3 Tái Tạo & Đồng Bộ Toàn Bộ Launcher Icons Mobile**: Sinh mới biểu tượng Vivona sắc nét qua `tool/generate_icons.py` và `flutter_launcher_icons`, đồng bộ triệt để toàn bộ thư mục mật độ `android/app/src/main/res/mipmap-*` (`ic_launcher.png`, `launcher_icon.png`) và iOS `ios/Runner/Assets.xcassets/AppIcon.appiconset`.
+- **A4 URL Ảnh Đồng Hồ Tương Thích Máy Chủ**: Sửa đổi `MeterReadingRepository.uploadMeterImage` để luôn sinh URL công khai từ Supabase Client đang cấu hình (`_client.storage.getPublicUrl`), xóa bỏ URL hardcode trỏ domain chưa đăng ký.
+- **A7.1 Khử Trùng Callback & Haptic Kép**: Tách biệt luồng nhận sự kiện giữa `Bounceable` và `ElevatedButton` tại thẻ hóa đơn sắp tới qua `IgnorePointer`.
+- **A7.2 Trạng Thái Lỗi Biểu Đồ Thân Thiện**: Bổ sung thẻ thông báo lỗi thu gọn kèm nút "Thử lại" khi gặp sự cố mạng, chấm dứt hiện tượng biểu đồ biến mất không lý do.
+- **A7.4 Đồng Bộ Đặt Lại Phân Trang Khi Kéo Tải Lại (Pull-to-Refresh)**: Làm mới đồng thời cả danh sách phân trang và luồng stream tại màn hình Hóa đơn, Phản ánh và Trang chủ, đưa trạng thái về trang 1 nguyên bản.
+- **A7.5 Hằng Số Hóa Cửa Sổ Khai Báo Chỉ Số**: Chuẩn hóa ngày mở cổng định kỳ vào `AppConstants.kMeterReadingWindowStartDay` (ngày 20) và chuỗi hướng dẫn dùng chung `kMeterReadingWindowScheduleDescription`.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

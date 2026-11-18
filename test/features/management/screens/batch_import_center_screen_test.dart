@@ -3,9 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vivona/data/models/batch_import_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 import 'package:vivona/data/providers/batch_import_provider.dart';
 import 'package:vivona/data/repositories/batch_import_repository.dart';
 import 'package:vivona/features/management/screens/batch_import_center_screen.dart';
+
+class _FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  _FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class FakeBatchImportRepository extends BatchImportRepository {
   @override
@@ -30,6 +39,11 @@ void main() {
   Widget buildTestWidget({BatchImportRepository? repo}) {
     return ProviderScope(
       overrides: [
+        authProvider.overrideWith(
+          (ref) => _FakeAuthNotifier(
+            UserModel(id: 'admin-01', fullName: 'Quản trị viên', role: 'admin'),
+          ),
+        ),
         batchImportRepositoryProvider.overrideWithValue(
           repo ?? FakeBatchImportRepository(),
         ),
@@ -85,6 +99,11 @@ void main() {
       final fakeRepo = FakeBatchImportRepository();
       final container = ProviderContainer(
         overrides: [
+          authProvider.overrideWith(
+            (ref) => _FakeAuthNotifier(
+              UserModel(id: 'admin-01', fullName: 'Quản trị viên', role: 'admin'),
+            ),
+          ),
           batchImportRepositoryProvider.overrideWithValue(fakeRepo),
         ],
       );

@@ -15,4 +15,9 @@ class AppConstants {
   // Hằng số phí quản lý vận hành tòa nhà
   static const double kDefaultManagementFeePerM2 = 16500.0;
   static const String kDefaultManagementFeeFormatted = '16.500 đ/m²/tháng';
+
+  // Cửa sổ ghi chỉ số điện nước cuối chu kỳ hàng tháng
+  static const int kMeterReadingWindowStartDay = 20;
+  static const String kMeterReadingWindowScheduleDescription =
+      'Cổng ghi nhận mở từ ngày $kMeterReadingWindowStartDay đến cuối tháng. Cập nhật để hóa đơn chính xác.';
 }

@@ -45,6 +45,30 @@ void main() {
       // Loi inline da bien mat
       expect(find.text('Vui lòng nhập chi tiết mô tả sự cố'), findsNothing);
     });
+
+    testWidgets('kiem tra thay doi chuyen mon hoac uu tien kich hoat Unsaved Changes Guard', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: CreateIssueScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Thay doi category
+      final categoryDropdown = find.byKey(const Key('issue_category_dropdown'));
+      await tester.tap(categoryDropdown);
+      await tester.pumpAndSettle();
+
+      // Chon PCCC & Canh bao an toan
+      await tester.tap(find.text('PCCC & Cảnh báo an toàn').last);
+      await tester.pumpAndSettle();
+
+      // Form gio da co unsaved changes
+      expect(find.text('PCCC & Cảnh báo an toàn'), findsWidgets);
+    });
   });
 }
 

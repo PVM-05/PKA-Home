@@ -158,25 +158,27 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                     AppSpacing.h16,
                     Bounceable(
                       onTap: onNavigateToInvoices,
-                      child: ElevatedButton.icon(
-                        onPressed: onNavigateToInvoices,
-                        icon: const Icon(
-                          Icons.qr_code_scanner,
-                          size: 18,
-                        ),
-                        label: Text(
-                          'THANH TOÁN NGAY',
-                          style: textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                      child: IgnorePointer(
+                        child: ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.receipt_long_rounded,
+                            size: 18,
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppTheme.sapphire,
-                          elevation: 0,
-                          padding: AppSpacing.py12,
-                          shape: AppRadius.shape12,
+                          label: Text(
+                            'THANH TOÁN NGAY',
+                            style: textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppTheme.sapphire,
+                            elevation: 0,
+                            padding: AppSpacing.py12,
+                            shape: AppRadius.shape12,
+                          ),
                         ),
                       ),
                     ),

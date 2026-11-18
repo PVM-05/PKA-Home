@@ -3,9 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vivona/data/models/subscription_model.dart';
 import 'package:vivona/data/models/subscription_plan_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 import 'package:vivona/data/providers/subscription_provider.dart';
 import 'package:vivona/data/repositories/subscription_repository.dart';
 import 'package:vivona/features/management/screens/subscription_management_screen.dart';
+
+class _FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  _FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class FakeSubscriptionRepository extends SubscriptionRepository {
   @override
@@ -52,6 +61,11 @@ void main() {
   Widget buildTestWidget() {
     return ProviderScope(
       overrides: [
+        authProvider.overrideWith(
+          (ref) => _FakeAuthNotifier(
+            UserModel(id: 'admin-01', fullName: 'Chủ tòa nhà', role: 'admin'),
+          ),
+        ),
         subscriptionRepositoryProvider.overrideWithValue(
           FakeSubscriptionRepository(),
         ),

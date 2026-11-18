@@ -93,12 +93,11 @@ final residentIssuePaginatedProvider = StateNotifierProvider.autoDispose<
   );
 });
 
-/// Giữ nguyên tương thích ngược 100% cho các màn hình và test hiện có
+/// Provider cung cấp danh sách sự cố tương thích ngược và tự động cập nhật theo Realtime Stream
 final residentIssueProvider = FutureProvider<List<IssueModel>>((ref) async {
-  final paginated = ref.watch(residentIssuePaginatedProvider);
-  return paginated.when(
-    data: (p) => p.items,
-    loading: () => const [],
-    error: (e, st) => throw e,
-  );
+  ref.watch(_issueReportsStreamProvider);
+  final repo = ref.watch(issueRepositoryProvider);
+  final activeAptId = ref.watch(selectedApartmentIdProvider);
+  final response = await repo.fetchIssues(apartmentId: activeAptId);
+  return response.map((e) => IssueModel.fromJson(e)).toList();
 });

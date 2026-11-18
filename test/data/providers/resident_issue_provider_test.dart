@@ -62,12 +62,17 @@ void main() {
       ];
 
       // Giả lập stream không bắn ra gì ban đầu (chỉ để giữ stream mở)
-      when(() => mockRepository.streamIssues(userId: any(named: 'userId')))
-          .thenAnswer((_) => const Stream.empty());
+      when(() => mockRepository.streamIssues(
+        userId: any(named: 'userId'),
+        apartmentId: any(named: 'apartmentId'),
+      )).thenAnswer((_) => const Stream.empty());
 
       // Giả lập fetchIssues() trả về initialData
-      when(() => mockRepository.fetchIssues())
-          .thenAnswer((_) async => initialData);
+      when(() => mockRepository.fetchIssues(
+        apartmentId: any(named: 'apartmentId'),
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+      )).thenAnswer((_) async => initialData);
 
       // Act
       final issues = await container.read(residentIssueProvider.future);
@@ -75,7 +80,11 @@ void main() {
       // Assert
       expect(issues.length, 1);
       expect(issues.first.description, 'Test issue 1');
-      verify(() => mockRepository.fetchIssues()).called(1);
+      verify(() => mockRepository.fetchIssues(
+        apartmentId: any(named: 'apartmentId'),
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+      )).called(1);
     });
 
     test('residentIssueProvider updates when Realtime stream emits a change event', () async {
@@ -109,11 +118,17 @@ void main() {
         }
       ];
 
-      when(() => mockRepository.streamIssues(userId: any(named: 'userId')))
-          .thenAnswer((_) => streamController.stream);
+      when(() => mockRepository.streamIssues(
+        userId: any(named: 'userId'),
+        apartmentId: any(named: 'apartmentId'),
+      )).thenAnswer((_) => streamController.stream);
 
       var callCount = 0;
-      when(() => mockRepository.fetchIssues()).thenAnswer((_) async {
+      when(() => mockRepository.fetchIssues(
+        apartmentId: any(named: 'apartmentId'),
+        limit: any(named: 'limit'),
+        offset: any(named: 'offset'),
+      )).thenAnswer((_) async {
         callCount++;
         return callCount == 1 ? initialData : updatedData;
       });

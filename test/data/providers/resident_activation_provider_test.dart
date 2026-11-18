@@ -2,13 +2,74 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vivona/data/providers/resident_activation_provider.dart';
 import 'package:vivona/data/repositories/resident_activation_repository.dart';
 
+class FakeResidentActivationRepository extends ResidentActivationRepository {
+  @override
+  Future<Map<String, dynamic>> verifyActivationCode({
+    required String phone,
+    required String activationCode,
+  }) async {
+    final cleanCode = activationCode.trim().toUpperCase();
+    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '').trim();
+    if (cleanCode.startsWith('ACT') || cleanCode.length >= 6) {
+      return {
+        'success': true,
+        'message': 'Mã kích hoạt hợp lệ.',
+        'full_name': 'Nguyễn Văn An',
+        'apartment_code': 'A0110',
+        'phone': cleanPhone,
+        'activation_code': cleanCode,
+        'otp_hint': '123456',
+      };
+    }
+    return {
+      'success': false,
+      'message': 'Số điện thoại hoặc mã kích hoạt không chính xác.',
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyActivationOtp({
+    required String phone,
+    required String activationCode,
+    required String otpCode,
+  }) async {
+    final cleanOtp = otpCode.trim();
+    if (cleanOtp == '123456') {
+      return {
+        'success': true,
+        'message': 'Xác thực OTP thành công.',
+      };
+    }
+    return {
+      'success': false,
+      'message': 'Mã xác thực OTP không chính xác hoặc đã hết hạn.',
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> completeActivation({
+    required String phone,
+    required String activationCode,
+    required String otpCode,
+    required String authUserId,
+    String? email,
+  }) async {
+    return {
+      'success': true,
+      'message': 'Kích hoạt tài khoản thành công!',
+      'apartment_code': 'A0110',
+      'user_id': authUserId,
+    };
+  }
+}
+
 void main() {
   group('ResidentActivationNotifier State Machine Tests', () {
     late ResidentActivationRepository repository;
     late ResidentActivationNotifier notifier;
 
     setUp(() {
-      repository = ResidentActivationRepository();
+      repository = FakeResidentActivationRepository();
       notifier = ResidentActivationNotifier(repository);
     });
 

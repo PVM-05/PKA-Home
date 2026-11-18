@@ -146,5 +146,27 @@ void main() {
       expect(find.text('12'), findsOneWidget);
       expect(find.text('m³'), findsOneWidget);
     });
+
+    testWidgets('Hiển thị thẻ lỗi nhỏ gọn kèm nút Thử lại khi tải thất bại', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            residentUtilityConsumptionHistoryProvider.overrideWith(
+              (ref) async => throw Exception('Lỗi kết nối máy chủ'),
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: ResidentUtilityConsumptionChartCard(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Không thể tải dữ liệu tiêu thụ điện nước'), findsOneWidget);
+      expect(find.text('Thử lại'), findsOneWidget);
+    });
   });
 }

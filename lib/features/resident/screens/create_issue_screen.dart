@@ -22,6 +22,8 @@ class CreateIssueScreen extends ConsumerStatefulWidget {
 
 class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _scrollController = ScrollController();
+  final _descriptionFieldKey = GlobalKey();
   final _descriptionController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   final List<File> _imageFiles = [];
@@ -31,7 +33,10 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   IssueTriageResult? _triageResult;
 
   bool get _hasUnsavedChanges =>
-      _descriptionController.text.trim().isNotEmpty || _imageFiles.isNotEmpty;
+      _descriptionController.text.trim().isNotEmpty ||
+      _imageFiles.isNotEmpty ||
+      _selectedCategory != 'electrical' ||
+      _selectedPriority != 'low';
 
   @override
   void initState() {
@@ -43,6 +48,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   void dispose() {
     _descriptionController.removeListener(_onDescriptionChanged);
     _descriptionController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -198,6 +204,14 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
+      final descContext = _descriptionFieldKey.currentContext;
+      if (descContext != null) {
+        Scrollable.ensureVisible(
+          descContext,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
       return;
     }
     final description = _descriptionController.text.trim();
@@ -232,6 +246,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
       );
 
       ref.invalidate(residentIssueProvider);
+      ref.invalidate(residentIssuePaginatedProvider);
 
       if (mounted) {
         if (result.imageUploadFailed) {
@@ -283,6 +298,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
+                controller: _scrollController,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -418,20 +434,23 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
-            TextFormField(
-              key: const Key('issue_description_field'),
-              controller: _descriptionController,
-              maxLines: 5,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Vui lòng nhập chi tiết mô tả sự cố';
-                }
-                return null;
-              },
-              decoration: const InputDecoration(
-                hintText:
-                    'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy...',
-                alignLabelWithHint: true,
+            KeyedSubtree(
+              key: _descriptionFieldKey,
+              child: TextFormField(
+                key: const Key('issue_description_field'),
+                controller: _descriptionController,
+                maxLines: 5,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Vui lòng nhập chi tiết mô tả sự cố';
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  hintText:
+                      'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy...',
+                  alignLabelWithHint: true,
+                ),
               ),
             ),
             if (_triageResult != null) ...[

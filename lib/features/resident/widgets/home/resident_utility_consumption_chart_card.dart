@@ -319,7 +319,39 @@ class _ResidentUtilityConsumptionChartCardState
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (e, st) => const SizedBox.shrink(),
+      error: (e, st) => Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.rLg,
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Padding(
+          padding: AppSpacing.p12,
+          child: Row(
+            children: [
+              Icon(
+                Icons.sync_problem_rounded,
+                color: Theme.of(context).colorScheme.error,
+                size: 20,
+              ),
+              AppSpacing.w8,
+              Expanded(
+                child: Text(
+                  'Không thể tải dữ liệu tiêu thụ điện nước',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              TextButton(
+                onPressed: () => ref.invalidate(residentUtilityConsumptionHistoryProvider),
+                child: const Text('Thử lại'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

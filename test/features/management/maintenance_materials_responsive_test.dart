@@ -3,8 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vivona/core/theme/app_theme.dart';
 import 'package:vivona/data/models/maintenance_material_model.dart';
+import 'package:vivona/data/models/user_model.dart';
+import 'package:vivona/data/providers/auth_provider.dart';
 import 'package:vivona/data/providers/material_provider.dart';
 import 'package:vivona/features/management/screens/maintenance_materials_screen.dart';
+
+class _FakeAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> implements AuthNotifier {
+  _FakeAuthNotifier(UserModel user) : super(AsyncValue.data(user));
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 void main() {
   final mockMaterials = [
@@ -35,6 +44,11 @@ void main() {
   Widget buildTestWidget({required Size screenSize, double textScale = 1.0}) {
     return ProviderScope(
       overrides: [
+        authProvider.overrideWith(
+          (ref) => _FakeAuthNotifier(
+            UserModel(id: 'admin-01', fullName: 'BQL', role: 'admin'),
+          ),
+        ),
         maintenanceMaterialsProvider(null).overrideWith((ref) => Future.value(mockMaterials)),
       ],
       child: MaterialApp(

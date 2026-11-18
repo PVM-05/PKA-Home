@@ -1325,14 +1325,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                   children: [
                     Expanded(
                       child: ChoiceChip(
-                        label: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.send_rounded, size: 16),
-                            SizedBox(width: 6),
-                            Text('Phát hành ngay'),
-                          ],
-                        ),
+                        avatar: const Icon(Icons.send_rounded, size: 16),
+                        label: const Text('Phát hành ngay'),
                         selected: !_isDraft,
                         onSelected: (val) {
                           if (val) setState(() => _isDraft = false);
@@ -1342,14 +1336,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: ChoiceChip(
-                        label: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.drafts_outlined, size: 16),
-                            SizedBox(width: 6),
-                            Text('Lưu bản nháp'),
-                          ],
-                        ),
+                        avatar: const Icon(Icons.drafts_outlined, size: 16),
+                        label: const Text('Lưu bản nháp'),
                         selected: _isDraft,
                         onSelected: (val) {
                           if (val) setState(() => _isDraft = true);

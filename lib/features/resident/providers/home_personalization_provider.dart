@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
@@ -76,8 +77,9 @@ final homePersonalizationProvider = Provider<HomePersonalizationState>((ref) {
 
   final issues = issuesAsync.valueOrNull ?? [];
 
-  // 1. Cửa sổ ghi chỉ số điện nước (ngày 20 đến hết tháng)
-  final isMeterReadingWindow = now.day >= 20;
+  // 1. Cửa sổ ghi chỉ số điện nước (từ kMeterReadingWindowStartDay đến hết tháng)
+  final isMeterReadingWindow =
+      now.day >= AppConstants.kMeterReadingWindowStartDay;
 
   // 2. Tìm hóa đơn chưa thanh toán có hạn gần nhất (hoặc quá hạn xa nhất)
   final today = DateTime(now.year, now.month, now.day);

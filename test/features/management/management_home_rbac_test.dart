@@ -56,6 +56,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
 
     // Do có ủy quyền accountant, tab 'Hóa đơn' phải xuất hiện
     expect(find.text('Hóa đơn'), findsWidgets);
@@ -98,6 +99,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
 
     // Không phải admin và không có ủy quyền: không được thấy nút "Duyệt liên kết" hay "Ủy quyền"
     expect(find.text('Duyệt liên kết'), findsNothing);

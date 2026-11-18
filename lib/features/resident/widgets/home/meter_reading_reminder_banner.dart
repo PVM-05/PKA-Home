@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -104,7 +105,7 @@ class MeterReadingReminderBanner extends StatelessWidget {
                     ),
                     AppSpacing.h4,
                     Text(
-                      'Cổng ghi nhận mở từ 20 đến cuối tháng. Cập nhật để hóa đơn chính xác.',
+                      AppConstants.kMeterReadingWindowScheduleDescription,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
