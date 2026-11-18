@@ -44,6 +44,11 @@ void main() {
       'lib/features/resident/widgets/home/resident_utility_consumption_chart_card.dart',
       'lib/features/resident/widgets/home/resident_home_upcoming_invoice_card.dart',
       'lib/features/resident/widgets/home/resident_home_quick_actions_row.dart',
+      // Module 8: Thích ứng & Cá nhân hóa 2026 (Adaptive & Personalization)
+      'lib/core/widgets/adaptive_master_detail_layout.dart',
+      'lib/core/widgets/app_semantic_badge.dart',
+      'lib/features/resident/providers/home_personalization_provider.dart',
+      'lib/features/resident/widgets/home/meter_reading_reminder_banner.dart',
     ];
 
     test('Guardrail: Các màn hình trong whitelist không được chứa mã màu cứng Color(0x...)', () {

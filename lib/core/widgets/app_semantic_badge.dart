@@ -34,3 +34,4 @@ class AppSemanticBadge extends StatelessWidget {
     return badge;
   }
 }
+

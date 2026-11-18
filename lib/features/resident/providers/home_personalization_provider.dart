@@ -120,3 +120,4 @@ final homePersonalizationProvider = Provider<HomePersonalizationState>((ref) {
     daysUntilDueDate: mostUrgentInvoice != null ? minDaysUntilDue : 0,
   );
 });
+
