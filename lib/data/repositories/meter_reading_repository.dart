@@ -241,4 +241,24 @@ class MeterReadingRepository {
       throw Exception(resMap['message'] ?? 'Không thể hủy phiếu chỉ số.');
     }
   }
+
+  /// Lấy lịch sử tiêu thụ điện nước đã được phê duyệt của căn hộ (để vẽ biểu đồ xu hướng)
+  Future<List<MeterReadingSubmissionModel>> getApprovedConsumptionHistory(
+    String apartmentId, {
+    int limit = 6,
+  }) async {
+    final response = await _client
+        .from('meter_reading_submissions')
+        .select('*, apartments(code), users:users!meter_reading_submissions_submitted_by_fkey(full_name)')
+        .eq('apartment_id', apartmentId)
+        .eq('status', 'approved')
+        .order('created_at', ascending: false)
+        .limit(limit);
+
+    final list = (response as List)
+        .map((json) => MeterReadingSubmissionModel.fromJson(json))
+        .toList();
+
+    return list.reversed.toList();
+  }
 }

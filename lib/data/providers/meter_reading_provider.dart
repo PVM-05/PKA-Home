@@ -76,3 +76,13 @@ final currentApartmentReadingsProvider = FutureProvider<Map<String, dynamic>?>((
     return null;
   }
 });
+
+/// Lịch sử tiêu thụ điện nước đã duyệt của căn hộ hiện tại (tối đa 6 kỳ) phục vụ biểu đồ xu hướng
+final residentUtilityConsumptionHistoryProvider =
+    FutureProvider.autoDispose<List<MeterReadingSubmissionModel>>((ref) async {
+  final aptId = await ref.watch(residentApartmentIdProvider.future);
+  if (aptId == null || aptId.isEmpty) return [];
+
+  final repo = ref.watch(meterReadingRepositoryProvider);
+  return await repo.getApprovedConsumptionHistory(aptId, limit: 6);
+});
