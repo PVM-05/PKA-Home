@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_glass.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
 
 /// Widget chọn căn hộ (Apartment Switcher) hiển thị trên header trang chủ cư dân.
@@ -141,13 +143,12 @@ class ApartmentSwitcherChip extends ConsumerWidget {
           // Chưa liên kết căn hộ
           return GestureDetector(
             onTap: () => context.push(AppRoutes.residentLinkRequest),
-            child: Container(
+            child: AppGlassCard(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-              ),
+              borderRadius: AppRadius.rFull,
+              opacity: 0.2,
+              blur: 8.0,
+              borderColor: Colors.white.withValues(alpha: 0.3),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -182,13 +183,12 @@ class ApartmentSwitcherChip extends ConsumerWidget {
             apartments,
             selectedId,
           ),
-          child: Container(
+          child: AppGlassCard(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
-            ),
+            borderRadius: AppRadius.rFull,
+            opacity: 0.2,
+            blur: 8.0,
+            borderColor: Colors.white.withValues(alpha: 0.35),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -219,12 +219,12 @@ class ApartmentSwitcherChip extends ConsumerWidget {
           ),
         );
       },
-      loading: () => Container(
+      loading: () => AppGlassCard(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
-        ),
+        borderRadius: AppRadius.rFull,
+        opacity: 0.15,
+        blur: 8.0,
+        borderColor: Colors.white.withValues(alpha: 0.2),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [

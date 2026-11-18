@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/widgets/app_glass.dart';
 import '../../../data/providers/announcement_provider.dart';
 
 /// Widget banner nổi bật hiển thị các thông báo khẩn cấp hoặc bảo trì đang diễn ra
@@ -47,21 +49,14 @@ class StickyEmergencyBar extends ConsumerWidget {
       timeText = ' (${DateFormat('HH:mm').format(topEmergency.eventStartAt!)} - ${DateFormat('HH:mm dd/MM').format(topEmergency.eventEndAt!)})';
     }
 
-    return Container(
+    return AppGlassCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: borderColor.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      borderRadius: AppRadius.rMd,
+      borderColor: borderColor,
+      borderWidth: 1.5,
+      opacity: 0.85,
+      blur: 10.0,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
