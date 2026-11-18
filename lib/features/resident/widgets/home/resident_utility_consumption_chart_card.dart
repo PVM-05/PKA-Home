@@ -199,88 +199,92 @@ class _ResidentUtilityConsumptionChartCardState
             AppSpacing.h16,
 
             // Biểu đồ cột mini FlChart
-            SizedBox(
-              height: 120,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: isElectricity ? 320 : 25,
-                  barTouchData: BarTouchData(
-                    enabled: true,
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipColor: (_) => colorScheme.inverseSurface,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        return BarTooltipItem(
-                          '${rod.toY.toStringAsFixed(0)} $currentUnit',
-                          textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onInverseSurface,
-                                fontWeight: FontWeight.bold,
-                              ) ??
-                              const TextStyle(),
-                        );
-                      },
-                    ),
-                  ),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          final idx = value.toInt();
-                          if (idx >= 0 && idx < _months.length) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 6.0),
-                              child: Text(
-                                _months[idx],
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: idx == _months.length - 1
-                                      ? primaryAccent
-                                      : colorScheme.onSurfaceVariant,
-                                  fontWeight: idx == _months.length - 1
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox.shrink();
+            Semantics(
+              container: true,
+              label: 'Biểu đồ tiêu thụ ${isElectricity ? 'Điện' : 'Nước'} 6 tháng gần nhất. Tháng này tiêu thụ ${latestVal.toStringAsFixed(0)} $currentUnit, ${isReduced ? 'giảm' : 'tăng'} $percentChange% so với tháng trước.',
+              child: SizedBox(
+                height: 120,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    maxY: isElectricity ? 320 : 25,
+                    barTouchData: BarTouchData(
+                      enabled: true,
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipColor: (_) => colorScheme.inverseSurface,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          return BarTooltipItem(
+                            '${rod.toY.toStringAsFixed(0)} $currentUnit',
+                            textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onInverseSurface,
+                                  fontWeight: FontWeight.bold,
+                                ) ??
+                                const TextStyle(),
+                          );
                         },
                       ),
                     ),
-                  ),
-                  gridData: const FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
-                  barGroups: List.generate(currentData.length, (index) {
-                    final isLast = index == currentData.length - 1;
-                    return BarChartGroupData(
-                      x: index,
-                      barRods: [
-                        BarChartRodData(
-                          toY: currentData[index],
-                          color: isLast
-                              ? primaryAccent
-                              : primaryAccent.withValues(alpha: 0.35),
-                          width: 14,
-                          borderRadius: BorderRadius.circular(4),
-                          backDrawRodData: BackgroundBarChartRodData(
-                            show: true,
-                            toY: isElectricity ? 320 : 25,
-                            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                          ),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            final idx = value.toInt();
+                            if (idx >= 0 && idx < _months.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6.0),
+                                child: Text(
+                                  _months[idx],
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: idx == _months.length - 1
+                                        ? primaryAccent
+                                        : colorScheme.onSurfaceVariant,
+                                    fontWeight: idx == _months.length - 1
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
                         ),
-                      ],
-                    );
-                  }),
+                      ),
+                    ),
+                    gridData: const FlGridData(show: false),
+                    borderData: FlBorderData(show: false),
+                    barGroups: List.generate(currentData.length, (index) {
+                      final isLast = index == currentData.length - 1;
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: currentData[index],
+                            color: isLast
+                                ? primaryAccent
+                                : primaryAccent.withValues(alpha: 0.35),
+                            width: 14,
+                            borderRadius: BorderRadius.circular(4),
+                            backDrawRodData: BackgroundBarChartRodData(
+                              show: true,
+                              toY: isElectricity ? 320 : 25,
+                              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),

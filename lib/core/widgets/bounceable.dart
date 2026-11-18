@@ -13,6 +13,8 @@ class Bounceable extends StatefulWidget {
     this.duration = const Duration(milliseconds: 100),
     this.reverseDuration = const Duration(milliseconds: 150),
     this.enableHaptic = true,
+    this.semanticLabel,
+    this.isButton,
   });
 
   final Widget child;
@@ -22,6 +24,8 @@ class Bounceable extends StatefulWidget {
   final Duration duration;
   final Duration reverseDuration;
   final bool enableHaptic;
+  final String? semanticLabel;
+  final bool? isButton;
 
   @override
   State<Bounceable> createState() => _BounceableState();
@@ -53,7 +57,7 @@ class _BounceableState extends State<Bounceable> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    Widget content = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
@@ -67,5 +71,15 @@ class _BounceableState extends State<Bounceable> {
         child: widget.child,
       ),
     );
+
+    if (widget.semanticLabel != null || widget.onTap != null) {
+      content = Semantics(
+        button: widget.isButton ?? (widget.onTap != null),
+        label: widget.semanticLabel,
+        child: content,
+      );
+    }
+
+    return content;
   }
 }
