@@ -7,6 +7,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../core/supabase_config.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_storage_image.dart';
+import '../../../core/widgets/app_unsaved_changes_guard.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
@@ -48,6 +49,11 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
   }
 
   int get _totalImageCount => _existingImages.length + _newImageFiles.length;
+
+  bool get _hasUnsavedChanges =>
+      _descriptionController.text.trim() != widget.issue.description.trim() ||
+      _newImageFiles.isNotEmpty ||
+      _removedImageUrls.isNotEmpty;
 
   Future<void> _pickImage(ImageSource source) async {
     final remaining = 3 - _totalImageCount;
@@ -241,10 +247,12 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chỉnh sửa phản ánh'),
-      ),
+    return AppUnsavedChangesGuard(
+      hasUnsavedChanges: _hasUnsavedChanges,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Chỉnh sửa phản ánh'),
+        ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 720),
@@ -553,6 +561,7 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

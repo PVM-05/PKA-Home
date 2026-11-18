@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/issue_smart_triage_engine.dart';
+import '../../../core/widgets/app_unsaved_changes_guard.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
 import '../../../data/providers/resident_issue_provider.dart';
@@ -20,6 +21,7 @@ class CreateIssueScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   final List<File> _imageFiles = [];
@@ -27,6 +29,9 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   String _selectedCategory = 'electrical';
   String _selectedPriority = 'low';
   IssueTriageResult? _triageResult;
+
+  bool get _hasUnsavedChanges =>
+      _descriptionController.text.trim().isNotEmpty || _imageFiles.isNotEmpty;
 
   @override
   void initState() {
@@ -192,16 +197,10 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
   }
 
   Future<void> _submit() async {
-    final description = _descriptionController.text.trim();
-    if (description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập mô tả sự cố'),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
+    if (!_formKey.currentState!.validate()) {
       return;
     }
+    final description = _descriptionController.text.trim();
 
     setState(() {
       _isLoading = true;
@@ -274,16 +273,20 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Gửi Phản Ánh')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+    return AppUnsavedChangesGuard(
+      hasUnsavedChanges: _hasUnsavedChanges,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Gửi Phản Ánh')),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                 const Text(
                   'Chuyên môn sự cố:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -415,10 +418,16 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
-            TextField(
+            TextFormField(
               key: const Key('issue_description_field'),
               controller: _descriptionController,
               maxLines: 5,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Vui lòng nhập chi tiết mô tả sự cố';
+                }
+                return null;
+              },
               decoration: const InputDecoration(
                 hintText:
                     'Ví dụ: Bóng đèn hành lang tầng 5 bị cháy...',
@@ -834,6 +843,8 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
       ),
     ),
   ),
+),
+),
 );
 }
 }
