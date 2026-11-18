@@ -23,8 +23,13 @@ import '../../document/screens/document_preview_screen.dart';
 
 class ResidentInvoiceDetailScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
+  final bool isEmbedded;
 
-  const ResidentInvoiceDetailScreen({super.key, required this.invoice});
+  const ResidentInvoiceDetailScreen({
+    super.key,
+    required this.invoice,
+    this.isEmbedded = false,
+  });
 
   @override
   ConsumerState<ResidentInvoiceDetailScreen> createState() =>
@@ -86,6 +91,7 @@ class _ResidentInvoiceDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: !widget.isEmbedded,
         title: Text('Chi tiết hóa đơn ${_invoice.period}'),
         actions: [
           IconButton(

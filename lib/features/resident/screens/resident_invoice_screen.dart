@@ -11,104 +11,165 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/adaptive_master_detail_layout.dart';
+import '../../../core/utils/app_haptics.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/models/invoice_model.dart';
+import 'resident_invoice_detail_screen.dart';
 
-class ResidentInvoiceScreen extends ConsumerWidget {
+class ResidentInvoiceScreen extends ConsumerStatefulWidget {
   const ResidentInvoiceScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResidentInvoiceScreen> createState() =>
+      _ResidentInvoiceScreenState();
+}
+
+class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
+  InvoiceModel? _selectedInvoice;
+
+  @override
+  Widget build(BuildContext context) {
     final invoiceState = ref.watch(residentInvoiceProvider);
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Hóa Đơn & Thanh Toán'),
-          bottom: const TabBar(
-            labelColor: AppTheme.primary,
-            unselectedLabelColor: AppTheme.textSecondary,
-            indicatorColor: AppTheme.primary,
-            tabs: [
-              Tab(
-                icon: Icon(Icons.pending_actions_outlined),
-                text: 'Cần thanh toán',
-              ),
-              Tab(icon: Icon(Icons.history_outlined), text: 'Lịch sử đã đóng'),
-            ],
-          ),
-        ),
-        body: invoiceState.when(
-          data: (invoices) {
-            final unpaidInvoices =
-                invoices.where((i) => i.status != 'paid').toList()..sort((
-                  a,
-                  b,
-                ) {
-                  // Sắp xếp: quá hạn lên đầu (so sánh trọn ngày, không tính quá hạn hôm nay), sau đó theo ngày đến hạn
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final aDue = DateTime(
-                    a.dueDate.year,
-                    a.dueDate.month,
-                    a.dueDate.day,
-                  );
-                  final bDue = DateTime(
-                    b.dueDate.year,
-                    b.dueDate.month,
-                    b.dueDate.day,
-                  );
-                  final aOverdue =
-                      a.status == 'unpaid' && today.difference(aDue).inDays > 0;
-                  final bOverdue =
-                      b.status == 'unpaid' && today.difference(bDue).inDays > 0;
-                  if (aOverdue && !bOverdue) return -1;
-                  if (!aOverdue && bOverdue) return 1;
-                  return a.dueDate.compareTo(b.dueDate);
-                });
-            final paidInvoices =
-                invoices.where((i) => i.status == 'paid').toList()..sort(
-                  (a, b) => (b.updatedAt ?? b.dueDate).compareTo(
-                    a.updatedAt ?? a.dueDate,
-                  ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Hóa Đơn & Thanh Toán'),
+      ),
+      body: invoiceState.when(
+        data: (invoices) {
+          final unpaidInvoices =
+              invoices.where((i) => i.status != 'paid').toList()..sort((
+                a,
+                b,
+              ) {
+                final now = DateTime.now();
+                final today = DateTime(now.year, now.month, now.day);
+                final aDue = DateTime(
+                  a.dueDate.year,
+                  a.dueDate.month,
+                  a.dueDate.day,
                 );
+                final bDue = DateTime(
+                  b.dueDate.year,
+                  b.dueDate.month,
+                  b.dueDate.day,
+                );
+                final aOverdue =
+                    a.status == 'unpaid' && today.difference(aDue).inDays > 0;
+                final bOverdue =
+                    b.status == 'unpaid' && today.difference(bDue).inDays > 0;
+                if (aOverdue && !bOverdue) return -1;
+                if (!aOverdue && bOverdue) return 1;
+                return a.dueDate.compareTo(b.dueDate);
+              });
+          final paidInvoices =
+              invoices.where((i) => i.status == 'paid').toList()..sort(
+                (a, b) => (b.updatedAt ?? b.dueDate).compareTo(
+                  a.updatedAt ?? a.dueDate,
+                ),
+              );
 
-            return TabBarView(
-              children: [
-                _buildInvoiceList(
-                  context,
-                  ref,
-                  unpaidInvoices,
-                  emptyMessage:
-                      'Tuyệt vời! Bạn không còn hóa đơn nào cần thanh toán.',
-                  emptyIcon: Icons.check_circle_outline,
-                  emptyColor: AppStatusColors.paid,
+          return AdaptiveMasterDetailLayout<InvoiceModel>(
+            selectedItem: _selectedInvoice,
+            masterWidth: 420.0,
+            emptyDetailBuilder: (ctx) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Theme.of(ctx).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.receipt_long_outlined,
+                        size: 48,
+                        color: Theme.of(ctx).colorScheme.primary.withValues(alpha: 0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Chi tiết hóa đơn',
+                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Chọn một hóa đơn từ danh sách bên trái để xem bảng kê chi tiết các khoản phí và thực hiện thanh toán.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                _buildInvoiceList(
-                  context,
-                  ref,
-                  paidInvoices,
-                  emptyMessage: 'Chưa có lịch sử hóa đơn đã thanh toán.',
-                  emptyIcon: Icons.receipt_long_outlined,
-                  emptyColor: AppTheme.textSecondary,
-                ),
-              ],
-            );
-          },
-          loading: () => ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              AppSkeletonShimmer.cardList(count: 4, itemHeight: 110),
-            ],
-          ),
-          error: (error, stack) => Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Center(
-              child: AppErrorCard(
-                error: error,
-                onRetry: () => ref.invalidate(residentInvoiceProvider),
               ),
+            ),
+            detailBuilder: (ctx, item) => ResidentInvoiceDetailScreen(
+              invoice: item,
+              isEmbedded: true,
+            ),
+            masterBuilder: (ctx, isMasterOnly) => DefaultTabController(
+              length: 2,
+              child: Column(
+                children: [
+                  const TabBar(
+                    labelColor: AppTheme.primary,
+                    unselectedLabelColor: AppTheme.textSecondary,
+                    indicatorColor: AppTheme.primary,
+                    tabs: [
+                      Tab(
+                        icon: Icon(Icons.pending_actions_outlined),
+                        text: 'Cần thanh toán',
+                      ),
+                      Tab(icon: Icon(Icons.history_outlined), text: 'Lịch sử đã đóng'),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _buildInvoiceList(
+                          ctx,
+                          unpaidInvoices,
+                          isMasterOnly: isMasterOnly,
+                          emptyMessage:
+                              'Tuyệt vời! Bạn không còn hóa đơn nào cần thanh toán.',
+                          emptyIcon: Icons.check_circle_outline,
+                          emptyColor: AppStatusColors.paid,
+                        ),
+                        _buildInvoiceList(
+                          ctx,
+                          paidInvoices,
+                          isMasterOnly: isMasterOnly,
+                          emptyMessage: 'Chưa có lịch sử hóa đơn đã thanh toán.',
+                          emptyIcon: Icons.receipt_long_outlined,
+                          emptyColor: AppTheme.textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AppSkeletonShimmer.cardList(count: 4, itemHeight: 110),
+          ],
+        ),
+        error: (error, stack) => Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: AppErrorCard(
+              error: error,
+              onRetry: () => ref.invalidate(residentInvoiceProvider),
             ),
           ),
         ),
@@ -118,8 +179,8 @@ class ResidentInvoiceScreen extends ConsumerWidget {
 
   Widget _buildInvoiceList(
     BuildContext context,
-    WidgetRef ref,
     List<InvoiceModel> invoices, {
+    required bool isMasterOnly,
     required String emptyMessage,
     required IconData emptyIcon,
     required Color emptyColor,
@@ -130,39 +191,45 @@ class ResidentInvoiceScreen extends ConsumerWidget {
         HapticFeedback.lightImpact();
         ref.invalidate(residentInvoiceProvider);
       },
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: invoices.isEmpty
-              ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.6,
-                      child: Center(
-                        child: AppEmptyState(
-                          icon: emptyIcon,
-                          title: 'Danh sách trống',
-                          description: emptyMessage,
-                        ),
-                      ),
+      child: invoices.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Center(
+                    child: AppEmptyState(
+                      icon: emptyIcon,
+                      title: 'Danh sách trống',
+                      description: emptyMessage,
                     ),
-                  ],
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: invoices.length,
-                  itemBuilder: (context, index) {
-                    final invoice = invoices[index];
-                    return _buildInvoiceCard(context, invoice);
-                  },
+                  ),
                 ),
-        ),
-      ),
+              ],
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: invoices.length,
+              itemBuilder: (context, index) {
+                final invoice = invoices[index];
+                final isSelected = !isMasterOnly && invoice.id == _selectedInvoice?.id;
+                return _buildInvoiceCard(
+                  context,
+                  invoice,
+                  isMasterOnly: isMasterOnly,
+                  isSelected: isSelected,
+                );
+              },
+            ),
     );
   }
 
-  Widget _buildInvoiceCard(BuildContext context, InvoiceModel invoice) {
+  Widget _buildInvoiceCard(
+    BuildContext context,
+    InvoiceModel invoice, {
+    required bool isMasterOnly,
+    required bool isSelected,
+  }) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -171,7 +238,6 @@ class ResidentInvoiceScreen extends ConsumerWidget {
     String statusText;
     IconData statusIcon;
 
-    // Kiểm tra quá hạn (chỉ tính quá hạn khi đã qua hết ngày đến hạn)
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dueDay = DateTime(
@@ -211,9 +277,11 @@ class ResidentInvoiceScreen extends ConsumerWidget {
         }
     }
 
-    final borderColor = isOverdue
-        ? AppTheme.error.withValues(alpha: isDark ? 0.7 : 0.5)
-        : null;
+    final borderColor = isSelected
+        ? AppTheme.primary
+        : (isOverdue
+            ? AppTheme.error.withValues(alpha: isDark ? 0.7 : 0.5)
+            : null);
 
     final spokenAmount =
         VietnameseCurrencyWords.toVietnameseWords(invoice.totalAmount.toDouble());
@@ -226,7 +294,14 @@ class ResidentInvoiceScreen extends ConsumerWidget {
         margin: const EdgeInsets.only(bottom: 12),
         borderColor: borderColor,
         onTap: () {
-          context.push(AppRoutes.residentInvoiceDetail, extra: invoice);
+          if (isMasterOnly) {
+            context.push(AppRoutes.residentInvoiceDetail, extra: invoice);
+          } else {
+            AppHaptics.selection();
+            setState(() {
+              _selectedInvoice = invoice;
+            });
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
