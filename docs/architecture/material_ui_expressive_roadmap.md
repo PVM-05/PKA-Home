@@ -68,3 +68,4 @@ Nhờ kiến trúc **Facade Pattern** của Vivona, quá trình nâng cấp tron
 3. Cập nhật các widget trong `lib/core/widgets/` (`AppCard`, `Bounceable`) để ủy quyền (delegate) xử lý cho component của `material_ui`.
 4. Toàn bộ các màn hình trong `features/` giữ nguyên mã nguồn 100%, không cần refactor lại.
 5. Chạy `flutter test test/goldens/ --update-goldens` để rà soát khác biệt hình ảnh và nghiệm thu.
+
