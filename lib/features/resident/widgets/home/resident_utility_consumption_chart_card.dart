@@ -159,41 +159,39 @@ class _ResidentUtilityConsumptionChartCardState
                   ),
                 ),
                 const Spacer(),
-                Flexible(
-                  child: Container(
-                    padding: AppSpacing.px8 + AppSpacing.py4,
-                    decoration: BoxDecoration(
-                      color: isReduced
-                          ? colorScheme.primary.withValues(alpha: 0.12)
-                          : colorScheme.error.withValues(alpha: 0.12),
-                      borderRadius: AppRadius.rFull,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isReduced
-                              ? Icons.trending_down_rounded
-                              : Icons.trending_up_rounded,
-                          size: 16,
+                Container(
+                  padding: AppSpacing.px8 + AppSpacing.py4,
+                  decoration: BoxDecoration(
+                    color: isReduced
+                        ? colorScheme.primary.withValues(alpha: 0.12)
+                        : colorScheme.error.withValues(alpha: 0.12),
+                    borderRadius: AppRadius.rFull,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isReduced
+                            ? Icons.trending_down_rounded
+                            : Icons.trending_up_rounded,
+                        size: 16,
+                        color: isReduced
+                            ? colorScheme.primary
+                            : colorScheme.error,
+                      ),
+                      AppSpacing.w4,
+                      Text(
+                        isReduced
+                            ? '$percentChange%'
+                            : '+$percentChange%',
+                        style: textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
                           color: isReduced
                               ? colorScheme.primary
                               : colorScheme.error,
                         ),
-                        AppSpacing.w4,
-                        Text(
-                          isReduced
-                              ? '$percentChange%'
-                              : '+$percentChange%',
-                          style: textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: isReduced
-                                ? colorScheme.primary
-                                : colorScheme.error,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -33,6 +33,8 @@ import '../widgets/home/resident_home_services_section.dart';
 import '../widgets/home/resident_home_latest_issue_card.dart';
 import '../widgets/home/resident_home_announcements_card.dart';
 import '../widgets/home/resident_utility_consumption_chart_card.dart';
+import '../widgets/home/meter_reading_reminder_banner.dart';
+import '../providers/home_personalization_provider.dart';
 import '../../../core/utils/app_haptics.dart';
 import '../../../core/widgets/bounceable.dart';
 
@@ -337,6 +339,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     final announcementsAsync = ref.watch(residentAnnouncementsProvider);
     final invoiceAsync = ref.watch(residentInvoiceProvider);
     final issueAsync = ref.watch(residentIssueProvider);
+    final personalization = ref.watch(homePersonalizationProvider);
     final fullName = user?.fullName ?? 'Cư dân';
 
     return RefreshIndicator(
@@ -485,16 +488,23 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final isDesktop = constraints.maxWidth >= 900;
+                      final isIssuePriority =
+                          personalization.priority == HomePriority.activeIssueTracking;
+
                       if (isDesktop) {
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Cột trái (60%): Hóa đơn + Thao tác nhanh + Dịch vụ tiện ích
+                            // Cột trái (60%): Nhắc chỉ số + Hóa đơn + Thao tác nhanh + [Sự cố ưu tiên] + Dịch vụ tiện ích + Biểu đồ
                             Expanded(
                               flex: 6,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  if (personalization.showMeterReadingReminder) ...[
+                                    const MeterReadingReminderBanner(),
+                                    AppSpacing.h20,
+                                  ],
                                   ResidentHomeUpcomingInvoiceCard(
                                     invoiceAsync: invoiceAsync,
                                     onNavigateToInvoices: () => _onItemTapped(1),
@@ -514,6 +524,14 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                     ),
                                   ),
                                   AppSpacing.h24,
+                                  if (isIssuePriority) ...[
+                                    ResidentHomeLatestIssueCard(
+                                      issueAsync: issueAsync,
+                                      onNavigateToIssues: () => _onItemTapped(2),
+                                      onRetry: () => ref.invalidate(residentIssueProvider),
+                                    ),
+                                    AppSpacing.h24,
+                                  ],
                                   const ResidentHomeServicesSection(),
                                   AppSpacing.h24,
                                   const ResidentUtilityConsumptionChartCard(),
@@ -521,7 +539,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                               ),
                             ),
                             AppSpacing.w24,
-                            // Cột phải (40%): Cảnh báo gián đoạn + Quỹ bảo trì + Phản ánh + Thông báo
+                            // Cột phải (40%): Cảnh báo gián đoạn + Quỹ bảo trì + [Phản ánh thường] + Thông báo
                             Expanded(
                               flex: 4,
                               child: Column(
@@ -531,12 +549,14 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                   const EquipmentInterruptionBanner(),
                                   AppSpacing.h16,
                                   const MaintenanceFundCard(),
-                                  AppSpacing.h24,
-                                  ResidentHomeLatestIssueCard(
-                                    issueAsync: issueAsync,
-                                    onNavigateToIssues: () => _onItemTapped(2),
-                                    onRetry: () => ref.invalidate(residentIssueProvider),
-                                  ),
+                                  if (!isIssuePriority) ...[
+                                    AppSpacing.h24,
+                                    ResidentHomeLatestIssueCard(
+                                      issueAsync: issueAsync,
+                                      onNavigateToIssues: () => _onItemTapped(2),
+                                      onRetry: () => ref.invalidate(residentIssueProvider),
+                                    ),
+                                  ],
                                   AppSpacing.h24,
                                   ResidentHomeAnnouncementsCard(
                                     announcementsAsync: announcementsAsync,
@@ -554,6 +574,10 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const StickyEmergencyBar(),
+                          if (personalization.showMeterReadingReminder) ...[
+                            const MeterReadingReminderBanner(),
+                            AppSpacing.h16,
+                          ],
                           ResidentHomeUpcomingInvoiceCard(
                             invoiceAsync: invoiceAsync,
                             onNavigateToInvoices: () => _onItemTapped(1),
@@ -577,15 +601,25 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                             ),
                           ),
                           AppSpacing.h24,
+                          if (isIssuePriority) ...[
+                            ResidentHomeLatestIssueCard(
+                              issueAsync: issueAsync,
+                              onNavigateToIssues: () => _onItemTapped(2),
+                              onRetry: () => ref.invalidate(residentIssueProvider),
+                            ),
+                            AppSpacing.h24,
+                          ],
                           const ResidentHomeServicesSection(),
                           AppSpacing.h24,
                           const ResidentUtilityConsumptionChartCard(),
-                          AppSpacing.h24,
-                          ResidentHomeLatestIssueCard(
-                            issueAsync: issueAsync,
-                            onNavigateToIssues: () => _onItemTapped(2),
-                            onRetry: () => ref.invalidate(residentIssueProvider),
-                          ),
+                          if (!isIssuePriority) ...[
+                            AppSpacing.h24,
+                            ResidentHomeLatestIssueCard(
+                              issueAsync: issueAsync,
+                              onNavigateToIssues: () => _onItemTapped(2),
+                              onRetry: () => ref.invalidate(residentIssueProvider),
+                            ),
+                          ],
                           AppSpacing.h24,
                           ResidentHomeAnnouncementsCard(
                             announcementsAsync: announcementsAsync,
