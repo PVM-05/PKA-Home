@@ -893,6 +893,4 @@ class _ResidentActivationScreenState
       ],
     );
   }
-    );
-  }
 }
