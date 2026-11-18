@@ -22,6 +22,7 @@ class ResidentIssuePaginatedNotifier extends StateNotifier<AsyncValue<PaginatedL
   final IssueRepository _repo;
   final String? _apartmentId;
   static const int _pageSize = 20;
+  late Future<void> initialFetchFuture;
 
   ResidentIssuePaginatedNotifier({
     required IssueRepository repo,
@@ -30,7 +31,7 @@ class ResidentIssuePaginatedNotifier extends StateNotifier<AsyncValue<PaginatedL
 
   ResidentIssuePaginatedNotifier._(this._repo, this._apartmentId)
       : super(const AsyncValue.loading()) {
-    fetchInitial();
+    initialFetchFuture = fetchInitial();
   }
 
   Future<void> fetchInitial() async {
@@ -84,20 +85,28 @@ class ResidentIssuePaginatedNotifier extends StateNotifier<AsyncValue<PaginatedL
 
 final residentIssuePaginatedProvider = StateNotifierProvider.autoDispose<
     ResidentIssuePaginatedNotifier, AsyncValue<PaginatedList<IssueModel>>>((ref) {
-  ref.watch(_issueReportsStreamProvider);
   final repo = ref.watch(issueRepositoryProvider);
   final activeAptId = ref.watch(selectedApartmentIdProvider);
-  return ResidentIssuePaginatedNotifier(
+  final notifier = ResidentIssuePaginatedNotifier(
     repo: repo,
     apartmentId: activeAptId,
   );
+  ref.listen(_issueReportsStreamProvider, (previous, next) {
+    if (next.hasValue) {
+      notifier.fetchInitial();
+    }
+  });
+  return notifier;
 });
 
-/// Provider cung cấp danh sách sự cố tương thích ngược và tự động cập nhật theo Realtime Stream
+/// Provider cung cấp danh sách sự cố dẫn xuất từ provider phân trang để tương thích ngược 100%
 final residentIssueProvider = FutureProvider<List<IssueModel>>((ref) async {
-  ref.watch(_issueReportsStreamProvider);
-  final repo = ref.watch(issueRepositoryProvider);
-  final activeAptId = ref.watch(selectedApartmentIdProvider);
-  final response = await repo.fetchIssues(apartmentId: activeAptId);
-  return response.map((e) => IssueModel.fromJson(e)).toList();
+  final notifier = ref.watch(residentIssuePaginatedProvider.notifier);
+  await notifier.initialFetchFuture;
+  final paginated = ref.watch(residentIssuePaginatedProvider);
+  return paginated.when(
+    data: (p) => p.items,
+    loading: () => const [],
+    error: (e, st) => throw e,
+  );
 });

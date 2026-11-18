@@ -151,5 +151,74 @@ void main() {
       subscription.close();
       await streamController.close();
     });
+
+    test('residentIssuePaginatedNotifier supports pagination and loadMore appends items', () async {
+      final page1Data = List.generate(
+        20,
+        (i) => {
+          'id': 'issue-$i',
+          'apartment_id': 'apt-1',
+          'reporter_id': 'user-1',
+          'description': 'Sự cố số $i',
+          'status': 'pending',
+          'priority': 'medium',
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+          'issue_images': [],
+        },
+      );
+
+      final page2Data = List.generate(
+        5,
+        (i) => {
+          'id': 'issue-${i + 20}',
+          'apartment_id': 'apt-1',
+          'reporter_id': 'user-1',
+          'description': 'Sự cố số ${i + 20}',
+          'status': 'pending',
+          'priority': 'low',
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+          'issue_images': [],
+        },
+      );
+
+      when(() => mockRepository.streamIssues(
+        userId: any(named: 'userId'),
+        apartmentId: any(named: 'apartmentId'),
+      )).thenAnswer((_) => const Stream.empty());
+
+      when(() => mockRepository.fetchIssues(
+        apartmentId: any(named: 'apartmentId'),
+        limit: 20,
+        offset: 0,
+      )).thenAnswer((_) async => page1Data);
+
+      when(() => mockRepository.fetchIssues(
+        apartmentId: any(named: 'apartmentId'),
+        limit: 20,
+        offset: 20,
+      )).thenAnswer((_) async => page2Data);
+
+      // Act 1: Ban đầu tải trang 1 (20 items, hasMore = true)
+      final issues = await container.read(residentIssueProvider.future);
+      expect(issues.length, 20);
+
+      final paginatedState = container.read(residentIssuePaginatedProvider);
+      expect(paginatedState.value?.hasMore, isTrue);
+      expect(paginatedState.value?.page, 1);
+
+      // Act 2: Gọi loadMore()
+      await container.read(residentIssuePaginatedProvider.notifier).loadMore();
+
+      final paginatedAfterLoadMore = container.read(residentIssuePaginatedProvider);
+      expect(paginatedAfterLoadMore.value?.items.length, 25);
+      expect(paginatedAfterLoadMore.value?.hasMore, isFalse);
+      expect(paginatedAfterLoadMore.value?.page, 2);
+
+      // Kiểm tra residentIssueProvider cũng tự động cập nhật lên 25 items
+      final issuesAfterLoadMore = await container.read(residentIssueProvider.future);
+      expect(issuesAfterLoadMore.length, 25);
+    });
   });
 }
