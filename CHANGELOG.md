@@ -50,6 +50,12 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - Bổ sung phương thức `AppSnackBar.showWarning` đạt chuẩn Design System với biểu tượng cảnh báo và màu sắc `AppTheme.warning`.
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `create_issue_screen.dart`, `vehicle_approval_screen.dart`, `parking_management_screen.dart`.
   - Giảm thêm 62 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 818 xuống 756). Toàn bộ 4 guardrail tests và 11 widget tests tính năng đều vượt qua 100%.
+- **Gói 2.4 Chuẩn Hóa Typography & Tokens Phân Hệ Tài Chính, Lập Hóa Đơn & Báo Cáo (Invoicing, Fee Policy & Financial Reports)**:
+  - `CreateInvoiceScreen`: Xóa sạch 100% 21/21 điểm `fontSize:` cứng và chuyển đổi toàn bộ 5 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar` (Success, Error, Warning).
+  - `FeePolicyManagementScreen`: Xóa sạch 100% 22/22 điểm `fontSize:` cứng, chuyển đổi biểu giá 6 bậc EVN, định mức nước và pro-rata sang Design Tokens ngữ nghĩa.
+  - `FinancialReportScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và chuyển đổi toàn bộ 3 lệnh gọi `ScaffoldMessenger.showSnackBar` xuất Excel sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `create_invoice_screen.dart`, `fee_policy_management_screen.dart`, `financial_report_screen.dart`.
+  - Giảm thêm 63 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 756 xuống 693). Đưa tổng số điểm nợ typography được xóa bỏ lên 243 điểm qua 4 gói dọn dẹp. Toàn bộ 4 guardrail tests và 3 widget tests tính năng đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

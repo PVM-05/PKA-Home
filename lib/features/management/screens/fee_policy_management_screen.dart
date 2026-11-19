@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/utility_fee_calculator.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/utils/money_formatter.dart';
@@ -189,7 +190,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
             Expanded(
               child: Text(
                 'Điều chỉnh biểu giá ${policy.policyTypeVietnamese.toLowerCase()}',
-                style: const TextStyle(fontSize: 16),
+                style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -216,7 +217,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                       policy.policyType == FeePolicyType.waterQuotaTier) ...[
                     Text(
                       'Đơn giá theo từng bậc (${policy.policyType == FeePolicyType.electricityTier ? "đ/kWh" : "đ/m³"}):',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     ...List.generate(currentTiersList.length, (index) {
@@ -228,7 +229,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               flex: 3,
-                              child: Text(tierName, style: const TextStyle(fontSize: 13)),
+                              child: Text(tierName, style: context.bodySmall),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -381,23 +382,21 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Biểu Giá & Chính Sách Phí',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: context.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'Cơ chế tính điện 6 bậc EVN, nước định mức nhân khẩu, phí xe pro-rata và phạt chậm nộp.',
-                      style: TextStyle(
-                        fontSize: 13,
+                      style: context.bodySmall?.copyWith(
                         color: AppTheme.textSecondary,
                         height: 1.3,
                       ),
@@ -476,8 +475,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
         ),
         title: Text(
           policy.name,
-          style: const TextStyle(
-            fontSize: 15,
+          style: context.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
           ),
@@ -486,7 +484,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(top: 4.0),
           child: Text(
             '${policy.calculationMethodVietnamese} • ${policy.formattedEffectiveRange}',
-            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
           ),
         ),
         trailing: Row(
@@ -512,8 +510,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                   const SizedBox(width: 4),
                   Text(
                     isSystemDefault ? 'Mặc định hệ thống' : 'Cấu hình riêng',
-                    style: TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isSystemDefault ? Colors.amber.shade900 : Colors.blue.shade800,
                     ),
@@ -537,8 +534,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
               ),
               child: Text(
                 policy.statusVietnamese,
-                style: TextStyle(
-                  fontSize: 11,
+                style: context.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: policy.isActive
                       ? Colors.green.shade700
@@ -552,7 +548,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
         children: [
           const Divider(height: 1),
           const SizedBox(height: 12),
-          _buildPolicyDetailContent(policy),
+          _buildPolicyDetailContent(context, policy),
           const SizedBox(height: 14),
           Wrap(
             alignment: WrapAlignment.end,
@@ -586,7 +582,7 @@ class FeePolicyManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPolicyDetailContent(FeeTierPolicyModel policy) {
+  Widget _buildPolicyDetailContent(BuildContext context, FeeTierPolicyModel policy) {
     if (policy.policyType == FeePolicyType.electricityTier) {
       final tiersList = policy.tiers is List
           ? (policy.tiers as List)
@@ -594,9 +590,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Bảng giá 6 bậc lũy tiến hiện hành:',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           ...tiersList.map((tier) {
@@ -612,15 +608,13 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: context.bodySmall?.copyWith(
                       color: AppTheme.textPrimary,
                     ),
                   ),
                   Text(
                     '${_vnCurrency.format(rate)}/kWh',
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: context.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primary,
                     ),
@@ -638,9 +632,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Định mức tiêu chuẩn: 4 m³/người/tháng',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           if (tiersList.isNotEmpty)
@@ -657,15 +651,13 @@ class FeePolicyManagementScreen extends ConsumerWidget {
                   children: [
                     Text(
                       name,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: context.bodySmall?.copyWith(
                         color: AppTheme.textPrimary,
                       ),
                     ),
                     Text(
                       '${_vnCurrency.format(rate)}/m³',
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: context.bodySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primary,
                       ),
@@ -675,9 +667,9 @@ class FeePolicyManagementScreen extends ConsumerWidget {
               );
             })
           else
-            const Text(
+            Text(
               'Bậc 1 (Trong định mức): 8.500 đ/m³\nBậc 2 (Vượt cấp 1): 12.000 đ/m³\nBậc 3 (Vượt cấp 2): 18.000 đ/m³',
-              style: TextStyle(fontSize: 13, height: 1.5),
+              style: context.bodySmall?.copyWith(height: 1.5),
             ),
         ],
       );
@@ -691,26 +683,25 @@ class FeePolicyManagementScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey.shade200),
         ),
-        child: const Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Công thức phân bổ theo ngày:',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               'Số tiền = (Đơn giá tháng × Số ngày sử dụng thực tế) / Tổng số ngày trong tháng',
-              style: TextStyle(
-                fontSize: 12,
+              style: context.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
                 color: AppTheme.textPrimary,
               ),
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               'Áp dụng tự động khi cư dân đăng ký hoặc hủy đăng ký phương tiện giữa chu kỳ tính phí.',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -725,43 +716,42 @@ class FeePolicyManagementScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.red.shade100),
         ),
-        child: const Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Quy định xử lý quá hạn thanh toán:',
-              style: TextStyle(
-                fontSize: 13,
+              style: context.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.error,
               ),
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Row(
               children: [
-                Icon(Icons.check_circle_outline, size: 16, color: Colors.green),
-                SizedBox(width: 6),
+                const Icon(Icons.check_circle_outline, size: 16, color: Colors.green),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     'Thời gian ân hạn: 3 ngày kể từ ngày đến hạn thanh toán.',
-                    style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                    style: context.bodySmall?.copyWith(color: AppTheme.textPrimary),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.warning_amber_rounded,
                   size: 16,
                   color: AppTheme.error,
                 ),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     'Lãi phạt quá hạn: 0.05% / ngày (~1.5% / tháng) tính trên dư nợ gốc.',
-                    style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                    style: context.bodySmall?.copyWith(color: AppTheme.textPrimary),
                   ),
                 ),
               ],

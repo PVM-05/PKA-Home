@@ -61,6 +61,10 @@ void main() {
       'lib/features/resident/screens/create_issue_screen.dart',
       'lib/features/management/screens/vehicle_approval_screen.dart',
       'lib/features/management/screens/parking_management_screen.dart',
+      // Module 12: Quản lý Biểu phí, Lập Hóa Đơn & Báo cáo Tài chính (Fee Policy, Invoicing & Financial Reports)
+      'lib/features/management/screens/create_invoice_screen.dart',
+      'lib/features/management/screens/fee_policy_management_screen.dart',
+      'lib/features/management/screens/financial_report_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

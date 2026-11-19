@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/utils/money_formatter.dart';
@@ -11,6 +12,7 @@ import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
@@ -169,12 +171,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedApartment == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn căn hộ'),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
+      AppSnackBar.showWarning(context, 'Vui lòng chọn căn hộ');
       return;
     }
 
@@ -242,12 +239,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       }
 
       if (items.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hóa đơn phải có ít nhất 1 loại phí > 0'),
-            backgroundColor: AppTheme.warning,
-          ),
-        );
+        AppSnackBar.showWarning(context, 'Hóa đơn phải có ít nhất 1 loại phí > 0');
         setState(() => _isSubmitting = false);
         return;
       }
@@ -266,12 +258,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         final successMsg = _isDraft
             ? 'Đã lưu bản nháp hóa đơn thành công (Chờ soát xét, chưa phát hành cho cư dân)!'
             : 'Lập và phát hành hóa đơn thành công!';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(successMsg),
-            backgroundColor: AppTheme.success,
-          ),
-        );
+        AppSnackBar.showSuccess(context, successMsg);
         Navigator.of(context).pop();
       }
     } on PostgrestException catch (pe) {
@@ -283,9 +270,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(pe);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorText), backgroundColor: AppTheme.error),
-        );
+        AppSnackBar.showError(context, errorText);
       }
     } catch (e) {
       if (mounted) {
@@ -295,9 +280,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(e);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorText), backgroundColor: AppTheme.error),
-        );
+        AppSnackBar.showError(context, errorText);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -497,11 +480,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Thông tin chung',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
                   ),
@@ -518,20 +500,19 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 borderRadius: AppTheme.radiusSm,
                 border: Border.all(color: AppTheme.warningBorder),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.warning_amber_rounded,
                     color: AppTheme.warningText,
                     size: 20,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Không có căn hộ nào đang có người ở. Vui lòng kiểm tra lại danh sách cư dân.',
-                      style: TextStyle(
+                      style: context.bodySmall?.copyWith(
                         color: AppTheme.warningText,
-                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -541,10 +522,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             )
           else ...[
             if (buildings.isNotEmpty) ...[
-              const Text(
+              Text(
                 'Chọn Tòa nhà:',
-                style: TextStyle(
-                  fontSize: 13,
+                style: context.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textSecondary,
                 ),
@@ -648,20 +628,19 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 borderRadius: AppTheme.radiusSm,
                 border: Border.all(color: AppTheme.warningBorder),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.warning_amber_rounded,
                     color: AppTheme.warningText,
                     size: 20,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Căn hộ này chưa có diện tích (0 m²). Tiền phí quản lý sẽ bằng 0 đ.',
-                      style: TextStyle(
+                      style: context.bodySmall?.copyWith(
                         color: AppTheme.warningText,
-                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -743,17 +722,15 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             children: [
               Text(
                 _isFixedRent ? 'Tiền thuê phòng' : 'Phí quản lý',
-                style: const TextStyle(
-                  fontSize: 16,
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
               Text(
                 _currencyFormat.format(_getManagementTotal()),
-                style: const TextStyle(
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
                   color: AppTheme.primary,
                 ),
               ),
@@ -887,19 +864,17 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              const Text(
+              Text(
                 'Tiền điện',
-                style: TextStyle(
-                  fontSize: 16,
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
               Text(
                 _currencyFormat.format(_getElecTotal()),
-                style: const TextStyle(
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
                   color: AppTheme.primary,
                 ),
               ),
@@ -960,14 +935,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: Colors.orange),
-                      SizedBox(width: 6),
+                      const Icon(Icons.info_outline, size: 16, color: Colors.orange),
+                      const SizedBox(width: 6),
                       Text(
                         'Tính tự động theo biểu giá điện sinh hoạt 6 bậc EVN',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
                         ),
@@ -983,11 +957,11 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                             children: [
                               Text(
                                 '${b.name}: ${b.formattedUnits} kWh × ${_currencyFormat.format(b.rate)}',
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                               ),
                               Text(
                                 _currencyFormat.format(b.amount),
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                style: context.labelSmall?.copyWith(fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
@@ -1074,19 +1048,17 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              const Text(
+              Text(
                 'Tiền nước',
-                style: TextStyle(
-                  fontSize: 16,
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
               Text(
                 _currencyFormat.format(_getWaterTotal()),
-                style: const TextStyle(
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
                   color: AppTheme.primary,
                 ),
               ),
@@ -1171,19 +1143,17 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              const Text(
+              Text(
                 'Phí gửi xe',
-                style: TextStyle(
-                  fontSize: 16,
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
               Text(
                 _currencyFormat.format(_getParkingTotal()),
-                style: const TextStyle(
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
                   color: AppTheme.primary,
                 ),
               ),
@@ -1254,8 +1224,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           const SizedBox(height: 8),
           Text(
             'Hệ thống tự động điền số xe theo dữ liệu đăng ký phương tiện của căn hộ.',
-            style: TextStyle(
-              fontSize: 12,
+            style: context.labelSmall?.copyWith(
               color: AppTheme.textSecondary.withValues(alpha: 0.8),
               fontStyle: FontStyle.italic,
             ),
@@ -1277,10 +1246,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              const Text(
+              Text(
                 'TỔNG CỘNG',
-                style: TextStyle(
-                  fontSize: 16,
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primary,
                 ),
@@ -1289,8 +1257,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   _currencyFormat.format(total),
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: context.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
@@ -1312,10 +1279,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Trạng thái phát hành:',
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
                   ),
@@ -1351,7 +1317,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                   _isDraft
                       ? 'Bản nháp được lưu để soát xét nội bộ, cư dân chưa nhìn thấy hóa đơn này.'
                       : 'Hóa đơn sẽ được phát hành ngay lập tức tới cư dân kèm thông báo thanh toán.',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                 ),
               ],
             ),
@@ -1377,8 +1343,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                   )
                 : Text(
                     _isDraft ? 'LƯU BẢN NHÁP HÓA ĐƠN' : 'XÁC NHẬN PHÁT HÀNH HÓA ĐƠN',
-                    style: const TextStyle(
-                      fontSize: 15,
+                    style: context.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
