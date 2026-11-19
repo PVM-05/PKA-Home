@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/providers/issue_rating_provider.dart';
@@ -114,6 +115,7 @@ class _ServiceRatingOverviewScreenState
                 children: [
                   // ─── Header: Tổng quan KPI & Điểm số ───
                   _buildKpiCard(
+                    context,
                     avgOverall: avgOverall,
                     satisfactionRate: satisfactionRate,
                     totalRatings: totalRatings,
@@ -129,19 +131,22 @@ class _ServiceRatingOverviewScreenState
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip('all', 'Tất cả (${ratings.length})'),
+                        _buildFilterChip(context, 'all', 'Tất cả (${ratings.length})'),
                         const SizedBox(width: 8),
                         _buildFilterChip(
+                          context,
                           '5_star',
                           '5 sao (${ratings.where((r) => r.overallRating >= 4.8).length})',
                         ),
                         const SizedBox(width: 8),
                         _buildFilterChip(
+                          context,
                           '4_star',
                           '4 sao (${ratings.where((r) => r.overallRating >= 3.8 && r.overallRating < 4.8).length})',
                         ),
                         const SizedBox(width: 8),
                         _buildFilterChip(
+                          context,
                           'low_star',
                           'Cần cải thiện (<4★) (${ratings.where((r) => r.overallRating < 3.8).length})',
                         ),
@@ -162,7 +167,7 @@ class _ServiceRatingOverviewScreenState
                     )
                   else
                     ...filteredRatings.map(
-                      (rating) => _buildRatingItemCard(rating, isDark),
+                      (rating) => _buildRatingItemCard(context, rating, isDark),
                     ),
                 ],
               ),
@@ -173,13 +178,12 @@ class _ServiceRatingOverviewScreenState
     );
   }
 
-  Widget _buildFilterChip(String key, String label) {
+  Widget _buildFilterChip(BuildContext context, String key, String label) {
     final isSelected = _selectedFilter == key;
     return FilterChip(
       selected: isSelected,
       label: Text(label),
-      labelStyle: TextStyle(
-        fontSize: 13,
+      labelStyle: context.labelMedium?.copyWith(
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         color: isSelected ? Colors.white : AppTheme.textPrimary,
       ),
@@ -192,7 +196,8 @@ class _ServiceRatingOverviewScreenState
     );
   }
 
-  Widget _buildKpiCard({
+  Widget _buildKpiCard(
+    BuildContext context, {
     required double avgOverall,
     required String satisfactionRate,
     required int totalRatings,
@@ -226,10 +231,9 @@ class _ServiceRatingOverviewScreenState
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Điểm dịch vụ toàn khu',
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: context.bodySmall?.copyWith(
                       color: AppTheme.textSecondary,
                     ),
                   ),
@@ -244,8 +248,7 @@ class _ServiceRatingOverviewScreenState
                       const SizedBox(width: 4),
                       Text(
                         '${avgOverall.toStringAsFixed(1)} / 5.0',
-                        style: const TextStyle(
-                          fontSize: 22,
+                        style: context.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.amber,
                         ),
@@ -267,15 +270,14 @@ class _ServiceRatingOverviewScreenState
                   children: [
                     Text(
                       '$satisfactionRate%',
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: context.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.success,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'Tỷ lệ hài lòng',
-                      style: TextStyle(fontSize: 11, color: AppTheme.success),
+                      style: context.labelSmall?.copyWith(color: AppTheme.success),
                     ),
                   ],
                 ),
@@ -290,9 +292,9 @@ class _ServiceRatingOverviewScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMetricColumn('Tốc độ', avgSpeed),
-              _buildMetricColumn('Thái độ', avgAttitude),
-              _buildMetricColumn('Kỹ thuật', avgQuality),
+              _buildMetricColumn(context, 'Tốc độ', avgSpeed),
+              _buildMetricColumn(context, 'Thái độ', avgAttitude),
+              _buildMetricColumn(context, 'Kỹ thuật', avgQuality),
             ],
           ),
         ],
@@ -300,12 +302,12 @@ class _ServiceRatingOverviewScreenState
     );
   }
 
-  Widget _buildMetricColumn(String title, double score) {
+  Widget _buildMetricColumn(BuildContext context, String title, double score) {
     return Column(
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+          style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
         ),
         const SizedBox(height: 4),
         Row(
@@ -315,7 +317,7 @@ class _ServiceRatingOverviewScreenState
             const SizedBox(width: 2),
             Text(
               score.toStringAsFixed(1),
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -323,7 +325,11 @@ class _ServiceRatingOverviewScreenState
     );
   }
 
-  Widget _buildRatingItemCard(IssueRatingModel rating, bool isDark) {
+  Widget _buildRatingItemCard(
+    BuildContext context,
+    IssueRatingModel rating,
+    bool isDark,
+  ) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final label = IssueRatingModel.getSatisfactionLabel(rating.overallRating);
 
@@ -356,8 +362,7 @@ class _ServiceRatingOverviewScreenState
                       ),
                       child: Text(
                         rating.reporterName ?? 'Cư dân',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primary,
                         ),
@@ -367,8 +372,7 @@ class _ServiceRatingOverviewScreenState
                 ),
                 Text(
                   dateFormat.format(rating.createdAt),
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: context.labelSmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -399,8 +403,7 @@ class _ServiceRatingOverviewScreenState
                       const SizedBox(width: 4),
                       Text(
                         '${rating.overallRating.toStringAsFixed(1)} / 5.0',
-                        style: const TextStyle(
-                          fontSize: 13,
+                        style: context.labelMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.amber,
                         ),
@@ -411,9 +414,8 @@ class _ServiceRatingOverviewScreenState
                 const SizedBox(width: 8),
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: context.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
                   ),
                 ),
               ],
@@ -423,11 +425,11 @@ class _ServiceRatingOverviewScreenState
             // Breakdown
             Row(
               children: [
-                _buildSmallChip('Tốc độ', rating.speedRating),
+                _buildSmallChip(context, 'Tốc độ', rating.speedRating),
                 const SizedBox(width: 8),
-                _buildSmallChip('Thái độ', rating.attitudeRating),
+                _buildSmallChip(context, 'Thái độ', rating.attitudeRating),
                 const SizedBox(width: 8),
-                _buildSmallChip('Kỹ thuật', rating.qualityRating),
+                _buildSmallChip(context, 'Kỹ thuật', rating.qualityRating),
               ],
             ),
 
@@ -444,9 +446,8 @@ class _ServiceRatingOverviewScreenState
                 ),
                 child: Text(
                   '"${rating.comment}"',
-                  style: TextStyle(
+                  style: context.bodySmall?.copyWith(
                     fontStyle: FontStyle.italic,
-                    fontSize: 13,
                     color: isDark ? Colors.white70 : Colors.grey.shade800,
                   ),
                 ),
@@ -458,10 +459,10 @@ class _ServiceRatingOverviewScreenState
     );
   }
 
-  Widget _buildSmallChip(String title, int score) {
+  Widget _buildSmallChip(BuildContext context, String title, int score) {
     return Text(
       '$title: $score★',
-      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+      style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
     );
   }
 
@@ -487,17 +488,14 @@ class _ServiceRatingOverviewScreenState
             const SizedBox(height: 20),
             Text(
               'Chưa có lượt đánh giá nào',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Khi cư dân hoàn thành đánh giá các sự cố kỹ thuật, kết quả khảo sát và thống kê KPI sẽ hiển thị tại đây.',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: context.bodyMedium?.copyWith(
                 color: Colors.grey.shade600,
-                fontSize: 14,
                 height: 1.4,
               ),
             ),

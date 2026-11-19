@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/subscription_model.dart';
@@ -59,33 +61,31 @@ class _SubscriptionManagementScreenState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Thẻ thông tin gói cước hiện tại
-                _buildCurrentSubscriptionCard(status),
+                _buildCurrentSubscriptionCard(context, status),
                 const SizedBox(height: 16),
 
                 // Cảnh báo hạn mức hoặc hết hạn nếu có
                 if (status.isExpiringSoon || status.usage.isNearLimit)
-                  _buildAlertBanner(status),
+                  _buildAlertBanner(context, status),
                 if (status.isExpiringSoon || status.usage.isNearLimit)
                   const SizedBox(height: 16),
 
                 // Thẻ đo lường hạn mức sử dụng (Quota Gauges)
-                _buildQuotaUsageCard(status.usage),
+                _buildQuotaUsageCard(context, status.usage),
                 const SizedBox(height: 24),
 
                 // Tiêu đề bảng gói cước
-                const Text(
+                Text(
                   'Bảng Gói Dịch Vụ Nâng Cấp',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Lựa chọn gói dịch vụ phù hợp với quy mô tòa nhà và nhu cầu vận hành của bạn',
-                  style: TextStyle(
-                    fontSize: 12.5,
+                  style: context.bodySmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -137,7 +137,10 @@ class _SubscriptionManagementScreenState
   );
 }
 
-  Widget _buildCurrentSubscriptionCard(SubscriptionStatusModel status) {
+  Widget _buildCurrentSubscriptionCard(
+    BuildContext context,
+    SubscriptionStatusModel status,
+  ) {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final expiresStr = status.expiresAt != null
         ? dateFormat.format(status.expiresAt!)
@@ -149,7 +152,7 @@ class _SubscriptionManagementScreenState
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [AppTheme.primary, AppTheme.secondary],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -166,20 +169,18 @@ class _SubscriptionManagementScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Gói Dịch Vụ Đang Sử Dụng',
-                        style: TextStyle(
+                        style: context.labelSmall?.copyWith(
                           color: Colors.white70,
-                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         status.planName,
-                        style: const TextStyle(
+                        style: context.headlineMedium?.copyWith(
                           color: Colors.white,
-                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -200,9 +201,8 @@ class _SubscriptionManagementScreenState
                   ),
                   child: Text(
                     status.statusBadgeText,
-                    style: const TextStyle(
+                    style: context.labelSmall?.copyWith(
                       color: Colors.white,
-                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -222,7 +222,7 @@ class _SubscriptionManagementScreenState
                 const SizedBox(width: 6),
                 Text(
                   'Hạn dùng: $expiresStr',
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  style: context.bodySmall?.copyWith(color: Colors.white),
                 ),
                 const Spacer(),
                 Container(
@@ -236,9 +236,8 @@ class _SubscriptionManagementScreenState
                   ),
                   child: Text(
                     status.remainingDaysText,
-                    style: const TextStyle(
+                    style: context.labelSmall?.copyWith(
                       color: Colors.white,
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -251,7 +250,10 @@ class _SubscriptionManagementScreenState
     );
   }
 
-  Widget _buildAlertBanner(SubscriptionStatusModel status) {
+  Widget _buildAlertBanner(
+    BuildContext context,
+    SubscriptionStatusModel status,
+  ) {
     String alertMsg = '';
     if (status.usage.isAtLimit) {
       alertMsg =
@@ -283,8 +285,7 @@ class _SubscriptionManagementScreenState
           Expanded(
             child: Text(
               alertMsg,
-              style: const TextStyle(
-                fontSize: 12.5,
+              style: context.bodySmall?.copyWith(
                 height: 1.4,
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w500,
@@ -296,7 +297,10 @@ class _SubscriptionManagementScreenState
     );
   }
 
-  Widget _buildQuotaUsageCard(SubscriptionUsageMetricsModel usage) {
+  Widget _buildQuotaUsageCard(
+    BuildContext context,
+    SubscriptionUsageMetricsModel usage,
+  ) {
     Color getProgressColor(double percent) {
       if (percent >= 100.0) return AppTheme.error;
       if (percent >= 80.0) return AppTheme.warning;
@@ -319,18 +323,17 @@ class _SubscriptionManagementScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.pie_chart_outline,
                   color: AppTheme.primary,
                   size: 20,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Hạn Mức Sử Dụng Thực Tế',
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
                   ),
@@ -341,6 +344,7 @@ class _SubscriptionManagementScreenState
 
             // 1. Chỉ số căn hộ
             _buildQuotaRow(
+              context,
               icon: Icons.apartment,
               title: 'Căn hộ trong tổ chức',
               ratioText: usage.displayApartmentRatio,
@@ -352,6 +356,7 @@ class _SubscriptionManagementScreenState
 
             // 2. Chỉ số tòa nhà
             _buildQuotaRow(
+              context,
               icon: Icons.domain,
               title: 'Số tòa nhà quản lý',
               ratioText: usage.displayBuildingRatio,
@@ -363,6 +368,7 @@ class _SubscriptionManagementScreenState
 
             // 3. Chỉ số nhân viên
             _buildQuotaRow(
+              context,
               icon: Icons.badge,
               title: 'Tài khoản nhân viên BQL',
               ratioText: usage.displayStaffRatio,
@@ -376,7 +382,8 @@ class _SubscriptionManagementScreenState
     );
   }
 
-  Widget _buildQuotaRow({
+  Widget _buildQuotaRow(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String ratioText,
@@ -393,8 +400,7 @@ class _SubscriptionManagementScreenState
             const SizedBox(width: 6),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 13,
+              style: context.bodySmall?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: AppTheme.textPrimary,
               ),
@@ -402,8 +408,7 @@ class _SubscriptionManagementScreenState
             const Spacer(),
             Text(
               ratioText,
-              style: const TextStyle(
-                fontSize: 13,
+              style: context.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
               ),
@@ -412,8 +417,7 @@ class _SubscriptionManagementScreenState
               const SizedBox(width: 6),
               Text(
                 '($percentText)',
-                style: TextStyle(
-                  fontSize: 12,
+                style: context.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: progressColor,
                 ),
@@ -471,8 +475,7 @@ class _SubscriptionManagementScreenState
                         children: [
                           Text(
                             plan.name,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: context.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
                             ),
@@ -481,8 +484,7 @@ class _SubscriptionManagementScreenState
                             const SizedBox(height: 4),
                             Text(
                               plan.description!,
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 color: AppTheme.textSecondary,
                               ),
                             ),
@@ -500,11 +502,10 @@ class _SubscriptionManagementScreenState
                           color: AppTheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Gói hiện tại',
-                          style: TextStyle(
+                          style: context.labelSmall?.copyWith(
                             color: AppTheme.primary,
-                            fontSize: 11.5,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -514,8 +515,7 @@ class _SubscriptionManagementScreenState
                 const SizedBox(height: 12),
                 Text(
                   plan.formattedPriceMonthly,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: context.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
@@ -525,22 +525,25 @@ class _SubscriptionManagementScreenState
                 const SizedBox(height: 10),
 
                 // Danh sách quyền lợi
-                _buildBenefitItem('Quy mô: ${plan.displayMaxApartments}'),
-                _buildBenefitItem('Tối đa: ${plan.displayMaxBuildings}'),
-                _buildBenefitItem('Nhân sự: ${plan.displayMaxStaff}'),
+                _buildBenefitItem(context, 'Quy mô: ${plan.displayMaxApartments}'),
+                _buildBenefitItem(context, 'Tối đa: ${plan.displayMaxBuildings}'),
+                _buildBenefitItem(context, 'Nhân sự: ${plan.displayMaxStaff}'),
                 if (plan.code == 'pro' || plan.code == 'enterprise') ...[
                   _buildBenefitItem(
+                    context,
                     'Đối soát & Cổng thanh toán VietQR tự động',
                   ),
                   _buildBenefitItem(
+                    context,
                     'Báo cáo phân tích tài chính & tuổi nợ chuyên sâu',
                   ),
                 ],
                 if (plan.code == 'enterprise') ...[
                   _buildBenefitItem(
+                    context,
                     'Hóa đơn điện tử & kết nối phần mềm kế toán',
                   ),
-                  _buildBenefitItem('Hỗ trợ kỹ thuật ưu tiên 24/7'),
+                  _buildBenefitItem(context, 'Hỗ trợ kỹ thuật ưu tiên 24/7'),
                 ],
 
                 const SizedBox(height: 14),
@@ -576,7 +579,7 @@ class _SubscriptionManagementScreenState
     );
   }
 
-  Widget _buildBenefitItem(String text) {
+  Widget _buildBenefitItem(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.5),
       child: Row(
@@ -586,8 +589,7 @@ class _SubscriptionManagementScreenState
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                fontSize: 12.5,
+              style: context.bodySmall?.copyWith(
                 color: AppTheme.textPrimary,
               ),
             ),
@@ -613,10 +615,9 @@ class _SubscriptionManagementScreenState
             children: [
               Text(
                 'Mức giá: ${plan.formattedPriceMonthly} (hoặc ${plan.formattedPriceYearly})',
-                style: const TextStyle(
+                style: ctx.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primary,
-                  fontSize: 13.5,
                 ),
               ),
               const SizedBox(height: 12),
@@ -653,11 +654,9 @@ class _SubscriptionManagementScreenState
             onPressed: () async {
               final phone = _phoneController.text.trim();
               if (phone.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Vui lòng nhập số điện thoại liên hệ'),
-                    backgroundColor: AppTheme.error,
-                  ),
+                AppSnackBar.showError(
+                  context,
+                  'Vui lòng nhập số điện thoại liên hệ',
                 );
                 return;
               }
@@ -673,14 +672,10 @@ class _SubscriptionManagementScreenState
                   );
 
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      result['message']?.toString() ??
-                          'Đã gửi yêu cầu thành công',
-                    ),
-                    backgroundColor: AppTheme.success,
-                  ),
+                AppSnackBar.showSuccess(
+                  context,
+                  result['message']?.toString() ??
+                      'Đã gửi yêu cầu thành công',
                 );
               }
             },

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/batch_import_model.dart';
@@ -30,22 +32,10 @@ class _BatchImportCenterScreenState
     ref.listen<BatchImportState>(batchImportProvider, (previous, next) {
       if (next.errorMessage != null &&
           next.errorMessage != previous?.errorMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage!),
-            backgroundColor: AppTheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackBar.showError(context, next.errorMessage!);
       } else if (next.successMessage != null &&
           next.successMessage != previous?.successMessage) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.successMessage!),
-            backgroundColor: AppTheme.success,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackBar.showSuccess(context, next.successMessage!);
       }
     });
 
@@ -68,7 +58,7 @@ class _BatchImportCenterScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Banner giới thiệu
-            _buildIntroductionBanner(),
+            _buildIntroductionBanner(context),
             const SizedBox(height: 16),
 
             // Tab chọn loại dữ liệu nhập
@@ -77,6 +67,7 @@ class _BatchImportCenterScreenState
 
             // Bước 1: Tải file mẫu
             _buildStepCard(
+              context: context,
               stepNumber: '1',
               title: 'Tải File Mẫu Chuẩn Hóa (.xlsx / .csv)',
               subtitle:
@@ -87,7 +78,7 @@ class _BatchImportCenterScreenState
                 children: [
                   OutlinedButton.icon(
                     icon: const Icon(Icons.table_view),
-                    label: Text('Tải mẫu Excel (.xlsx)'),
+                    label: const Text('Tải mẫu Excel (.xlsx)'),
                     onPressed: state.isProcessing
                         ? null
                         : () async {
@@ -95,18 +86,16 @@ class _BatchImportCenterScreenState
                               state.selectedType,
                             );
                             if (path != null && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Đã tạo file mẫu Excel thành công'),
-                                  backgroundColor: AppTheme.success,
-                                ),
+                              AppSnackBar.showSuccess(
+                                context,
+                                'Đã tạo file mẫu Excel thành công',
                               );
                             }
                           },
                   ),
                   OutlinedButton.icon(
                     icon: const Icon(Icons.description),
-                    label: Text('Tải mẫu CSV (.csv)'),
+                    label: const Text('Tải mẫu CSV (.csv)'),
                     onPressed: state.isProcessing
                         ? null
                         : () async {
@@ -114,11 +103,9 @@ class _BatchImportCenterScreenState
                               state.selectedType,
                             );
                             if (path != null && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Đã tạo file mẫu CSV thành công'),
-                                  backgroundColor: AppTheme.success,
-                                ),
+                              AppSnackBar.showSuccess(
+                                context,
+                                'Đã tạo file mẫu CSV thành công',
                               );
                             }
                           },
@@ -130,6 +117,7 @@ class _BatchImportCenterScreenState
 
             // Bước 2: Chọn file dữ liệu
             _buildStepCard(
+              context: context,
               stepNumber: '2',
               title: 'Chọn File Dữ Liệu Excel hoặc CSV',
               subtitle:
@@ -191,6 +179,7 @@ class _BatchImportCenterScreenState
 
             // Bước 3: Kết quả kiểm tra & Thẩm định dữ liệu
             _buildStepCard(
+              context: context,
               stepNumber: '3',
               title: 'Kết Quả Thẩm Định & Kiểm Tra',
               subtitle:
@@ -209,7 +198,7 @@ class _BatchImportCenterScreenState
   );
 }
 
-  Widget _buildIntroductionBanner() {
+  Widget _buildIntroductionBanner(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -217,31 +206,29 @@ class _BatchImportCenterScreenState
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, color: AppTheme.primary, size: 24),
-          SizedBox(width: 12),
+          const Icon(Icons.info_outline, color: AppTheme.primary, size: 24),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Quy chuẩn dữ liệu nhập tự động',
-                  style: TextStyle(
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
                     color: AppTheme.primary,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   '• Mã căn hộ: Cấu trúc <Block><Tầng 2 số><Phòng 2 số> (VD: A0110, B0205).\n'
                   '• Số điện thoại: 10 chữ số chuẩn mạng viễn thông Việt Nam.\n'
                   '• Chỉ số điện nước: Số thực không âm (≥ 0).\n'
                   '• An toàn dữ liệu: Cư dân chuyển đi chỉ đổi trạng thái kết thúc, bảo toàn 100% lịch sử giao dịch và công nợ.',
-                  style: TextStyle(
-                    fontSize: 12.5,
+                  style: context.bodySmall?.copyWith(
                     height: 1.4,
                     color: AppTheme.textPrimary,
                   ),
@@ -286,6 +273,7 @@ class _BatchImportCenterScreenState
   }
 
   Widget _buildStepCard({
+    required BuildContext context,
     required String stepNumber,
     required String title,
     required String subtitle,
@@ -306,9 +294,8 @@ class _BatchImportCenterScreenState
                   backgroundColor: AppTheme.primary,
                   child: Text(
                     stepNumber,
-                    style: const TextStyle(
+                    style: context.labelMedium?.copyWith(
                       color: Colors.white,
-                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -317,8 +304,7 @@ class _BatchImportCenterScreenState
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 15,
+                    style: context.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
                     ),
@@ -329,8 +315,7 @@ class _BatchImportCenterScreenState
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: const TextStyle(
-                fontSize: 12.5,
+              style: context.bodySmall?.copyWith(
                 color: AppTheme.textSecondary,
               ),
             ),
@@ -348,16 +333,16 @@ class _BatchImportCenterScreenState
     BatchImportNotifier notifier,
   ) {
     if (state.isProcessing) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
         child: Center(
           child: Column(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 12),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 12),
               Text(
                 'Đang phân tích và thẩm định dữ liệu...',
-                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
               ),
             ],
           ),
@@ -374,9 +359,9 @@ class _BatchImportCenterScreenState
           color: Colors.grey.shade50,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Text(
+        child: Text(
           'Chưa có dữ liệu nào được thẩm định. Vui lòng chọn file Excel ở bước 2.',
-          style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+          style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
           textAlign: TextAlign.center,
         ),
       );
@@ -389,6 +374,7 @@ class _BatchImportCenterScreenState
         Row(
           children: [
             _buildStatBadge(
+              context: context,
               label: 'Tổng số dòng',
               count: validation.totalRows,
               color: Colors.blueGrey,
@@ -396,6 +382,7 @@ class _BatchImportCenterScreenState
             ),
             const SizedBox(width: 8),
             _buildStatBadge(
+              context: context,
               label: 'Hợp lệ',
               count: validation.validCount,
               color: AppTheme.success,
@@ -403,6 +390,7 @@ class _BatchImportCenterScreenState
             ),
             const SizedBox(width: 8),
             _buildStatBadge(
+              context: context,
               label: 'Bị lỗi',
               count: validation.errorCount,
               color: AppTheme.error,
@@ -423,17 +411,16 @@ class _BatchImportCenterScreenState
                 color: AppTheme.success.withValues(alpha: 0.3),
               ),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.verified, color: AppTheme.success, size: 20),
-                SizedBox(width: 8),
+                const Icon(Icons.verified, color: AppTheme.success, size: 20),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Tuyệt vời! 100% dòng dữ liệu đều hợp lệ và sẵn sàng nạp.',
-                    style: TextStyle(
+                    style: context.titleSmall?.copyWith(
                       color: AppTheme.success,
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -464,10 +451,9 @@ class _BatchImportCenterScreenState
                     Expanded(
                       child: Text(
                         'Phát hiện ${validation.errorCount} dòng dữ liệu không hợp lệ',
-                        style: const TextStyle(
+                        style: context.titleSmall?.copyWith(
                           color: AppTheme.error,
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
                         ),
                       ),
                     ),
@@ -488,13 +474,9 @@ class _BatchImportCenterScreenState
                       onPressed: () async {
                         final path = await notifier.exportErrorRows();
                         if (path != null && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Đã xuất file Excel dòng lỗi thành công',
-                              ),
-                              backgroundColor: AppTheme.success,
-                            ),
+                          AppSnackBar.showSuccess(
+                            context,
+                            'Đã xuất file Excel dòng lỗi thành công',
                           );
                         }
                       },
@@ -509,13 +491,9 @@ class _BatchImportCenterScreenState
                       onPressed: () async {
                         final path = await notifier.exportErrorRowsCsv();
                         if (path != null && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Đã xuất file CSV dòng lỗi thành công',
-                              ),
-                              backgroundColor: AppTheme.success,
-                            ),
+                          AppSnackBar.showSuccess(
+                            context,
+                            'Đã xuất file CSV dòng lỗi thành công',
                           );
                         }
                       },
@@ -533,14 +511,13 @@ class _BatchImportCenterScreenState
               contentPadding: EdgeInsets.zero,
               title: Text(
                 'Chỉ nạp ${validation.validCount} dòng hợp lệ (bỏ qua ${validation.errorCount} dòng lỗi)',
-                style: const TextStyle(
-                  fontSize: 13,
+                style: context.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              subtitle: const Text(
+              subtitle: Text(
                 'Cho phép nạp trước các dòng đạt chuẩn, các dòng lỗi có thể sửa và nạp lại sau',
-                style: TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+                style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
               ),
               value: state.importOnlyValidRows,
               onChanged: (val) => notifier.toggleImportOnlyValidRows(val),
@@ -552,8 +529,7 @@ class _BatchImportCenterScreenState
             child: ExpansionTile(
               title: Text(
                 'Xem chi tiết ${validation.errorCount} lỗi',
-                style: const TextStyle(
-                  fontSize: 13,
+                style: context.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.error,
                 ),
@@ -572,8 +548,7 @@ class _BatchImportCenterScreenState
                       Expanded(
                         child: Text(
                           err.displayText,
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: context.bodySmall?.copyWith(
                             color: AppTheme.textPrimary,
                           ),
                         ),
@@ -614,8 +589,7 @@ class _BatchImportCenterScreenState
             const SizedBox(width: 8),
             Text(
               'Xem trước dữ liệu (${validation.validCount} dòng hợp lệ)',
-              style: const TextStyle(
-                fontSize: 13.5,
+              style: context.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primary,
               ),
@@ -625,7 +599,7 @@ class _BatchImportCenterScreenState
         subtitle: validItems.length > 20
             ? Text(
                 'Hiển thị 20 / ${validItems.length} dòng đầu tiên',
-                style: const TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+                style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
               )
             : null,
         children: [
@@ -743,6 +717,7 @@ class _BatchImportCenterScreenState
   }
 
   Widget _buildStatBadge({
+    required BuildContext context,
     required String label,
     required int count,
     required Color color,
@@ -762,16 +737,14 @@ class _BatchImportCenterScreenState
             const SizedBox(height: 4),
             Text(
               '$count',
-              style: TextStyle(
-                fontSize: 18,
+              style: context.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
             ),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 11,
+              style: context.labelSmall?.copyWith(
                 color: color.withValues(alpha: 0.85),
               ),
               textAlign: TextAlign.center,
@@ -819,7 +792,10 @@ class _BatchImportCenterScreenState
         state.isProcessing
             ? 'Đang tiến hành nạp...'
             : 'Tiến Hành Nạp $countToImport Dòng Dữ Liệu',
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        style: context.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
       onPressed: canExecute
           ? () => _confirmAndExecute(
@@ -847,7 +823,7 @@ class _BatchImportCenterScreenState
         content: Text(
           'Bạn có chắc chắn muốn nạp $count dòng dữ liệu $typeLabel vào tòa nhà này?\n\n'
           'Hệ thống sẽ cập nhật tự động và ghi nhận toàn bộ lịch sử quản lý.',
-          style: const TextStyle(fontSize: 13.5, height: 1.4),
+          style: ctx.bodyMedium?.copyWith(height: 1.4),
         ),
         actions: [
           TextButton(

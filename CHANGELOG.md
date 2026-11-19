@@ -74,6 +74,12 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - `ResidentHandbookScreen`: Xóa sạch 100% 15/15 điểm `fontSize:` cứng tại thanh tìm kiếm, danh mục hotline khẩn cấp, quy chế tòa nhà, đặt lịch tiện ích và câu hỏi thường gặp FAQ, đồng thời chuyển đổi 2 lệnh gọi `ScaffoldMessenger` sang `AppSnackBar.showError`.
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `community_management_screen.dart`, `resident_community_screen.dart`, `resident_handbook_screen.dart`.
   - Giảm thêm 51 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 578 xuống 527). Đưa tổng số điểm nợ typography được xóa bỏ lên 409 điểm qua 7 gói dọn dẹp liên hoàn. Toàn bộ 4 guardrail tests và 10 screen widget tests đều vượt qua 100%.
+- **Gói 2.8 Chuẩn Hóa Typography & Tokens Phân Hệ Nhập Liệu Hàng Loạt, Gói Thuê Bao B2B SaaS & Đánh Giá Dịch Vụ (Batch Import, SaaS Subscription & Service Rating)**:
+  - `BatchImportCenterScreen`: Xóa sạch 100% 19/19 điểm `fontSize:` cứng tại các bước wizard import Excel, bảng preview dữ liệu căn hộ & cư dân, KPI số lượng dòng nạp; chuyển đổi toàn bộ 6 lệnh gọi `ScaffoldMessenger.showSnackBar` phân tán sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
+  - `SubscriptionManagementScreen`: Xóa sạch 100% 18/18 điểm `fontSize:` cứng tại thẻ gói dịch vụ SaaS hiện tại, bảng giá gói cước mở rộng, thước đo hạn mức quota; chuyển đổi toàn bộ 2 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar`.
+  - `ServiceRatingOverviewScreen`: Xóa sạch 100% 14/14 điểm `fontSize:` cứng tại điểm số CSAT trung bình, phân bổ đánh giá 1-5 sao và danh sách ý kiến phản hồi cư dân.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `batch_import_center_screen.dart`, `subscription_management_screen.dart`, `service_rating_overview_screen.dart` (Module 16).
+  - Giảm thêm 51 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 527 xuống 476, chính thức phá vỡ mốc 500 nợ). Đưa tổng số điểm nợ typography được xóa bỏ lên 460 điểm qua 8 gói dọn dẹp liên hoàn. Toàn bộ 4 guardrail tests và 8 screen widget tests đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

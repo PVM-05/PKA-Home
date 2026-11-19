@@ -77,6 +77,10 @@ void main() {
       'lib/features/management/screens/community_management_screen.dart',
       'lib/features/resident/screens/resident_community_screen.dart',
       'lib/features/resident/screens/resident_handbook_screen.dart',
+      // Module 16: Nhập liệu hàng loạt, Gói thuê bao B2B SaaS & Đánh giá chất lượng dịch vụ (Batch Import, SaaS Subscription & Service Rating)
+      'lib/features/management/screens/batch_import_center_screen.dart',
+      'lib/features/management/screens/subscription_management_screen.dart',
+      'lib/features/management/screens/service_rating_overview_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {
