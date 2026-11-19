@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
@@ -134,7 +136,7 @@ class _HandbookManagementScreenState
                             children: [
                               Text(
                                 contact.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5),
+                                style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 4),
                               Wrap(
@@ -144,7 +146,7 @@ class _HandbookManagementScreenState
                                 children: [
                                   Text(
                                     'SĐT: ${contact.phone}',
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
+                                    style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -154,8 +156,7 @@ class _HandbookManagementScreenState
                                     ),
                                     child: Text(
                                       contact.contactTypeDisplayName,
-                                      style: const TextStyle(
-                                        fontSize: 10.5,
+                                      style: context.labelSmall?.copyWith(
                                         color: AppTheme.primary,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -163,7 +164,7 @@ class _HandbookManagementScreenState
                                   ),
                                   Text(
                                     'Thứ tự: ${contact.displayOrder}',
-                                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                    style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                                   ),
                                 ],
                               ),
@@ -337,25 +338,16 @@ class _HandbookManagementScreenState
                     }
                     ref.invalidate(emergencyContactsProvider);
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isEditing
-                                ? 'Đã cập nhật đường dây nóng!'
-                                : 'Đã thêm đường dây nóng thành công!',
-                          ),
-                          backgroundColor: AppTheme.success,
-                        ),
+                      AppSnackBar.showSuccess(
+                        context,
+                        isEditing
+                            ? 'Đã cập nhật đường dây nóng!'
+                            : 'Đã thêm đường dây nóng thành công!',
                       );
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(formatErrorMessage(e)),
-                          backgroundColor: AppTheme.error,
-                        ),
-                      );
+                      AppSnackBar.showError(context, formatErrorMessage(e));
                     }
                   }
                 }
@@ -404,9 +396,8 @@ class _HandbookManagementScreenState
                             Expanded(
                               child: Text(
                                 '${index + 1}. ${rule.title}',
-                                style: const TextStyle(
+                                style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 15,
                                 ),
                               ),
                             ),
@@ -453,8 +444,7 @@ class _HandbookManagementScreenState
                         const SizedBox(height: 8),
                         Text(
                           rule.content,
-                          style: TextStyle(
-                            fontSize: 14,
+                          style: context.bodyMedium?.copyWith(
                             color: Colors.grey.shade700,
                             height: 1.5,
                           ),
@@ -554,25 +544,16 @@ class _HandbookManagementScreenState
                   }
                   ref.invalidate(buildingRulesProvider);
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          isEditing
-                              ? 'Đã cập nhật nội quy!'
-                              : 'Đã thêm nội quy thành công!',
-                        ),
-                        backgroundColor: AppTheme.success,
-                      ),
+                    AppSnackBar.showSuccess(
+                      context,
+                      isEditing
+                          ? 'Đã cập nhật nội quy!'
+                          : 'Đã thêm nội quy thành công!',
                     );
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(formatErrorMessage(e)),
-                        backgroundColor: AppTheme.error,
-                      ),
-                    );
+                    AppSnackBar.showError(context, formatErrorMessage(e));
                   }
                 }
               }
@@ -620,8 +601,7 @@ class _HandbookManagementScreenState
                             Expanded(
                               child: Text(
                                 amenity.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
+                                style: context.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.primary,
                                 ),
@@ -697,8 +677,7 @@ class _HandbookManagementScreenState
                                       const SizedBox(width: 4),
                                       Text(
                                         amenity.openHours!,
-                                        style: const TextStyle(
-                                          fontSize: 12,
+                                        style: context.labelSmall?.copyWith(
                                           fontWeight: FontWeight.w600,
                                           color: AppStatusColors.paid,
                                         ),
@@ -733,8 +712,7 @@ class _HandbookManagementScreenState
                                       amenity.isShared
                                           ? 'Dùng chung (${amenity.maxCapacity} người)'
                                           : 'Bao trọn khung giờ',
-                                      style: const TextStyle(
-                                        fontSize: 12,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.primary,
                                       ),
@@ -755,8 +733,7 @@ class _HandbookManagementScreenState
                                 ),
                                 child: Text(
                                   'Phí: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.feeAmount)}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                  style: context.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: Colors.blue,
                                   ),
@@ -775,8 +752,7 @@ class _HandbookManagementScreenState
                                 ),
                                 child: Text(
                                   'Cọc: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.depositAmount)}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                  style: context.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: Colors.brown,
                                   ),
@@ -789,8 +765,7 @@ class _HandbookManagementScreenState
                           const SizedBox(height: 8),
                           Text(
                             amenity.description!,
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: context.bodyMedium?.copyWith(
                               color: Colors.grey.shade700,
                               height: 1.4,
                             ),
@@ -1035,25 +1010,16 @@ class _HandbookManagementScreenState
                     }
                     ref.invalidate(buildingAmenitiesProvider);
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isEditing
-                                ? 'Đã cập nhật tiện ích!'
-                                : 'Đã thêm tiện ích thành công!',
-                          ),
-                          backgroundColor: AppTheme.success,
-                        ),
+                      AppSnackBar.showSuccess(
+                        context,
+                        isEditing
+                            ? 'Đã cập nhật tiện ích!'
+                            : 'Đã thêm tiện ích thành công!',
                       );
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(formatErrorMessage(e)),
-                          backgroundColor: AppTheme.error,
-                        ),
-                      );
+                      AppSnackBar.showError(context, formatErrorMessage(e));
                     }
                   }
                 }
@@ -1093,21 +1059,11 @@ class _HandbookManagementScreenState
               try {
                 await onConfirm();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(successMessage),
-                      backgroundColor: AppTheme.success,
-                    ),
-                  );
+                  AppSnackBar.showSuccess(context, successMessage);
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(formatErrorMessage(e)),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
+                  AppSnackBar.showError(context, formatErrorMessage(e));
                 }
               }
             },

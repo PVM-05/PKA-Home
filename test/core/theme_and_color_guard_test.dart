@@ -86,6 +86,11 @@ void main() {
       'lib/features/management/screens/apartment_ledger_screen.dart',
       'lib/features/management/screens/maintenance_fund_ledger_screen.dart',
       'lib/features/management/screens/edit_invoice_screen.dart',
+      // Module 18: Quản trị Cẩm nang tòa nhà, Trạm kiểm kê/tuần tra hiện trường, Duyệt liên kết & Bàn giao căn hộ (Handbook Management, Inspection Workstation, Link Request & Handover Management)
+      'lib/features/management/screens/handbook_management_screen.dart',
+      'lib/features/management/screens/inspection_workstation_screen.dart',
+      'lib/features/management/screens/link_request_management_screen.dart',
+      'lib/features/management/screens/handover_management_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

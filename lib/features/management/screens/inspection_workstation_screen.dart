@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/supabase_config.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/signature_pad_dialog.dart';
@@ -163,36 +165,26 @@ class _InspectionWorkstationScreenState
     final elecStr = _electricityController.text.trim();
     final waterStr = _waterController.text.trim();
     if (elecStr.isEmpty || waterStr.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Vui lòng nhập đầy đủ chỉ số đồng hồ điện và nước thực tế tại hiện trường.',
-          ),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Vui lòng nhập đầy đủ chỉ số đồng hồ điện và nước thực tế tại hiện trường.',
       );
       return;
     }
 
     final depositHeld = parseMoney(_depositController.text).toDouble();
     if (_handoverType == 'move_out' && depositHeld <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Vui lòng nhập số tiền cọc hiện đang giữ để chiết tính hoàn trả cư dân.',
-          ),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Vui lòng nhập số tiền cọc hiện đang giữ để chiết tính hoàn trả cư dân.',
       );
       return;
     }
 
     if (_staffSignatureBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng ký tên đại diện Ban Quản Lý trước khi gửi.'),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Vui lòng ký tên đại diện Ban Quản Lý trước khi gửi.',
       );
       return;
     }
@@ -249,23 +241,15 @@ class _InspectionWorkstationScreenState
       ref.invalidate(buildingHandoversProvider(widget.buildingId));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('Đã lưu và gửi biên bản bàn giao cho cư dân xác nhận!'),
-            backgroundColor: AppStatusColors.paid,
-          ),
+        AppSnackBar.showSuccess(
+          context,
+          'Đã lưu và gửi biên bản bàn giao cho cư dân xác nhận!',
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi lưu biên bản: $e'),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, 'Lỗi lưu biên bản: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -302,17 +286,16 @@ class _InspectionWorkstationScreenState
                       color: AppStatusColors.paid.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.lock, size: 14, color: AppStatusColors.paid),
-                      SizedBox(width: 4),
+                      const Icon(Icons.lock, size: 14, color: AppStatusColors.paid),
+                      const SizedBox(width: 4),
                       Text(
                         'Đã duyệt (Bất biến)',
-                        style: TextStyle(
+                        style: context.labelSmall?.copyWith(
                           color: AppStatusColors.paid,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -446,8 +429,7 @@ class _InspectionWorkstationScreenState
                   children: [
                     Text(
                       'Căn hộ ${widget.apartmentCode}',
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: context.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
@@ -457,9 +439,8 @@ class _InspectionWorkstationScreenState
                       _handoverType == 'move_in'
                           ? 'Nhận nhà (Move-in)'
                           : 'Trả nhà (Move-out)',
-                      style: const TextStyle(
+                      style: context.bodySmall?.copyWith(
                         color: AppTheme.textSecondary,
-                        fontSize: 13,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -501,9 +482,9 @@ class _InspectionWorkstationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Chốt chỉ số đồng hồ bàn giao',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           LayoutBuilder(
@@ -581,9 +562,9 @@ class _InspectionWorkstationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Chiết tính hoàn tiền đặt cọc',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -637,9 +618,8 @@ class _InspectionWorkstationScreenState
                     ),
                     Text(
                       _formatCurrency(_depositRefund),
-                      style: const TextStyle(
+                      style: context.titleMedium?.copyWith(
                         color: AppStatusColors.paid,
-                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -656,10 +636,10 @@ class _InspectionWorkstationScreenState
   Widget _buildItemsHeader() {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
             'Danh mục kiểm kê hiện trường',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -722,9 +702,8 @@ class _InspectionWorkstationScreenState
               Expanded(
                 child: Text(
                   item.itemName,
-                  style: const TextStyle(
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -736,7 +715,7 @@ class _InspectionWorkstationScreenState
                 visualDensity: VisualDensity.compact,
                 label: Text(
                   item.roomAreaDisplayName,
-                  style: const TextStyle(fontSize: 11),
+                  style: context.labelSmall,
                 ),
               ),
             ],
@@ -817,9 +796,9 @@ class _InspectionWorkstationScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Xác nhận đại diện Ban Quản Lý',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -866,9 +845,8 @@ class _InspectionWorkstationScreenState
                       Flexible(
                         child: Text(
                           'Đã có chữ ký BQL',
-                          style: const TextStyle(
+                          style: context.labelSmall?.copyWith(
                             color: AppStatusColors.paid,
-                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
@@ -896,9 +874,8 @@ class _InspectionWorkstationScreenState
                       Flexible(
                         child: Text(
                           'Cư dân đã ký nhận',
-                          style: const TextStyle(
+                          style: context.labelSmall?.copyWith(
                             color: AppStatusColors.paid,
-                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,

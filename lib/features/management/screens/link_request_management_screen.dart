@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_state_view.dart';
@@ -74,9 +75,8 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       residentName,
-                                      style: const TextStyle(
+                                      style: context.titleMedium?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 16,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -84,8 +84,7 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                                       const SizedBox(height: 2),
                                       Text(
                                         'SĐT: $residentPhone',
-                                        style: const TextStyle(
-                                          fontSize: 12,
+                                        style: context.bodySmall?.copyWith(
                                           color: AppTheme.textSecondary,
                                         ),
                                       ),
@@ -112,9 +111,8 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                                 ),
                                 child: Text(
                                   roleLabel,
-                                  style: TextStyle(
+                                  style: context.labelSmall?.copyWith(
                                     color: isOwner ? AppTheme.primary : Colors.teal.shade800,
-                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -151,14 +149,14 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: AppTheme.warning.withValues(alpha: 0.2)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 children: [
-                                  Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.warning),
-                                  SizedBox(width: 6),
+                                  const Icon(Icons.warning_amber_rounded, size: 16, color: AppTheme.warning),
+                                  const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
                                       'Yêu cầu vai trò Chủ hộ: Cần kiểm tra kỹ hồ sơ hợp đồng sở hữu trước khi duyệt.',
-                                      style: TextStyle(fontSize: 11.5, color: Colors.brown),
+                                      style: context.labelSmall?.copyWith(color: Colors.brown),
                                     ),
                                   ),
                                 ],
@@ -234,11 +232,11 @@ class LinkRequestManagementScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.check_circle_outline, color: AppTheme.primary),
-            SizedBox(width: 8),
-            Text('Xác nhận phê duyệt', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Icon(Icons.check_circle_outline, color: AppTheme.primary),
+            const SizedBox(width: 8),
+            Text('Xác nhận phê duyệt', style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
@@ -273,14 +271,14 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.security, color: AppTheme.warning, size: 18),
-                    SizedBox(width: 8),
+                    const Icon(Icons.security, color: AppTheme.warning, size: 18),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Cảnh báo: Cư dân sẽ có toàn quyền đại diện căn hộ, nhận thông báo công nợ và thêm các thành viên khác.',
-                        style: TextStyle(fontSize: 11.5, color: Colors.brown),
+                        style: ctx.labelSmall?.copyWith(color: Colors.brown),
                       ),
                     ),
                   ],
@@ -333,11 +331,11 @@ class LinkRequestManagementScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.cancel_outlined, color: AppTheme.error),
-            SizedBox(width: 8),
-            Text('Từ chối yêu cầu liên kết', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Icon(Icons.cancel_outlined, color: AppTheme.error),
+            const SizedBox(width: 8),
+            Text('Từ chối yêu cầu liên kết', style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
         content: SingleChildScrollView(
@@ -349,12 +347,12 @@ class LinkRequestManagementScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Từ chối liên kết của cư dân $residentName với căn hộ $apartmentCode.',
-                  style: const TextStyle(fontSize: 13.5),
+                  style: ctx.bodyMedium,
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'Lý do từ chối * (Cư dân sẽ nhận được thông báo này)',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: ctx.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
@@ -371,9 +369,9 @@ class LinkRequestManagementScreen extends ConsumerWidget {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    _buildReasonChip('SĐT không khớp hợp đồng', reasonCtrl),
-                    _buildReasonChip('Căn hộ đã có chủ hộ', reasonCtrl),
-                    _buildReasonChip('Thiếu giấy tờ chứng minh', reasonCtrl),
+                    _buildReasonChip(ctx, 'SĐT không khớp hợp đồng', reasonCtrl),
+                    _buildReasonChip(ctx, 'Căn hộ đã có chủ hộ', reasonCtrl),
+                    _buildReasonChip(ctx, 'Thiếu giấy tờ chứng minh', reasonCtrl),
                   ],
                 ),
               ],
@@ -416,9 +414,9 @@ class LinkRequestManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildReasonChip(String text, TextEditingController controller) {
+  Widget _buildReasonChip(BuildContext context, String text, TextEditingController controller) {
     return ActionChip(
-      label: Text(text, style: const TextStyle(fontSize: 11)),
+      label: Text(text, style: context.labelSmall),
       onPressed: () => controller.text = text,
     );
   }

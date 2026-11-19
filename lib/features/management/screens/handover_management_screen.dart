@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/utils/handover_pdf_builder.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/constants/permissions.dart';
@@ -173,9 +175,8 @@ class _HandoverManagementScreenState
                                 const SizedBox(height: 12),
                                 Text(
                                   'Chưa có biên bản bàn giao nào',
-                                  style: TextStyle(
+                                  style: context.bodyMedium?.copyWith(
                                     color: Colors.grey.shade600,
-                                    fontSize: 15,
                                   ),
                                 ),
                               ],
@@ -364,8 +365,7 @@ class _HandoverManagementScreenState
             fit: BoxFit.scaleDown,
             child: Text(
               value,
-              style: TextStyle(
-                fontSize: 16,
+              style: context.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -375,8 +375,7 @@ class _HandoverManagementScreenState
             fit: BoxFit.scaleDown,
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 11,
+              style: context.labelSmall?.copyWith(
                 color: AppTheme.textSecondary,
               ),
               maxLines: 1,
@@ -434,10 +433,9 @@ class _HandoverManagementScreenState
                     fit: BoxFit.scaleDown,
                     child: Text(
                       item.statusDisplayName,
-                      style: TextStyle(
+                      style: context.labelSmall?.copyWith(
                         color: statusColor,
                         fontWeight: FontWeight.w600,
-                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -453,8 +451,7 @@ class _HandoverManagementScreenState
             children: [
               Text(
                 'Căn hộ: ${item.apartmentCode ?? 'A0110'}',
-                style: const TextStyle(
-                  fontSize: 16,
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -463,7 +460,7 @@ class _HandoverManagementScreenState
                 visualDensity: VisualDensity.compact,
                 label: Text(
                   item.handoverTypeDisplayName,
-                  style: const TextStyle(fontSize: 12),
+                  style: context.labelSmall,
                 ),
               ),
             ],
@@ -471,7 +468,7 @@ class _HandoverManagementScreenState
           const SizedBox(height: 6),
           Text(
             'Cư dân: ${item.residentName ?? 'Chưa gán'} • Người kiểm kê: ${item.staffName ?? 'BQL'}',
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -479,8 +476,7 @@ class _HandoverManagementScreenState
             const SizedBox(height: 4),
             Text(
               'Tiền cọc: ${_formatCurrency(item.depositHeld)} | Khấu trừ: ${_formatCurrency(item.totalDeduction)} | Hoàn trả: ${_formatCurrency(item.depositRefund)}',
-              style: const TextStyle(
-                fontSize: 12,
+              style: context.bodySmall?.copyWith(
                 color: AppTheme.primary,
                 fontWeight: FontWeight.w500,
               ),
@@ -516,9 +512,7 @@ class _HandoverManagementScreenState
                       );
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Lỗi tạo PDF: $e')),
-                        );
+                        AppSnackBar.showError(context, 'Lỗi tạo PDF: $e');
                       }
                     }
                   },
