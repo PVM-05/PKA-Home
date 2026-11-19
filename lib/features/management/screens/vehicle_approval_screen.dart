@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/photo_viewer_screen.dart';
 import '../../../data/models/parking_slot_model.dart';
 import '../../../data/models/vehicle_model.dart';
@@ -114,8 +116,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                     ),
                     child: Text(
                       vehicle.licensePlate,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: context.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
                       ),
@@ -125,18 +126,16 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                 const SizedBox(height: 12),
                 Text(
                   'Biểu phí ${vehicle.vehicleTypeDisplayName}: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng sẽ tự động được cộng vào hóa đơn căn hộ.',
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: context.bodySmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                 ),
                 if (vehicle.isCar) ...[
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Vị trí ô đỗ tầng hầm (B1/B2):',
-                    style: TextStyle(
+                    style: context.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -177,19 +176,18 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.orange.shade200),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.warning_amber_rounded,
                             size: 16,
                             color: AppTheme.warning,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Hết ô đỗ ô tô trống ở hầm B1/B2. Phương tiện sẽ được duyệt nhưng chưa thể gán ô đỗ cố định.',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.labelSmall?.copyWith(
                                 color: AppTheme.warning,
                               ),
                             ),
@@ -235,22 +233,16 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
           final slotMsg = selectedSlot != null
               ? ' và đã gán ô đỗ ${selectedSlot!.slotNumber}'
               : '';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Đã phê duyệt thành công phương tiện ${vehicle.licensePlate}$slotMsg!',
-              ),
-              backgroundColor: AppStatusColors.paid,
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            'Đã phê duyệt thành công phương tiện ${vehicle.licensePlate}$slotMsg!',
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(formatErrorMessage(e)),
-              backgroundColor: AppTheme.error,
-            ),
+          AppSnackBar.showError(
+            context,
+            formatErrorMessage(e),
           );
         }
       }
@@ -284,12 +276,12 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                 children: [
                   Text(
                     'Bạn có chắc chắn muốn từ chối đăng ký phương tiện biển số "${vehicle.licensePlate}" không?',
-                    style: const TextStyle(fontSize: 14),
+                    style: ctx.bodyMedium,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Lý do từ chối (tùy chọn):',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: ctx.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -300,7 +292,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                       return ChoiceChip(
                         label: Text(
                           reason,
-                          style: const TextStyle(fontSize: 12),
+                          style: ctx.labelSmall,
                         ),
                         selected: isSelected,
                         onSelected: (selected) {
@@ -318,7 +310,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                     decoration: InputDecoration(
                       hintText:
                           'Nhập lý do từ chối cụ thể để cư dân nắm thông tin...',
-                      hintStyle: const TextStyle(fontSize: 13),
+                      hintStyle: ctx.bodySmall,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -358,20 +350,16 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
             .rejectVehicle(vehicle.id, reason: reasonParam);
         _refreshData();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Đã từ chối đăng ký xe ${vehicle.licensePlate}!'),
-              backgroundColor: AppTheme.error,
-            ),
+          AppSnackBar.showError(
+            context,
+            'Đã từ chối đăng ký xe ${vehicle.licensePlate}!',
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(formatErrorMessage(e)),
-              backgroundColor: AppTheme.error,
-            ),
+          AppSnackBar.showError(
+            context,
+            formatErrorMessage(e),
           );
         }
       }
@@ -431,8 +419,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                     ),
                     child: Text(
                       '$count',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -528,11 +515,10 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                               color: Colors.grey.shade300,
                             ),
                             const SizedBox(height: 12),
-                            const Text(
+                            Text(
                               'Không tìm thấy phương tiện nào phù hợp.',
-                              style: TextStyle(
+                              style: context.bodyMedium?.copyWith(
                                 color: AppTheme.textSecondary,
-                                fontSize: 15,
                               ),
                             ),
                           ],
@@ -694,8 +680,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 12,
+                style: context.labelSmall?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
                 maxLines: 1,
@@ -707,8 +692,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                 alignment: Alignment.centerLeft,
                 child: Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
@@ -753,9 +737,8 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                   children: [
                     Text(
                       v.licensePlate,
-                      style: const TextStyle(
+                      style: context.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -763,8 +746,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                     const SizedBox(height: 2),
                     Text(
                       '${v.vehicleTypeDisplayName}${v.brandModel != null && v.brandModel!.isNotEmpty ? ' • ${v.brandModel}' : ''}',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
                       maxLines: 1,
@@ -789,8 +771,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                     fit: BoxFit.scaleDown,
                     child: Text(
                       v.statusDisplayName,
-                      style: TextStyle(
-                        fontSize: 11,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: statusColor,
                       ),
@@ -821,8 +802,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                     Flexible(
                       child: Text(
                         'Biểu phí: ${_currencyFormat.format(v.monthlyFee)}/tháng',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppTheme.primary,
                         ),
@@ -835,8 +815,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
               ),
               Text(
                 'Đăng ký: ${_dateFormat.format(v.createdAt)}',
-                style: const TextStyle(
-                  fontSize: 11,
+                style: context.labelSmall?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
               ),
@@ -868,8 +847,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                   Flexible(
                     child: Text(
                       'Vị trí ô đỗ: ${v.parkingSlotNumber}',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primary,
                       ),
@@ -908,25 +886,24 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: Colors.blue.shade200),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.badge_outlined,
                       size: 13,
                       color: AppTheme.primary,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       'Xem ảnh cà vẹt xe',
-                      style: TextStyle(
-                        fontSize: 11,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppTheme.primary,
                       ),
                     ),
-                    SizedBox(width: 4),
-                    Icon(
+                    const SizedBox(width: 4),
+                    const Icon(
                       Icons.open_in_new,
                       size: 11,
                       color: AppTheme.primary,
@@ -961,8 +938,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                   Expanded(
                     child: Text(
                       'Lý do từ chối: ${v.hasRejectionReason ? v.rejectionReason! : 'Không đủ điều kiện cấp thẻ xe.'}',
-                      style: const TextStyle(
-                        fontSize: 11,
+                      style: context.labelSmall?.copyWith(
                         color: AppTheme.error,
                         fontWeight: FontWeight.w500,
                       ),

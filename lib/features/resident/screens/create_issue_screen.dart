@@ -5,8 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/issue_smart_triage_engine.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_unsaved_changes_guard.dart';
 import '../../../core/supabase_config.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
@@ -77,22 +79,12 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
         await launchUrl(uri);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$label: $phoneNumber'),
-              backgroundColor: AppTheme.primary,
-            ),
-          );
+          AppSnackBar.showInfo(context, '$label: $phoneNumber');
         }
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$label: $phoneNumber'),
-            backgroundColor: AppTheme.primary,
-          ),
-        );
+        AppSnackBar.showInfo(context, '$label: $phoneNumber');
       }
     }
   }
@@ -144,12 +136,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
 
   void _showImageSourceDialog() {
     if (_imageFiles.length >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã đạt tối đa 3 hình ảnh cho mỗi phản ánh'),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
+      AppSnackBar.showInfo(context, 'Đã đạt tối đa 3 hình ảnh cho mỗi phản ánh');
       return;
     }
 
@@ -164,10 +151,9 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Chọn nguồn ảnh',
-                style: TextStyle(
-                  fontSize: 16,
+                style: ctx.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primary,
                 ),
@@ -250,31 +236,23 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
 
       if (mounted) {
         if (result.imageUploadFailed) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Đã gửi phản ánh nhưng ảnh tải lên thất bại, vui lòng thử đính kèm lại sau',
-              ),
-              backgroundColor: Colors.orange,
-            ),
+          AppSnackBar.showWarning(
+            context,
+            'Đã gửi phản ánh nhưng ảnh tải lên thất bại, vui lòng thử đính kèm lại sau',
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Gửi phản ánh thành công!'),
-              backgroundColor: AppTheme.success,
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            'Gửi phản ánh thành công!',
           );
         }
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
+        AppSnackBar.showError(
+          context,
+          formatErrorMessage(e),
         );
       }
     } finally {
@@ -303,9 +281,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                const Text(
+                Text(
                   'Chuyên môn sự cố:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: context.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
@@ -348,9 +328,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Mức độ khẩn cấp & Cam kết SLA:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: context.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 LayoutBuilder(
@@ -387,7 +369,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: _selectedPriority == 'high'
-                      ? AppTheme.error.withValues(alpha: 0.3)
+                       ? AppTheme.error.withValues(alpha: 0.3)
                       : (_selectedPriority == 'medium'
                             ? Colors.orange.withValues(alpha: 0.3)
                             : Colors.blue.withValues(alpha: 0.2)),
@@ -414,8 +396,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                           : (_selectedPriority == 'medium'
                                 ? 'Cam kết SLA: Đội kỹ thuật xử lý trong vòng 24 giờ.'
                                 : 'Cam kết SLA: Xử lý theo lịch bảo trì định kỳ trong vòng 72 giờ.'),
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: _selectedPriority == 'high'
                             ? AppTheme.error
@@ -429,9 +410,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Vui lòng mô tả sự cố hoặc yêu cầu hỗ trợ:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: context.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             KeyedSubtree(
@@ -467,21 +450,20 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.warning_amber_rounded,
                             color: AppTheme.error,
                             size: 20,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'CẢNH BÁO NGUY HIỂM KHẨN CẤP',
-                              style: TextStyle(
+                              style: context.titleSmall?.copyWith(
                                 color: AppTheme.error,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13,
                               ),
                             ),
                           ),
@@ -490,8 +472,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                       const SizedBox(height: 6),
                       Text(
                         _triageResult!.reason,
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           color: AppTheme.textPrimary,
                         ),
                       ),
@@ -509,9 +490,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 icon: const Icon(Icons.local_fire_department, size: 16),
-                                label: const Text(
+                                label: Text(
                                   'GỌI 114 (CỨU HỎA)',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                  style: context.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -526,9 +509,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 icon: const Icon(Icons.phone_in_talk, size: 16),
-                                label: const Text(
+                                label: Text(
                                   'GỌI TRỰC BAN BQL',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                  style: context.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -547,9 +532,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 icon: const Icon(Icons.emergency, size: 16),
-                                label: const Text(
+                                label: Text(
                                   'GỌI 114 (CỨU NẠN)',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                  style: context.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -564,9 +551,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 icon: const Icon(Icons.medical_services, size: 16),
-                                label: const Text(
+                                label: Text(
                                   'GỌI 115 (CẤP CỨU)',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                  style: context.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -584,9 +573,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                               visualDensity: VisualDensity.compact,
                             ),
                             icon: const Icon(Icons.phone_in_talk, size: 16),
-                            label: const Text(
+                            label: Text(
                               'GỌI TRỰC BAN BQL: 024.3999.8888',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              style: context.labelSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -602,11 +593,10 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                               visualDensity: VisualDensity.compact,
                             ),
                             icon: const Icon(Icons.phone_in_talk, size: 16),
-                            label: const Text(
+                            label: Text(
                               'GỌI HOTLINE KHẨN CẤP BQL (24/7): 024.3999.8888',
-                              style: TextStyle(
+                              style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -640,10 +630,9 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                           Expanded(
                             child: Text(
                               'Gợi ý phân loại tự động',
-                              style: const TextStyle(
+                              style: context.titleSmall?.copyWith(
                                 color: AppTheme.primary,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13,
                               ),
                             ),
                           ),
@@ -660,14 +649,9 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                                 _selectedCategory = _triageResult!.category;
                                 _selectedPriority = _triageResult!.priority;
                               });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Đã tự động áp dụng phân loại và mức ưu tiên gợi ý!',
-                                  ),
-                                  duration: Duration(seconds: 2),
-                                  backgroundColor: AppTheme.primary,
-                                ),
+                              AppSnackBar.showSuccess(
+                                context,
+                                'Đã tự động áp dụng phân loại và mức ưu tiên gợi ý!',
                               );
                             },
                             child: const Text(
@@ -679,8 +663,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                       ),
                       Text(
                         'Đề xuất: ${_triageResult!.suggestedStaffRole} • Ưu tiên: ${_triageResult!.priorityDisplayName}',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textPrimary,
                         ),
@@ -688,8 +671,7 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                       const SizedBox(height: 4),
                       Text(
                         _triageResult!.reason,
-                        style: const TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -701,18 +683,19 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Flexible(
+                Flexible(
                   child: Text(
                     'Đính kèm hình ảnh (Tối đa 3 ảnh):',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: context.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '${_imageFiles.length}/3',
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: context.bodyMedium?.copyWith(
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -735,28 +718,27 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                         Theme.of(context).cardTheme.color ??
                         Theme.of(context).colorScheme.surface,
                   ),
-                  child: const Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.add_a_photo_outlined,
                         size: 40,
                         color: AppTheme.primary,
                       ),
-                      SizedBox(height: 8),
-                      Text(
+                      const SizedBox(height: 8),
+                      const Text(
                         '+ Chọn ảnh từ máy',
                         style: TextStyle(
                           color: AppTheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         '(Chụp ảnh hoặc chọn từ thư viện - Tối đa 3 ảnh)',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -819,19 +801,18 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                           borderRadius: BorderRadius.circular(12),
                           color: AppTheme.primary.withValues(alpha: 0.05),
                         ),
-                        child: const Column(
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.add_photo_alternate_outlined,
                               color: AppTheme.primary,
                               size: 28,
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               'Thêm ảnh',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.labelSmall?.copyWith(
                                 color: AppTheme.primary,
                                 fontWeight: FontWeight.w600,
                               ),

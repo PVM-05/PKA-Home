@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/apartment_model.dart';
@@ -73,9 +75,9 @@ class _ParkingManagementScreenState
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Loại phương tiện:',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -179,13 +181,12 @@ class _ParkingManagementScreenState
           children: [
             Text(
               'Vé Xe Điện Tử: ${ticket.ticketCode}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Biển số: ${ticket.licensePlate} (${ticket.displayVehicleType})',
-              style: const TextStyle(
-                fontSize: 15,
+              style: context.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppTheme.primary,
               ),
@@ -203,8 +204,7 @@ class _ParkingManagementScreenState
             const SizedBox(height: 12),
             Text(
               'Giờ vào: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
-              style: const TextStyle(
-                fontSize: 13,
+              style: context.bodySmall?.copyWith(
                 color: AppTheme.textSecondary,
               ),
             ),
@@ -246,7 +246,7 @@ class _ParkingManagementScreenState
           children: [
             Text(
               'Biển số: ${ticket.licensePlate}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text('Loại xe: ${ticket.displayVehicleType}'),
@@ -261,8 +261,7 @@ class _ParkingManagementScreenState
                 ),
                 Text(
                   formattedFee,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: context.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
@@ -329,7 +328,7 @@ class _ParkingManagementScreenState
                   children: [
                     Text(
                       'Loại ô đỗ: ${slot.slotType == 'car' ? 'Ô tô' : 'Xe máy'} | Khu vực: ${slot.zone}',
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                     ),
                     const SizedBox(height: 16),
 
@@ -470,11 +469,9 @@ class _ParkingManagementScreenState
                   final aptId = selectedApartment?.id ?? '';
 
                   if (plate.isEmpty || aptCode.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vui lòng nhập đầy đủ biển số xe và chọn căn hộ!'),
-                        backgroundColor: AppTheme.error,
-                      ),
+                    AppSnackBar.showError(
+                      context,
+                      'Vui lòng nhập đầy đủ biển số xe và chọn căn hộ!',
                     );
                     return;
                   }
@@ -687,8 +684,7 @@ class _ParkingManagementScreenState
               Expanded(
                 child: Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 11,
+                  style: context.labelSmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                   maxLines: 1,
@@ -703,8 +699,7 @@ class _ParkingManagementScreenState
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: TextStyle(
-                fontSize: 16,
+              style: context.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -712,7 +707,7 @@ class _ParkingManagementScreenState
           ),
           Text(
             subtext,
-            style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary),
+            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -877,9 +872,8 @@ class _ParkingManagementScreenState
               Expanded(
                 child: Text(
                   slot.slotNumber,
-                  style: const TextStyle(
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -899,9 +893,8 @@ class _ParkingManagementScreenState
               alignment: Alignment.centerLeft,
               child: Text(
                 slot.licensePlate ?? 'Đã có xe',
-                style: const TextStyle(
+                style: context.bodySmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 13,
                   color: AppTheme.primary,
                 ),
               ),
@@ -911,8 +904,7 @@ class _ParkingManagementScreenState
                 Expanded(
                   child: Text(
                     slot.apartmentCode ?? 'Căn hộ',
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       color: AppTheme.textSecondary,
                     ),
                     maxLines: 1,
@@ -929,12 +921,11 @@ class _ParkingManagementScreenState
                       ref.invalidate(parkingSlotsProvider);
                       ref.invalidate(parkingCapacityStatsProvider);
                     },
-                    child: const FittedBox(
+                    child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         'Giải phóng',
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           color: AppTheme.error,
                           fontWeight: FontWeight.bold,
                         ),
@@ -947,8 +938,7 @@ class _ParkingManagementScreenState
           ] else ...[
             Text(
               slot.displayStatus,
-              style: TextStyle(
-                fontSize: 12,
+              style: context.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: slot.isAvailable
                     ? Colors.green.shade700
@@ -961,12 +951,11 @@ class _ParkingManagementScreenState
               alignment: Alignment.centerRight,
               child: InkWell(
                 onTap: () => _showAssignSlotDialog(slot),
-                child: const FittedBox(
+                child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     'Gán xe',
-                    style: TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       color: AppTheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1050,9 +1039,8 @@ class _ParkingManagementScreenState
                                   Expanded(
                                     child: Text(
                                       ticket.licensePlate,
-                                      style: const TextStyle(
+                                      style: context.titleMedium?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 16,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -1077,8 +1065,7 @@ class _ParkingManagementScreenState
                                   fit: BoxFit.scaleDown,
                                   child: Text(
                                     ticket.displayStatus,
-                                    style: const TextStyle(
-                                      fontSize: 11,
+                                    style: context.labelSmall?.copyWith(
                                       color: Colors.orange,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -1095,15 +1082,13 @@ class _ParkingManagementScreenState
                           children: [
                             Text(
                               'Loại xe: ${ticket.displayVehicleType}',
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 color: AppTheme.textSecondary,
                               ),
                             ),
                             Text(
                               'Mã vé: ${ticket.ticketCode}',
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 color: AppTheme.textSecondary,
                               ),
                             ),
@@ -1112,8 +1097,7 @@ class _ParkingManagementScreenState
                         const SizedBox(height: 4),
                         Text(
                           'Vào lúc: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: context.bodySmall?.copyWith(
                             color: AppTheme.textSecondary,
                           ),
                         ),
@@ -1121,8 +1105,7 @@ class _ParkingManagementScreenState
                           const SizedBox(height: 4),
                           Text(
                             'Ghi chú: ${ticket.note}',
-                            style: const TextStyle(
-                              fontSize: 12,
+                            style: context.bodySmall?.copyWith(
                               fontStyle: FontStyle.italic,
                             ),
                           ),

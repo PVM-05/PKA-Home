@@ -57,6 +57,10 @@ void main() {
       'lib/features/management/screens/amenity_management_screen.dart',
       'lib/features/resident/screens/amenity_booking_screen.dart',
       'lib/features/resident/widgets/resident_amenity_bookings_tab.dart',
+      // Module 11: Tạo Phản ánh Sự cố, Duyệt xe & Quản lý Bãi đỗ xe (Issue & Parking System)
+      'lib/features/resident/screens/create_issue_screen.dart',
+      'lib/features/management/screens/vehicle_approval_screen.dart',
+      'lib/features/management/screens/parking_management_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

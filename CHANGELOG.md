@@ -43,6 +43,13 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - `AmenityBookingScreen`: Xóa sạch 100% 26/26 điểm `fontSize:` cứng và chuyển đổi toàn bộ 6 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar`.
   - `ResidentAmenityBookingsTab`: Xóa sạch 100% 12/12 điểm `fontSize:` cứng và 3 lệnh gọi `ScaffoldMessenger.showSnackBar`.
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `amenity_management_screen.dart`, `amenity_booking_screen.dart`, `resident_amenity_bookings_tab.dart`. Đảm bảo 100% không tái xuất hiện `fontSize:` và `Color(0x...)` cứng.
+- **Gói 2.3 Chuẩn Hóa Typography & Tokens Phân Hệ Sự Cố & Bãi Xe (Issue & Parking System)**:
+  - `CreateIssueScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và thay thế 7 lệnh gọi `ScaffoldMessenger.showSnackBar` bằng `AppSnackBar` (Success, Error, Warning, Info).
+  - `VehicleApprovalScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và thay thế 4 lệnh gọi `ScaffoldMessenger.showSnackBar` bằng `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
+  - `ParkingManagementScreen`: Xóa sạch 100% 22/22 điểm `fontSize:` cứng và thay thế toàn bộ lệnh gọi `ScaffoldMessenger.showSnackBar` bằng `AppSnackBar.showError`.
+  - Bổ sung phương thức `AppSnackBar.showWarning` đạt chuẩn Design System với biểu tượng cảnh báo và màu sắc `AppTheme.warning`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `create_issue_screen.dart`, `vehicle_approval_screen.dart`, `parking_management_screen.dart`.
+  - Giảm thêm 62 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 818 xuống 756). Toàn bộ 4 guardrail tests và 11 widget tests tính năng đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.
