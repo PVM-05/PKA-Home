@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/link_request_provider.dart';
 import '../widgets/accept_invitation_dialog.dart';
@@ -29,12 +31,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
     final code = _codeController.text.trim().toUpperCase();
     final validationError = validateApartmentCode(code);
     if (validationError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(validationError),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
+      AppSnackBar.showWarning(context, validationError);
       return;
     }
 
@@ -44,24 +41,14 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
           .read(residentLinkProvider.notifier)
           .submitRequest(code, _relationRole);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã gửi yêu cầu liên kết thành công!'),
-            backgroundColor: AppTheme.success,
-          ),
-        );
+        AppSnackBar.showSuccess(context, 'Đã gửi yêu cầu liên kết thành công!');
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop(true);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -184,20 +171,16 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                     .read(residentLinkProvider.notifier)
                     .cancelPendingRequest(requestId);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã hủy yêu cầu liên kết căn hộ.'),
-                      backgroundColor: AppTheme.success,
-                    ),
+                  AppSnackBar.showSuccess(
+                    context,
+                    'Đã hủy yêu cầu liên kết căn hộ.',
                   );
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(e.toString().replaceAll('Exception: ', '')),
-                      backgroundColor: AppTheme.error,
-                    ),
+                  AppSnackBar.showError(
+                    context,
+                    e.toString().replaceAll('Exception: ', ''),
                   );
                 }
               } finally {
@@ -249,10 +232,10 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
             color: AppTheme.primary,
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Liên kết căn hộ của bạn',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           ref
@@ -275,21 +258,20 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Row(
+                              Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.info_outline,
                                     color: AppTheme.warningText,
                                     size: 20,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       'Chưa tải được danh mục căn hộ tự động. Bạn có thể nhập trực tiếp mã căn hộ (VD: A0110) ở ô bên dưới.',
-                                      style: TextStyle(
+                                      style: context.bodySmall?.copyWith(
                                         color: AppTheme.warningText,
-                                        fontSize: 13,
                                       ),
                                     ),
                                   ),
@@ -303,11 +285,10 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                                     color: AppTheme.warningText,
                                     size: 16,
                                   ),
-                                  label: const Text(
+                                  label: Text(
                                     'Tải lại danh mục',
-                                    style: TextStyle(
+                                    style: context.labelSmall?.copyWith(
                                       color: AppTheme.warningText,
-                                      fontSize: 12,
                                     ),
                                   ),
                                   onPressed: () => ref.invalidate(
@@ -529,21 +510,20 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Row(
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.error_outline,
                                   color: AppTheme.error,
                                   size: 20,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Không thể tải danh mục căn hộ. Bạn có thể nhập trực tiếp mã căn hộ ở ô bên dưới.',
-                                    style: TextStyle(
+                                    style: context.bodySmall?.copyWith(
                                       color: AppTheme.error,
-                                      fontSize: 13,
                                     ),
                                   ),
                                 ),
@@ -557,11 +537,10 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                                   color: AppTheme.error,
                                   size: 16,
                                 ),
-                                label: const Text(
+                                label: Text(
                                   'Tải lại danh mục',
-                                  style: TextStyle(
+                                  style: context.labelSmall?.copyWith(
                                     color: AppTheme.error,
-                                    fontSize: 12,
                                   ),
                                 ),
                                 onPressed: () => ref.invalidate(
@@ -618,20 +597,19 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                   : const Text('Gửi yêu cầu'),
             ),
             const SizedBox(height: 16),
-            const Row(
+            Row(
               children: [
-                Expanded(child: Divider()),
+                const Expanded(child: Divider()),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
                     'HOẶC',
-                    style: TextStyle(
+                    style: context.labelSmall?.copyWith(
                       color: AppTheme.textSecondary,
-                      fontSize: 12,
                     ),
                   ),
                 ),
-                Expanded(child: Divider()),
+                const Expanded(child: Divider()),
               ],
             ),
             const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/payment_transaction_model.dart';
@@ -29,7 +30,6 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final transactionsAsync = ref.watch(paymentTransactionsProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Lịch sử thanh toán')),
@@ -53,7 +53,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             children: [
               // Thanh bộ lọc ngang
               Container(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                color: Theme.of(context).cardColor,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
@@ -156,8 +156,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             ],
             Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
+              style: context.bodySmall?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected ? Colors.white : AppTheme.textPrimary,
               ),
@@ -204,15 +203,14 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 Text(
                   tx.title ??
                       (isInvoice ? 'Hóa đơn định kỳ' : 'Dịch vụ tiện ích'),
-                  style: const TextStyle(
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _dateFormat.format(tx.createdAt),
-                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 6),
                 Container(
@@ -228,8 +226,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   ),
                   child: Text(
                     tx.transactionCode,
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
                     ),
@@ -244,9 +241,8 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             children: [
               Text(
                 _currencyFormat.format(tx.amount),
-                style: const TextStyle(
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
-                  fontSize: 16,
                 ),
               ),
               const SizedBox(height: 6),
@@ -261,8 +257,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   const SizedBox(width: 4),
                   Text(
                     tx.statusDisplayName,
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: tx.isSuccess ? AppTheme.success : AppTheme.error,
                     ),
@@ -295,14 +290,14 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Chưa có giao dịch thanh toán nào',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Text(
             'Các hóa đơn và lịch đặt dịch vụ đã thanh toán sẽ hiển thị ở đây',
-            style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],

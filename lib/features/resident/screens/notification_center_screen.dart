@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/models/notification_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/notification_provider.dart';
@@ -35,9 +37,9 @@ class _NotificationCenterScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Thông báo & Nhắc nhở',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -50,14 +52,9 @@ class _NotificationCenterScreenState
                         .read(notificationRepositoryProvider)
                         .markAllAsRead(user.id);
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Đã đánh dấu tất cả thông báo là đã đọc',
-                          ),
-                          backgroundColor: AppStatusColors.paid,
-                          duration: Duration(seconds: 2),
-                        ),
+                      AppSnackBar.showSuccess(
+                        context,
+                        'Đã đánh dấu tất cả thông báo là đã đọc',
                       );
                     }
                   },
@@ -93,20 +90,18 @@ class _NotificationCenterScreenState
                             ),
                           ),
                           const SizedBox(height: 20),
-                          const Text(
+                          Text(
                             'Chưa có thông báo nào',
-                            style: TextStyle(
-                              fontSize: 18,
+                            style: context.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'Bạn sẽ nhận được thông báo tự động khi có hóa đơn mới, lịch nhắc hạn thanh toán hoặc thông báo khẩn cấp từ Ban Quản Lý.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: context.bodyMedium?.copyWith(
                               color: AppTheme.textSecondary,
                               height: 1.4,
                             ),
@@ -118,14 +113,13 @@ class _NotificationCenterScreenState
                 }
 
                 if (filteredNotifications.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32.0),
+                      padding: const EdgeInsets.all(32.0),
                       child: Text(
                         'Không có thông báo nào phù hợp với bộ lọc đã chọn',
-                        style: TextStyle(
+                        style: context.bodyMedium?.copyWith(
                           color: AppTheme.textSecondary,
-                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -181,8 +175,7 @@ class _NotificationCenterScreenState
           return ChoiceChip(
             label: Text(
               filter['label']!,
-              style: TextStyle(
-                fontSize: 13,
+              style: context.bodySmall?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected ? Colors.white : AppTheme.textSecondary,
               ),
@@ -220,16 +213,16 @@ class _NotificationCard extends ConsumerWidget {
       case 'invoice_overdue':
         return AppTheme.error;
       case 'invoice_due_today':
-        return const Color(0xFFE65100);
+        return AppTheme.warning;
       case 'invoice_due_soon':
       case 'invoice_due_reminder':
         return AppStatusColors.unpaid;
       case 'new_invoice':
         return AppTheme.primary;
       case 'equipment_maintenance':
-        return const Color(0xFFF57C00);
+        return AppTheme.warning;
       case 'issue_update':
-        return const Color(0xFF00897B);
+        return AppTheme.secondary;
       default:
         return AppTheme.secondary;
     }
@@ -340,8 +333,7 @@ class _NotificationCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: TextStyle(
-                              fontSize: 15,
+                            style: context.titleSmall?.copyWith(
                               fontWeight: isUnread
                                   ? FontWeight.bold
                                   : FontWeight.w600,
@@ -369,9 +361,8 @@ class _NotificationCard extends ConsumerWidget {
                             ),
                             child: Text(
                               badgeText,
-                              style: TextStyle(
+                              style: context.labelSmall?.copyWith(
                                 color: iconColor,
-                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -393,8 +384,7 @@ class _NotificationCard extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       notification.body,
-                      style: TextStyle(
-                        fontSize: 13,
+                      style: context.bodySmall?.copyWith(
                         color: isDark
                             ? Colors.white60
                             : (isUnread
@@ -406,8 +396,7 @@ class _NotificationCard extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       _formatNotificationTime(notification.createdAt),
-                      style: TextStyle(
-                        fontSize: 11,
+                      style: context.labelSmall?.copyWith(
                         color: Colors.grey.shade500,
                         fontWeight: FontWeight.w500,
                       ),

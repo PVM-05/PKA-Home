@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/apartment_handover_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -53,11 +54,10 @@ class ResidentHandoverScreen extends ConsumerWidget {
                     color: Colors.grey.shade400,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Bạn chưa có biên bản bàn giao nào',
-                    style: TextStyle(
+                    style: context.bodyMedium?.copyWith(
                       color: AppTheme.textSecondary,
-                      fontSize: 15,
                     ),
                   ),
                 ],
@@ -141,10 +141,9 @@ class ResidentHandoverScreen extends ConsumerWidget {
                       fit: BoxFit.scaleDown,
                       child: Text(
                         item.statusDisplayName,
-                        style: TextStyle(
+                        style: context.labelSmall?.copyWith(
                           color: statusColor,
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
                         ),
                       ),
                     ),
@@ -160,8 +159,7 @@ class ResidentHandoverScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Căn hộ: ${item.apartmentCode ?? 'A0110'}',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -170,7 +168,7 @@ class ResidentHandoverScreen extends ConsumerWidget {
                   visualDensity: VisualDensity.compact,
                   label: Text(
                     item.handoverTypeDisplayName,
-                    style: const TextStyle(fontSize: 12),
+                    style: context.labelSmall,
                   ),
                 ),
               ],
@@ -178,9 +176,8 @@ class ResidentHandoverScreen extends ConsumerWidget {
             const SizedBox(height: 6),
             Text(
               'Đại diện BQL: ${item.staffName ?? 'Ban Quản Lý'} • Ngày: ${item.handoverDate.day}/${item.handoverDate.month}/${item.handoverDate.year}',
-              style: const TextStyle(
+              style: context.bodySmall?.copyWith(
                 color: AppTheme.textSecondary,
-                fontSize: 13,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -196,12 +193,11 @@ class ResidentHandoverScreen extends ConsumerWidget {
                       item.isPendingResident
                           ? 'Bấm để kiểm tra & ký tên'
                           : 'Xem chi tiết biên bản',
-                      style: TextStyle(
+                      style: context.bodySmall?.copyWith(
                         color: item.isPendingResident
                             ? AppTheme.warning
                             : AppTheme.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

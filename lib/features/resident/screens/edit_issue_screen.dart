@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/supabase_config.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_storage_image.dart';
@@ -98,11 +100,9 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
 
   void _showImageSourceDialog() {
     if (_totalImageCount >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã đạt tối đa 3 hình ảnh cho mỗi phản ánh'),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Đã đạt tối đa 3 hình ảnh cho mỗi phản ánh',
       );
       return;
     }
@@ -134,11 +134,10 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Chọn nguồn hình ảnh',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: ctx.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
                       ),
@@ -188,12 +187,7 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
   Future<void> _submitUpdate() async {
     final description = _descriptionController.text.trim();
     if (description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng nhập mô tả sự cố'),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
+      AppSnackBar.showWarning(context, 'Vui lòng nhập mô tả sự cố');
       return;
     }
 
@@ -219,22 +213,12 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
       ref.invalidate(residentIssueProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cập nhật phản ánh thành công!'),
-            backgroundColor: AppTheme.success,
-          ),
-        );
+        AppSnackBar.showSuccess(context, 'Cập nhật phản ánh thành công!');
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     } finally {
       if (mounted) {
@@ -275,11 +259,10 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                             color: AppTheme.primary,
                           ),
                           const SizedBox(width: 8),
-                          const Expanded(
+                          Expanded(
                             child: Text(
                               'Mô tả sự cố',
-                              style: TextStyle(
-                                fontSize: 16,
+                              style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -288,10 +271,9 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'Cung cấp thông tin chi tiết giúp đội ngũ kỹ thuật xử lý nhanh chóng.',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -340,20 +322,19 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.photo_library_outlined,
                                   size: 20,
                                   color: AppTheme.primary,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Hình ảnh đính kèm',
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                    style: context.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -376,8 +357,7 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                             ),
                             child: Text(
                               '$_totalImageCount/3 ảnh',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.labelSmall?.copyWith(
                                 color: _totalImageCount >= 3
                                     ? Colors.orange.shade800
                                     : AppTheme.primary,
@@ -388,10 +368,9 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'Hình ảnh chụp trực tiếp tại hiện trường giúp thẩm định chính xác sự cố.',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -497,19 +476,18 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   color: AppTheme.primary.withValues(alpha: 0.04),
                                 ),
-                                child: const Column(
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.add_a_photo_outlined,
                                       color: AppTheme.primary,
                                       size: 28,
                                     ),
-                                    SizedBox(height: 6),
+                                    const SizedBox(height: 6),
                                     Text(
                                       'Thêm ảnh',
-                                      style: TextStyle(
-                                        fontSize: 12,
+                                      style: context.labelSmall?.copyWith(
                                         color: AppTheme.primary,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -547,10 +525,9 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                             ),
                           )
                         : const Icon(Icons.check, size: 20),
-                    label: const Text(
+                    label: Text(
                       'Lưu thay đổi',
-                      style: TextStyle(
-                        fontSize: 15,
+                      style: context.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),

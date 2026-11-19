@@ -96,6 +96,12 @@ void main() {
       'lib/features/management/screens/role_delegation_screen.dart',
       'lib/features/management/screens/permission_matrix_screen.dart',
       'lib/features/management/screens/audit_trail_screen.dart',
+      // Module 20: Trung tâm thông báo cư dân, Lịch sử thanh toán, Sửa phản ánh, Bàn giao căn hộ & Gửi yêu cầu liên kết (Notification Center, Payment History, Edit Issue, Resident Handover & Link Request)
+      'lib/features/resident/screens/notification_center_screen.dart',
+      'lib/features/resident/screens/payment_history_screen.dart',
+      'lib/features/resident/screens/edit_issue_screen.dart',
+      'lib/features/resident/screens/resident_handover_screen.dart',
+      'lib/features/resident/screens/link_request_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {
