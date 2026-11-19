@@ -3,17 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../data/models/building_equipment_model.dart';
-import '../../../data/models/equipment_maintenance_task_model.dart';
-import '../../../data/providers/equipment_provider.dart';
-import '../widgets/equipment_form_dialog.dart';
-import '../widgets/maintenance_task_form_dialog.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/accounting_voucher_dialog.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../data/models/building_equipment_model.dart';
+import '../../../data/models/equipment_maintenance_task_model.dart';
 import '../../../data/models/maintenance_fund_transaction_model.dart';
-import '../../../data/providers/maintenance_fund_provider.dart';
 import '../../../data/providers/building_provider.dart';
+import '../../../data/providers/equipment_provider.dart';
+import '../../../data/providers/maintenance_fund_provider.dart';
+import '../widgets/equipment_form_dialog.dart';
+import '../widgets/maintenance_task_form_dialog.dart';
 
 /// Màn hình Chi tiết Thiết bị, lịch sử bảo dưỡng và hạch toán chi phí
 class EquipmentDetailScreen extends ConsumerStatefulWidget {
@@ -68,11 +70,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
 
   void _disburseMaintenanceFund(EquipmentMaintenanceTaskModel task) async {
     if (task.cost <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hạng mục không phát sinh chi phí để lập phiếu chi.'),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Hạng mục không phát sinh chi phí để lập phiếu chi.',
       );
       return;
     }
@@ -83,11 +83,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
         : (_equipment.building.length == 36 ? _equipment.building : null);
 
     if (buildingId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn tòa nhà hợp lệ trước khi lập phiếu chi Quỹ bảo trì.'),
-          backgroundColor: AppTheme.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Vui lòng chọn tòa nhà hợp lệ trước khi lập phiếu chi Quỹ bảo trì.',
       );
       return;
     }
@@ -99,14 +97,16 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.account_balance_wallet_outlined, color: AppTheme.error),
-            SizedBox(width: 8),
+            const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.error),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Lập phiếu chi Quỹ bảo trì',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: ctx.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -115,9 +115,11 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Xác nhận lập phiếu chi từ Quỹ bảo trì 2% cho hạng mục sau:',
-              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              style: ctx.bodySmall?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -131,10 +133,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
             const SizedBox(height: 8),
             Text(
               'Số tiền chi: ${_currencyFormat.format(task.cost)}',
-              style: const TextStyle(
+              style: ctx.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.error,
-                fontSize: 16,
               ),
             ),
           ],
@@ -173,13 +174,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
           });
           ref.invalidate(activeMaintenanceFundProvider);
           ref.invalidate(maintenanceFundLedgerProvider);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Đã lập phiếu chi ${res['voucher_number']} thành công!',
-              ),
-              backgroundColor: AppTheme.success,
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            'Đã lập phiếu chi ${res['voucher_number']} thành công!',
           );
 
           final dummyTx = MaintenanceFundTransactionModel(
@@ -204,13 +201,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
             buildingName: activeBuilding?.name ?? 'Tòa nhà Landmark PKA',
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Không thể lập phiếu chi. Vui lòng kiểm tra lại số dư Quỹ bảo trì.',
-              ),
-              backgroundColor: AppTheme.error,
-            ),
+          AppSnackBar.showError(
+            context,
+            'Không thể lập phiếu chi. Vui lòng kiểm tra lại số dư Quỹ bảo trì.',
           );
         }
       }
@@ -248,22 +241,12 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
         ref.invalidate(upcomingMaintenanceEquipmentsProvider);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã xóa thiết bị thành công!'),
-              backgroundColor: AppTheme.success,
-            ),
-          );
+          AppSnackBar.showSuccess(context, 'Đã xóa thiết bị thành công!');
           context.pop();
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(formatErrorMessage(e)),
-              backgroundColor: AppTheme.error,
-            ),
-          );
+          AppSnackBar.showError(context, formatErrorMessage(e));
         }
       }
     }
@@ -328,10 +311,9 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                         ),
                         child: Text(
                           _equipment.code,
-                          style: const TextStyle(
+                          style: context.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primary,
-                            fontSize: 15,
                           ),
                         ),
                       ),
@@ -339,9 +321,8 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                       Expanded(
                         child: Text(
                           _equipment.categoryDisplayName,
-                          style: const TextStyle(
+                          style: context.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -356,9 +337,8 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                         ),
                         child: Text(
                           _equipment.statusDisplayName,
-                          style: TextStyle(
+                          style: context.bodySmall?.copyWith(
                             color: badgeColor,
-                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -392,18 +372,16 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                   ),
                   if (_equipment.specifications != null) ...[
                     const Divider(height: 16),
-                    const Text(
+                    Text(
                       'Thông số kỹ thuật:',
-                      style: TextStyle(
+                      style: context.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _equipment.specifications!,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: context.bodyMedium?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
                     ),
@@ -417,10 +395,15 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Lịch sử bảo trì & sửa chữa',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Text(
+                    'Lịch sử bảo trì & sửa chữa',
+                    style: context.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: _openCreateTaskDialog,
                   icon: const Icon(Icons.add, size: 16),
@@ -466,18 +449,19 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Tổng chi phí bảo dưỡng đã hoàn thành:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                          Expanded(
+                            child: Text(
+                              'Tổng chi phí bảo dưỡng đã hoàn thành:',
+                              style: context.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             _currencyFormat.format(totalCost),
-                            style: const TextStyle(
+                            style: context.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
                               color: AppTheme.primary,
                             ),
                           ),
@@ -509,12 +493,13 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            style: context.bodyMedium?.copyWith(
+              color: AppTheme.textSecondary,
+            ),
           ),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 13,
+            style: context.bodyMedium?.copyWith(
               fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
               color: isHighlight ? highlightColor : AppTheme.textPrimary,
             ),
@@ -554,9 +539,8 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                 Expanded(
                   child: Text(
                     task.title,
-                    style: const TextStyle(
+                    style: context.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
                     ),
                   ),
                 ),
@@ -571,9 +555,8 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                   ),
                   child: Text(
                     task.statusDisplayName,
-                    style: TextStyle(
+                    style: context.labelSmall?.copyWith(
                       color: badgeColor,
-                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -585,17 +568,15 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               children: [
                 Text(
                   '${task.taskTypeDisplayName} • ${dateFormat.format(task.scheduledStart)}',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: context.bodySmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                 ),
                 const Spacer(),
                 Text(
                   _currencyFormat.format(task.cost),
-                  style: const TextStyle(
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
                   ),
                 ),
               ],
@@ -604,8 +585,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               const SizedBox(height: 4),
               Text(
                 'Đơn vị thực hiện: ${task.vendorName} (${task.vendorContact ?? "N/A"})',
-                style: const TextStyle(
-                  fontSize: 12,
+                style: context.bodySmall?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
               ),
@@ -614,8 +594,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               const SizedBox(height: 4),
               Text(
                 'Ghi chú: ${task.notes!}',
-                style: const TextStyle(
-                  fontSize: 12,
+                style: context.bodySmall?.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -637,19 +616,18 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                             color: AppStatusColors.paid.withValues(alpha: 0.3),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.check_circle,
                               size: 14,
                               color: AppStatusColors.paid,
                             ),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Text(
                               'Đã giải ngân Quỹ bảo trì',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.labelMedium?.copyWith(
                                 color: AppStatusColors.paid,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -667,10 +645,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                           ),
                         ),
                         icon: const Icon(Icons.receipt_long_outlined, size: 16),
-                        label: const Text(
-                          'Chi từ Quỹ bảo trì',
-                          style: TextStyle(fontSize: 12),
-                        ),
+                        label: const Text('Chi từ Quỹ bảo trì'),
                         onPressed: () => _disburseMaintenanceFund(task),
                       ),
               ),

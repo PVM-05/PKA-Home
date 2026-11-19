@@ -69,6 +69,10 @@ void main() {
       'lib/features/management/screens/front_desk_workstation_screen.dart',
       'lib/features/resident/screens/resident_visitor_parcel_screen.dart',
       'lib/features/resident/screens/resident_handover_detail_screen.dart',
+      // Module 14: Kỹ thuật, Quản lý Trang thiết bị & Vật tư bảo dưỡng (Equipment & Maintenance System)
+      'lib/features/management/screens/equipment_detail_screen.dart',
+      'lib/features/management/screens/equipment_management_screen.dart',
+      'lib/features/management/screens/maintenance_materials_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

@@ -62,6 +62,12 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - `ResidentHandoverDetailScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và thay thế toàn bộ 5 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar` (Success, Error, Warning).
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `front_desk_workstation_screen.dart`, `resident_visitor_parcel_screen.dart`, `resident_handover_detail_screen.dart`.
   - Giảm thêm 60 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 690 xuống 630). Đưa tổng số điểm nợ typography được dọn sạch lên 306 điểm qua 5 gói dọn dẹp liên hoàn. Toàn bộ 4 guardrail tests và 4 screen widget tests đều vượt qua 100%.
+- **Gói 2.6 Chuẩn Hóa Typography & Tokens Phân Hệ Kỹ Thuật, Thiết Bị & Bảo Trì (Equipment & Maintenance System)**:
+  - `EquipmentDetailScreen`: Xóa sạch 100% 21/21 điểm `fontSize:` cứng, khắc phục triệt để nguy cơ RenderFlex overflow bằng `Expanded` responsive, và chuyển đổi toàn bộ 6 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar` (Success, Error, Warning).
+  - `EquipmentManagementScreen`: Xóa sạch 100% 16/16 điểm `fontSize:` cứng tại KPI cards, bộ lọc thiết bị, danh sách phiếu bảo trì và chuyển đổi 2 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
+  - `MaintenanceMaterialsScreen`: Xóa sạch 100% 15/15 điểm `fontSize:` cứng tại hộp thoại điều chỉnh kho, thẻ cảnh báo sắp hết và danh mục vật tư phụ tùng.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `equipment_detail_screen.dart`, `equipment_management_screen.dart`, `maintenance_materials_screen.dart`.
+  - Giảm thêm 52 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 630 xuống 578). Đưa tổng số điểm nợ typography được xóa bỏ lên 358 điểm qua 6 gói dọn dẹp liên hoàn. Toàn bộ 4 guardrail tests và 9 screen widget tests đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

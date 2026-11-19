@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../core/constants/permissions.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/building_equipment_model.dart';
 import '../../../data/models/equipment_maintenance_task_model.dart';
 import '../../../data/providers/equipment_provider.dart';
 import '../widgets/equipment_form_dialog.dart';
 import '../widgets/maintenance_task_form_dialog.dart';
-import '../../../core/utils/error_formatter.dart';
-import '../../../core/widgets/role_guard.dart';
-import '../../../core/constants/permissions.dart';
 
 /// Màn hình Quản lý danh mục thiết bị và bảo trì định kỳ toàn tòa nhà
 class EquipmentManagementScreen extends ConsumerStatefulWidget {
@@ -88,29 +90,20 @@ class _EquipmentManagementScreenState
       ref.invalidate(upcomingMaintenanceEquipmentsProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              newStatus == 'in_progress'
-                  ? 'Đã bắt đầu bảo trì!'
-                  : (newStatus == 'completed'
-                        ? 'Nghiệm thu thành công! Chu kỳ bảo dưỡng tiếp theo đã được cập nhật.'
-                        : 'Đã hủy phiếu bảo trì.'),
-            ),
-            backgroundColor: newStatus == 'completed'
-                ? AppTheme.success
-                : AppTheme.primary,
-          ),
-        );
+        final msg = newStatus == 'in_progress'
+            ? 'Đã bắt đầu bảo trì!'
+            : (newStatus == 'completed'
+                  ? 'Nghiệm thu thành công! Chu kỳ bảo dưỡng tiếp theo đã được cập nhật.'
+                  : 'Đã hủy phiếu bảo trì.');
+        if (newStatus == 'completed') {
+          AppSnackBar.showSuccess(context, msg);
+        } else {
+          AppSnackBar.showInfo(context, msg);
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     }
   }
@@ -299,8 +292,7 @@ class _EquipmentManagementScreenState
           children: [
             Text(
               value,
-              style: TextStyle(
-                fontSize: 20,
+              style: context.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -309,8 +301,7 @@ class _EquipmentManagementScreenState
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
+              style: context.labelSmall?.copyWith(
                 color: AppTheme.textSecondary,
               ),
             ),
@@ -365,10 +356,9 @@ class _EquipmentManagementScreenState
                     ),
                     child: Text(
                       eq.code,
-                      style: const TextStyle(
+                      style: context.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primary,
-                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -376,9 +366,8 @@ class _EquipmentManagementScreenState
                   Expanded(
                     child: Text(
                       eq.name,
-                      style: const TextStyle(
+                      style: context.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -393,9 +382,8 @@ class _EquipmentManagementScreenState
                     ),
                     child: Text(
                       eq.statusDisplayName,
-                      style: TextStyle(
+                      style: context.labelMedium?.copyWith(
                         color: badgeColor,
-                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -414,16 +402,14 @@ class _EquipmentManagementScreenState
                   Expanded(
                     child: Text(
                       '${eq.location} (${eq.building})',
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: context.bodyMedium?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
                     ),
                   ),
                   Text(
                     'Định kỳ: ${eq.maintenanceIntervalDays} ngày',
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: context.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -451,8 +437,7 @@ class _EquipmentManagementScreenState
                       const SizedBox(width: 4),
                       Text(
                         'Hạn bảo dưỡng: $nextMaintText',
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: context.bodyMedium?.copyWith(
                           fontWeight:
                               (eq.isOverdueMaintenance ||
                                   eq.isUpcomingMaintenance)
@@ -555,9 +540,8 @@ class _EquipmentManagementScreenState
                 Expanded(
                   child: Text(
                     task.title,
-                    style: const TextStyle(
+                    style: context.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
                     ),
                   ),
                 ),
@@ -572,9 +556,8 @@ class _EquipmentManagementScreenState
                   ),
                   child: Text(
                     task.statusDisplayName,
-                    style: TextStyle(
+                    style: context.labelMedium?.copyWith(
                       color: badgeColor,
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -593,8 +576,7 @@ class _EquipmentManagementScreenState
                   const SizedBox(width: 4),
                   Text(
                     '${task.equipmentCode ?? ""} - ${task.equipmentName}',
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: context.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: AppTheme.primary,
                     ),
@@ -612,17 +594,15 @@ class _EquipmentManagementScreenState
                 const SizedBox(width: 4),
                 Text(
                   '${dateFormat.format(task.scheduledStart)} - ${dateFormat.format(task.scheduledEnd)}',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: context.bodySmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                 ),
                 const Spacer(),
                 Text(
                   _currencyFormat.format(task.cost),
-                  style: const TextStyle(
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
                   ),
                 ),
               ],
@@ -641,8 +621,7 @@ class _EquipmentManagementScreenState
                     task.vendorName != null
                         ? 'Nhà thầu: ${task.vendorName}'
                         : 'Kỹ thuật: ${task.technicianName}',
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: context.bodySmall?.copyWith(
                       color: AppTheme.textSecondary,
                     ),
                   ),
@@ -669,8 +648,7 @@ class _EquipmentManagementScreenState
                       child: Text(
                         task.serviceInterruptionNote ??
                             'Tạm ngưng phục vụ trong thời gian bảo trì',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.labelMedium?.copyWith(
                           color: AppTheme.warning,
                         ),
                       ),
@@ -706,13 +684,15 @@ class _EquipmentManagementScreenState
                     label: const Text('Nghiệm thu hoàn tất'),
                   ),
                 ] else if (task.status == 'completed') ...[
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.check, size: 16, color: AppTheme.success),
-                      SizedBox(width: 4),
+                      const Icon(Icons.check, size: 16, color: AppTheme.success),
+                      const SizedBox(width: 4),
                       Text(
                         'Đã cập nhật chu kỳ kế tiếp',
-                        style: TextStyle(fontSize: 12, color: AppTheme.success),
+                        style: context.labelMedium?.copyWith(
+                          color: AppTheme.success,
+                        ),
                       ),
                     ],
                   ),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/maintenance_material_model.dart';
 import '../../../data/providers/material_provider.dart';
@@ -52,9 +53,11 @@ class _MaintenanceMaterialsScreenState
                   children: [
                     Text('Hiện tồn: ${material.stockQuantity} ${material.unit}'),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'Loại biến động kho:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: dialogCtx.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -90,7 +93,9 @@ class _MaintenanceMaterialsScreenState
                     const SizedBox(height: 12),
                     Text(
                       isImport ? 'Số lượng nhập thêm:' : 'Số lượng xuất giảm:',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: dialogCtx.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -103,9 +108,8 @@ class _MaintenanceMaterialsScreenState
                         ),
                         Text(
                           '$adjustQuantity ${material.unit}',
-                          style: const TextStyle(
+                          style: dialogCtx.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
                           ),
                         ),
                         IconButton(
@@ -137,8 +141,7 @@ class _MaintenanceMaterialsScreenState
                         isValid
                             ? 'Tồn kho sau khi điều chỉnh: $resultingStock ${material.unit}'
                             : 'Lỗi: Tồn kho sau điều chỉnh không thể âm ($resultingStock < 0)',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: dialogCtx.labelMedium?.copyWith(
                           color: isValid
                               ? (isImport ? AppTheme.success : AppTheme.warning)
                               : AppTheme.error,
@@ -408,10 +411,9 @@ class _MaintenanceMaterialsScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Tổng loại vật tư',
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                  style: context.bodySmall?.copyWith(
                                     color: AppTheme.textSecondary,
                                   ),
                                   maxLines: 1,
@@ -423,8 +425,7 @@ class _MaintenanceMaterialsScreenState
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     '${allMaterials.length} mã hàng',
-                                    style: const TextStyle(
-                                      fontSize: 16,
+                                    style: context.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.primary,
                                     ),
@@ -455,10 +456,9 @@ class _MaintenanceMaterialsScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Cảnh báo sắp hết',
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                  style: context.bodySmall?.copyWith(
                                     color: AppTheme.textSecondary,
                                   ),
                                   maxLines: 1,
@@ -470,8 +470,7 @@ class _MaintenanceMaterialsScreenState
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     '$lowStockCount mã cần nhập',
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                    style: context.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: lowStockCount > 0
                                           ? Colors.orange.shade800
@@ -562,8 +561,7 @@ class _MaintenanceMaterialsScreenState
                                           ),
                                           child: Text(
                                             mat.code,
-                                            style: const TextStyle(
-                                              fontSize: 10,
+                                            style: context.labelSmall?.copyWith(
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -572,8 +570,7 @@ class _MaintenanceMaterialsScreenState
                                         Expanded(
                                           child: Text(
                                             mat.categoryDisplayName,
-                                            style: const TextStyle(
-                                              fontSize: 11,
+                                            style: context.labelSmall?.copyWith(
                                               color: AppTheme.textSecondary,
                                             ),
                                             maxLines: 1,
@@ -595,9 +592,8 @@ class _MaintenanceMaterialsScreenState
                                     // Dòng 2: Tên vật tư
                                     Text(
                                       mat.name,
-                                      style: const TextStyle(
+                                      style: context.titleSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 14,
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -607,8 +603,7 @@ class _MaintenanceMaterialsScreenState
                                     // Dòng 3: Đơn giá
                                     Text(
                                       'Đơn giá: ${mat.priceFormatted}/${mat.unit}',
-                                      style: const TextStyle(
-                                        fontSize: 12,
+                                      style: context.bodySmall?.copyWith(
                                         color: AppTheme.textSecondary,
                                       ),
                                       maxLines: 1,
@@ -641,13 +636,7 @@ class _MaintenanceMaterialsScreenState
                                           ),
                                           child: Text(
                                             'Tồn: ${mat.stockQuantity} ${mat.unit}',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: mat.isLowStock
-                                                  ? AppTheme.error
-                                                  : Colors.green.shade700,
-                                            ),
+                                            style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: mat.isLowStock ? AppTheme.error : Colors.green.shade700),
                                           ),
                                         ),
                                         InkWell(
@@ -672,10 +661,7 @@ class _MaintenanceMaterialsScreenState
                                                 ),
                                               ),
                                             ),
-                                            child: const Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
+                                            child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(
                                                   Icons.add_circle_outline,
                                                   size: 13,
                                                   color: AppTheme.primary,
@@ -683,11 +669,7 @@ class _MaintenanceMaterialsScreenState
                                                 SizedBox(width: 4),
                                                 Text(
                                                   'Nhập kho',
-                                                  style: TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppTheme.primary,
-                                                  ),
+                                                  style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                                                 ),
                                               ],
                                             ),
@@ -721,10 +703,9 @@ class _MaintenanceMaterialsScreenState
         onSelected: (val) => setState(() => _selectedCategory = key),
         selectedColor: AppTheme.primary.withValues(alpha: 0.15),
         checkmarkColor: AppTheme.primary,
-        labelStyle: TextStyle(
+        labelStyle: context.labelMedium?.copyWith(
           color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 12,
         ),
       ),
     );
