@@ -65,6 +65,10 @@ void main() {
       'lib/features/management/screens/create_invoice_screen.dart',
       'lib/features/management/screens/fee_policy_management_screen.dart',
       'lib/features/management/screens/financial_report_screen.dart',
+      // Module 13: Lễ tân, Khách thăm & Bàn giao căn hộ (Front Desk, Visitor Pass & Handover)
+      'lib/features/management/screens/front_desk_workstation_screen.dart',
+      'lib/features/resident/screens/resident_visitor_parcel_screen.dart',
+      'lib/features/resident/screens/resident_handover_detail_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

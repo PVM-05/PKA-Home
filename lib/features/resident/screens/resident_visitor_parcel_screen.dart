@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../data/models/parcel_model.dart';
 import '../../../data/models/visitor_pass_model.dart';
@@ -112,9 +114,8 @@ class _ResidentVisitorParcelScreenState
           indicatorWeight: 3,
           labelColor: AppTheme.primary,
           unselectedLabelColor: Colors.grey,
-          labelStyle: const TextStyle(
+          labelStyle: context.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            fontSize: 14,
           ),
           tabs: const [
             Tab(icon: Icon(Icons.badge_outlined), text: 'Khách Viếng Thăm'),
@@ -195,10 +196,9 @@ class _ResidentVisitorParcelScreenState
                         color: Colors.grey[400],
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Chưa có đăng ký đón khách nào',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: context.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -206,7 +206,9 @@ class _ResidentVisitorParcelScreenState
                       Text(
                         'Đăng ký đón người thân, bạn bè hoặc người giao hàng trước để ra vào thuận tiện',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        style: context.bodyMedium?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton.icon(
@@ -291,9 +293,8 @@ class _ResidentVisitorParcelScreenState
                         Expanded(
                           child: Text(
                             pass.visitorName,
-                            style: const TextStyle(
+                            style: context.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -315,8 +316,7 @@ class _ResidentVisitorParcelScreenState
                     ),
                     child: Text(
                       pass.statusDisplayName,
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: statusColor,
                       ),
@@ -339,17 +339,18 @@ class _ResidentVisitorParcelScreenState
                     ),
                     child: Text(
                       pass.passCode,
-                      style: const TextStyle(
+                      style: context.bodySmall?.copyWith(
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '• ${pass.purposeDisplayName}',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    style: context.bodySmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -366,7 +367,7 @@ class _ResidentVisitorParcelScreenState
                     const SizedBox(width: 6),
                     Text(
                       'Biển số: ${pass.licensePlate!}',
-                      style: const TextStyle(fontSize: 13),
+                      style: context.bodySmall,
                     ),
                   ],
                 ),
@@ -378,7 +379,9 @@ class _ResidentVisitorParcelScreenState
                   const SizedBox(width: 6),
                   Text(
                     'Dự kiến: ${_dateFormat.format(pass.expectedArrival)}',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    style: context.bodySmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -453,10 +456,9 @@ class _ResidentVisitorParcelScreenState
                         color: Colors.grey[400],
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Không có bưu kiện nào tại lễ tân',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: context.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -464,7 +466,9 @@ class _ResidentVisitorParcelScreenState
                       Text(
                         'Khi có shipper giao hàng đến sảnh lễ tân, thông tin kiện hàng và mã PIN sẽ hiển thị tại đây',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        style: context.bodyMedium?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -521,17 +525,15 @@ class _ResidentVisitorParcelScreenState
                       children: [
                         Text(
                           parcel.carrierDisplayName,
-                          style: const TextStyle(
+                          style: context.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
                           ),
                         ),
                         if (parcel.trackingNumber != null)
                           Text(
                             'Vận đơn: ${parcel.trackingNumber}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                            style: context.bodySmall?.copyWith(
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                       ],
@@ -556,8 +558,7 @@ class _ResidentVisitorParcelScreenState
                   ),
                   child: Text(
                     parcel.statusDisplayName,
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isArrived ? Colors.orange[800] : Colors.green[800],
                     ),
@@ -582,15 +583,16 @@ class _ResidentVisitorParcelScreenState
                   Expanded(
                     child: Text(
                       'Vị trí: ${parcel.shelfLocation}',
-                      style: const TextStyle(
+                      style: context.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
                       ),
                     ),
                   ),
                   Text(
                     'Đến lúc: ${_dateFormat.format(parcel.arrivedAt)}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: context.labelSmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -620,10 +622,9 @@ class _ResidentVisitorParcelScreenState
                           color: AppTheme.primary,
                         ),
                         const SizedBox(width: 6),
-                        const Text(
+                        Text(
                           'MÃ PIN NHẬN HÀNG BẢO MẬT',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.labelSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
                             color: AppTheme.primary,
@@ -637,8 +638,7 @@ class _ResidentVisitorParcelScreenState
                       children: [
                         Text(
                           parcel.pickupPin,
-                          style: const TextStyle(
-                            fontSize: 28,
+                          style: context.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: 6.0,
                             fontFamily: 'monospace',
@@ -657,11 +657,9 @@ class _ResidentVisitorParcelScreenState
                             Clipboard.setData(
                               ClipboardData(text: parcel.pickupPin),
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Đã sao chép mã PIN nhận hàng'),
-                                duration: Duration(seconds: 2),
-                              ),
+                            AppSnackBar.showSuccess(
+                              context,
+                              'Đã sao chép mã PIN nhận hàng',
                             );
                           },
                         ),
@@ -671,7 +669,9 @@ class _ResidentVisitorParcelScreenState
                     Text(
                       'Cung cấp mã PIN 6 số này cho lễ tân tại quầy để nhận kiện hàng',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                      style: context.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -688,7 +688,9 @@ class _ResidentVisitorParcelScreenState
                   const SizedBox(width: 6),
                   Text(
                     'Đã bàn giao lúc: ${parcel.collectedAt != null ? _dateFormat.format(parcel.collectedAt!) : 'Không rõ'}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    style: context.bodySmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),

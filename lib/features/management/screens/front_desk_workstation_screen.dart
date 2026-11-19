@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/security/visitor_pass_token_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/providers/front_desk_provider.dart';
 import '../widgets/handover_parcel_dialog.dart';
@@ -102,13 +104,9 @@ class _FrontDeskWorkstationScreenState
       );
       if (!parseResult.isValid) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                parseResult.errorMessage ?? 'Mã QR vé khách không hợp lệ',
-              ),
-              backgroundColor: AppTheme.error,
-            ),
+          AppSnackBar.showError(
+            context,
+            parseResult.errorMessage ?? 'Mã QR vé khách không hợp lệ',
           );
         }
         return;
@@ -128,23 +126,16 @@ class _FrontDeskWorkstationScreenState
       ref.invalidate(frontDeskStatsProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['message'] as String? ?? 'Xử lý vé thành công'),
-            backgroundColor: res['success'] == true
-                ? AppTheme.success
-                : AppTheme.error,
-          ),
-        );
+        final message = res['message'] as String? ?? 'Xử lý vé thành công';
+        if (res['success'] == true) {
+          AppSnackBar.showSuccess(context, message);
+        } else {
+          AppSnackBar.showError(context, message);
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     }
   }
@@ -193,10 +184,9 @@ class _FrontDeskWorkstationScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Khách hôm nay',
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -204,8 +194,7 @@ class _FrontDeskWorkstationScreenState
                               const SizedBox(height: 2),
                               Text(
                                 '${stats.expectedVisitorsToday} lượt',
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -227,10 +216,9 @@ class _FrontDeskWorkstationScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Trong tòa nhà',
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   color: Colors.green,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -238,8 +226,7 @@ class _FrontDeskWorkstationScreenState
                               const SizedBox(height: 2),
                               Text(
                                 '${stats.visitorsInBuilding} người',
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -269,8 +256,7 @@ class _FrontDeskWorkstationScreenState
                                 stats.overdueParcels > 0
                                     ? 'Tồn quá 3 ngày'
                                     : 'Bưu kiện kệ',
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   color: stats.overdueParcels > 0
                                       ? AppTheme.error
                                       : Colors.amber.shade800,
@@ -280,8 +266,7 @@ class _FrontDeskWorkstationScreenState
                               const SizedBox(height: 2),
                               Text(
                                 '${stats.pendingParcels} kiện',
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -397,9 +382,8 @@ class _FrontDeskWorkstationScreenState
                           children: [
                             Text(
                               pass.passCode,
-                              style: const TextStyle(
+                              style: context.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13,
                                 color: AppTheme.primary,
                               ),
                             ),
@@ -418,8 +402,7 @@ class _FrontDeskWorkstationScreenState
                               ),
                               child: Text(
                                 pass.statusDisplayName,
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: isCheckedIn
                                       ? Colors.green.shade800
@@ -434,8 +417,7 @@ class _FrontDeskWorkstationScreenState
                         const SizedBox(height: 8),
                         Text(
                           pass.visitorName,
-                          style: const TextStyle(
-                            fontSize: 15,
+                          style: context.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -450,8 +432,7 @@ class _FrontDeskWorkstationScreenState
                             const SizedBox(width: 4),
                             Text(
                               'Căn hộ ${pass.apartmentCode ?? pass.apartmentId}',
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -464,8 +445,7 @@ class _FrontDeskWorkstationScreenState
                             const SizedBox(width: 4),
                             Text(
                               pass.vehicleDisplayName,
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 color: AppTheme.textSecondary,
                               ),
                             ),
@@ -482,8 +462,7 @@ class _FrontDeskWorkstationScreenState
                             const SizedBox(width: 4),
                             Text(
                               'Dự kiến: ${dateFormat.format(pass.expectedArrival)}',
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 color: AppTheme.textSecondary,
                               ),
                             ),
@@ -501,9 +480,9 @@ class _FrontDeskWorkstationScreenState
                                   ),
                                   minimumSize: const Size(60, 32),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Vào',
-                                  style: TextStyle(fontSize: 12),
+                                  style: context.labelMedium,
                                 ),
                               ),
                             if (pass.isCheckOutAllowed)
@@ -529,9 +508,9 @@ class _FrontDeskWorkstationScreenState
                                   ),
                                   minimumSize: const Size(60, 32),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Rời tòa',
-                                  style: TextStyle(fontSize: 12),
+                                  style: context.labelMedium,
                                 ),
                               ),
                           ],
@@ -639,9 +618,8 @@ class _FrontDeskWorkstationScreenState
                           children: [
                             Text(
                               parcel.parcelCode,
-                              style: const TextStyle(
+                              style: context.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13,
                                 color: AppTheme.primary,
                               ),
                             ),
@@ -664,8 +642,7 @@ class _FrontDeskWorkstationScreenState
                                 parcel.isOverdueStorage
                                     ? 'Tồn quá 3 ngày'
                                     : parcel.statusDisplayName,
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: isArrived
                                       ? (parcel.isOverdueStorage
@@ -700,24 +677,21 @@ class _FrontDeskWorkstationScreenState
                                 children: [
                                   Text(
                                     parcel.description ?? 'Bưu phẩm tiêu chuẩn',
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: context.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Căn hộ: ${parcel.apartmentCode ?? parcel.apartmentId} ${parcel.recipientName != null ? "(${parcel.recipientName})" : ""}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
+                                    style: context.bodySmall?.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     '${parcel.carrierDisplayName} - ${parcel.shelfLocation}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
+                                    style: context.bodySmall?.copyWith(
                                       color: AppTheme.textSecondary,
                                     ),
                                   ),
@@ -732,8 +706,7 @@ class _FrontDeskWorkstationScreenState
                           children: [
                             Text(
                               'Đến: ${dateFormat.format(parcel.arrivedAt)}',
-                              style: const TextStyle(
-                                fontSize: 11,
+                              style: context.labelSmall?.copyWith(
                                 color: AppTheme.textSecondary,
                               ),
                             ),

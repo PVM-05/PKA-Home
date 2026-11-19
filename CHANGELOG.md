@@ -56,6 +56,12 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - `FinancialReportScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và chuyển đổi toàn bộ 3 lệnh gọi `ScaffoldMessenger.showSnackBar` xuất Excel sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `create_invoice_screen.dart`, `fee_policy_management_screen.dart`, `financial_report_screen.dart`.
   - Giảm thêm 63 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 756 xuống 693). Đưa tổng số điểm nợ typography được xóa bỏ lên 243 điểm qua 4 gói dọn dẹp. Toàn bộ 4 guardrail tests và 3 widget tests tính năng đều vượt qua 100%.
+- **Gói 2.5 Chuẩn Hóa Typography & Tokens Phân Hệ Tiền Sảnh, Khách Thăm & Bàn Giao (Front Desk, Visitor Pass & Handover)**:
+  - `FrontDeskWorkstationScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và thay thế toàn bộ 3 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar` (Success, Error).
+  - `ResidentVisitorParcelScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và thay thế lệnh gọi `ScaffoldMessenger.showSnackBar` sao chép PIN sang `AppSnackBar.showSuccess`.
+  - `ResidentHandoverDetailScreen`: Xóa sạch 100% 20/20 điểm `fontSize:` cứng và thay thế toàn bộ 5 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar` (Success, Error, Warning).
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `front_desk_workstation_screen.dart`, `resident_visitor_parcel_screen.dart`, `resident_handover_detail_screen.dart`.
+  - Giảm thêm 60 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 690 xuống 630). Đưa tổng số điểm nợ typography được dọn sạch lên 306 điểm qua 5 gói dọn dẹp liên hoàn. Toàn bộ 4 guardrail tests và 4 screen widget tests đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.
