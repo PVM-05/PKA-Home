@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/announcement_provider.dart';
 import '../../../data/providers/building_provider.dart';
@@ -131,8 +133,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                       const SizedBox(width: 3),
                                       Text(
                                         'Đã ghim',
-                                        style: TextStyle(
-                                          fontSize: 10.5,
+                                        style: context.labelSmall?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.amber.shade900,
                                         ),
@@ -158,8 +159,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                     const SizedBox(width: 4),
                                     Text(
                                       announcement.categoryDisplayName,
-                                      style: TextStyle(
-                                        fontSize: 11,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: catColor,
                                       ),
@@ -185,8 +185,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                     const SizedBox(width: 4),
                                     Text(
                                       announcement.targetDisplayName,
-                                      style: const TextStyle(
-                                        fontSize: 11,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.textSecondary,
                                       ),
@@ -198,7 +197,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             // Thời gian tạo
                             Text(
                               DateFormat('dd/MM HH:mm').format(announcement.createdAt),
-                              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                              style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                             ),
                           ],
                         ),
@@ -241,9 +240,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   // Tiêu đề
                   Text(
                     announcement.title,
-                    style: TextStyle(
+                    style: context.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 15.5,
                       color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
                     ),
                   ),
@@ -254,7 +252,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                     announcement.content,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: AppTheme.textSecondary, height: 1.4, fontSize: 13),
+                    style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary, height: 1.4),
                   ),
 
                   // Khung giờ sự kiện / bảo trì (nếu có)
@@ -290,8 +288,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               'Thời gian: ${DateFormat('HH:mm dd/MM').format(announcement.eventStartAt!)} - ${DateFormat('HH:mm dd/MM').format(announcement.eventEndAt!)}${announcement.isOngoing ? " • Đang diễn ra" : ""}',
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: announcement.isOngoing
                                     ? Colors.orange.shade900
@@ -325,8 +322,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             const SizedBox(width: 6),
                             Text(
                               'Đã phát: ${announcement.broadcastCount} • Đã đọc: ${announcement.readCount} (${announcement.readRatioPercentageText})',
-                              style: TextStyle(
-                                fontSize: 11.5,
+                              style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.grey.shade700,
                               ),
@@ -351,8 +347,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   announcement.hotlineContact!,
-                                  style: const TextStyle(
-                                    fontSize: 11.5,
+                                  style: context.labelSmall?.copyWith(
                                     color: AppTheme.primary,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -477,18 +472,18 @@ class AnnouncementManagementScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.send_rounded, color: AppTheme.primary),
-            SizedBox(width: 8),
-            Text('Phát lại thông báo đẩy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Icon(Icons.send_rounded, color: AppTheme.primary),
+            const SizedBox(width: 8),
+            Text('Phát lại thông báo đẩy', style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Bạn có chắc chắn muốn phát lại thông báo:', style: const TextStyle(fontWeight: FontWeight.w500)),
+            const Text('Bạn có chắc chắn muốn phát lại thông báo:', style: TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.all(10),
@@ -504,7 +499,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               'Tiến độ hiện tại: Đã phát ${announcement.broadcastCount} lần • Đã đọc ${announcement.readCount} (${announcement.readRatioPercentageText})',
-              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              style: ctx.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 10),
             Container(
@@ -514,14 +509,14 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: AppTheme.warning, size: 18),
-                  SizedBox(width: 8),
+                  const Icon(Icons.info_outline, color: AppTheme.warning, size: 18),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Hệ thống sẽ gửi Push Notification mới tới tất cả cư dân. Vui lòng không phát lại liên tục.',
-                      style: TextStyle(fontSize: 11.5, color: Colors.brown),
+                      style: ctx.labelSmall?.copyWith(color: Colors.brown),
                     ),
                   ),
                 ],
@@ -570,11 +565,11 @@ class AnnouncementManagementScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.schedule_send_rounded, color: AppTheme.primary),
-            SizedBox(width: 8),
-            Text('Quét nhắc nợ hóa đơn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Icon(Icons.schedule_send_rounded, color: AppTheme.primary),
+            const SizedBox(width: 8),
+            Text('Quét nhắc nợ hóa đơn', style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
@@ -583,7 +578,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
           children: [
             Text(
               'Hệ thống sẽ quét toàn bộ các hóa đơn chưa thanh toán hoặc quá hạn trong $buildingName và gửi thông báo nhắc nợ tự động tới từng cư dân có công nợ.',
-              style: const TextStyle(fontSize: 13.5),
+              style: ctx.bodyMedium,
             ),
             const SizedBox(height: 12),
             Container(
@@ -593,14 +588,14 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.notifications_active_outlined, color: AppTheme.primary, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.notifications_active_outlined, color: AppTheme.primary, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Mỗi cư dân có hóa đơn cần thanh toán sẽ nhận được thông báo đẩy trên ứng dụng kèm chi tiết công nợ.',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                      style: ctx.bodySmall?.copyWith(color: AppTheme.textPrimary),
                     ),
                   ),
                 ],
@@ -667,21 +662,11 @@ class AnnouncementManagementScreen extends ConsumerWidget {
               try {
                 await ref.read(announcementRepositoryProvider).deleteAnnouncement(id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã xóa thông báo thành công'),
-                      backgroundColor: AppTheme.success,
-                    ),
-                  );
+                  AppSnackBar.showSuccess(context, 'Đã xóa thông báo thành công');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(formatErrorMessage(e)),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
+                  AppSnackBar.showError(context, formatErrorMessage(e));
                 }
               }
             },
@@ -722,10 +707,10 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.campaign, color: AppTheme.primary),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Tạo & Phát sóng Thông báo',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   TextButton.icon(
@@ -742,6 +727,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                 width: 500,
                 child: showLivePreview
                     ? _buildLivePreviewWidget(
+                        context,
                         title: titleController.text,
                         content: contentController.text,
                         category: category,
@@ -900,7 +886,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                         eventStartAt == null
                                             ? 'Giờ bắt đầu'
                                             : DateFormat('HH:mm dd/MM').format(eventStartAt!),
-                                        style: const TextStyle(fontSize: 12),
+                                        style: context.bodySmall,
                                       ),
                                       onPressed: () async {
                                         final picked = await _pickDateTime(context, eventStartAt);
@@ -918,7 +904,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                         eventEndAt == null
                                             ? 'Giờ kết thúc'
                                             : DateFormat('HH:mm dd/MM').format(eventEndAt!),
-                                        style: const TextStyle(fontSize: 12),
+                                        style: context.bodySmall,
                                       ),
                                       onPressed: () async {
                                         final picked = await _pickDateTime(context, eventEndAt ?? eventStartAt);
@@ -964,22 +950,22 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                               // 7. Tùy chọn nâng cao
                               CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text('Ghim đầu bảng tin cư dân', style: TextStyle(fontSize: 13.5)),
+                                title: Text('Ghim đầu bảng tin cư dân', style: context.bodyMedium),
                                 value: isPinned,
                                 activeColor: AppTheme.primary,
                                 onChanged: (val) => setState(() => isPinned = val ?? false),
                               ),
                               CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text('Đánh dấu Khẩn cấp (Hiển thị nổi bật)', style: TextStyle(fontSize: 13.5)),
+                                title: Text('Đánh dấu Khẩn cấp (Hiển thị nổi bật)', style: context.bodyMedium),
                                 value: isUrgent,
                                 activeColor: AppTheme.error,
                                 onChanged: (val) => setState(() => isUrgent = val ?? false),
                               ),
                               SwitchListTile.adaptive(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text('Phát sóng thông báo tức thì (Push Broadcast)', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold)),
-                                subtitle: const Text('Mặc định tắt. Bật nếu muốn gửi thông báo đẩy tới thiết bị cư dân ngay khi tạo.', style: TextStyle(fontSize: 11.5)),
+                                title: Text('Phát sóng thông báo tức thì (Push Broadcast)', style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                                subtitle: Text('Mặc định tắt. Bật nếu muốn gửi thông báo đẩy tới thiết bị cư dân ngay khi tạo.', style: context.labelSmall),
                                 value: autoBroadcast,
                                 activeTrackColor: AppTheme.primary,
                                 onChanged: (val) => setState(() => autoBroadcast = val),
@@ -1036,24 +1022,15 @@ class AnnouncementManagementScreen extends ConsumerWidget {
 
                             if (context.mounted) {
                               Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    res['message']?.toString() ?? 'Tạo và phát sóng thông báo thành công!',
-                                  ),
-                                  backgroundColor: AppTheme.success,
-                                ),
+                              AppSnackBar.showSuccess(
+                                context,
+                                res['message']?.toString() ?? 'Tạo và phát sóng thông báo thành công!',
                               );
                             }
                           } catch (e) {
                             setState(() => isSubmitting = false);
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(formatErrorMessage(e)),
-                                  backgroundColor: AppTheme.error,
-                                ),
-                              );
+                              AppSnackBar.showError(context, formatErrorMessage(e));
                             }
                           }
                         },
@@ -1066,7 +1043,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLivePreviewWidget({
+  Widget _buildLivePreviewWidget(
+    BuildContext context, {
     required String title,
     required String content,
     required String category,
@@ -1094,9 +1072,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.phone_android, size: 16, color: AppTheme.textSecondary),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'Mô phỏng hiển thị trên App Cư dân',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                style: context.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
               ),
             ],
           ),
@@ -1143,20 +1121,19 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                                     : (category == 'utility_outage'
                                         ? 'Cúp điện / nước'
                                         : (category == 'resident_meeting' ? 'Họp cư dân' : 'Thông báo'))),
-                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: catColor),
+                            style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: catColor),
                           ),
                         ],
                       ),
                     ),
                     const Spacer(),
-                    const Text('Vừa xong', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+                    Text('Vừa xong', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
                   title.trim().isEmpty ? '(Chưa có tiêu đề)' : title,
-                  style: TextStyle(
-                    fontSize: 14.5,
+                  style: context.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: isUrgent ? AppTheme.error : AppTheme.textPrimary,
                   ),
@@ -1165,7 +1142,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                 Text(
                   content.trim().isEmpty ? '(Chưa có nội dung mô tả chi tiết...)' : content,
                   maxLines: 3,
-                  style: const TextStyle(fontSize: 12.5, color: AppTheme.textSecondary, height: 1.3),
+                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary, height: 1.3),
                 ),
                 if (eventStartAt != null && eventEndAt != null) ...[
                   const SizedBox(height: 8),
@@ -1177,7 +1154,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                     ),
                     child: Text(
                       'Khung giờ: ${DateFormat('HH:mm dd/MM').format(eventStartAt)} - ${DateFormat('HH:mm dd/MM').format(eventEndAt)}',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blue.shade900),
+                      style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.blue.shade900),
                     ),
                   ),
                 ],
@@ -1187,7 +1164,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                     children: [
                       const Icon(Icons.phone_in_talk, size: 12, color: AppTheme.primary),
                       const SizedBox(width: 4),
-                      Text('Hotline: $hotline', style: const TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                      Text('Hotline: $hotline', style: context.labelSmall?.copyWith(color: AppTheme.primary, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
@@ -1247,7 +1224,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Text(
                         announcement.categoryDisplayName,
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: catColor),
+                        style: ctx.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: catColor),
                       ),
                     ],
                   ),
@@ -1262,7 +1239,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                     ),
                     child: Text(
                       'Đã ghim',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.amber.shade900),
+                      style: ctx.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.amber.shade900),
                     ),
                   ),
               ],
@@ -1270,9 +1247,8 @@ class AnnouncementManagementScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               announcement.title,
-              style: TextStyle(
+              style: ctx.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
                 color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
               ),
             ),
@@ -1289,14 +1265,14 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   const SizedBox(width: 6),
                   Text(
                     'Đối tượng nhận: ${announcement.targetDisplayName}',
-                    style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                    style: ctx.bodyMedium?.copyWith(color: AppTheme.primary, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
               Text(
                 'Ngày đăng: ${DateFormat('dd/MM/yyyy HH:mm').format(announcement.createdAt)}',
-                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                style: ctx.bodySmall?.copyWith(color: AppTheme.textSecondary),
               ),
               if (announcement.eventStartAt != null && announcement.eventEndAt != null) ...[
                 const SizedBox(height: 10),
@@ -1308,7 +1284,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                   ),
                   child: Text(
                     'Thời gian hiệu lực: ${DateFormat('HH:mm dd/MM/yyyy').format(announcement.eventStartAt!)} đến ${DateFormat('HH:mm dd/MM/yyyy').format(announcement.eventEndAt!)}',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue.shade900),
+                    style: ctx.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.blue.shade900),
                   ),
                 ),
               ],
@@ -1316,7 +1292,7 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Hotline kỹ thuật: ${announcement.hotlineContact}',
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                  style: ctx.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                 ),
               ],
               const SizedBox(height: 14),
@@ -1324,14 +1300,14 @@ class AnnouncementManagementScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               Text(
                 announcement.content,
-                style: const TextStyle(fontSize: 14, height: 1.5),
+                style: ctx.bodyMedium?.copyWith(height: 1.5),
               ),
               const SizedBox(height: 16),
               const Divider(height: 1),
               const SizedBox(height: 8),
               Text(
                 'Tiến độ xem tin: Đã phát ${announcement.broadcastCount} cư dân • Đã đọc ${announcement.readCount} (${announcement.readRatioPercentageText})',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                style: ctx.bodySmall?.copyWith(color: Colors.grey.shade700, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -1463,22 +1439,12 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                             );
                             if (context.mounted) {
                               Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Cập nhật thông báo thành công'),
-                                  backgroundColor: AppTheme.success,
-                                ),
-                              );
+                              AppSnackBar.showSuccess(context, 'Cập nhật thông báo thành công');
                             }
                           } catch (e) {
                             setState(() => isSubmitting = false);
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(formatErrorMessage(e)),
-                                  backgroundColor: AppTheme.error,
-                                ),
-                              );
+                              AppSnackBar.showError(context, formatErrorMessage(e));
                             }
                           }
                         },

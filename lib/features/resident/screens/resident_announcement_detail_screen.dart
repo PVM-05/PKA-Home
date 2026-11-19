@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/announcement_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -134,9 +135,8 @@ class _ResidentAnnouncementDetailScreenState
                                   const SizedBox(width: 5),
                                   Text(
                                     announcement.categoryDisplayName.toUpperCase(),
-                                    style: TextStyle(
+                                    style: context.labelSmall?.copyWith(
                                       color: catColor,
-                                      fontSize: 11.5,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -152,17 +152,16 @@ class _ResidentAnnouncementDetailScreenState
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: Colors.amber.shade300),
                               ),
-                              child: const FittedBox(
+                              child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.push_pin, size: 13, color: Colors.amber),
-                                    SizedBox(width: 4),
+                                    const Icon(Icons.push_pin, size: 13, color: Colors.amber),
+                                    const SizedBox(width: 4),
                                     Text(
                                       'Đã ghim',
-                                      style: TextStyle(
-                                        fontSize: 11,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87,
                                       ),
@@ -188,8 +187,7 @@ class _ResidentAnnouncementDetailScreenState
                                     const SizedBox(width: 4),
                                     Text(
                                       'Đang diễn ra',
-                                      style: TextStyle(
-                                        fontSize: 11,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.green.shade800,
                                       ),
@@ -203,8 +201,7 @@ class _ResidentAnnouncementDetailScreenState
                       const SizedBox(height: 12),
                       Text(
                         announcement.title,
-                        style: TextStyle(
-                          fontSize: 19,
+                        style: context.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           height: 1.3,
                           color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
@@ -227,7 +224,7 @@ class _ResidentAnnouncementDetailScreenState
                                 const SizedBox(width: 6),
                                 Text(
                                   formattedDate,
-                                  style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12.5),
+                                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                                 ),
                               ],
                             ),
@@ -238,11 +235,10 @@ class _ResidentAnnouncementDetailScreenState
                               color: AppTheme.primary.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Ban Quản Lý',
-                              style: TextStyle(
+                              style: context.labelSmall?.copyWith(
                                 color: AppTheme.primary,
-                                fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -274,8 +270,7 @@ class _ResidentAnnouncementDetailScreenState
                             Expanded(
                               child: Text(
                                 'Khung thời gian thực hiện',
-                                style: TextStyle(
-                                  fontSize: 14,
+                                style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: announcement.isOngoing ? Colors.orange.shade900 : Colors.blue.shade900,
                                 ),
@@ -286,8 +281,7 @@ class _ResidentAnnouncementDetailScreenState
                         const SizedBox(height: 8),
                         Text(
                           'Bắt đầu: ${DateFormat('HH:mm - dd/MM/yyyy').format(announcement.eventStartAt!)}\nKết thúc: ${DateFormat('HH:mm - dd/MM/yyyy').format(announcement.eventEndAt!)}',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.bodySmall?.copyWith(
                             height: 1.4,
                             color: announcement.isOngoing ? Colors.orange.shade900 : Colors.blue.shade900,
                           ),
@@ -327,15 +321,14 @@ class _ResidentAnnouncementDetailScreenState
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
+                                        Text(
                                           'Hotline kỹ thuật viên trực ban',
-                                          style: TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+                                          style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           announcement.hotlineContact!,
-                                          style: TextStyle(
-                                            fontSize: 14.5,
+                                          style: context.titleSmall?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.green.shade900,
                                           ),
@@ -353,7 +346,7 @@ class _ResidentAnnouncementDetailScreenState
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 ),
                                 icon: const Icon(Icons.call, size: 16),
-                                label: const Text('Gọi ngay', style: TextStyle(fontSize: 12)),
+                                label: Text('Gọi ngay', style: context.labelMedium),
                                 onPressed: () => _makePhoneCall(announcement.hotlineContact!),
                               ),
                             ],
@@ -375,15 +368,14 @@ class _ResidentAnnouncementDetailScreenState
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Hotline kỹ thuật viên trực ban',
-                                    style: TextStyle(fontSize: 11.5, color: AppTheme.textSecondary),
+                                    style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     announcement.hotlineContact!,
-                                    style: TextStyle(
-                                      fontSize: 14.5,
+                                    style: context.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.green.shade900,
                                     ),
@@ -398,7 +390,7 @@ class _ResidentAnnouncementDetailScreenState
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               ),
                               icon: const Icon(Icons.call, size: 16),
-                              label: const Text('Gọi ngay', style: TextStyle(fontSize: 12)),
+                              label: Text('Gọi ngay', style: context.labelMedium),
                               onPressed: () => _makePhoneCall(announcement.hotlineContact!),
                             ),
                           ],
@@ -416,15 +408,14 @@ class _ResidentAnnouncementDetailScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.article_outlined, color: AppTheme.primary, size: 20),
-                          SizedBox(width: 8),
+                          const Icon(Icons.article_outlined, color: AppTheme.primary, size: 20),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Nội dung thông báo',
-                              style: TextStyle(
-                                fontSize: 16,
+                              style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.textPrimary,
                               ),
@@ -435,8 +426,7 @@ class _ResidentAnnouncementDetailScreenState
                       const Divider(height: 24),
                       Text(
                         announcement.content,
-                        style: const TextStyle(
-                          fontSize: 15,
+                        style: context.bodyMedium?.copyWith(
                           height: 1.6,
                           color: AppTheme.textPrimary,
                         ),

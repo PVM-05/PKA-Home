@@ -49,6 +49,10 @@ void main() {
       'lib/core/widgets/app_semantic_badge.dart',
       'lib/features/resident/providers/home_personalization_provider.dart',
       'lib/features/resident/widgets/home/meter_reading_reminder_banner.dart',
+      // Module 9: Quản lý & Chi tiết Thông báo & Hệ thống Phản hồi (Announcement & AppSnackBar)
+      'lib/core/widgets/app_snack_bar.dart',
+      'lib/features/management/screens/announcement_management_screen.dart',
+      'lib/features/resident/screens/resident_announcement_detail_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_snack_bar.dart';
 import 'app_logger.dart';
-import 'error_formatter.dart';
 
 /// Trình bọc thực thi thao tác trung thực cho nghiệp vụ B2B SaaS:
 /// - Chỉ thông báo thành công khi server thực sự phản hồi OK.
@@ -15,27 +15,14 @@ Future<bool> runAction(
   try {
     final successMessage = await action();
     if (context.mounted && successMessage != null && successMessage.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(successMessage),
-          backgroundColor: Colors.green.shade800,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackBar.showSuccess(context, successMessage);
     }
     onSuccess?.call();
     return true;
   } catch (error, stackTrace) {
     AppLogger.e('Thao tác ${actionName ?? ""} thất bại:', error, stackTrace);
     if (context.mounted) {
-      final errorMessage = formatErrorMessage(error);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red.shade800,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackBar.showError(context, error);
     }
     return false;
   }
