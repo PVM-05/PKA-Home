@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/apartment_ledger_entry_model.dart';
 import '../../../data/providers/accounting_providers.dart';
 import '../widgets/close_period_dialog.dart';
@@ -69,8 +70,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                     const SizedBox(width: 8),
                     Text(
                       'Căn hộ: ${widget.apartmentCode}',
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: context.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -86,10 +86,9 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.blueGrey.shade200),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Sổ Phụ Công Nợ',
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Colors.blueGrey,
                     ),
@@ -176,9 +175,9 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
             const SizedBox(height: 24),
 
             // Danh sách bút toán dòng thời gian
-            const Text(
+            Text(
               'Lịch Sử Bút Toán Công Nợ (Append-Only)',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
 
@@ -262,10 +261,9 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Số dư công nợ hiện tại',
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: context.bodyMedium?.copyWith(
                     color: Colors.black54,
                     fontWeight: FontWeight.w500,
                   ),
@@ -289,8 +287,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                       const SizedBox(width: 4),
                       Text(
                         statusText,
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: statusColor,
                         ),
@@ -303,8 +300,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
             const SizedBox(height: 8),
             Text(
               balance < 0 ? '- $formattedMoney' : formattedMoney,
-              style: TextStyle(
-                fontSize: 26,
+              style: context.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: statusColor,
               ),
@@ -337,15 +333,14 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
               children: [
                 Text(
                   entry.entryCode,
-                  style: const TextStyle(
+                  style: context.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
                     color: Colors.blueGrey,
                   ),
                 ),
                 Text(
                   entry.formattedCreatedAtWithTime,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: context.labelSmall?.copyWith(color: Colors.grey),
                 ),
               ],
             ),
@@ -364,8 +359,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                   ),
                   child: Text(
                     entry.entryTypeVietnamese,
-                    style: TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: amountColor,
                     ),
@@ -373,8 +367,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
                 ),
                 Text(
                   '$prefix${entry.formattedAmount}',
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: amountColor,
                   ),
@@ -384,7 +377,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
             const SizedBox(height: 6),
             Text(
               entry.description,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
+              style: context.bodySmall?.copyWith(color: Colors.black87),
             ),
             const Divider(height: 16),
             Row(
@@ -392,12 +385,11 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
               children: [
                 Text(
                   'Kỳ: ${entry.formattedPeriod}',
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  style: context.labelSmall?.copyWith(color: Colors.black54),
                 ),
                 Text(
                   'Dư nợ sau GD: ${entry.formattedBalanceAfter}',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: context.labelSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Colors.blueGrey,
                   ),

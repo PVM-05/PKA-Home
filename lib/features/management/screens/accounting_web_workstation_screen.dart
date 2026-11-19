@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
@@ -195,22 +197,21 @@ class _AccountingWebWorkstationScreenState
                               style: const TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
                           Text('Số tiền: ${currencyFormat.format(tx.amount)}',
-                              style: const TextStyle(
+                              style: context.titleSmall?.copyWith(
                                   color: AppTheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15)),
+                                  fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
                           Text('Nội dung CK: ${tx.title ?? tx.failureReason ?? "Không có nội dung"}',
-                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                           const SizedBox(height: 4),
                           Text('Cổng / Phương thức: ${tx.paymentMethod}',
-                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text('Chọn Hóa Đơn Cần Gạch Nợ:',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text('Chọn Hóa Đơn Cần Gạch Nợ:',
+                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     if (unpaidInvoices.isEmpty)
                       const Text(
@@ -426,6 +427,7 @@ class _AccountingWebWorkstationScreenState
 
                 final cards = [
                   _buildKpiCard(
+                    context,
                     title: 'Tổng Giao Dịch SePay',
                     value: '$totalTxs',
                     subtitle: 'Biến động số dư nhận được',
@@ -434,6 +436,7 @@ class _AccountingWebWorkstationScreenState
                     bgColor: AppTheme.primary.withValues(alpha: 0.08),
                   ),
                   _buildKpiCard(
+                    context,
                     title: 'Đã Gạch Nợ Tự Động',
                     value: '$autoPaidTxs',
                     subtitle: 'Khớp mã hóa đơn tức thì',
@@ -442,6 +445,7 @@ class _AccountingWebWorkstationScreenState
                     bgColor: Colors.teal.withValues(alpha: 0.08),
                   ),
                   _buildKpiCard(
+                    context,
                     title: 'Giao Dịch Chưa Khớp',
                     value: '$unmatchedTxs',
                     subtitle: 'Cần kế toán viên kiểm tra',
@@ -450,6 +454,7 @@ class _AccountingWebWorkstationScreenState
                     bgColor: Colors.deepOrange.withValues(alpha: 0.08),
                   ),
                   _buildKpiCard(
+                    context,
                     title: 'Tổng Tiền Thực Nhận',
                     value: currencyFormat.format(totalAmount),
                     subtitle: 'Đã vào tài khoản ngân hàng',
@@ -559,11 +564,7 @@ class _AccountingWebWorkstationScreenState
                                       ),
                                       child: Text(
                                         tx.statusDisplayName,
-                                        style: TextStyle(
-                                          color: tx.isSuccess
-                                              ? Colors.teal.shade800
-                                              : (tx.isUnmatched ? Colors.deepOrange.shade800 : Colors.orange.shade800),
-                                          fontSize: 12,
+                                        style: context.labelSmall?.copyWith(color: tx.isSuccess ? Colors.teal.shade800 : (tx.isUnmatched ? Colors.deepOrange.shade800 : Colors.orange.shade800),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -576,9 +577,9 @@ class _AccountingWebWorkstationScreenState
                                             style: FilledButton.styleFrom(
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                             ),
-                                            child: const Text('Khớp nợ thủ công', style: TextStyle(fontSize: 12)),
+                                            child: Text('Khớp nợ thủ công', style: context.labelSmall),
                                           )
-                                        : const Text('Tự động khớp', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                        : Text('Tự động khớp', style: context.labelSmall?.copyWith(color: Colors.grey)),
                                   ),
                                 ],
                               );
@@ -609,11 +610,10 @@ class _AccountingWebWorkstationScreenState
                   size: 28,
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Bàn Làm Việc Kế Toán & Đối Soát',
-                    style: TextStyle(
-                      fontSize: 22,
+                    style: context.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
                     ),
@@ -622,9 +622,9 @@ class _AccountingWebWorkstationScreenState
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Quản lý công nợ, đối soát ngân hàng và phát hành hóa đơn tập trung',
-              style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),
           ],
         );
@@ -650,13 +650,9 @@ class _AccountingWebWorkstationScreenState
             FilledButton.icon(
               onPressed: () {
                 exportWorkstationToCsv(rows);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Đã xuất dữ liệu ${rows.length} dòng thành công sang file bảng tính.',
-                    ),
-                    backgroundColor: AppTheme.primary,
-                  ),
+                AppSnackBar.showSuccess(
+                  context,
+                  'Đã xuất dữ liệu ${rows.length} dòng thành công sang file bảng tính.',
                 );
               },
               icon: const Icon(Icons.file_download_outlined, size: 18),
@@ -703,6 +699,7 @@ class _AccountingWebWorkstationScreenState
 
         final cards = [
           _buildKpiCard(
+            context,
             title: 'Tổng Phát Hành',
             value: summary.formattedTotalAmount,
             subtitle: '${summary.totalInvoices} hóa đơn kỳ này',
@@ -711,6 +708,7 @@ class _AccountingWebWorkstationScreenState
             bgColor: AppTheme.primary.withValues(alpha: 0.08),
           ),
           _buildKpiCard(
+            context,
             title: 'Thực Thu',
             value: summary.formattedPaidAmount,
             subtitle: 'Tỷ lệ thu hồi: ${summary.collectionRate}%',
@@ -719,6 +717,7 @@ class _AccountingWebWorkstationScreenState
             bgColor: Colors.teal.withValues(alpha: 0.08),
           ),
           _buildKpiCard(
+            context,
             title: 'Chờ Thu Trong Hạn',
             value: summary.formattedUnpaidAmount,
             subtitle: 'Chờ đối soát / chuyển khoản',
@@ -727,6 +726,7 @@ class _AccountingWebWorkstationScreenState
             bgColor: Colors.orange.withValues(alpha: 0.08),
           ),
           _buildKpiCard(
+            context,
             title: 'Nợ Quá Hạn',
             value: summary.formattedOverdueAmount,
             subtitle: 'Cần gửi thông báo đôn đốc',
@@ -786,7 +786,8 @@ class _AccountingWebWorkstationScreenState
     );
   }
 
-  Widget _buildKpiCard({
+  Widget _buildKpiCard(
+    BuildContext context, {
     required String title,
     required String value,
     required String subtitle,
@@ -819,8 +820,7 @@ class _AccountingWebWorkstationScreenState
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: context.bodySmall?.copyWith(
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -828,8 +828,7 @@ class _AccountingWebWorkstationScreenState
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: context.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
                   ),
@@ -839,8 +838,7 @@ class _AccountingWebWorkstationScreenState
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: context.labelSmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
                   maxLines: 1,
@@ -1210,7 +1208,7 @@ class _AccountingWebWorkstationScreenState
                           ),
                         ),
                         DataCell(
-                          _buildStatusChip(row.status, row.displayStatus),
+                          _buildStatusChip(context, row.status, row.displayStatus),
                         ),
                         DataCell(
                           Container(
@@ -1224,9 +1222,8 @@ class _AccountingWebWorkstationScreenState
                             ),
                             child: Text(
                               row.vietQrCode,
-                              style: const TextStyle(
+                              style: context.labelSmall?.copyWith(
                                 fontFamily: 'monospace',
-                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -1246,7 +1243,7 @@ class _AccountingWebWorkstationScreenState
     );
   }
 
-  Widget _buildStatusChip(String status, String displayStatus) {
+  Widget _buildStatusChip(BuildContext context, String status, String displayStatus) {
     Color bg;
     Color fg;
 
@@ -1278,7 +1275,7 @@ class _AccountingWebWorkstationScreenState
       ),
       child: Text(
         displayStatus,
-        style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600),
+        style: context.labelSmall?.copyWith(color: fg, fontWeight: FontWeight.w600),
       ),
     );
   }

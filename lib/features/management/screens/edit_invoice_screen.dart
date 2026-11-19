@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/utils/money_formatter.dart';
@@ -133,11 +135,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
   void _removeItem(int index) {
     if (_items.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hóa đơn phải có ít nhất một khoản phí.'),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Hóa đơn phải có ít nhất một khoản phí.',
       );
       return;
     }
@@ -171,11 +171,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng thêm ít nhất một khoản phí.'),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Vui lòng thêm ít nhất một khoản phí.',
       );
       return;
     }
@@ -187,11 +185,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
       final price = item.unitPrice;
       final qty = item.quantity;
       if (displayName.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tên loại phí không được để trống.'),
-            backgroundColor: AppTheme.warning,
-          ),
+        AppSnackBar.showWarning(
+          context,
+          'Tên loại phí không được để trống.',
         );
         return;
       }
@@ -216,11 +212,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
       ref.invalidate(invoiceDetailProvider(widget.invoice.id));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cập nhật hóa đơn thành công!'),
-            backgroundColor: AppTheme.success,
-          ),
+        AppSnackBar.showSuccess(
+          context,
+          'Cập nhật hóa đơn thành công!',
         );
         Navigator.of(context).pop(true);
       }
@@ -233,9 +227,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(pe);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorText), backgroundColor: AppTheme.error),
-        );
+        AppSnackBar.showError(context, errorText);
       }
     } catch (e) {
       if (mounted) {
@@ -245,9 +237,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
             : formatErrorMessage(e);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorText), backgroundColor: AppTheme.error),
-        );
+        AppSnackBar.showError(context, errorText);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -364,9 +354,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                   Expanded(
                     child: Text(
                       'Hóa đơn đã thanh toán. Theo chuẩn mực kế toán, số liệu đã hạch toán là bất biến. Để điều chỉnh, vui lòng tạo Phiếu giảm trừ (Credit Note).',
-                      style: TextStyle(
+                      style: context.bodySmall?.copyWith(
                         color: Colors.amber.shade900,
-                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -389,11 +378,10 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Thông tin chung',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
                   ),
@@ -435,9 +423,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                 if (widget.invoice.apartment?.area != null)
                   Text(
                     '${widget.invoice.apartment!.area} m²',
-                    style: const TextStyle(
+                    style: context.bodySmall?.copyWith(
                       color: AppTheme.textSecondary,
-                      fontSize: 13,
                     ),
                   ),
               ],
@@ -552,10 +539,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              const Text(
+              Text(
                 'Chi tiết các khoản phí',
-                style: TextStyle(
-                  fontSize: 16,
+                style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
@@ -661,18 +647,16 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                       alignment: WrapAlignment.spaceBetween,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           'Thành tiền:',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.labelSmall?.copyWith(
                             color: AppTheme.textSecondary,
                           ),
                         ),
                         Text(
                           _currencyFormat.format(item.subtotal),
-                          style: const TextStyle(
+                          style: context.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
                             color: AppTheme.primary,
                           ),
                         ),
@@ -735,10 +719,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text(
+                              Text(
                                 'Thành tiền',
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   color: AppTheme.textSecondary,
                                 ),
                               ),
@@ -746,9 +729,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   _currencyFormat.format(item.subtotal),
-                                  style: const TextStyle(
+                                  style: context.labelMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 13,
                                     color: AppTheme.textPrimary,
                                   ),
                                 ),
@@ -782,11 +764,10 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              const Text(
+              Text(
                 'TỔNG CỘNG MỚI',
-                style: TextStyle(
+                style: context.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
                   color: AppTheme.primary,
                 ),
               ),
@@ -794,9 +775,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   _currencyFormat.format(_totalAmount),
-                  style: const TextStyle(
+                  style: context.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 22,
                     color: AppTheme.primary,
                   ),
                 ),
@@ -826,8 +806,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                   )
                 : Text(
                     isPaid ? 'HÓA ĐƠN ĐÃ KHÓA SỔ (BẤT BIẾN)' : 'LƯU THAY ĐỔI',
-                    style: const TextStyle(
-                      fontSize: 15,
+                    style: context.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),

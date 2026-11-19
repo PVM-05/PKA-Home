@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/accounting_voucher_dialog.dart';
@@ -28,10 +30,9 @@ class _MaintenanceFundLedgerScreenState
 
   void _showCreateVoucherSheet(BuildContext context, String? buildingId) {
     if (buildingId == null || buildingId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn tòa nhà trước khi lập phiếu.'),
-        ),
+      AppSnackBar.showError(
+        context,
+        'Vui lòng chọn tòa nhà trước khi lập phiếu.',
       );
       return;
     }
@@ -71,8 +72,7 @@ class _MaintenanceFundLedgerScreenState
                           type == 'INCOME'
                               ? 'Lập Phiếu Thu Quỹ'
                               : 'Lập Phiếu Chi Quỹ',
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: ctx.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -199,22 +199,16 @@ class _MaintenanceFundLedgerScreenState
                               final desc = descController.text.trim();
 
                               if (rawAmount <= 0) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Vui lòng nhập số tiền hợp lệ.',
-                                    ),
-                                  ),
+                                AppSnackBar.showError(
+                                  context,
+                                  'Vui lòng nhập số tiền hợp lệ.',
                                 );
                                 return;
                               }
                               if (person.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Vui lòng nhập họ tên người nộp/nhận.',
-                                    ),
-                                  ),
+                                AppSnackBar.showError(
+                                  context,
+                                  'Vui lòng nhập họ tên người nộp/nhận.',
                                 );
                                 return;
                               }
@@ -243,21 +237,14 @@ class _MaintenanceFundLedgerScreenState
                               if (result != null && result['success'] == true) {
                                 ref.invalidate(activeMaintenanceFundProvider);
                                 ref.invalidate(maintenanceFundLedgerProvider);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Lập chứng từ ${result['voucher_number']} thành công!',
-                                    ),
-                                    backgroundColor: AppTheme.success,
-                                  ),
+                                AppSnackBar.showSuccess(
+                                  context,
+                                  'Lập chứng từ ${result['voucher_number']} thành công!',
                                 );
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Không thể ghi sổ quỹ. Vui lòng kiểm tra số dư.',
-                                    ),
-                                  ),
+                                AppSnackBar.showError(
+                                  context,
+                                  'Không thể ghi sổ quỹ. Vui lòng kiểm tra số dư.',
                                 );
                               }
                             },
@@ -441,10 +428,9 @@ class _MaintenanceFundLedgerScreenState
                 spacing: 8,
                 runSpacing: 4,
                 children: [
-                  const Text(
+                  Text(
                     'Số dư quỹ khả dụng',
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: context.bodySmall?.copyWith(
                       color: AppTheme.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
@@ -460,8 +446,7 @@ class _MaintenanceFundLedgerScreenState
                     ),
                     child: Text(
                       activeBuilding?.name ?? 'Toàn tòa nhà',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primary,
                       ),
@@ -477,8 +462,7 @@ class _MaintenanceFundLedgerScreenState
                 alignment: Alignment.centerLeft,
                 child: Text(
                   _currencyFormat.format(balance),
-                  style: const TextStyle(
-                    fontSize: 26,
+                  style: context.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
@@ -496,8 +480,7 @@ class _MaintenanceFundLedgerScreenState
                   Expanded(
                     child: Text(
                       'Lãi tiền gửi ($interestRate%/năm): +${_currencyFormat.format(interestEarned)}',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         color: AppTheme.success,
                         fontWeight: FontWeight.w600,
                       ),
@@ -520,8 +503,7 @@ class _MaintenanceFundLedgerScreenState
                     Expanded(
                       child: Text(
                         '${fund.bankName} - ${fund.bankAccountNumber}',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                         maxLines: 1,
@@ -673,16 +655,14 @@ class _MaintenanceFundLedgerScreenState
                             children: [
                               Text(
                                 tx.voucherNumber,
-                                style: const TextStyle(
+                                style: context.labelMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13,
                                 ),
                               ),
                               Text(
                                 '${isIncome ? '+' : '-'}${_currencyFormat.format(tx.amount)}',
-                                style: TextStyle(
+                                style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
                                   color: isIncome
                                       ? AppTheme.success
                                       : AppTheme.error,
@@ -693,8 +673,7 @@ class _MaintenanceFundLedgerScreenState
                           const SizedBox(height: 2),
                           Text(
                             tx.categoryDisplayName,
-                            style: TextStyle(
-                              fontSize: 11,
+                            style: context.labelSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: isIncome
                                   ? AppTheme.primary
@@ -704,8 +683,7 @@ class _MaintenanceFundLedgerScreenState
                           const SizedBox(height: 4),
                           Text(
                             tx.description,
-                            style: const TextStyle(
-                              fontSize: 12,
+                            style: context.bodySmall?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                             maxLines: 2,
@@ -722,15 +700,13 @@ class _MaintenanceFundLedgerScreenState
                                 DateFormat(
                                   'dd/MM/yyyy HH:mm',
                                 ).format(tx.createdAt),
-                                style: const TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   color: AppTheme.textSecondary,
                                 ),
                               ),
                               Text(
                                 'Số dư sau GD: ${_currencyFormat.format(tx.balanceAfter)}',
-                                style: const TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   fontWeight: FontWeight.w500,
                                   color: AppTheme.textSecondary,
                                 ),

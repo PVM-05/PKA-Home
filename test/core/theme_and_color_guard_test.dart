@@ -81,6 +81,11 @@ void main() {
       'lib/features/management/screens/batch_import_center_screen.dart',
       'lib/features/management/screens/subscription_management_screen.dart',
       'lib/features/management/screens/service_rating_overview_screen.dart',
+      // Module 17: Trạm Kế toán B2B Web, Sổ cái công nợ, Quỹ bảo trì 2% & Điều chỉnh hóa đơn (Accounting Workstation, Apartment Ledger, Maintenance Fund Ledger & Edit Invoice)
+      'lib/features/management/screens/accounting_web_workstation_screen.dart',
+      'lib/features/management/screens/apartment_ledger_screen.dart',
+      'lib/features/management/screens/maintenance_fund_ledger_screen.dart',
+      'lib/features/management/screens/edit_invoice_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {
