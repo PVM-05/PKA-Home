@@ -38,6 +38,11 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - `ResidentAnnouncementDetailScreen`: Xóa sạch 100% 16/16 điểm `fontSize:` cứng, chuyển đổi hoàn toàn sang `context.titleLarge`, `context.bodyMedium`, `context.labelSmall`, `context.bodySmall`...
   - `AnnouncementManagementScreen`: Xóa sạch 100% 38/38 điểm `fontSize:` cứng và chuyển đổi toàn bộ 6 lệnh gọi `ScaffoldMessenger.showSnackBar` phân tán sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ 3 file: `app_snack_bar.dart`, `announcement_management_screen.dart`, `resident_announcement_detail_screen.dart`. Đảm bảo 100% không tái xuất hiện `fontSize:` và `Color(0x...)` cứng.
+- **Gói 2.2 Chuẩn Hóa Typography & Tokens Cụm Tiện Ích Đặt Chỗ (Amenity Module)**:
+  - `AmenityManagementScreen`: Xóa sạch 100% 26/26 điểm `fontSize:` cứng và chuyển đổi toàn bộ 4 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
+  - `AmenityBookingScreen`: Xóa sạch 100% 26/26 điểm `fontSize:` cứng và chuyển đổi toàn bộ 6 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar`.
+  - `ResidentAmenityBookingsTab`: Xóa sạch 100% 12/12 điểm `fontSize:` cứng và 3 lệnh gọi `ScaffoldMessenger.showSnackBar`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file: `amenity_management_screen.dart`, `amenity_booking_screen.dart`, `resident_amenity_bookings_tab.dart`. Đảm bảo 100% không tái xuất hiện `fontSize:` và `Color(0x...)` cứng.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

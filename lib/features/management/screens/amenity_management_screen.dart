@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/building_amenity_model.dart';
@@ -90,9 +92,9 @@ class _AmenityManagementScreenState
                     color: Colors.grey.shade300,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Không có ca nào cần nghiệm thu hoặc xử lý cọc',
-                    style: TextStyle(color: Colors.grey, fontSize: 15),
+                    style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                   ),
                 ],
               ),
@@ -117,9 +119,8 @@ class _AmenityManagementScreenState
                           Expanded(
                             child: Text(
                               b.amenityName ?? 'Tiện ích',
-                              style: const TextStyle(
+                              style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                             ),
                           ),
@@ -141,8 +142,7 @@ class _AmenityManagementScreenState
                             ),
                             child: Text(
                               b.isCheckedIn ? 'Đã check-in' : 'Chờ nghiệm thu',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: b.isCheckedIn
                                     ? Colors.green.shade800
@@ -155,24 +155,21 @@ class _AmenityManagementScreenState
                       const SizedBox(height: 8),
                       Text(
                         'Căn hộ: ${b.apartmentCode ?? b.apartmentId} • Người đặt: ${b.bookerName ?? "Cư dân"}',
-                        style: const TextStyle(
-                          fontSize: 13,
+                        style: context.bodySmall?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Ngày: ${_dateFormat.format(b.bookingDate)} • Ca: ${b.timeSlot}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade700,
+                        style: context.bodySmall?.copyWith(
+                          color: AppTheme.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Tiền cọc đã nộp: ${_currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
-                        style: const TextStyle(
-                          fontSize: 13,
+                        style: context.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppStatusColors.paid,
                         ),
@@ -181,9 +178,8 @@ class _AmenityManagementScreenState
                         const SizedBox(height: 4),
                         Text(
                           'Mã vé: ${b.qrTicketToken}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
+                          style: context.labelSmall?.copyWith(
+                            color: AppTheme.textSecondary,
                           ),
                         ),
                       ],
@@ -403,8 +399,7 @@ class _AmenityManagementScreenState
     return FilterChip(
       selected: isSelected,
       label: Text(label),
-      labelStyle: TextStyle(
-        fontSize: 12,
+      labelStyle: context.labelSmall?.copyWith(
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         color: isSelected ? Colors.white : Colors.black87,
       ),
@@ -446,9 +441,8 @@ class _AmenityManagementScreenState
               Expanded(
                 child: Text(
                   'Căn hộ: ${b.apartmentCode ?? "***"} — ${b.amenityName ?? "Tiện ích"}',
-                  style: const TextStyle(
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -464,8 +458,7 @@ class _AmenityManagementScreenState
                 ),
                 child: Text(
                   statusLabel,
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: context.labelSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: statusColor,
                   ),
@@ -489,7 +482,7 @@ class _AmenityManagementScreenState
                   const SizedBox(width: 4),
                   Text(
                     _dateFormat.format(b.bookingDate),
-                    style: const TextStyle(fontSize: 13),
+                    style: context.bodySmall,
                   ),
                 ],
               ),
@@ -500,8 +493,7 @@ class _AmenityManagementScreenState
                   const SizedBox(width: 4),
                   Text(
                     b.timeSlot,
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: context.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -518,7 +510,7 @@ class _AmenityManagementScreenState
                   const SizedBox(width: 4),
                   Text(
                     b.bookerName ?? 'Cư dân',
-                    style: const TextStyle(fontSize: 13),
+                    style: context.bodySmall,
                   ),
                 ],
               ),
@@ -534,8 +526,7 @@ class _AmenityManagementScreenState
                     const SizedBox(width: 4),
                     Text(
                       '${b.guestsCount} người',
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: context.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -553,7 +544,7 @@ class _AmenityManagementScreenState
                   Chip(
                     label: Text(
                       'Phí: ${_currencyFormat.format(b.feeAmount)} ${b.isPendingPayment ? "(Chưa thu)" : "(Đã thu)"}',
-                      style: const TextStyle(fontSize: 11),
+                      style: context.labelSmall,
                     ),
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
@@ -562,7 +553,7 @@ class _AmenityManagementScreenState
                   Chip(
                     label: Text(
                       'Cọc: ${_currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
-                      style: const TextStyle(fontSize: 11),
+                      style: context.labelSmall,
                     ),
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
@@ -621,23 +612,14 @@ class _AmenityManagementScreenState
                           .checkInBooking(b.id);
                       ref.invalidate(allAmenityBookingsProvider);
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Check-in thành công cho căn hộ ${b.apartmentCode ?? ""}!',
-                            ),
-                            backgroundColor: AppStatusColors.paid,
-                          ),
+                        AppSnackBar.showSuccess(
+                          context,
+                          'Check-in thành công cho căn hộ ${b.apartmentCode ?? ""}!',
                         );
                       }
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(formatErrorMessage(e)),
-                            backgroundColor: AppTheme.error,
-                          ),
-                        );
+                        AppSnackBar.showError(context, formatErrorMessage(e));
                       }
                     }
                   },
@@ -723,9 +705,8 @@ class _AmenityManagementScreenState
                     Expanded(
                       child: Text(
                         a.name,
-                        style: const TextStyle(
+                        style: context.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -742,8 +723,7 @@ class _AmenityManagementScreenState
                       ),
                       child: Text(
                         isShared ? 'Dùng chung' : 'Trọn gói',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isShared
                               ? Colors.blue.shade800
@@ -757,7 +737,7 @@ class _AmenityManagementScreenState
                   const SizedBox(height: 6),
                   Text(
                     a.description!,
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                    style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                   ),
                 ],
                 const SizedBox(height: 10),
@@ -769,8 +749,7 @@ class _AmenityManagementScreenState
                       avatar: const Icon(Icons.groups, size: 16),
                       label: Text(
                         'Sức chứa: ${a.maxCapacity} người',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -781,7 +760,7 @@ class _AmenityManagementScreenState
                       avatar: const Icon(Icons.timer_outlined, size: 16),
                       label: Text(
                         '${a.slotDurationMinutes} phút/slot',
-                        style: const TextStyle(fontSize: 12),
+                        style: context.labelSmall,
                       ),
                       backgroundColor: Colors.grey.shade100,
                       visualDensity: VisualDensity.compact,
@@ -790,7 +769,7 @@ class _AmenityManagementScreenState
                       avatar: const Icon(Icons.payments_outlined, size: 16),
                       label: Text(
                         'Phí: ${_currencyFormat.format(a.feeAmount)}',
-                        style: const TextStyle(fontSize: 12),
+                        style: context.labelSmall,
                       ),
                       backgroundColor: Colors.grey.shade100,
                       visualDensity: VisualDensity.compact,
@@ -800,7 +779,7 @@ class _AmenityManagementScreenState
                         avatar: const Icon(Icons.shield_outlined, size: 16),
                         label: Text(
                           'Cọc: ${_currencyFormat.format(a.depositAmount)}',
-                          style: const TextStyle(fontSize: 12),
+                          style: context.labelSmall,
                         ),
                         backgroundColor: Colors.amber.shade50,
                         visualDensity: VisualDensity.compact,
@@ -819,9 +798,8 @@ class _AmenityManagementScreenState
                     Expanded(
                       child: Text(
                         'Giờ mở cửa: ${a.openHours ?? "06:00 - 22:00"}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade700,
+                        style: context.labelSmall?.copyWith(
+                          color: AppTheme.textSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -913,7 +891,7 @@ class _AmenityManagementScreenState
                   icon: const Icon(Icons.calendar_today, size: 16),
                   label: Text(
                     _dateFormat.format(_selectedDate),
-                    style: const TextStyle(fontSize: 13),
+                    style: context.bodySmall,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -995,9 +973,8 @@ class _AmenityManagementScreenState
                           children: [
                             Text(
                               '${_timeFormat.format(w.startTime)} - ${_timeFormat.format(w.endTime)}',
-                              style: const TextStyle(
+                              style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -1047,20 +1024,16 @@ class _AmenityManagementScreenState
                                 amenityMaintenanceForDateProvider(query),
                               );
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Đã gỡ bỏ lịch bảo trì!'),
-                                    backgroundColor: AppStatusColors.paid,
-                                  ),
+                                AppSnackBar.showSuccess(
+                                  context,
+                                  'Đã gỡ bỏ lịch bảo trì!',
                                 );
                               }
                             } catch (e) {
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(formatErrorMessage(e)),
-                                    backgroundColor: AppTheme.error,
-                                  ),
+                                AppSnackBar.showError(
+                                  context,
+                                  formatErrorMessage(e),
                                 );
                               }
                             }

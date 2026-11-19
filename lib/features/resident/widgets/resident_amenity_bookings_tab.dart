@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/core/widgets/app_error_card.dart';
 import 'package:vivona/core/widgets/app_skeleton_shimmer.dart';
+import 'package:vivona/core/widgets/app_snack_bar.dart';
 import 'package:vivona/core/widgets/unified_payment_sheet.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
 import 'package:vivona/data/models/building_amenity_model.dart';
@@ -63,21 +65,11 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                 );
                 ref.invalidate(myAmenityBookingsProvider);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã hủy lịch đặt thành công'),
-                      backgroundColor: AppTheme.success,
-                    ),
-                  );
+                  AppSnackBar.showSuccess(context, 'Đã hủy lịch đặt thành công');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Lỗi hủy lịch: $e'),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
+                  AppSnackBar.showError(context, 'Lỗi hủy lịch: $e');
                 }
               }
             },
@@ -113,9 +105,9 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                     color: Colors.grey.shade300,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Chưa có lịch đặt tiện ích nào',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                    style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                   ),
                 ],
               ),
@@ -182,9 +174,8 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               b.amenityName ?? amenity.name,
-                              style: const TextStyle(
+                              style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -201,8 +192,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                             ),
                             child: Text(
                               statusLabel,
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: statusColor,
                               ),
@@ -226,7 +216,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               const SizedBox(width: 6),
                               Text(
                                 'Ngày: ${fullDateFormat.format(b.bookingDate)}',
-                                style: const TextStyle(fontSize: 13),
+                                style: context.bodySmall,
                               ),
                             ],
                           ),
@@ -241,8 +231,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               const SizedBox(width: 6),
                               Text(
                                 b.timeSlot,
-                                style: const TextStyle(
-                                  fontSize: 13,
+                                style: context.bodySmall?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -262,7 +251,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               Chip(
                                 label: Text(
                                   '${b.guestsCount} người',
-                                  style: const TextStyle(fontSize: 11),
+                                  style: context.labelSmall,
                                 ),
                                 padding: EdgeInsets.zero,
                                 visualDensity: VisualDensity.compact,
@@ -271,7 +260,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               Chip(
                                 label: Text(
                                   'Phí: ${currencyFormat.format(b.feeAmount)}',
-                                  style: const TextStyle(fontSize: 11),
+                                  style: context.labelSmall,
                                 ),
                                 padding: EdgeInsets.zero,
                                 visualDensity: VisualDensity.compact,
@@ -283,10 +272,9 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                                   size: 14,
                                   color: Colors.green,
                                 ),
-                                label: const Text(
+                                label: Text(
                                   'Đã check-in',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                                  style: context.labelSmall?.copyWith(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -305,8 +293,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                                   ),
                                   label: Text(
                                     'Đã hoàn cọc 100% (${currencyFormat.format(b.refundAmount > 0 ? b.refundAmount : b.depositAmount)})',
-                                    style: const TextStyle(
-                                      fontSize: 11,
+                                    style: context.labelSmall?.copyWith(
                                       color: Colors.teal,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -324,8 +311,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                                   ),
                                   label: Text(
                                     'Khấu trừ cọc: ${currencyFormat.format(b.forfeitedAmount)}',
-                                    style: const TextStyle(
-                                      fontSize: 11,
+                                    style: context.labelSmall?.copyWith(
                                       color: Colors.deepOrange,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -340,8 +326,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                                     b.isCheckedIn
                                         ? 'Cọc: ${currencyFormat.format(b.depositAmount)} (Chờ nghiệm thu hoàn cọc)'
                                         : 'Cọc: ${currencyFormat.format(b.depositAmount)} (Đã nộp)',
-                                    style: TextStyle(
-                                      fontSize: 11,
+                                    style: context.labelSmall?.copyWith(
                                       color: b.isCheckedIn
                                           ? Colors.blue.shade900
                                           : Colors.orange.shade900,
@@ -358,7 +343,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                                 Chip(
                                   label: Text(
                                     'Cọc: ${currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
-                                    style: const TextStyle(fontSize: 11),
+                                    style: context.labelSmall,
                                   ),
                                   padding: EdgeInsets.zero,
                                   visualDensity: VisualDensity.compact,
@@ -432,13 +417,9 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                                       ),
                                     );
                                   }
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Yêu cầu thanh toán đã được tiếp nhận thành công',
-                                      ),
-                                      backgroundColor: AppTheme.success,
-                                    ),
+                                  AppSnackBar.showSuccess(
+                                    context,
+                                    'Yêu cầu thanh toán đã được tiếp nhận thành công',
                                   );
                                 }
                               },

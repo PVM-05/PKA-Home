@@ -53,6 +53,10 @@ void main() {
       'lib/core/widgets/app_snack_bar.dart',
       'lib/features/management/screens/announcement_management_screen.dart',
       'lib/features/resident/screens/resident_announcement_detail_screen.dart',
+      // Module 10: Quản lý & Đặt chỗ Tiện ích (Amenity System)
+      'lib/features/management/screens/amenity_management_screen.dart',
+      'lib/features/resident/screens/amenity_booking_screen.dart',
+      'lib/features/resident/widgets/resident_amenity_bookings_tab.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/amenity_slot_helper.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/unified_payment_sheet.dart';
 import '../../../data/models/building_amenity_model.dart';
 import '../../../data/models/amenity_booking_model.dart';
@@ -193,8 +195,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           isWaitlist
                               ? 'Khung giờ này đã hết chỗ. Khi có người hủy lịch, hệ thống sẽ tự động xác nhận cho bạn và gửi thông báo.'
                               : 'Vui lòng có mặt đúng giờ. Nếu có đặt cọc, vui lòng hoàn tất tại quầy lễ tân/BQL.',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: ctx.labelSmall?.copyWith(
                             color: isWaitlist
                                 ? Colors.purple.shade900
                                 : Colors.black87,
@@ -320,23 +321,19 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
 
                             if (paymentRes.isPending ||
                                 paymentRes.status == 'PENDING') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Đã gửi thông báo thanh toán (${paymentRes.transactionCode}). Vui lòng chờ BQL xác nhận.',
-                                  ),
-                                  action: SnackBarAction(
-                                    label: 'Biên nhận',
-                                    textColor: Colors.white,
-                                    onPressed: () =>
-                                        showAmenityReceiptBottomSheet(
-                                          context: context,
-                                          booking: updatedBooking,
-                                          fallbackAmenityName:
-                                              widget.amenity.name,
-                                        ),
-                                  ),
-                                  backgroundColor: Colors.orange.shade800,
+                              AppSnackBar.showInfo(
+                                context,
+                                'Đã gửi thông báo thanh toán (${paymentRes.transactionCode}). Vui lòng chờ BQL xác nhận.',
+                                action: SnackBarAction(
+                                  label: 'Biên nhận',
+                                  textColor: Colors.white,
+                                  onPressed: () =>
+                                      showAmenityReceiptBottomSheet(
+                                        context: context,
+                                        booking: updatedBooking,
+                                        fallbackAmenityName:
+                                            widget.amenity.name,
+                                      ),
                                 ),
                               );
                             } else {
@@ -350,30 +347,20 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           }
 
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Lịch đặt đã được ghi nhận ở trạng thái Chờ thanh toán. Vui lòng liên hệ Ban Quản Lý để hoàn tất thanh toán trước giờ sử dụng.',
-                                ),
-                                backgroundColor: Colors.orange,
-                              ),
+                            AppSnackBar.showInfo(
+                              context,
+                              'Lịch đặt đã được ghi nhận ở trạng thái Chờ thanh toán. Vui lòng liên hệ Ban Quản Lý để hoàn tất thanh toán trước giờ sử dụng.',
                             );
                             return;
                           }
                         }
 
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                result.isWaitlist
-                                    ? 'Đã thêm vào danh sách chờ thành công!'
-                                    : 'Đặt lịch tiện ích thành công!',
-                              ),
-                              backgroundColor: result.isWaitlist
-                                  ? Colors.purple
-                                  : AppStatusColors.paid,
-                            ),
+                          AppSnackBar.showSuccess(
+                            context,
+                            result.isWaitlist
+                                ? 'Đã thêm vào danh sách chờ thành công!'
+                                : 'Đặt lịch tiện ích thành công!',
                           );
                         }
                       } catch (e) {
@@ -389,11 +376,9 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                         ref.invalidate(myAmenityBookingsProvider);
 
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(NetworkErrorHandler.getMessage(e)),
-                              backgroundColor: AppTheme.error,
-                            ),
+                          AppSnackBar.showError(
+                            context,
+                            NetworkErrorHandler.getMessage(e),
                           );
                         }
                       } finally {
@@ -452,23 +437,14 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       _isWaitlistSelection = false;
                     }
                   });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Đã hủy lịch thành công. Khung giờ đã được giải phóng để bạn có thể đặt lại.',
-                      ),
-                      backgroundColor: AppTheme.success,
-                    ),
+                  AppSnackBar.showSuccess(
+                    context,
+                    'Đã hủy lịch thành công. Khung giờ đã được giải phóng để bạn có thể đặt lại.',
                   );
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(formatErrorMessage(e)),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
+                  AppSnackBar.showError(context, formatErrorMessage(e));
                 }
               }
             },
@@ -504,13 +480,13 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
       body: aptIdAsync.when(
         data: (apartmentId) {
           if (apartmentId == null || user == null) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Text(
                   'Bạn cần được Ban Quản Lý phê duyệt liên kết căn hộ trước khi đặt lịch tiện ích.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15),
+                  style: context.bodyMedium,
                 ),
               ),
             );
@@ -568,9 +544,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                   Expanded(
                     child: Text(
                       'Thời gian mở cửa: ${widget.amenity.openHours ?? "06:00 - 22:00"} (${widget.amenity.slotDurationMinutes} phút/lượt)',
-                      style: const TextStyle(
+                      style: context.bodySmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -592,9 +567,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       widget.amenity.isShared
                           ? 'Tiện ích dùng chung — Sức chứa: ${widget.amenity.maxCapacity} người/khung giờ'
                           : 'Tiện ích trọn gói — 1 căn hộ/khung giờ',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade700,
+                      style: context.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
                     ),
                   ),
@@ -614,8 +588,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                     Expanded(
                       child: Text(
                         'Phí: ${_currencyFormat.format(widget.amenity.feeAmount)}${widget.amenity.requiresDeposit ? ' • Cọc: ${_currencyFormat.format(widget.amenity.depositAmount)}' : ''}',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppStatusColors.paid,
                         ),
@@ -637,8 +610,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                     Expanded(
                       child: Text(
                         'Hạn mức: Tối đa ${widget.amenity.maxSlotsPerWeek} lượt/tuần / căn hộ',
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: AppTheme.textPrimary,
                         ),
@@ -672,8 +644,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           children: [
                             Text(
                               'Quy định & Hoàn cọc:',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue.shade900,
                               ),
@@ -681,8 +652,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                             const SizedBox(height: 2),
                             Text(
                               widget.amenity.rulesAndRegulations!,
-                              style: TextStyle(
-                                fontSize: 11,
+                              style: context.labelSmall?.copyWith(
                                 color: Colors.blue.shade900,
                               ),
                             ),
@@ -744,8 +714,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           index == 0
                               ? 'Hôm nay'
                               : _dayOfWeekFormat.format(date),
-                          style: TextStyle(
-                            fontSize: 11,
+                          style: context.labelSmall?.copyWith(
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.normal,
@@ -757,8 +726,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                         const SizedBox(height: 4),
                         Text(
                           _dateDisplayFormat.format(date),
-                          style: TextStyle(
-                            fontSize: 14,
+                          style: context.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: isSelected
                                 ? Colors.white
@@ -876,8 +844,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                               const SizedBox(width: 4),
                               Text(
                                 myBookingInSlot.statusDisplayName,
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.green.shade900,
                                 ),
@@ -912,10 +879,9 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                         color: Colors.orange.shade100,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Bảo trì',
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.deepOrange,
                         ),
@@ -935,10 +901,9 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Đã qua',
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.grey,
                         ),
@@ -967,8 +932,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       ),
                       child: Text(
                         isSelected ? 'Chờ duyệt' : 'Vào Waitlist',
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isSelected
                               ? Colors.white
@@ -1017,9 +981,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       ),
                       title: Text(
                         slot,
-                        style: TextStyle(
+                        style: context.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
                           color: (isPast || isMaintenance)
                               ? Colors.grey.shade600
                               : Colors.black87,
@@ -1027,8 +990,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       ),
                       subtitle: Text(
                         subtitleText,
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.labelSmall?.copyWith(
                           color: subtitleColor,
                           fontWeight: FontWeight.w500,
                         ),
@@ -1105,8 +1067,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                             Expanded(
                               child: Text(
                                 'Bạn đã có lịch (${mySelectedBooking.statusDisplayName}) ở khung giờ này. Để đặt lại hoặc thay đổi, vui lòng hủy lịch hiện tại trước.',
-                                style: TextStyle(
-                                  fontSize: 12,
+                                style: context.labelSmall?.copyWith(
                                   color: Colors.orange.shade900,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -1129,8 +1090,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           icon: const Icon(Icons.cancel_outlined),
                           label: Text(
                             'Hủy lịch khung giờ $_selectedSlot',
-                            style: const TextStyle(
-                              fontSize: 15,
+                            style: context.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1145,11 +1105,10 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Số người tham gia:',
-                              style: TextStyle(
+                              style: context.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13,
                               ),
                             ),
                             Row(
@@ -1165,9 +1124,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                                 ),
                                 Text(
                                   '$_guestsCount',
-                                  style: const TextStyle(
+                                  style: context.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 15,
                                   ),
                                 ),
                                 IconButton(
@@ -1221,8 +1179,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                                       : (_isWaitlistSelection
                                             ? 'Vào danh sách chờ khung giờ $_selectedSlot'
                                             : 'Đặt lịch khung giờ $_selectedSlot'),
-                                  style: const TextStyle(
-                                    fontSize: 15,
+                                  style: context.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1260,13 +1217,13 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Column(
+        title: Column(
           children: [
-            Icon(Icons.check_circle_rounded, color: AppTheme.success, size: 56),
-            SizedBox(height: 12),
+            const Icon(Icons.check_circle_rounded, color: AppTheme.success, size: 56),
+            const SizedBox(height: 12),
             Text(
               'Đặt Dịch Vụ Thành Công!',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: dialogCtx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -1277,16 +1234,15 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
             children: [
               Text(
                 widget.amenity.name,
-                style: const TextStyle(
+                style: dialogCtx.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
                 '${_fullDateFormat.format(_selectedDate)} • $slot',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                style: dialogCtx.bodySmall?.copyWith(color: AppTheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -1299,18 +1255,16 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Mã đặt chỗ:',
-                      style: TextStyle(
-                        fontSize: 13,
+                      style: dialogCtx.bodySmall?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
                     ),
                     Text(
                       bookingCode,
-                      style: const TextStyle(
+                      style: dialogCtx.titleMedium?.copyWith(
                         fontWeight: FontWeight.w900,
-                        fontSize: 15,
                         color: AppTheme.primary,
                       ),
                     ),
