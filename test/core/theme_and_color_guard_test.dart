@@ -102,6 +102,11 @@ void main() {
       'lib/features/resident/screens/edit_issue_screen.dart',
       'lib/features/resident/screens/resident_handover_screen.dart',
       'lib/features/resident/screens/link_request_screen.dart',
+      // Module 21: Đổi mật khẩu, Xác thực OTP, Tra cứu chứng từ điện tử & Xem trước chứng từ (Change Password, Verify OTP, Document Lookup & Document Preview) - Cán mốc 100% tất cả các màn hình
+      'lib/features/auth/screens/change_password_screen.dart',
+      'lib/features/auth/screens/verify_otp_screen.dart',
+      'lib/features/document/screens/document_lookup_screen.dart',
+      'lib/features/document/screens/document_preview_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

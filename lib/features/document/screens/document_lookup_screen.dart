@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/document_lookup_result_model.dart';
 import '../../../data/providers/document_providers.dart';
 
@@ -211,16 +212,16 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
     final successColor = AppStatusColors.getPaid(context);
     final successBg = isDark
         ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
-        : const Color(0xFFF0FDF4);
+        : AppTheme.success.withValues(alpha: 0.08);
     final borderColor = isDark
         ? successColor.withValues(alpha: 0.4)
-        : const Color(0xFF15803D);
+        : AppTheme.success;
     final dividerColor = isDark
         ? theme.dividerColor.withValues(alpha: 0.2)
-        : const Color(0xFFBBF7D0);
+        : AppTheme.success.withValues(alpha: 0.25);
     final messageColor = isDark
         ? theme.colorScheme.onSurfaceVariant
-        : const Color(0xFF166534);
+        : AppTheme.textPrimary;
 
     final dateFormat = DateFormat('dd/MM/yyyy');
     final dateTimeFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -252,19 +253,17 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
                     children: [
                       Text(
                         'CHỨNG TỪ HỢP LỆ & XÁC THỰC',
-                        style: TextStyle(
+                        style: context.titleMedium?.copyWith(
                           color: successColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         result.message ??
                             'Chứng từ đã được phát hành và lưu trữ hợp lệ trên hệ thống.',
-                        style: TextStyle(
+                        style: context.bodySmall?.copyWith(
                           color: messageColor,
-                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -304,16 +303,16 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
     final errorColor = AppStatusColors.getUnpaid(context);
     final errorBg = isDark
         ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
-        : const Color(0xFFFEF2F2);
+        : AppTheme.error.withValues(alpha: 0.08);
     final borderColor = isDark
         ? errorColor.withValues(alpha: 0.4)
-        : const Color(0xFFB91C1C);
+        : AppTheme.error;
     final messageColor = isDark
         ? theme.colorScheme.onSurfaceVariant
-        : const Color(0xFF991B1B);
+        : AppTheme.error;
     final codeColor = isDark
         ? theme.colorScheme.error
-        : const Color(0xFF7F1D1D);
+        : AppTheme.error;
 
     return Card(
       elevation: 0,
@@ -339,27 +338,24 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
                 children: [
                   Text(
                     'CHỨNG TỪ KHÔNG HỢP LỆ',
-                    style: TextStyle(
+                    style: context.titleMedium?.copyWith(
                       color: errorColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     result.message ??
                         'Không tìm thấy chứng từ với mã tra cứu tương ứng hoặc chứng từ đã bị hủy.',
-                    style: TextStyle(
+                    style: context.bodyMedium?.copyWith(
                       color: messageColor,
-                      fontSize: 14,
                     ),
                   ),
                   if (result.lookupCode != null && result.lookupCode!.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
                       'Mã tra cứu: ${result.lookupCode}',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         color: codeColor,
                         fontWeight: FontWeight.w600,
                       ),
@@ -377,10 +373,10 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
   Widget _buildDetailRow(BuildContext context, String label, String value, {bool isHighlight = false}) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final labelColor = isDark ? theme.colorScheme.onSurfaceVariant : const Color(0xFF374151);
+    final labelColor = isDark ? theme.colorScheme.onSurfaceVariant : AppTheme.textSecondary;
     final valueColor = isHighlight
-        ? (isDark ? theme.colorScheme.primary : const Color(0xFF0F172A))
-        : (isDark ? theme.colorScheme.onSurface : const Color(0xFF1F2937));
+        ? (isDark ? theme.colorScheme.primary : AppTheme.textPrimary)
+        : (isDark ? theme.colorScheme.onSurface : AppTheme.textPrimary);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -391,9 +387,8 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
             width: 130,
             child: Text(
               label,
-              style: TextStyle(
+              style: context.bodySmall?.copyWith(
                 color: labelColor,
-                fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -402,9 +397,8 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
           Expanded(
             child: Text(
               value,
-              style: TextStyle(
+              style: context.bodySmall?.copyWith(
                 color: valueColor,
-                fontSize: 13,
                 fontWeight: isHighlight ? FontWeight.bold : FontWeight.w500,
               ),
             ),

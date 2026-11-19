@@ -111,6 +111,14 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 5 file: `notification_center_screen.dart`, `payment_history_screen.dart`, `edit_issue_screen.dart`, `resident_handover_screen.dart`, `link_request_screen.dart` (Module 20).
   - **Cán Mốc Kép Lịch Sử**: 100% toàn bộ màn hình thuộc cả 2 phân hệ cốt lõi `lib/features/resident/screens/` và `lib/features/management/screens/` đạt trạng thái sạch hoàn toàn (0 điểm nợ `fontSize:` cứng, 0 mã màu cứng).
   - Giảm thêm 37 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 365 xuống 328). Đưa tổng số điểm nợ typography được xóa bỏ lên 608 điểm qua 12 gói dọn dẹp liên hoàn (xóa sạch 65.0% nợ). Toàn bộ 4 guardrail tests và 13 resident screen widget/responsive tests đều vượt qua 100%.
+- **Gói 2.13 Chuẩn Hóa Typography & Tokens Toàn Diện 4 Màn Hình Cuối Cùng Toàn Ứng Dụng: Đổi Mật Khẩu, Xác Thực OTP, Tra Cứu Chứng Từ Điện Tử & Xem Trước Chứng Từ (Cán Mốc 100% Toàn Bộ Screens Ứng Dụng Đạt Zero Debt Typography & Zero Hardcoded Color)**:
+  - `ChangePasswordScreen`: Xóa sạch 100% 2/2 điểm `fontSize:` cứng, chuyển đổi toàn bộ 2 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`.
+  - `VerifyOtpScreen`: Xóa sạch 100% 2/2 điểm `fontSize:` cứng, chuyển đổi lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess`.
+  - `DocumentLookupScreen`: Xóa sạch 100% 7/7 điểm `fontSize:` cứng và 11 điểm mã màu cứng, thay thế bằng `AppStatusColors`, `AppTheme.success`, `AppTheme.error`, `AppTheme.textPrimary`, `AppTheme.textSecondary`.
+  - `DocumentPreviewScreen`: Xóa sạch 100% 1/1 điểm `fontSize:` cứng tại AppBar tiêu đề tệp đính kèm sang `context.titleLarge`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 4 file: `change_password_screen.dart`, `verify_otp_screen.dart`, `document_lookup_screen.dart`, `document_preview_screen.dart` (Module 21).
+  - **Cán Mốc Toàn Thắng Lịch Sử**: 100% toàn bộ tất cả màn hình giao diện (`*/screens/*.dart`) trong toàn bộ ứng dụng Vivona đạt trạng thái sạch hoàn toàn (0 điểm nợ `fontSize:` cứng, 0 mã màu cứng).
+  - Giảm thêm 12 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 328 xuống 316). Đưa tổng số điểm nợ typography được xóa bỏ lên 620 điểm qua 13 gói dọn dẹp liên hoàn (xóa sạch 66.2% nợ). Toàn bộ 4 guardrail tests và 22 widget tests đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../widgets/otp_input_boxes.dart';
 
@@ -68,12 +70,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
       await ref.read(authRepositoryProvider).sendPasswordResetOtp(widget.email);
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã gửi lại mã OTP mới vào hòm thư của bạn.'),
-          backgroundColor: AppTheme.success,
-        ),
-      );
+      AppSnackBar.showSuccess(context, 'Đã gửi lại mã OTP mới vào hòm thư của bạn.');
       _startCountdown();
     } catch (e) {
       if (!mounted) return;
@@ -252,8 +249,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
                               _secondsRemaining > 0
                                   ? 'Gửi lại mã sau ($_secondsRemaining s)'
                                   : 'Chưa nhận được mã?',
-                              style: TextStyle(
-                                fontSize: 13,
+                              style: context.bodySmall?.copyWith(
                                 color: _secondsRemaining > 0
                                     ? AppTheme.textSecondary
                                     : AppTheme.textPrimary,
@@ -273,11 +269,10 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
                                         width: 14,
                                         child: CircularProgressIndicator(strokeWidth: 2),
                                       )
-                                    : const Text(
+                                    : Text(
                                         'Gửi lại mã',
-                                        style: TextStyle(
+                                        style: context.labelMedium?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 13,
                                         ),
                                       ),
                               ),

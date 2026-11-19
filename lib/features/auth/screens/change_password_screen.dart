@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -36,22 +38,12 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       await ref.read(authRepositoryProvider).updatePassword(_passwordController.text);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đổi mật khẩu thành công!'),
-            backgroundColor: AppTheme.success,
-          ),
-        );
+        AppSnackBar.showSuccess(context, 'Đổi mật khẩu thành công!');
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     } finally {
       if (mounted) {
@@ -90,10 +82,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Nhập mật khẩu mới của bạn. Mật khẩu phải chứa ít nhất 6 ký tự, bao gồm cả chữ cái và chữ số để đảm bảo an toàn.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                      style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                     ),
                     const SizedBox(height: 24),
                     AppCard(
@@ -159,9 +151,15 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                                     width: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                   )
-                                : const FittedBox(
+                                : FittedBox(
                                     fit: BoxFit.scaleDown,
-                                    child: Text('Cập nhật mật khẩu', style: TextStyle(fontSize: 16)),
+                                    child: Text(
+                                      'Cập nhật mật khẩu',
+                                      style: context.titleMedium?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                           ),
                         ],

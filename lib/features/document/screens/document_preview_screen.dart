@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Màn hình xem trước chứng từ PDF tích hợp xem trực quan,
 /// in ấn (Wifi/AirPrint), lưu file và chia sẻ qua Zalo/Email.
@@ -24,7 +25,7 @@ class DocumentPreviewScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+          style: context.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: Colors.white),
         ),
         elevation: 0,
         backgroundColor: AppTheme.primary,
