@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/models/petition_model.dart';
@@ -84,12 +86,7 @@ class _ResidentCommunityScreenState
     final authUser = ref.read(authProvider).valueOrNull;
     if (authUser == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Vui lòng đăng nhập để đồng thuận kiến nghị'),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, 'Vui lòng đăng nhập để đồng thuận kiến nghị');
       }
       return;
     }
@@ -112,28 +109,16 @@ class _ResidentCommunityScreenState
           )),
         );
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã ghi nhận sự đồng thuận của căn hộ bạn'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          AppSnackBar.showSuccess(context, 'Đã ghi nhận sự đồng thuận của căn hộ bạn');
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(res['message'] ?? 'Thao tác không thành công'),
-              backgroundColor: AppTheme.error,
-            ),
-          );
+          AppSnackBar.showError(context, res['message'] ?? 'Thao tác không thành công');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
-        );
+        AppSnackBar.showError(context, 'Lỗi: $e');
       }
     }
   }
@@ -168,10 +153,7 @@ class _ResidentCommunityScreenState
           indicatorWeight: 3,
           labelColor: AppTheme.primary,
           unselectedLabelColor: Colors.grey,
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
+          labelStyle: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           tabs: const [
             Tab(
               icon: Icon(Icons.how_to_vote_outlined),
@@ -261,11 +243,7 @@ class _ResidentCommunityScreenState
                   ),
                   child: Text(
                     poll.pollCode,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: context.labelSmall?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -302,13 +280,7 @@ class _ResidentCommunityScreenState
                         poll.isOfficialAssembly
                             ? 'Nghị quyết chính thức (Hội nghị nhà chung cư)'
                             : 'Khảo sát ý kiến',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: poll.isOfficialAssembly
-                              ? Colors.deepPurple.shade700
-                              : Colors.blue.shade700,
-                        ),
+                        style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: poll.isOfficialAssembly ? Colors.deepPurple.shade700 : Colors.blue.shade700),
                       ),
                     ],
                   ),
@@ -327,25 +299,7 @@ class _ResidentCommunityScreenState
                         color: Colors.green.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_circle_outline,
-                          size: 14,
-                          color: Colors.green,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Đã biểu quyết',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.check_circle_outline, size: 14, color: Colors.green), const SizedBox(width: 4), Text('Đã biểu quyết', style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.green)),],),
                   )
                 else
                   Container(
@@ -359,11 +313,7 @@ class _ResidentCommunityScreenState
                     ),
                     child: Text(
                       poll.statusDisplayName,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
-                      ),
+                      style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                     ),
                   ),
               ],
@@ -371,13 +321,13 @@ class _ResidentCommunityScreenState
             const SizedBox(height: 10),
             Text(
               poll.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (poll.description != null && poll.description!.isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(
                 poll.description!,
-                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -399,15 +349,12 @@ class _ResidentCommunityScreenState
                   const SizedBox(width: 6),
                   Text(
                     poll.voteWeightDisplayName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
+                    style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const Spacer(),
                   Text(
                     'Hạn chót: ${_dateFormat.format(poll.endTime)}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                   ),
                 ],
               ),
@@ -511,11 +458,7 @@ class _ResidentCommunityScreenState
                   ),
                   child: Text(
                     petition.petitionCode,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: context.labelSmall?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
                   ),
                 ),
                 Container(
@@ -529,11 +472,7 @@ class _ResidentCommunityScreenState
                   ),
                   child: Text(
                     petition.statusDisplayName,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
-                    ),
+                    style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                   ),
                 ),
               ],
@@ -541,12 +480,12 @@ class _ResidentCommunityScreenState
             const SizedBox(height: 10),
             Text(
               petition.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text(
               petition.content,
-              style: TextStyle(fontSize: 13, color: Colors.grey[800]),
+              style: context.bodyMedium?.copyWith(color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 12),
 
@@ -565,28 +504,11 @@ class _ResidentCommunityScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.verified_outlined,
-                          size: 16,
-                          color: Colors.green,
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'Phản hồi từ Ban Quản Lý:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
+                    Row(children: [const Icon(Icons.verified_outlined, size: 16, color: Colors.green), const SizedBox(width: 6), Text('Phản hồi từ Ban Quản Lý:', style: context.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.green)),],),
                     const SizedBox(height: 4),
                     Text(
                       petition.officialResponse!,
-                      style: const TextStyle(fontSize: 13),
+                      style: context.bodyMedium,
                     ),
                   ],
                 ),
@@ -600,7 +522,7 @@ class _ResidentCommunityScreenState
               children: [
                 Text(
                   petition.categoryDisplayName,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                 ),
                 ElevatedButton.icon(
                   onPressed: petition.isEndorsedByMe
@@ -627,10 +549,7 @@ class _ResidentCommunityScreenState
                     petition.isEndorsedByMe
                         ? 'Đã đồng thuận (${petition.endorsementCount})'
                         : 'Đồng thuận (${petition.endorsementCount})',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
+                    style: context.labelMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

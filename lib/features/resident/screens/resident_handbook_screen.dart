@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/handbook_provider.dart';
@@ -50,22 +52,12 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         await launchUrl(launchUri);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Không thể thực hiện cuộc gọi đến $phoneNumber'),
-            ),
-          );
+          AppSnackBar.showError(context, 'Không thể thực hiện cuộc gọi đến $phoneNumber');
         }
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Không thể mở ứng dụng điện thoại cho số: $phoneNumber',
-            ),
-          ),
-        );
+        AppSnackBar.showError(context, 'Không thể mở ứng dụng điện thoại cho số: $phoneNumber');
       }
     }
   }
@@ -78,7 +70,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(fontSize: 16),
+                style: context.bodyLarge,
                 decoration: const InputDecoration(
                   hintText: 'Tìm kiếm hotline, nội quy...',
                   border: InputBorder.none,
@@ -255,29 +247,18 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                       ),
                       child: Text(
                         typeLabel,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: typeColor,
-                        ),
+                        style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: typeColor),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       contact.name,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       contact.phone,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -397,21 +378,14 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                         ),
                         title: Text(
                           rule.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                          style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         children: [
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             child: Text(
                               rule.content,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade800,
-                                height: 1.5,
-                              ),
+                              style: context.bodyMedium?.copyWith(color: AppTheme.textPrimary, height: 1.5),
                             ),
                           ),
                         ],
@@ -465,11 +439,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                             Expanded(
                               child: Text(
                                 amenity.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primary,
-                                ),
+                                style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                               ),
                             ),
                             if (amenity.openHours != null &&
@@ -498,11 +468,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                                       const SizedBox(width: 4),
                                       Text(
                                         amenity.openHours!,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppStatusColors.paid,
-                                        ),
+                                        style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppStatusColors.paid),
                                       ),
                                     ],
                                   ),
@@ -515,11 +481,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                           const SizedBox(height: 8),
                           Text(
                             amenity.description!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade800,
-                              height: 1.4,
-                            ),
+                            style: context.bodyMedium?.copyWith(color: AppTheme.textPrimary, height: 1.4),
                           ),
                         ],
                         const SizedBox(height: 12),
@@ -541,10 +503,9 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
                               Icons.calendar_month_outlined,
                               size: 16,
                             ),
-                            label: const Text(
+                            label: Text(
                               'Đặt lịch sử dụng',
-                              style: TextStyle(
-                                fontSize: 13,
+                              style: context.labelMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -672,26 +633,19 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+                style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 2),
               Text(
                 formula,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
               ),
             ],
           ),
         ),
         Text(
           rate,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primary,
-            fontSize: 14,
-          ),
+          style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
         ),
       ],
     );
@@ -707,18 +661,14 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
           leading: const Icon(Icons.help_outline, color: AppTheme.primary),
           title: Text(
             question,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Text(
                 answer,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade800,
-                  height: 1.4,
-                ),
+                style: context.bodySmall?.copyWith(color: AppTheme.textPrimary, height: 1.4),
               ),
             ),
           ],

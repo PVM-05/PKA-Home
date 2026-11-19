@@ -73,6 +73,10 @@ void main() {
       'lib/features/management/screens/equipment_detail_screen.dart',
       'lib/features/management/screens/equipment_management_screen.dart',
       'lib/features/management/screens/maintenance_materials_screen.dart',
+      // Module 15: Bảng tin cộng đồng, Ý kiến cư dân & Sổ tay tòa nhà (Community & Handbook System)
+      'lib/features/management/screens/community_management_screen.dart',
+      'lib/features/resident/screens/resident_community_screen.dart',
+      'lib/features/resident/screens/resident_handbook_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {
