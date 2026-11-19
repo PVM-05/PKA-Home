@@ -107,6 +107,14 @@ void main() {
       'lib/features/auth/screens/verify_otp_screen.dart',
       'lib/features/document/screens/document_lookup_screen.dart',
       'lib/features/document/screens/document_preview_screen.dart',
+      // Module 22: Cụm Auth Widgets & Resident Identity/Safety Widgets (MFA Setup, MFA Verification, OTP Boxes, Accept Invitation, Apartment Switcher, Sticky Emergency Bar & Equipment Interruption)
+      'lib/features/auth/widgets/mfa_setup_dialog.dart',
+      'lib/features/auth/widgets/mfa_verification_dialog.dart',
+      'lib/features/auth/widgets/otp_input_boxes.dart',
+      'lib/features/resident/widgets/accept_invitation_dialog.dart',
+      'lib/features/resident/widgets/apartment_switcher_chip.dart',
+      'lib/features/resident/widgets/sticky_emergency_bar.dart',
+      'lib/features/resident/widgets/equipment_interruption_banner.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

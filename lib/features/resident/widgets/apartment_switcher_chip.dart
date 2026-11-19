@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_glass.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
 
@@ -48,12 +49,9 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Chọn căn hộ quản lý',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       TextButton.icon(
                         onPressed: () {
@@ -61,7 +59,7 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                           context.push(AppRoutes.residentLinkRequest);
                         },
                         icon: const Icon(Icons.add, size: 18),
-                        label: const Text('Thêm căn hộ', style: TextStyle(fontSize: 13)),
+                        label: Text('Thêm căn hộ', style: context.labelMedium),
                       ),
                     ],
                   ),
@@ -106,7 +104,7 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                         ),
                         subtitle: Text(
                           '$role ${area != null ? "• ${area}m²" : ""}',
-                          style: const TextStyle(fontSize: 12),
+                          style: context.labelSmall,
                         ),
                         trailing: isSelected
                             ? const Icon(Icons.check_circle, color: AppTheme.primary)
@@ -149,20 +147,19 @@ class ApartmentSwitcherChip extends ConsumerWidget {
               opacity: 0.2,
               blur: 8.0,
               borderColor: Colors.white.withValues(alpha: 0.3),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.add_link, color: Colors.white, size: 16),
-                  SizedBox(width: 4),
+                  const Icon(Icons.add_link, color: Colors.white, size: 16),
+                  const SizedBox(width: 4),
                   Flexible(
                     child: Text(
                       'Liên kết căn hộ',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: TextStyle(
+                      style: context.labelMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -199,10 +196,9 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                     '$code',
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
-                    style: const TextStyle(
+                    style: context.labelMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -225,17 +221,17 @@ class ApartmentSwitcherChip extends ConsumerWidget {
         opacity: 0.15,
         blur: 8.0,
         borderColor: Colors.white.withValues(alpha: 0.2),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.apartment, color: Colors.white70, size: 16),
-            SizedBox(width: 6),
+            const Icon(Icons.apartment, color: Colors.white70, size: 16),
+            const SizedBox(width: 6),
             Flexible(
               child: Text(
                 'Đang tải...',
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
-                style: TextStyle(color: Colors.white70, fontSize: 13),
+                style: context.labelMedium?.copyWith(color: Colors.white70),
               ),
             ),
           ],

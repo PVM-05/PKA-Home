@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Hộp thoại xác thực 2 yếu tố khi đăng nhập tài khoản quản trị
 class MfaVerificationDialog extends StatefulWidget {
@@ -87,10 +88,10 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
             child: const Icon(Icons.security, color: AppTheme.primary),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               'Xác thực hai yếu tố',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -100,10 +101,10 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Tài khoản quản trị của bạn được bảo vệ bằng lớp bảo mật hai yếu tố (TOTP). '
               'Vui lòng mở ứng dụng Google Authenticator hoặc Microsoft Authenticator để lấy mã 6 chữ số.',
-              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.4),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -111,8 +112,7 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               maxLength: 6,
-              style: const TextStyle(
-                fontSize: 24,
+              style: context.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 8,
               ),
@@ -144,12 +144,12 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 16, color: Colors.red),
+                  const Icon(Icons.error_outline, size: 16, color: AppTheme.error),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: const TextStyle(fontSize: 12, color: Colors.red),
+                      style: context.labelSmall?.copyWith(color: AppTheme.error),
                     ),
                   ),
                 ],

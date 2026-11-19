@@ -119,6 +119,17 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 4 file: `change_password_screen.dart`, `verify_otp_screen.dart`, `document_lookup_screen.dart`, `document_preview_screen.dart` (Module 21).
   - **Cán Mốc Toàn Thắng Lịch Sử**: 100% toàn bộ tất cả màn hình giao diện (`*/screens/*.dart`) trong toàn bộ ứng dụng Vivona đạt trạng thái sạch hoàn toàn (0 điểm nợ `fontSize:` cứng, 0 mã màu cứng).
   - Giảm thêm 12 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 328 xuống 316). Đưa tổng số điểm nợ typography được xóa bỏ lên 620 điểm qua 13 gói dọn dẹp liên hoàn (xóa sạch 66.2% nợ). Toàn bộ 4 guardrail tests và 22 widget tests đều vượt qua 100%.
+- **Gói 2.14 Chuẩn Hóa Typography & Tokens Cụm Auth Widgets & Resident Identity/Safety Widgets (Cán Mốc 100% Zero Debt Toàn Bộ Phân Hệ Auth)**:
+  - `MfaSetupDialog`: Xóa sạch 100% 6/6 điểm `fontSize:` cứng, thay `Colors.red` bằng `AppTheme.error`, chuẩn hóa lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess`.
+  - `MfaVerificationDialog`: Xóa sạch 100% 4/4 điểm `fontSize:` cứng và 2 điểm `Colors.red` sang `AppTheme.error`.
+  - `OtpInputBoxes`: Kết nối kiểu chữ `context.titleLarge` chuẩn Design System cho các ô nhập mã xác thực OTP.
+  - `AcceptInvitationDialog`: Xóa sạch 100% 4/4 điểm `fontSize:` cứng tại tiêu đề, hướng dẫn và thông báo kích hoạt.
+  - `ApartmentSwitcherChip`: Xóa sạch 100% 6/6 điểm `fontSize:` cứng tại bottom sheet chọn căn hộ, chip hiển thị mã phòng và nút liên kết.
+  - `StickyEmergencyBar`: Xóa sạch 100% 4/4 điểm `fontSize:` cứng tại banner cảnh báo khẩn cấp, nhãn phân loại và nút chi tiết.
+  - `EquipmentInterruptionBanner`: Xóa sạch 100% 6/6 điểm `fontSize:` cứng và 14 điểm mã màu cứng, thay thế bằng `AppTheme.warningBackground`, `AppTheme.warningText`, `AppTheme.warningBorder`, `AppTheme.error`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 7 file: `mfa_setup_dialog.dart`, `mfa_verification_dialog.dart`, `otp_input_boxes.dart`, `accept_invitation_dialog.dart`, `apartment_switcher_chip.dart`, `sticky_emergency_bar.dart`, `equipment_interruption_banner.dart` (Module 22).
+  - **Cán Mốc Kỷ Lục Mới**: 100% toàn bộ phân hệ Xác thực (`lib/features/auth/`) bao gồm cả screens và widgets đạt trạng thái Zero Debt Typography & Zero Hardcoded Color.
+  - Giảm thêm 30 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 316 xuống 286). Đưa tổng số điểm nợ typography được xóa bỏ lên 650 điểm qua 14 gói dọn dẹp liên hoàn (xóa sạch 69.4% nợ). Toàn bộ 4 guardrail tests và 7 widget tests đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

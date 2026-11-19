@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_glass.dart';
 import '../../../data/providers/announcement_provider.dart';
 
@@ -73,8 +74,7 @@ class StickyEmergencyBar extends ConsumerWidget {
                   children: [
                     Text(
                       topEmergency.categoryDisplayName.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 10.5,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                         color: textColor,
@@ -88,10 +88,9 @@ class StickyEmergencyBar extends ConsumerWidget {
                           color: textColor,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Đang diễn ra',
-                          style: TextStyle(
-                            fontSize: 9.5,
+                          style: context.labelSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -105,8 +104,7 @@ class StickyEmergencyBar extends ConsumerWidget {
                   '${topEmergency.title}$timeText',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: textColor,
                   ),
@@ -130,9 +128,9 @@ class StickyEmergencyBar extends ConsumerWidget {
                 extra: topEmergency,
               );
             },
-            child: const Text(
+            child: Text(
               'Chi tiết',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],

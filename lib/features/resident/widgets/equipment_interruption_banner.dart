@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/equipment_maintenance_task_model.dart';
 import '../../../data/providers/equipment_provider.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
@@ -57,12 +59,12 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
   ) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? Colors.amber.shade900.withValues(alpha: 0.25) : const Color(0xFFFFF8E1);
-    final borderColor = isDark ? Colors.amber.shade700 : const Color(0xFFFFB74D);
-    final titleColor = isDark ? Colors.red.shade300 : const Color(0xFFB71C1C);
-    final subTitleColor = isDark ? Colors.grey.shade300 : const Color(0xFF5D4037);
-    final itemTextColor = isDark ? Colors.white : const Color(0xFF263238);
-    final timeColor = isDark ? Colors.grey.shade400 : const Color(0xFF546E7A);
+    final bgColor = isDark ? AppTheme.warning.withValues(alpha: 0.2) : AppTheme.warningBackground;
+    final borderColor = isDark ? AppTheme.warning.withValues(alpha: 0.5) : AppTheme.warningBorder;
+    final titleColor = isDark ? Colors.red.shade300 : AppTheme.error;
+    final subTitleColor = isDark ? Colors.grey.shade300 : AppTheme.textSecondary;
+    final itemTextColor = isDark ? Colors.white : AppTheme.textPrimary;
+    final timeColor = isDark ? Colors.grey.shade400 : AppTheme.textSecondary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -72,7 +74,7 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
         border: Border.all(color: borderColor, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFFB300).withValues(alpha: 0.12),
+            color: AppTheme.warning.withValues(alpha: 0.12),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -88,12 +90,12 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.amber.shade800 : const Color(0xFFFFE082),
+                  color: isDark ? AppTheme.warning.withValues(alpha: 0.3) : AppTheme.warningBorder,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.warning_amber_rounded,
-                  color: Color(0xFFD84315),
+                  color: AppTheme.warningText,
                   size: 20,
                 ),
               ),
@@ -104,16 +106,14 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                   children: [
                     Text(
                       'Bảo trì thiết bị - Tạm gián đoạn dịch vụ',
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: context.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: titleColor,
                       ),
                     ),
                     Text(
                       'Khu vực: $buildingName',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.labelSmall?.copyWith(
                         color: subTitleColor,
                       ),
                     ),
@@ -124,15 +124,14 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFCC80),
+                    color: AppTheme.warning.withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '${tasks.length} thiết bị',
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFE65100),
+                      color: AppTheme.warningText,
                     ),
                   ),
                 ),
@@ -155,7 +154,7 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                     child: Icon(
                       Icons.build_circle_outlined,
                       size: 16,
-                      color: Color(0xFFE65100),
+                      color: AppTheme.warningText,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -165,8 +164,7 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                       children: [
                         Text(
                           '$eqTitle: ${task.title}',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: itemTextColor,
                           ),
@@ -177,13 +175,12 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                             const Icon(
                               Icons.access_time,
                               size: 12,
-                              color: Color(0xFF78909C),
+                              color: AppTheme.textSecondary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Thời gian: ${dateFormat.format(task.scheduledStart)} - ${dateFormat.format(task.scheduledEnd)}',
-                              style: TextStyle(
-                                fontSize: 11,
+                              style: context.labelSmall?.copyWith(
                                 color: timeColor,
                               ),
                             ),
@@ -198,10 +195,9 @@ class EquipmentInterruptionBanner extends ConsumerWidget {
                                     ? task.serviceInterruptionNote
                                     : task.notes)!
                                 .trim(),
-                            style: const TextStyle(
-                              fontSize: 12,
+                            style: context.labelSmall?.copyWith(
                               fontStyle: FontStyle.italic,
-                              color: Color(0xFF455A64),
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                         ],

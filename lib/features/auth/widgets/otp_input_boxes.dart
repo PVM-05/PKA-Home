@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 
 class OtpInputBoxes extends StatefulWidget {
   final int length;
@@ -136,7 +137,7 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
                   focusNode: _focusNodes[index],
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: context.titleLarge?.copyWith(
                     fontSize: fontSize,
                     fontWeight: FontWeight.bold,
                   ),

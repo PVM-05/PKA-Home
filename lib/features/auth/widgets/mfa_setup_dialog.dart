@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 
 /// Hộp thoại thiết lập và kích hoạt xác thực hai yếu tố (MFA / TOTP)
 class MfaSetupDialog extends StatefulWidget {
@@ -49,12 +51,7 @@ class _MfaSetupDialogState extends State<MfaSetupDialog> {
     setState(() {
       _copied = true;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã sao chép khóa bí mật vào bộ nhớ tạm.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    AppSnackBar.showSuccess(context, 'Đã sao chép khóa bí mật vào bộ nhớ tạm.');
   }
 
   Future<void> _handleActivate() async {
@@ -107,10 +104,10 @@ class _MfaSetupDialogState extends State<MfaSetupDialog> {
             child: const Icon(Icons.enhanced_encryption, color: AppTheme.primary),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               'Kích hoạt xác thực 2 yếu tố',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -120,9 +117,9 @@ class _MfaSetupDialogState extends State<MfaSetupDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Bước 1: Mở ứng dụng Google Authenticator hoặc Microsoft Authenticator, chọn "Thêm khóa thủ công" và nhập khóa bí mật sau:',
-              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.4),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 12),
             Container(
@@ -137,10 +134,9 @@ class _MfaSetupDialogState extends State<MfaSetupDialog> {
                   Expanded(
                     child: SelectableText(
                       widget.secretKey,
-                      style: const TextStyle(
+                      style: context.bodyMedium?.copyWith(
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
                         letterSpacing: 1.5,
                       ),
                     ),
@@ -154,9 +150,9 @@ class _MfaSetupDialogState extends State<MfaSetupDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Bước 2: Nhập mã 6 chữ số hiển thị trên ứng dụng xác thực để kiểm tra và hoàn tất:',
-              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.4),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -164,7 +160,7 @@ class _MfaSetupDialogState extends State<MfaSetupDialog> {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               maxLength: 6,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 6),
+              style: context.headlineSmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 6),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 hintText: '000000',
@@ -183,7 +179,7 @@ class _MfaSetupDialogState extends State<MfaSetupDialog> {
               const SizedBox(height: 10),
               Text(
                 _errorMessage!,
-                style: const TextStyle(fontSize: 12, color: Colors.red),
+                style: context.labelSmall?.copyWith(color: AppTheme.error),
               ),
             ],
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/resident_lifecycle_provider.dart';
 
 class AcceptInvitationDialog extends ConsumerStatefulWidget {
@@ -65,10 +66,10 @@ class _AcceptInvitationDialogState extends ConsumerState<AcceptInvitationDialog>
             child: const Icon(Icons.key_rounded, color: AppTheme.primary, size: 22),
           ),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
               'Gia Nhập Căn Hộ Qua Mã Mời',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -77,9 +78,9 @@ class _AcceptInvitationDialogState extends ConsumerState<AcceptInvitationDialog>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Nhập mã mời được Ban Quản Lý hoặc Chủ hộ cung cấp để tự động liên kết vào căn hộ của bạn.',
-            style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -97,7 +98,7 @@ class _AcceptInvitationDialogState extends ConsumerState<AcceptInvitationDialog>
             const SizedBox(height: 10),
             Text(
               _errorMessage!,
-              style: const TextStyle(color: AppTheme.error, fontSize: 13),
+              style: context.bodySmall?.copyWith(color: AppTheme.error),
             ),
           ],
           if (_successMessage != null) ...[
@@ -109,7 +110,7 @@ class _AcceptInvitationDialogState extends ConsumerState<AcceptInvitationDialog>
                 Expanded(
                   child: Text(
                     _successMessage!,
-                    style: const TextStyle(color: AppTheme.success, fontSize: 13, fontWeight: FontWeight.w600),
+                    style: context.bodySmall?.copyWith(color: AppTheme.success, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
