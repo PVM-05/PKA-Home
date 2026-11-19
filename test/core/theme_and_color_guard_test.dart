@@ -91,6 +91,11 @@ void main() {
       'lib/features/management/screens/inspection_workstation_screen.dart',
       'lib/features/management/screens/link_request_management_screen.dart',
       'lib/features/management/screens/handover_management_screen.dart',
+      // Module 19: Giao dịch thanh toán BQL, Ủy quyền vai trò, Ma trận phân quyền & Nhật ký kiểm toán (Payment Transactions, Role Delegation, Permission Matrix & Audit Trail)
+      'lib/features/management/screens/management_payment_transactions_screen.dart',
+      'lib/features/management/screens/role_delegation_screen.dart',
+      'lib/features/management/screens/permission_matrix_screen.dart',
+      'lib/features/management/screens/audit_trail_screen.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

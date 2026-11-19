@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/resident_model.dart';
@@ -35,13 +37,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
     if (!context.mounted) return;
 
     if (eligibleUsers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Không có nhân sự BQL phù hợp để ủy quyền. Vui lòng tạo tài khoản nhân viên (Kế toán, Kỹ thuật viên...) trước.',
-          ),
-          backgroundColor: AppTheme.warning,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Không có nhân sự BQL phù hợp để ủy quyền. Vui lòng tạo tài khoản nhân viên (Kế toán, Kỹ thuật viên...) trước.',
       );
       return;
     }
@@ -169,10 +167,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                         fit: BoxFit.scaleDown,
                                         child: Text(
                                           item.roleDisplayName,
-                                          style: TextStyle(
+                                          style: context.labelSmall?.copyWith(
                                             color: roleColor,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
@@ -195,10 +192,9 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                         fit: BoxFit.scaleDown,
                                         child: Text(
                                           statusText,
-                                          style: TextStyle(
+                                          style: context.labelSmall?.copyWith(
                                             color: statusColor,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
@@ -220,17 +216,15 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                             const SizedBox(height: 12),
                             Text(
                               'Người nhận: ${item.delegateName ?? "N/A"}',
-                              style: const TextStyle(
+                              style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Người ủy quyền: ${item.delegatorName ?? "Quản trị viên"}',
-                              style: const TextStyle(
+                              style: context.bodySmall?.copyWith(
                                 color: AppTheme.textSecondary,
-                                fontSize: 13,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -245,7 +239,7 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                 Expanded(
                                   child: Text(
                                     '${_dateFormat.format(item.startsAt)} -> ${_dateFormat.format(item.endsAt)}',
-                                    style: const TextStyle(fontSize: 13),
+                                    style: context.bodySmall,
                                   ),
                                 ),
                               ],
@@ -261,8 +255,7 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                 ),
                                 child: Text(
                                   'Lý do: ${item.note}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                  style: context.labelSmall?.copyWith(
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),

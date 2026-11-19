@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../data/models/payment_transaction_model.dart';
@@ -30,14 +31,14 @@ class _ManagementPaymentTransactionsScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.verified, color: AppTheme.success),
-            SizedBox(width: 8),
+            const Icon(Icons.verified, color: AppTheme.success),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Chi tiết Giao dịch',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -98,14 +99,13 @@ class _ManagementPaymentTransactionsScreenState
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
           ),
           Flexible(
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: TextStyle(
-                fontSize: 13,
+              style: context.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: isAmount ? AppTheme.primary : AppTheme.textPrimary,
               ),
@@ -233,16 +233,14 @@ class _ManagementPaymentTransactionsScreenState
                                         children: [
                                           Text(
                                             tx.title ?? 'Giao dịch thanh toán',
-                                            style: const TextStyle(
+                                            style: context.titleSmall?.copyWith(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 14,
                                             ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             '${tx.transactionCode} • ${DateFormat('dd/MM/yyyy HH:mm').format(tx.createdAt)}',
-                                            style: const TextStyle(
-                                              fontSize: 12,
+                                            style: context.bodySmall?.copyWith(
                                               color: AppTheme.textSecondary,
                                             ),
                                           ),
@@ -255,9 +253,8 @@ class _ManagementPaymentTransactionsScreenState
                                       children: [
                                         Text(
                                           _currencyFormat.format(tx.amount),
-                                          style: const TextStyle(
+                                          style: context.titleSmall?.copyWith(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
                                             color: AppTheme.primary,
                                           ),
                                         ),
@@ -277,8 +274,7 @@ class _ManagementPaymentTransactionsScreenState
                                           ),
                                           child: Text(
                                             tx.statusDisplayName,
-                                            style: TextStyle(
-                                              fontSize: 10,
+                                            style: context.labelSmall?.copyWith(
                                               color: _getStatusColor(tx),
                                               fontWeight: FontWeight.bold,
                                             ),

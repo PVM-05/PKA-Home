@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
@@ -338,14 +339,13 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
                       color: _onlyMyActions ? Colors.white : AppTheme.primary,
                     ),
                     label: const Text('Của tôi'),
-                    labelStyle: TextStyle(
+                    labelStyle: context.bodySmall?.copyWith(
                       color: _onlyMyActions
                           ? Colors.white
                           : AppTheme.textPrimary,
                       fontWeight: _onlyMyActions
                           ? FontWeight.bold
                           : FontWeight.normal,
-                      fontSize: 13,
                     ),
                     backgroundColor: Colors.white,
                     selectedColor: AppTheme.primary,
@@ -443,9 +443,8 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
                                 children: [
                                   Text(
                                     log.title,
-                                    style: const TextStyle(
+                                    style: context.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 15,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -460,8 +459,7 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
                                   const SizedBox(height: 4),
                                   Text(
                                     relativeTime,
-                                    style: TextStyle(
-                                      fontSize: 12,
+                                    style: context.labelSmall?.copyWith(
                                       color: log.color,
                                     ),
                                   ),
@@ -487,10 +485,9 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
     return FilterChip(
       selected: isSelected,
       label: Text(label),
-      labelStyle: TextStyle(
+      labelStyle: context.bodySmall?.copyWith(
         color: isSelected ? Colors.white : AppTheme.textPrimary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 13,
       ),
       backgroundColor: Colors.white,
       selectedColor: AppTheme.primary,

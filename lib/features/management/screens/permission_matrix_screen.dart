@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/role_guard.dart';
 
@@ -43,32 +44,30 @@ class PermissionMatrixScreen extends StatelessWidget {
                   color: AppTheme.primary.withValues(alpha: 0.3),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.shield_outlined,
                     color: AppTheme.primary,
                     size: 24,
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Kiến Trúc Bảo Mật 2 Lớp (Defense-in-Depth)',
-                          style: TextStyle(
+                          style: context.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
                             color: AppTheme.primary,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           'Hệ thống áp dụng nghiêm ngặt nguyên tắc Đặc quyền tối thiểu (Least Privilege). Quyền hạn được bảo vệ 2 lớp: Tầng CSDL (Supabase RLS) và Tầng Giao diện (Flutter RoleGuard).',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.bodySmall?.copyWith(
                             color: AppTheme.textSecondary,
                             height: 1.3,
                           ),
@@ -166,9 +165,8 @@ class PermissionMatrixScreen extends StatelessWidget {
                                         children: [
                                           Text(
                                             perm.name,
-                                            style: const TextStyle(
+                                            style: context.bodySmall?.copyWith(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 13,
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -176,8 +174,7 @@ class PermissionMatrixScreen extends StatelessWidget {
                                           const SizedBox(height: 2),
                                           Text(
                                             perm.description,
-                                            style: const TextStyle(
-                                              fontSize: 11,
+                                            style: context.labelSmall?.copyWith(
                                               color: AppTheme.textSecondary,
                                             ),
                                             maxLines: 1,
@@ -224,8 +221,7 @@ class PermissionMatrixScreen extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Bảng trên thể hiện quyền hạn mặc định theo vai trò. Quyền hạn có thể được mở rộng tạm thời theo thời gian thực thông qua cơ chế Ủy quyền vai trò (xem mục Quản lý Ủy quyền).',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.bodySmall?.copyWith(
                         color: Colors.amber.shade900,
                         height: 1.4,
                         fontWeight: FontWeight.w500,
