@@ -51,7 +51,12 @@ SET status = 'available',
 -- Dọn sạch xe demo
 TRUNCATE TABLE public.vehicles CASCADE;
 
--- Ghi nhận lịch sử di chuyển schema
-INSERT INTO public._applied_migrations (name, applied_at)
-VALUES ('20261106_01_cleanup_dead_tables_and_seed_data', timezone('utc'::text, now()))
-ON CONFLICT DO NOTHING;
+-- Ghi nhận lịch sử di chuyển schema (nếu bảng tồn tại)
+DO $$
+BEGIN
+  IF to_regclass('public._applied_migrations') IS NOT NULL THEN
+    INSERT INTO public._applied_migrations (name, applied_at)
+    VALUES ('20261106_01_cleanup_dead_tables_and_seed_data', timezone('utc'::text, now()))
+    ON CONFLICT DO NOTHING;
+  END IF;
+END $$;

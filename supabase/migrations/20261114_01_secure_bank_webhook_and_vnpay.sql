@@ -7,9 +7,16 @@
 --   4. CẬP NHẬT RPC process_sepay_webhook TỰ ĐỘNG GẠCH NỢ AN TOÀN 100%.
 -- ==============================================================================
 
--- 1. Nới lỏng bảng audit_logs: Cho phép target_table và target_id nhận NULL
-ALTER TABLE public.audit_logs ALTER COLUMN target_table DROP NOT NULL;
-ALTER TABLE public.audit_logs ALTER COLUMN target_id DROP NOT NULL;
+-- 1. Nới lỏng bảng audit_logs: Cho phép target_table và target_id nhận NULL nếu tồn tại
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'audit_logs' AND column_name = 'target_table') THEN
+    ALTER TABLE public.audit_logs ALTER COLUMN target_table DROP NOT NULL;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'audit_logs' AND column_name = 'target_id') THEN
+    ALTER TABLE public.audit_logs ALTER COLUMN target_id DROP NOT NULL;
+  END IF;
+END $$;
 
 -- 2. Bổ sung các cột thanh toán cho bảng invoices nếu chưa có
 ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
@@ -19,9 +26,18 @@ ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS payment_reference TEXT;
 -- 3. Chuẩn hóa bảng payment_transactions: Gỡ bỏ triệt để check constraint status cũ
 ALTER TABLE public.payment_transactions ADD COLUMN IF NOT EXISTS idempotency_key TEXT;
 ALTER TABLE public.payment_transactions ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
-ALTER TABLE public.payment_transactions ALTER COLUMN transaction_code DROP NOT NULL;
-ALTER TABLE public.payment_transactions ALTER COLUMN type DROP NOT NULL;
-ALTER TABLE public.payment_transactions ALTER COLUMN user_id DROP NOT NULL;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_transactions' AND column_name = 'transaction_code') THEN
+    ALTER TABLE public.payment_transactions ALTER COLUMN transaction_code DROP NOT NULL;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_transactions' AND column_name = 'type') THEN
+    ALTER TABLE public.payment_transactions ALTER COLUMN type DROP NOT NULL;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'payment_transactions' AND column_name = 'user_id') THEN
+    ALTER TABLE public.payment_transactions ALTER COLUMN user_id DROP NOT NULL;
+  END IF;
+END $$;
 
 -- Gỡ bỏ ràng buộc status_check cũ chỉ cho phép PENDING/SUCCESS/FAILED/CANCELLED
 ALTER TABLE public.payment_transactions DROP CONSTRAINT IF EXISTS payment_transactions_status_check;

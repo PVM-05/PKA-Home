@@ -8,16 +8,16 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
 
 ## [2.3.0] - 2026-11-20
 
-### Đã thêm (Added) - Cổng Bảo Mật MFA AAL2, Hoàn Tất 21/21 RPCs & Tách Migration Chuẩn Hóa
+### Đã thêm (Added) - Cổng Bảo Mật MFA AAL2, Hoàn Tất 22/22 RPCs & Tách Migration Chuẩn Hóa
 - **Cổng Bảo Mật Bắt Buộc MFA / TOTP (`MfaChallengeScreen`) (C5)**:
   - Triển khai tuyến đường `AppRoutes.mfaChallenge` và màn hình bảo mật `MfaChallengeScreen` (`lib/features/auth/screens/mfa_challenge_screen.dart`), bảo vệ các tài khoản quản trị đã bật TOTP (kiểm thử bởi `mfa_challenge_screen_test.dart`).
   - Tích hợp `mfaChallengeRequiredProvider` vào bộ điều hướng toàn cục `appRouterProvider` và `GoRouterAuthNotifier`, loại bỏ triệt để race condition khi khôi phục phiên; cưỡng chế chuyển hướng và chặn người dùng truy cập mọi phân hệ khi phiên chưa đạt cấp độ AAL2.
   - Tích hợp hàm kiểm tra `is_aal2_if_mfa_enrolled()` trực tiếp vào `public.is_staff_or_management()`, áp đặt bảo vệ cấp độ AAL2 cho toàn bộ các bảng dữ liệu Ban Quản Lý và RPCs ở tầng cơ sở dữ liệu.
-- **Khôi Phục Đầy Đủ 21/21 RPCs Nghiệp Vụ Cốt Lõi Từ Archive (§0)**:
+- **Khôi Phục Đầy Đủ Toàn Bộ 22/22 RPCs Nghiệp Vụ Cốt Lõi Từ Archive (§0)**:
   - Tách bạch cấu trúc migration không sửa đè file đã áp dụng:
     - `20261120_01_security_hardening_auth_and_rls.sql`: Bảo tồn 10 RPCs đầu tiên và các trigger immutability.
-    - `20261120_02_align_enum_values.sql`: Migration chuyên biệt bổ sung các giá trị enum (`invoice_status`, `issue_status`, `user_role`, `vehicle_type`) an toàn, loại trừ rủi ro transaction block.
-    - `20261120_03_security_hardening_and_missing_rpcs.sql`: Khôi phục toàn diện 11 RPCs còn lại và 5 bảng nghiệp vụ, nâng tổng số RPCs khôi phục lên 21/21:
+    - `20261120_02_align_enum_values.sql`: Migration chuyên biệt cô lập các câu lệnh `ALTER TYPE ... ADD VALUE IF NOT EXISTS` (`invoice_status`, `issue_status`, `user_role`, `vehicle_type`) trong một transaction riêng biệt không tham chiếu enum mới, loại trừ hoàn toàn lỗi `unsafe use of new value of enum type` trên Postgres 12+.
+    - `20261120_03_security_hardening_and_missing_rpcs.sql`: Khôi phục toàn diện 12 RPCs còn lại và 5 bảng nghiệp vụ, nâng tổng số RPCs khôi phục lên trọn vẹn 22/22 RPCs có lời gọi trực tiếp trong ứng dụng:
       1. `generate_resident_activation_codes` (kèm alias `generate_bulk_resident_activations`)
       2. `get_financial_aging_report`: Phân tích tuổi nợ và dòng tiền (vá lỗi phân quyền chặn ẩn danh).
       3. `create_invoice_with_items`: Tạo hóa đơn kèm chi tiết ACID.
@@ -39,11 +39,20 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
       19. `get_co_residents`: Tra cứu thành viên cùng căn hộ.
       20. `check_in_amenity_booking`: Xác nhận check-in lượt đặt tiện ích.
       21. `get_amenity_slot_availability`: Tra cứu khung giờ tiện ích khả dụng.
+      22. `update_own_profile`: Cập nhật hồ sơ cá nhân an toàn (gọi bởi `UserRepository.updateProfile`).
+      23. `get_upcoming_maintenance_equipments`: Tra cứu thiết bị sắp đến hạn bảo trì trong 7 ngày (gọi bởi `EquipmentRepository.getUpcomingMaintenanceEquipments`).
+      24. `record_meter_reading`: Ghi nhận chỉ số điện nước ngoại tuyến / cá lẻ (gọi bởi `OfflineSyncManager`).
       *(Bao gồm 2 hàm hỗ trợ import batch: `import_apartments_batch`, `import_residents_batch`).*
-  - Khởi tạo 5 bảng còn thiếu: `emergency_contacts`, `building_rules`, `role_change_log`, `issue_ratings`, `building_equipments` kèm RLS policies.
-  - Sửa lỗi migration trên fresh database: Bọc lệnh `TRUNCATE TABLE public.issue_ratings CASCADE` trong `20261106_01_cleanup_dead_tables_and_seed_data.sql` với điều kiện kiểm tra tồn tại bảng `to_regclass`.
+  - Khởi tạo 5 bảng còn thiếu: `emergency_contacts`, `building_rules`, `role_change_log`, `issue_ratings`, `building_equipments` (mở rộng đầy đủ các trường `building`, `warranty_until`, `maintenance_interval_days`, `last_maintenance_date`, `next_maintenance_date`, `specifications` tương thích `BuildingEquipmentModel`) kèm RLS policies và index hiệu năng.
+  - Sửa lỗi tương thích migration trên fresh database:
+    - Bọc lệnh `TRUNCATE TABLE public.issue_ratings CASCADE` và `INSERT INTO public._applied_migrations` trong `20261106_01_cleanup_dead_tables_and_seed_data.sql` với điều kiện kiểm tra tồn tại bảng `to_regclass`.
+    - Bọc các lệnh `ALTER COLUMN target_table/id` và `transaction_code/type/user_id` trong `20261114_01_secure_bank_webhook_and_vnpay.sql` bằng kiểm tra tồn tại cột `information_schema.columns`.
 
 ### Đã sửa (Fixed) - Vá Lỗ Hổng Bảo Mật Nghiêm Trọng (C1 - C5) & Hoàn Thiện UI/Dark Mode (P1-1, P1-2, P1-9, P1-14)
+- **Khắc Phục 3 Điểm Nghẽn Triển Khai Cơ Sở Dữ Liệu (Deployment Blockers)**:
+  - **Sửa Lỗi Ép Kiểu Enum `user_role` trong `is_staff_or_management()`**: Loại bỏ giá trị `'manager'` không tồn tại trong enum `user_role` (chuyển sang `role IN ('admin', 'management', 'staff', 'accountant', 'technician')`), ngăn chặn triệt để lỗi crash runtime PostgreSQL `invalid input value for enum user_role: "manager"`.
+  - **Khắc Phục Lỗi Cột Trong `verify_activation_code`**: Thay thế tham chiếu cột `failed_attempts` sang `code_attempts` và kiểm tra hết hạn linh hoạt `COALESCE(expires_at, created_at + INTERVAL '30 days')`, đồng thời bổ sung các câu lệnh `ALTER TABLE public.resident_activations ADD COLUMN IF NOT EXISTS expires_at/code_attempts` đảm bảo tương thích 100% với schema gốc.
+  - **Khắc Phục Bế Tắc Trạng Thái Kích Hoạt Cư Dân**: Bổ sung cập nhật `status = 'otp_sent'` khi sinh mã OTP thành công, cho phép các RPC tiếp theo (`verify_activation_otp` và `complete_resident_activation`) nhận diện bản ghi kích hoạt; bổ sung trả về đồng bộ các trường `full_name`, `user_name`, `apartment_code`, `phone`, `activation_code`.
 - **Vá Lỗ Hổng Tự Nâng Quyền Hạn Admin (C1 & C2)**:
   - Thiết lập Trigger bất biến `trg_enforce_user_security_immutability` chặn người dùng tự sửa đổi `role`, `is_locked`, hoặc `is_active` trên bảng `users`.
   - Cập nhật trigger `handle_new_user()`: mọi tài khoản tự đăng ký mới mặc định gán vai trò `resident`, chỉ service_role mới có quyền gán role từ metadata.
@@ -55,6 +64,10 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - Triển khai bảng `system_runtime_config` và hàm `public.is_production_environment()`: Môi trường hoàn toàn do server quyết định, mặc định an toàn là Production (fail-safe).
   - Loại bỏ hoàn toàn tham số client `p_is_production` khỏi RPC `verify_activation_code` và Dart repository, ngăn chặn tuyệt đối việc kẻ xấu gửi cờ giả mạo để lấy `otp_hint`.
   - Ghi nhận trung thực hiện trạng SMS: Hệ thống chưa kết nối SMS gateway thực tế trên Production; khi chạy trên Production, `otp_hint` bị ẩn 100% và API thông báo người dùng liên hệ BQL để nhận mã, không còn thông báo sai "OTP đã được gửi đến số điện thoại". Luồng auto-fill OTP chỉ kích hoạt trên Dev/Staging khi server được cấu hình môi trường tương ứng.
+  - *Lưu ý cấu hình Dev/Staging cục bộ:* Bảng `system_runtime_config` khởi tạo mặc định là `environment = 'production'`. Để kích hoạt tính năng tự động điền OTP trong môi trường thử nghiệm, chạy lệnh SQL:
+    ```sql
+    UPDATE public.system_runtime_config SET value = 'development' WHERE key = 'environment';
+    ```
 - **Khắc Phục Nút Xóa Ảnh Sự Cố Vô Hình (P1-1)**:
   - Bổ sung `Icon(Icons.close_rounded, size: 16, color: Colors.white)` và padding cảm ứng 4dp trong `InkWell` tại `CreateIssueScreen`, giúp cư dân nhìn thấy và thao tác xóa ảnh đã đính kèm.
 - **Chống Tràn Bảng DataTable Hóa Đơn Máy Tính (P1-9)**:
@@ -62,7 +75,7 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
 - **Động Hóa Bộ Lọc Kỳ Báo Cáo Tài Chính (P1-14)**:
   - Xóa bỏ mảng tháng hardcode tĩnh `[10, 9, 8, 7, 6]`; triển khai hàm `_generateRecentPeriods()` tự động tính toán các kỳ đối soát 6 tháng gần nhất theo thời gian thực tại `FinancialReportScreen`.
 - **Tối Ưu Tương Phản Dark Mode Đạt Chuẩn WCAG AA (P1-2)**:
-  - Màu phụ cũ `#64748B` trên nền tối `#1E1E1E` chỉ đạt độ tương phản 3.6:1 (không đạt ngưỡng tối thiểu 4.5:1 của WCAG AA). Chuẩn hóa màu chữ phụ tối sang `Color(0xFF94A3B8)` Slate 400 đạt tỷ lệ tương phản **6.50:1**, vượt chuẩn WCAG AA.
+  - Màu phụ cũ `#64748B` trên nền tối `#1E1E1E` đạt tỷ lệ tương phản **3.50:1** (không đạt ngưỡng tối thiểu 4.5:1 của WCAG AA). Chuẩn hóa màu chữ phụ tối sang `Color(0xFF94A3B8)` Slate 400 đạt tỷ lệ tương phản **6.50:1**, vượt chuẩn WCAG AA.
   - Bổ sung cấu hình `onSurfaceVariant` cho cả `lightTheme` và `darkTheme`.
   - Chuyển đổi màu trạng thái tĩnh `AppStatusColors` sang các hàm getter thích ứng `getPaid(context)`, `getUnpaid(context)`, `getPendingConfirmation(context)` tại `InvoiceManagementScreen`.
 

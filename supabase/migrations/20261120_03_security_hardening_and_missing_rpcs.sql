@@ -4,19 +4,25 @@
 -- 1. [C3] Cơ chế xác định môi trường phía máy chủ (Server-Authoritative Environment Engine)
 --    - Bảng system_runtime_config & hàm is_production_environment()
 --    - Sửa verify_activation_code: Bỏ tham số client p_is_production; server tự quyết định ẩn/hiện OTP
+--    - Khắc phục lỗi cột (code_attempts, expires_at) và cập nhật trạng thái 'otp_sent'
 --    - Phản hồi trung thực về trạng thái SMS gateway trên production
 -- 2. [C4] Khắc phục triệt để lỗ hổng Inverted Authorization Check:
 --    - Hàm thực tế generate_resident_activation_codes(p_building_id UUID)
 --    - Khôi phục bản vá cho get_financial_aging_report chặn ẩn danh khai thác
 --    - import_apartments_batch & import_residents_batch
 -- 3. [C5] Tích hợp kiểm tra AAL2 vào is_staff_or_management() bảo vệ toàn diện 100% RLS BQL
+--    - Loại bỏ enum 'manager' không tồn tại khỏi user_role
 -- 4. [§0] Bổ sung 5 bảng nghiệp vụ còn thiếu (emergency_contacts, building_rules, role_change_log, issue_ratings, building_equipments)
--- 5. [§0] Khôi phục 9 RPCs quản trị và kế toán từ archive (hoàn tất 21/21 RPCs)
+-- 5. [§0] Khôi phục toàn bộ 22/22 RPCs quản trị, thiết bị, chỉ số và kế toán từ archive
 -- ==============================================================================
 
 -- ==============================================================================
 -- PHẦN 1: [C3] SERVER-AUTHORITATIVE ENVIRONMENT & BẢO MẬT KÍCH HOẠT CƯ DÂN
 -- ==============================================================================
+
+-- Đảm bảo tương thích cấu trúc cột bảng resident_activations trên mọi môi trường
+ALTER TABLE public.resident_activations ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ DEFAULT (CURRENT_TIMESTAMP + INTERVAL '30 days');
+ALTER TABLE public.resident_activations ADD COLUMN IF NOT EXISTS code_attempts INT DEFAULT 0;
 
 -- 1.1 Bảng cấu hình runtime nội bộ của hệ thống (Chỉ service_role/admin được quyền ghi)
 CREATE TABLE IF NOT EXISTS public.system_runtime_config (
@@ -94,7 +100,7 @@ BEGIN
     -- 1. Tìm bản ghi kích hoạt đang chờ
     SELECT * INTO v_record
     FROM public.resident_activations
-    WHERE phone = v_clean_phone AND status = 'pending'
+    WHERE phone = v_clean_phone AND status IN ('pending', 'otp_sent')
     FOR UPDATE;
 
     IF NOT FOUND THEN
@@ -106,7 +112,7 @@ BEGIN
     END IF;
 
     -- 2. Kiểm tra Rate Limiting (Tối đa 5 lần thử sai)
-    IF v_record.failed_attempts >= 5 THEN
+    IF COALESCE(v_record.code_attempts, 0) >= 5 THEN
         RETURN jsonb_build_object(
             'success', FALSE,
             'error_code', 'MAX_ATTEMPTS_EXCEEDED',
@@ -115,7 +121,7 @@ BEGIN
     END IF;
 
     -- 3. Kiểm tra hết hạn mã kích hoạt
-    IF v_record.expires_at < CURRENT_TIMESTAMP THEN
+    IF COALESCE(v_record.expires_at, v_record.created_at + INTERVAL '30 days') < CURRENT_TIMESTAMP THEN
         RETURN jsonb_build_object(
             'success', FALSE,
             'error_code', 'EXPIRED',
@@ -128,23 +134,23 @@ BEGIN
     IF v_record.activation_code_hash IS NOT NULL AND v_record.activation_code_hash != '' THEN
         IF v_record.activation_code_hash != v_hashed_input THEN
             UPDATE public.resident_activations
-            SET failed_attempts = failed_attempts + 1, updated_at = CURRENT_TIMESTAMP
+            SET code_attempts = COALESCE(code_attempts, 0) + 1, updated_at = CURRENT_TIMESTAMP
             WHERE id = v_record.id;
             RETURN jsonb_build_object(
                 'success', FALSE,
                 'error_code', 'INVALID_CODE',
-                'message', 'Mã kích hoạt không chính xác. Bạn còn ' || (4 - v_record.failed_attempts) || ' lần thử.'
+                'message', 'Mã kích hoạt không chính xác. Bạn còn ' || (4 - COALESCE(v_record.code_attempts, 0)) || ' lần thử.'
             );
         END IF;
     ELSE
         IF UPPER(TRIM(v_record.activation_code)) != v_clean_code THEN
             UPDATE public.resident_activations
-            SET failed_attempts = failed_attempts + 1, updated_at = CURRENT_TIMESTAMP
+            SET code_attempts = COALESCE(code_attempts, 0) + 1, updated_at = CURRENT_TIMESTAMP
             WHERE id = v_record.id;
             RETURN jsonb_build_object(
                 'success', FALSE,
                 'error_code', 'INVALID_CODE',
-                'message', 'Mã kích hoạt không chính xác. Bạn còn ' || (4 - v_record.failed_attempts) || ' lần thử.'
+                'message', 'Mã kích hoạt không chính xác. Bạn còn ' || (4 - COALESCE(v_record.code_attempts, 0)) || ' lần thử.'
             );
         END IF;
     END IF;
@@ -153,9 +159,10 @@ BEGIN
     v_otp_code := lpad(floor(random() * 900000 + 100000)::text, 6, '0');
 
     UPDATE public.resident_activations
-    SET otp_code = v_otp_code,
+    SET status = 'otp_sent',
+        otp_code = v_otp_code,
         otp_expires_at = CURRENT_TIMESTAMP + INTERVAL '10 minutes',
-        failed_attempts = 0,
+        code_attempts = 0,
         updated_at = CURRENT_TIMESTAMP
     WHERE id = v_record.id;
 
@@ -169,7 +176,10 @@ BEGIN
         RETURN jsonb_build_object(
             'success', TRUE,
             'user_name', COALESCE(v_user_name, 'Cư dân'),
+            'full_name', COALESCE(v_user_name, 'Cư dân'),
             'apartment_code', COALESCE(v_apartment_code, ''),
+            'phone', v_clean_phone,
+            'activation_code', v_clean_code,
             'otp_hint', v_otp_code,
             'is_production', FALSE,
             'message', 'Mã kích hoạt hợp lệ. Chế độ thử nghiệm: Mã OTP tự động điền là ' || v_otp_code
@@ -179,7 +189,10 @@ BEGIN
         RETURN jsonb_build_object(
             'success', TRUE,
             'user_name', COALESCE(v_user_name, 'Cư dân'),
+            'full_name', COALESCE(v_user_name, 'Cư dân'),
             'apartment_code', COALESCE(v_apartment_code, ''),
+            'phone', v_clean_phone,
+            'activation_code', v_clean_code,
             'is_production', TRUE,
             'sms_dispatched', FALSE,
             'message', 'Mã kích hoạt hợp lệ. Lưu ý: Cổng SMS Brandname của tòa nhà chưa được kết nối. Vui lòng liên hệ trực tiếp Ban Quản Lý tòa nhà để nhận mã xác thực OTP.'
@@ -576,7 +589,7 @@ BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.users
     WHERE id = auth.uid()
-      AND role IN ('admin', 'management', 'staff', 'manager', 'accountant', 'technician')
+      AND role IN ('admin', 'management', 'staff', 'accountant', 'technician')
       AND is_active = true
       AND is_locked = false
   );
@@ -657,18 +670,34 @@ CREATE POLICY "issue_ratings_insert" ON public.issue_ratings FOR INSERT TO authe
 -- 4.5 Bảng building_equipments (Trang thiết bị tòa nhà phục vụ vận hành)
 CREATE TABLE IF NOT EXISTS public.building_equipments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    building_id UUID REFERENCES public.buildings(id) ON DELETE CASCADE,
+    code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    code TEXT UNIQUE,
     category TEXT NOT NULL,
-    location TEXT,
+    building TEXT NOT NULL DEFAULT 'Toàn khu',
+    building_id UUID REFERENCES public.buildings(id) ON DELETE SET NULL,
+    location TEXT NOT NULL DEFAULT '',
     installation_date DATE,
+    warranty_until DATE,
     warranty_expiry DATE,
-    status TEXT NOT NULL DEFAULT 'normal',
+    maintenance_interval_days INTEGER NOT NULL DEFAULT 30,
+    last_maintenance_date TIMESTAMPTZ,
+    next_maintenance_date TIMESTAMPTZ,
+    status TEXT NOT NULL DEFAULT 'operational',
+    specifications TEXT,
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+ALTER TABLE public.building_equipments
+    ADD COLUMN IF NOT EXISTS building TEXT DEFAULT 'Toàn khu',
+    ADD COLUMN IF NOT EXISTS warranty_until DATE,
+    ADD COLUMN IF NOT EXISTS maintenance_interval_days INTEGER DEFAULT 30,
+    ADD COLUMN IF NOT EXISTS last_maintenance_date TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS next_maintenance_date TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS specifications TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_building_equipments_next_maint ON public.building_equipments(next_maintenance_date);
 
 ALTER TABLE public.building_equipments ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "building_equipments_read" ON public.building_equipments;
@@ -1331,4 +1360,141 @@ $$;
 
 REVOKE ALL ON FUNCTION public.admin_unlink_apartment(UUID, UUID) FROM anon, PUBLIC;
 GRANT EXECUTE ON FUNCTION public.admin_unlink_apartment(UUID, UUID) TO authenticated;
+
+-- 5.10 Cập nhật hồ sơ cá nhân an toàn (update_own_profile)
+CREATE OR REPLACE FUNCTION public.update_own_profile(
+    p_full_name VARCHAR DEFAULT NULL,
+    p_phone VARCHAR DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth, pg_catalog
+AS $$
+DECLARE
+    v_user RECORD;
+BEGIN
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Yêu cầu đăng nhập để cập nhật hồ sơ.';
+    END IF;
+
+    UPDATE public.users 
+    SET 
+        full_name = COALESCE(TRIM(p_full_name), full_name),
+        phone = COALESCE(TRIM(p_phone), phone),
+        updated_at = NOW()
+    WHERE id = auth.uid()
+    RETURNING id, full_name, phone, role, created_at, updated_at INTO v_user;
+
+    RETURN to_jsonb(v_user);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.update_own_profile(VARCHAR, VARCHAR) FROM anon, PUBLIC;
+GRANT EXECUTE ON FUNCTION public.update_own_profile(VARCHAR, VARCHAR) TO authenticated;
+
+-- 5.11 Tra cứu thiết bị sắp đến hạn bảo trì trong N ngày (get_upcoming_maintenance_equipments)
+CREATE OR REPLACE FUNCTION public.get_upcoming_maintenance_equipments(p_days_ahead INTEGER DEFAULT 7)
+RETURNS SETOF public.building_equipments
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+    SELECT *
+    FROM public.building_equipments
+    WHERE next_maintenance_date IS NOT NULL
+      AND next_maintenance_date <= (now() + (p_days_ahead || ' days')::interval)
+      AND status != 'inactive'
+    ORDER BY next_maintenance_date ASC;
+$$;
+
+REVOKE ALL ON FUNCTION public.get_upcoming_maintenance_equipments(INTEGER) FROM anon, PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_upcoming_maintenance_equipments(INTEGER) TO authenticated;
+
+-- 5.12 Ghi nhận chỉ số điện nước cá lẻ hoặc ngoại tuyến (record_meter_reading)
+CREATE OR REPLACE FUNCTION public.record_meter_reading(
+    p_apartment_id UUID DEFAULT NULL,
+    p_period VARCHAR DEFAULT NULL,
+    p_electric_reading NUMERIC DEFAULT 0,
+    p_water_reading NUMERIC DEFAULT 0,
+    p_electric_image_url TEXT DEFAULT NULL,
+    p_water_image_url TEXT DEFAULT NULL,
+    p_notes TEXT DEFAULT NULL,
+    apartment_id UUID DEFAULT NULL,
+    period VARCHAR DEFAULT NULL,
+    electric_reading NUMERIC DEFAULT NULL,
+    water_reading NUMERIC DEFAULT NULL,
+    electric_image_url TEXT DEFAULT NULL,
+    water_image_url TEXT DEFAULT NULL,
+    notes TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+DECLARE
+    v_apt_id UUID;
+    v_prd VARCHAR;
+    v_elec NUMERIC;
+    v_water NUMERIC;
+    v_elec_img TEXT;
+    v_water_img TEXT;
+    v_nt TEXT;
+    v_submission_id UUID;
+BEGIN
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Yêu cầu đăng nhập để ghi nhận chỉ số điện nước';
+    END IF;
+
+    v_apt_id := COALESCE(p_apartment_id, apartment_id);
+    v_prd := COALESCE(p_period, period, to_char(CURRENT_DATE, 'YYYY-MM'));
+    v_elec := COALESCE(p_electric_reading, electric_reading, 0);
+    v_water := COALESCE(p_water_reading, water_reading, 0);
+    v_elec_img := COALESCE(p_electric_image_url, electric_image_url);
+    v_water_img := COALESCE(p_water_image_url, water_image_url);
+    v_nt := COALESCE(p_notes, notes);
+
+    IF v_apt_id IS NULL THEN
+        RAISE EXCEPTION 'Mã định danh căn hộ (apartment_id) không được để trống';
+    END IF;
+
+    INSERT INTO public.meter_reading_submissions (
+        apartment_id,
+        submitted_by,
+        period,
+        electric_reading,
+        water_reading,
+        electric_image_url,
+        water_image_url,
+        status,
+        anomaly_reason,
+        created_at,
+        updated_at
+    ) VALUES (
+        v_apt_id,
+        auth.uid(),
+        v_prd,
+        v_elec,
+        v_water,
+        v_elec_img,
+        v_water_img,
+        'pending',
+        v_nt,
+        NOW(),
+        NOW()
+    ) RETURNING id INTO v_submission_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_submission_id,
+        'message', 'Đã ghi nhận chỉ số điện nước thành công'
+    );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.record_meter_reading(UUID, VARCHAR, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, UUID, VARCHAR, NUMERIC, NUMERIC, TEXT, TEXT, TEXT) FROM anon, PUBLIC;
+GRANT EXECUTE ON FUNCTION public.record_meter_reading(UUID, VARCHAR, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, UUID, VARCHAR, NUMERIC, NUMERIC, TEXT, TEXT, TEXT) TO authenticated;
+
 
