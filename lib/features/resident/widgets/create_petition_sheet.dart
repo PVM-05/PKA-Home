@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/petition_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/community_provider.dart';
@@ -40,11 +43,9 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
     final authUser = ref.read(authProvider).valueOrNull;
     if (authUser == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Vui lòng đăng nhập để gửi kiến nghị'),
-            backgroundColor: AppTheme.error,
-          ),
+        AppSnackBar.showError(
+          context,
+          'Vui lòng đăng nhập để gửi kiến nghị',
         );
       }
       return;
@@ -74,20 +75,14 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
       if (mounted) {
         Navigator.pop(context);
         widget.onPetitionCreated?.call(newPet);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Kiến nghị của bạn đã được gửi tới Ban Quản Lý thành công',
-            ),
-            backgroundColor: Colors.green,
-          ),
+        AppSnackBar.showSuccess(
+          context,
+          'Kiến nghị của bạn đã được gửi tới Ban Quản Lý thành công',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -139,11 +134,10 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Gửi Ý Kiến & Kiến Nghị Mới',
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: context.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -241,7 +235,7 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                     Expanded(
                       child: Text(
                         'Kiến nghị sẽ được hiển thị công khai trên ứng dụng để các cư dân cùng bấm Đồng thuận ủng hộ.',
-                        style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+                        style: context.bodySmall?.copyWith(color: AppTheme.primary),
                       ),
                     ),
                   ],
@@ -272,9 +266,9 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                     : const Icon(Icons.send_rounded),
                 label: Text(
                   _isLoading ? 'Đang gửi...' : 'Gửi Kiến Nghị Tới Ban Quản Lý',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: context.labelLarge?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),

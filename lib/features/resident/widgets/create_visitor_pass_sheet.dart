@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/visitor_pass_model.dart';
 import '../../../data/providers/front_desk_provider.dart';
 
@@ -118,11 +121,9 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Không thể tạo vé khách: $e'),
-            backgroundColor: AppTheme.error,
-          ),
+        AppSnackBar.showError(
+          context,
+          'Không thể tạo vé khách: ${formatErrorMessage(e)}',
         );
       }
     } finally {
@@ -173,10 +174,10 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
                     child: const Icon(Icons.person_add_alt_1_rounded, color: AppTheme.primary),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Đón Khách Viếng Thăm Mới',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -305,10 +306,10 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 leading: const Icon(Icons.event_available_outlined, color: AppTheme.primary),
-                title: const Text('Dự kiến đến', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                title: Text('Dự kiến đến', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                 subtitle: Text(
                   _dateFormat.format(_expectedArrival),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 trailing: const Icon(Icons.edit_calendar_outlined),
                 onTap: () => _pickDateTime(isArrival: true),
@@ -346,7 +347,7 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
                     : const Icon(Icons.qr_code_rounded),
                 label: Text(
                   _isLoading ? 'Đang tạo vé...' : 'Tạo Mã Vé & QR Đón Khách',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: context.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ],

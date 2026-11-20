@@ -120,6 +120,14 @@ void main() {
       'lib/features/resident/widgets/vote_poll_sheet.dart',
       'lib/features/resident/widgets/resident_ledger_history_sheet.dart',
       'lib/features/resident/widgets/issue_rating_bottom_sheet.dart',
+      // Module 24: Toàn bộ Resident Widgets Cán Mốc 100% Zero Debt (Amenity QR, Amenity Receipt, Create Petition, Create Visitor Pass, Notification Card, Reschedule Booking & Visitor Pass QR)
+      'lib/features/resident/widgets/amenity_qr_code_dialog.dart',
+      'lib/features/resident/widgets/amenity_receipt_bottom_sheet.dart',
+      'lib/features/resident/widgets/create_petition_sheet.dart',
+      'lib/features/resident/widgets/create_visitor_pass_sheet.dart',
+      'lib/features/resident/widgets/notification_card.dart',
+      'lib/features/resident/widgets/reschedule_booking_bottom_sheet.dart',
+      'lib/features/resident/widgets/visitor_pass_qr_sheet.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

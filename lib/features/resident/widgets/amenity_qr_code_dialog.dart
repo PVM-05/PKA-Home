@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
 
 void showAmenityQrCodeDialog({
@@ -24,14 +25,14 @@ void showAmenityQrCodeDialog({
       title: Center(
         child: Column(
           children: [
-            const Text(
+            Text(
               'Vé Điện Tử Check-in',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: dialogCtx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               amenityName,
-              style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              style: dialogCtx.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -75,9 +76,8 @@ void showAmenityQrCodeDialog({
               ),
               child: Text(
                 token,
-                style: const TextStyle(
+                style: dialogCtx.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
                   letterSpacing: 1,
                 ),
               ),
@@ -85,9 +85,8 @@ void showAmenityQrCodeDialog({
             const SizedBox(height: 8),
             Text(
               'Căn hộ: $aptCode • Ca: $slot',
-              style: const TextStyle(
+              style: dialogCtx.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
               ),
             ),
             if (booking.isCheckedIn) ...[
@@ -102,17 +101,16 @@ void showAmenityQrCodeDialog({
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: Colors.green.shade200),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_circle, size: 14, color: Colors.green),
-                    SizedBox(width: 4),
+                    const Icon(Icons.check_circle, size: 14, color: AppTheme.success),
+                    const SizedBox(width: 4),
                     Text(
                       'Đã check-in tại cổng',
-                      style: TextStyle(
-                        fontSize: 11,
+                      style: dialogCtx.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: AppTheme.success,
                       ),
                     ),
                   ],
@@ -120,9 +118,9 @@ void showAmenityQrCodeDialog({
               ),
             ],
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Xuất trình mã này cho bảo vệ / lễ tân để quét check-in vào tiện ích',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              style: dialogCtx.bodySmall?.copyWith(color: AppTheme.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],

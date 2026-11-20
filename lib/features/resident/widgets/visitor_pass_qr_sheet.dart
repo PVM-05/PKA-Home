@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/models/visitor_pass_model.dart';
 
 class VisitorPassQrSheet extends StatelessWidget {
@@ -39,16 +41,16 @@ class VisitorPassQrSheet extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Tiêu đề
-            const Text(
+            Text(
               'Thẻ Khách Viếng Thăm',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               'Vui lòng gửi mã này cho khách để quét tại cổng kiểm soát',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 20),
 
@@ -100,10 +102,9 @@ class VisitorPassQrSheet extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       pass.passCode,
-                      style: const TextStyle(
+                      style: context.titleMedium?.copyWith(
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                         color: AppTheme.primary,
                       ),
                     ),
@@ -123,21 +124,21 @@ class VisitorPassQrSheet extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildInfoRow('Khách viếng thăm', pass.visitorName, isBold: true),
+                  _buildInfoRow(context, 'Khách viếng thăm', pass.visitorName, isBold: true),
                   if (pass.visitorPhone != null && pass.visitorPhone!.isNotEmpty) ...[
                     const Divider(height: 16),
-                    _buildInfoRow('Số điện thoại', pass.visitorPhone!),
+                    _buildInfoRow(context, 'Số điện thoại', pass.visitorPhone!),
                   ],
                   if (pass.licensePlate != null && pass.licensePlate!.isNotEmpty) ...[
                     const Divider(height: 16),
-                    _buildInfoRow('Biển số xe', pass.licensePlate!),
+                    _buildInfoRow(context, 'Biển số xe', pass.licensePlate!),
                   ],
                   const Divider(height: 16),
-                  _buildInfoRow('Dự kiến đến', dateFormat.format(pass.expectedArrival)),
+                  _buildInfoRow(context, 'Dự kiến đến', dateFormat.format(pass.expectedArrival)),
                   const Divider(height: 16),
-                  _buildInfoRow('Mục đích', pass.purposeDisplayName),
+                  _buildInfoRow(context, 'Mục đích', pass.purposeDisplayName),
                   const Divider(height: 16),
-                  _buildInfoRow('Trạng thái', pass.statusDisplayName),
+                  _buildInfoRow(context, 'Trạng thái', pass.statusDisplayName),
                 ],
               ),
             ),
@@ -150,11 +151,9 @@ class VisitorPassQrSheet extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: pass.passCode));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Đã sao chép mã vé vào bộ nhớ tạm'),
-                          duration: Duration(seconds: 2),
-                        ),
+                      AppSnackBar.showSuccess(
+                        context,
+                        'Đã sao chép mã vé vào bộ nhớ tạm',
                       );
                     },
                     icon: const Icon(Icons.copy_rounded, size: 18),
@@ -187,18 +186,17 @@ class VisitorPassQrSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {bool isBold = false}) {
+  Widget _buildInfoRow(BuildContext context, String label, String value, {bool isBold = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+        Text(label, style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             value,
             textAlign: TextAlign.end,
-            style: TextStyle(
-              fontSize: 14,
+            style: context.bodyMedium?.copyWith(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
             ),
           ),

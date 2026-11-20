@@ -137,6 +137,17 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - `IssueRatingBottomSheet`: Xóa sạch 100% 7/7 điểm `fontSize:` cứng, chuẩn hóa 2 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`, thay `Colors.amber` và `Colors.grey.shade600` bằng `AppTheme.warning` và `AppTheme.textSecondary`.
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 4 file: `tiered_fee_breakdown_dialog.dart`, `vote_poll_sheet.dart`, `resident_ledger_history_sheet.dart`, `issue_rating_bottom_sheet.dart` (Module 23).
   - Giảm thêm 36 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 286 xuống 250). Đưa tổng số điểm nợ typography được xóa bỏ lên 686 điểm qua 15 gói dọn dẹp liên hoàn (xóa sạch 73.3% nợ). Toàn bộ các guardrail tests và widget tests đều vượt qua 100%.
+- **Gói 2.16 Chuẩn Hóa Typography & Tokens 7 Resident Widgets Còn Lại (Cán Mốc Lịch Sử 100% Zero Debt Toàn Bộ Phân Hệ Resident)**:
+  - `AmenityQrCodeDialog`: Xóa sạch 100% 6/6 điểm `fontSize:` cứng, thay `Colors.green` bằng `AppTheme.success`.
+  - `AmenityReceiptBottomSheet`: Xóa sạch 100% 4/4 điểm `fontSize:` cứng, thay `Color(0xFFF9FAFB)` bằng `AppTheme.background`, chuẩn hóa 2 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess`.
+  - `CreatePetitionSheet`: Xóa sạch 100% 3/3 điểm `fontSize:` cứng, chuẩn hóa 3 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showError` và `AppSnackBar.showSuccess`.
+  - `CreateVisitorPassSheet`: Xóa sạch 100% 4/4 điểm `fontSize:` cứng, chuẩn hóa lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showError`.
+  - `NotificationCard`: Xóa sạch 100% 3/3 điểm `fontSize:` cứng, kết nối `context.titleMedium`, `context.bodySmall`, `context.bodyMedium`.
+  - `RescheduleBookingBottomSheet`: Xóa sạch 100% 7/7 điểm `fontSize:` cứng, chuẩn hóa 4 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showWarning`, `AppSnackBar.showSuccess`, `AppSnackBar.showError`.
+  - `VisitorPassQrSheet`: Xóa sạch 100% 5/5 điểm `fontSize:` cứng, chuẩn hóa lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 7 file: `amenity_qr_code_dialog.dart`, `amenity_receipt_bottom_sheet.dart`, `create_petition_sheet.dart`, `create_visitor_pass_sheet.dart`, `notification_card.dart`, `reschedule_booking_bottom_sheet.dart`, `visitor_pass_qr_sheet.dart` (Module 24).
+  - **Cán Mốc Toàn Thắng Lịch Sử Phân Hệ Cư Dân**: 100% toàn bộ phân hệ Cư dân (`lib/features/resident/`) bao gồm tất cả screens và widgets đạt trạng thái sạch hoàn toàn (0 điểm nợ `fontSize:` cứng).
+  - Giảm thêm 32 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 250 xuống 218). Đưa tổng số điểm nợ typography được xóa bỏ lên 718 điểm qua 16 gói dọn dẹp liên hoàn (xóa sạch 76.7% nợ). Toàn bộ các guardrail tests và widget tests đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
+import 'package:vivona/core/widgets/app_snack_bar.dart';
 import 'package:vivona/core/utils/amenity_slot_helper.dart';
 import 'package:vivona/core/utils/error_formatter.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
@@ -79,9 +81,7 @@ class _RescheduleBookingBottomSheetState
 
   Future<void> _handleConfirmReschedule() async {
     if (_selectedSlot == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn một khung giờ mới.')),
-      );
+      AppSnackBar.showWarning(context, 'Vui lòng chọn một khung giờ mới.');
       return;
     }
 
@@ -90,12 +90,9 @@ class _RescheduleBookingBottomSheetState
         _selectedDate.month == widget.booking.bookingDate.month &&
         _selectedDate.day == widget.booking.bookingDate.day;
     if (sameDate && _selectedSlot == widget.booking.timeSlot) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Vui lòng chọn ngày hoặc khung giờ khác với lịch hiện tại.',
-          ),
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Vui lòng chọn ngày hoặc khung giờ khác với lịch hiện tại.',
       );
       return;
     }
@@ -140,21 +137,11 @@ class _RescheduleBookingBottomSheetState
           successMsg = 'Đổi lịch đặt chỗ thành công!';
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(successMsg),
-            backgroundColor: AppTheme.success,
-          ),
-        );
+        AppSnackBar.showSuccess(context, successMsg);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -194,18 +181,16 @@ class _RescheduleBookingBottomSheetState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Đổi Lịch Đặt Chỗ',
-                        style: TextStyle(
-                          fontSize: 18,
+                        style: context.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Tiện ích: ${widget.amenity.name}',
-                        style: const TextStyle(
-                          fontSize: 13,
+                        style: context.bodySmall?.copyWith(
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -242,9 +227,8 @@ class _RescheduleBookingBottomSheetState
                   Expanded(
                     child: Text(
                       'Lượt đặt đã xác nhận/thanh toán sẽ giữ nguyên số người (${widget.booking.guestsCount} người) và bảo lưu toàn bộ chi phí/tiền cọc.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue.shade900,
+                      style: context.bodySmall?.copyWith(
+                        color: AppTheme.primary,
                       ),
                     ),
                   ),
@@ -297,25 +281,23 @@ class _RescheduleBookingBottomSheetState
                             index == 0
                                 ? 'Hôm nay'
                                 : _dayOfWeekFormat.format(date),
-                            style: TextStyle(
-                              fontSize: 11,
+                            style: context.labelSmall?.copyWith(
                               fontWeight: isSelected
                                   ? FontWeight.bold
                                   : FontWeight.normal,
                               color: isSelected
                                   ? Colors.white70
-                                  : Colors.grey.shade600,
+                                  : AppTheme.textSecondary,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             _dateDisplayFormat.format(date),
-                            style: TextStyle(
-                              fontSize: 13,
+                            style: context.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: isSelected
                                   ? Colors.white
-                                  : Colors.grey.shade900,
+                                  : AppTheme.textPrimary,
                             ),
                           ),
                         ],
@@ -349,9 +331,8 @@ class _RescheduleBookingBottomSheetState
                       ),
                       Text(
                         '$_guestsCount',
-                        style: const TextStyle(
+                        style: context.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
                       IconButton(
@@ -467,8 +448,7 @@ class _RescheduleBookingBottomSheetState
                         ),
                         subtitle: Text(
                           subtitleText,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.bodySmall?.copyWith(
                             color: subtitleColor,
                             fontWeight: FontWeight.w500,
                           ),
