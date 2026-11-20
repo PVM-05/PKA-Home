@@ -31,7 +31,7 @@ class ResidentOnboardingDialog {
                 height: 68,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [AppTheme.primary, Color(0xFF1E88E5)],
+                    colors: [AppTheme.primary, AppTheme.secondary],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -90,7 +90,7 @@ class ResidentOnboardingDialog {
               _buildFeatureItem(
                 context: ctx,
                 icon: Icons.receipt_long_rounded,
-                iconColor: const Color(0xFF1976D2),
+                iconColor: AppTheme.primary,
                 title: 'Hóa đơn & VietQR tức thì',
                 subtitle: 'Tra cứu phí minh bạch, thanh toán một chạm chuẩn VietQR & VNPay an toàn.',
               ),
@@ -98,7 +98,7 @@ class ResidentOnboardingDialog {
               _buildFeatureItem(
                 context: ctx,
                 icon: Icons.handyman_rounded,
-                iconColor: const Color(0xFFE65100),
+                iconColor: AppTheme.warning,
                 title: 'Báo cáo sự cố 24/7',
                 subtitle: 'Gửi hình ảnh phản ánh sự cố điện nước và theo dõi kỹ thuật xử lý trực tiếp.',
               ),
@@ -106,7 +106,7 @@ class ResidentOnboardingDialog {
               _buildFeatureItem(
                 context: ctx,
                 icon: Icons.speed_rounded,
-                iconColor: const Color(0xFF00897B),
+                iconColor: AppTheme.success,
                 title: 'Chỉ số điện nước AI',
                 subtitle: 'Chụp ảnh công tơ với nhận diện thông minh, cảnh báo bất thường kịp thời.',
               ),
@@ -114,7 +114,7 @@ class ResidentOnboardingDialog {
               _buildFeatureItem(
                 context: ctx,
                 icon: Icons.menu_book_rounded,
-                iconColor: const Color(0xFF7B1FA2),
+                iconColor: AppTheme.secondary,
                 title: 'Cẩm nang & Tiện ích tòa nhà',
                 subtitle: 'Hotline khẩn cấp, nội quy, đặt lịch phòng sinh hoạt & gửi xe dễ dàng.',
               ),
@@ -176,12 +176,12 @@ class ResidentOnboardingDialog {
       decoration: BoxDecoration(
         color: isDark
             ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.25)
-            : const Color(0xFFF8FAFC),
+            : AppTheme.background,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark
               ? Colors.white.withValues(alpha: 0.08)
-              : const Color(0xFFE2E8F0),
+              : AppTheme.border,
         ),
       ),
       child: Row(

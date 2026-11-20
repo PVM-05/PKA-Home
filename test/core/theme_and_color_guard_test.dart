@@ -120,7 +120,7 @@ void main() {
       'lib/features/resident/widgets/vote_poll_sheet.dart',
       'lib/features/resident/widgets/resident_ledger_history_sheet.dart',
       'lib/features/resident/widgets/issue_rating_bottom_sheet.dart',
-      // Module 24: Toàn bộ Resident Widgets Cán Mốc 100% Zero Debt (Amenity QR, Amenity Receipt, Create Petition, Create Visitor Pass, Notification Card, Reschedule Booking & Visitor Pass QR)
+      // Module 24: Toàn bộ Resident Widgets Cán Mốc 100% Zero Debt (Amenity QR, Amenity Receipt, Create Petition, Create Visitor Pass, Notification Card, Reschedule Booking, Visitor Pass QR & Resident Onboarding)
       'lib/features/resident/widgets/amenity_qr_code_dialog.dart',
       'lib/features/resident/widgets/amenity_receipt_bottom_sheet.dart',
       'lib/features/resident/widgets/create_petition_sheet.dart',
@@ -128,6 +128,7 @@ void main() {
       'lib/features/resident/widgets/notification_card.dart',
       'lib/features/resident/widgets/reschedule_booking_bottom_sheet.dart',
       'lib/features/resident/widgets/visitor_pass_qr_sheet.dart',
+      'lib/features/resident/widgets/resident_onboarding_dialog.dart',
       // Module 25: Cụm BQL Charts, Risk Radar & Hiệu suất Nhân sự (Debt Risk Radar, Revenue Trend Chart & Technician Performance Card)
       'lib/features/management/widgets/debt_risk_radar_tab.dart',
       'lib/features/management/widgets/revenue_trend_chart.dart',
