@@ -16,6 +16,7 @@ Hệ thống tài liệu chính thức của Vivona được chuẩn hóa theo c
 | 4 | **Danh Mục API & RPC Stored Procedures** | Hợp đồng giao tiếp (Contract) giữa Client và Backend, 10 RPCs giao dịch nguyên tử (ACID), tham số vào/ra và rollback. | [API_AND_RPC.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/API_AND_RPC.md) |
 | 5 | **Quy Trình Bàn Giao & Vận Hành** | Hướng dẫn Onboarding cơ sở mới, đặc tả 6 Sheet Excel import dữ liệu, quy trình nạp SQL, checklist nghiệm thu UAT. | [BAN_GIAO_VAN_HANH.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/BAN_GIAO_VAN_HANH.md) |
 | 6 | **Kiểm Thử & Đảm Bảo Chất Lượng (QA & Testing)** | Chiến lược kiểm thử tự động (TDD), 489 test cases (Unit, Widget, Provider, Integration, RLS Security) và Linter Quality Gate. | [TESTING_AND_QA.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/TESTING_AND_QA.md) |
+| 7 | **Kịch Bản Triển Khai Migration (Runbook)** | Quy trình kiểm thử và đẩy migration an toàn (Staging trước, Production sau), baseline repair, kiểm chứng 8 tiêu chí kỹ thuật và kế hoạch rollback. | [MIGRATION_DEPLOYMENT_RUNBOOK.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/MIGRATION_DEPLOYMENT_RUNBOOK.md) |
 
 ---
 
