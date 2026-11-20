@@ -22,7 +22,12 @@ TRUNCATE TABLE public.invoices CASCADE;
 
 -- Phản ánh sự cố & Dữ liệu đính kèm
 TRUNCATE TABLE public.issue_comments CASCADE;
-TRUNCATE TABLE public.issue_ratings CASCADE;
+DO $$
+BEGIN
+  IF to_regclass('public.issue_ratings') IS NOT NULL THEN
+    EXECUTE 'TRUNCATE TABLE public.issue_ratings CASCADE';
+  END IF;
+END $$;
 TRUNCATE TABLE public.issue_images CASCADE;
 TRUNCATE TABLE public.issue_materials CASCADE;
 TRUNCATE TABLE public.issue_reports CASCADE;
