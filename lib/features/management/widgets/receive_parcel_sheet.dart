@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/dashboard_providers.dart';
 import '../../../data/providers/front_desk_provider.dart';
@@ -141,13 +142,13 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.inventory_2_outlined, color: AppTheme.primary, size: 24),
-                  SizedBox(width: 8),
+                  const Icon(Icons.inventory_2_outlined, color: AppTheme.primary, size: 24),
+                  const SizedBox(width: 8),
                   Text(
                     'Tiếp Nhận Bưu Kiện Từ Shipper',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

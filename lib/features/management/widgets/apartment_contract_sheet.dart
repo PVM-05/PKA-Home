@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/resident_lifecycle_provider.dart';
 import 'create_apartment_invitation_sheet.dart';
 
@@ -27,9 +28,9 @@ class ApartmentContractSheet extends ConsumerWidget {
           children: [
             Text('Bạn có chắc chắn muốn kết thúc lưu trú của cư dân ${contract.fullName}?'),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Hệ thống sẽ lưu vết lịch sử vĩnh viễn, chốt ngày chuyển đi và bảo toàn mọi hóa đơn cũ.',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -110,11 +111,11 @@ class ApartmentContractSheet extends ConsumerWidget {
                   children: [
                     Text(
                       'Hợp Đồng & Lưu Trú Căn Hộ $apartmentCode',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    const Text(
+                    Text(
                       'Quản lý hợp đồng thuê, cọc giữ chỗ và lịch sử lưu trú',
-                      style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                     ),
                   ],
                 ),
@@ -193,7 +194,7 @@ class ApartmentContractSheet extends ConsumerWidget {
                             children: [
                               Text(
                                 item.fullName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               Row(
                                 children: [
@@ -205,8 +206,7 @@ class ApartmentContractSheet extends ConsumerWidget {
                                     ),
                                     child: Text(
                                       item.displayRole,
-                                      style: const TextStyle(
-                                        fontSize: 11,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.primary,
                                       ),
@@ -223,8 +223,7 @@ class ApartmentContractSheet extends ConsumerWidget {
                                     ),
                                     child: Text(
                                       item.displayStatus,
-                                      style: TextStyle(
-                                        fontSize: 11,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: item.isActive ? Colors.teal.shade800 : Colors.grey.shade700,
                                       ),
@@ -242,7 +241,7 @@ class ApartmentContractSheet extends ConsumerWidget {
                               const SizedBox(width: 6),
                               Text(
                                 '${item.formattedStartDate} - ${item.formattedEndDate}',
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                               ),
                               if (item.depositAmount > 0) ...[
                                 const Spacer(),
@@ -250,7 +249,7 @@ class ApartmentContractSheet extends ConsumerWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   'Cọc: ${item.formattedDeposit}',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                  style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                                 ),
                               ],
                             ],
@@ -260,7 +259,7 @@ class ApartmentContractSheet extends ConsumerWidget {
                             const SizedBox(height: 4),
                             Text(
                               'Số HĐ: ${item.contractNumber}',
-                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                             ),
                           ],
 
@@ -271,7 +270,7 @@ class ApartmentContractSheet extends ConsumerWidget {
                               child: TextButton.icon(
                                 onPressed: () => _showTerminationDialog(context, ref, item),
                                 icon: const Icon(Icons.exit_to_app, size: 16, color: AppTheme.error),
-                                label: const Text('Kết thúc lưu trú', style: TextStyle(color: AppTheme.error, fontSize: 12)),
+                                label: Text('Kết thúc lưu trú', style: context.bodySmall?.copyWith(color: AppTheme.error)),
                                 style: TextButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   visualDensity: VisualDensity.compact,

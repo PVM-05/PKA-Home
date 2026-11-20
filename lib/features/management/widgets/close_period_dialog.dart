@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/accounting_providers.dart';
 
 class ClosePeriodDialog extends ConsumerStatefulWidget {
@@ -95,9 +96,9 @@ class _ClosePeriodDialogState extends ConsumerState<ClosePeriodDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Lưu ý: Sau khi khóa sổ, toàn bộ hóa đơn và số liệu sổ cái trong kỳ này sẽ bị khóa cứng (bất biến) để đảm bảo tính toàn vẹn kiểm toán.',
-              style: TextStyle(fontSize: 13, color: Colors.black87),
+              style: context.bodyMedium?.copyWith(color: Colors.black87),
             ),
             const SizedBox(height: 16),
             TextField(

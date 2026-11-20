@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/debt_risk_score_model.dart';
 import '../../../data/providers/debt_prediction_provider.dart';
 
@@ -159,18 +160,16 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Thực Thi Đôn Đốc Đa Tầng',
-                            style: TextStyle(
-                              fontSize: 18,
+                            style: context.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary,
                             ),
                           ),
                           Text(
                             'Căn hộ: ${widget.apartmentCode} - ${widget.ownerName}',
-                            style: const TextStyle(
-                              fontSize: 13,
+                            style: context.bodySmall?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                           ),
@@ -199,38 +198,37 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                     children: [
                       Column(
                         children: [
-                          const Text('Tổng nợ quá hạn', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                          Text('Tổng nợ quá hạn', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                           const SizedBox(height: 4),
                           Text(
                             '${_moneyFormat.format(widget.unpaidAmount)} đ',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.error, fontSize: 14),
+                            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.error),
                           ),
                         ],
                       ),
                       Container(height: 30, width: 1, color: AppTheme.border),
                       Column(
                         children: [
-                          const Text('Số ngày trễ', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                          Text('Số ngày trễ', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                           const SizedBox(height: 4),
                           Text(
                             '${widget.overdueDays} ngày',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 14),
+                            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                           ),
                         ],
                       ),
                       Container(height: 30, width: 1, color: AppTheme.border),
                       Column(
                         children: [
-                          const Text('Điểm rủi ro', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                          Text('Điểm rủi ro', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                           const SizedBox(height: 4),
                           Text(
                             '${widget.riskScore} / 100',
-                            style: TextStyle(
+                            style: context.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: widget.riskScore >= 70
                                   ? AppTheme.error
                                   : (widget.riskScore >= 40 ? AppTheme.warning : AppTheme.success),
-                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -242,9 +240,9 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                 const SizedBox(height: 16),
 
                 // Chọn tầng đôn đốc
-                const Text(
+                Text(
                   'Chọn cấp độ chiến lược đôn đốc:',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
                 const SizedBox(height: 8),
 
@@ -278,8 +276,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                             const SizedBox(width: 6),
                             Text(
                               tier.label,
-                              style: TextStyle(
-                                fontSize: 13,
+                              style: context.bodyMedium?.copyWith(
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                 color: isSelected ? tier.color : AppTheme.textPrimary,
                               ),
@@ -292,9 +289,9 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                                   color: AppTheme.primary.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Đề xuất AI',
-                                  style: TextStyle(fontSize: 10, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                                  style: context.labelSmall?.copyWith(color: AppTheme.primary, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -308,9 +305,9 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                 const SizedBox(height: 16),
 
                 // Tiêu đề thông báo
-                const Text(
+                Text(
                   'Tiêu đề thông báo:',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
                 const SizedBox(height: 6),
                 TextField(
@@ -319,15 +316,15 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  style: const TextStyle(fontSize: 13),
+                  style: context.bodyMedium,
                 ),
 
                 const SizedBox(height: 12),
 
                 // Nội dung thông báo
-                const Text(
+                Text(
                   'Nội dung gửi Quý cư dân:',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 ),
                 const SizedBox(height: 6),
                 TextField(
@@ -337,7 +334,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                     contentPadding: const EdgeInsets.all(12),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  style: const TextStyle(fontSize: 13),
+                  style: context.bodyMedium,
                 ),
 
                 const SizedBox(height: 20),

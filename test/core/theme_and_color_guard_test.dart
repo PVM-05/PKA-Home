@@ -136,6 +136,30 @@ void main() {
       'lib/features/management/widgets/resident_360_detail_sheet.dart',
       'lib/features/management/widgets/resolve_issue_materials_sheet.dart',
       'lib/features/management/widgets/bulk_invoice_dialog.dart',
+      // Module 27: Cụm Công Cụ Tài Chính, Đôn Đốc & Khảo Sát BQL (Quick Fee Calculator, Execute Dunning, Resident Activation & Poll Result)
+      'lib/features/management/widgets/quick_fee_calculator_sheet.dart',
+      'lib/features/management/widgets/execute_dunning_dialog.dart',
+      'lib/features/management/widgets/resident_activation_management_sheet.dart',
+      'lib/features/management/widgets/poll_result_dialog.dart',
+      // Module 28: Hợp Đồng Căn Hộ, Lời Mời, Biểu Quyết & Nhiệm Vụ Kỹ Thuật (Apartment Contract, Create Poll, Apartment Invitation, Role Onboarding & Maintenance Task Form)
+      'lib/features/management/widgets/apartment_contract_sheet.dart',
+      'lib/features/management/widgets/create_poll_sheet.dart',
+      'lib/features/management/widgets/create_apartment_invitation_sheet.dart',
+      'lib/features/management/widgets/role_onboarding_dialog.dart',
+      'lib/features/management/widgets/maintenance_task_form_dialog.dart',
+      // Module 29: Cụm Nghiệp Vụ Tiện Ích, Trạm Lễ Tân & Phím Tắt Nhanh - Cán Mốc 100% Zero Debt Toàn Bộ Widgets BQL
+      'lib/features/management/widgets/amenity_management_receipt_sheet.dart',
+      'lib/features/management/widgets/respond_petition_dialog.dart',
+      'lib/features/management/widgets/stat_card.dart',
+      'lib/features/management/widgets/all_quick_actions_sheet.dart',
+      'lib/features/management/widgets/handover_parcel_dialog.dart',
+      'lib/features/management/widgets/amenity_deposit_dialog.dart',
+      'lib/features/management/widgets/amenity_inspection_dialog.dart',
+      'lib/features/management/widgets/management_theme_mode_sheet.dart',
+      'lib/features/management/widgets/amenity_confirm_payment_dialog.dart',
+      'lib/features/management/widgets/close_period_dialog.dart',
+      'lib/features/management/widgets/receive_parcel_sheet.dart',
+      'lib/features/management/widgets/amenity_quick_check_in_dialog.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

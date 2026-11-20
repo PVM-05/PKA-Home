@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/core/utils/error_formatter.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
 import 'package:vivona/data/models/amenity_inspection_model.dart';
@@ -54,9 +55,9 @@ void showAmenityInspectionDialog({
                   ),
                 ),
                 const Divider(height: 20),
-                const Text(
+                Text(
                   'Kết quả kiểm tra hiện trường:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 SegmentedButton<String>(
@@ -87,8 +88,7 @@ void showAmenityInspectionDialog({
                   isPassed
                       ? '• Hoàn trả ${currencyFormat.format(deposit)} cho cư dân'
                       : '• Khấu trừ một phần hoặc toàn bộ tiền cọc để đền bù',
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: context.bodySmall?.copyWith(
                     color: isPassed ? Colors.teal.shade800 : AppTheme.error,
                     fontWeight: FontWeight.w500,
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/core/utils/error_formatter.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
 import 'package:vivona/data/providers/amenity_booking_provider.dart';
@@ -119,8 +120,7 @@ void showAmenityDepositDialog({
                                   : (booking.inspectionResult == 'violated'
                                       ? 'Cảnh báo: Có vi phạm/khấu trừ (${currencyFormat.format(booking.forfeitedAmount)})'
                                       : 'Lưu ý: Chưa lập biên bản nghiệm thu hiện trường'),
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: context.bodySmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: booking.inspectionResult == 'passed'
                                     ? Colors.green.shade800
@@ -131,9 +131,9 @@ void showAmenityDepositDialog({
                         ],
                       ),
                       const SizedBox(height: 4),
-                      const Text(
+                      Text(
                         'Tiền cọc là quỹ ký quỹ hoàn trả, không gộp vào doanh thu tòa nhà. Bắt buộc ghi nhận chứng từ/mã giao dịch hoàn tiền.',
-                        style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                        style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                       ),
                     ],
                   ),

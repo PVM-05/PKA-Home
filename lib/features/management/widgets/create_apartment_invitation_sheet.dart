@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/resident_lifecycle_provider.dart';
 
 class CreateApartmentInvitationSheet extends ConsumerStatefulWidget {
@@ -77,11 +78,11 @@ class _CreateApartmentInvitationSheetState
                     children: [
                       Text(
                         'Mã Mời Căn Hộ ${widget.apartmentCode}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                      const Text(
+                      Text(
                         'Mời cư dân / người thuê kích hoạt tự phục vụ',
-                        style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                       ),
                     ],
                   ),
@@ -95,9 +96,9 @@ class _CreateApartmentInvitationSheetState
             const Divider(height: 24),
 
             if (_createdInvite == null) ...[
-              const Text(
+              Text(
                 'Vai trò người được mời',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: context.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               SegmentedButton<String>(
@@ -120,9 +121,9 @@ class _CreateApartmentInvitationSheetState
               ),
               const SizedBox(height: 16),
 
-              const Text(
+              Text(
                 'Thời hạn mã mời',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: context.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
@@ -176,15 +177,14 @@ class _CreateApartmentInvitationSheetState
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'MÃ KÍCH HOẠT',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, letterSpacing: 1.2),
+                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary, letterSpacing: 1.2),
                     ),
                     const SizedBox(height: 4),
                     SelectableText(
                       _createdInvite!['invite_code'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 26,
+                      style: context.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3,
                         color: AppTheme.primary,
@@ -194,7 +194,7 @@ class _CreateApartmentInvitationSheetState
                     const SizedBox(height: 6),
                     Text(
                       'Hiệu lực: $_selectedHours giờ • Vai trò: ${_selectedRole == 'tenant' ? 'Người thuê' : 'Thành viên'}',
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                     ),
                   ],
                 ),

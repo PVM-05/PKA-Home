@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
 
 void showAmenityManagementReceiptSheet({
@@ -63,9 +64,8 @@ void showAmenityManagementReceiptSheet({
                 const SizedBox(width: 10),
                 Text(
                   isPaid ? 'BIÊN NHẬN ĐIỆN TỬ BQL' : 'GIAO DỊCH CHỜ ĐỐI SOÁT',
-                  style: const TextStyle(
+                  style: context.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
                   ),
                 ),
               ],
@@ -75,8 +75,7 @@ void showAmenityManagementReceiptSheet({
               isPaid
                   ? 'Giao dịch thanh toán dịch vụ tiện ích đã được Ban Quản Lý xác thực'
                   : 'Yêu cầu thanh toán đang chờ Ban Quản Lý đối soát hoặc thu tiền',
-              style: const TextStyle(
-                fontSize: 12,
+              style: context.bodySmall?.copyWith(
                 color: AppTheme.textSecondary,
               ),
               textAlign: TextAlign.center,
@@ -87,7 +86,7 @@ void showAmenityManagementReceiptSheet({
               decoration: BoxDecoration(
                 color: isDark
                     ? Theme.of(context).colorScheme.surface
-                    : const Color(0xFFF9FAFB),
+                    : AppTheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isDark ? Colors.white12 : Colors.grey.shade200,
@@ -243,7 +242,7 @@ Widget _buildReceiptRow(
     children: [
       Text(
         label,
-        style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
       ),
       const SizedBox(width: 8),
       Flexible(
@@ -253,8 +252,7 @@ Widget _buildReceiptRow(
             Flexible(
               child: Text(
                 value,
-                style: TextStyle(
-                  fontSize: isHighlight ? 16 : 13,
+                style: (isHighlight ? context.titleMedium : context.bodySmall)?.copyWith(
                   fontWeight: isHighlight ? FontWeight.w900 : FontWeight.w600,
                   color: isHighlight ? AppTheme.primary : null,
                 ),

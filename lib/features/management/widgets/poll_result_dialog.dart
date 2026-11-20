@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/providers/community_provider.dart';
 
@@ -35,17 +36,16 @@ class PollResultDialog extends ConsumerWidget {
                       children: [
                         Text(
                           poll.pollCode,
-                          style: const TextStyle(
+                          style: context.bodyMedium?.copyWith(
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
                             color: AppTheme.primary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           poll.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -91,7 +91,7 @@ class PollResultDialog extends ConsumerWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text('Tỷ lệ tham gia biểu quyết:', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                                    Text('Tỷ lệ tham gia biểu quyết:', style: context.bodyMedium?.copyWith(color: Colors.grey)),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                       decoration: BoxDecoration(
@@ -100,7 +100,7 @@ class PollResultDialog extends ConsumerWidget {
                                       ),
                                       child: Text(
                                         result.isQuorumMet ? 'Đạt túc số biểu quyết' : 'Chưa đạt túc số tối thiểu',
-                                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                        style: context.labelSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ],
@@ -111,8 +111,7 @@ class PollResultDialog extends ConsumerWidget {
                                   children: [
                                     Text(
                                       '${result.participationRate}%',
-                                      style: TextStyle(
-                                        fontSize: 32,
+                                      style: context.headlineLarge?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: result.isQuorumMet ? Colors.green[800] : Colors.orange[800],
                                       ),
@@ -123,7 +122,7 @@ class PollResultDialog extends ConsumerWidget {
                                         isByArea
                                             ? '(${numberFormat.format(result.votedArea)} m² / ${numberFormat.format(result.totalArea)} m²)'
                                             : '(${result.votedApartments} / ${result.totalApartments} căn hộ)',
-                                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                                        style: context.bodyMedium?.copyWith(color: Colors.grey[700]),
                                       ),
                                     ),
                                   ],
@@ -142,9 +141,9 @@ class PollResultDialog extends ConsumerWidget {
                           const SizedBox(height: 20),
 
                           // Danh sách kết quả từng phương án
-                          const Text(
+                          Text(
                             'Chi Tiết Biểu Quyết Từng Phương Án',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
 
@@ -166,12 +165,12 @@ class PollResultDialog extends ConsumerWidget {
                                       Expanded(
                                         child: Text(
                                           opt.optionText,
-                                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                                          style: context.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                                         ),
                                       ),
                                       Text(
                                         '${opt.percentOfVotes}%',
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary),
+                                        style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                                       ),
                                     ],
                                   ),
@@ -187,9 +186,9 @@ class PollResultDialog extends ConsumerWidget {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('${opt.voteCount} phiếu ủng hộ', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                                      Text('${opt.voteCount} phiếu ủng hộ', style: context.bodySmall?.copyWith(color: Colors.grey[600])),
                                       if (isByArea)
-                                        Text('${numberFormat.format(opt.voteWeightSum)} m²', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                                        Text('${numberFormat.format(opt.voteWeightSum)} m²', style: context.bodySmall?.copyWith(color: Colors.grey[600])),
                                     ],
                                   ),
                                 ],

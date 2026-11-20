@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/core/theme/theme_mode_provider.dart';
 
 void showManagementThemeModeSheet(BuildContext context, WidgetRef ref) {
@@ -43,9 +44,9 @@ void showManagementThemeModeSheet(BuildContext context, WidgetRef ref) {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Chọn giao diện',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 ...entries.map(
@@ -73,7 +74,7 @@ void showManagementThemeModeSheet(BuildContext context, WidgetRef ref) {
                         ),
                         subtitle: Text(
                           entry.$4,
-                          style: const TextStyle(fontSize: 12),
+                          style: ctx.bodySmall,
                         ),
                         activeColor: AppTheme.primary,
                       ),

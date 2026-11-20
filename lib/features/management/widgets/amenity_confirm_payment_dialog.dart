@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/core/utils/error_formatter.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
 import 'package:vivona/data/providers/amenity_booking_provider.dart';
@@ -73,9 +74,9 @@ Future<void> showAmenityConfirmPaymentDialog({
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'Hình thức thanh toán thực thu:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               SegmentedButton<String>(

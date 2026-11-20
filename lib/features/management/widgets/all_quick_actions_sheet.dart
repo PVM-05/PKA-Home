@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/core/router/route_names.dart';
 import 'package:vivona/data/providers/dashboard_providers.dart';
 import 'package:vivona/data/providers/management_provider.dart';
@@ -173,7 +174,7 @@ void showAllQuickActionsSheet(
                         title: 'Duyệt chỉ số điện nước',
                         subtitle:
                             'Kiểm tra và phê duyệt số điện nước công tơ',
-                        color: const Color(0xFFE65100),
+                        color: Colors.orange.shade900,
                         badgeCount: pendingMeterCount,
                         onTap: () async {
                           await context.push(
@@ -408,9 +409,8 @@ Widget _buildSheetActionItem({
                 ),
                 child: Text(
                   '$badgeCount',
-                  style: const TextStyle(
+                  style: context.labelSmall?.copyWith(
                     color: Colors.white,
-                    fontSize: 9,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -420,13 +420,13 @@ Widget _buildSheetActionItem({
       ),
       title: Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(
         subtitle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+        style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
       ),
       trailing: const Icon(
         Icons.chevron_right,

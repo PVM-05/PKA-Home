@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/theme/app_typography.dart';
 import 'package:vivona/core/utils/error_formatter.dart';
 import 'package:vivona/data/providers/amenity_booking_provider.dart';
 
@@ -28,9 +29,9 @@ void showAmenityQuickCheckInDialog({
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Nhập mã đặt chỗ từ mã QR của cư dân để xác nhận điểm danh sử dụng dịch vụ:',
-              style: TextStyle(fontSize: 13),
+              style: context.bodyMedium,
             ),
             const SizedBox(height: 12),
             TextField(

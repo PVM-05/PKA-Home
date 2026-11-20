@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/petition_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/community_provider.dart';
@@ -111,16 +112,15 @@ class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
                         children: [
                           Text(
                             widget.petition.petitionCode,
-                            style: const TextStyle(
+                            style: context.bodySmall?.copyWith(
                               fontFamily: 'monospace',
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
                               color: AppTheme.primary,
                             ),
                           ),
-                          const Text(
+                          Text(
                             'Phản Hồi & Xử Lý Kiến Nghị',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -142,7 +142,7 @@ class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
                   ),
                   child: Text(
                     widget.petition.title,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(height: 16),

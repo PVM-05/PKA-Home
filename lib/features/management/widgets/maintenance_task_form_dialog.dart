@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/building_equipment_model.dart';
 import '../../../data/providers/equipment_provider.dart';
 import '../../../core/utils/error_formatter.dart';
@@ -235,8 +236,7 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                                       ),
                                       Text(
                                         'Vị trí: ${widget.equipment!.location} (${widget.equipment!.building})',
-                                        style: const TextStyle(
-                                          fontSize: 12,
+                                        style: context.bodySmall?.copyWith(
                                           color: AppTheme.textSecondary,
                                         ),
                                       ),
@@ -319,7 +319,7 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                                   ),
                                   child: Text(
                                     dateFormat.format(_scheduledStart),
-                                    style: const TextStyle(fontSize: 13),
+                                    style: context.bodyMedium,
                                   ),
                                 ),
                               ),
@@ -335,7 +335,7 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                                   ),
                                   child: Text(
                                     dateFormat.format(_scheduledEnd),
-                                    style: const TextStyle(fontSize: 13),
+                                    style: context.bodyMedium,
                                   ),
                                 ),
                               ),
@@ -369,13 +369,13 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                         const SizedBox(height: 16),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text(
+                          title: Text(
                             'Tạm dừng thiết bị (Ảnh hưởng cư dân)',
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                            style: context.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                           ),
-                          subtitle: const Text(
+                          subtitle: Text(
                             'Hệ thống sẽ thông báo tới cư dân của tòa nhà khi bắt đầu bảo trì.',
-                            style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                           ),
                           value: _affectsService,
                           onChanged: (val) => setState(() => _affectsService = val),

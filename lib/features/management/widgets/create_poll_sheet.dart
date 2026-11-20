@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/community_provider.dart';
@@ -203,10 +204,10 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                     child: const Icon(Icons.how_to_vote_rounded, color: AppTheme.primary),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Tạo Cuộc Biểu Quyết / Khảo Sát Mới',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -296,8 +297,8 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                         side: BorderSide(color: Colors.grey[300]!),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      title: const Text('Bắt đầu', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      subtitle: Text(_dateFormat.format(_startTime), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      title: Text('Bắt đầu', style: context.bodySmall?.copyWith(color: Colors.grey)),
+                      subtitle: Text(_dateFormat.format(_startTime), style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                       trailing: const Icon(Icons.calendar_today_outlined, size: 18),
                       onTap: () => _pickDateTime(isStart: true),
                     ),
@@ -310,8 +311,8 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                         side: BorderSide(color: Colors.grey[300]!),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      title: const Text('Kết thúc', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      subtitle: Text(_dateFormat.format(_endTime), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      title: Text('Kết thúc', style: context.bodySmall?.copyWith(color: Colors.grey)),
+                      subtitle: Text(_dateFormat.format(_endTime), style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                       trailing: const Icon(Icons.event_available_outlined, size: 18),
                       onTap: () => _pickDateTime(isStart: false),
                     ),
@@ -324,7 +325,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Danh Sách Phương Án Lựa Chọn *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text('Danh Sách Phương Án Lựa Chọn *', style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                   TextButton.icon(
                     onPressed: _addOption,
                     icon: const Icon(Icons.add_rounded, size: 18),
@@ -342,7 +343,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                       CircleAvatar(
                         radius: 12,
                         backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-                        child: Text('${idx + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                        child: Text('${idx + 1}', style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary)),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -397,7 +398,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                     : const Icon(Icons.publish_rounded),
                 label: Text(
                   _isLoading ? 'Đang tạo cuộc biểu quyết...' : 'Phát Hành Cuộc Biểu Quyết',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
             ],

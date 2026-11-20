@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/utility_fee_calculator.dart';
 import '../../../data/models/tiered_calculation_result_model.dart';
 
@@ -170,11 +171,10 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
               children: [
                 const Icon(Icons.calculate_outlined, color: AppTheme.primary, size: 26),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Công Cụ Tính Nhanh Biểu Phí',
-                    style: TextStyle(
-                      fontSize: 18,
+                    'Công cụ tính nhanh biểu phí',
+                    style: context.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
                     ),
@@ -198,7 +198,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
             unselectedLabelColor: AppTheme.textSecondary,
             indicatorColor: AppTheme.primary,
             indicatorWeight: 3,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            labelStyle: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             tabs: const [
               Tab(
                 key: Key('tab_electricity'),
@@ -265,9 +265,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
           const SizedBox(height: 12),
           // Tùy chọn nhập chỉ số công tơ Cũ - Mới
           ExpansionTile(
-            title: const Text(
+            title: Text(
               'Tính từ chỉ số công tơ cũ & mới',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
             tilePadding: EdgeInsets.zero,
             children: [
@@ -325,9 +325,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
               subtitle: 'Sản lượng tính: ${_elecResult!.formattedConsumption} kWh',
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Bảng chi tiết các bậc thang:',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             _buildTierBreakdownTable(_elecResult!.breakdown, unit: 'kWh'),
@@ -393,9 +393,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
               subtitle: 'Định mức áp dụng: ${_waterResult!.baseQuota?.toInt() ?? 0} m³ (${_waterResidentsController.text} nhân khẩu × 4 m³)',
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Bảng phân bổ định mức & vượt mức:',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             _buildTierBreakdownTable(_waterResult!.breakdown, unit: 'm³'),
@@ -615,9 +615,8 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: context.bodyMedium?.copyWith(
                 color: AppTheme.warningText,
-                fontSize: 13,
                 height: 1.3,
               ),
             ),
@@ -633,7 +632,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
     required String subtitle,
     bool isError = false,
   }) {
-    final bgColor = isError ? const Color(0xFFFFEBEE) : const Color(0xFFE3F2FD);
+    final bgColor = isError
+        ? AppTheme.error.withValues(alpha: 0.1)
+        : AppTheme.primary.withValues(alpha: 0.1);
     final primaryColor = isError ? AppTheme.error : AppTheme.primary;
 
     return Container(
@@ -648,8 +649,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontSize: 14,
+            style: context.bodyMedium?.copyWith(
               color: primaryColor,
               fontWeight: FontWeight.w600,
             ),
@@ -657,8 +657,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
           const SizedBox(height: 6),
           Text(
             amountText,
-            style: TextStyle(
-              fontSize: 26,
+            style: context.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: primaryColor,
             ),
@@ -666,9 +665,8 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade700,
+            style: context.bodyMedium?.copyWith(
+              color: AppTheme.textSecondary,
             ),
           ),
         ],
@@ -702,10 +700,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
                   backgroundColor: isUsed ? AppTheme.primary : Colors.grey.shade300,
                   child: Text(
                     '${item.tier}',
-                    style: TextStyle(
-                      fontSize: 11,
+                    style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isUsed ? Colors.white : Colors.grey.shade700,
+                      color: isUsed ? Colors.white : AppTheme.textSecondary,
                     ),
                   ),
                 ),
@@ -716,8 +713,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
                     children: [
                       Text(
                         item.name,
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: context.bodyMedium?.copyWith(
                           fontWeight: isUsed ? FontWeight.bold : FontWeight.normal,
                           color: isUsed ? AppTheme.textPrimary : AppTheme.textSecondary,
                         ),
@@ -725,9 +721,8 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
                       const SizedBox(height: 2),
                       Text(
                         'Đơn giá: ${item.formattedRate}/$unit • Tính: ${item.formattedUnits} $unit',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
+                        style: context.bodySmall?.copyWith(
+                          color: AppTheme.textSecondary,
                         ),
                       ),
                     ],
@@ -735,8 +730,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
                 ),
                 Text(
                   item.formattedAmount,
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: context.bodyMedium?.copyWith(
                     fontWeight: isUsed ? FontWeight.bold : FontWeight.normal,
                     color: isUsed ? AppTheme.primary : AppTheme.textSecondary,
                   ),
@@ -760,12 +754,11 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+          style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
         ),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 14,
+          style: context.bodyMedium?.copyWith(
             fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
             color: color ?? AppTheme.textPrimary,
           ),

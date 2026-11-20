@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/excel_export_helper.dart';
 import '../../../data/models/resident_activation_model.dart';
 import '../../../data/providers/building_provider.dart';
@@ -85,21 +86,19 @@ class _ResidentActivationManagementSheetState
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Mã Kích Hoạt & Thư Mời Cư Dân',
-                            style: TextStyle(
-                              fontSize: 17,
+                            style: context.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             'Phát hành mã bàn giao căn hộ cho cư dân mới',
-                            style: TextStyle(
-                              fontSize: 12.5,
+                            style: context.bodySmall?.copyWith(
                               color: AppTheme.textSecondary,
                             ),
                           ),
@@ -241,10 +240,9 @@ class _ResidentActivationManagementSheetState
                                               ),
                                             )
                                           : const Icon(Icons.auto_fix_high, size: 18),
-                                      label: const Text(
+                                      label: Text(
                                         'Tạo mã cho cư dân mới',
-                                        style: TextStyle(
-                                          fontSize: 12.5,
+                                        style: context.bodyMedium?.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -262,9 +260,9 @@ class _ResidentActivationManagementSheetState
                                       ),
                                     ),
                                     icon: const Icon(Icons.file_download_outlined, size: 18),
-                                    label: const Text(
+                                    label: Text(
                                       'Xuất CSV',
-                                      style: TextStyle(fontSize: 12.5),
+                                      style: context.bodyMedium,
                                     ),
                                     onPressed: () =>
                                         _exportActivationListCsv(activations),
@@ -334,16 +332,14 @@ class _ResidentActivationManagementSheetState
               children: [
                 Text(
                   count,
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
                 ),
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 11,
+                  style: context.labelSmall?.copyWith(
                     color: color.withValues(alpha: 0.9),
                   ),
                 ),
@@ -393,10 +389,9 @@ class _ResidentActivationManagementSheetState
           alignment: Alignment.center,
           child: Text(
             item.apartmentCode,
-            style: const TextStyle(
+            style: context.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppTheme.primary,
-              fontSize: 13,
             ),
           ),
         ),
@@ -412,9 +407,8 @@ class _ResidentActivationManagementSheetState
                   Expanded(
                     child: Text(
                       item.fullName,
-                      style: const TextStyle(
+                      style: context.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -429,8 +423,7 @@ class _ResidentActivationManagementSheetState
                     ),
                     child: Text(
                       item.statusText,
-                      style: TextStyle(
-                        fontSize: 10.5,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: statusTextColor,
                       ),
@@ -441,8 +434,7 @@ class _ResidentActivationManagementSheetState
               const SizedBox(height: 2),
               Text(
                 'SĐT: ${item.phone} • ${item.relationRoleText}',
-                style: const TextStyle(
-                  fontSize: 12,
+                style: context.bodySmall?.copyWith(
                   color: AppTheme.textSecondary,
                 ),
               ),
@@ -471,8 +463,7 @@ class _ResidentActivationManagementSheetState
                       const SizedBox(width: 6),
                       Text(
                         item.activationCode,
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: context.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
                           color: item.isLocked ? AppTheme.error : AppTheme.primary,

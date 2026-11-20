@@ -160,6 +160,34 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - `BulkInvoiceDialog`: Xóa sạch 100% 16/16 điểm `fontSize:` cứng trong bước thiết lập kỳ hóa đơn (Dry-Run), tiêu đề kết quả tiền kiểm tra, thẻ tóm tắt dự thu, các thẻ KPI trạng thái, danh sách căn hộ hợp lệ và danh sách căn hộ có cảnh báo bất thường.
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file BQL widgets nghiệp vụ lõi: `resident_360_detail_sheet.dart`, `resolve_issue_materials_sheet.dart`, `bulk_invoice_dialog.dart` (Module 26).
   - Giảm thêm 54 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 169 xuống còn 115 điểm). Đưa tổng số điểm nợ typography được xóa bỏ lên 821 điểm qua 18 gói dọn dẹp liên hoàn (xóa sạch 87.71% tổng nợ dự án). Toàn bộ 4 bài test guardrail đều vượt qua 100%.
+- **Gói 2.19 Chuẩn Hóa Typography Cụm Công Cụ Tài Chính, Đôn Đốc & Khảo Sát BQL (Batch A - 52 Điểm Nợ)**:
+  - `QuickFeeCalculatorSheet`: Xóa sạch 100% 15/15 điểm `fontSize:` cứng trong tiêu đề sheet, tab bar cấu hình phí, ExpansionTile tính toán nhanh chi phí căn hộ, thẻ tổng số tiền dự thu `_buildTotalAmountCard`, bảng chi tiết lũy tiến `_buildTierBreakdownTable`, hàng tóm tắt `_buildSummaryRow`.
+  - `ExecuteDunningDialog`: Xóa sạch 100% 15/15 điểm `fontSize:` cứng trong tiêu đề hộp thoại, thẻ tóm tắt nợ quá hạn, số ngày trễ, điểm rủi ro tài chính, bộ chọn cấp độ đôn đốc đa tầng DunningTier, badge đề xuất AI, ô nhập tiêu đề và nội dung thông báo cư dân.
+  - `ResidentActivationManagementSheet`: Xóa sạch 100% 11/11 điểm `fontSize:` cứng trong tiêu đề bàn giao mã kích hoạt, nút sinh mã tự động, xuất CSV, thẻ thống kê `_buildStatCard`, danh sách căn hộ và mã PIN bàn giao.
+  - `PollResultDialog`: Xóa sạch 100% 11/11 điểm `fontSize:` cứng trong mã biểu quyết, tiêu đề khảo sát, tỷ lệ tham gia túc số tối thiểu, tiến độ phần trăm và chi tiết số phiếu/diện tích $m^2$ ủng hộ từng phương án.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ 4 file: `quick_fee_calculator_sheet.dart`, `execute_dunning_dialog.dart`, `resident_activation_management_sheet.dart`, `poll_result_dialog.dart` (Module 27).
+- **Gói 2.20 Chuẩn Hóa Typography Hợp Đồng Căn Hộ, Lời Mời, Biểu Quyết & Nhiệm Vụ Kỹ Thuật (Batch B - 36 Điểm Nợ)**:
+  - `ApartmentContractSheet`: Xóa sạch 100% 10/10 điểm `fontSize:` cứng trong hộp thoại xác nhận kết thúc lưu trú, tiêu đề sheet hợp đồng, thông tin cư dân, vai trò, trạng thái, ngày bắt đầu/kết thúc, tiền cọc, số hợp đồng và nút kết thúc lưu trú.
+  - `CreatePollSheet`: Xóa sạch 100% 8/8 điểm `fontSize:` cứng trong tiêu đề tạo khảo sát biểu quyết, ô chọn thời gian bắt đầu/kết thúc, danh sách phương án lựa chọn và nút phát hành cuộc biểu quyết.
+  - `CreateApartmentInvitationSheet`: Xóa sạch 100% 7/7 điểm `fontSize:` cứng trong tiêu đề thư mời, bộ chọn vai trò người được mời (thành viên/người thuê), thời hạn hiệu lực, mã kích hoạt in hoa định dạng số và nhãn hướng dẫn.
+  - `RoleOnboardingDialog`: Xóa sạch 100% 6/6 điểm `fontSize:` cứng trong tiêu đề chào mừng vai trò mới, huy hiệu phân quyền, mô tả trách nhiệm, danh sách quyền hạn chính và ghi chú liên hệ Quản trị viên.
+  - `MaintenanceTaskFormDialog`: Xóa sạch 100% 5/5 điểm `fontSize:` cứng trong thông tin vị trí thiết bị, ô chọn ngày giờ bắt đầu/kết thúc dự kiến và cảnh báo tạm ngưng thiết bị ảnh hưởng cư dân.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ 5 file: `apartment_contract_sheet.dart`, `create_poll_sheet.dart`, `create_apartment_invitation_sheet.dart`, `role_onboarding_dialog.dart`, `maintenance_task_form_dialog.dart` (Module 28).
+- **Gói 2.21 Chuẩn Hóa Typography Nghiệp Vụ Tiện Ích, Trạm Lễ Tân & Phím Tắt Nhanh - Cán Mốc 100% Zero Debt Toàn Bộ Features Widgets (Batch C - 27 Điểm Nợ)**:
+  - `AmenityManagementReceiptSheet`: Xóa sạch 100% 4/4 điểm `fontSize:` cứng trong tiêu đề biên nhận điện tử BQL, ghi chú đối soát, và các hàng chi tiết biên nhận `_buildReceiptRow`.
+  - `RespondPetitionDialog`: Xóa sạch 100% 3/3 điểm `fontSize:` cứng trong mã kiến nghị, tiêu đề phản hồi xử lý và nội dung kiến nghị của cư dân.
+  - `StatCard`: Xóa sạch 100% 3/3 điểm `fontSize:` cứng trong thẻ thống kê chỉ số điều hành BQL (tiêu đề, phụ đề, giá trị số lớn).
+  - `AllQuickActionsSheet`: Xóa sạch 100% 3/3 điểm `fontSize:` cứng trong badge đếm sự cố chờ duyệt, tiêu đề phím tắt nhanh và phụ đề hành động.
+  - `HandoverParcelDialog`: Xóa sạch 100% 3/3 điểm `fontSize:` cứng trong ô nhập mã PIN nhận hàng 6 số, thông báo lỗi và hướng dẫn đối soát shipper.
+  - `AmenityDepositDialog`: Xóa sạch 100% 2/2 điểm `fontSize:` cứng trong cảnh báo biên bản nghiệm thu hiện trường và lưu ý quản lý quỹ ký quỹ đặt cọc.
+  - `AmenityInspectionDialog`: Xóa sạch 100% 2/2 điểm `fontSize:` cứng trong tiêu đề kết quả kiểm tra hiện trường và chi tiết hoàn cọc/khấu trừ đền bù.
+  - `ManagementThemeModeSheet`: Xóa sạch 100% 2/2 điểm `fontSize:` cứng trong tiêu đề chọn giao diện và phụ đề mô tả chế độ sáng/tối/hệ thống.
+  - `AmenityConfirmPaymentDialog`: Xóa sạch 100% 1/1 điểm `fontSize:` cứng trong tiêu đề hình thức thanh toán thực thu (tiền mặt / chuyển khoản).
+  - `ClosePeriodDialog`: Xóa sạch 100% 1/1 điểm `fontSize:` cứng trong cảnh báo bất biến dữ liệu khóa sổ kỳ kế toán.
+  - `ReceiveParcelSheet`: Xóa sạch 100% 1/1 điểm `fontSize:` cứng trong tiêu đề tiếp nhận bưu kiện từ shipper.
+  - `AmenityQuickCheckInDialog`: Xóa sạch 100% 1/1 điểm `fontSize:` cứng trong hướng dẫn quét mã QR check-in tiện ích.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ 12 file: `amenity_management_receipt_sheet.dart`, `respond_petition_dialog.dart`, `stat_card.dart`, `all_quick_actions_sheet.dart`, `handover_parcel_dialog.dart`, `amenity_deposit_dialog.dart`, `amenity_inspection_dialog.dart`, `management_theme_mode_sheet.dart`, `amenity_confirm_payment_dialog.dart`, `close_period_dialog.dart`, `receive_parcel_sheet.dart`, `amenity_quick_check_in_dialog.dart` (Module 29).
+  - **CÁN MỐC LỊCH SỬ TUYỆT ĐỐI**: 100% toàn bộ các màn hình (`screens`) và các thành phần giao diện (`widgets`) thuộc cả 3 phân hệ cốt lõi (`lib/features/auth/`, `lib/features/resident/`, `lib/features/management/`) đạt trạng thái **100% ZERO DEBT TYPOGRAPHY** (thanh toán sạch 936/936 điểm nợ cứng). Toàn bộ 32/32 widgets BQL được tích hợp và bảo vệ vĩnh viễn bởi CI/CD Guardrail Test Suite.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.

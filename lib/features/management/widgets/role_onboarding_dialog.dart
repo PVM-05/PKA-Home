@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/user_model.dart';
 
 class RoleOnboardingDialog {
@@ -63,7 +64,7 @@ class RoleOnboardingDialog {
             const SizedBox(height: 16),
             Text(
               'Chào mừng ${user.fullName}!',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 6),
@@ -75,10 +76,9 @@ class RoleOnboardingDialog {
               ),
               child: Text(
                 user.roleDisplayName,
-                style: TextStyle(
+                style: context.bodySmall?.copyWith(
                   color: roleColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
                 ),
               ),
             ),
@@ -86,7 +86,7 @@ class RoleOnboardingDialog {
             Text(
               roleDesc,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 16),
             Container(
@@ -99,9 +99,9 @@ class RoleOnboardingDialog {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Quyền hạn chính của bạn:',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   ...keyFeatures.map((feat) => Padding(
@@ -114,7 +114,7 @@ class RoleOnboardingDialog {
                             Expanded(
                               child: Text(
                                 feat,
-                                style: const TextStyle(fontSize: 12),
+                                style: context.bodySmall,
                               ),
                             ),
                           ],
@@ -124,10 +124,10 @@ class RoleOnboardingDialog {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Nếu cần thêm quyền hạn, vui lòng liên hệ Quản trị viên để được cấp hoặc ủy quyền tạm thời.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
+              style: context.labelSmall?.copyWith(fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 20),
             SizedBox(

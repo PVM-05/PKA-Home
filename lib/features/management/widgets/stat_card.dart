@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
@@ -63,8 +64,7 @@ class StatCard extends StatelessWidget {
                         subtitle!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           color: isDark ? Colors.white60 : AppTheme.textSecondary,
                         ),
                       ),
@@ -77,8 +77,7 @@ class StatCard extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: context.bodySmall?.copyWith(
                     color: isDark ? Colors.white70 : AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -90,8 +89,7 @@ class StatCard extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 20,
+                  style: context.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color,
                     letterSpacing: -0.3,

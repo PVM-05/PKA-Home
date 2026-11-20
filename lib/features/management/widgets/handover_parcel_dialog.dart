@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/parcel_model.dart';
 import '../../../data/providers/front_desk_provider.dart';
 
@@ -115,16 +116,16 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Nhập mã PIN lấy hàng (6 số từ cư dân): *',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _pinCtrl,
               keyboardType: TextInputType.number,
               maxLength: 6,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 8),
+              style: context.headlineMedium?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 8),
               textAlign: TextAlign.center,
               decoration: const InputDecoration(
                 hintText: '••••••',
@@ -143,7 +144,7 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
             ),
             if (_errorMessage != null) ...[
               const SizedBox(height: 8),
-              Text(_errorMessage!, style: const TextStyle(color: AppTheme.error, fontSize: 12)),
+              Text(_errorMessage!, style: context.bodySmall?.copyWith(color: AppTheme.error)),
             ],
           ],
         ),
