@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/config/app_environment.dart';
 import '../../core/supabase_config.dart';
 import '../../core/utils/guard_helper.dart';
 import '../models/resident_activation_model.dart';
@@ -62,6 +63,7 @@ class ResidentActivationRepository {
         params: {
           'p_phone': cleanPhone,
           'p_activation_code': cleanCode,
+          'p_is_production': AppEnvironment.current.isProduction,
         },
       );
       return Map<String, dynamic>.from(response as Map);

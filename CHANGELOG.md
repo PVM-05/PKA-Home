@@ -8,41 +8,52 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
 
 ## [2.3.0] - 2026-11-20
 
-### Đã thêm (Added) - Cổng Bảo Mật Xác Thực Hai Yếu Tố (MFA AAL2 Gate) & Khôi Phục 10 RPCs Cốt Lõi
+### Đã thêm (Added) - Cổng Bảo Mật Xác Thực Hai Yếu Tố (MFA AAL2 Gate), 15 RPCs & 5 Bảng Nghiệp Vụ Cốt Lõi
 - **Cổng Bảo Mật Bắt Buộc MFA / TOTP (`MfaChallengeScreen`) (C5)**:
   - Triển khai tuyến đường `AppRoutes.mfaChallenge` và màn hình bảo mật `MfaChallengeScreen` (`lib/features/auth/screens/mfa_challenge_screen.dart`), bảo vệ các tài khoản quản trị đã bật TOTP.
-  - Tích hợp `mfaChallengeRequiredProvider` vào bộ điều hướng toàn cục `appRouterProvider`, tự động cưỡng chế chuyển hướng và chặn người dùng truy cập mọi phân hệ khi phiên đăng nhập chưa đạt cấp độ AAL2 (kể cả khi tắt ứng dụng mở lại hoặc làm mới trang).
-  - Bổ sung hàm cơ sở dữ liệu `is_aal2_if_mfa_enrolled()` bảo vệ phân quyền ở tầng dữ liệu.
-- **Khôi Phục Toàn Diện 10 RPCs Cốt Lõi Từ Archive (§0)**:
-  - Bổ sung migration `20261120_01_security_hardening_auth_and_rls.sql` khôi phục đầy đủ 10 hàm RPC bị thất lạc sau đợt squash baseline:
-    1. `approve_link_request`: Duyệt liên kết căn hộ cư dân.
-    2. `cancel_apartment_link_request`: Hủy yêu cầu liên kết căn hộ.
-    3. `cancel_pending_meter_reading`: Hủy phiếu chỉ số điện nước đang chờ duyệt.
-    4. `update_pending_meter_reading`: Sửa chỉ số và ảnh đồng hồ đang chờ duyệt.
-    5. `cancel_pending_vehicle`: Hủy đăng ký phương tiện đang chờ duyệt.
-    6. `update_pending_vehicle`: Sửa thông tin biển số và loại xe đang chờ duyệt.
-    7. `get_co_residents`: Tra cứu thành viên cùng căn hộ bảo mật theo RLS.
-    8. `check_in_amenity_booking`: Xác nhận check-in lượt đặt tiện ích tòa nhà.
-    9. `get_amenity_slot_availability`: Tra cứu khung giờ tiện ích khả dụng bảo vệ quyền riêng tư cư dân.
-    10. `update_invoice_with_items`: Cập nhật hóa đơn và các dòng chi phí trong 1 giao dịch nguyên tử ACID.
+  - Tích hợp `mfaChallengeRequiredProvider` vào bộ điều hướng toàn cục `appRouterProvider` và `GoRouterAuthNotifier`, loại bỏ race condition khi khôi phục phiên; cưỡng chế chuyển hướng và chặn người dùng truy cập mọi phân hệ khi phiên chưa đạt cấp độ AAL2.
+  - Tích hợp hàm kiểm tra `is_aal2_if_mfa_enrolled()` trực tiếp vào `public.is_staff_or_management()`, áp đặt bảo vệ cấp độ AAL2 cho toàn bộ các bảng dữ liệu Ban Quản Lý và RPCs ở tầng cơ sở dữ liệu.
+- **Khôi Phục Đầy Đủ 15 RPCs Nghiệp Vụ & 5 Bảng Dữ Liệu (§0)**:
+  - Khôi phục 15 hàm RPC cốt lõi trong migration `20261120_01_security_hardening_auth_and_rls.sql`:
+    1. `generate_resident_activation_codes` (kèm alias `generate_bulk_resident_activations`): Sinh mã kích hoạt cư dân hàng loạt với kiểm tra phân quyền chuẩn mực.
+    2. `create_invoice_with_items`: Tạo hóa đơn kèm danh mục phí trong 1 transaction ACID.
+    3. `update_invoice_with_items`: Cập nhật hóa đơn và các dòng chi phí nguyên tử.
+    4. `record_manual_payment`: Ghi nhận thanh toán tiền mặt/chuyển khoản thủ công.
+    5. `validate_monthly_bulk_invoices`: Tiền kiểm tra dữ liệu phát hành hóa đơn hàng loạt.
+    6. `generate_valid_bulk_invoices`: Phát hành hóa đơn hàng loạt cho tòa nhà.
+    7. `admin_create_user`: Khởi tạo tài khoản nhân viên / BQL bảo mật.
+    8. `approve_link_request`: Duyệt liên kết căn hộ cư dân.
+    9. `cancel_apartment_link_request`: Hủy yêu cầu liên kết căn hộ.
+    10. `cancel_pending_meter_reading`: Hủy phiếu chỉ số điện nước đang chờ duyệt.
+    11. `update_pending_meter_reading`: Sửa chỉ số và ảnh đồng hồ đang chờ duyệt.
+    12. `cancel_pending_vehicle`: Hủy đăng ký phương tiện đang chờ duyệt.
+    13. `update_pending_vehicle`: Sửa thông tin biển số và loại xe đang chờ duyệt.
+    14. `get_co_residents`: Tra cứu thành viên cùng căn hộ bảo mật theo RLS.
+    15. `check_in_amenity_booking` & `get_amenity_slot_availability`: Quản lý và kiểm tra lịch đặt tiện ích.
+  - Bổ sung 5 bảng còn thiếu kèm chính sách RLS: `emergency_contacts`, `building_rules`, `role_change_log`, `issue_ratings`, `building_equipments`.
+  - Đồng bộ các giá trị enum: `invoice_status` (`unpaid`, `pending_confirmation`), `issue_status` (`pending`), `user_role` (`accountant`, `technician`), `vehicle_type` (`motorbike`, `electric_bicycle`).
 
-### Đã sửa (Fixed) - Vá Lỗ Hổng Bảo Mật Nghiêm Trọng (C1 - C5) & Khắc Phục 4 Lỗi UI Trọng Yếu (P1-1, P1-2, P1-9, P1-14)
+### Đã sửa (Fixed) - Vá Lỗ Hổng Bảo Mật Nghiêm Trọng (C1 - C5) & Hoàn Thiện UI/Dark Mode (P1-1, P1-2, P1-9, P1-14)
 - **Vá Lỗ Hổng Tự Nâng Quyền Hạn Admin (C1 & C2)**:
   - Thiết lập Trigger bất biến `trg_enforce_user_security_immutability` chặn người dùng tự sửa đổi `role`, `is_locked`, hoặc `is_active` trên bảng `users`.
-  - Cập nhật trigger `handle_new_user()`: mọi tài khoản tự đăng ký mới mặc định gán vai trò `resident`, chặn triệt để tham số `role: 'admin'` gửi từ client.
+  - Cập nhật trigger `handle_new_user()`: mọi tài khoản tự đăng ký mới mặc định gán vai trò `resident`, chỉ service_role mới có quyền gán role từ metadata.
   - Siết chặt chính sách RLS `users_update_own_or_admin` với điều kiện kiểm tra cột nghiêm ngặt.
-- **Vá Lỗ Hổng Kích Hoạt Cư Dân & Sửa Lỗi Đảo Ngược Phân Quyền (C3 & C4)**:
-  - Sửa đổi RPC `verify_activation_code`: chuyển đổi từ mã OTP hardcode `'123456'` sang sinh số ngẫu nhiên 6 chữ số thực tế, loại bỏ hoàn toàn trường rò rỉ `otp_hint`.
-  - Khắc phục lỗi điều kiện logic `IF NOT v_is_authorized AND v_caller_id IS NOT NULL` trên toàn bộ các RPCs: `generate_bulk_resident_activations`, `regenerate_resident_activation`, `revoke_resident_activation`, `get_building_activation_list`, `get_financial_aging_report`, `import_apartments_batch`, `import_residents_batch`. Chặn đứng nguy cơ người dùng ẩn danh (auth.uid() IS NULL) bypass kiểm tra phân quyền.
+- **Sửa Lỗi Phân Quyền Gọi Kích Hoạt Cư Dân (C4)**:
+  - Khắc phục triệt để lỗ hổng đảo ngược logic trên hàm thực tế app đang gọi `generate_resident_activation_codes(p_building_id UUID)`: kiểm tra phân quyền `IF NOT (v_is_authorized OR (auth.jwt() ->> 'role' = 'service_role')) THEN RAISE EXCEPTION`, chặn hoàn toàn khả năng người dùng ẩn danh hoặc cư dân gọi hàm.
+- **Xác Thực Kích Hoạt Cư Dân Theo Môi Trường (C3)**:
+  - Cập nhật `verify_activation_code` nhận tham số `p_is_production BOOLEAN DEFAULT FALSE`.
+  - Trên môi trường phát triển/thử nghiệm (Dev/Staging), trả về `otp_hint` để thông luồng kiểm thử khi chưa kết nối SMS gateway; trên môi trường Production (`p_is_production: true`), triệt tiêu `otp_hint` và bảo mật mã OTP.
+  - Cập nhật `ResidentActivationRepository` gửi cờ `AppEnvironment.current.isProduction` và cập nhật giao diện `ResidentActivationScreen` thông báo rõ ràng về trạng thái gửi OTP theo môi trường.
 - **Khắc Phục Nút Xóa Ảnh Sự Cố Vô Hình (P1-1)**:
   - Bổ sung `Icon(Icons.close_rounded, size: 16, color: Colors.white)` và padding cảm ứng 4dp trong `InkWell` tại `CreateIssueScreen`, giúp cư dân nhìn thấy và thao tác xóa ảnh đã đính kèm.
 - **Chống Tràn Bảng DataTable Hóa Đơn Máy Tính (P1-9)**:
   - Bọc `DataTable` trong `SingleChildScrollView(scrollDirection: Axis.horizontal)` với `ConstrainedBox(minWidth: 900)` tại `InvoiceManagementScreen`, đảm bảo bảng quản lý hóa đơn hiển thị chuẩn mực và cuộn ngang mượt mà trên desktop và tablet.
 - **Động Hóa Bộ Lọc Kỳ Báo Cáo Tài Chính (P1-14)**:
   - Xóa bỏ mảng tháng hardcode tĩnh `[10, 9, 8, 7, 6]`; triển khai hàm `_generateRecentPeriods()` tự động tính toán các kỳ đối soát 6 tháng gần nhất theo thời gian thực tại `FinancialReportScreen`.
-- **Thích Ứng Giao Diện Tối (Dark Mode) Cho Màu Trạng Thái (P1-2)**:
-  - Chuyển đổi toàn bộ màu trạng thái tĩnh `AppStatusColors` sang các hàm getter thích ứng `getPaid(context)`, `getUnpaid(context)`, `getPendingConfirmation(context)` tại `InvoiceManagementScreen`.
-  - Bổ sung các getter `getTextPrimary(context)`, `getTextSecondary(context)` đạt chuẩn tương phản WCAG AA vào `AppTheme` và `AppTypographyExtension`.
+- **Tối Ưu Tương Phản Dark Mode Đạt Chuẩn WCAG AA (P1-2)**:
+  - Nâng cấp màu `darkTextSecondary` từ `Colors.white70` (độ tương phản 3.5:1) lên `Color(0xFF94A3B8)` Slate 400 (độ tương phản 6.5:1 trên surface tối `0xFF1E1E1E`, vượt ngưỡng chuẩn WCAG AA 4.5:1).
+  - Bổ sung cấu hình `onSurfaceVariant` cho cả `lightTheme` và `darkTheme`.
+  - Chuyển đổi màu trạng thái tĩnh `AppStatusColors` sang các hàm getter thích ứng `getPaid(context)`, `getUnpaid(context)`, `getPendingConfirmation(context)` tại `InvoiceManagementScreen`.
 
 ---
 

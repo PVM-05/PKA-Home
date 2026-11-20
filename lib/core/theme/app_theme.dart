@@ -153,6 +153,7 @@ class AppTheme {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: textPrimary,
+        onSurfaceVariant: textSecondary,
         onError: Colors.white,
       ),
       scaffoldBackgroundColor: background,
@@ -331,7 +332,7 @@ class AppTheme {
     const darkSurface = Color(0xFF1E1E1E);
     const darkBackground = Color(0xFF121212);
     const darkTextPrimary = Colors.white;
-    const darkTextSecondary = Colors.white70;
+    const darkTextSecondary = Color(0xFF94A3B8); // Slate 400 (6.5:1 contrast ratio trên darkSurface đạt chuẩn WCAG AA)
 
     return ThemeData(
       useMaterial3: true,
@@ -343,6 +344,7 @@ class AppTheme {
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: darkTextPrimary,
+        onSurfaceVariant: darkTextSecondary,
         onError: Colors.white,
       ),
       scaffoldBackgroundColor: darkBackground,

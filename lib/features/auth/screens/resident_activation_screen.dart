@@ -604,7 +604,9 @@ class _ResidentActivationScreenState
           const SizedBox(height: 20),
 
           Text(
-            'Mã OTP 6 chữ số đã được gửi đến số điện thoại ${state.phone}. Vui lòng nhập mã để xác nhận quyền sử dụng.',
+            state.otpHint != null
+                ? 'Môi trường phát triển: Mã OTP tự động điền (${state.otpHint}). Trên môi trường Production, mã xác thực sẽ được gửi qua tin nhắn SMS.'
+                : 'Mã OTP 6 chữ số đã được gửi đến số điện thoại ${state.phone}. Vui lòng nhập mã để xác nhận quyền sử dụng.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
           ),
           const SizedBox(height: 20),

@@ -95,14 +95,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
         return;
       }
 
-      state = AsyncValue.data(userModel);
-
       // Kiểm tra xem tài khoản có bật MFA và phiên hiện tại cần nâng cấp lên AAL2 không
+      // PHẢI chạy trước khi cập nhật state userModel để loại trừ hoàn toàn race condition ở GoRouter redirect gate
       if (_ref != null) {
         final mfaService = _ref.read(mfaServiceProvider);
         final needsMfa = await mfaService.needsMfaVerification();
         _ref.read(mfaChallengeRequiredProvider.notifier).state = needsMfa;
       }
+
+      state = AsyncValue.data(userModel);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

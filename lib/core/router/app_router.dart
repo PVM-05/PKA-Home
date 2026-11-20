@@ -771,10 +771,13 @@ class _ResidentShellWrapper extends ConsumerWidget {
   }
 }
 
-/// Notifier giúp GoRouter lắng nghe thay đổi auth state.
+/// Notifier giúp GoRouter lắng nghe thay đổi auth state và MFA challenge state.
 class GoRouterAuthNotifier extends ChangeNotifier {
   GoRouterAuthNotifier(this._ref) {
     _ref.listen(authProvider, (prev, next) {
+      notifyListeners();
+    });
+    _ref.listen(mfaChallengeRequiredProvider, (prev, next) {
       notifyListeners();
     });
   }
