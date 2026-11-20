@@ -20,6 +20,7 @@ void main() {
       'lib/features/auth/screens/register_screen.dart',
       'lib/features/auth/screens/resident_activation_screen.dart',
       'lib/features/auth/screens/forgot_password_screen.dart',
+      'lib/features/auth/screens/mfa_challenge_screen.dart',
       // Module 4: Cư dân - Trang chủ & Hồ sơ cá nhân (Resident Portal Foundation)
       'lib/features/resident/screens/resident_home_screen.dart',
       'lib/features/resident/screens/resident_profile_screen.dart',

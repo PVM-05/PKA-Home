@@ -307,20 +307,20 @@ class _InvoiceManagementScreenState
           _buildFilterChip(
             'pending_confirmation',
             'Chờ xác nhận ($pendingConfirmationCount)',
-            AppStatusColors.pendingConfirmation,
+            AppStatusColors.getPendingConfirmation(context),
             hasBadge: pendingConfirmationCount > 0,
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
             'unpaid',
             'Đang nợ ($unpaidCount)',
-            AppStatusColors.unpaid,
+            AppStatusColors.getUnpaid(context),
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
             'paid',
             'Đã thanh toán ($paidCount)',
-            AppStatusColors.paid,
+            AppStatusColors.getPaid(context),
           ),
         ],
       ),
@@ -412,58 +412,62 @@ class _InvoiceManagementScreenState
               boxShadow: isDark ? null : AppShadows.softSm,
             ),
             clipBehavior: Clip.antiAlias,
-            child: DataTable(
-              headingRowColor: WidgetStateProperty.all(
-                isDark
-                    ? Colors.white.withValues(alpha: 0.03)
-                    : Colors.black.withValues(alpha: 0.02),
-              ),
-              headingRowHeight: 48,
-              dataRowMinHeight: 56,
-              dataRowMaxHeight: 64,
-              horizontalMargin: 20,
-              columnSpacing: 24,
-              columns: [
-                DataColumn(
-                  label: Text(
-                    'CĂN HỘ',
-                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 900),
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : Colors.black.withValues(alpha: 0.02),
                   ),
-                ),
-                DataColumn(
-                  label: Text(
-                    'KỲ PHÍ',
-                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    'TỔNG TIỀN',
-                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    'HẠN THANH TOÁN',
-                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    'TRẠNG THÁI',
-                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    'THAO TÁC',
-                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-              rows: filtered.map((invoice) {
-                final isPending = invoice.status == 'pending_confirmation';
-                final statusColor = _getStatusColor(invoice.status);
+                  headingRowHeight: 48,
+                  dataRowMinHeight: 56,
+                  dataRowMaxHeight: 64,
+                  horizontalMargin: 20,
+                  columnSpacing: 24,
+                  columns: [
+                    DataColumn(
+                      label: Text(
+                        'CĂN HỘ',
+                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'KỲ PHÍ',
+                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'TỔNG TIỀN',
+                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'HẠN THANH TOÁN',
+                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'TRẠNG THÁI',
+                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'THAO TÁC',
+                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                  rows: filtered.map((invoice) {
+                    final isPending = invoice.status == 'pending_confirmation';
+                    final statusColor = _getStatusColor(context, invoice.status);
                 final statusText = _getStatusText(invoice.status);
 
                 return DataRow(
@@ -582,7 +586,7 @@ class _InvoiceManagementScreenState
                                   : Icons.visibility_outlined,
                               size: 20,
                               color: isPending
-                                  ? AppStatusColors.pendingConfirmation
+                                  ? AppStatusColors.getPendingConfirmation(context)
                                   : AppTheme.primary,
                             ),
                             tooltip: isPending
@@ -631,6 +635,8 @@ class _InvoiceManagementScreenState
                   ],
                 );
               }).toList(),
+                ),
+              ),
             ),
           ),
         ],
@@ -655,7 +661,7 @@ class _InvoiceManagementScreenState
           final isNew =
               DateTime.now().difference(invoice.createdAt).inMinutes < 15;
           final isPending = invoice.status == 'pending_confirmation';
-          final statusColor = _getStatusColor(invoice.status);
+          final statusColor = _getStatusColor(context, invoice.status);
           final statusText = _getStatusText(invoice.status);
 
           return AppCard(
@@ -683,7 +689,7 @@ class _InvoiceManagementScreenState
                             Icon(
                               Icons.domain,
                               color: isPending
-                                  ? AppStatusColors.pendingConfirmation
+                                  ? AppStatusColors.getPendingConfirmation(context)
                                   : AppTheme.primary,
                               size: 20,
                             ),
@@ -935,15 +941,15 @@ class _InvoiceManagementScreenState
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(BuildContext context, String status) {
     switch (status) {
       case 'paid':
-        return AppStatusColors.paid;
+        return AppStatusColors.getPaid(context);
       case 'pending_confirmation':
-        return AppStatusColors.pendingConfirmation;
+        return AppStatusColors.getPendingConfirmation(context);
       case 'unpaid':
       default:
-        return AppStatusColors.unpaid;
+        return AppStatusColors.getUnpaid(context);
     }
   }
 

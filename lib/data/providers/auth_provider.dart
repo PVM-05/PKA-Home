@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/push_notification_service.dart';
+import '../../core/security/mfa_service.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 
@@ -28,6 +29,9 @@ final sessionExpiredNoticeProvider = StateProvider<bool>((ref) => false);
 
 /// Provider thông báo tài khoản bị khóa
 final accountLockedNoticeProvider = StateProvider<bool>((ref) => false);
+
+/// Provider thông báo phiên làm việc yêu cầu hoàn tất xác thực hai yếu tố (AAL2 TOTP)
+final mfaChallengeRequiredProvider = StateProvider<bool>((ref) => false);
 
 final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
   return AuthNotifier(ref.read(authRepositoryProvider), ref);
@@ -92,6 +96,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
       }
 
       state = AsyncValue.data(userModel);
+
+      // Kiểm tra xem tài khoản có bật MFA và phiên hiện tại cần nâng cấp lên AAL2 không
+      if (_ref != null) {
+        final mfaService = _ref.read(mfaServiceProvider);
+        final needsMfa = await mfaService.needsMfaVerification();
+        _ref.read(mfaChallengeRequiredProvider.notifier).state = needsMfa;
+      }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -112,12 +123,17 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   Future<void> logout() async {
     _isManualLogout = true;
     _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
+    _ref?.read(mfaChallengeRequiredProvider.notifier).state = false;
     try {
       await _repository.logout();
     } catch (_) {
       _isManualLogout = false;
       rethrow;
     }
+  }
+
+  void clearMfaChallenge() {
+    _ref?.read(mfaChallengeRequiredProvider.notifier).state = false;
   }
 
   void updateUser(UserModel updated) {

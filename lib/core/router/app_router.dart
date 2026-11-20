@@ -30,6 +30,7 @@ import '../../features/auth/screens/resident_activation_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/verify_otp_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
+import '../../features/auth/screens/mfa_challenge_screen.dart';
 import '../../features/resident/screens/resident_home_screen.dart';
 import '../../features/resident/screens/resident_invoice_screen.dart';
 import '../../features/resident/screens/resident_invoice_detail_screen.dart';
@@ -142,12 +143,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == AppRoutes.forgotPassword;
       final isRecoveryRoute = state.matchedLocation == AppRoutes.verifyOtp ||
           state.matchedLocation == AppRoutes.resetPassword;
+      final needsMfa = ref.read(mfaChallengeRequiredProvider);
 
       // Đang loading auth state → không redirect
       if (authState.isLoading) return null;
 
       // Đang trong luồng khôi phục mật khẩu (xác thực OTP hoặc đặt lại mật khẩu) → không tự redirect ra trang chủ
       if (isRecoveryRoute) return null;
+
+      // Phiên đăng nhập đang ở cấp độ AAL1 nhưng tài khoản yêu cầu AAL2 (MFA TOTP Gate)
+      if (isLoggedIn && needsMfa) {
+        if (state.matchedLocation != AppRoutes.mfaChallenge) {
+          return AppRoutes.mfaChallenge;
+        }
+        return null;
+      }
+      if (isLoggedIn && !needsMfa && state.matchedLocation == AppRoutes.mfaChallenge) {
+        return user.isManagement ? AppRoutes.managementHome : AppRoutes.residentHome;
+      }
 
       // Chưa đăng nhập → về login
       if (!isLoggedIn && !isAuthRoute) return AppRoutes.login;
@@ -225,6 +238,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
           state: state,
           child: const ResetPasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.mfaChallenge,
+        pageBuilder: (context, state) => AppPageTransitions.fade(
+          state: state,
+          child: const MfaChallengeScreen(),
         ),
       ),
 

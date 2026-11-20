@@ -1,5 +1,3 @@
-import '../../../core/security/mfa_service.dart';
-import '../widgets/mfa_verification_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -51,38 +49,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     try {
       await ref.read(authProvider.notifier).login(email, password);
-
-      // Kiểm tra xác thực 2 bước (MFA / TOTP)
-      if (mounted) {
-        final mfaService = ref.read(mfaServiceProvider);
-        final hasMfa = await mfaService.isMfaEnrolled();
-        if (hasMfa && mounted) {
-          final factorId = await mfaService.getVerifiedFactorId();
-          if (factorId != null && factorId.isNotEmpty) {
-            if (!mounted) return;
-            final mfaPassed = await MfaVerificationDialog.show(
-              context,
-              onVerify: (code) =>
-                  mfaService.verifyTotp(factorId: factorId, code: code),
-            );
-
-            if (mfaPassed != true) {
-              await ref.read(authProvider.notifier).logout();
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Xác thực hai bước (MFA) không thành công. Phiên đăng nhập đã bị hủy.',
-                    ),
-                    backgroundColor: AppTheme.error,
-                  ),
-                );
-              }
-              return;
-            }
-          }
-        }
-      }
     } catch (e) {
       if (mounted) {
         setState(() {

@@ -117,6 +117,16 @@ class AppTheme {
   static const Color warningText = Color(0xFFB45309); // Chữ cảnh báo
   static const Color warningBorder = Color(0xFFFDE68A); // Viền cảnh báo
 
+  // Adaptive Context Helpers for Dark Mode Support (WCAG AA Compliance)
+  static Color getTextPrimary(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? Colors.white : textPrimary;
+  static Color getTextSecondary(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFF94A3B8) : textSecondary;
+  static Color getSurface(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : surface;
+  static Color getBorder(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : border;
+
   // Spacing chuẩn (theme_spec.md)
   static const double spacingXs = 4.0;
   static const double spacingSm = 8.0;

@@ -6,6 +6,46 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
 
 ---
 
+## [2.3.0] - 2026-11-20
+
+### Đã thêm (Added) - Cổng Bảo Mật Xác Thực Hai Yếu Tố (MFA AAL2 Gate) & Khôi Phục 10 RPCs Cốt Lõi
+- **Cổng Bảo Mật Bắt Buộc MFA / TOTP (`MfaChallengeScreen`) (C5)**:
+  - Triển khai tuyến đường `AppRoutes.mfaChallenge` và màn hình bảo mật `MfaChallengeScreen` (`lib/features/auth/screens/mfa_challenge_screen.dart`), bảo vệ các tài khoản quản trị đã bật TOTP.
+  - Tích hợp `mfaChallengeRequiredProvider` vào bộ điều hướng toàn cục `appRouterProvider`, tự động cưỡng chế chuyển hướng và chặn người dùng truy cập mọi phân hệ khi phiên đăng nhập chưa đạt cấp độ AAL2 (kể cả khi tắt ứng dụng mở lại hoặc làm mới trang).
+  - Bổ sung hàm cơ sở dữ liệu `is_aal2_if_mfa_enrolled()` bảo vệ phân quyền ở tầng dữ liệu.
+- **Khôi Phục Toàn Diện 10 RPCs Cốt Lõi Từ Archive (§0)**:
+  - Bổ sung migration `20261120_01_security_hardening_auth_and_rls.sql` khôi phục đầy đủ 10 hàm RPC bị thất lạc sau đợt squash baseline:
+    1. `approve_link_request`: Duyệt liên kết căn hộ cư dân.
+    2. `cancel_apartment_link_request`: Hủy yêu cầu liên kết căn hộ.
+    3. `cancel_pending_meter_reading`: Hủy phiếu chỉ số điện nước đang chờ duyệt.
+    4. `update_pending_meter_reading`: Sửa chỉ số và ảnh đồng hồ đang chờ duyệt.
+    5. `cancel_pending_vehicle`: Hủy đăng ký phương tiện đang chờ duyệt.
+    6. `update_pending_vehicle`: Sửa thông tin biển số và loại xe đang chờ duyệt.
+    7. `get_co_residents`: Tra cứu thành viên cùng căn hộ bảo mật theo RLS.
+    8. `check_in_amenity_booking`: Xác nhận check-in lượt đặt tiện ích tòa nhà.
+    9. `get_amenity_slot_availability`: Tra cứu khung giờ tiện ích khả dụng bảo vệ quyền riêng tư cư dân.
+    10. `update_invoice_with_items`: Cập nhật hóa đơn và các dòng chi phí trong 1 giao dịch nguyên tử ACID.
+
+### Đã sửa (Fixed) - Vá Lỗ Hổng Bảo Mật Nghiêm Trọng (C1 - C5) & Khắc Phục 4 Lỗi UI Trọng Yếu (P1-1, P1-2, P1-9, P1-14)
+- **Vá Lỗ Hổng Tự Nâng Quyền Hạn Admin (C1 & C2)**:
+  - Thiết lập Trigger bất biến `trg_enforce_user_security_immutability` chặn người dùng tự sửa đổi `role`, `is_locked`, hoặc `is_active` trên bảng `users`.
+  - Cập nhật trigger `handle_new_user()`: mọi tài khoản tự đăng ký mới mặc định gán vai trò `resident`, chặn triệt để tham số `role: 'admin'` gửi từ client.
+  - Siết chặt chính sách RLS `users_update_own_or_admin` với điều kiện kiểm tra cột nghiêm ngặt.
+- **Vá Lỗ Hổng Kích Hoạt Cư Dân & Sửa Lỗi Đảo Ngược Phân Quyền (C3 & C4)**:
+  - Sửa đổi RPC `verify_activation_code`: chuyển đổi từ mã OTP hardcode `'123456'` sang sinh số ngẫu nhiên 6 chữ số thực tế, loại bỏ hoàn toàn trường rò rỉ `otp_hint`.
+  - Khắc phục lỗi điều kiện logic `IF NOT v_is_authorized AND v_caller_id IS NOT NULL` trên toàn bộ các RPCs: `generate_bulk_resident_activations`, `regenerate_resident_activation`, `revoke_resident_activation`, `get_building_activation_list`, `get_financial_aging_report`, `import_apartments_batch`, `import_residents_batch`. Chặn đứng nguy cơ người dùng ẩn danh (auth.uid() IS NULL) bypass kiểm tra phân quyền.
+- **Khắc Phục Nút Xóa Ảnh Sự Cố Vô Hình (P1-1)**:
+  - Bổ sung `Icon(Icons.close_rounded, size: 16, color: Colors.white)` và padding cảm ứng 4dp trong `InkWell` tại `CreateIssueScreen`, giúp cư dân nhìn thấy và thao tác xóa ảnh đã đính kèm.
+- **Chống Tràn Bảng DataTable Hóa Đơn Máy Tính (P1-9)**:
+  - Bọc `DataTable` trong `SingleChildScrollView(scrollDirection: Axis.horizontal)` với `ConstrainedBox(minWidth: 900)` tại `InvoiceManagementScreen`, đảm bảo bảng quản lý hóa đơn hiển thị chuẩn mực và cuộn ngang mượt mà trên desktop và tablet.
+- **Động Hóa Bộ Lọc Kỳ Báo Cáo Tài Chính (P1-14)**:
+  - Xóa bỏ mảng tháng hardcode tĩnh `[10, 9, 8, 7, 6]`; triển khai hàm `_generateRecentPeriods()` tự động tính toán các kỳ đối soát 6 tháng gần nhất theo thời gian thực tại `FinancialReportScreen`.
+- **Thích Ứng Giao Diện Tối (Dark Mode) Cho Màu Trạng Thái (P1-2)**:
+  - Chuyển đổi toàn bộ màu trạng thái tĩnh `AppStatusColors` sang các hàm getter thích ứng `getPaid(context)`, `getUnpaid(context)`, `getPendingConfirmation(context)` tại `InvoiceManagementScreen`.
+  - Bổ sung các getter `getTextPrimary(context)`, `getTextSecondary(context)` đạt chuẩn tương phản WCAG AA vào `AppTheme` và `AppTypographyExtension`.
+
+---
+
 ## [2.2.0] - 2026-11-18
 
 ### Đã thêm (Added) - Hiện Đại Hóa Giao Diện UI 2026 & Cá Nhân Hóa Theo Ngữ Cảnh

@@ -300,12 +300,21 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
   );
 }
 
+  List<String> _generateRecentPeriods({int count = 6}) {
+    final now = DateTime.now();
+    return List.generate(count, (i) {
+      final date = DateTime(now.year, now.month - i, 1);
+      return '${date.month}/${date.year}';
+    });
+  }
+
   Widget _buildFilterSection(FinancialReportFilter filter) {
     return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isNarrow = constraints.maxWidth < 320;
+          final periods = _generateRecentPeriods();
           if (isNarrow) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,10 +344,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                         value: null,
                         child: Text('Tất cả các kỳ'),
                       ),
-                      for (final m in [10, 9, 8, 7, 6])
+                      for (final period in periods)
                         DropdownMenuItem<String?>(
-                          value: '$m/2026',
-                          child: Text('Tháng $m/2026'),
+                          value: period,
+                          child: Text('Tháng $period'),
                         ),
                     ],
                     onChanged: (val) {
@@ -375,10 +384,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                         value: null,
                         child: Text('Tất cả các kỳ'),
                       ),
-                      for (final m in [10, 9, 8, 7, 6])
+                      for (final period in periods)
                         DropdownMenuItem<String?>(
-                          value: '$m/2026',
-                          child: Text('Tháng $m/2026'),
+                          value: period,
+                          child: Text('Tháng $period'),
                         ),
                     ],
                     onChanged: (val) {

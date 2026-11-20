@@ -33,6 +33,14 @@ extension AppTypographyExtension on BuildContext {
   TextStyle? get labelLarge => textTheme.labelLarge;
   TextStyle? get labelMedium => textTheme.labelMedium;
   TextStyle? get labelSmall => textTheme.labelSmall;
+
+  /// Màu chữ chính thích ứng sáng/tối theo chuẩn WCAG AA
+  Color get textPrimary =>
+      Theme.of(this).brightness == Brightness.dark ? Colors.white : const Color(0xFF0F172A);
+
+  /// Màu chữ phụ thích ứng sáng/tối theo chuẩn WCAG AA
+  Color get textSecondary =>
+      Theme.of(this).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 }
 
 /// Lớp hằng số kích thước Typography chuẩn (Theme Spec)

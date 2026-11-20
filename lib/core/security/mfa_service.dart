@@ -54,6 +54,18 @@ class MfaService {
     }
   }
 
+  /// Kiểm tra xem phiên đăng nhập hiện tại có đang thiếu bước xác thực 2 (yêu cầu AAL2 nhưng đang ở AAL1) không
+  Future<bool> needsMfaVerification() async {
+    try {
+      final aal = _effectiveClient.auth.mfa.getAuthenticatorAssuranceLevel();
+      return aal.currentLevel == AuthenticatorAssuranceLevels.aal1 &&
+          aal.nextLevel == AuthenticatorAssuranceLevels.aal2;
+    } catch (e) {
+      debugPrint('[MfaService] Lỗi kiểm tra mức độ xác thực AAL: $e');
+      return false;
+    }
+  }
+
   /// Lấy ID của yếu tố xác thực TOTP đang kích hoạt đầu tiên
   Future<String?> getVerifiedFactorId() async {
     try {

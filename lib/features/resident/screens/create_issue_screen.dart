@@ -781,6 +781,11 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                               },
                               child: const Padding(
                                 padding: EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
