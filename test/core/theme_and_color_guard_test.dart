@@ -132,6 +132,10 @@ void main() {
       'lib/features/management/widgets/debt_risk_radar_tab.dart',
       'lib/features/management/widgets/revenue_trend_chart.dart',
       'lib/features/management/widgets/technician_performance_card.dart',
+      // Module 26: Cụm Nghiệp Vụ BQL Trọng Yếu (Resident 360 Detail, Resolve Issue Materials & Bulk Invoice Dialog)
+      'lib/features/management/widgets/resident_360_detail_sheet.dart',
+      'lib/features/management/widgets/resolve_issue_materials_sheet.dart',
+      'lib/features/management/widgets/bulk_invoice_dialog.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

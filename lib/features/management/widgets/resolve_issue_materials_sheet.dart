@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/maintenance_material_model.dart';
 import '../../../data/providers/management_provider.dart';
@@ -86,7 +87,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Chọn vật tư:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text('Chọn vật tư:', style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<MaintenanceMaterialModel>(
                       initialValue: selected,
@@ -97,7 +98,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                           child: Text(
                             '${m.name} (Còn ${m.stockQuantity} ${m.unit})',
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 13),
+                            style: context.bodyMedium,
                           ),
                         );
                       }).toList(),
@@ -110,17 +111,17 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                     const SizedBox(height: 12),
                     Text(
                       'Đơn giá: ${selected.priceFormatted}/${selected.unit}',
-                      style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.primary, fontSize: 13),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.primary),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Text('Số lượng: ', style: TextStyle(fontSize: 13)),
+                        Text('Số lượng: ', style: context.bodyMedium),
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline),
                           onPressed: qty > 1 ? () => setDialogState(() => qty--) : null,
                         ),
-                        Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        Text('$qty', style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
                           onPressed: qty < selected.stockQuantity ? () => setDialogState(() => qty++) : null,
@@ -130,8 +131,8 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                     const SizedBox(height: 8),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Tính phí vào hóa đơn cư dân', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                      subtitle: const Text('Bật nếu là thiết bị sở hữu riêng của căn hộ', style: TextStyle(fontSize: 11)),
+                      title: Text('Tính phí vào hóa đơn cư dân', style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Bật nếu là thiết bị sở hữu riêng của căn hộ', style: context.labelSmall),
                       value: isChargeable,
                       activeThumbColor: Colors.white,
                       activeTrackColor: AppTheme.primary,
@@ -285,14 +286,14 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Nghiệm Thu & Xuất Kho Vật Tư',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        Text(
+                          'Nghiệm thu & xuất kho vật tư',
+                          style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Căn hộ: ${widget.issue.apartment?.code ?? "Chung"} • Sự cố #${widget.issue.id.substring(0, 6)}',
-                          style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                          style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                         ),
                       ],
                     ),
@@ -312,15 +313,15 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                     color: AppTheme.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(_errorMessage!, style: const TextStyle(color: AppTheme.error, fontSize: 13)),
+                  child: Text(_errorMessage!, style: context.bodyMedium?.copyWith(color: AppTheme.error)),
                 ),
                 const SizedBox(height: 16),
               ],
 
               // 1. Ảnh minh chứng nghiệm thu
-              const Text(
+              Text(
                 '1. Ảnh minh chứng sau sửa chữa (Ảnh Nghiệm thu)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               if (_proofFiles.isEmpty)
@@ -376,9 +377,9 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     '2. Vật tư tiêu hao sửa chữa',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   materialsAsync.when(
                     data: (mats) => TextButton.icon(
@@ -400,11 +401,11 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'Chưa có vật tư nào được xuất kho cho sự cố này.\nBấm "Xuất vật tư" nếu có thay thế linh kiện.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                     ),
                   ),
                 )
@@ -437,18 +438,17 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                               children: [
                                 Text(
                                   entry.material.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Số lượng: ${entry.quantity} ${entry.material.unit} • Đơn giá: ${entry.material.priceFormatted}',
-                                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                  style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   entry.isChargeable ? '• Tính phí căn hộ: ${_currencyFormat.format(entry.totalAmount)}' : '• Chi phí vận hành tòa nhà',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                                  style: context.labelSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: entry.isChargeable ? AppTheme.primary : Colors.grey.shade700,
                                   ),
@@ -476,13 +476,13 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Tổng tiền kết chuyển hóa đơn:',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           _currencyFormat.format(totalChargeableAmount),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primary),
+                          style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                         ),
                       ],
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/resident_model.dart';
 import '../../../data/providers/management_provider.dart';
@@ -241,7 +242,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
       builder: (dlgCtx) => StatefulBuilder(
         builder: (dialogContext, setDlg) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Chỉnh sửa hồ sơ người dùng', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          title: Text('Chỉnh sửa hồ sơ người dùng', style: dialogContext.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -428,7 +429,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                       backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
                       child: Text(
                         _resident.fullName.isNotEmpty ? _resident.fullName[0].toUpperCase() : '?',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                        style: context.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -441,7 +442,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                               Expanded(
                                 child: Text(
                                   _resident.fullName,
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ),
                               IconButton(
@@ -453,12 +454,12 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                           ),
                           Text(
                             'Căn hộ: ${aptCode ?? "Chưa gán"} • ${_resident.roleDisplayName}',
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                            style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Email: ${_resident.email ?? "Chưa có"} • SĐT: ${_resident.phone ?? "Chưa có"}',
-                            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                           ),
                           const SizedBox(height: 6),
                           Wrap(
@@ -473,7 +474,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                                 ),
                                 child: Text(
                                   _resident.roleDisplayName,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                                  style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.primary),
                                 ),
                               ),
                               Container(
@@ -486,8 +487,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                                 ),
                                 child: Text(
                                   _resident.statusDisplayName,
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                  style: context.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: (_resident.isActive && !_resident.isLocked) ? AppTheme.success : AppTheme.error,
                                   ),
@@ -510,12 +510,12 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                     OutlinedButton.icon(
                       onPressed: _isActionLoading ? null : _toggleLock,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: _resident.isLocked ? AppTheme.success : Colors.orange.shade800,
-                        side: BorderSide(color: _resident.isLocked ? AppTheme.success : Colors.orange.shade800),
+                        foregroundColor: _resident.isLocked ? AppTheme.success : AppTheme.warning,
+                        side: BorderSide(color: _resident.isLocked ? AppTheme.success : AppTheme.warning),
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
                       icon: Icon(_resident.isLocked ? Icons.lock_open : Icons.lock_outline, size: 16),
-                      label: Text(_resident.isLocked ? 'Mở khóa' : 'Khóa tài khoản', style: const TextStyle(fontSize: 12)),
+                      label: Text(_resident.isLocked ? 'Mở khóa' : 'Khóa tài khoản', style: context.bodySmall),
                     ),
                     OutlinedButton.icon(
                       onPressed: _isActionLoading ? null : _toggleActiveStatus,
@@ -525,7 +525,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
                       icon: Icon(_resident.isActive ? Icons.person_off_outlined : Icons.person_outline, size: 16),
-                      label: Text(_resident.isActive ? 'Vô hiệu hóa' : 'Kích hoạt', style: const TextStyle(fontSize: 12)),
+                      label: Text(_resident.isActive ? 'Vô hiệu hóa' : 'Kích hoạt', style: context.bodySmall),
                     ),
                     if (_resident.email != null)
                       OutlinedButton.icon(
@@ -536,7 +536,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                         ),
                         icon: const Icon(Icons.lock_reset, size: 16),
-                        label: const Text('Gửi link đổi mật khẩu', style: TextStyle(fontSize: 12)),
+                        label: Text('Gửi link đổi mật khẩu', style: context.bodySmall),
                       ),
                   ],
                 ),
@@ -554,7 +554,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                 children: [
                   const Icon(Icons.apartment, size: 16, color: AppTheme.primary),
                   const SizedBox(width: 6),
-                  const Text('Căn hộ liên kết:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  Text('Căn hộ liên kết:', style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: SingleChildScrollView(
@@ -567,8 +567,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                             child: FilterChip(
                               selected: isSelected,
                               label: Text('${a.apartmentCode} (${a.relationRoleDisplayName})'),
-                              labelStyle: TextStyle(
-                                fontSize: 11,
+                              labelStyle: context.labelSmall?.copyWith(
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                 color: isSelected ? Colors.white : AppTheme.textPrimary,
                               ),
@@ -613,7 +612,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                         );
                       },
                       icon: const Icon(Icons.assignment_outlined, size: 16),
-                      label: const Text('Xem hợp đồng & lưu trú', style: TextStyle(fontSize: 12)),
+                      label: Text('Xem hợp đồng & lưu trú', style: context.bodySmall),
                     ),
                   ],
                 ),
@@ -693,8 +692,8 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('$plate', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                        Text('Loại: $type • Căn hộ: ${aptCode ?? "N/A"}', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('$plate', style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                        Text('Loại: $type • Căn hộ: ${aptCode ?? "N/A"}', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                       ],
                     ),
                   ),
@@ -706,7 +705,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                     ),
                     child: Text(
                       statusLabel,
-                      style: TextStyle(fontSize: 11, color: statusColor, fontWeight: FontWeight.bold),
+                      style: context.labelSmall?.copyWith(color: statusColor, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -763,7 +762,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Kỳ: $period', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('${amount.toStringAsFixed(0)} đ', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('${amount.toStringAsFixed(0)} đ', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                       ],
                     ),
                   ),
@@ -775,7 +774,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                     ),
                     child: Text(
                       statusLabel,
-                      style: TextStyle(fontSize: 11, color: statusColor, fontWeight: FontWeight.bold),
+                      style: context.labelSmall?.copyWith(color: statusColor, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -845,7 +844,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('$amenityName', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('Lịch: $slot ngày $date • Căn hộ ${aptCode ?? "N/A"}', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('Lịch: $slot ngày $date • Căn hộ ${aptCode ?? "N/A"}', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                       ],
                     ),
                   ),
@@ -857,7 +856,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                     ),
                     child: Text(
                       statusLabel,
-                      style: TextStyle(fontSize: 11, color: statusColor, fontWeight: FontWeight.bold),
+                      style: context.labelSmall?.copyWith(color: statusColor, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],

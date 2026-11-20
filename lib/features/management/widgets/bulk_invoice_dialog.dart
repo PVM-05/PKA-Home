@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/network_error_handler.dart';
 import '../../../data/models/bulk_invoice_validation_model.dart';
 import '../../../data/providers/management_provider.dart';
@@ -206,9 +207,9 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Bước 1: Thiết lập kỳ và biểu phí để hệ thống chạy tiền kiểm tra (Dry-Run) trước khi phát hành hóa đơn.',
-                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -301,8 +302,8 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Kết Quả Tiền Kiểm Tra',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Kết quả tiền kiểm tra',
+              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -316,7 +317,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
             children: [
               Text(
                 'Kỳ: ${result.period} • Quét ${result.totalScanned} căn hộ (Dry-Run: Chưa ghi vào cơ sở dữ liệu)',
-                style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 14),
 
@@ -380,17 +381,17 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Tổng tiền dự thu (${'các căn hợp lệ'}):', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('Tổng tiền dự thu (${'các căn hợp lệ'}):', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
                         const SizedBox(height: 2),
                         Text(
                           _currencyFormat.format(result.totalEstimatedAmount),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                          style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
                         ),
                       ],
                     ),
                     Text(
                       '${result.validCount}/${result.totalScanned} căn',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -472,8 +473,8 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: color)),
-                Text(sub, style: TextStyle(fontSize: 10, color: color.withValues(alpha: 0.8))),
+                Text(label, style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: color)),
+                Text(sub, style: context.labelSmall?.copyWith(color: color.withValues(alpha: 0.8))),
               ],
             ),
           ),
@@ -484,7 +485,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
 
   Widget _buildValidItemsList(List<ValidApartmentBillingItem> items) {
     if (items.isEmpty) {
-      return const Center(child: Text('Không có căn hộ nào đủ điều kiện tạo hóa đơn.', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)));
+      return Center(child: Text('Không có căn hộ nào đủ điều kiện tạo hóa đơn.', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)));
     }
 
     return ListView.separated(
@@ -502,12 +503,12 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
                 children: [
                   const Icon(Icons.apartment, size: 16, color: AppTheme.primary),
                   const SizedBox(width: 6),
-                  Text('Căn ${item.apartmentCode}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  Text('Căn ${item.apartmentCode}', style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(width: 6),
-                  Text('(${item.area} m²)', style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                  Text('(${item.area} m²)', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                 ],
               ),
-              Text(_currencyFormat.format(item.estimatedTotal), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              Text(_currencyFormat.format(item.estimatedTotal), style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
             ],
           ),
         );
@@ -517,7 +518,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
 
   Widget _buildIssuesList(List<BulkInvoiceIssueItem> issues) {
     if (issues.isEmpty) {
-      return const Center(child: Text('Tất cả các căn hộ đều hợp lệ!', style: TextStyle(fontSize: 12, color: AppStatusColors.paid)));
+      return Center(child: Text('Tất cả các căn hộ đều hợp lệ!', style: context.bodySmall?.copyWith(color: AppStatusColors.paid)));
     }
 
     return ListView.separated(
@@ -543,7 +544,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
                 ),
                 child: Text(
                   issue.apartmentCode,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: color),
+                  style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: color),
                 ),
               ),
               const SizedBox(width: 8),
@@ -551,8 +552,8 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(issue.typeDisplayName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color)),
-                    Text(issue.message, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                    Text(issue.typeDisplayName, style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: color)),
+                    Text(issue.message, style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                   ],
                 ),
               ),
