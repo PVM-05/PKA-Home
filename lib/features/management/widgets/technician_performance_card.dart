@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/app_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/issue_rating_provider.dart';
@@ -112,15 +113,15 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.15),
+                      color: AppTheme.warning.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.analytics_outlined, color: Colors.orange, size: 20),
+                    child: const Icon(Icons.analytics_outlined, color: AppTheme.warning, size: 20),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Hiệu Suất Kỹ Thuật Viên',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    'Hiệu suất kỹ thuật viên',
+                    style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -160,7 +161,7 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   item.staffName,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -179,8 +180,7 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                                       const SizedBox(width: 2),
                                       Text(
                                         item.avgRating.toStringAsFixed(1),
-                                        style: const TextStyle(
-                                          fontSize: 11,
+                                        style: context.labelSmall?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.amber,
                                         ),
@@ -197,22 +197,22 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Đã xử lý', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                                  Text('Đã xử lý', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                                   Text(
                                     '${item.resolvedCount}/${item.totalAssigned} ($completionRate%)',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.success, fontSize: 13),
+                                    style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.success),
                                   ),
                                 ],
                               ),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  const Text('TG trung bình', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                                  Text('TG trung bình', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                                   Text(
                                     item.avgResolutionHours < 1
                                         ? '${(item.avgResolutionHours * 60).toStringAsFixed(0)} phút'
                                         : '${item.avgResolutionHours.toStringAsFixed(1)} giờ',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange, fontSize: 13),
+                                    style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.warning),
                                   ),
                                 ],
                               ),

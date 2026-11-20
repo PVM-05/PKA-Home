@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/dashboard_providers.dart';
 import '../../../core/utils/error_formatter.dart';
@@ -26,13 +27,13 @@ class RevenueTrendChart extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Row(
-                    children: const [
-                      Icon(Icons.bar_chart_rounded, color: AppTheme.primary, size: 22),
-                      SizedBox(width: 8),
+                    children: [
+                      const Icon(Icons.bar_chart_rounded, color: AppTheme.primary, size: 22),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Xu hướng thu phí 6 kỳ',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -44,29 +45,29 @@ class RevenueTrendChart extends ConsumerWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildLegendItem(color: AppStatusColors.paid, label: 'Đã thu'),
+                    _buildLegendItem(context, color: AppStatusColors.paid, label: 'Đã thu'),
                     const SizedBox(width: 12),
-                    _buildLegendItem(color: AppStatusColors.unpaid, label: 'Còn nợ'),
+                    _buildLegendItem(context, color: AppStatusColors.unpaid, label: 'Còn nợ'),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'So sánh thực thu và nợ phí theo từng kỳ hóa đơn',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 16),
 
             trendAsync.when(
               data: (items) {
                 if (items.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0),
                     child: Center(
                       child: Text(
                         'Chưa có dữ liệu hóa đơn nào.',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                       ),
                     ),
                   );
@@ -138,16 +139,14 @@ class RevenueTrendChart extends ConsumerWidget {
                                     const SizedBox(height: 8),
                                     Text(
                                       item.shortLabel,
-                                      style: TextStyle(
-                                        fontSize: 11,
+                                      style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: Theme.of(context).colorScheme.onSurface,
                                       ),
                                     ),
                                     Text(
                                       item.period.length >= 7 ? item.period.substring(3) : '',
-                                      style: const TextStyle(
-                                        fontSize: 9,
+                                      style: context.labelSmall?.copyWith(
                                         color: AppTheme.textSecondary,
                                       ),
                                     ),
@@ -168,14 +167,13 @@ class RevenueTrendChart extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Tổng thực thu', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                              Text('Tổng thực thu', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                               const SizedBox(height: 2),
                               Text(
                                 currencyFormat.format(totalPaidAll),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
+                                style: context.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppStatusColors.paid,
                                 ),
@@ -187,14 +185,13 @@ class RevenueTrendChart extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Text('Tổng nợ tồn', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                              Text('Tổng nợ tồn', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                               const SizedBox(height: 2),
                               Text(
                                 currencyFormat.format(totalUnpaidAll),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
+                                style: context.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppStatusColors.unpaid,
                                 ),
@@ -206,12 +203,11 @@ class RevenueTrendChart extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text('Tỷ lệ thu hồi', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                              Text('Tỷ lệ thu hồi', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                               const SizedBox(height: 2),
                               Text(
                                 '${avgRate.toStringAsFixed(1)}%',
-                                style: const TextStyle(
-                                  fontSize: 13,
+                                style: context.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.primary,
                                 ),
@@ -239,7 +235,7 @@ class RevenueTrendChart extends ConsumerWidget {
                       Text(
                         formatErrorMessage(err),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppTheme.error, fontSize: 13),
+                        style: context.bodyMedium?.copyWith(color: AppTheme.error),
                       ),
                       const SizedBox(height: 8),
                       TextButton.icon(
@@ -252,7 +248,7 @@ class RevenueTrendChart extends ConsumerWidget {
                           ref.invalidate(monthlyRevenueTrendProvider);
                         },
                         icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: const Text('Thử lại', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        label: Text('Thử lại', style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -264,7 +260,7 @@ class RevenueTrendChart extends ConsumerWidget {
     );
   }
 
-  static Widget _buildLegendItem({required Color color, required String label}) {
+  static Widget _buildLegendItem(BuildContext context, {required Color color, required String label}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -279,7 +275,7 @@ class RevenueTrendChart extends ConsumerWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+          style: context.labelSmall?.copyWith(color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -304,18 +300,18 @@ class RevenueTrendChart extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Text(
                     'Chi tiết kỳ hóa đơn ${item.period}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              _buildDetailRow('Đã thu:', currencyFormat.format(item.paidAmount), AppStatusColors.paid),
+              _buildDetailRow(ctx, 'Đã thu:', currencyFormat.format(item.paidAmount), AppStatusColors.paid),
               const Divider(height: 16),
-              _buildDetailRow('Còn nợ:', currencyFormat.format(item.unpaidAmount), AppStatusColors.unpaid),
+              _buildDetailRow(ctx, 'Còn nợ:', currencyFormat.format(item.unpaidAmount), AppStatusColors.unpaid),
               const Divider(height: 16),
-              _buildDetailRow('Tổng phát sinh:', currencyFormat.format(item.totalAmount), AppTheme.textPrimary),
+              _buildDetailRow(ctx, 'Tổng phát sinh:', currencyFormat.format(item.totalAmount), AppTheme.textPrimary),
               const Divider(height: 16),
-              _buildDetailRow('Tỷ lệ hoàn thành:', '${(item.collectionRate * 100).toStringAsFixed(1)}%', AppTheme.primary),
+              _buildDetailRow(ctx, 'Tỷ lệ hoàn thành:', '${(item.collectionRate * 100).toStringAsFixed(1)}%', AppTheme.primary),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -335,14 +331,14 @@ class RevenueTrendChart extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, Color valueColor) {
+  Widget _buildDetailRow(BuildContext context, String label, String value, Color valueColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary)),
+        Text(label, style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary)),
         Text(
           value,
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: valueColor),
+          style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: valueColor),
         ),
       ],
     );

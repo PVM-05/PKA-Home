@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/debt_risk_score_model.dart';
 import '../../../data/providers/debt_prediction_provider.dart';
@@ -176,7 +177,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -185,12 +186,12 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
           const SizedBox(height: 6),
           Text(
             value,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color),
           ),
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -208,7 +209,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Tìm theo mã căn hộ, họ tên chủ hộ hoặc số điện thoại...',
-              hintStyle: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              hintStyle: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
               prefixIcon: const Icon(Icons.search_rounded, size: 20),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -225,7 +226,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
             ),
-            style: const TextStyle(fontSize: 13),
+            style: context.bodyMedium,
             onChanged: (val) {
               ref.read(debtRiskSearchQueryProvider.notifier).state = val;
             },
@@ -255,8 +256,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
     final activeColor = color ?? AppTheme.primary;
     return ChoiceChip(
       label: Text(label),
-      labelStyle: TextStyle(
-        fontSize: 12,
+      labelStyle: context.bodySmall?.copyWith(
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         color: isSelected ? Colors.white : AppTheme.textPrimary,
       ),
@@ -272,21 +272,21 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
 
   Widget _buildApartmentList(List<DebtRiskScoreModel> list) {
     if (list.isEmpty) {
-      return const AppCard(
-        padding: EdgeInsets.all(32),
+      return AppCard(
+        padding: const EdgeInsets.all(32),
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.check_circle_outline_rounded, color: AppTheme.success, size: 48),
-              SizedBox(height: 12),
+              const Icon(Icons.check_circle_outline_rounded, color: AppTheme.success, size: 48),
+              const SizedBox(height: 12),
               Text(
                 'Không có căn hộ nào nằm trong tiêu chí rủi ro này',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 'Các căn hộ đều duy trì tình trạng thanh toán an toàn',
-                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
               ),
             ],
           ),
@@ -303,12 +303,12 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
             Expanded(
               child: Text(
                 'Danh sách căn hộ rủi ro (${list.length} căn)',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
-            const Text(
+            Text(
               'Sắp xếp theo Điểm rủi ro AI',
-              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -336,10 +336,9 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 ),
                 child: Text(
                   apt.apartmentCode,
-                  style: const TextStyle(
+                  style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
-                    fontSize: 15,
                   ),
                 ),
               ),
@@ -350,12 +349,12 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                   children: [
                     Text(
                       apt.ownerName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     if (apt.ownerPhone.isNotEmpty)
                       Text(
                         apt.ownerPhone,
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                       ),
                   ],
                 ),
@@ -378,18 +377,16 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                         const SizedBox(width: 4),
                         Text(
                           '${apt.riskScore}/100',
-                          style: TextStyle(
+                          style: context.bodyMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: apt.riskLevel.color,
-                            fontSize: 13,
                           ),
                         ),
                       ],
                     ),
                     Text(
                       apt.riskLevel.label,
-                      style: TextStyle(
-                        fontSize: 10,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: apt.riskLevel.color,
                       ),
@@ -411,11 +408,11 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Dư nợ hiện tại', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                    Text('Dư nợ hiện tại', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                     const SizedBox(height: 2),
                     Text(
                       '${_moneyFormat.format(apt.unpaidAmount)} đ',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.error, fontSize: 13),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.error),
                     ),
                   ],
                 ),
@@ -424,11 +421,11 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Quá hạn', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                    Text('Quá hạn', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                     const SizedBox(height: 2),
                     Text(
                       '${apt.overdueDays} ngày',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 13),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                     ),
                   ],
                 ),
@@ -437,11 +434,11 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Lịch sử trễ', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                    Text('Lịch sử trễ', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
                     const SizedBox(height: 2),
                     Text(
                       '${apt.latePaymentCount} kỳ',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 13),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                     ),
                   ],
                 ),
@@ -471,7 +468,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                       const SizedBox(width: 4),
                       Text(
                         f.label,
-                        style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500),
+                        style: context.labelSmall?.copyWith(color: color, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -491,14 +488,13 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                   children: [
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           'Chiến lược đề xuất: ',
-                          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                          style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                         ),
                         Text(
                           apt.recommendedTier.shortName,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.bodySmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: apt.recommendedTier.color,
                           ),
@@ -508,7 +504,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                     if (apt.dunningCount > 0)
                       Text(
                         'Đã đôn đốc ${apt.dunningCount} lần (Gần nhất: ${apt.lastDunningTier?.shortName ?? ""})',
-                        style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                        style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                       ),
                   ],
                 ),

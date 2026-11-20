@@ -128,6 +128,10 @@ void main() {
       'lib/features/resident/widgets/notification_card.dart',
       'lib/features/resident/widgets/reschedule_booking_bottom_sheet.dart',
       'lib/features/resident/widgets/visitor_pass_qr_sheet.dart',
+      // Module 25: Cụm BQL Charts, Risk Radar & Hiệu suất Nhân sự (Debt Risk Radar, Revenue Trend Chart & Technician Performance Card)
+      'lib/features/management/widgets/debt_risk_radar_tab.dart',
+      'lib/features/management/widgets/revenue_trend_chart.dart',
+      'lib/features/management/widgets/technician_performance_card.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

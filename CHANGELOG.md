@@ -148,6 +148,12 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 7 file: `amenity_qr_code_dialog.dart`, `amenity_receipt_bottom_sheet.dart`, `create_petition_sheet.dart`, `create_visitor_pass_sheet.dart`, `notification_card.dart`, `reschedule_booking_bottom_sheet.dart`, `visitor_pass_qr_sheet.dart` (Module 24).
   - **Cán Mốc Toàn Thắng Lịch Sử Phân Hệ Cư Dân**: 100% toàn bộ phân hệ Cư dân (`lib/features/resident/`) bao gồm tất cả screens và widgets đạt trạng thái sạch hoàn toàn (0 điểm nợ `fontSize:` cứng).
   - Giảm thêm 32 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 250 xuống 218). Đưa tổng số điểm nợ typography được xóa bỏ lên 718 điểm qua 16 gói dọn dẹp liên hoàn (xóa sạch 76.7% nợ). Toàn bộ các guardrail tests và widget tests đều vượt qua 100%.
+- **Gói 2.17 Chuẩn Hóa Typography & BQL Charts, Radar Rủi Ro Công Nợ & Hiệu Suất Nhân Sự**:
+  - `DebtRiskRadarTab`: Xóa sạch 100% 25/25 điểm `fontSize:` cứng trong KPI cards, search input, filter chips, danh sách căn hộ rủi ro, thẻ chi tiết căn hộ, chip yếu tố rủi ro và khuyến nghị đôn đốc dunning.
+  - `RevenueTrendChart`: Xóa sạch 100% 17/17 điểm `fontSize:` cứng trong tiêu đề biểu đồ, ghi chú legend, nhãn tháng trục hoành, hàng tóm tắt tài chính 6 kỳ (thực thu, nợ tồn, tỷ lệ thu hồi), thông báo lỗi và bottom sheet chi tiết kỳ hóa đơn.
+  - `TechnicianPerformanceCard`: Xóa sạch 100% 7/7 điểm `fontSize:` cứng trong tiêu đề thẻ, tên nhân viên kỹ thuật, huy hiệu điểm đánh giá rating, số sự cố đã xử lý và thời gian xử lý trung bình; chuẩn hóa `Colors.orange` sang `AppTheme.warning`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 3 file BQL widgets phân tích cao cấp: `debt_risk_radar_tab.dart`, `revenue_trend_chart.dart`, `technician_performance_card.dart` (Module 25).
+  - Giảm thêm 49 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 218 xuống còn 169 điểm). Đưa tổng số điểm nợ typography được xóa bỏ lên 767 điểm qua 17 gói dọn dẹp liên hoàn (xóa sạch 81.95% tổng nợ dự án). Toàn bộ 4 bài test guardrail đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.
