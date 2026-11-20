@@ -43,6 +43,8 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
       23. `get_upcoming_maintenance_equipments`: Tra cứu thiết bị sắp đến hạn bảo trì trong 7 ngày (gọi bởi `EquipmentRepository.getUpcomingMaintenanceEquipments`).
       24. `record_meter_reading`: Ghi nhận chỉ số điện nước ngoại tuyến / cá lẻ (gọi bởi `OfflineSyncManager`).
       *(Bao gồm 2 hàm hỗ trợ import batch: `import_apartments_batch`, `import_residents_batch`).*
+    - `20261120_04_patch_activation_and_staff_roles.sql`: Migration phòng vệ tiến trình mới (nâng tổng số lên 44 migration files), tái áp dụng nguyên tử các bản vá Blocker 1, 2, 3 và 3 RPCs mới, đảm bảo mọi môi trường (kể cả nơi đã áp dụng bản `20261120_03` cũ) đều tự động nhận đầy đủ bản sửa lỗi khi chạy migration.
+  - Bộ kiểm thử hồi quy tự động khóa chặt các lỗi triển khai: Bổ sung 5 test case trong `test/data/migrations/p0_security_migration_content_test.dart` (nâng số test từ 11 lên 16), tự động kiểm tra tĩnh nội dung file migration: cấm enum `'manager'`, ép buộc dùng `code_attempts`, cấm `failed_attempts`, ép buộc gán `status = 'otp_sent'`, xác nhận đầy đủ 3 RPCs mới và guard cho fresh database.
   - Khởi tạo 5 bảng còn thiếu: `emergency_contacts`, `building_rules`, `role_change_log`, `issue_ratings`, `building_equipments` (mở rộng đầy đủ các trường `building`, `warranty_until`, `maintenance_interval_days`, `last_maintenance_date`, `next_maintenance_date`, `specifications` tương thích `BuildingEquipmentModel`) kèm RLS policies và index hiệu năng.
   - Sửa lỗi tương thích migration trên fresh database:
     - Bọc lệnh `TRUNCATE TABLE public.issue_ratings CASCADE` và `INSERT INTO public._applied_migrations` trong `20261106_01_cleanup_dead_tables_and_seed_data.sql` với điều kiện kiểm tra tồn tại bảng `to_regclass`.
