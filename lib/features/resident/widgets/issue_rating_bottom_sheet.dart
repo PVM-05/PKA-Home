@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/repositories/issue_repository.dart';
 import '../../../data/providers/issue_rating_provider.dart';
@@ -81,31 +83,23 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
 
       if (mounted) {
         Navigator.of(context).pop(result);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.initialRating != null
-                  ? 'Đã cập nhật đánh giá thành công'
-                  : 'Cảm ơn bạn đã đánh giá chất lượng dịch vụ!',
-            ),
-            backgroundColor: AppTheme.success,
-          ),
+        AppSnackBar.showSuccess(
+          context,
+          widget.initialRating != null
+              ? 'Đã cập nhật đánh giá thành công'
+              : 'Cảm ơn bạn đã đánh giá chất lượng dịch vụ!',
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     }
   }
 
-  Widget _buildStarRow({
+  Widget _buildStarRow(
+    BuildContext context, {
     required String title,
     required String subtitle,
     required int currentRating,
@@ -121,7 +115,7 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
             children: [
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -149,7 +143,7 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
           ),
           Text(
             subtitle,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -205,11 +199,11 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
                     children: [
                       Text(
                         isEditing ? 'Chỉnh sửa đánh giá' : 'Đánh giá chất lượng dịch vụ',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
                         'Đóng góp ý kiến giúp nâng cao chất lượng phục vụ',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                       ),
                     ],
                   ),
@@ -233,17 +227,15 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
                   const SizedBox(width: 6),
                   Text(
                     '${overall.toStringAsFixed(1)} / 5.0',
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: context.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.amber,
+                      color: AppTheme.warning,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '($label)',
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: context.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
@@ -256,18 +248,21 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
 
             // 3 Tiêu chí
             _buildStarRow(
+              context,
               title: 'Tốc độ xử lý',
               subtitle: 'Thời gian tiếp nhận và đến kiểm tra sự cố',
               currentRating: _speedRating,
               onRatingChanged: (val) => setState(() => _speedRating = val),
             ),
             _buildStarRow(
+              context,
               title: 'Thái độ phục vụ',
               subtitle: 'Sự nhã nhặn, lịch sự và lắng nghe của nhân viên',
               currentRating: _attitudeRating,
               onRatingChanged: (val) => setState(() => _attitudeRating = val),
             ),
             _buildStarRow(
+              context,
               title: 'Chất lượng kỹ thuật',
               subtitle: 'Hiệu quả khắc phục triệt để và vệ sinh sau sửa',
               currentRating: _qualityRating,
@@ -305,7 +300,7 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
                     )
                   : Text(
                       isEditing ? 'Cập nhật đánh giá' : 'Gửi đánh giá',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: context.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                     ),
             ),
           ],

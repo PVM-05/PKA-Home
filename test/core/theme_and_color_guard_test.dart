@@ -115,6 +115,11 @@ void main() {
       'lib/features/resident/widgets/apartment_switcher_chip.dart',
       'lib/features/resident/widgets/sticky_emergency_bar.dart',
       'lib/features/resident/widgets/equipment_interruption_banner.dart',
+      // Module 23: Cụm Bottom Sheets & Dialogs Cư Dân (Tiered Fee Breakdown, Vote Poll Sheet, Resident Ledger History Sheet & Issue Rating Bottom Sheet)
+      'lib/features/resident/widgets/tiered_fee_breakdown_dialog.dart',
+      'lib/features/resident/widgets/vote_poll_sheet.dart',
+      'lib/features/resident/widgets/resident_ledger_history_sheet.dart',
+      'lib/features/resident/widgets/issue_rating_bottom_sheet.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

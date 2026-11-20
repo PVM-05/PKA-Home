@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/models/tiered_calculation_result_model.dart';
 
 /// Hộp thoại hiển thị chi tiết phân rã bậc thang lũy tiến (Điện/Nước) cho cư dân
@@ -19,7 +20,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isWater = unit.toLowerCase().contains('m');
-    final headerColor = isWater ? const Color(0xFF0288D1) : const Color(0xFFE65100);
+    final headerColor = isWater ? AppTheme.secondary : AppTheme.warning;
     final headerIcon = isWater ? Icons.water_drop_rounded : Icons.electric_bolt_rounded;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark
@@ -59,8 +60,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
-                            fontSize: 16,
+                          style: context.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: isDark ? Colors.white : AppTheme.textPrimary,
                           ),
@@ -68,8 +68,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           result.policyName,
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: context.bodySmall?.copyWith(
                             color: AppTheme.textSecondary,
                           ),
                         ),
@@ -92,15 +91,14 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Badge tổng tiêu thụ và tổng tiền
-                    _buildSummaryHeader(headerColor, isDark),
+                    _buildSummaryHeader(context, headerColor, isDark),
                     const SizedBox(height: 16),
 
                     // Thanh phân bổ tỷ lệ các bậc
                     if (result.consumption > 0) ...[
-                      const Text(
+                      Text(
                         'TỶ LỆ PHÂN BỔ CÁC BẬC',
-                        style: TextStyle(
-                          fontSize: 11,
+                        style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textSecondary,
                           letterSpacing: 1.1,
@@ -112,17 +110,16 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                     ],
 
                     // Danh sách chi tiết từng bậc
-                    const Text(
+                    Text(
                       'CHI TIẾT ĐỊNH MỨC & THÀNH TIỀN',
-                      style: TextStyle(
-                        fontSize: 11,
+                      style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textSecondary,
                         letterSpacing: 1.1,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    ...result.breakdown.map((item) => _buildTierItem(item, headerColor, isDark)),
+                    ...result.breakdown.map((item) => _buildTierItem(context, item, headerColor, isDark)),
 
                     // Thông tin nhân khẩu (nếu có)
                     if (result.residentCount != null) ...[
@@ -130,19 +127,22 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.08),
+                          color: AppTheme.secondary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                          border: Border.all(color: AppTheme.secondary.withValues(alpha: 0.2)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.people_alt_rounded, size: 18, color: Colors.blue),
+                            const Icon(Icons.people_alt_rounded, size: 18, color: AppTheme.secondary),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Định mức áp dụng: ${result.residentCount} nhân khẩu '
                                 '${result.baseQuota != null ? "(${result.baseQuota!.toInt()} $unit/tháng)" : ""}',
-                                style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w600),
+                                style: context.bodySmall?.copyWith(
+                                  color: AppTheme.secondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
@@ -168,7 +168,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Đóng', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text('Đóng', style: context.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -178,7 +178,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryHeader(Color accentColor, bool isDark) {
+  Widget _buildSummaryHeader(BuildContext context, Color accentColor, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -192,15 +192,14 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Tổng tiêu thụ',
-                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 4),
               Text(
                 '${result.formattedConsumption} $unit',
-                style: TextStyle(
-                  fontSize: 20,
+                style: context.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: accentColor,
                 ),
@@ -210,15 +209,14 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const Text(
+              Text(
                 'Tổng thành tiền',
-                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 4),
               Text(
                 result.formattedTotalAmount,
-                style: TextStyle(
-                  fontSize: 20,
+                style: context.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: accentColor,
                 ),
@@ -270,7 +268,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildTierItem(TierBreakdownItem item, Color accentColor, bool isDark) {
+  Widget _buildTierItem(BuildContext context, TierBreakdownItem item, Color accentColor, bool isDark) {
     final isActive = item.units > 0;
     final formatCurrency = NumberFormat('#,##0 đ', 'vi_VN');
 
@@ -300,10 +298,9 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
             ),
             child: Text(
               '${item.tier}',
-              style: const TextStyle(
+              style: context.labelSmall?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
               ),
             ),
           ),
@@ -314,9 +311,8 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
               children: [
                 Text(
                   item.name,
-                  style: TextStyle(
+                  style: context.bodyMedium?.copyWith(
                     fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                    fontSize: 13,
                     color: isActive
                         ? (isDark ? Colors.white : AppTheme.textPrimary)
                         : AppTheme.textSecondary,
@@ -325,8 +321,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${item.formattedUnits} $unit x ${formatCurrency.format(item.rate)}',
-                  style: TextStyle(
-                    fontSize: 11,
+                  style: context.bodySmall?.copyWith(
                     color: isActive ? AppTheme.textSecondary : Colors.grey,
                   ),
                 ),
@@ -335,9 +330,8 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
           ),
           Text(
             item.formattedAmount,
-            style: TextStyle(
+            style: context.bodyMedium?.copyWith(
               fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
-              fontSize: 14,
               color: isActive ? accentColor : Colors.grey,
             ),
           ),

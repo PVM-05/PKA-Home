@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/accounting_providers.dart';
 
 class ResidentLedgerHistorySheet extends ConsumerWidget {
@@ -44,7 +46,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
             children: [
               Text(
                 'Lịch Sử Đối Soát Công Nợ - $apartmentCode',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               IconButton(
                 icon: const Icon(Icons.close),
@@ -61,7 +63,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                   NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(balance.abs());
               final isDebt = balance > 0;
               final isZero = balance == 0;
-              final color = isDebt ? Colors.deepOrange : (isZero ? Colors.green : Colors.blue);
+              final color = isDebt ? AppTheme.error : (isZero ? AppTheme.success : AppTheme.primary);
               final text = isDebt
                   ? 'Còn nợ: $formattedMoney'
                   : (isZero ? 'Đã thanh toán đủ (0 đ)' : 'Đã nộp trước: $formattedMoney');
@@ -86,7 +88,10 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Số dư công nợ căn hộ: $text',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: color),
+                      style: context.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
                     ),
                   ],
                 ),
@@ -102,10 +107,10 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
             child: entriesAsync.when(
               data: (entries) {
                 if (entries.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
                       'Chưa có giao dịch sổ cái nào được ghi nhận.',
-                      style: TextStyle(color: Colors.grey),
+                      style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                     ),
                   );
                 }
@@ -117,7 +122,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                     final item = entries[index];
                     final isDebit = item.isDebit;
                     final prefix = isDebit ? '+' : '-';
-                    final color = isDebit ? Colors.deepOrange : Colors.green;
+                    final color = isDebit ? AppTheme.error : AppTheme.success;
 
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -126,16 +131,14 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                         children: [
                           Text(
                             item.entryCode,
-                            style: const TextStyle(
-                              fontSize: 13,
+                            style: context.bodySmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey,
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                           Text(
                             '$prefix${item.formattedAmount}',
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: context.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: color,
                             ),
@@ -146,21 +149,20 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 4),
-                          Text(item.description, style: const TextStyle(fontSize: 13)),
+                          Text(item.description, style: context.bodyMedium),
                           const SizedBox(height: 2),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 item.formattedCreatedAtWithTime,
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
                               ),
                               Text(
                                 'Dư sau GD: ${item.formattedBalanceAfter}',
-                                style: const TextStyle(
-                                  fontSize: 11,
+                                style: context.labelSmall?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.blueGrey,
+                                  color: AppTheme.textSecondary,
                                 ),
                               ),
                             ],

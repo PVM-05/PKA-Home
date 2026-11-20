@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
@@ -46,10 +49,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
 
   Future<void> _submitVote() async {
     if (_selectedOptionIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn ít nhất một phương án để biểu quyết'),
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Vui lòng chọn ít nhất một phương án để biểu quyết',
       );
       return;
     }
@@ -57,11 +59,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
     final authUser = ref.read(authProvider).valueOrNull;
     if (authUser == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Vui lòng đăng nhập để tham gia biểu quyết'),
-            backgroundColor: AppTheme.error,
-          ),
+        AppSnackBar.showError(
+          context,
+          'Vui lòng đăng nhập để tham gia biểu quyết',
         );
       }
       return;
@@ -87,11 +87,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
         if (mounted) {
           Navigator.pop(context);
           widget.onVoted?.call();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Lá phiếu của bạn đã được ghi nhận vào hệ thống'),
-              backgroundColor: Colors.green,
-            ),
+          AppSnackBar.showSuccess(
+            context,
+            'Lá phiếu của bạn đã được ghi nhận vào hệ thống',
           );
           // Mở kết quả hiện thời
           showDialog(
@@ -101,19 +99,15 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(res['message'] ?? 'Bỏ phiếu thất bại'),
-              backgroundColor: AppTheme.error,
-            ),
+          AppSnackBar.showError(
+            context,
+            res['message'] ?? 'Bỏ phiếu thất bại',
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -176,17 +170,15 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                     children: [
                       Text(
                         widget.poll.pollCode,
-                        style: const TextStyle(
+                        style: context.labelSmall?.copyWith(
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
                           color: AppTheme.primary,
                         ),
                       ),
-                      const Text(
+                      Text(
                         'Phiếu Biểu Quyết Trực Tuyến',
-                        style: TextStyle(
-                          fontSize: 18,
+                        style: context.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -200,7 +192,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
             // Tiêu đề & Căn cứ
             Text(
               widget.poll.title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: context.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             if (widget.poll.description != null &&
                 widget.poll.description!.isNotEmpty) ...[
@@ -214,7 +208,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                 ),
                 child: Text(
                   widget.poll.description!,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
                 ),
               ),
             ],
@@ -238,8 +232,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                   Expanded(
                     child: Text(
                       'Cơ chế tính: ${widget.poll.voteWeightDisplayName} • ${widget.poll.choiceTypeDisplayName}',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: context.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppTheme.primary,
                       ),
@@ -269,8 +262,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                     Expanded(
                       child: Text(
                         'Theo Điều 102 Luật Nhà ở 2023, chỉ Chủ sở hữu căn hộ (owner) mới có quyền biểu quyết tại Hội nghị nhà chung cư. Khách thuê chỉ có thể tham gia các cuộc khảo sát ý kiến cộng đồng.',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.bodySmall?.copyWith(
                           color: Colors.amber.shade900,
                           height: 1.35,
                           fontWeight: FontWeight.w500,
@@ -283,9 +275,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
             ],
             const SizedBox(height: 16),
 
-            const Text(
+            Text(
               'Chọn Phương Án Biểu Quyết Của Bạn:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
 
@@ -328,8 +320,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                         Expanded(
                           child: Text(
                             opt.optionText,
-                            style: TextStyle(
-                              fontSize: 14,
+                            style: context.bodyMedium?.copyWith(
                               fontWeight: isSelected
                                   ? FontWeight.bold
                                   : FontWeight.normal,
@@ -376,9 +367,9 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                     : (isBlockedByHousingLaw
                           ? 'Chỉ Chủ Hộ Được Biểu Quyết'
                           : 'Xác Nhận Bỏ Phiếu Biểu Quyết'),
-                style: const TextStyle(
-                  fontSize: 16,
+                style: context.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),

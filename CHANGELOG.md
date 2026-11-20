@@ -130,6 +130,13 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 7 file: `mfa_setup_dialog.dart`, `mfa_verification_dialog.dart`, `otp_input_boxes.dart`, `accept_invitation_dialog.dart`, `apartment_switcher_chip.dart`, `sticky_emergency_bar.dart`, `equipment_interruption_banner.dart` (Module 22).
   - **Cán Mốc Kỷ Lục Mới**: 100% toàn bộ phân hệ Xác thực (`lib/features/auth/`) bao gồm cả screens và widgets đạt trạng thái Zero Debt Typography & Zero Hardcoded Color.
   - Giảm thêm 30 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 316 xuống 286). Đưa tổng số điểm nợ typography được xóa bỏ lên 650 điểm qua 14 gói dọn dẹp liên hoàn (xóa sạch 69.4% nợ). Toàn bộ 4 guardrail tests và 7 widget tests đều vượt qua 100%.
+- **Gói 2.15 Chuẩn Hóa Typography, Mã Màu Cứng & Tokens Cụm Bottom Sheets & Dialogs Cư Dân (Xóa Sạch 36 Điểm Nợ)**:
+  - `TieredFeeBreakdownDialog`: Xóa sạch 100% 13/13 điểm `fontSize:` cứng, thay thế màu cứng nước/điện bằng `AppTheme.secondary` và `AppTheme.warning`, thay `Colors.blue` bằng `AppTheme.secondary`.
+  - `VotePollSheet`: Xóa sạch 100% 9/9 điểm `fontSize:` cứng, chuẩn hóa 5 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showWarning`, `AppSnackBar.showError`, `AppSnackBar.showSuccess`.
+  - `ResidentLedgerHistorySheet`: Xóa sạch 100% 7/7 điểm `fontSize:` cứng và chuyển đổi các mã màu Material cứng sang `AppTheme.error`, `AppTheme.success`, `AppTheme.primary`, `AppTheme.textSecondary`.
+  - `IssueRatingBottomSheet`: Xóa sạch 100% 7/7 điểm `fontSize:` cứng, chuẩn hóa 2 lệnh gọi `ScaffoldMessenger.showSnackBar` sang `AppSnackBar.showSuccess` và `AppSnackBar.showError`, thay `Colors.amber` và `Colors.grey.shade600` bằng `AppTheme.warning` và `AppTheme.textSecondary`.
+  - Mở rộng Whitelist của Guardrail CI (`test/core/theme_and_color_guard_test.dart`) bảo vệ thêm 4 file: `tiered_fee_breakdown_dialog.dart`, `vote_poll_sheet.dart`, `resident_ledger_history_sheet.dart`, `issue_rating_bottom_sheet.dart` (Module 23).
+  - Giảm thêm 36 điểm nợ `fontSize:` cứng toàn bộ phân hệ features (từ 286 xuống 250). Đưa tổng số điểm nợ typography được xóa bỏ lên 686 điểm qua 15 gói dọn dẹp liên hoàn (xóa sạch 73.3% nợ). Toàn bộ các guardrail tests và widget tests đều vượt qua 100%.
 
 ### Đã thay đổi (Changed) - Tái Định Vị Thương Hiệu Toàn Diện Sang Vivona (Cấp Độ 3 Full Codebase Refactor)
 - **Tên Thương Hiệu & Tên Package**: Tái định vị thương hiệu toàn diện từ PKA-Home sang **Vivona** (Latin: *vivo* - sống động, tagline: *"Nơi chung cư sống động hơn"* | *"Quản lý tòa nhà, chạm là xong"*). Đổi tên package Dart `pka_home` $\rightarrow$ `vivona` trên toàn bộ 335+ tệp mã nguồn và kiểm thử.
