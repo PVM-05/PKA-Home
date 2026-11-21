@@ -46,7 +46,7 @@
   - [x] `lib/features/auth/screens/verify_otp_screen.dart`
   - [x] `lib/features/auth/screens/reset_password_screen.dart`
   - [x] `lib/features/auth/screens/change_password_screen.dart`
-- [ ] **2.5** `lib/features/resident/screens/resident_profile_screen.dart` *(Tier 2)* — Hồ sơ cá nhân, hiển thị & quyền riêng tư PDPL
+- [x] **2.5** `lib/features/resident/screens/resident_profile_screen.dart` *(Tier 2)* — Hồ sơ cá nhân, hiển thị & quyền riêng tư PDPL
 
 ---
 
