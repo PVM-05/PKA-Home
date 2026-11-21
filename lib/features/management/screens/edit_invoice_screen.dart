@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/widgets/app_unsaved_changes_guard.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/utils/money_formatter.dart';
@@ -77,6 +78,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   final List<_EditableFeeItem> _items = [];
   bool _isItemsInitialized = false;
   bool _isSubmitting = false;
+  bool _hasModified = false;
 
   @override
   void initState() {
@@ -96,6 +98,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   }
 
   void _onItemChanged() {
+    _hasModified = true;
     if (mounted) setState(() {});
   }
 
@@ -121,6 +124,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
   void _addNewItem() {
     setState(() {
+      _hasModified = true;
       _items.add(
         _EditableFeeItem(
           feeKey: 'other',
@@ -142,6 +146,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
       return;
     }
     setState(() {
+      _hasModified = true;
       final removed = _items.removeAt(index);
       removed.dispose();
     });
@@ -163,7 +168,10 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
     if (picked != null && picked != _dueDate) {
-      setState(() => _dueDate = picked);
+      setState(() {
+        _hasModified = true;
+        _dueDate = picked;
+      });
     }
   }
 
@@ -250,8 +258,10 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
     return RoleGuard(
       permission: AppPermissions.invoiceManagement,
-      child: Scaffold(
-        appBar: AppBar(title: Text('Sửa Hóa đơn ${widget.invoice.period}')),
+      child: AppUnsavedChangesGuard(
+        hasUnsavedChanges: _hasModified && !_isSubmitting,
+        child: Scaffold(
+          appBar: AppBar(title: Text('Sửa Hóa đơn ${widget.invoice.period}')),
         body: SafeArea(
           child: detailAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -326,6 +336,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             },
           ),
         ),
+      ),
       ),
     );
   }

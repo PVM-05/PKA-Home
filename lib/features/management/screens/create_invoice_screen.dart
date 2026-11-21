@@ -13,6 +13,7 @@ import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/widgets/app_unsaved_changes_guard.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
@@ -62,6 +63,12 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   bool _isDraft = false; // true: Lưu nháp (pending), false: Phát hành ngay (unpaid)
 
   bool _isSubmitting = false;
+
+  bool get _hasUnsavedChanges =>
+      _selectedApartment != null ||
+      _periodController.text.trim().isNotEmpty ||
+      _elecQtyController.text.trim().isNotEmpty ||
+      _waterQtyController.text.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -317,8 +324,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     return RoleGuard(
       permission: AppPermissions.invoiceManagement,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Lập hóa đơn mới')),
+      child: AppUnsavedChangesGuard(
+        hasUnsavedChanges: _hasUnsavedChanges && !_isSubmitting,
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Lập hóa đơn mới')),
         body: SafeArea(
           child: apartmentsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -448,6 +457,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             },
           ),
         ),
+      ),
       ),
     );
   }

@@ -9,6 +9,7 @@ import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_state_view.dart';
+import '../../../core/widgets/app_search_field.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/models/invoice_model.dart';
@@ -273,27 +274,14 @@ class _InvoiceManagementScreenState
     required int unpaidCount,
     required int paidCount,
   }) {
-    final searchField = TextField(
+    final searchField = AppSearchField(
       controller: _searchController,
-      decoration: InputDecoration(
-        hintText: 'Tìm theo căn hộ (VD: A0110, B0502)...',
-        prefixIcon: const Icon(Icons.search, size: 20),
-        suffixIcon: _searchQuery.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear, size: 18),
-                onPressed: () {
-                  _searchController.clear();
-                  setState(() => _searchQuery = '');
-                },
-              )
-            : null,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 10,
-        ),
-      ),
+      hintText: 'Tìm theo căn hộ (VD: A0110, B0502)...',
       onChanged: (val) {
         setState(() => _searchQuery = val.trim());
+      },
+      onClear: () {
+        setState(() => _searchQuery = '');
       },
     );
 

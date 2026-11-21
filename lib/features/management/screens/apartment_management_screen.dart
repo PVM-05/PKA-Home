@@ -11,6 +11,7 @@ import '../../../core/supabase_config.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_search_field.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/batch_import_model.dart';
 import '../../../data/providers/batch_import_provider.dart';
@@ -251,28 +252,15 @@ class _ApartmentManagementScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              TextField(
+                              AppSearchField(
                                 controller: _searchController,
-                                decoration: InputDecoration(
-                                  hintText:
-                                      'Tìm theo mã căn hộ (VD: A0110, B0502)...',
-                                  prefixIcon: const Icon(Icons.search, size: 20),
-                                  suffixIcon: _searchQuery.isNotEmpty
-                                      ? IconButton(
-                                          icon: const Icon(Icons.clear, size: 18),
-                                          onPressed: () {
-                                            _searchController.clear();
-                                            setState(() => _searchQuery = '');
-                                          },
-                                        )
-                                      : null,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 10,
-                                  ),
-                                ),
+                                hintText:
+                                    'Tìm theo mã căn hộ (VD: A0110, B0502)...',
                                 onChanged: (val) {
                                   setState(() => _searchQuery = val.trim());
+                                },
+                                onClear: () {
+                                  setState(() => _searchQuery = '');
                                 },
                               ),
                               const SizedBox(height: 8),
@@ -615,27 +603,14 @@ class _ApartmentManagementScreenState
                   children: [
                     SizedBox(
                       width: 320,
-                      child: TextField(
+                      child: AppSearchField(
                         controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Tìm theo mã căn hộ (VD: A0110)...',
-                          prefixIcon: const Icon(Icons.search, size: 20),
-                          suffixIcon: _searchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear, size: 18),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    setState(() => _searchQuery = '');
-                                  },
-                                )
-                              : null,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                        ),
+                        hintText: 'Tìm theo mã căn hộ (VD: A0110)...',
                         onChanged: (val) {
                           setState(() => _searchQuery = val.trim());
+                        },
+                        onClear: () {
+                          setState(() => _searchQuery = '');
                         },
                       ),
                     ),

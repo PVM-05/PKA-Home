@@ -9,6 +9,8 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../core/widgets/app_search_field.dart';
+import '../../../core/widgets/app_qr_scanner_sheet.dart';
 import '../../../data/providers/front_desk_provider.dart';
 import '../widgets/handover_parcel_dialog.dart';
 import '../widgets/receive_parcel_sheet.dart';
@@ -44,53 +46,16 @@ class _FrontDeskWorkstationScreenState
     super.dispose();
   }
 
-  void _showScanVisitorDialog() {
-    final codeCtrl = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.qr_code_scanner, color: AppTheme.primary),
-            SizedBox(width: 8),
-            Text('Quét / Nhập Mã Vé Khách'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Nhập mã vé hoặc quét mã QR từ điện thoại khách:'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: codeCtrl,
-              autofocus: true,
-              textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(
-                hintText: 'VD: VP-202611-00001',
-                prefixIcon: Icon(Icons.confirmation_number_outlined),
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final code = codeCtrl.text.trim();
-              if (code.isEmpty) return;
-              Navigator.pop(ctx);
-              _processVisitorCode(code);
-            },
-            child: const Text('Xác nhận'),
-          ),
-        ],
-      ),
+  Future<void> _showScanVisitorDialog() async {
+    final scannedCode = await AppQrScannerSheet.show(
+      context,
+      title: 'Quét vé khách vào/ra',
+      hintText: 'Căn chỉnh mã QR vé khách trong khung hình',
+      manualInputHint: 'VD: VP-202611-00001 hoặc mã token PKAPASS',
     );
+    if (scannedCode != null && scannedCode.isNotEmpty) {
+      _processVisitorCode(scannedCode);
+    }
   }
 
   Future<void> _processVisitorCode(String rawCode) async {
@@ -309,19 +274,9 @@ class _FrontDeskWorkstationScreenState
           child: Row(
             children: [
               Expanded(
-                child: TextField(
+                child: AppSearchField(
                   controller: _searchVisitorCtrl,
-                  decoration: InputDecoration(
-                    hintText: 'Tìm theo mã vé, tên khách, căn hộ...',
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 0,
-                      horizontal: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  hintText: 'Tìm theo mã vé, tên khách, căn hộ...',
                   onChanged: (val) =>
                       setState(() => _visitorSearch = val.toLowerCase().trim()),
                 ),
@@ -329,13 +284,14 @@ class _FrontDeskWorkstationScreenState
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: _showScanVisitorDialog,
-                icon: const Icon(Icons.qr_code_scanner, size: 18),
+                icon: const Icon(Icons.qr_code_scanner, size: 20),
                 label: const Text('Quét vé'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
@@ -541,19 +497,9 @@ class _FrontDeskWorkstationScreenState
           child: Row(
             children: [
               Expanded(
-                child: TextField(
+                child: AppSearchField(
                   controller: _searchParcelCtrl,
-                  decoration: InputDecoration(
-                    hintText: 'Tìm kiện hàng, căn hộ, mã vận đơn...',
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 0,
-                      horizontal: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  hintText: 'Tìm kiện hàng, căn hộ, mã vận đơn...',
                   onChanged: (val) =>
                       setState(() => _parcelSearch = val.toLowerCase().trim()),
                 ),
@@ -561,13 +507,14 @@ class _FrontDeskWorkstationScreenState
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => ReceiveParcelSheet.show(context),
-                icon: const Icon(Icons.add_box_outlined, size: 18),
+                icon: const Icon(Icons.add_box_outlined, size: 20),
                 label: const Text('Nhận kiện'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),

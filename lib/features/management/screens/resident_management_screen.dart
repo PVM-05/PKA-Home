@@ -9,6 +9,7 @@ import '../../../core/utils/action_runner.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_search_field.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/resident_model.dart';
@@ -987,27 +988,14 @@ class _ResidentManagementScreenState
               children: [
                 SizedBox(
                   width: 400,
-                  child: TextField(
+                  child: AppSearchField(
                     controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
-                      prefixIcon: const Icon(Icons.search, size: 20),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _searchQuery = '');
-                              },
-                            )
-                          : null,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                    ),
+                    hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
                     onChanged: (val) {
                       setState(() => _searchQuery = val.toLowerCase().trim());
+                    },
+                    onClear: () {
+                      setState(() => _searchQuery = '');
                     },
                   ),
                 ),
@@ -1065,27 +1053,14 @@ class _ResidentManagementScreenState
             )
           : Column(
               children: [
-                TextField(
+                AppSearchField(
                   controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                  ),
+                  hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
                   onChanged: (val) {
                     setState(() => _searchQuery = val.toLowerCase().trim());
+                  },
+                  onClear: () {
+                    setState(() => _searchQuery = '');
                   },
                 ),
                 const SizedBox(height: 6),

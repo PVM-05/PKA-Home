@@ -11,6 +11,7 @@ import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/app_search_field.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/models/issue_model.dart';
@@ -488,26 +489,11 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
               children: [
                 SizedBox(
                   width: 380,
-                  child: TextField(
+                  child: AppSearchField(
                     controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Tìm theo căn hộ hoặc mô tả sự cố...',
-                      prefixIcon: const Icon(Icons.search, size: 20),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _searchQuery = '');
-                              },
-                            )
-                          : null,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                    ),
+                    hintText: 'Tìm theo căn hộ hoặc mô tả sự cố...',
                     onChanged: (val) => setState(() => _searchQuery = val.trim()),
+                    onClear: () => setState(() => _searchQuery = ''),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -521,26 +507,11 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
             )
           : Column(
               children: [
-                TextField(
+                AppSearchField(
                   controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Tìm theo căn hộ hoặc mô tả sự cố...',
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                          )
-                        : null,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                  ),
+                  hintText: 'Tìm theo căn hộ hoặc mô tả sự cố...',
                   onChanged: (val) => setState(() => _searchQuery = val.trim()),
+                  onClear: () => setState(() => _searchQuery = ''),
                 ),
                 const SizedBox(height: 6),
                 SingleChildScrollView(
