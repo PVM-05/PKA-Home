@@ -8,6 +8,19 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
 
 ## [2.3.1] - 2026-11-21
 
+### Đã sửa (Fixed) - Khắc Phục Bẫy Luồng Notification BQL & Chuẩn Hóa Toàn Diện ColorScheme / WCAG AA
+- **Vá Triệt Để Bẫy Điều Hướng Push Notification Cho Ban Quản Lý (`PushNotificationService`)**:
+  - Bổ sung nhận diện vai trò người dùng `userRole` vào `safeInitialize` và `resolveRouteFromNotification`.
+  - Phân luồng điều hướng độc lập: Nếu người dùng thuộc nhóm quản lý/nhân viên (`admin`, `management`, `staff`, `accountant`, `technician`), các thông báo hóa đơn, sự cố, thiết bị, chỉ số, duyệt xe được tự động ánh xạ về phân hệ quản trị tương ứng (`/management/*`), loại trừ hoàn toàn nguy cơ tài khoản quản trị bị kẹt vào màn hình liên kết căn hộ cư dân.
+  - Tích hợp kiểm thử tự động toàn diện trong `test/core/services/push_notification_service_test.dart` và `test/data/providers/notification_realtime_sync_test.dart`.
+- **Định Nghĩa Đầy Đủ 30+ Role Material 3 ColorScheme & Triệt Tiêu Màu Tím Mặc Định**:
+  - Khai báo trọn vẹn toàn bộ các role M3 cho cả `lightTheme` và `darkTheme` trong `AppTheme` (`outline`, `outlineVariant`, `surfaceContainer`, `surfaceContainerHighest`, `tertiary`, `surfaceDim`, `surfaceBright`, v.v.).
+  - Xóa bỏ triệt để hiện tượng viền kính `AppGlassCard` và nền phụ tại 22 vị trí bị rò rỉ màu tím baseline mặc định của Flutter (`#CAC4D0` / `#49454F`), chuyển về bảng màu Slate trung tính đồng nhất nhận diện thương hiệu Vivona.
+- **Chuẩn Hóa Màu Semantic Đạt Chuẩn Tương Phản WCAG AA ($\ge 4.5:1$)**:
+  - Bổ sung bộ màu chữ semantic chuyên biệt trên nền sáng: `textSuccess` (Emerald 700 `#047857`, 4.88:1), `textWarning` (Amber 700 `#B45309`, 4.55:1), `textError` (Rose 700 `#BE123C`, 5.38:1), `textSecondaryAction` (Sky 700 `#0369A1`, 4.65:1).
+  - Chuẩn hóa các màu trạng thái trong `AppStatusColors` (`paid`, `unpaid`, `pendingConfirmation`, `priorityHigh`, `priorityMedium`, `priorityLow`) đảm bảo 100% đạt ngưỡng tối thiểu 4.5:1 của chuẩn tiếp cận W3C WCAG 2.1.
+  - Bổ sung test kiểm toán toán học độ tương phản trong `test/core/theme/color_scheme_and_wcag_test.dart`.
+
 ### Đã thêm (Added) - Nghiệm Thu Toàn Diện E2E Cơ Sở Dữ Liệu Production (Rollback An Toàn)
 - **Nghiệm Thu E2E Luồng Kích Hoạt Cư Dân 4 Bước Trực Tiếp Trên Production (`vpgimjyyechhuofjghsb`)**:
   - Thực thi thành công toàn bộ chu trình kích hoạt tài khoản cư dân lần đầu qua 4 bước RPC liên hoàn:

@@ -43,7 +43,13 @@ class PushNotificationService {
 
   bool _isLocalNotificationsInitialized = false;
   void Function(String route)? _onSelectRouteCallback;
+  String? _currentUserRole;
   DateTime _sessionStartTime = DateTime.now();
+
+  /// Cập nhật vai trò người dùng hiện tại để điều hướng thông báo phù hợp theo phân hệ (Cư dân vs Ban Quản Lý)
+  void setCurrentUserRole(String? role) {
+    _currentUserRole = role;
+  }
 
   StreamSubscription<String>? _tokenRefreshSub;
   StreamSubscription<RemoteMessage>? _onMessageSub;
@@ -125,9 +131,13 @@ class PushNotificationService {
   /// Windows desktop hoặc thiết bị chưa có dịch vụ Google Play.
   Future<void> safeInitialize({
     required String userId,
+    String? userRole,
     void Function(String route)? onSelectNotificationRoute,
   }) async {
     try {
+      if (userRole != null) {
+        _currentUserRole = userRole;
+      }
       if (onSelectNotificationRoute != null) {
         _onSelectRouteCallback = onSelectNotificationRoute;
       }
@@ -375,8 +385,53 @@ class PushNotificationService {
   }
 
   /// Phân tích dữ liệu thông báo và trả về Route điều hướng phù hợp trong ứng dụng
-  String resolveRouteFromNotification(Map<String, dynamic> data) {
+  /// Hỗ trợ phân quyền: Nếu là Ban Quản Lý / Staff / Admin thì điều hướng về các màn hình quản trị (/management/*),
+  /// tránh bẫy kẹt màn hình liên kết căn hộ cư dân.
+  String resolveRouteFromNotification(Map<String, dynamic> data, [String? userRole]) {
+    final role = (userRole ?? _currentUserRole)?.toLowerCase();
+    const managementRoles = {
+      'admin',
+      'management',
+      'staff',
+      'accountant',
+      'technician',
+      'security',
+      'receptionist',
+      'bql',
+    };
+    final isManagementOrStaff = role != null && managementRoles.contains(role);
     final type = data['type'] as String? ?? '';
+
+    if (isManagementOrStaff) {
+      switch (type) {
+        case 'new_invoice':
+        case 'invoice_due_reminder':
+        case 'invoice_paid':
+          return AppRoutes.managementInvoices;
+        case 'equipment_maintenance':
+          return AppRoutes.managementEquipment;
+        case 'issue_update':
+        case 'new_issue':
+        case 'issue_assigned':
+        case 'issue_reported':
+          return AppRoutes.managementIssues;
+        case 'announcement':
+          return AppRoutes.managementAnnouncements;
+        case 'meter_reading':
+        case 'meter_reading_window':
+          return AppRoutes.managementMeterReading;
+        case 'vehicle_approval':
+        case 'new_vehicle_registration':
+          return AppRoutes.managementVehicleApproval;
+        case 'link_request':
+        case 'apartment_link_request':
+          return AppRoutes.managementLinkRequests;
+        default:
+          return AppRoutes.managementHome;
+      }
+    }
+
+    // Luồng mặc định dành cho Cư dân (Resident)
     switch (type) {
       case 'new_invoice':
       case 'invoice_due_reminder':
@@ -387,6 +442,15 @@ class PushNotificationService {
         return AppRoutes.residentIssues;
       case 'announcement':
         return AppRoutes.residentHandbook;
+      case 'meter_reading':
+      case 'meter_reading_window':
+        return AppRoutes.residentMeterReading;
+      case 'vehicle_approval':
+      case 'new_vehicle_registration':
+        return AppRoutes.residentVehicles;
+      case 'link_request':
+      case 'apartment_link_request':
+        return AppRoutes.residentLinkRequest;
       default:
         return AppRoutes.residentNotifications;
     }

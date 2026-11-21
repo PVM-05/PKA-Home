@@ -13,7 +13,11 @@ class FakePushNotificationService extends PushNotificationService {
   FakePushNotificationService() : super(NotificationRepository());
 
   @override
-  Future<void> safeInitialize({required String userId, void Function(String route)? onSelectNotificationRoute}) async {
+  Future<void> safeInitialize({
+    required String userId,
+    String? userRole,
+    void Function(String route)? onSelectNotificationRoute,
+  }) async {
     initializedUserId = userId;
   }
 

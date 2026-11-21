@@ -50,7 +50,8 @@ void main() {
       service = PushNotificationService(mockRepo);
     });
 
-    test('resolveRouteFromNotification điều hướng chính xác từng loại thông báo', () {
+    test('resolveRouteFromNotification điều hướng chính xác từng loại thông báo cho cư dân', () {
+      service.setCurrentUserRole('resident');
       expect(
         service.resolveRouteFromNotification({'type': 'new_invoice'}),
         equals(AppRoutes.residentInvoices),
@@ -77,6 +78,11 @@ void main() {
       );
 
       expect(
+        service.resolveRouteFromNotification({'type': 'meter_reading'}),
+        equals(AppRoutes.residentMeterReading),
+      );
+
+      expect(
         service.resolveRouteFromNotification({'type': 'unknown'}),
         equals(AppRoutes.residentNotifications),
       );
@@ -85,6 +91,66 @@ void main() {
         service.resolveRouteFromNotification({}),
         equals(AppRoutes.residentNotifications),
       );
+    });
+
+    test('resolveRouteFromNotification cho Ban Quản Lý / Staff / Admin điều hướng về phân hệ quản trị, không kẹt màn cư dân', () {
+      for (final role in ['admin', 'management', 'staff', 'accountant', 'technician']) {
+        service.setCurrentUserRole(role);
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'new_invoice'}),
+          equals(AppRoutes.managementInvoices),
+          reason: 'Role $role hóa đơn phải về /management/invoices',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'invoice_due_reminder'}),
+          equals(AppRoutes.managementInvoices),
+          reason: 'Role $role nhắc nợ phải về /management/invoices',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'issue_update'}),
+          equals(AppRoutes.managementIssues),
+          reason: 'Role $role sự cố phải về /management/issues',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'equipment_maintenance'}),
+          equals(AppRoutes.managementEquipment),
+          reason: 'Role $role thiết bị phải về /management/equipment',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'announcement'}),
+          equals(AppRoutes.managementAnnouncements),
+          reason: 'Role $role thông báo phải về /management/announcements',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'meter_reading'}),
+          equals(AppRoutes.managementMeterReading),
+          reason: 'Role $role chỉ số điện nước phải về /management/meter-readings',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'vehicle_approval'}),
+          equals(AppRoutes.managementVehicleApproval),
+          reason: 'Role $role duyệt xe phải về /management/vehicle-approval',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'link_request'}),
+          equals(AppRoutes.managementLinkRequests),
+          reason: 'Role $role liên kết căn hộ phải về /management/link-requests',
+        );
+
+        expect(
+          service.resolveRouteFromNotification({'type': 'unknown'}),
+          equals(AppRoutes.managementHome),
+          reason: 'Role $role thông báo chung phải về /management',
+        );
+      }
     });
 
     test('startRealtimeNotificationListener không bắn thông báo cho các thông báo cũ trước mốc mở app', () async {

@@ -16,10 +16,12 @@ final fcmTokenSyncProvider = Provider<void>((ref) {
   if (user != null) {
     pushService.safeInitialize(
       userId: user.id,
+      userRole: user.role,
       onSelectNotificationRoute: navigateToRoute,
     );
     pushService.startRealtimeNotificationListener(userId: user.id);
   } else {
+    pushService.setCurrentUserRole(null);
     pushService.stopRealtimeNotificationListener();
   }
 });
