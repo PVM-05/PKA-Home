@@ -200,6 +200,7 @@ flutter:
   assets:
     - .env
     - .env.example
+    - assets/google_fonts/
 
 
 

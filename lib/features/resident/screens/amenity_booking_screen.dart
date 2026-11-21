@@ -625,9 +625,11 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: AppTheme.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.shade100),
+                    border: Border.all(
+                      color: AppTheme.primary.withValues(alpha: 0.25),
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -635,7 +637,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       Icon(
                         Icons.rule_folder_outlined,
                         size: 16,
-                        color: Colors.blue.shade700,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -646,7 +648,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                               'Quy định & Hoàn cọc:',
                               style: context.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade900,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -866,59 +868,65 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       ],
                     );
                   } else if (isMaintenance) {
-                    cardBg = Colors.orange.shade50;
-                    cardBorder = BorderSide(color: Colors.orange.shade200);
+                    cardBg = AppTheme.warning.withValues(alpha: 0.1);
+                    cardBorder = BorderSide(
+                      color: AppTheme.warning.withValues(alpha: 0.35),
+                    );
                     subtitleText = 'Đang bảo trì / vệ sinh định kỳ';
-                    subtitleColor = AppTheme.warning;
+                    subtitleColor = AppTheme.getSemanticWarning(context);
                     trailingWidget = Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade100,
+                        color: AppTheme.warning.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         'Bảo trì',
                         style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.deepOrange,
+                          color: AppTheme.getSemanticWarning(context),
                         ),
                       ),
                     );
                   } else if (isPast) {
-                    cardBg = Colors.grey.shade100;
-                    cardBorder = BorderSide(color: Colors.grey.shade300);
+                    cardBg = Theme.of(context).colorScheme.surfaceContainerLow;
+                    cardBorder = BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    );
                     subtitleText = 'Khung giờ này đã trôi qua';
-                    subtitleColor = Colors.grey;
+                    subtitleColor = Theme.of(context).colorScheme.onSurfaceVariant;
                     trailingWidget = Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         'Đã qua',
                         style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     );
                   } else if (isFullyBooked) {
                     cardBg = isSelected
-                        ? Colors.purple.shade50
-                        : Colors.grey.shade50;
+                        ? AppTheme.secondary.withValues(alpha: 0.12)
+                        : Theme.of(context).colorScheme.surfaceContainerLow;
                     cardBorder = BorderSide(
-                      color: isSelected ? Colors.purple : Colors.grey.shade300,
+                      color: isSelected
+                          ? AppTheme.secondary
+                          : Theme.of(context).colorScheme.outlineVariant,
                       width: isSelected ? 2 : 1,
                     );
                     subtitleText = 'Đã hết chỗ — Bấm để tham gia Danh sách chờ';
-                    subtitleColor = Colors.purple;
+                    subtitleColor = AppTheme.getSemanticSecondary(context);
                     trailingWidget = Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -926,8 +934,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.purple
-                            : Colors.purple.shade100,
+                            ? AppTheme.secondary
+                            : AppTheme.secondary.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -1052,23 +1060,25 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen>
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
+                          color: AppTheme.warning.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.orange.shade200),
+                          border: Border.all(
+                            color: AppTheme.warning.withValues(alpha: 0.35),
+                          ),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.info_outline,
                               size: 18,
-                              color: Colors.orange.shade800,
+                              color: AppTheme.getSemanticWarning(context),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Bạn đã có lịch (${mySelectedBooking.statusDisplayName}) ở khung giờ này. Để đặt lại hoặc thay đổi, vui lòng hủy lịch hiện tại trước.',
                                 style: context.labelSmall?.copyWith(
-                                  color: Colors.orange.shade900,
+                                  color: AppTheme.getSemanticWarning(context),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

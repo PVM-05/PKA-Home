@@ -298,7 +298,7 @@ class _VehicleManagementScreenState
                               child: Text(
                                 'Căn hộ đã đạt hạn mức 2 xe máy theo quy chế vận hành.',
                                 style: TextStyle(
-                                  color: Colors.orange.shade800,
+                                  color: AppTheme.getSemanticWarning(context),
                                 ),
                               ),
                             ),
@@ -317,7 +317,7 @@ class _VehicleManagementScreenState
                             borderRadius: BorderRadius.circular(12),
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -343,7 +343,7 @@ class _VehicleManagementScreenState
                             borderRadius: BorderRadius.circular(12),
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -357,7 +357,7 @@ class _VehicleManagementScreenState
                       Text(
                         'Đính kèm ảnh cà vẹt rõ nét để BQL đối soát chính chủ và vị trí đỗ xe.',
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -369,7 +369,7 @@ class _VehicleManagementScreenState
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade300),
+                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                                 image: DecorationImage(
                                   image: FileImage(selectedRegistrationImage!),
                                   fit: BoxFit.cover,
@@ -425,10 +425,10 @@ class _VehicleManagementScreenState
                               horizontal: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
+                              color: Theme.of(context).colorScheme.surfaceContainerLow,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Colors.grey.shade300,
+                                color: Theme.of(context).colorScheme.outlineVariant,
                               ),
                             ),
                             child: Column(
@@ -1257,9 +1257,9 @@ class _VehicleManagementScreenState
                 final motorbikeItem = Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1267,10 +1267,10 @@ class _VehicleManagementScreenState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Flexible(
+                          Flexible(
                             child: Text(
                               'Xe máy',
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1295,8 +1295,8 @@ class _VehicleManagementScreenState
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: motorbikeCount >= 2
-                                      ? Colors.orange.shade900
-                                      : AppStatusColors.paid,
+                                      ? AppTheme.getSemanticWarning(context)
+                                      : AppTheme.getSemanticSuccess(context),
                                 ),
                               ),
                             ),
@@ -1321,9 +1321,9 @@ class _VehicleManagementScreenState
                 final carItem = Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1331,10 +1331,10 @@ class _VehicleManagementScreenState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Flexible(
+                          Flexible(
                             child: Text(
                               'Ô tô',
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
