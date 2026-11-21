@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261107_01_vehicle_registration_and_slot_allocation.sql', () {
+  group('Database Migration: 20261107010000_vehicle_registration_and_slot_allocation.sql', () {
     late String migrationSql;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261107_01_vehicle_registration_and_slot_allocation.sql');
+      final file = File('supabase/migrations/20261107010000_vehicle_registration_and_slot_allocation.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration file 20261107_01 phải tồn tại.');
       migrationSql = file.readAsStringSync();
     });

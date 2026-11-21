@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Multi-Tenancy Migration Verification Tests', () {
     final migrationFile = File(
-      'supabase/migrations/20261027_03_multi_tenancy_organizations_and_buildings.sql',
+      'supabase/migrations/20261027030000_multi_tenancy_organizations_and_buildings.sql',
     );
 
     test('migration file exists', () {

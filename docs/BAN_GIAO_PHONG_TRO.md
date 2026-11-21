@@ -97,13 +97,13 @@ Gửi file Excel mẫu có 6 sheet sau cho chủ trọ/đơn vị quản lý đi
 
 1. **Khởi tạo môi trường Supabase**:
    - Chạy tuần tự các migration từ Baseline:
-     - `20261027_01_baseline_schema.sql`
-     - `20261027_02_dynamic_fees_and_maintenance_fund.sql`
-     - `20261027_03_multi_tenancy_organizations_and_buildings.sql`
-     - `20261028_01_notifications_and_reminders.sql`
-     - `20261028_02_boarding_house_extension.sql`
+     - `20261027010000_baseline_schema.sql`
+     - `20261027020000_dynamic_fees_and_maintenance_fund.sql`
+     - `20261027030000_multi_tenancy_organizations_and_buildings.sql`
+     - `20261028010000_notifications_and_reminders.sql`
+     - `20261028020000_boarding_house_extension.sql`
 2. **Nạp dữ liệu từ 6 Sheet**:
-   - Sử dụng kịch bản SQL Transaction (xem mẫu trong migration `20261028_02_boarding_house_extension.sql`).
+   - Sử dụng kịch bản SQL Transaction (xem mẫu trong migration `20261028020000_boarding_house_extension.sql`).
    - Thứ tự insert: `organizations` -> `buildings` -> `apartments` -> `users` -> `residents_apartments` -> `fee_schedules` -> `meter_readings` -> `invoices (công nợ đầu kỳ)`.
 3. **Kiểm tra chéo (Data Sanity Check)**:
    - Tổng số phòng trong DB = Số phòng trên Sheet 2.

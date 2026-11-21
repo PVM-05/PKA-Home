@@ -24,7 +24,7 @@ Dựa trên phân tích 3 tầng quản trị thực tế của sản phẩm Saa
 
 ## 2. Thiết Kế Cơ Sở Dữ Liệu & Migration
 
-### 2.1. Migration SQL: `20261030_02_residents_apartments_lifecycle_and_batch_import.sql`
+### 2.1. Migration SQL: `20261030020000_residents_apartments_lifecycle_and_batch_import.sql`
 1. **Nâng cấp bảng `residents_apartments`:**
    ```sql
    ALTER TABLE public.residents_apartments 

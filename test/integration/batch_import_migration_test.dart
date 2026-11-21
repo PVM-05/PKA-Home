@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Batch Import Migration Tests (20261030_02)', () {
-    const migrationFilePath = 'supabase/migrations/20261030_02_residents_apartments_lifecycle_and_batch_import.sql';
+    const migrationFilePath = 'supabase/migrations/20261030020000_residents_apartments_lifecycle_and_batch_import.sql';
 
     test('Migration file 20261030_02 must exist', () {
       final file = File(migrationFilePath);

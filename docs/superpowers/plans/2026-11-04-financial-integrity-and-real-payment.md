@@ -16,14 +16,14 @@
 
 ## Danh Sách Các Bước Thực Thi (Tasks)
 
-### Task 1: Migration CSDL Tính Toàn Vẹn Tài Chính & Sequence Sổ Quỹ (`20261104_01_financial_integrity_and_real_payment.sql`)
+### Task 1: Migration CSDL Tính Toàn Vẹn Tài Chính & Sequence Sổ Quỹ (`20261104010000_financial_integrity_and_real_payment.sql`)
 
 **Files:**
-- Create: `supabase/migrations/20261104_01_financial_integrity_and_real_payment.sql`
+- Create: `supabase/migrations/20261104010000_financial_integrity_and_real_payment.sql`
 - Test: `test/database/financial_integrity_migration_test.dart`
 
 **Interfaces:**
-- Consumes: `has_building_role(p_building_id, p_allowed_roles)` từ migration `20261103_05_tenant_isolation_and_memberships.sql`.
+- Consumes: `has_building_role(p_building_id, p_allowed_roles)` từ migration `20261103050000_tenant_isolation_and_memberships.sql`.
 - Produces: 
   - RPC `create_payment_intent(p_reference_id UUID, p_payment_type TEXT, p_payment_method TEXT) RETURNS JSONB`
   - Sequences: `maintenance_fund_pt_seq`, `maintenance_fund_pc_seq`
@@ -32,7 +32,7 @@
   - Thu hồi quyền: `REVOKE EXECUTE ON FUNCTION public.simulate_unified_payment(...) FROM authenticated, anon, PUBLIC;`
 
 - [x] **Step 1: Viết test kiểm tra migration SQL** (`test/database/financial_integrity_migration_test.dart`) (5/5 tests pass)
-- [x] **Step 2: Viết migration SQL** (`supabase/migrations/20261104_01_financial_integrity_and_real_payment.sql`)
+- [x] **Step 2: Viết migration SQL** (`supabase/migrations/20261104010000_financial_integrity_and_real_payment.sql`)
 - [x] **Step 3: Chạy test xác minh**
 - [x] **Step 4: Commit trực tiếp vào `main`**: `555ffdc`
 

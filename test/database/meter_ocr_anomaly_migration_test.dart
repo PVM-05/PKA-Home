@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261103_03_meter_ocr_and_anomaly.sql', () {
+  group('Database Migration: 20261103030000_meter_ocr_and_anomaly.sql', () {
     late String migrationSql;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261103_03_meter_ocr_and_anomaly.sql');
+      final file = File('supabase/migrations/20261103030000_meter_ocr_and_anomaly.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration file 20261103_03 phải tồn tại.');
       migrationSql = file.readAsStringSync();
     });

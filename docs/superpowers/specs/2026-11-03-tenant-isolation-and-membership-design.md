@@ -12,8 +12,8 @@
 
 Bản kiểm toán mã nguồn ngày 03/11/2026 đã chỉ ra các lỗ hổng P0 nghiêm trọng trong hệ thống:
 1. **RLS chưa thực sự cách ly Tenant:**
-   - Trong `20261027_03_multi_tenancy_organizations_and_buildings.sql`, các bảng `organizations`, `buildings`, `building_staff` đều đang dùng `FOR SELECT TO authenticated USING (true)`.
-   - Bảng `maintenance_fund_transactions` trong `20261027_05_maintenance_fund_ledger.sql` cũng dùng `USING (true)`.
+   - Trong `20261027030000_multi_tenancy_organizations_and_buildings.sql`, các bảng `organizations`, `buildings`, `building_staff` đều đang dùng `FOR SELECT TO authenticated USING (true)`.
+   - Bảng `maintenance_fund_transactions` trong `20261027050000_maintenance_fund_ledger.sql` cũng dùng `USING (true)`.
    - Hậu quả: Bất kỳ người dùng đã đăng nhập nào (kể cả cư dân của Công ty A) cũng có thể truy vấn và đọc toàn bộ thông tin tổ chức B, tòa nhà B, nhân viên B và sổ quỹ tài chính B.
 2. **Thiếu mô hình Membership đa tầng:**
    - Hệ thống phụ thuộc vào trường `users.role` toàn cục.

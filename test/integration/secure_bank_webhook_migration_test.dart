@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Secure Bank Webhook & VNPay Migration Tests (20261114_01)', () {
-    const migrationPath = 'supabase/migrations/20261114_01_secure_bank_webhook_and_vnpay.sql';
+    const migrationPath = 'supabase/migrations/20261114010000_secure_bank_webhook_and_vnpay.sql';
 
-    test('Tập tin migration 20261114_01_secure_bank_webhook_and_vnpay.sql phải tồn tại', () {
+    test('Tập tin migration 20261114010000_secure_bank_webhook_and_vnpay.sql phải tồn tại', () {
       final file = File(migrationPath);
       expect(file.existsSync(), isTrue, reason: 'Tập tin migration phải tồn tại trên đĩa');
       expect(file.readAsStringSync().trim(), isNotEmpty, reason: 'Migration không được rỗng');

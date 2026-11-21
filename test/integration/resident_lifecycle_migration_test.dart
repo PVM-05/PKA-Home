@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Resident Lifecycle & Contracts Migration Tests (20261030_04)', () {
-    const migrationPath = 'supabase/migrations/20261030_04_resident_lifecycle_and_contracts.sql';
+    const migrationPath = 'supabase/migrations/20261030040000_resident_lifecycle_and_contracts.sql';
 
     test('Migration file exists and is not empty', () {
       final file = File(migrationPath);

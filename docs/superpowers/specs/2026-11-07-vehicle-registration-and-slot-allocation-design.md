@@ -68,7 +68,7 @@ ALTER TABLE public.vehicles
 - `approved_at`: Thời điểm phê duyệt.
 - `approved_by`: Người phê duyệt (BQL/Admin).
 
-### 3.2. Migration CSDL: `supabase/migrations/20261107_01_vehicle_registration_and_slot_allocation.sql`
+### 3.2. Migration CSDL: `supabase/migrations/20261107010000_vehicle_registration_and_slot_allocation.sql`
 - Bổ sung các cột mới trên bảng `vehicles`.
 - Tạo bucket lưu trữ `vehicle-docs` trong `storage.buckets` (nếu chưa có).
 - RLS Policies cho `storage.objects` thuộc bucket `vehicle-docs`:

@@ -21,13 +21,13 @@
 ### Task 1: Migration SQL & Schema Tests (D7)
 - **Mục tiêu:** Tạo migration PostgreSQL định nghĩa 5 bảng: `polls`, `poll_options`, `poll_votes`, `resident_petitions`, `petition_endorsements`; triggers sinh mã tự động; và 4 RPCs (`submit_poll_vote`, `get_poll_results`, `endorse_petition`, `update_petition_response`).
 - **Files:**
-  - Create: `supabase/migrations/20261103_02_digital_voting_and_petitions.sql`
+  - Create: `supabase/migrations/20261103020000_digital_voting_and_petitions.sql`
   - Test: `test/integration/digital_voting_and_petitions_migration_test.dart`
 - **Interfaces:**
   - Produces: Migration SQL hợp lệ và các RPCs phục vụ kiểm toán biểu quyết & kiến nghị cộng đồng.
 - [x] **Step 1:** Viết failing test `test/integration/digital_voting_and_petitions_migration_test.dart`.
 - [x] **Step 2:** Chạy test để xác nhận test fail.
-- [x] **Step 3:** Tạo migration `supabase/migrations/20261103_02_digital_voting_and_petitions.sql`.
+- [x] **Step 3:** Tạo migration `supabase/migrations/20261103020000_digital_voting_and_petitions.sql`.
 - [x] **Step 4:** Chạy test xác minh 100% test pass.
 - [x] **Step 5:** Commit: `feat(db): migration sql bieu quyet dien tu va kien nghi cong dong D7`.
 

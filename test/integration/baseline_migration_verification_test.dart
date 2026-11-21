@@ -6,7 +6,7 @@ void main() {
     late String baselineContent;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261027_01_baseline_schema.sql');
+      final file = File('supabase/migrations/20261027010000_baseline_schema.sql');
       expect(file.existsSync(), isTrue, reason: 'Baseline migration file must exist');
       baselineContent = file.readAsStringSync();
     });

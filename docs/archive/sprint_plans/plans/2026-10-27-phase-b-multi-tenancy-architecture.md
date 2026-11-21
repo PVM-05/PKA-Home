@@ -5,7 +5,7 @@
 **Goal:** Chuyển đổi hệ thống sang kiến trúc Multi-Tenancy 2 cấp (Organization -> Building -> Units/Staff) với CSDL tách biệt bằng RLS, hỗ trợ nhiều tòa nhà có cùng mã căn (`UNIQUE(building_id, code)`), bộ chuyển đổi tòa nhà trên AppBar cho BQL, đồng thời bảo toàn tính tương thích ngược 100% cho toàn bộ dữ liệu và test suite.
 
 **Architecture:**
-- CSDL: Tạo migration `20261027_03_multi_tenancy_organizations_and_buildings.sql` tạo bảng `organizations`, `buildings`, `building_staff`, bổ sung `building_id` vào các bảng nghiệp vụ, backfill với Tòa nhà mẫu canonical và cập nhật RLS policies.
+- CSDL: Tạo migration `20261027030000_multi_tenancy_organizations_and_buildings.sql` tạo bảng `organizations`, `buildings`, `building_staff`, bổ sung `building_id` vào các bảng nghiệp vụ, backfill với Tòa nhà mẫu canonical và cập nhật RLS policies.
 - Flutter Data: Bổ sung `OrganizationModel`, `BuildingModel`, `BuildingStaffModel`, cập nhật `ApartmentModel.buildingId`, tạo `BuildingRepository` và `building_provider.dart` (`activeBuildingProvider`, `userBuildingsProvider`).
 - Flutter UI: Thêm widget `BuildingSwitcherDropdown` tích hợp vào AppBar của `ManagementHomeScreen`.
 
@@ -23,7 +23,7 @@
 ### Task 1: Database Migration Multi-Tenancy & Canonical Backfill
 
 **Files:**
-- Create: `supabase/migrations/20261027_03_multi_tenancy_organizations_and_buildings.sql`
+- Create: `supabase/migrations/20261027030000_multi_tenancy_organizations_and_buildings.sql`
 - Test: `test/integration/multi_tenancy_migration_test.dart`
 
 **Interfaces:**
@@ -42,7 +42,7 @@ Tạo file `test/integration/multi_tenancy_migration_test.dart` kiểm tra sự 
 - [ ] **Step 2: Chạy test để xác nhận FAIL (TDD)**
 Chạy: `flutter test test/integration/multi_tenancy_migration_test.dart`
 
-- [ ] **Step 3: Viết migration `20261027_03_multi_tenancy_organizations_and_buildings.sql`**
+- [ ] **Step 3: Viết migration `20261027030000_multi_tenancy_organizations_and_buildings.sql`**
 Triển khai DDL tạo bảng, seed dữ liệu mẫu, add column, backfill data, drop constraint cũ, add constraint mới và RLS.
 
 - [ ] **Step 4: Chạy test để xác nhận PASS**
@@ -50,7 +50,7 @@ Chạy: `flutter test test/integration/multi_tenancy_migration_test.dart`
 
 - [ ] **Step 5: Commit migration**
 ```bash
-git add supabase/migrations/20261027_03_multi_tenancy_organizations_and_buildings.sql test/integration/multi_tenancy_migration_test.dart ; git commit -m "feat(db): migration multi-tenancy tao organizations, buildings va backfill building_id"
+git add supabase/migrations/20261027030000_multi_tenancy_organizations_and_buildings.sql test/integration/multi_tenancy_migration_test.dart ; git commit -m "feat(db): migration multi-tenancy tao organizations, buildings va backfill building_id"
 ```
 
 ---

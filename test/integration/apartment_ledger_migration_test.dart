@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Apartment Ledger and Credit Notes Migration Tests (20261029_03)', () {
     const migrationPath =
-        'supabase/migrations/20261029_03_apartment_ledger_and_credit_notes.sql';
+        'supabase/migrations/20261029030000_apartment_ledger_and_credit_notes.sql';
 
-    test('Migration file 20261029_03_apartment_ledger_and_credit_notes.sql must exist', () {
+    test('Migration file 20261029030000_apartment_ledger_and_credit_notes.sql must exist', () {
       final file = File(migrationPath);
       expect(file.existsSync(), isTrue, reason: 'Migration file must exist');
     });

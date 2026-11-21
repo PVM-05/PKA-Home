@@ -23,7 +23,7 @@
 
 ### Task 2.1: Migration Bảo Mật RPCs & Server-Authoritative Identity (`auth.uid()`)
 **Files:**
-- Create: `supabase/migrations/20261105_01_server_authoritative_identity_and_rpc_hardening.sql`
+- Create: `supabase/migrations/20261105010000_server_authoritative_identity_and_rpc_hardening.sql`
 
 - [x] **Bước 2.1.1:** Tạo migration SQL bổ sung cột `poll_type` trong bảng `polls`, cột `pickup_pin_hash` trong bảng `parcels`.
 - [x] **Bước 2.1.2:** Viết trigger tự động băm SHA-256 mã PIN `fn_generate_parcel_code_and_pin()`.

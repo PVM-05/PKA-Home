@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261116_02_separate_payment_secrets_and_scope_webhook.sql', () {
+  group('Database Migration: 20261116020000_separate_payment_secrets_and_scope_webhook.sql', () {
     late String migrationSql;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261116_02_separate_payment_secrets_and_scope_webhook.sql');
-      expect(file.existsSync(), isTrue, reason: 'Migration file 20261116_02_separate_payment_secrets_and_scope_webhook.sql phải tồn tại.');
+      final file = File('supabase/migrations/20261116020000_separate_payment_secrets_and_scope_webhook.sql');
+      expect(file.existsSync(), isTrue, reason: 'Migration file 20261116020000_separate_payment_secrets_and_scope_webhook.sql phải tồn tại.');
       migrationSql = file.readAsStringSync();
     });
 

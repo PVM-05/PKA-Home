@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Commercial VietQR & Webhook Migration Tests (20261029_02)', () {
-    const migrationPath = 'supabase/migrations/20261029_02_commercial_vietqr_and_webhook.sql';
+    const migrationPath = 'supabase/migrations/20261029020000_commercial_vietqr_and_webhook.sql';
 
-    test('Tập tin migration 20261029_02_commercial_vietqr_and_webhook.sql phải tồn tại', () {
+    test('Tập tin migration 20261029020000_commercial_vietqr_and_webhook.sql phải tồn tại', () {
       final file = File(migrationPath);
       expect(file.existsSync(), isTrue, reason: 'Migration 20261029_02 chưa được tạo.');
     });

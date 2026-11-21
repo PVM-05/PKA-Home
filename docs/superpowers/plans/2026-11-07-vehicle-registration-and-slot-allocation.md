@@ -22,14 +22,14 @@
 ### Nhiệm Vụ 1: Cơ Sở Dữ Liệu & Storage Migration
 
 **Tập tin tác động:**
-- Tạo mới: `supabase/migrations/20261107_01_vehicle_registration_and_slot_allocation.sql`
+- Tạo mới: `supabase/migrations/20261107010000_vehicle_registration_and_slot_allocation.sql`
 - Kiểm thử: `test/database/vehicle_registration_migration_test.dart`
 
 - [ ] **Bước 1: Viết test kiểm tra migration SQL**
   Tạo `test/database/vehicle_registration_migration_test.dart` kiểm tra file migration tồn tại và chứa các câu lệnh `ALTER TABLE vehicles` cùng cấu hình bucket `vehicle-docs`.
 
 - [ ] **Bước 2: Viết file migration SQL**
-  Tạo `supabase/migrations/20261107_01_vehicle_registration_and_slot_allocation.sql`.
+  Tạo `supabase/migrations/20261107010000_vehicle_registration_and_slot_allocation.sql`.
 
 - [ ] **Bước 3: Chạy migration lên CSDL Supabase**
   Thực thi migration và xác nhận cấu trúc bảng `vehicles` cùng bucket `vehicle-docs` trên Supabase production.
@@ -39,7 +39,7 @@
 
 - [ ] **Bước 5: Commit vào `main`**
   ```bash
-  git add supabase/migrations/20261107_01_vehicle_registration_and_slot_allocation.sql test/database/vehicle_registration_migration_test.dart
+  git add supabase/migrations/20261107010000_vehicle_registration_and_slot_allocation.sql test/database/vehicle_registration_migration_test.dart
   git commit -m "feat(db): migration bổ sung registration_image_url và bucket vehicle-docs"
   ```
 

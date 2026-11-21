@@ -21,7 +21,7 @@
 ### Task 1: Migration Cơ Sở Dữ Liệu (Bảng fee_tier_policies, Seeds & 4 RPCs Tính Toán)
 
 **Files:**
-- Create: `supabase/migrations/20261029_04_progressive_fees_and_prorata_engine.sql`
+- Create: `supabase/migrations/20261029040000_progressive_fees_and_prorata_engine.sql`
 - Test: `test/integration/progressive_fees_migration_test.dart`
 
 **Interfaces:**
@@ -41,7 +41,7 @@ Viết `test/integration/progressive_fees_migration_test.dart` kiểm tra file m
 Chạy `flutter test test/integration/progressive_fees_migration_test.dart` và xác nhận thất bại do chưa có file migration.
 
 - [x] **Step 3: Viết migration SQL**
-Tạo file `supabase/migrations/20261029_04_progressive_fees_and_prorata_engine.sql`:
+Tạo file `supabase/migrations/20261029040000_progressive_fees_and_prorata_engine.sql`:
 - Bảng `fee_tier_policies` (id, building_id, policy_type, name, calculation_method, tiers, effective_from, effective_to, is_active, created_at, updated_at).
 - RLS read cho mọi authenticated users, RLS manage cho BQL.
 - Seed biểu giá 6 bậc EVN mặc định, nước định mức 4 m³/người/tháng, lãi phạt trễ hạn 0.05%/ngày (ân hạn 3 ngày).
@@ -52,7 +52,7 @@ Chạy `flutter test test/integration/progressive_fees_migration_test.dart` đ�
 
 - [x] **Step 5: Commit vào git**
 ```bash
-git add supabase/migrations/20261029_04_progressive_fees_and_prorata_engine.sql test/integration/progressive_fees_migration_test.dart
+git add supabase/migrations/20261029040000_progressive_fees_and_prorata_engine.sql test/integration/progressive_fees_migration_test.dart
 git commit -m "feat(db): migration engine tinh phi bac thang evn pro rata va phat tre han C2"
 ```
 

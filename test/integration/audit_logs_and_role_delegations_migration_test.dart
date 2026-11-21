@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Audit Logs & Role Delegations Migration Tests (20261029_01)', () {
-    const migrationPath = 'supabase/migrations/20261029_01_audit_logs_and_role_delegations.sql';
+    const migrationPath = 'supabase/migrations/20261029010000_audit_logs_and_role_delegations.sql';
 
-    test('Tập tin migration 20261029_01_audit_logs_and_role_delegations.sql phải tồn tại', () {
+    test('Tập tin migration 20261029010000_audit_logs_and_role_delegations.sql phải tồn tại', () {
       final file = File(migrationPath);
       expect(file.existsSync(), isTrue, reason: 'Migration 20261029_01 chưa được tạo.');
     });

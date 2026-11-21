@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Task 1: Kiem tra Migration SQL Bieu Quyet Dien Tu & Kien Nghi Cong Dong D7', () {
-    const migrationPath = 'supabase/migrations/20261103_02_digital_voting_and_petitions.sql';
+    const migrationPath = 'supabase/migrations/20261103020000_digital_voting_and_petitions.sql';
 
     test('1. Tap tin migration 20261103_02 phai ton tai', () {
       final file = File(migrationPath);

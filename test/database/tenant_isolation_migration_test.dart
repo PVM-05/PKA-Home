@@ -2,14 +2,14 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261103_05_tenant_isolation_and_memberships.sql', () {
+  group('Database Migration: 20261103050000_tenant_isolation_and_memberships.sql', () {
     late File migrationFile;
     late String content;
 
     setUpAll(() {
-      migrationFile = File('supabase/migrations/20261103_05_tenant_isolation_and_memberships.sql');
+      migrationFile = File('supabase/migrations/20261103050000_tenant_isolation_and_memberships.sql');
       expect(migrationFile.existsSync(), isTrue,
-          reason: 'File migration 20261103_05_tenant_isolation_and_memberships.sql phai ton tai');
+          reason: 'File migration 20261103050000_tenant_isolation_and_memberships.sql phai ton tai');
       content = migrationFile.readAsStringSync();
     });
 

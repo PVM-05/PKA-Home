@@ -8,9 +8,9 @@
 
 ## Danh Sách Các Bước Thực Thi (Tasks)
 
-- [x] **Task 1: Migration CSDL Cách Ly Tenant & Bảng Memberships (`20261103_05_tenant_isolation_and_memberships.sql`)**
+- [x] **Task 1: Migration CSDL Cách Ly Tenant & Bảng Memberships (`20261103050000_tenant_isolation_and_memberships.sql`)**
   - Viết test kiểm tra migration SQL: `test/database/tenant_isolation_migration_test.dart` (4/4 tests pass)
-  - Viết migration: `supabase/migrations/20261103_05_tenant_isolation_and_memberships.sql`
+  - Viết migration: `supabase/migrations/20261103050000_tenant_isolation_and_memberships.sql`
     - Tạo bảng `organization_memberships` và `building_memberships`
     - Cài đặt 3 hàm bảo mật: `get_user_accessible_organizations`, `get_user_accessible_buildings`, `has_building_role`
     - Xóa bỏ toàn bộ chính sách RLS `USING (true)` trên `organizations`, `buildings`, `apartments`, `building_staff`, `maintenance_funds`, `maintenance_fund_transactions`

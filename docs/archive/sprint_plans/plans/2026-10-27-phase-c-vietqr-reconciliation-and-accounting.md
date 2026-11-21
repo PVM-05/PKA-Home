@@ -5,7 +5,7 @@
 **Goal:** Chuyển đổi toàn diện phương thức thanh toán sang VietQR thật chuẩn Napas 247 (EMVCo) sinh trực tiếp ngoại tuyến, cung cấp biên lai thu tiền điện tử (E-Receipt) kèm mã tra cứu và số tiền đọc bằng chữ tiếng Việt, cùng dịch vụ xuất báo cáo kế toán đối soát ra file Excel (.xlsx).
 
 **Architecture:**
-- Database: Migration `20261027_04_commercial_banking_and_receipts.sql` bổ sung thông tin ngân hàng thụ hưởng vào `buildings`, trường chứng từ (`receipt_number`, `einvoice_lookup_code`, `paid_amount`) vào `invoices`/`payment_transactions` và RPC `generate_receipt_number`.
+- Database: Migration `20261027040000_commercial_banking_and_receipts.sql` bổ sung thông tin ngân hàng thụ hưởng vào `buildings`, trường chứng từ (`receipt_number`, `einvoice_lookup_code`, `paid_amount`) vào `invoices`/`payment_transactions` và RPC `generate_receipt_number`.
 - Utilities: `VietQrGenerator` (chuẩn EMVCo TLV Napas 247 + CRC16-CCITT) và `VietnameseCurrencyWords` (chuyển đổi số tiền thành chữ tiếng Việt chuẩn ngữ pháp).
 - Flutter UI: `UnifiedPaymentSheet` hiển thị mã VietQR thật theo tài khoản ngân hàng của tòa nhà (loại bỏ hoàn toàn watermark `DEMO ONLY`); `ElectronicReceiptSheet` hiển thị phiếu thu điện tử; Nút "Xuất báo cáo Excel" trên `InvoiceManagementScreen`.
 - Data Services: `AccountingExportService` sử dụng package `excel` để kết xuất bảng kê đối soát thu phí và công nợ.
@@ -24,7 +24,7 @@
 ### Task 1: Database Migration Thông Tin Ngân Hàng Tòa Nhà & Chứng Từ Kế Toán
 
 **Files:**
-- Create: `supabase/migrations/20261027_04_commercial_banking_and_receipts.sql`
+- Create: `supabase/migrations/20261027040000_commercial_banking_and_receipts.sql`
 - Test: `test/integration/commercial_banking_and_receipts_migration_test.dart`
 
 **Interfaces:**
@@ -40,7 +40,7 @@ Tạo file `test/integration/commercial_banking_and_receipts_migration_test.dart
 - [ ] **Step 2: Chạy test để xác nhận FAIL (TDD)**
 Chạy: `flutter test test/integration/commercial_banking_and_receipts_migration_test.dart`
 
-- [ ] **Step 3: Viết migration `20261027_04_commercial_banking_and_receipts.sql`**
+- [ ] **Step 3: Viết migration `20261027040000_commercial_banking_and_receipts.sql`**
 Viết DDL thêm cột vào các bảng và tạo hàm `generate_receipt_number`.
 
 - [ ] **Step 4: Chạy test để xác nhận PASS**
@@ -48,7 +48,7 @@ Chạy: `flutter test test/integration/commercial_banking_and_receipts_migration
 
 - [ ] **Step 5: Commit migration**
 ```bash
-git add supabase/migrations/20261027_04_commercial_banking_and_receipts.sql test/integration/commercial_banking_and_receipts_migration_test.dart ; git commit -m "feat(db): migration ngan hang toa nha va chung tu bien lai dien tu"
+git add supabase/migrations/20261027040000_commercial_banking_and_receipts.sql test/integration/commercial_banking_and_receipts_migration_test.dart ; git commit -m "feat(db): migration ngan hang toa nha va chung tu bien lai dien tu"
 ```
 
 ---

@@ -21,13 +21,13 @@
 ### Task 1: Migration SQL & Schema Tests (D6)
 - **Mục tiêu:** Tạo migration PostgreSQL định nghĩa bảng `visitor_access_passes`, `parcels`, triggers sinh mã và 4 RPCs.
 - **Files:**
-  - Create: `supabase/migrations/20261103_01_visitor_and_parcel_hub.sql`
+  - Create: `supabase/migrations/20261103010000_visitor_and_parcel_hub.sql`
   - Test: `test/integration/visitor_and_parcel_migration_test.dart`
 - **Interfaces:**
   - Produces: Migration SQL hợp lệ và các RPCs `check_in_visitor_pass`, `check_out_visitor_pass`, `collect_parcel`, `get_front_desk_stats`.
 - [x] **Step 1:** Viết failing test `test/integration/visitor_and_parcel_migration_test.dart`.
 - [x] **Step 2:** Chạy test để xác nhận test fail.
-- [x] **Step 3:** Tạo migration `supabase/migrations/20261103_01_visitor_and_parcel_hub.sql`.
+- [x] **Step 3:** Tạo migration `supabase/migrations/20261103010000_visitor_and_parcel_hub.sql`.
 - [x] **Step 4:** Chạy test xác minh 100% test pass.
 - [x] **Step 5:** Commit: `feat(db): migration sql dang ky khach qr va buu kien le tan D6`.
 

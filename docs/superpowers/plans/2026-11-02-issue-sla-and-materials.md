@@ -21,13 +21,13 @@
 ### Task 1: Migration SQL & Schema Tests (D3)
 - **Mục tiêu:** Tạo migration PostgreSQL bổ sung các cột SLA trên `issue_reports`, tạo bảng `maintenance_materials`, `issue_materials`, các triggers và RPCs.
 - **Files:**
-  - Create: `supabase/migrations/20261102_02_issue_sla_and_materials.sql`
+  - Create: `supabase/migrations/20261102020000_issue_sla_and_materials.sql`
   - Test: `test/integration/issue_sla_and_materials_migration_test.dart`
 - **Interfaces:**
   - Produces: Migration SQL hợp lệ và các RPCs `get_issue_sla_stats`, `record_issue_materials_usage`, `charge_issue_materials_to_invoice`.
 - [x] **Step 1:** Viết failing test `test/integration/issue_sla_and_materials_migration_test.dart`.
 - [x] **Step 2:** Chạy test để xác nhận test fail.
-- [x] **Step 3:** Tạo migration `supabase/migrations/20261102_02_issue_sla_and_materials.sql`.
+- [x] **Step 3:** Tạo migration `supabase/migrations/20261102020000_issue_sla_and_materials.sql`.
 - [x] **Step 4:** Chạy test xác minh 100% test pass.
 - [x] **Step 5:** Commit: `feat(db): migration sql canh bao sla va kho vat tu su co D3`.
 

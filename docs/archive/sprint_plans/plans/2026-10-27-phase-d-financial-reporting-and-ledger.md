@@ -21,7 +21,7 @@
 ### Task 1: Cơ Sở Dữ Liệu - Migration Sổ Quỹ Bảo Trì & RPC Giao Dịch
 
 **Files:**
-- Create: `supabase/migrations/20261027_05_maintenance_fund_ledger.sql`
+- Create: `supabase/migrations/20261027050000_maintenance_fund_ledger.sql`
 - Test: `test/integration/maintenance_fund_ledger_migration_test.dart`
 
 **Interfaces:**
@@ -37,7 +37,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Maintenance Fund Ledger Migration Tests', () {
-    final migrationFile = File('supabase/migrations/20261027_05_maintenance_fund_ledger.sql');
+    final migrationFile = File('supabase/migrations/20261027050000_maintenance_fund_ledger.sql');
 
     test('Migration file exists and contains necessary DDL & RPC', () {
       expect(migrationFile.existsSync(), isTrue);
@@ -61,13 +61,13 @@ void main() {
 Chạy: `flutter test test/integration/maintenance_fund_ledger_migration_test.dart`
 Kỳ vọng: FAIL vì file migration chưa tồn tại.
 
-- [ ] **Step 3: Tạo file migration `20261027_05_maintenance_fund_ledger.sql`**
+- [ ] **Step 3: Tạo file migration `20261027050000_maintenance_fund_ledger.sql`**
 
 ```sql
--- supabase/migrations/20261027_05_maintenance_fund_ledger.sql
+-- supabase/migrations/20261027050000_maintenance_fund_ledger.sql
 -- ==============================================================================
 -- PKA-HOME: PHASE D - MAINTENANCE FUND LEDGER & VOUCHERS
--- Migration: 20261027_05_maintenance_fund_ledger.sql
+-- Migration: 20261027050000_maintenance_fund_ledger.sql
 -- ==============================================================================
 
 -- 1. Bổ sung building_id vào maintenance_funds
@@ -242,7 +242,7 @@ Kỳ vọng: PASS
 - [ ] **Step 5: Commit code**
 
 ```bash
-git add supabase/migrations/20261027_05_maintenance_fund_ledger.sql test/integration/maintenance_fund_ledger_migration_test.dart
+git add supabase/migrations/20261027050000_maintenance_fund_ledger.sql test/integration/maintenance_fund_ledger_migration_test.dart
 git commit -m "feat(db): thêm migration sổ quỹ bảo trì 2% và RPC ghi giao dịch kế toán"
 ```
 

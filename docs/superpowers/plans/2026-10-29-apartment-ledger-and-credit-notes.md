@@ -21,7 +21,7 @@
 ### Task 1: Migration Cơ Sở Dữ Liệu (Bảng, Triggers, RLS & RPCs)
 
 **Files:**
-- Create: `supabase/migrations/20261029_03_apartment_ledger_and_credit_notes.sql`
+- Create: `supabase/migrations/20261029030000_apartment_ledger_and_credit_notes.sql`
 - Test: `test/integration/apartment_ledger_migration_test.dart`
 
 **Interfaces:**
@@ -38,7 +38,7 @@ Viết `test/integration/apartment_ledger_migration_test.dart` kiểm tra file m
 Chạy `flutter test test/integration/apartment_ledger_migration_test.dart` và xác nhận thất bại do chưa có file migration.
 
 - [x] **Step 3: Viết migration SQL**
-Tạo file `supabase/migrations/20261029_03_apartment_ledger_and_credit_notes.sql`:
+Tạo file `supabase/migrations/20261029030000_apartment_ledger_and_credit_notes.sql`:
 - Tạo bảng `accounting_periods` (id, building_id, period, status, opened_at, closed_at, closed_by, notes, created_at, updated_at).
 - Tạo bảng `apartment_ledger_entries` (id, building_id, apartment_id, entry_code, entry_type, amount, balance_after, period, reference_type, reference_id, description, created_by, created_at).
 - Tạo bảng `credit_notes` (id, credit_note_code, building_id, apartment_id, invoice_id, note_type, amount, reason, status, approved_by, approved_at, created_at).
@@ -53,7 +53,7 @@ Chạy `flutter test test/integration/apartment_ledger_migration_test.dart` đ�
 
 - [x] **Step 5: Commit vào git**
 ```bash
-git add supabase/migrations/20261029_03_apartment_ledger_and_credit_notes.sql test/integration/apartment_ledger_migration_test.dart
+git add supabase/migrations/20261029030000_apartment_ledger_and_credit_notes.sql test/integration/apartment_ledger_migration_test.dart
 git commit -m "feat(db): migration so cai cong no can ho credit notes va hoa don bat bien C1"
 ```
 

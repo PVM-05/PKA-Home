@@ -20,11 +20,11 @@
 
 ### 1.2. Vấn đề 2: Tồn tại dữ liệu demo nhạy cảm trong Core Migration CSDL
 - **Hiện trạng:**
-  - `20261027_02_dynamic_fees_and_maintenance_fund.sql` hardcode giá trị số dư quỹ bảo trì `2.450.000.000 đ`, lãi ngân hàng `127.400.000 đ`, tài khoản BIDV `1234567890`.
-  - `20261027_04_commercial_banking_and_receipts.sql` đặt giá trị mặc định cho cột `bank_account_number DEFAULT '1234567890'` và tự động update tòa nhà về STK này.
+  - `20261027020000_dynamic_fees_and_maintenance_fund.sql` hardcode giá trị số dư quỹ bảo trì `2.450.000.000 đ`, lãi ngân hàng `127.400.000 đ`, tài khoản BIDV `1234567890`.
+  - `20261027040000_commercial_banking_and_receipts.sql` đặt giá trị mặc định cho cột `bank_account_number DEFAULT '1234567890'` và tự động update tòa nhà về STK này.
 - **Rủi ro:** Khi đưa phần mềm vào triển khai cho chung cư thật, tòa nhà mới onboarding có nguy cơ bị gán số dư quỹ ảo hoặc tài khoản nhận tiền demo BIDV, gây rủi ro thất thoát tài chính và vi phạm kiểm toán kế toán.
 - **Giải pháp:**
-  - Tạo migration `20261104_02_production_clean_seed_separation.sql`:
+  - Tạo migration `20261104020000_production_clean_seed_separation.sql`:
     - Xóa bỏ toàn bộ các giá trị mặc định hardcode demo (`DEFAULT '1234567890'`, `DEFAULT '970418'`, v.v.) trên `buildings` và `maintenance_funds`.
     - Thiết lập số dư mặc định của Quỹ bảo trì cho tòa nhà mới là `0.00 đ`. Cấu hình ngân hàng ban đầu là `NULL`.
     - Xây dựng RPC `onboard_building_commercial_config`: Khi BQL onboarding tòa nhà mới, bắt buộc nhập thông tin ngân hàng thực tế và số dư đầu kỳ có xác nhận, đồng thời tự động ghi nhận nhật ký kiểm toán bất biến `audit_logs` (lưu vết `user_id`, thời điểm, IP/metadata).
@@ -77,7 +77,7 @@ jobs:
         run: flutter test --reporter expanded
 ```
 
-### 2.2. Migration Làm Sạch Dữ Liệu Production (`20261104_02_production_clean_seed_separation.sql`)
+### 2.2. Migration Làm Sạch Dữ Liệu Production (`20261104020000_production_clean_seed_separation.sql`)
 1. Gỡ bỏ `DEFAULT` demo trên `public.buildings`:
    ```sql
    ALTER TABLE public.buildings ALTER COLUMN bank_bin DROP DEFAULT;
@@ -117,7 +117,7 @@ jobs:
 
 1. **Test CI/CD:** `test/ci/github_actions_workflow_test.dart` kiểm tra file `.github/workflows/ci.yml` tồn tại, đúng cú pháp YAML, có bước `dart analyze --fatal-infos` và `flutter test`.
 2. **Test CSDL Clean Seed:** `test/database/seed_separation_migration_test.dart` kiểm tra:
-   - File migration `20261104_02_production_clean_seed_separation.sql` gỡ bỏ default mock data.
+   - File migration `20261104020000_production_clean_seed_separation.sql` gỡ bỏ default mock data.
    - Có RPC `onboard_building_commercial_config` và ghi log vào `audit_logs`.
    - File `supabase/seed.sql` độc lập tồn tại.
 3. **Phân tích tĩnh:** `dart analyze lib test` đạt 0 issues.

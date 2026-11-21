@@ -21,7 +21,7 @@
 ### Task 1: Migration SQL Database & RPC `get_financial_aging_report`
 
 **Files:**
-- Create: `supabase/migrations/20261030_01_financial_aging_report_rpc.sql`
+- Create: `supabase/migrations/20261030010000_financial_aging_report_rpc.sql`
 - Test: `test/integration/financial_aging_report_migration_test.dart`
 
 **Interfaces:**
@@ -30,7 +30,7 @@
 
 - [x] **Step 1:** Viết failing test `financial_aging_report_migration_test.dart` kiểm tra sự tồn tại của tệp migration, cấu trúc hàm RPC, kiểm tra quyền truy cập RBAC, các CTE tính toán (`filtered_invoices`, `summary_calc`, `aging_calc`, `debtors`, `collection_by_block`) và cấu trúc JSON trả về.
 - [x] **Step 2:** Chạy `flutter test test/integration/financial_aging_report_migration_test.dart` để xác nhận test FAIL.
-- [x] **Step 3:** Tạo tệp migration `supabase/migrations/20261030_01_financial_aging_report_rpc.sql` với đầy đủ logic phân quyền và tổng hợp tính toán.
+- [x] **Step 3:** Tạo tệp migration `supabase/migrations/20261030010000_financial_aging_report_rpc.sql` với đầy đủ logic phân quyền và tổng hợp tính toán.
 - [x] **Step 4:** Chạy lại test `financial_aging_report_migration_test.dart` để xác nhận PASS.
 - [x] **Step 5:** Commit task 1 vào `main`.
 

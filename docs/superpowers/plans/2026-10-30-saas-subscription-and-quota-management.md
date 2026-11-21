@@ -12,10 +12,10 @@
 - **Mục tiêu:** Tạo bảng `subscription_plans`, `organization_subscriptions`, seed 3 gói dịch vụ chuẩn, trigger `trg_enforce_apartment_quota` và RPC `get_organization_subscription_status`.
 - **Files:**
   - `test/integration/subscription_quota_migration_test.dart`
-  - `supabase/migrations/20261030_03_saas_subscription_plans_and_quota.sql`
+  - `supabase/migrations/20261030030000_saas_subscription_plans_and_quota.sql`
 - **Các bước:**
   1. Viết failing integration test `test/integration/subscription_quota_migration_test.dart`.
-  2. Viết migration SQL `20261030_03_saas_subscription_plans_and_quota.sql`.
+  2. Viết migration SQL `20261030030000_saas_subscription_plans_and_quota.sql`.
   3. Chạy `flutter test test/integration/subscription_quota_migration_test.dart` -> PASS.
   4. Commit: `feat(db): migration bang subscription_plans va trigger han muc B3`.
 

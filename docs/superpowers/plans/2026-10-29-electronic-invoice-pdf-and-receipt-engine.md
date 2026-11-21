@@ -21,7 +21,7 @@
 ### Task 1: Migration Cơ Sở Dữ Liệu & RPC Tra Cứu (Supabase/PostgreSQL)
 
 **Files:**
-- Create: `supabase/migrations/20261029_05_electronic_invoice_and_lookup_engine.sql`
+- Create: `supabase/migrations/20261029050000_electronic_invoice_and_lookup_engine.sql`
 - Test: `test/integration/electronic_invoice_migration_test.dart`
 
 **Interfaces:**
@@ -38,14 +38,14 @@ Viết `test/integration/electronic_invoice_migration_test.dart` kiểm tra file
 Chạy `flutter test test/integration/electronic_invoice_migration_test.dart` xác nhận FAIL.
 
 - [x] **Step 3: Viết migration SQL**
-Tạo `supabase/migrations/20261029_05_electronic_invoice_and_lookup_engine.sql` định nghĩa đầy đủ schema, backfill mã tra cứu cho các hóa đơn hiện hữu và RPC `verify_document_lookup`.
+Tạo `supabase/migrations/20261029050000_electronic_invoice_and_lookup_engine.sql` định nghĩa đầy đủ schema, backfill mã tra cứu cho các hóa đơn hiện hữu và RPC `verify_document_lookup`.
 
 - [x] **Step 4: Chạy test để xác nhận PASS**
 Chạy lại test, đảm bảo PASS 100%.
 
 - [x] **Step 5: Commit vào git**
 ```bash
-git add supabase/migrations/20261029_05_electronic_invoice_and_lookup_engine.sql test/integration/electronic_invoice_migration_test.dart
+git add supabase/migrations/20261029050000_electronic_invoice_and_lookup_engine.sql test/integration/electronic_invoice_migration_test.dart
 git commit -m "feat(db): migration lookup_code va rpc tra cuu hoa don bien lai C4"
 ```
 

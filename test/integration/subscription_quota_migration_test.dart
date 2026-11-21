@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('SaaS Subscription & Quota Migration Tests (20261030_03)', () {
     const migrationPath =
-        'supabase/migrations/20261030_03_saas_subscription_plans_and_quota.sql';
+        'supabase/migrations/20261030030000_saas_subscription_plans_and_quota.sql';
 
     test('Migration file exists and is not empty', () {
       final file = File(migrationPath);

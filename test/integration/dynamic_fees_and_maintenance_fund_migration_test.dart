@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Dynamic Fees and Maintenance Fund Migration Verification', () {
     final migrationFile = File(
-      'supabase/migrations/20261027_02_dynamic_fees_and_maintenance_fund.sql',
+      'supabase/migrations/20261027020000_dynamic_fees_and_maintenance_fund.sql',
     );
 
     test('migration file exists', () {

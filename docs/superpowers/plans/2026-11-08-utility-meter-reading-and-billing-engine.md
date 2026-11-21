@@ -19,7 +19,7 @@
 ### Task 1: CSDL Migration: Bảng Biểu Giá Điện Nước & ACID RPC Phê Duyệt Tự Động Lập Hóa Đơn
 
 **Files:**
-- Create: `supabase/migrations/20261108_03_utility_billing_engine.sql`
+- Create: `supabase/migrations/20261108030000_utility_billing_engine.sql`
 - Test: `test/database/utility_billing_engine_migration_test.dart`
 
 **Interfaces:**
@@ -31,7 +31,7 @@
 
 - [x] **Step 1: Viết failing test cho Migration SQL**
 - [x] **Step 2: Chạy test xác nhận Red phase**
-- [x] **Step 3: Tạo file migration `20261108_03_utility_billing_engine.sql` với đầy đủ schema & 2 RPCs**
+- [x] **Step 3: Tạo file migration `20261108030000_utility_billing_engine.sql` với đầy đủ schema & 2 RPCs**
 - [x] **Step 4: Chạy lại test xác nhận Green phase**
 - [x] **Step 5: Commit vào `main`**
 

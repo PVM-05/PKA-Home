@@ -7,10 +7,10 @@
 
 ## Danh Sách Tasks
 
-### Task 1: Database Migration `20261028_03_notification_automation_triggers.sql`
+### Task 1: Database Migration `20261028030000_notification_automation_triggers.sql`
 - [x] Viết test `test/integration/notification_automation_triggers_migration_test.dart`
 - [x] Xác nhận test fail khi chưa có file migration
-- [x] Tạo file migration `supabase/migrations/20261028_03_notification_automation_triggers.sql`:
+- [x] Tạo file migration `supabase/migrations/20261028030000_notification_automation_triggers.sql`:
   - Trigger 1: `trg_notify_on_new_invoice` (Tự động thông báo khi có hóa đơn mới)
   - Trigger 2: `trg_notify_on_issue_status_change` (Tự động thông báo khi tiếp nhận/xử lý/hoàn tất phản ánh)
   - Trigger 3: `trg_notify_on_link_request_status` (Tự động thông báo khi duyệt/từ chối liên kết căn hộ)

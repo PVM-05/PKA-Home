@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Financial Aging Report Migration Tests (20261030_01)', () {
-    const migrationFilePath = 'supabase/migrations/20261030_01_financial_aging_report_rpc.sql';
+    const migrationFilePath = 'supabase/migrations/20261030010000_financial_aging_report_rpc.sql';
 
-    test('Migration file 20261030_01_financial_aging_report_rpc.sql must exist', () {
+    test('Migration file 20261030010000_financial_aging_report_rpc.sql must exist', () {
       final file = File(migrationFilePath);
       expect(file.existsSync(), isTrue, reason: 'Tệp migration C6 $migrationFilePath phải tồn tại');
     });

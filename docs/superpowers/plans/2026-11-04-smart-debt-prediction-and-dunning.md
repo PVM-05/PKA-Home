@@ -13,7 +13,7 @@ Triển khai toàn bộ tính năng **E3: Dự báo nợ xấu & Nhắc nợ th�
 
 ### Task 1: Cơ Sở Dữ Liệu & RPC PostgreSQL (CSDL & Test)
 - **Tập tin:**
-  - `supabase/migrations/20261104_03_debt_prediction_and_dunning.sql`
+  - `supabase/migrations/20261104030000_debt_prediction_and_dunning.sql`
   - `test/database/debt_prediction_migration_test.dart`
 - **Nội dung:**
   - Tạo bảng `debt_risk_scores` và `dunning_actions`.

@@ -25,7 +25,7 @@
 
 ## 2. Kiến Trúc Cơ Sở Dữ Liệu & RPC Backend
 
-### 2.1. Migration SQL: `20261030_01_financial_aging_report_rpc.sql`
+### 2.1. Migration SQL: `20261030010000_financial_aging_report_rpc.sql`
 Tạo hàm RPC `get_financial_aging_report` với đặc tính `SECURITY DEFINER` và phân quyền RBAC:
 
 ```sql

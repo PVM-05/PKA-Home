@@ -5,7 +5,7 @@
 **Goal:** Chuẩn hóa cơ sở dữ liệu thông báo và FCM token vào migration chính thức, triển khai RPC tự động quét nhắc phí 3 cấp độ (sắp đến hạn 3 ngày, đúng hạn, quá hạn), nâng cấp thông báo BQL hỗ trợ gửi đích danh theo Block/Tầng/Căn hộ và trung tâm thông báo cư dân thời gian thực hỗ trợ lọc theo ngữ cảnh.
 
 **Architecture:**
-- Database: Migration `20261028_01_notifications_and_reminders.sql` tạo bảng `user_fcm_tokens`, `notifications`, nâng cấp `announcements` với `target_type` và `target_value`, cùng hàm `check_and_generate_invoice_due_reminders` chống gửi lặp trong ngày.
+- Database: Migration `20261028010000_notifications_and_reminders.sql` tạo bảng `user_fcm_tokens`, `notifications`, nâng cấp `announcements` với `target_type` và `target_value`, cùng hàm `check_and_generate_invoice_due_reminders` chống gửi lặp trong ngày.
 - Models & Data Layer: `NotificationModel` bổ sung `buildingId` và helper getters; `AnnouncementModel` mở rộng hỗ trợ `targetType` linh hoạt (`all`, `block`, `floor`, `apartment`); `NotificationRepository` hỗ trợ lọc theo tòa nhà và kích hoạt RPC nhắc nợ; `notification_provider.dart` cung cấp các bộ lọc 'Tất cả', 'Chưa đọc', 'Hóa đơn', 'Tòa nhà'.
 - Flutter UI: Màn hình Cư dân `NotificationCenterScreen` với tab lọc đa năng và biểu tượng trực quan; màn hình BQL `AnnouncementManagementScreen` với bộ chọn phạm vi thông báo linh hoạt (Block/Tầng/Căn hộ) và nút thao tác "Quét nhắc nợ hóa đơn".
 
@@ -24,7 +24,7 @@
 ### Task 1: Database Migration Bảng `notifications`, `user_fcm_tokens` & RPC Quét Nhắc Nợ
 
 **Files:**
-- Create: `supabase/migrations/20261028_01_notifications_and_reminders.sql`
+- Create: `supabase/migrations/20261028010000_notifications_and_reminders.sql`
 - Create: `test/integration/notifications_and_reminders_migration_test.dart`
 
 **Interfaces:**
@@ -44,9 +44,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notifications and Reminders Migration Tests', () {
-    final migrationFile = File('supabase/migrations/20261028_01_notifications_and_reminders.sql');
+    final migrationFile = File('supabase/migrations/20261028010000_notifications_and_reminders.sql');
 
-    test('Tập tin migration 20261028_01_notifications_and_reminders.sql phải tồn tại', () {
+    test('Tập tin migration 20261028010000_notifications_and_reminders.sql phải tồn tại', () {
       expect(migrationFile.existsSync(), isTrue);
     });
 
@@ -83,11 +83,11 @@ flutter test test/integration/notifications_and_reminders_migration_test.dart
 ```
 Kỳ vọng: FAIL vì file migration chưa được tạo.
 
-- [ ] **Step 3: Tạo migration `supabase/migrations/20261028_01_notifications_and_reminders.sql`**
+- [ ] **Step 3: Tạo migration `supabase/migrations/20261028010000_notifications_and_reminders.sql`**
 
 Nội dung SQL hoàn chỉnh:
 ```sql
--- Migration: 20261028_01_notifications_and_reminders.sql
+-- Migration: 20261028010000_notifications_and_reminders.sql
 -- Mô tả: Chuẩn hóa bảng user_fcm_tokens, notifications, nâng cấp announcements và RPC nhắc nợ hóa đơn tự động
 
 -- 1. Bảng lưu trữ FCM tokens của người dùng
@@ -259,7 +259,7 @@ Kỳ vọng: PASS (4 tests passing).
 - [ ] **Step 5: Commit migration**
 
 ```bash
-git add supabase/migrations/20261028_01_notifications_and_reminders.sql test/integration/notifications_and_reminders_migration_test.dart
+git add supabase/migrations/20261028010000_notifications_and_reminders.sql test/integration/notifications_and_reminders_migration_test.dart
 git commit -m "feat(db): migration bang notifications fcm tokens va rpc nhac no hoa don"
 ```
 

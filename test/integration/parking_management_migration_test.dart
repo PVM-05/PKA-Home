@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Parking Management & Capacity Migration Tests (20261102_01)', () {
-    const migrationPath = 'supabase/migrations/20261102_01_parking_slots_and_visitor_tickets.sql';
+    const migrationPath = 'supabase/migrations/20261102010000_parking_slots_and_visitor_tickets.sql';
 
     test('Migration file exists and is not empty', () {
       final file = File(migrationPath);

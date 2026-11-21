@@ -20,7 +20,7 @@
 ### Task 1: Migration Cơ Sở Dữ Liệu & Supabase Storage
 
 **Files:**
-- Create: `supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql`
+- Create: `supabase/migrations/20261107020000_digital_asset_handover_and_inspection.sql`
 - Test: `test/database/handover_migration_test.dart`
 
 **Interfaces:**
@@ -31,11 +31,11 @@
 - [x] **Step 2: Chạy test để xác nhận test thất bại**
   `flutter test test/database/handover_migration_test.dart` (Fails vì chưa có file SQL).
 - [x] **Step 3: Viết file migration SQL**
-  Tạo `supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql` với đầy đủ schema theo đặc tả thiết kế.
+  Tạo `supabase/migrations/20261107020000_digital_asset_handover_and_inspection.sql` với đầy đủ schema theo đặc tả thiết kế.
 - [x] **Step 4: Chạy test để xác nhận test pass**
   `flutter test test/database/handover_migration_test.dart` (Pass).
 - [x] **Step 5: Commit lên nhánh main**
-  `git add supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql test/database/handover_migration_test.dart`
+  `git add supabase/migrations/20261107020000_digital_asset_handover_and_inspection.sql test/database/handover_migration_test.dart`
   `git commit -m "feat(db): migration bien ban ban giao va kiem ke tai san can ho so hoa"`
 
 ---

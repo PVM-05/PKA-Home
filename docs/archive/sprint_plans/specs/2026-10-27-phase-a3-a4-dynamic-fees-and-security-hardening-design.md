@@ -21,7 +21,7 @@
 
 ### 2.1. Biểu Phí Động (Dynamic Fee Schedules - A3)
 
-#### A. Migration Database: `20261027_02_dynamic_fees_and_maintenance_fund.sql`
+#### A. Migration Database: `20261027020000_dynamic_fees_and_maintenance_fund.sql`
 1. **Seed dữ liệu chuẩn cho `fee_schedules`:**
    - `electricity`: Đơn giá điện sinh hoạt 3.500 đ/kWh (đơn vị: 'kWh').
    - `water`: Đơn giá nước sinh hoạt 18.000 đ/m³ (đơn vị: 'm³').

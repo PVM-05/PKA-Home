@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -62,10 +62,10 @@ void main() {
   });
 
   group('Kiểm thử bảo vệ các bản sửa lỗi trong Migration 20261120_03, 20261120_04 và Fresh DB', () {
-    final migration03 = File('supabase/migrations/20261120_03_security_hardening_and_missing_rpcs.sql');
-    final migration04 = File('supabase/migrations/20261120_04_patch_activation_and_staff_roles.sql');
-    final migration06 = File('supabase/migrations/20261106_01_cleanup_dead_tables_and_seed_data.sql');
-    final migration14 = File('supabase/migrations/20261114_01_secure_bank_webhook_and_vnpay.sql');
+    final migration03 = File('supabase/migrations/20261120030000_security_hardening_and_missing_rpcs.sql');
+    final migration04 = File('supabase/migrations/20261120040000_patch_activation_and_staff_roles.sql');
+    final migration06 = File('supabase/migrations/20261106010000_cleanup_dead_tables_and_seed_data.sql');
+    final migration14 = File('supabase/migrations/20261114010000_secure_bank_webhook_and_vnpay.sql');
 
     test('Blocker 1: is_staff_or_management loại bỏ enum manager không hợp lệ (không crash enum user_role)', () {
       expect(migration03.existsSync(), isTrue);

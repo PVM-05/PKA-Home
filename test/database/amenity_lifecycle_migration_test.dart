@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261108_02_amenity_lifecycle_and_deposit.sql', () {
+  group('Database Migration: 20261108020000_amenity_lifecycle_and_deposit.sql', () {
     late String migrationContent;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261108_02_amenity_lifecycle_and_deposit.sql');
+      final file = File('supabase/migrations/20261108020000_amenity_lifecycle_and_deposit.sql');
       expect(file.existsSync(), isTrue, reason: 'Tệp migration phải tồn tại');
       migrationContent = file.readAsStringSync();
     });

@@ -21,7 +21,7 @@
 ### Task 1: Migration SQL Vòng Đời Cư Dân & RPCs Batch Import
 
 **Files:**
-- Create: `supabase/migrations/20261030_02_residents_apartments_lifecycle_and_batch_import.sql`
+- Create: `supabase/migrations/20261030020000_residents_apartments_lifecycle_and_batch_import.sql`
 - Test: `test/integration/batch_import_migration_test.dart`
 
 **Interfaces:**
@@ -34,7 +34,7 @@
 
 - [ ] **Step 1:** Viết failing test `batch_import_migration_test.dart` kiểm tra sự tồn tại của tệp migration, các cột mới trong `residents_apartments`, và các hàm RPC batch import với kiểm tra quyền RBAC.
 - [ ] **Step 2:** Chạy test để xác nhận FAIL.
-- [ ] **Step 3:** Tạo tệp migration `supabase/migrations/20261030_02_residents_apartments_lifecycle_and_batch_import.sql`.
+- [ ] **Step 3:** Tạo tệp migration `supabase/migrations/20261030020000_residents_apartments_lifecycle_and_batch_import.sql`.
 - [ ] **Step 4:** Chạy lại test để xác nhận PASS.
 - [ ] **Step 5:** Commit task 1 vào `main`.
 

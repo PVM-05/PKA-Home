@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notifications and Reminders Migration Tests', () {
-    final migrationFile = File('supabase/migrations/20261028_01_notifications_and_reminders.sql');
+    final migrationFile = File('supabase/migrations/20261028010000_notifications_and_reminders.sql');
 
-    test('Tập tin migration 20261028_01_notifications_and_reminders.sql phải tồn tại', () {
+    test('Tập tin migration 20261028010000_notifications_and_reminders.sql phải tồn tại', () {
       expect(migrationFile.existsSync(), isTrue);
     });
 

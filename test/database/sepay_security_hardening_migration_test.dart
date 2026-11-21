@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261116_01_sepay_webhook_security_hardening.sql', () {
+  group('Database Migration: 20261116010000_sepay_webhook_security_hardening.sql', () {
     late String migrationSql;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261116_01_sepay_webhook_security_hardening.sql');
-      expect(file.existsSync(), isTrue, reason: 'Migration file 20261116_01_sepay_webhook_security_hardening.sql phải tồn tại.');
+      final file = File('supabase/migrations/20261116010000_sepay_webhook_security_hardening.sql');
+      expect(file.existsSync(), isTrue, reason: 'Migration file 20261116010000_sepay_webhook_security_hardening.sql phải tồn tại.');
       migrationSql = file.readAsStringSync();
     });
 

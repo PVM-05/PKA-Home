@@ -5,7 +5,7 @@
 **Goal:** Chuyển đổi toàn bộ tiền tệ sang biểu phí động theo thời gian, nối dữ liệu thật cho Quỹ bảo trì, xóa bỏ fallback căn hộ ảo trong provider và cấu hình release signing an toàn cho Android.
 
 **Architecture:**
-- Database: Tạo migration `20261027_02_dynamic_fees_and_maintenance_fund.sql` seed dữ liệu `fee_schedules`, tạo bảng `maintenance_funds` có RLS và hàm helper `get_effective_fee_schedule`.
+- Database: Tạo migration `20261027020000_dynamic_fees_and_maintenance_fund.sql` seed dữ liệu `fee_schedules`, tạo bảng `maintenance_funds` có RLS và hàm helper `get_effective_fee_schedule`.
 - Flutter Data Layer: Thêm `FeeScheduleModel`, `FeeScheduleRepository`, `feeScheduleProvider`, `MaintenanceFundModel`, `maintenanceFundProvider`.
 - Flutter UI Layer: `bulk_invoice_dialog.dart` & `create_invoice_screen.dart` nạp biểu phí động từ provider; `MaintenanceFundCard` xóa toàn bộ hằng số 2,45 tỷ giả và đọc từ `maintenanceFundProvider`.
 - Provider Sanitization: Xóa fallback ảo `'A0110'` (1250 kWh, 80 m³) trong `meter_reading_provider.dart`.
@@ -24,7 +24,7 @@
 ### Task 1: Database Migration - Seed `fee_schedules`, Tạo Bảng `maintenance_funds` & RPC Tra Cứu
 
 **Files:**
-- Create: `supabase/migrations/20261027_02_dynamic_fees_and_maintenance_fund.sql`
+- Create: `supabase/migrations/20261027020000_dynamic_fees_and_maintenance_fund.sql`
 - Test: `test/integration/dynamic_fees_and_maintenance_fund_migration_test.dart`
 
 **Interfaces:**
@@ -40,7 +40,7 @@ Tạo file `test/integration/dynamic_fees_and_maintenance_fund_migration_test.da
 - [ ] **Step 2: Chạy test để xác nhận FAIL (TDD)**
 Chạy: `flutter test test/integration/dynamic_fees_and_maintenance_fund_migration_test.dart`
 
-- [ ] **Step 3: Viết migration `20261027_02_dynamic_fees_and_maintenance_fund.sql`**
+- [ ] **Step 3: Viết migration `20261027020000_dynamic_fees_and_maintenance_fund.sql`**
 Tạo file migration bổ sung seed biểu phí, bảng `maintenance_funds`, RLS policy và hàm `get_effective_fee_schedule`.
 
 - [ ] **Step 4: Chạy test để xác nhận PASS**
@@ -48,7 +48,7 @@ Chạy: `flutter test test/integration/dynamic_fees_and_maintenance_fund_migrati
 
 - [ ] **Step 5: Commit migration**
 ```bash
-git add supabase/migrations/20261027_02_dynamic_fees_and_maintenance_fund.sql test/integration/dynamic_fees_and_maintenance_fund_migration_test.dart
+git add supabase/migrations/20261027020000_dynamic_fees_and_maintenance_fund.sql test/integration/dynamic_fees_and_maintenance_fund_migration_test.dart
 git commit -m "feat(db): them migration bieu phi dong va bang quy bao tri maintenance_funds"
 ```
 

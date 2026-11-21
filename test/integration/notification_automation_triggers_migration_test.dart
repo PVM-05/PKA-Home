@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Notification Automation Triggers Migration Tests', () {
-    const migrationPath = 'supabase/migrations/20261028_03_notification_automation_triggers.sql';
+    const migrationPath = 'supabase/migrations/20261028030000_notification_automation_triggers.sql';
 
-    test('Tập tin migration 20261028_03_notification_automation_triggers.sql phải tồn tại', () {
+    test('Tập tin migration 20261028030000_notification_automation_triggers.sql phải tồn tại', () {
       final file = File(migrationPath);
       expect(file.existsSync(), isTrue, reason: 'Migration 20261028_03 chưa được tạo.');
     });

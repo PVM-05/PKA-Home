@@ -17,7 +17,7 @@
   - Commit trực tiếp vào `main`: `9d799b0`
 
 - [x] **Task 2: Migration CSDL & RPC Auto-Assignment PostgreSQL**
-  - Viết migration: `supabase/migrations/20261103_04_issue_smart_triage_and_auto_assign.sql`
+  - Viết migration: `supabase/migrations/20261103040000_issue_smart_triage_and_auto_assign.sql`
   - Bổ sung các cột AI Triage vào `issue_reports`: `ai_category_confidence`, `ai_suggested_category`, `ai_suggested_priority`, `ai_triage_reason`, `is_hazardous`, `auto_assigned`
   - Viết RPC: `triage_and_auto_assign_issue(p_issue_id UUID)` với cơ chế cân bằng tải KTV
   - Viết test migration SQL: `test/database/issue_smart_triage_migration_test.dart` (3/3 tests pass)

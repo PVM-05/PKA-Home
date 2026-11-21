@@ -79,7 +79,7 @@ sequenceDiagram
     end
 ```
 
-### 2.2. Chi Tiết RPCs Cơ Sở Dữ Liệu (`20261104_01_financial_integrity_and_real_payment.sql`)
+### 2.2. Chi Tiết RPCs Cơ Sở Dữ Liệu (`20261104010000_financial_integrity_and_real_payment.sql`)
 
 #### 1. RPC `create_payment_intent`
 ```sql

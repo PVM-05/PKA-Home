@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Kiểm tra Migration 20261104_02: Làm Sạch Production & Tách Seed (INF-02)', () {
-    const migrationPath = 'supabase/migrations/20261104_02_production_clean_seed_separation.sql';
+    const migrationPath = 'supabase/migrations/20261104020000_production_clean_seed_separation.sql';
     const seedPath = 'supabase/seed.sql';
 
     test('File migration clean seed và file seed.sql độc lập phải tồn tại', () {

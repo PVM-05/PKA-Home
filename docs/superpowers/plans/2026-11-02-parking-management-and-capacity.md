@@ -11,11 +11,11 @@
 ### Task 1: Migration SQL & Schema Tests [x] Đã hoàn thành (commit `314906e`)
 - **Mục tiêu:** Tạo migration PostgreSQL bổ sung bảng `parking_slots`, `visitor_parking_tickets`, trường `parking_slot_id` / `parking_slot_number` vào `vehicles`, và các RPCs `get_parking_capacity_stats`, `calculate_visitor_parking_fee`, `checkout_visitor_ticket`.
 - **Files:**
-  - `supabase/migrations/20261102_01_parking_slots_and_visitor_tickets.sql`
+  - `supabase/migrations/20261102010000_parking_slots_and_visitor_tickets.sql`
   - `test/integration/parking_management_migration_test.dart`
 - **Các bước:**
   1. [x] Viết failing integration test `test/integration/parking_management_migration_test.dart`.
-  2. [x] Tạo migration `20261102_01_parking_slots_and_visitor_tickets.sql`.
+  2. [x] Tạo migration `20261102010000_parking_slots_and_visitor_tickets.sql`.
   3. [x] Chạy test `parking_management_migration_test.dart` -> PASS (5/5).
   4. [x] Commit: `feat(db): migration sql quan ly o do ham va ve xe vang lai D2`.
 

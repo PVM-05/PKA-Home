@@ -19,7 +19,7 @@
 ### Task 1: CSDL Migration & ACID RPCs Nghiệm Thu Cọc & Vé Check-in
 
 **Files:**
-- Create: `supabase/migrations/20261108_02_amenity_lifecycle_and_deposit.sql`
+- Create: `supabase/migrations/20261108020000_amenity_lifecycle_and_deposit.sql`
 - Test: `test/database/amenity_lifecycle_migration_test.dart`
 
 **Interfaces:**
@@ -30,7 +30,7 @@
 
 - [x] **Step 1: Viết failing test cho Migration SQL**
 - [x] **Step 2: Chạy test xác nhận Red phase**
-- [x] **Step 3: Tạo file migration `20261108_02_amenity_lifecycle_and_deposit.sql` với đầy đủ schema & 3 RPCs**
+- [x] **Step 3: Tạo file migration `20261108020000_amenity_lifecycle_and_deposit.sql` với đầy đủ schema & 3 RPCs**
 - [x] **Step 4: Chạy lại test xác nhận Green phase**
 - [x] **Step 5: Commit vào `main`**
 

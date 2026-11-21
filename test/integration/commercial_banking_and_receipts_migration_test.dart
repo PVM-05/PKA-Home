@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Commercial Banking and Receipts Migration Verification Tests', () {
     final migrationFile = File(
-      'supabase/migrations/20261027_04_commercial_banking_and_receipts.sql',
+      'supabase/migrations/20261027040000_commercial_banking_and_receipts.sql',
     );
 
     test('migration file exists', () {

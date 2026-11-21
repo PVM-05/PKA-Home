@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261108_01_sepay_real_payment_and_webhook.sql', () {
+  group('Database Migration: 20261108010000_sepay_real_payment_and_webhook.sql', () {
     late String migrationSql;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261108_01_sepay_real_payment_and_webhook.sql');
-      expect(file.existsSync(), isTrue, reason: 'Migration file 20261108_01_sepay_real_payment_and_webhook.sql phải tồn tại.');
+      final file = File('supabase/migrations/20261108010000_sepay_real_payment_and_webhook.sql');
+      expect(file.existsSync(), isTrue, reason: 'Migration file 20261108010000_sepay_real_payment_and_webhook.sql phải tồn tại.');
       migrationSql = file.readAsStringSync();
     });
 

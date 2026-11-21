@@ -3,11 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Task 1: Kiem tra Migration SQL Dang Ky Khach QR & Buu Kien Le Tan D6', () {
-    const migrationPath = 'supabase/migrations/20261103_01_visitor_and_parcel_hub.sql';
+    const migrationPath = 'supabase/migrations/20261103010000_visitor_and_parcel_hub.sql';
 
     test('1. Tap tin migration 20261103_01 phai ton tai', () {
       final file = File(migrationPath);
-      expect(file.existsSync(), isTrue, reason: 'Tập tin migration 20261103_01_visitor_and_parcel_hub.sql chưa được tạo');
+      expect(file.existsSync(), isTrue, reason: 'Tập tin migration 20261103010000_visitor_and_parcel_hub.sql chưa được tạo');
     });
 
     test('2. Migration phai dinh nghia bang visitor_access_passes va RLS', () {

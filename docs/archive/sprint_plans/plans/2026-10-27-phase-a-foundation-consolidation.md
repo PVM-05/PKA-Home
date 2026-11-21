@@ -6,7 +6,7 @@
 
 **Architecture:** 
 - Toàn bộ 58 migration cũ được chuyển vào `supabase/migrations_archive/` làm tài liệu lưu trữ.
-- Tạo file baseline duy nhất `supabase/migrations/20261027_01_baseline_schema.sql` tuân thủ nguyên tắc một định nghĩa duy nhất cho mỗi RPC và không tham chiếu cột sai.
+- Tạo file baseline duy nhất `supabase/migrations/20261027010000_baseline_schema.sql` tuân thủ nguyên tắc một định nghĩa duy nhất cho mỗi RPC và không tham chiếu cột sai.
 - Phía Flutter client (`payment_service.dart`, `resident_invoice_provider.dart`, `amenity_service.dart`), đồng bộ 100% tham số gọi RPC với kiểu dữ liệu chặt chẽ và loại bỏ param thừa (`p_type`).
 - Kiểm thử tĩnh (`flutter analyze`) và kiểm thử đơn vị/tích hợp (`flutter test`) xác minh độ toàn vẹn.
 
@@ -48,14 +48,14 @@ git commit -m "chore(db): luu tru 58 file migration cu vao migrations_archive"
 
 ---
 
-### Task 2: Xây Dựng File Baseline Schema Duy Nhất (`20261027_01_baseline_schema.sql`)
+### Task 2: Xây Dựng File Baseline Schema Duy Nhất (`20261027010000_baseline_schema.sql`)
 
 **Files:**
-- Create: `supabase/migrations/20261027_01_baseline_schema.sql`
+- Create: `supabase/migrations/20261027010000_baseline_schema.sql`
 
 **Interfaces:**
 - Consumes: Toàn bộ schema, trigger, policy và RPCs chuẩn từ các bản migration mới nhất (đặc biệt `20261025_03` và `20261026_03`).
-- Produces: `20261027_01_baseline_schema.sql` chứa đầy đủ 9 khối DDL & RPC:
+- Produces: `20261027010000_baseline_schema.sql` chứa đầy đủ 9 khối DDL & RPC:
   - Part 1: Extensions & Enums (`user_role`, `vehicle_type`, `invoice_status`, `payment_method`, `amenity_booking_status`, `meter_submission_status`, `issue_status`).
   - Part 2: Bảng cốt lõi (`users`, `apartments`, `residents_apartments`, `apartment_link_requests`, `invoices`, `invoice_items`, `vehicles`, `building_amenities`, `amenity_bookings`, `amenity_maintenance_windows`, `meter_reading_submissions`, `payment_transactions`, `announcements`, `issue_reports`, `issue_images`, `equipment_maintenance_tasks`, `audit_logs`, `service_ratings`, `issue_comments`).
   - Part 3: Bảng cấu hình biểu phí động (`fee_schedules`, `tiered_tariffs`).
@@ -67,7 +67,7 @@ git commit -m "chore(db): luu tru 58 file migration cu vao migrations_archive"
   - Part 9: Storage Buckets & Policies (`issue-images`, `meter-readings`, `avatars`).
 
 - [ ] **Step 1: Viết file baseline schema tổng hợp đầy đủ DDL, RLS, Triggers và RPCs chuẩn hóa**
-Viết file `supabase/migrations/20261027_01_baseline_schema.sql`.
+Viết file `supabase/migrations/20261027010000_baseline_schema.sql`.
 Đặc biệt sửa triệt để:
 - Trong `reschedule_amenity_booking`: so khớp `start_time <= v_day_end AND end_time >= v_day_start` (bỏ `start_date`/`end_date`), cập nhật `payment_transactions` bằng `booking_id = p_booking_id` (bỏ `OR invoice_id = p_booking_id::text`), đọc `v_amenity.fee_amount` (bỏ `price_per_slot`).
 - Trong `simulate_unified_payment`: chỉ nhận `p_reference_id`, `p_payment_type`, `p_payment_method`, `p_outcome`, `p_failure_reason`. Bỏ `p_type`.
@@ -78,8 +78,8 @@ Kiểm tra tính nhất quán của các bảng, khóa ngoại và chữ ký hà
 
 - [ ] **Step 3: Commit file baseline schema**
 ```bash
-git add supabase/migrations/20261027_01_baseline_schema.sql
-git commit -m "feat(db): tao baseline migration duy nhat 20261027_01_baseline_schema.sql"
+git add supabase/migrations/20261027010000_baseline_schema.sql
+git commit -m "feat(db): tao baseline migration duy nhat 20261027010000_baseline_schema.sql"
 ```
 
 ---

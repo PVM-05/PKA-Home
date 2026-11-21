@@ -11,7 +11,7 @@
 
 ### 1.1. Hiện trạng & Thách thức
 1. **Lỗi P0 VNPay sau khi tách Secrets**:
-   - Migration `20261116_02_separate_payment_secrets_and_scope_webhook.sql` đã `DROP` cột `vnpay_hash_secret` khỏi bảng `building_payment_configs` để bảo vệ khóa bí mật khỏi việc cư dân đọc trộm qua REST API.
+   - Migration `20261116020000_separate_payment_secrets_and_scope_webhook.sql` đã `DROP` cột `vnpay_hash_secret` khỏi bảng `building_payment_configs` để bảo vệ khóa bí mật khỏi việc cư dân đọc trộm qua REST API.
    - Phía Client (`PaymentService.createVnpayPaymentUrl`) đọc config từ `building_payment_configs` nên luôn nhận `vnpayHashSecret == null`, khiến nút VNPay trên `UnifiedPaymentSheet` ném ngoại lệ *"Không thể khởi tạo URL thanh toán VNPay"*.
    - Khóa bí mật không bao giờ được phép để ở Client. Cần chuyển việc sinh URL và ký số HMAC-SHA512 về Server-side an toàn tuyệt đối.
    - Edge Function `vnpay-ipn/index.ts` hiện tại vẫn đang `select` `vnpay_hash_secret` từ bảng cũ `building_payment_configs` (vốn đã bị drop).

@@ -14,7 +14,7 @@
 
 ### Task 1: Migration PostgreSQL Cắt Quyền Client RPC & Bổ Sung Cấu Hình VNPay
 **Tệp:**
-- Tạo mới: `supabase/migrations/20261114_01_secure_bank_webhook_and_vnpay.sql`
+- Tạo mới: `supabase/migrations/20261114010000_secure_bank_webhook_and_vnpay.sql`
 - Kiểm thử: `test/integration/secure_bank_webhook_migration_test.dart`
 
 - [x] **Step 1:** Viết file migration SQL:

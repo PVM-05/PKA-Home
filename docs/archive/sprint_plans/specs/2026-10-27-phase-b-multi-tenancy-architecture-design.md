@@ -157,7 +157,7 @@ Các bảng nghiệp vụ sẽ được gắn thêm cột `building_id UUID REFE
 ## 4. Kế Hoạch Kiểm Thử & Xác Minh (Verification Strategy)
 
 1. **Migration Verification Tests:**
-   - Viết test kiểm tra cú pháp và sự tồn tại của migration `20261027_03_multi_tenancy_organizations_and_buildings.sql`.
+   - Viết test kiểm tra cú pháp và sự tồn tại của migration `20261027030000_multi_tenancy_organizations_and_buildings.sql`.
    - Kiểm tra việc tạo các bảng `organizations`, `buildings`, `building_staff`.
    - Kiểm tra cột `building_id` trên `apartments`, `announcements`, `fee_schedules`, `maintenance_funds`.
    - Kiểm tra ràng buộc `UNIQUE(building_id, code)` trên bảng `apartments`.

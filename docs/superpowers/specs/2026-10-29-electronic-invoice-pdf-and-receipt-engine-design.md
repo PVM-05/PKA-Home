@@ -79,7 +79,7 @@ flowchart TD
 
 ## 3. Thiết Kế Cơ Sở Dữ Liệu (Supabase Migration)
 
-### 3.1. File migration: `supabase/migrations/20261029_05_electronic_invoice_and_lookup_engine.sql`
+### 3.1. File migration: `supabase/migrations/20261029050000_electronic_invoice_and_lookup_engine.sql`
 1. Bổ sung cột trên bảng `public.invoices`:
    ```sql
    ALTER TABLE public.invoices 

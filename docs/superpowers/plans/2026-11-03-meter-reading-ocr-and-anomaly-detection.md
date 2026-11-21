@@ -17,7 +17,7 @@
   - Commit trực tiếp vào `main`: `51c54df`
 
 - [x] **Task 2: Migration CSDL & RPC Phát Hiện Bất Thường trên PostgreSQL**
-  - Viết migration: `supabase/migrations/20261103_03_meter_ocr_and_anomaly.sql`
+  - Viết migration: `supabase/migrations/20261103030000_meter_ocr_and_anomaly.sql`
   - Bổ sung các cột: `ocr_confidence`, `is_anomaly`, `anomaly_severity`, `anomaly_reason`, `previous_electric_reading`, `previous_water_reading`, `avg_electric_usage`, `avg_water_usage` vào `meter_reading_submissions`
   - Viết RPC: `detect_meter_reading_anomaly`
   - Viết Trigger: `trg_check_meter_reading_anomaly` tự động phân tích khi ghi/cập nhật chỉ số

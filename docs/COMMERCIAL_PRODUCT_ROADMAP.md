@@ -65,7 +65,7 @@ graph TD
 
 #### Gói 2: Tính Toàn Vẹn Tài Chính & Thanh Toán Thật (FIN-01, FIN-02, FIN-03, SEC-04, SEC-05, OPS-FIX) - [HOÀN THÀNH 100%]
 - [x] **FIN-01. Khai tử thanh toán giả lập `simulate_unified_payment`:**
-  - Vô hiệu hóa RPC giả lập trong production migration (`20261104_01_financial_integrity_and_real_payment.sql`).
+  - Vô hiệu hóa RPC giả lập trong production migration (`20261104010000_financial_integrity_and_real_payment.sql`).
   - `PaymentService.pay()` và `createPaymentIntent()` chỉ tạo giao dịch chờ thanh toán (`status = 'pending'`), xuất mã VietQR động Napas 247.
   - Tuyệt đối không tự động chuyển hóa đơn sang `paid` từ phía client.
 - [x] **FIN-02. Củng cố Webhook gạch nợ ngân hàng (`process_bank_payment_webhook`):**
@@ -82,7 +82,7 @@ graph TD
   - Thiết lập `.github/workflows/ci.yml` tự động chạy `flutter test` và `dart analyze --fatal-infos` trên mỗi commit push lên `main`.
 - [x] **INF-02. Tách bạch Seed Data Demo khỏi Production:**
   - Chuyển toàn bộ dữ liệu mẫu (2.45 tỷ đồng, STK demo BIDV) ra file `supabase/seed.sql` độc lập.
-  - Ban hành migration `20261104_02_production_clean_seed_separation.sql` gỡ bỏ default hardcode và tạo RPC `onboard_building_commercial_config` có xác thực quyền quản trị và ghi vết `audit_logs`.
+  - Ban hành migration `20261104020000_production_clean_seed_separation.sql` gỡ bỏ default hardcode và tạo RPC `onboard_building_commercial_config` có xác thực quyền quản trị và ghi vết `audit_logs`.
 
 ---
 
@@ -211,7 +211,7 @@ graph TD
     - Màn hình Phương tiện cư dân (`VehicleManagementScreen`): Tự động nhận diện và hiển thị huy hiệu vị trí ô đỗ cố định dưới hầm (VD: `Vị trí ô đỗ: P-B1-01 (Tầng B1)`).
     - Lối tắt điều hướng "Bãi xe" trực tiếp từ Dashboard BQL và Menu "Tất cả thao tác quản trị".
 - [x] **D3. Sự cố Kỹ Thuật, Cảnh Báo SLA Đa Tầng, Phân Công Chuyên Môn & Quản Lý Vật Tư Tiêu Hao:**
-  - Cơ sở dữ liệu & Business Triggers (`20261102_02_issue_sla_and_materials.sql`):
+  - Cơ sở dữ liệu & Business Triggers (`20261102020000_issue_sla_and_materials.sql`):
     - Cột SLA và phân loại chuyên môn (`category`: điện, nước, thang máy, PCCC, xây dựng, khác) trên `issue_reports`.
     - Trigger `trg_calculate_issue_sla_deadline` tự động ấn định hạn chót xử lý theo mức độ khẩn cấp (Khẩn cấp: 2h, Cao: 8h, Bình thường: 24h, Thấp: 72h).
     - Danh mục kho vật tư kỹ thuật `maintenance_materials` (đơn vị tính, tồn kho, định mức tối thiểu, đơn giá xuất kho).
@@ -231,7 +231,7 @@ graph TD
 - [x] **D4. Tiện ích & Waitlist FIFO:** Đặt chỗ, hàng đợi First-In-First-Out, tự hủy hoàn cọc và đôn người trong danh sách chờ.
 - [x] **D5. Thông báo đa kênh & Triggers:** Triggers tự động hóa thông báo, CDC Realtime Stream đẩy Heads-up notification, quét nhắc nợ định kỳ.
 - [x] **D6. An ninh & Khách (Visitor Access & Front-Desk Parcel Hub):**
-  - Cơ sở dữ liệu & Migration (`20261103_01_visitor_and_parcel_hub.sql`):
+  - Cơ sở dữ liệu & Migration (`20261103010000_visitor_and_parcel_hub.sql`):
     - Bảng `visitor_access_passes`: Mã vé `VP-YYYYMM-XXXXX`, mã QR payload bảo mật, thông tin khách (tên, SĐT, biển số xe, phương tiện), thời gian dự kiến đến/rời đi, trạng thái (`pending`, `checked_in`, `checked_out`, `cancelled`, `expired`).
     - Bảng `parcels`: Mã kiện `PCL-YYYYMM-XXXXX`, căn hộ, người nhận, hãng vận chuyển (SPX, GHTK, GHN, Viettel Post...), mã vận đơn, vị trí kệ lưu trữ, mã PIN nhận hàng 6 số ngẫu nhiên, trạng thái (`arrived`, `collected`, `returned`).
     - 4 RPCs PostgreSQL: `check_in_visitor_pass` (quét mã QR/nhập mã vé check-in), `check_out_visitor_pass` (ghi nhận khách rời đi), `collect_parcel` (đối soát mã PIN bảo mật 6 số và bàn giao cho cư dân), `get_front_desk_stats` (KPI sảnh lễ tân thời gian thực).
@@ -252,7 +252,7 @@ graph TD
     - Phân tích tĩnh `dart analyze` toàn bộ dự án đạt 0 issues.
     - Đồng bộ Knowledge Graph (8.881 nodes, 12.518 edges).
 - [x] **D7. Biểu Quyết Điện Tử & Kiến Nghị Cộng Đồng (Digital Voting, AGM & Resident Petitions):**
-  - Cơ sở dữ liệu & Migration (`20261103_02_digital_voting_and_petitions.sql`):
+  - Cơ sở dữ liệu & Migration (`20261103020000_digital_voting_and_petitions.sql`):
     - Bảng `polls`: Mã đợt `POLL-YYYYMM-XXXXX`, tiêu đề, mô tả, phân loại chuyên mục (Hội nghị chung cư, Tài chính, Bảo trì, Nội quy, Chung), hình thức tính quyền biểu quyết (`per_apartment` - "1 Căn hộ = 1 Phiếu", `by_area` - "Theo diện tích sở hữu m²" theo Điều 102 Luật Nhà ở 2023), hình thức lựa chọn (`single_choice`, `multiple_choice`, `yes_no_abstain`), tỷ lệ tham gia tối thiểu (`min_participation_rate`), tỷ lệ tán thành để thông qua (`required_approval_rate`), thời hạn bắt đầu/kết thúc.
     - Bảng `poll_options`: Danh sách các phương án biểu quyết, thứ tự hiển thị.
     - Bảng `poll_votes`: Phiếu bầu bất biến của từng căn hộ (`UNIQUE(poll_id, apartment_id)`), trọng số biểu quyết tính theo diện tích $m^2$ hoặc 1.0, trigger DB ngăn chặn sửa/xóa phiếu khi cuộc biểu quyết đã kết thúc.
@@ -283,7 +283,7 @@ graph TD
 - [x] **E1. OCR Đồng hồ điện nước thực tế & Cảnh báo bất thường:** Thuật toán OCR bóc tách công tơ điện cơ/điện tử & đồng hồ nước (`UtilityMeterOcrEngine`), tính điểm tin cậy OCR, engine phát hiện tiêu thụ bất thường (`UtilityAnomalyDetector`) gắn cờ chỉ số lùi, tăng vọt > 50% hoặc nhảy vọt cực đại > 2.5x so với mức trung bình kèm hộp thoại xác nhận và tab lọc bất thường cho Ban Quản Lý.
 - [x] **E2. AI Phân Loại Sự Cố & Tự Động Gán Kỹ Thuật Viên (Smart Issue Triage & Auto-Assignment):**
   - Engine ngữ nghĩa tiếng Việt `IssueSmartTriageEngine`: Nhận diện 6 chuyên môn kỹ thuật (`electrical`, `plumbing`, `elevator`, `fire_safety`, `construction`, `other`), tính toán độ tin cậy ngữ cảnh, phân biệt tinh tế giữa cháy bóng đèn thông thường (Điện - thường) và chập cháy nổ/khói khét (PCCC/Điện - khẩn cấp), nhận diện tình huống nguy hiểm khẩn cấp (`isHazardous`).
-  - Migration CSDL & RPC Auto-Assignment PostgreSQL (`20261103_04_issue_smart_triage_and_auto_assign.sql`):
+  - Migration CSDL & RPC Auto-Assignment PostgreSQL (`20261103040000_issue_smart_triage_and_auto_assign.sql`):
     - Bổ sung các cột AI Triage vào `issue_reports`: `ai_category_confidence`, `ai_suggested_category`, `ai_suggested_priority`, `ai_triage_reason`, `is_hazardous`, `auto_assigned`.
     - RPC `triage_and_auto_assign_issue(p_issue_id, p_auto_assign)`: Tự động phân loại sự cố và thực hiện phân bổ cân bằng tải (load-balancing) cho KTV phù hợp chuyên môn đang có ít sự cố mở nhất.
   - Tầng Dữ liệu & Repository:
@@ -296,7 +296,7 @@ graph TD
     - 17/17 unit & widget tests E2 tự động pass 100%.
     - Phân tích tĩnh `dart analyze` toàn bộ dự án đạt 0 issues.
 - [x] **E3. Dự Báo Nợ Xấu & Nhắc Nợ Thông Minh (Smart Debt Prediction & Multi-Tier Dunning Strategy):**
-  - Cơ sở dữ liệu & Phân tích định lượng (`20261104_03_debt_prediction_and_dunning.sql`):
+  - Cơ sở dữ liệu & Phân tích định lượng (`20261104030000_debt_prediction_and_dunning.sql`):
     - Bảng `debt_risk_scores`: Điểm rủi ro nợ xấu từ 0 đến 100 điểm, phân cấp rủi ro (`low`, `medium`, `high`), số ngày quá hạn, số tiền nợ, lịch sử nộp chậm, tầng đôn đốc đề xuất (`tier_1`, `tier_2`, `tier_3`), các yếu tố rủi ro JSONB (`risk_factors`), thiết lập RLS cách ly tenant theo `building_memberships`.
     - Bảng nhật ký `dunning_actions`: Lưu vết toàn bộ lịch sử đôn đốc nợ đa tầng của tòa nhà kèm người thực hiện, thời gian và trạng thái.
     - 3 RPCs PostgreSQL:

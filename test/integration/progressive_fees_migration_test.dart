@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Progressive Fees and Pro-rata Engine Migration Tests (20261029_04)', () {
     const migrationPath =
-        'supabase/migrations/20261029_04_progressive_fees_and_prorata_engine.sql';
+        'supabase/migrations/20261029040000_progressive_fees_and_prorata_engine.sql';
 
-    test('Migration file 20261029_04_progressive_fees_and_prorata_engine.sql must exist', () {
+    test('Migration file 20261029040000_progressive_fees_and_prorata_engine.sql must exist', () {
       final file = File(migrationPath);
       expect(file.existsSync(), isTrue, reason: 'Migration file must exist');
     });

@@ -29,7 +29,7 @@
 ### Task 2: Migration CSDL Làm Sạch Dữ Liệu Production & Tách Seed Data Ra `supabase/seed.sql`
 
 **Files:**
-- Create: `supabase/migrations/20261104_02_production_clean_seed_separation.sql`
+- Create: `supabase/migrations/20261104020000_production_clean_seed_separation.sql`
 - Create: `supabase/seed.sql`
 - Test: `test/database/seed_separation_migration_test.dart`
 
@@ -40,7 +40,7 @@
   - File `supabase/seed.sql` độc lập phục vụ local dev / demo.
 
 - [x] **Step 1: Viết test kiểm tra migration clean seed và file seed.sql** (`test/database/seed_separation_migration_test.dart`) (4/4 tests pass)
-- [x] **Step 2: Viết migration `20261104_02_production_clean_seed_separation.sql`**
+- [x] **Step 2: Viết migration `20261104020000_production_clean_seed_separation.sql`**
 - [x] **Step 3: Tạo file `supabase/seed.sql` độc lập**
 - [x] **Step 4: Chạy test xác minh**
 - [x] **Step 5: Commit trực tiếp vào `main`**: `f032fae`

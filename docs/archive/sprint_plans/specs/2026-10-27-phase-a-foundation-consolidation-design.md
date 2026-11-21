@@ -26,7 +26,7 @@ Sau quá trình phát triển nhanh theo phương pháp lặp (iterative sprints
 
 1. **A1 - Hợp nhất Database Schema:**
    - Di chuyển an toàn toàn bộ 58 file migration cũ vào `supabase/migrations_archive/` làm tài liệu tham chiếu lịch sử.
-   - Xây dựng một file migration baseline duy nhất: `supabase/migrations/20261027_01_baseline_schema.sql`.
+   - Xây dựng một file migration baseline duy nhất: `supabase/migrations/20261027010000_baseline_schema.sql`.
    - Đảm bảo file baseline chứa đầy đủ 100% thực thể: extensions, types/enums, tables, constraints, indexes, RLS policies, triggers, storage buckets và canonical RPC functions.
    - Mỗi RPC chỉ có **đúng 1 định nghĩa duy nhất** với chữ ký chuẩn xác và xử lý lỗi đồng nhất.
 2. **A2 - Chuẩn hóa Hợp đồng Client ↔ Server:**
@@ -38,7 +38,7 @@ Sau quá trình phát triển nhanh theo phương pháp lặp (iterative sprints
 
 ## 3. Thiết Kế Chi Tiết
 
-### 3.1. Cấu Trúc File Baseline Schema (`20261027_01_baseline_schema.sql`)
+### 3.1. Cấu Trúc File Baseline Schema (`20261027010000_baseline_schema.sql`)
 
 File baseline được tổ chức theo 9 khối logic độc lập, đảm bảo tính phụ thuộc một chiều:
 
@@ -197,7 +197,7 @@ File baseline được tổ chức theo 9 khối logic độc lập, đảm bả
 ## 4. Kế Hoạch Xác Minh & Tiêu Chuẩn Nghiệm Thu
 
 1. **Kiểm tra cú pháp Database:**
-   - Toàn bộ file baseline `20261027_01_baseline_schema.sql` có thể thực thi tuần tự từ trên xuống dưới mà không gặp bất kỳ lỗi phụ thuộc hoặc trùng lặp bảng/hàm nào.
+   - Toàn bộ file baseline `20261027010000_baseline_schema.sql` có thể thực thi tuần tự từ trên xuống dưới mà không gặp bất kỳ lỗi phụ thuộc hoặc trùng lặp bảng/hàm nào.
 2. **Kiểm tra chất lượng mã nguồn Flutter:**
    - `flutter analyze` đạt kết quả sạch (0 error).
 3. **Kiểm tra kiểm thử tích hợp (Integration Tests):**

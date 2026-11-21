@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261103_04_issue_smart_triage_and_auto_assign.sql', () {
+  group('Database Migration: 20261103040000_issue_smart_triage_and_auto_assign.sql', () {
     late String migrationSql;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261103_04_issue_smart_triage_and_auto_assign.sql');
+      final file = File('supabase/migrations/20261103040000_issue_smart_triage_and_auto_assign.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration file 20261103_04 phải tồn tại.');
       migrationSql = file.readAsStringSync();
     });

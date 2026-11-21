@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261107_02_digital_asset_handover_and_inspection.sql', () {
+  group('Database Migration: 20261107020000_digital_asset_handover_and_inspection.sql', () {
     late String migrationSql;
 
     setUpAll(() {
-      final file = File('supabase/migrations/20261107_02_digital_asset_handover_and_inspection.sql');
+      final file = File('supabase/migrations/20261107020000_digital_asset_handover_and_inspection.sql');
       expect(file.existsSync(), isTrue, reason: 'Migration file 20261107_02 phải tồn tại.');
       migrationSql = file.readAsStringSync();
     });

@@ -4,12 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Electronic Invoice & Lookup Engine Migration Tests (20261029_05)', () {
     const migrationPath =
-        'supabase/migrations/20261029_05_electronic_invoice_and_lookup_engine.sql';
+        'supabase/migrations/20261029050000_electronic_invoice_and_lookup_engine.sql';
 
-    test('Migration file 20261029_05_electronic_invoice_and_lookup_engine.sql must exist', () {
+    test('Migration file 20261029050000_electronic_invoice_and_lookup_engine.sql must exist', () {
       final file = File(migrationPath);
       expect(file.existsSync(), isTrue,
-          reason: 'Migration file 20261029_05_electronic_invoice_and_lookup_engine.sql must exist');
+          reason: 'Migration file 20261029050000_electronic_invoice_and_lookup_engine.sql must exist');
     });
 
     test('Migration adds lookup_code column to public.invoices with unique constraint and index', () {

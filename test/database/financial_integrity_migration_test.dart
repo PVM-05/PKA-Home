@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Kiểm tra Migration 20261104_01: Tính Toàn Vẹn Tài Chính & Sổ Quỹ', () {
-    const migrationPath = 'supabase/migrations/20261104_01_financial_integrity_and_real_payment.sql';
+    const migrationPath = 'supabase/migrations/20261104010000_financial_integrity_and_real_payment.sql';
 
     test('File migration phải tồn tại và không rỗng', () {
       final file = File(migrationPath);

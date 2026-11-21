@@ -18,7 +18,7 @@
 ### Task 1: Migration CSDL: Bảng Cấu Hình SePay Tòa Nhà & RPC `process_sepay_webhook`
 
 **Files:**
-- Create: `supabase/migrations/20261108_01_sepay_real_payment_and_webhook.sql`
+- Create: `supabase/migrations/20261108010000_sepay_real_payment_and_webhook.sql`
 - Test: `test/database/sepay_migration_test.dart`
 
 **Interfaces:**
@@ -31,11 +31,11 @@
 - [ ] **Step 2: Chạy test để xác nhận test thất bại**
   `flutter test test/database/sepay_migration_test.dart` (Fails vì chưa có file SQL).
 - [ ] **Step 3: Viết file migration SQL**
-  Tạo `supabase/migrations/20261108_01_sepay_real_payment_and_webhook.sql`.
+  Tạo `supabase/migrations/20261108010000_sepay_real_payment_and_webhook.sql`.
 - [ ] **Step 4: Chạy test để xác nhận test pass**
   `flutter test test/database/sepay_migration_test.dart` (Pass).
 - [ ] **Step 5: Commit lên nhánh main**
-  `git add supabase/migrations/20261108_01_sepay_real_payment_and_webhook.sql test/database/sepay_migration_test.dart`
+  `git add supabase/migrations/20261108010000_sepay_real_payment_and_webhook.sql test/database/sepay_migration_test.dart`
   `git commit -m "feat(db): migration bang cau hinh SePay va RPC process_sepay_webhook"`
 
 ---

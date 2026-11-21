@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Kiểm tra Migration 20261104_03: Dự Báo Nợ Xấu & Đôn Đốc Đa Tầng E3', () {
-    const migrationPath = 'supabase/migrations/20261104_03_debt_prediction_and_dunning.sql';
+    const migrationPath = 'supabase/migrations/20261104030000_debt_prediction_and_dunning.sql';
 
     test('File migration phải tồn tại và không rỗng', () {
       final file = File(migrationPath);

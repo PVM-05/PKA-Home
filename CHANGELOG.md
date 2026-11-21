@@ -15,9 +15,9 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
   - Tích hợp hàm kiểm tra `is_aal2_if_mfa_enrolled()` trực tiếp vào `public.is_staff_or_management()`, áp đặt bảo vệ cấp độ AAL2 cho toàn bộ các bảng dữ liệu Ban Quản Lý và RPCs ở tầng cơ sở dữ liệu.
 - **Khôi Phục Đầy Đủ Toàn Bộ 22/22 RPCs Nghiệp Vụ Cốt Lõi Từ Archive (§0)**:
   - Tách bạch cấu trúc migration không sửa đè file đã áp dụng:
-    - `20261120_01_security_hardening_auth_and_rls.sql`: Bảo tồn 10 RPCs đầu tiên và các trigger immutability.
-    - `20261120_02_align_enum_values.sql`: Migration chuyên biệt cô lập các câu lệnh `ALTER TYPE ... ADD VALUE IF NOT EXISTS` (`invoice_status`, `issue_status`, `user_role`, `vehicle_type`) trong một transaction riêng biệt không tham chiếu enum mới, loại trừ hoàn toàn lỗi `unsafe use of new value of enum type` trên Postgres 12+.
-    - `20261120_03_security_hardening_and_missing_rpcs.sql`: Khôi phục toàn diện 12 RPCs còn lại và 5 bảng nghiệp vụ, nâng tổng số RPCs khôi phục lên trọn vẹn 22/22 RPCs có lời gọi trực tiếp trong ứng dụng:
+    - `20261120010000_security_hardening_auth_and_rls.sql`: Bảo tồn 10 RPCs đầu tiên và các trigger immutability.
+    - `20261120020000_align_enum_values.sql`: Migration chuyên biệt cô lập các câu lệnh `ALTER TYPE ... ADD VALUE IF NOT EXISTS` (`invoice_status`, `issue_status`, `user_role`, `vehicle_type`) trong một transaction riêng biệt không tham chiếu enum mới, loại trừ hoàn toàn lỗi `unsafe use of new value of enum type` trên Postgres 12+.
+    - `20261120030000_security_hardening_and_missing_rpcs.sql`: Khôi phục toàn diện 12 RPCs còn lại và 5 bảng nghiệp vụ, nâng tổng số RPCs khôi phục lên trọn vẹn 22/22 RPCs có lời gọi trực tiếp trong ứng dụng:
       1. `generate_resident_activation_codes` (kèm alias `generate_bulk_resident_activations`)
       2. `get_financial_aging_report`: Phân tích tuổi nợ và dòng tiền (vá lỗi phân quyền chặn ẩn danh).
       3. `create_invoice_with_items`: Tạo hóa đơn kèm chi tiết ACID.
@@ -43,12 +43,12 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
       23. `get_upcoming_maintenance_equipments`: Tra cứu thiết bị sắp đến hạn bảo trì trong 7 ngày (gọi bởi `EquipmentRepository.getUpcomingMaintenanceEquipments`).
       24. `record_meter_reading`: Ghi nhận chỉ số điện nước ngoại tuyến / cá lẻ (gọi bởi `OfflineSyncManager`).
       *(Bao gồm 2 hàm hỗ trợ import batch: `import_apartments_batch`, `import_residents_batch`).*
-    - `20261120_04_patch_activation_and_staff_roles.sql`: Migration phòng vệ tiến trình mới (nâng tổng số lên 44 migration files), tái áp dụng nguyên tử các bản vá Blocker 1, 2, 3 và 3 RPCs mới, đảm bảo mọi môi trường (kể cả nơi đã áp dụng bản `20261120_03` cũ) đều tự động nhận đầy đủ bản sửa lỗi khi chạy migration.
+    - `20261120040000_patch_activation_and_staff_roles.sql`: Migration phòng vệ tiến trình mới (nâng tổng số lên 44 migration files), tái áp dụng nguyên tử các bản vá Blocker 1, 2, 3 và 3 RPCs mới, đảm bảo mọi môi trường (kể cả nơi đã áp dụng bản `20261120_03` cũ) đều tự động nhận đầy đủ bản sửa lỗi khi chạy migration.
   - Bộ kiểm thử hồi quy tự động khóa chặt các lỗi triển khai: Bổ sung 5 test case trong `test/data/migrations/p0_security_migration_content_test.dart` (nâng số test từ 11 lên 16), tự động kiểm tra tĩnh nội dung file migration: cấm enum `'manager'`, ép buộc dùng `code_attempts`, cấm `failed_attempts`, ép buộc gán `status = 'otp_sent'`, xác nhận đầy đủ 3 RPCs mới và guard cho fresh database.
   - Khởi tạo 5 bảng còn thiếu: `emergency_contacts`, `building_rules`, `role_change_log`, `issue_ratings`, `building_equipments` (mở rộng đầy đủ các trường `building`, `warranty_until`, `maintenance_interval_days`, `last_maintenance_date`, `next_maintenance_date`, `specifications` tương thích `BuildingEquipmentModel`) kèm RLS policies và index hiệu năng.
   - Sửa lỗi tương thích migration trên fresh database:
-    - Bọc lệnh `TRUNCATE TABLE public.issue_ratings CASCADE` và `INSERT INTO public._applied_migrations` trong `20261106_01_cleanup_dead_tables_and_seed_data.sql` với điều kiện kiểm tra tồn tại bảng `to_regclass`.
-    - Bọc các lệnh `ALTER COLUMN target_table/id` và `transaction_code/type/user_id` trong `20261114_01_secure_bank_webhook_and_vnpay.sql` bằng kiểm tra tồn tại cột `information_schema.columns`.
+    - Bọc lệnh `TRUNCATE TABLE public.issue_ratings CASCADE` và `INSERT INTO public._applied_migrations` trong `20261106010000_cleanup_dead_tables_and_seed_data.sql` với điều kiện kiểm tra tồn tại bảng `to_regclass`.
+    - Bọc các lệnh `ALTER COLUMN target_table/id` và `transaction_code/type/user_id` trong `20261114010000_secure_bank_webhook_and_vnpay.sql` bằng kiểm tra tồn tại cột `information_schema.columns`.
 
 ### Đã sửa (Fixed) - Vá Lỗ Hổng Bảo Mật Nghiêm Trọng (C1 - C5) & Hoàn Thiện UI/Dark Mode (P1-1, P1-2, P1-9, P1-14)
 - **Khắc Phục 3 Điểm Nghẽn Triển Khai Cơ Sở Dữ Liệu (Deployment Blockers)**:

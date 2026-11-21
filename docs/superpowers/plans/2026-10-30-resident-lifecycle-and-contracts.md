@@ -11,11 +11,11 @@
 ### [x] Task 1: Migration SQL & Schema Tests
 - **Mục tiêu:** Tạo migration PostgreSQL bổ sung các cột hợp đồng vào `residents_apartments`, tạo bảng `apartment_invitations`, và các RPCs `create_apartment_invitation`, `accept_apartment_invitation`, `terminate_resident_stay`.
 - **Files:**
-  - `supabase/migrations/20261030_04_resident_lifecycle_and_contracts.sql`
+  - `supabase/migrations/20261030040000_resident_lifecycle_and_contracts.sql`
   - `test/integration/resident_lifecycle_migration_test.dart`
 - **Các bước:**
   1. Viết failing integration test `test/integration/resident_lifecycle_migration_test.dart`.
-  2. Tạo migration `20261030_04_resident_lifecycle_and_contracts.sql`.
+  2. Tạo migration `20261030040000_resident_lifecycle_and_contracts.sql`.
   3. Chạy test `resident_lifecycle_migration_test.dart` -> PASS.
   4. Commit: `feat(db): migration sql quan ly hop dong va ma moi cu dan D1`.
 

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Maintenance Fund Ledger Migration Tests', () {
     final migrationFile =
-        File('supabase/migrations/20261027_05_maintenance_fund_ledger.sql');
+        File('supabase/migrations/20261027050000_maintenance_fund_ledger.sql');
 
     test('Migration file exists and contains necessary DDL & RPC', () {
       expect(migrationFile.existsSync(), isTrue);

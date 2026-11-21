@@ -3,11 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Task 1: Kiem tra Migration SQL Canh Bao SLA & Kho Vat Tu Su Co D3', () {
-    const migrationPath = 'supabase/migrations/20261102_02_issue_sla_and_materials.sql';
+    const migrationPath = 'supabase/migrations/20261102020000_issue_sla_and_materials.sql';
 
     test('1. Tập tin migration 20261102_02 phải tồn tại', () {
       final file = File(migrationPath);
-      expect(file.existsSync(), isTrue, reason: 'Migration file 20261102_02_issue_sla_and_materials.sql phải tồn tại');
+      expect(file.existsSync(), isTrue, reason: 'Migration file 20261102020000_issue_sla_and_materials.sql phải tồn tại');
     });
 
     test('2. Migration phải mở rộng bảng issue_reports với các cột SLA và category', () {

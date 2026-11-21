@@ -2,15 +2,15 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('Database Migration: 20261108_03_utility_billing_engine.sql', () {
+  group('Database Migration: 20261108030000_utility_billing_engine.sql', () {
     late String sqlContent;
-    final migrationFile = File('supabase/migrations/20261108_03_utility_billing_engine.sql');
+    final migrationFile = File('supabase/migrations/20261108030000_utility_billing_engine.sql');
 
     setUpAll(() {
       expect(
         migrationFile.existsSync(),
         isTrue,
-        reason: 'Tệp migration 20261108_03_utility_billing_engine.sql phải tồn tại',
+        reason: 'Tệp migration 20261108030000_utility_billing_engine.sql phải tồn tại',
       );
       sqlContent = migrationFile.readAsStringSync();
     });
