@@ -87,11 +87,11 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: (daysUntilDueDate < 0)
-                                ? Colors.red.shade900.withValues(alpha: 0.5)
+                                ? AppTheme.error.withValues(alpha: 0.85)
                                 : Colors.white.withValues(alpha: 0.2),
                             borderRadius: AppRadius.r20,
                             border: (daysUntilDueDate < 0)
-                                ? Border.all(color: Colors.red.shade300, width: 1)
+                                ? Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1)
                                 : null,
                           ),
                           child: Row(
@@ -121,7 +121,7 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                         ),
                         Flexible(
                           child: Text(
-                            '( $unpaidCount hóa đơn chưa thanh toán )',
+                            '$unpaidCount hóa đơn chưa thanh toán',
                             overflow: TextOverflow.ellipsis,
                             style: textTheme.bodySmall?.copyWith(
                               color: Colors.white70,
@@ -176,6 +176,7 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                             backgroundColor: Colors.white,
                             foregroundColor: AppTheme.sapphire,
                             elevation: 0,
+                            minimumSize: const Size(0, 48),
                             padding: AppSpacing.py12,
                             shape: AppRadius.shape12,
                           ),
@@ -246,7 +247,7 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                   Text(
                     'Căn hộ của bạn không có hóa đơn quá hạn hoặc đang chờ đối soát.',
                     style: textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -260,6 +261,7 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
                       padding: AppSpacing.py12,
                       shape: AppRadius.shape12,
                     ),

@@ -405,11 +405,10 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                       unreadNotificationsCountProvider,
                                     );
                                     return IconButton(
-                                      visualDensity: VisualDensity.compact,
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(
-                                        minWidth: 36,
-                                        minHeight: 36,
+                                        minWidth: 48,
+                                        minHeight: 48,
                                       ),
                                       icon: Badge(
                                         isLabelVisible: unreadCount > 0,

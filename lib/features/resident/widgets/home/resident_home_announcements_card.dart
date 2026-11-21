@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:vivona/core/router/route_names.dart';
 import 'package:vivona/core/theme/app_radius.dart';
 import 'package:vivona/core/theme/app_spacing.dart';
-import 'package:vivona/core/theme/app_theme.dart';
 import 'package:vivona/core/widgets/app_card.dart';
 import 'package:vivona/core/widgets/app_error_card.dart';
 import 'package:vivona/core/widgets/app_skeleton_shimmer.dart';
@@ -59,10 +58,12 @@ class ResidentHomeAnnouncementsCard extends StatelessWidget {
             if (announcements.isEmpty) {
               return AppCard(
                 padding: AppSpacing.p16,
-                child: const Center(
+                child: Center(
                   child: Text(
                     'Không có thông báo nào.',
-                    style: TextStyle(color: AppTheme.textSecondary),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               );

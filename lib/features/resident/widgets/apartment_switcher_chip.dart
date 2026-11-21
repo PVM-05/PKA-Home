@@ -38,7 +38,7 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: Theme.of(ctx).colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -86,12 +86,14 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? AppTheme.primary.withValues(alpha: 0.15)
-                                : Colors.grey.shade100,
+                                : Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
                             Icons.apartment,
-                            color: isSelected ? AppTheme.primary : Colors.grey.shade600,
+                            color: isSelected
+                                ? AppTheme.primary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
                             size: 22,
                           ),
                         ),
@@ -108,7 +110,10 @@ class ApartmentSwitcherChip extends ConsumerWidget {
                         ),
                         trailing: isSelected
                             ? const Icon(Icons.check_circle, color: AppTheme.primary)
-                            : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                            : Icon(
+                                Icons.radio_button_unchecked,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                         onTap: () {
                           ref
                               .read(selectedApartmentIdProvider.notifier)

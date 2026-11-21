@@ -74,7 +74,7 @@ class ResidentHomeLatestIssueCard extends StatelessWidget {
                           Text(
                             'Không có phản ánh nào gần đây.',
                             style: textTheme.bodySmall?.copyWith(
-                              color: AppTheme.textSecondary,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -129,9 +129,9 @@ class ResidentHomeLatestIssueCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.chevron_right,
-                  color: AppTheme.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 onTap: onNavigateToIssues,
               ),

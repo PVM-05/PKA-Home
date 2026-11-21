@@ -1,8 +1,8 @@
-# Kế Hoạch Tổng Thể Nâng Cấp 65 Màn Hình Vivona Theo Mobbin
+# Kế Hoạch Tổng Thể Nâng Cấp 65 Màn Hình Vivona (`impeccable` + `thiet-ke-giao-dien`)
 
 > **Ngày lập:** 21/11/2026  
 > **Định vị sản phẩm:** Vivona — Commercial Production B2B SaaS & PropTech Platform.  
-> **Nguyên tắc tối thượng:** Lấy **cấu trúc & luồng tương tác** từ các ứng dụng thực tế trên Mobbin, triển khai 100% trong **Design System của Vivona** (`AppTheme` WCAG AA Light/Dark, 30+ M3 ColorScheme roles, font Inter đóng gói offline, 100% tiếng Việt chuẩn mực, không Emoji, vùng chạm $\ge 48\text{dp}$). Không sao chép màu sắc/font chữ hay cắt bỏ nghiệp vụ hiện có.
+> **Nguyên tắc tối thượng:** Nâng cấp toàn bộ 65 màn hình theo chuẩn **Design System của Vivona** (`AppTheme` WCAG AA Light/Dark, 30+ M3 ColorScheme roles, font Inter đóng gói offline, 100% tiếng Việt chuẩn mực, không Emoji, vùng chạm $\ge 48\text{dp}$), áp dụng bộ quy chuẩn **Impeccable** + **Thiết kế Giao diện Vivona**. Không cắt bỏ nghiệp vụ hiện có.
 
 ---
 
@@ -10,7 +10,7 @@
 
 1. **Mỗi lượt xử lý đúng 1 màn hình** (tối đa 5 vấn đề ưu tiên/lượt).
 2. **Preserve list cố định:** Giữ nguyên nghiệp vụ, phân quyền RBAC, trạng thái dữ liệu, tên trường tiếng Việt và toàn bộ kiểm thử đang pass.
-3. **1 hướng kiến trúc thống nhất từ Mobbin:** Không chắp vá nửa hướng này, nửa hướng kia; mọi thay đổi trong bảng Move table phải có `mobbin_url` đối chiếu.
+3. **1 hướng kiến trúc thống nhất:** Tập trung vào phân cấp thị giác rõ ràng, độ tương phản WCAG AA, vùng chạm $\ge 48\text{dp}$ và khả năng co giãn 320dp–1440dp.
 4. **Dọn nợ kỹ thuật song song:** Với file $>1.200$ dòng, tách widget con theo trách nhiệm; loại bỏ màu cứng phá vỡ Dark Mode; ưu tiên widget lõi (`AppCard`, `AppSearchField`, `AppTextField`, `AppFormScaffold`, `AppEmptyState`, `AppSkeletonShimmer`, `AppUnsavedChangesGuard`).
 5. **Cổng nghiệm thu trước khi merge mỗi Đợt vào `main`:**
    - `dart analyze` = **0 lỗi, 0 cảnh báo**
@@ -23,7 +23,7 @@
 
 *Ưu tiên số 1: Tác động trực tiếp đến 100% cư dân hàng ngày và tỷ lệ thu phí đúng hạn.*
 
-- [ ] **1.1** `lib/features/resident/screens/resident_home_screen.dart` *(Tier 1)* — Trang chủ Cư dân (phân cấp thẻ hóa đơn đến hạn, nhịp lưới dịch vụ, biểu đồ điện nước)
+- [x] **1.1** `lib/features/resident/screens/resident_home_screen.dart` *(Tier 1)* — Trang chủ Cư dân (phân cấp thẻ hóa đơn đến hạn, nhịp lưới dịch vụ, biểu đồ điện nước)
 - [ ] **1.2** `lib/features/resident/screens/resident_invoice_screen.dart` *(Tier 1)* — Danh sách Hóa đơn & Tab Giao dịch VietQR
 - [ ] **1.3** `lib/features/resident/screens/resident_invoice_detail_screen.dart` *(Tier 1)* — Chi tiết Hóa đơn & sao kê khoản phí *(+ tách widget bảng kê)*
 - [ ] **1.4** `lib/core/widgets/unified_payment_sheet.dart` *(Tier 1)* — Cổng thanh toán VietQR / VNPay *(+ dọn ~40 màu cứng & tách bước)*
