@@ -5,6 +5,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/widgets/app_unsaved_changes_guard.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -22,8 +23,25 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
+  bool get _hasUnsavedChanges =>
+      _passwordController.text.isNotEmpty ||
+      _confirmPasswordController.text.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_onInputChanged);
+    _confirmPasswordController.addListener(_onInputChanged);
+  }
+
+  void _onInputChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    _passwordController.removeListener(_onInputChanged);
+    _confirmPasswordController.removeListener(_onInputChanged);
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -54,10 +72,12 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Đổi mật khẩu'),
-      ),
+    return AppUnsavedChangesGuard(
+      hasUnsavedChanges: _hasUnsavedChanges && !_isLoading,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Đổi mật khẩu'),
+        ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -171,6 +191,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

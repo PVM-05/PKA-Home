@@ -118,14 +118,16 @@ void main() {
       expect(find.textContaining('3.302'), findsWidgets);
 
       // Nhấn mở chính sách Nước sinh hoạt
+      final waterTile = find.byKey(const Key('policy_tile_water'));
       await tester.scrollUntilVisible(
-        find.byKey(const Key('policy_tile_water')),
+        waterTile,
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      final waterTile = find.byKey(const Key('policy_tile_water'));
+      await tester.ensureVisible(waterTile);
+      await tester.pumpAndSettle();
       expect(waterTile, findsOneWidget);
-      await tester.tap(waterTile);
+      await tester.tap(find.textContaining('Nước sinh hoạt định mức').first);
       await tester.pumpAndSettle();
 
       // Cuộn để thấy chi tiết nếu cần
@@ -148,7 +150,7 @@ void main() {
 
       // Xác nhận sheet đã mở
       expect(find.byType(QuickFeeCalculatorSheet), findsOneWidget);
-      expect(find.text('Công Cụ Tính Nhanh Biểu Phí'), findsOneWidget);
+      expect(find.text('Công cụ tính nhanh biểu phí'), findsOneWidget);
 
       // Kiểm tra các tab chuyển đổi
       expect(find.text('Điện EVN'), findsWidgets);

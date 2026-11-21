@@ -107,7 +107,7 @@ void main() {
     expect(mockRepo.validateCalled, isTrue);
 
     // 3. Kiem tra Step 2 (Ket qua tien kiem tra)
-    expect(find.text('Kết Quả Tiền Kiểm Tra'), findsOneWidget);
+    expect(find.text('Kết quả tiền kiểm tra'), findsOneWidget);
     expect(find.text('270 Hợp lệ'), findsOneWidget);
     expect(find.text('8 Thiếu số'), findsOneWidget);
     expect(find.text('2 Bất thường'), findsOneWidget);

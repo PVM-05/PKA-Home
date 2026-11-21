@@ -39,6 +39,8 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
 ) async {
   final client = SupabaseConfig.client;
   List<AuditLogItem> logs = [];
+  int failedSources = 0;
+  Object? lastError;
 
   // 1. Truy vấn nhật ký kiểm toán bất biến (Primary Immutable Audit Logs)
   try {
@@ -84,7 +86,11 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         ),
       );
     }
-  } catch (_) {}
+  } catch (e) {
+    failedSources++;
+    lastError = e;
+    debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
+  }
 
   // 2. Fetch Invoices (Fallback / Bổ trợ cho dữ liệu lịch sử)
   try {
@@ -123,7 +129,11 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         ),
       );
     }
-  } catch (_) {}
+  } catch (e) {
+    failedSources++;
+    lastError = e;
+    debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
+  }
 
   // 2. Fetch Issues
   try {
@@ -165,7 +175,11 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         ),
       );
     }
-  } catch (_) {}
+  } catch (e) {
+    failedSources++;
+    lastError = e;
+    debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
+  }
 
   // 3. Fetch Link Requests
   try {
@@ -208,7 +222,11 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         ),
       );
     }
-  } catch (_) {}
+  } catch (e) {
+    failedSources++;
+    lastError = e;
+    debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
+  }
 
   // 4. Fetch Role Change Logs
   try {
@@ -242,7 +260,11 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         ),
       );
     }
-  } catch (_) {}
+  } catch (e) {
+    failedSources++;
+    lastError = e;
+    debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
+  }
 
   // 5. Fetch Role Delegations
   try {
@@ -268,14 +290,23 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
           subtitle: '$delegatorName ➔ $delegateName',
           updatedAt: DateTime.parse(row['created_at']).toLocal(),
           icon: Icons.vpn_key_outlined,
-          color: Colors.purple,
+          color: AppTheme.secondary,
           category: 'rbac',
           changedBy: row['delegator_id'] as String?,
           performerName: delegatorName,
         ),
       );
     }
-  } catch (_) {}
+  } catch (e) {
+    failedSources++;
+    lastError = e;
+    debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
+  }
+
+  // Nếu tất cả nguồn dữ liệu đều thất bại, trả lỗi về UI thay vì hiển thị danh sách rỗng
+  if (logs.isEmpty && failedSources >= 6 && lastError != null) {
+    throw Exception('Không thể tải nhật ký hoạt động. Vui lòng thử lại.');
+  }
 
   // Sắp xếp theo thời gian mới nhất
   logs.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));

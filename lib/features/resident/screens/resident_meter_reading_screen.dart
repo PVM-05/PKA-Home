@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_unsaved_changes_guard.dart';
 
 import '../../../core/widgets/app_error_card.dart';
 
@@ -641,14 +642,22 @@ class _ResidentMeterReadingScreenState
     }
   }
 
+  bool get _hasUnsavedChanges =>
+      _electricController.text.trim().isNotEmpty ||
+      _waterController.text.trim().isNotEmpty ||
+      _electricImagePath != null ||
+      _waterImagePath != null;
+
   @override
   Widget build(BuildContext context) {
     final aptReadingsAsync = ref.watch(currentApartmentReadingsProvider);
 
     final historyAsync = ref.watch(residentMeterReadingsProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Khai Báo Chỉ Số Điện Nước')),
+    return AppUnsavedChangesGuard(
+      hasUnsavedChanges: _hasUnsavedChanges && !_isSubmitting,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Khai Báo Chỉ Số Điện Nước')),
 
       body: aptReadingsAsync.when(
         data: (aptData) {
@@ -838,6 +847,7 @@ class _ResidentMeterReadingScreenState
           ],
         ),
         error: (e, _) => Center(child: AppErrorCard(error: e)),
+      ),
       ),
     );
   }

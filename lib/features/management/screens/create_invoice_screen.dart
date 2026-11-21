@@ -619,7 +619,15 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     _carQtyController.text =
                         cars > 0 ? cars.toString() : '';
                     if (mounted) setState(() {});
-                  } catch (_) {}
+                  } catch (e) {
+                    debugPrint('Không thể tự động tải số lượng xe căn hộ ${val.code}: $e');
+                    if (mounted) {
+                      AppSnackBar.showWarning(
+                        context,
+                        'Không thể tự động nạp số lượng xe của căn hộ ${val.code}. Vui lòng nhập thủ công nếu cần.',
+                      );
+                    }
+                  }
                 }
               },
               validator: (val) =>
