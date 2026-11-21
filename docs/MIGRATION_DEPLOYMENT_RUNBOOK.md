@@ -1,7 +1,7 @@
 # Vivona — Kịch Bản Kiểm Thử & Triển Khai Push Migration An Toàn
 ## (Staging Trước, Production Sau — Chuẩn Bị Ngày 21/11/2026)
 
-> **MÃ NGUỒN KIỂM CHỨNG:** Git commit `3df3b2b` (Nhánh `main`)  
+> **MÃ NGUỒN KIỂM CHỨNG:** Git commit `6cd75d0` (Nhánh `main`)  
 > **QUY MÔ MIGRATION:** 44 tệp migration đã chuẩn hóa timestamp 14 chữ số duy nhất (`YYYYMMDDHH0000`)  
 > **DỰ ÁN ĐÍCH (REMOTE):** `Ứng Dụng Quản Lý Chung Cư` (Project Ref: `vpgimjyyechhuofjghsb`) — Environment: `production`  
 > **MỤC ĐÍCH TÀI LIỆU:** Cung cấp quy trình vận hành tiêu chuẩn (SOP Runbook) cho Kỹ sư Vận hành / Agent Triển khai đưa toàn bộ các bản vá bảo mật (C1–C5), 22 RPCs cốt lõi (§0) và cấu trúc dữ liệu mới lên cơ sở dữ liệu thực tế mà không gây gián đoạn dịch vụ hoặc xung đột dữ liệu.
@@ -322,4 +322,4 @@ Xác nhận lại: Gọi `verify_activation_code` trên môi trường Productio
 | 9 | [Tiêu chí 5] `system_runtime_config` môi trường | [x] | `environment: 'production'` (Fail-safe mặc định) | **ĐÃ HOÀN TẤT** |
 | 10 | [Tiêu chí 6] Chặn quyền ẩn danh (anon) trên báo cáo | [x] | `anon_can_access: false` trên `get_financial_aging_report` | **ĐÃ HOÀN TẤT** |
 | 11 | [Tiêu chí 7] Hàm phân quyền `is_staff_or_management` | [x] | Cổng MFA AAL2 hoạt động, cấm anon, không còn chuỗi `'manager'` | **ĐÃ HOÀN TẤT** |
-| 12 | [Tiêu chí 8] Trigger toàn vẹn hóa đơn | [x] | 9 triggers hoạt động chuẩn (`tgenabled: 'O'`) | **ĐÃ HOÀN TẤT** |
+| 12 | [Tiêu chí 8] Test UPDATE bọc ROLLBACK | [x] | UPDATE trả về `{id: 'c000...0001', status: 'paid'}` thành công, trigger không chặn sai, ROLLBACK hoàn nguyên 100% | **ĐÃ HOÀN TẤT** |
