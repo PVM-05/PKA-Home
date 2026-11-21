@@ -1,23 +1,26 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../../core/supabase_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
-import '../../../core/widgets/app_snack_bar.dart';
-import '../../../core/supabase_config.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_form_scaffold.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_storage_image.dart';
-import '../../../core/widgets/app_unsaved_changes_guard.dart';
+import '../../../core/widgets/app_text_field.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/providers/resident_issue_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
 
 /// Màn hình chỉnh sửa phản ánh sự cố cư dân.
-/// Hỗ trợ chuẩn B2B SaaS Impeccable Taste:
+/// Hỗ trợ chuẩn B2B SaaS:
 /// - Desktop (>= 900dp): Giới hạn độ rộng biểu mẫu maxWidth: 720dp, căn giữa thanh lịch.
-/// - Mobile (< 900dp): Thẻ AppCard viền mỏng mờ, chống tràn 100% trên 320dp (Text Zoom 1.3x).
+/// - Mobile (< 900dp): Thẻ AppCard viền mỏng, Sticky CTA 48dp, chống tràn 100% trên 320dp (Text Zoom 1.3x).
 class EditIssueScreen extends ConsumerStatefulWidget {
   final IssueModel issue;
 
@@ -107,80 +110,87 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
       return;
     }
 
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.add_photo_alternate_outlined,
-                      color: AppTheme.primary,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Chọn nguồn hình ảnh',
-                      style: ctx.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.add_photo_alternate_outlined,
+                        color: colorScheme.primary,
+                        size: 22,
                       ),
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Chọn nguồn hình ảnh',
+                        style: ctx.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                ListTile(
+                  leading: Icon(
+                    Icons.camera_alt_outlined,
+                    color: colorScheme.primary,
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Divider(),
-              ListTile(
-                leading: const Icon(
-                  Icons.camera_alt_outlined,
-                  color: AppTheme.primary,
+                  title: const Text(
+                    'Chụp ảnh mới',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    'Sử dụng máy ảnh thiết bị để chụp hiện trường',
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.camera);
+                  },
                 ),
-                title: const Text(
-                  'Chụp ảnh mới',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                ListTile(
+                  leading: Icon(
+                    Icons.photo_library_outlined,
+                    color: colorScheme.primary,
+                  ),
+                  title: const Text(
+                    'Chọn từ thư viện ảnh',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    'Tải ảnh đã lưu từ bộ sưu tập của bạn',
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pickImage(ImageSource.gallery);
+                  },
                 ),
-                subtitle: const Text('Sử dụng máy ảnh thiết bị để chụp hiện trường'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.photo_library_outlined,
-                  color: AppTheme.primary,
-                ),
-                title: const Text(
-                  'Chọn từ thư viện ảnh',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: const Text('Tải ảnh đã lưu từ bộ sưu tập của bạn'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -231,37 +241,91 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppUnsavedChangesGuard(
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final semanticWarning = AppTheme.getSemanticWarning(context);
+    final countBadgeColor = _totalImageCount >= 3
+        ? semanticWarning
+        : colorScheme.primary;
+
+    return AppFormScaffold(
+      title: 'Chỉnh sửa phản ánh',
       hasUnsavedChanges: _hasUnsavedChanges,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Chỉnh sửa phản ánh'),
-        ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      primaryButtonLabel: 'Lưu thay đổi',
+      onPrimaryPressed: _submitUpdate,
+      isPrimaryLoading: _isLoading,
+      maxWidth: 720,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Khối 1: Thẻ mô tả sự cố
+          AppCard(
+            padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Khối 1: Thẻ mô tả sự cố
-                AppCard(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                Row(
+                  children: [
+                    Icon(
+                      Icons.description_outlined,
+                      size: 20,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Mô tả sự cố',
+                        style: context.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Cung cấp thông tin chi tiết giúp đội ngũ kỹ thuật xử lý nhanh chóng.',
+                  style: context.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: _descriptionController,
+                  maxLines: 5,
+                  minLines: 4,
+                  hintText: 'Nhập chi tiết về sự cố bạn đang gặp phải...',
+                  onChanged: (_) => setState(() {}),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Khối 2: Thẻ hình ảnh đính kèm
+          AppCard(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
                         children: [
-                          const Icon(
-                            Icons.description_outlined,
+                          Icon(
+                            Icons.photo_library_outlined,
                             size: 20,
-                            color: AppTheme.primary,
+                            color: colorScheme.primary,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Mô tả sự cố',
+                              'Hình ảnh đính kèm',
                               style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -270,275 +334,182 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Cung cấp thông tin chi tiết giúp đội ngũ kỹ thuật xử lý nhanh chóng.',
-                        style: context.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: countBadgeColor.withValues(
+                          alpha: isDark ? 0.2 : 0.1,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '$_totalImageCount/3 ảnh',
+                        style: context.labelSmall?.copyWith(
+                          color: countBadgeColor,
+                          fontWeight: FontWeight.bold,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _descriptionController,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập chi tiết về sự cố bạn đang gặp phải...',
-                          filled: true,
-                          fillColor: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white10
-                              : Colors.grey.shade50,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppTheme.primary,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Hình ảnh chụp trực tiếp tại hiện trường giúp thẩm định chính xác sự cố.',
+                  style: context.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                // Khối 2: Thẻ hình ảnh đính kèm
-                AppCard(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Grid hiển thị ảnh hiện có + ảnh mới + nút thêm
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    // 1. Ảnh hiện có từ Server
+                    ..._existingImages.map((imageUrl) {
+                      return Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.photo_library_outlined,
-                                  size: 20,
-                                  color: AppTheme.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Hình ảnh đính kèm',
-                                    style: context.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          AppStorageImage(
+                            imageUrl: imageUrl,
+                            width: 104,
+                            height: 104,
+                            fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _totalImageCount >= 3
-                                  ? AppTheme.warning.withValues(alpha: 0.1)
-                                  : AppTheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '$_totalImageCount/3 ảnh',
-                              style: context.labelSmall?.copyWith(
-                                color: _totalImageCount >= 3
-                                    ? Colors.orange.shade800
-                                    : AppTheme.primary,
-                                fontWeight: FontWeight.bold,
+                          Positioned(
+                            top: -6,
+                            right: -6,
+                            child: IconButton(
+                              tooltip: 'Xóa ảnh',
+                              constraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Hình ảnh chụp trực tiếp tại hiện trường giúp thẩm định chính xác sự cố.',
-                        style: context.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-
-                      // Grid hiển thị ảnh hiện có + ảnh mới + nút thêm
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          // 1. Ảnh hiện có từ Server
-                          ..._existingImages.map((imageUrl) {
-                            return Stack(
-                              children: [
-                                AppStorageImage(
-                                  imageUrl: imageUrl,
-                                  width: 104,
-                                  height: 104,
-                                  fit: BoxFit.cover,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                Positioned(
-                                  top: 6,
-                                  right: 6,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _existingImages.remove(imageUrl);
-                                        _removedImageUrls.add(imageUrl);
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.65),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        size: 14,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }),
-
-                          // 2. Ảnh mới thêm từ máy
-                          ..._newImageFiles.map((file) {
-                            return Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    file,
-                                    width: 104,
-                                    height: 104,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 6,
-                                  right: 6,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _newImageFiles.remove(file);
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.65),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        size: 14,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }),
-
-                          // 3. Nút thêm ảnh nếu chưa đủ 3
-                          if (_totalImageCount < 3)
-                            InkWell(
-                              onTap: _showImageSourceDialog,
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                width: 104,
-                                height: 104,
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                setState(() {
+                                  _existingImages.remove(imageUrl);
+                                  _removedImageUrls.add(imageUrl);
+                                });
+                              },
+                              icon: Container(
+                                padding: const EdgeInsets.all(5),
                                 decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: AppTheme.primary.withValues(alpha: 0.4),
-                                    style: BorderStyle.solid,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: AppTheme.primary.withValues(alpha: 0.04),
+                                  color: Colors.black.withValues(alpha: 0.72),
+                                  shape: BoxShape.circle,
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.add_a_photo_outlined,
-                                      color: AppTheme.primary,
-                                      size: 28,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      'Thêm ảnh',
-                                      style: context.labelSmall?.copyWith(
-                                        color: AppTheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 14,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
+                          ),
                         ],
-                      ),
-                    ],
-                  ),
-                ),
+                      );
+                    }),
 
-                const SizedBox(height: 32),
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _submitUpdate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    icon: _isLoading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                    // 2. Ảnh mới thêm từ máy
+                    ..._newImageFiles.map((file) {
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              file,
+                              width: 104,
+                              height: 104,
+                              fit: BoxFit.cover,
                             ),
-                          )
-                        : const Icon(Icons.check, size: 20),
-                    label: Text(
-                      'Lưu thay đổi',
-                      style: context.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                          ),
+                          Positioned(
+                            top: -6,
+                            right: -6,
+                            child: IconButton(
+                              tooltip: 'Xóa ảnh',
+                              constraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                setState(() {
+                                  _newImageFiles.remove(file);
+                                });
+                              },
+                              icon: Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.72),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+
+                    // 3. Nút thêm ảnh nếu chưa đủ 3
+                    if (_totalImageCount < 3)
+                      InkWell(
+                        onTap: _showImageSourceDialog,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 104,
+                          height: 104,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: colorScheme.primary.withValues(alpha: 0.45),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            color: colorScheme.primary.withValues(
+                              alpha: isDark ? 0.12 : 0.04,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo_outlined,
+                                color: colorScheme.primary,
+                                size: 28,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Thêm ảnh',
+                                style: context.labelSmall?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 16),
+        ],
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -14,6 +14,7 @@ class AppFormScaffold extends StatelessWidget {
   final Widget body;
   final bool hasUnsavedChanges;
   final String primaryButtonLabel;
+  final Key? primaryButtonKey;
   final VoidCallback? onPrimaryPressed;
   final bool isPrimaryLoading;
   final String? secondaryButtonLabel;
@@ -23,6 +24,8 @@ class AppFormScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final bool isScrollable;
   final EdgeInsetsGeometry padding;
+  final ScrollController? scrollController;
+  final double? maxWidth;
 
   const AppFormScaffold({
     super.key,
@@ -30,6 +33,7 @@ class AppFormScaffold extends StatelessWidget {
     required this.body,
     this.hasUnsavedChanges = false,
     required this.primaryButtonLabel,
+    this.primaryButtonKey,
     required this.onPrimaryPressed,
     this.isPrimaryLoading = false,
     this.secondaryButtonLabel,
@@ -39,6 +43,8 @@ class AppFormScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.isScrollable = true,
     this.padding = const EdgeInsets.all(16.0),
+    this.scrollController,
+    this.maxWidth,
   });
 
   @override
@@ -46,13 +52,24 @@ class AppFormScaffold extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    Widget innerBody = body;
+    if (maxWidth != null) {
+      innerBody = Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth!),
+          child: body,
+        ),
+      );
+    }
+
     Widget content = isScrollable
         ? SingleChildScrollView(
+            controller: scrollController,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: padding,
-            child: body,
+            child: innerBody,
           )
-        : Padding(padding: padding, child: body);
+        : Padding(padding: padding, child: innerBody);
 
     final scaffold = Scaffold(
       appBar: AppBar(
@@ -84,6 +101,85 @@ class AppFormScaffold extends StatelessWidget {
   }
 
   Widget _buildStickyFooter(BuildContext context, ColorScheme colorScheme) {
+    final theme = Theme.of(context);
+    Widget buttonRow = Row(
+      children: [
+        if (secondaryButtonLabel != null && onSecondaryPressed != null) ...[
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: AppRadius.shape12,
+                  side: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                onPressed: isPrimaryLoading ? null : onSecondaryPressed,
+                child: Text(
+                  secondaryButtonLabel!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
+          AppSpacing.w12,
+        ],
+        Expanded(
+          flex: 2,
+          child: SizedBox(
+            height: 48,
+            child: Bounceable(
+              onTap: (isPrimaryLoading || onPrimaryPressed == null)
+                  ? () {}
+                  : onPrimaryPressed!,
+              child: ElevatedButton(
+                key: primaryButtonKey,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  shape: AppRadius.shape12,
+                  elevation: 0,
+                ),
+                onPressed: isPrimaryLoading ? null : onPrimaryPressed,
+                child: isPrimaryLoading
+                    ? SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.onPrimary,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        primaryButtonLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (maxWidth != null) {
+      buttonRow = Center(
+        heightFactor: 1.0,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth!),
+          child: buttonRow,
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -104,72 +200,7 @@ class AppFormScaffold extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            if (secondaryButtonLabel != null && onSecondaryPressed != null) ...[
-              Expanded(
-                flex: 1,
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: AppRadius.shape12,
-                      side: BorderSide(color: colorScheme.outlineVariant),
-                    ),
-                    onPressed: isPrimaryLoading ? null : onSecondaryPressed,
-                    child: Text(
-                      secondaryButtonLabel!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ),
-              AppSpacing.w12,
-            ],
-            Expanded(
-              flex: 2,
-              child: SizedBox(
-                height: 48,
-                child: Bounceable(
-                  onTap: (isPrimaryLoading || onPrimaryPressed == null)
-                      ? () {}
-                      : onPrimaryPressed!,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      shape: AppRadius.shape12,
-                      elevation: 0,
-                    ),
-                    onPressed: isPrimaryLoading ? null : onPrimaryPressed,
-                    child: isPrimaryLoading
-                        ? SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.onPrimary,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            primaryButtonLabel,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: buttonRow,
       ),
     );
   }
