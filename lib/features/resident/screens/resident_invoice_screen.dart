@@ -528,8 +528,7 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                           ),
                           child: Text(
                             tx.statusDisplayName,
-                            style: TextStyle(
-                              fontSize: 11,
+                            style: context.labelSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: isSuccess ? AppStatusColors.paid : Colors.amber.shade800,
                             ),

@@ -86,11 +86,13 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                       color: color,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      'Số dư công nợ căn hộ: $text',
-                      style: context.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color,
+                    Expanded(
+                      child: Text(
+                        'Số dư công nợ căn hộ: $text',
+                        style: context.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
                       ),
                     ),
                   ],

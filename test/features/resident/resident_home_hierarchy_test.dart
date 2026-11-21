@@ -100,14 +100,14 @@ void main() {
 
     // Check vertical order (dy position):
     // Header is on top
-    // Invoice (Tier 2) must be above Interruption (Tier 3)
+    // Kiến trúc 2026 "chú ý trước, điều hướng sau": cảnh báo gián đoạn nằm trên cùng
     final dyInvoice = tester.getTopLeft(invoiceTitleFinder).dy;
     final dyInterruption = tester.getTopLeft(interruptionFinder).dy;
     final dyQuickActions = tester.getTopLeft(quickPayFinder).dy;
     final dyServices = tester.getTopLeft(servicesTitleFinder).dy;
 
-    expect(dyInvoice, lessThan(dyInterruption), reason: 'Tier 2 (Invoice) must be placed above Tier 3 (Interruption)');
-    expect(dyInterruption, lessThan(dyQuickActions), reason: 'Tier 3 (Interruption) must be placed above Tier 4 (Quick Actions)');
-    expect(dyQuickActions, lessThan(dyServices), reason: 'Tier 4 (Quick Actions) must be placed above Tier 5 (Services)');
+    expect(dyInterruption, lessThan(dyInvoice), reason: 'Cảnh báo gián đoạn phải đặt trên tổng quan hóa đơn');
+    expect(dyInvoice, lessThan(dyQuickActions), reason: 'Tổng quan hóa đơn phải đặt trên thao tác nhanh');
+    expect(dyQuickActions, lessThan(dyServices), reason: 'Thao tác nhanh phải đặt trên dịch vụ & tiện ích');
   });
 }

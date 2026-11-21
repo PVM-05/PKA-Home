@@ -87,20 +87,11 @@ void main() {
     expect(navBar.selectedIndex, 1);
   });
 
-  testWidgets('ResidentHomeScreen hiển thị nút Đăng xuất nhanh và mở dialog xác nhận', (tester) async {
+  testWidgets('ResidentHomeScreen không còn nút Đăng xuất ở tiêu đề (chuyển vào tab Cá nhân)', (tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    // Phải có nút Logout trên AppBar
-    final logoutBtn = find.byTooltip('Đăng xuất');
-    expect(logoutBtn, findsOneWidget);
-
-    // Bấm nút Logout hiển thị Dialog xác nhận
-    await tester.tap(logoutBtn);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Bạn có chắc chắn muốn đăng xuất không?'), findsOneWidget);
-    expect(find.text('Hủy'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Đăng xuất'), findsOneWidget);
+    // Kiến trúc thông tin 2026: tránh bấm nhầm đăng xuất ngay trang chủ
+    expect(find.byTooltip('Đăng xuất'), findsNothing);
   });
 }
