@@ -6,6 +6,27 @@ Tất cả các thay đổi đáng chú ý của dự án **Vivona - Nền Tản
 
 ---
 
+## [2.3.1] - 2026-11-21
+
+### Đã thêm (Added) - Nghiệm Thu Toàn Diện E2E Cơ Sở Dữ Liệu Production (Rollback An Toàn)
+- **Nghiệm Thu E2E Luồng Kích Hoạt Cư Dân 4 Bước Trực Tiếp Trên Production (`vpgimjyyechhuofjghsb`)**:
+  - Thực thi thành công toàn bộ chu trình kích hoạt tài khoản cư dân lần đầu qua 4 bước RPC liên hoàn:
+    1. `generate_resident_activation_codes(NULL)`: BQL sinh mã kích hoạt định dạng 8 ký tự kèm mã băm SHA-256 an toàn.
+    2. `verify_activation_code(phone, code)`: Nhận diện môi trường production, tự động sinh mã OTP 6 chữ số ngẫu nhiên (`otp_sent`), cấm tiết lộ `otp_hint`.
+    3. `verify_activation_otp(phone, code, otp)`: Xác thực OTP thành công trong khung thời gian 10 phút.
+    4. `complete_resident_activation(...)`: Chuyển hồ sơ người dùng sang `is_active = TRUE`, cập nhật căn hộ `is_empty = FALSE`, liên kết quyền cư dân vào tài khoản mới.
+  - Tự động hoàn nguyên (ROLLBACK) 100% dữ liệu mẫu sau kiểm thử, đảm bảo zero data leakage trên production.
+- **Nghiệm Thu 5 Kịch Bản Kiểm Soát An Ninh Cổng MFA AAL2 (`is_staff_or_management`)**:
+  - *Case 1 (Staff chưa bật TOTP, phiên AAL1)*: Cho phép truy cập hệ thống nghiệp vụ (`TRUE`).
+  - *Case 2 (Staff đã đăng ký TOTP, phiên AAL1 chưa nhập OTP MFA)*: **Chặn đứng truy cập tuyệt đối (`FALSE`)**.
+  - *Case 3 (Staff đã xác thực TOTP, phiên nâng cấp lên AAL2)*: Cho phép truy cập (`TRUE`).
+  - *Case 4 (Cư dân có token AAL2)*: Bị chặn bởi vai trò người dùng (`FALSE`).
+  - *Case 5 (Người dùng ẩn danh / anon không có token)*: Bị chặn (`FALSE`).
+- **Đồng Bộ Runbook Triển Khai SOP**:
+  - Cập nhật mục 9.2 trong `docs/MIGRATION_DEPLOYMENT_RUNBOOK.md` ghi nhận toàn bộ bằng chứng kiểm thử E2E và trạng thái nghiệm thu.
+
+---
+
 ## [2.3.0] - 2026-11-20
 
 ### Đã thêm (Added) - Cổng Bảo Mật MFA AAL2, Hoàn Tất 22/22 RPCs & Tách Migration Chuẩn Hóa
