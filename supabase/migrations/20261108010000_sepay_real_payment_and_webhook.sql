@@ -27,12 +27,14 @@ CREATE TABLE IF NOT EXISTS public.building_payment_configs (
 ALTER TABLE public.building_payment_configs ENABLE ROW LEVEL SECURITY;
 
 -- Cư dân & Người dùng được phép xem thông tin ngân hàng công khai (trừ API key) để render VietQR
+DROP POLICY IF EXISTS "Cho phép xem thông tin tài khoản ngân hàng tòa nhà" ON public.building_payment_configs;
 CREATE POLICY "Cho phép xem thông tin tài khoản ngân hàng tòa nhà"
 ON public.building_payment_configs
 FOR SELECT
 USING (is_active = true);
 
 -- Ban Quản Lý và Admin được toàn quyền cấu hình
+DROP POLICY IF EXISTS "Ban Quản Lý toàn quyền quản lý cấu hình SePay" ON public.building_payment_configs;
 CREATE POLICY "Ban Quản Lý toàn quyền quản lý cấu hình SePay"
 ON public.building_payment_configs
 FOR ALL

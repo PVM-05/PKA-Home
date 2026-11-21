@@ -79,7 +79,7 @@ CREATE OR REPLACE FUNCTION public.verify_activation_code(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = public, extensions, pg_catalog
 AS $$
 DECLARE
     v_clean_phone TEXT;
@@ -213,7 +213,7 @@ CREATE OR REPLACE FUNCTION public.generate_resident_activation_codes(p_building_
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = public, extensions, pg_catalog
 AS $$
 DECLARE
     v_calling_user_id UUID := auth.uid();
@@ -612,6 +612,10 @@ CREATE TABLE IF NOT EXISTS public.emergency_contacts (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+ALTER TABLE public.emergency_contacts
+    ADD COLUMN IF NOT EXISTS building_id UUID REFERENCES public.buildings(id) ON DELETE CASCADE,
+    ADD COLUMN IF NOT EXISTS role TEXT;
+
 ALTER TABLE public.emergency_contacts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "emergency_contacts_read" ON public.emergency_contacts;
 CREATE POLICY "emergency_contacts_read" ON public.emergency_contacts FOR SELECT TO authenticated USING (true);
@@ -630,6 +634,12 @@ CREATE TABLE IF NOT EXISTS public.building_rules (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+ALTER TABLE public.building_rules
+    ADD COLUMN IF NOT EXISTS building_id UUID REFERENCES public.buildings(id) ON DELETE CASCADE,
+    ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'general',
+    ADD COLUMN IF NOT EXISTS version INT DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
 
 ALTER TABLE public.building_rules ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "building_rules_read" ON public.building_rules;
@@ -660,6 +670,10 @@ CREATE TABLE IF NOT EXISTS public.issue_ratings (
     user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+ALTER TABLE public.issue_ratings
+    ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS rating INT CHECK (rating >= 1 AND rating <= 5);
 
 ALTER TABLE public.issue_ratings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "issue_ratings_read" ON public.issue_ratings;
@@ -710,6 +724,7 @@ CREATE POLICY "building_equipments_manage" ON public.building_equipments FOR ALL
 -- ==============================================================================
 
 -- 5.1 Tạo hóa đơn và các dòng chi tiết ACID (create_invoice_with_items)
+DROP FUNCTION IF EXISTS public.create_invoice_with_items(UUID, VARCHAR, DATE, JSONB);
 CREATE OR REPLACE FUNCTION public.create_invoice_with_items(
     p_apartment_id UUID,
     p_period VARCHAR,
@@ -752,6 +767,7 @@ REVOKE ALL ON FUNCTION public.create_invoice_with_items(UUID, VARCHAR, DATE, JSO
 GRANT EXECUTE ON FUNCTION public.create_invoice_with_items(UUID, VARCHAR, DATE, JSONB) TO authenticated;
 
 -- 5.2 Ghi nhận thanh toán thủ công (record_manual_payment)
+DROP FUNCTION IF EXISTS public.record_manual_payment;
 CREATE OR REPLACE FUNCTION public.record_manual_payment(
     p_invoice_id UUID,
     p_payment_method VARCHAR DEFAULT 'CASH',
@@ -867,6 +883,7 @@ REVOKE ALL ON FUNCTION public.record_manual_payment(UUID, VARCHAR, TEXT) FROM an
 GRANT EXECUTE ON FUNCTION public.record_manual_payment(UUID, VARCHAR, TEXT) TO authenticated;
 
 -- 5.3 Tiền kiểm tra phát hành hóa đơn hàng loạt (validate_monthly_bulk_invoices)
+DROP FUNCTION IF EXISTS public.validate_monthly_bulk_invoices;
 CREATE OR REPLACE FUNCTION public.validate_monthly_bulk_invoices(
   p_period text,
   p_mgmt_rate numeric DEFAULT 10000,
@@ -984,6 +1001,7 @@ REVOKE ALL ON FUNCTION public.validate_monthly_bulk_invoices(text, numeric, nume
 GRANT EXECUTE ON FUNCTION public.validate_monthly_bulk_invoices(text, numeric, numeric, numeric) TO authenticated;
 
 -- 5.4 Phát hành hóa đơn hàng loạt cho danh sách căn hộ hợp lệ (generate_valid_bulk_invoices)
+DROP FUNCTION IF EXISTS public.generate_valid_bulk_invoices;
 CREATE OR REPLACE FUNCTION public.generate_valid_bulk_invoices(
   p_period text,
   p_due_date timestamptz,
@@ -1100,6 +1118,7 @@ REVOKE ALL ON FUNCTION public.generate_valid_bulk_invoices(text, timestamptz, uu
 GRANT EXECUTE ON FUNCTION public.generate_valid_bulk_invoices(text, timestamptz, uuid[], numeric, numeric, numeric) TO authenticated;
 
 -- 5.5 Phát hành hóa đơn hàng loạt tự động (generate_monthly_bulk_invoices)
+DROP FUNCTION IF EXISTS public.generate_monthly_bulk_invoices;
 CREATE OR REPLACE FUNCTION public.generate_monthly_bulk_invoices(
   p_period text,
   p_due_date timestamptz,
@@ -1127,6 +1146,7 @@ REVOKE ALL ON FUNCTION public.generate_monthly_bulk_invoices(text, timestamptz, 
 GRANT EXECUTE ON FUNCTION public.generate_monthly_bulk_invoices(text, timestamptz, numeric, numeric, numeric) TO authenticated;
 
 -- 5.6 Tạo tài khoản người dùng từ Admin (admin_create_user)
+DROP FUNCTION IF EXISTS public.admin_create_user;
 CREATE OR REPLACE FUNCTION public.admin_create_user(
     p_email VARCHAR,
     p_password VARCHAR,
@@ -1238,6 +1258,7 @@ REVOKE ALL ON FUNCTION public.admin_create_user(VARCHAR, VARCHAR, VARCHAR, VARCH
 GRANT EXECUTE ON FUNCTION public.admin_create_user(VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, UUID, VARCHAR) TO authenticated;
 
 -- 5.7 Cập nhật hồ sơ người dùng từ Admin (admin_update_user_profile)
+DROP FUNCTION IF EXISTS public.admin_update_user_profile;
 CREATE OR REPLACE FUNCTION public.admin_update_user_profile(
     p_target_user_id UUID,
     p_full_name VARCHAR,
@@ -1291,6 +1312,7 @@ REVOKE ALL ON FUNCTION public.admin_update_user_profile(UUID, VARCHAR, VARCHAR, 
 GRANT EXECUTE ON FUNCTION public.admin_update_user_profile(UUID, VARCHAR, VARCHAR, VARCHAR) TO authenticated;
 
 -- 5.8 Khóa/Mở khóa/Vô hiệu hóa tài khoản (admin_toggle_user_status)
+DROP FUNCTION IF EXISTS public.admin_toggle_user_status;
 CREATE OR REPLACE FUNCTION public.admin_toggle_user_status(
     p_target_user_id UUID,
     p_action VARCHAR,
@@ -1334,6 +1356,7 @@ REVOKE ALL ON FUNCTION public.admin_toggle_user_status(UUID, VARCHAR, TEXT) FROM
 GRANT EXECUTE ON FUNCTION public.admin_toggle_user_status(UUID, VARCHAR, TEXT) TO authenticated;
 
 -- 5.9 Gỡ liên kết căn hộ (admin_unlink_apartment)
+DROP FUNCTION IF EXISTS public.admin_unlink_apartment;
 CREATE OR REPLACE FUNCTION public.admin_unlink_apartment(
     p_user_id UUID,
     p_apartment_id UUID

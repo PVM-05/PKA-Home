@@ -110,7 +110,7 @@ CREATE OR REPLACE FUNCTION public.verify_activation_code(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = public, extensions, pg_catalog
 AS $function$
 DECLARE
     v_norm_phone TEXT;
@@ -202,7 +202,7 @@ CREATE OR REPLACE FUNCTION public.generate_bulk_resident_activations(p_building_
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = public, extensions, pg_catalog
 AS $function$
 DECLARE
     v_caller_id UUID := auth.uid();
@@ -276,7 +276,7 @@ CREATE OR REPLACE FUNCTION public.regenerate_resident_activation(p_user_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = public, extensions, pg_catalog
 AS $function$
 DECLARE
     v_caller_id UUID := auth.uid();
@@ -391,6 +391,7 @@ END;
 $function$;
 
 -- 2.5 Sửa inverted caller check trong get_building_activation_list
+DROP FUNCTION IF EXISTS public.get_building_activation_list(UUID);
 CREATE OR REPLACE FUNCTION public.get_building_activation_list(p_building_id UUID)
 RETURNS TABLE (
     activation_id UUID,

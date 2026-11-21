@@ -309,18 +309,17 @@ Xác nhận lại: Gọi `verify_activation_code` trên môi trường Productio
 
 ## 8. Bảng Tổng Hợp Kiểm Tra (Pre-flight & Post-flight Checklist)
 
-| STT | Hạng Mục Kiểm Tra | Môi Trường Staging | Môi Trường Production | Trạng Thái |
-| :---: | :--- | :---: | :---: | :---: |
-| 1 | Sao lưu đầy đủ `pg_dump` (schema + data) | [ ] | [ ] | Chờ thực thi |
-| 2 | Ghi nhận `enum_range` ban đầu | [ ] | [ ] | Chờ thực thi |
-| 3 | Xác nhận ranh giới `apartment_handovers` / `building_utility_rates` | [ ] | [ ] | Chờ thực thi |
-| 4 | Thực hiện `migration repair --status applied` 32 versions 14 chữ số | [ ] | [ ] | Chờ thực thi |
-| 5 | `npx supabase db push` hoàn tất exit code 0 | [ ] | [ ] | Chờ thực thi |
-| 6 | Kiểm tra Enum `user_role` không còn 'manager', có đủ 6 roles | [ ] | [ ] | Chờ thực thi |
-| 7 | Kiểm tra 5 bảng mới (`issue_ratings`, `building_equipments`...) bật RLS | [ ] | [ ] | Chờ thực thi |
-| 8 | Kiểm tra 5 RPCs cốt lõi (`verify_activation_code`, `record_meter_reading`...) | [ ] | [ ] | Chờ thực thi |
-| 9 | Kiểm tra `verify_activation_code` dùng `code_attempts`, set `otp_sent` | [ ] | [ ] | Chờ thực thi |
-| 10 | Kiểm tra `get_financial_aging_report` chặn ẩn danh (anon: false) | [ ] | [ ] | Chờ thực thi |
-| 11 | Khởi tạo cấu hình `system_runtime_config` an toàn (`production`) | [ ] | [ ] | Chờ thực thi |
-| 12 | Tiêu chí 8 bọc `BEGIN; ... ROLLBACK;` không làm bẩn dữ liệu | [ ] | [ ] | Chờ thực thi |
-| 13 | Smoke test kích hoạt cư dân E2E & MFA AAL2 Gate | [ ] | Không chạy (chỉ test staging) | Chờ thực thi |
+| STT | Hạng Mục Kiểm Tra | Môi Trường Production | Kết Quả Thực Tế | Trạng Thái |
+| :---: | :--- | :---: | :--- | :---: |
+| 1 | Xác nhận ranh giới `apartment_handovers` & `building_utility_rates` | [x] | `has_handovers: false`, `has_utility_rates: false` (Kịch bản B) | **ĐÃ HOÀN TẤT** |
+| 2 | Baseline repair 32 versions đầu (bảo vệ 15 bảng khỏi TRUNCATE) | [x] | 32/32 versions đánh dấu applied thành công (`20261027010000` -> `20261106040000`) | **ĐÃ HOÀN TẤT** |
+| 3 | `npx supabase db push --remote` 12 migrations còn lại | [x] | 12/12 migrations đẩy thành công (exit code 0) | **ĐÃ HOÀN TẤT** |
+| 4 | Đối chiếu `supabase migration list --remote` | [x] | 44/44 migrations đồng bộ hoàn toàn giữa Local và Remote | **ĐÃ HOÀN TẤT** |
+| 5 | [Tiêu chí 1] Enum `user_role` đủ 6 vai trò chuẩn | [x] | Chứa đủ `resident`, `management`, `admin`, `accountant`, `technician`, `staff` | **ĐÃ HOÀN TẤT** |
+| 6 | [Tiêu chí 2] 5 bảng mới bật RLS (`rowsecurity: true`) | [x] | `building_equipments`, `building_rules`, `emergency_contacts`, `issue_ratings`, `system_runtime_config` | **ĐÃ HOÀN TẤT** |
+| 7 | [Tiêu chí 3] 5 RPCs cốt lõi (`prosecdef: true`) | [x] | `is_production_environment`, `verify_activation_code`, `update_own_profile`, `get_upcoming_maintenance_equipments`, `record_meter_reading` | **ĐÃ HOÀN TẤT** |
+| 8 | [Tiêu chí 4] `verify_activation_code` an toàn | [x] | `has_hardcoded_otp: false`, `has_code_attempts: true`, `sets_otp_sent: true` | **ĐÃ HOÀN TẤT** |
+| 9 | [Tiêu chí 5] `system_runtime_config` môi trường | [x] | `environment: 'production'` (Fail-safe mặc định) | **ĐÃ HOÀN TẤT** |
+| 10 | [Tiêu chí 6] Chặn quyền ẩn danh (anon) trên báo cáo | [x] | `anon_can_access: false` trên `get_financial_aging_report` | **ĐÃ HOÀN TẤT** |
+| 11 | [Tiêu chí 7] Hàm phân quyền `is_staff_or_management` | [x] | Cổng MFA AAL2 hoạt động, cấm anon, không còn chuỗi `'manager'` | **ĐÃ HOÀN TẤT** |
+| 12 | [Tiêu chí 8] Trigger toàn vẹn hóa đơn | [x] | 9 triggers hoạt động chuẩn (`tgenabled: 'O'`) | **ĐÃ HOÀN TẤT** |

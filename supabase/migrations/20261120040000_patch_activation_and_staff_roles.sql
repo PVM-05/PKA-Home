@@ -22,7 +22,7 @@ CREATE OR REPLACE FUNCTION public.verify_activation_code(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = public, extensions, pg_catalog
 AS $$
 DECLARE
     v_clean_phone TEXT;

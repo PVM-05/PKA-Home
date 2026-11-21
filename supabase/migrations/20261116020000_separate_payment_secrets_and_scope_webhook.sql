@@ -69,7 +69,7 @@ END $$;
 
 -- Xoay vòng khóa SePay cũ đã từng bị lộ sáng qua API cư dân
 UPDATE public.building_payment_secrets
-SET sepay_api_key = 'sec_pka_' || encode(gen_random_bytes(16), 'hex'),
+SET sepay_api_key = 'sec_pka_' || encode(extensions.gen_random_bytes(16), 'hex'),
     updated_at = now();
 
 -- ==============================================================================
@@ -81,6 +81,7 @@ ALTER TABLE public.building_payment_configs DROP COLUMN IF EXISTS vnpay_hash_sec
 -- ==============================================================================
 -- BƯỚC 4: NÂNG CẤP RPC PROCESS_SEPAY_WEBHOOK RÀNG BUỘC THEO TÒA NHÀ (TENANT-SCOPED)
 -- ==============================================================================
+DROP FUNCTION IF EXISTS public.process_sepay_webhook(JSONB, TEXT);
 CREATE OR REPLACE FUNCTION public.process_sepay_webhook(
     p_payload JSONB,
     p_api_key TEXT

@@ -5,6 +5,7 @@
 -- 3. Ghi vết kiểm toán an ninh SEPAY_WEBHOOK_UNAUTHORIZED vào audit_logs khi phát hiện truy cập bất hợp pháp.
 -- 4. Thu hồi quyền EXECUTE từ PUBLIC, anon, authenticated; chỉ cho phép service_role (Edge Function) thực thi.
 
+DROP FUNCTION IF EXISTS public.process_sepay_webhook(JSONB, TEXT);
 CREATE OR REPLACE FUNCTION public.process_sepay_webhook(
     p_payload JSONB,
     p_api_key TEXT
