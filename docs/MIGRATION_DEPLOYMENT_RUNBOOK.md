@@ -334,11 +334,21 @@ Xác nhận lại: Gọi `verify_activation_code` trên môi trường Productio
   1. Tạo thêm một Supabase Project riêng (gói Free/Pro) làm môi trường Staging chuẩn.
   2. Hoặc cấu hình Docker Desktop trên máy trạm để chạy `npx supabase start` kiểm thử trước cục bộ.
 
-### 9.2. Phân Định Trạng Thái Smoke Test (Phase 4)
-- **Cấp độ RPC (Database Functions):** **ĐÃ ĐÓNG (PASS 100%)** — `verify_activation_code`, `get_upcoming_maintenance_equipments`, `is_production_environment` đều đã được kiểm tra trực tiếp qua SQL và trả về kết quả chuẩn xác.
-- **Cấp độ E2E UI Flow (Giao diện người dùng):** **MỞ (Chờ kiểm thử người dùng/tích hợp)**:
-  1. Luồng kích hoạt cư dân 4 bước hoàn chỉnh trên app (`generate_codes` $\rightarrow$ `verify_code` $\rightarrow$ `verify_otp` $\rightarrow$ `complete_activation`).
-  2. Cổng chặn MFA AAL2 khi người dùng BQL đăng nhập và quét mã TOTP trên thiết bị thật.
+### 9.2. Phân Định Trạng Thái Kiểm Thử Nghiệm Thu (Phase 4)
+- **Cấp độ Database RPC & E2E Function Flow:** **ĐÃ ĐÓNG (PASS 100% TRÊN PRODUCTION)**
+  1. **Luồng kích hoạt cư dân 4 bước hoàn chỉnh (Tự động ROLLBACK):**
+     - **Bước 1 (`generate_resident_activation_codes`):** BQL sinh mã thành công (`generated_count: 1`, hash SHA-256 an toàn, trạng thái `pending`).
+     - **Bước 2 (`verify_activation_code`):** Cư dân chưa đăng nhập gọi thành công, hệ thống tự nhận diện production, sinh OTP 6 số ngẫu nhiên (`otp_sent`), cấm tiết lộ `otp_hint`.
+     - **Bước 3 (`verify_activation_otp`):** Xác thực OTP 6 số thành công trong khung thời gian 10 phút.
+     - **Bước 4 (`complete_resident_activation`):** Chuyển hồ sơ người dùng sang `is_active = TRUE`, cập nhật căn hộ `is_empty = FALSE`, liên kết quyền cư dân vào tài khoản mới.
+  2. **Cổng kiểm soát bảo mật MFA AAL2 (5 Kịch bản):**
+     - *Case 1 (Staff chưa TOTP, AAL1):* Được phép truy cập (`TRUE`).
+     - *Case 2 (Staff đã kích hoạt TOTP, phiên AAL1 chưa nhập OTP):* **Bị chặn tuyệt đối (`FALSE`)**.
+     - *Case 3 (Staff đã xác thực TOTP, phiên nâng lên AAL2):* Được phép truy cập (`TRUE`).
+     - *Case 4 (Cư dân có token AAL2):* Bị chặn bởi vai trò người dùng (`FALSE`).
+     - *Case 5 (Người dùng ẩn danh / anon không token):* Bị chặn (`FALSE`).
+  3. **3 RPCs cốt lõi mở rộng:** `verify_activation_code`, `get_upcoming_maintenance_equipments`, `is_production_environment` hoạt động chính xác.
+- **Cấp độ Client UI (Màn hình thiết bị di động):** Chờ phiên kiểm thử người dùng thực tế trên ứng dụng Flutter (sau khi đóng gói build).
 
 ### 9.3. Ghi Nhận 5 Điểm Nghẽn Kỹ Thuật Đã Xử Lý
 1. `building_payment_configs`: Idempotent `DROP POLICY IF EXISTS`.
