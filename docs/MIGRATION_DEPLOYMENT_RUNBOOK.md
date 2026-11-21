@@ -323,3 +323,26 @@ Xác nhận lại: Gọi `verify_activation_code` trên môi trường Productio
 | 10 | [Tiêu chí 6] Chặn quyền ẩn danh (anon) trên báo cáo | [x] | `anon_can_access: false` trên `get_financial_aging_report` | **ĐÃ HOÀN TẤT** |
 | 11 | [Tiêu chí 7] Hàm phân quyền `is_staff_or_management` | [x] | Cổng MFA AAL2 hoạt động, cấm anon, không còn chuỗi `'manager'` | **ĐÃ HOÀN TẤT** |
 | 12 | [Tiêu chí 8] Test UPDATE bọc ROLLBACK | [x] | UPDATE trả về `{id: 'c000...0001', status: 'paid'}` thành công, trigger không chặn sai, ROLLBACK hoàn nguyên 100% | **ĐÃ HOÀN TẤT** |
+
+---
+
+## 9. Nhật Ký Nghiệm Thu Thực Tế & Khuyến Nghị Hạ Tầng Đợt Kế Tiếp
+
+### 9.1. Bài Học Vận Hành & Khuyến Nghị Staging
+- **Thực tế hạ tầng đợt 21/11/2026:** Dự án chỉ có duy nhất 1 remote project (`vpgimjyyechhuofjghsb`) và môi trường máy trạm không có Docker Desktop. Toàn bộ thao tác repair và push migration diễn ra trực tiếp trên Production trong giờ hành chính.
+- **Khuyến nghị bắt buộc cho đợt kế tiếp:** Trước khi thực hiện bất kỳ đợt migration nào tiếp theo, Ban Quản trị cần:
+  1. Tạo thêm một Supabase Project riêng (gói Free/Pro) làm môi trường Staging chuẩn.
+  2. Hoặc cấu hình Docker Desktop trên máy trạm để chạy `npx supabase start` kiểm thử trước cục bộ.
+
+### 9.2. Phân Định Trạng Thái Smoke Test (Phase 4)
+- **Cấp độ RPC (Database Functions):** **ĐÃ ĐÓNG (PASS 100%)** — `verify_activation_code`, `get_upcoming_maintenance_equipments`, `is_production_environment` đều đã được kiểm tra trực tiếp qua SQL và trả về kết quả chuẩn xác.
+- **Cấp độ E2E UI Flow (Giao diện người dùng):** **MỞ (Chờ kiểm thử người dùng/tích hợp)**:
+  1. Luồng kích hoạt cư dân 4 bước hoàn chỉnh trên app (`generate_codes` $\rightarrow$ `verify_code` $\rightarrow$ `verify_otp` $\rightarrow$ `complete_activation`).
+  2. Cổng chặn MFA AAL2 khi người dùng BQL đăng nhập và quét mã TOTP trên thiết bị thật.
+
+### 9.3. Ghi Nhận 5 Điểm Nghẽn Kỹ Thuật Đã Xử Lý
+1. `building_payment_configs`: Idempotent `DROP POLICY IF EXISTS`.
+2. `process_sepay_webhook`: Bổ sung `DROP FUNCTION IF EXISTS` trước khi thay đổi tham số mặc định.
+3. Extension `pgcrypto`: Trỏ trực tiếp schema `extensions` cho `gen_random_bytes` và cấu hình `search_path`.
+4. Bảng mở rộng (`building_rules`, `emergency_contacts`, `issue_ratings`): Thêm `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`.
+5. Đổi kiểu dữ liệu trả về: Bổ sung `DROP FUNCTION IF EXISTS` cho `get_building_activation_list` và 9 RPCs kế toán.
