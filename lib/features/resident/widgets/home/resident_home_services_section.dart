@@ -114,7 +114,7 @@ class ResidentHomeServicesSection extends StatelessWidget {
             subtitle: 'BBQ, Hồ bơi, Gym',
             icon: Icons.pool_outlined,
             color: AppTheme.emerald,
-            onTap: () => context.push(AppRoutes.residentHandbook, extra: 2),
+            onTap: () => context.push(AppRoutes.residentAmenities),
           ),
           _buildServiceCard(
             context: context,

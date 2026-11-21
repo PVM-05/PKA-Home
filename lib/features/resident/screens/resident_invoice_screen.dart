@@ -13,6 +13,8 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/adaptive_master_detail_layout.dart';
 import '../../../core/utils/app_haptics.dart';
+import '../../../core/utils/error_formatter.dart';
+import '../../../data/providers/payment_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/models/invoice_model.dart';
 import 'resident_invoice_detail_screen.dart';
@@ -122,7 +124,7 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
               isEmbedded: true,
             ),
             masterBuilder: (ctx, isMasterOnly) => DefaultTabController(
-              length: 2,
+              length: 3,
               child: Column(
                 children: [
                   const TabBar(
@@ -135,6 +137,7 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                         text: 'Cần thanh toán',
                       ),
                       Tab(icon: Icon(Icons.history_outlined), text: 'Lịch sử đã đóng'),
+                      Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Giao dịch'),
                     ],
                   ),
                   Expanded(
@@ -157,6 +160,7 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                           emptyIcon: Icons.receipt_long_outlined,
                           emptyColor: AppTheme.textSecondary,
                         ),
+                        _buildTransactionsList(ctx, isMasterOnly: isMasterOnly),
                       ],
                     ),
                   ),
@@ -438,6 +442,114 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionsList(BuildContext context, {required bool isMasterOnly}) {
+    final transactionsAsync = ref.watch(paymentTransactionsProvider);
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
+    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+
+    return RefreshIndicator(
+      onRefresh: () async => ref.invalidate(paymentTransactionsProvider),
+      child: transactionsAsync.when(
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            AppSkeletonShimmer.cardList(count: 4, itemHeight: 90),
+          ],
+        ),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Text(
+              formatErrorMessage(err),
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppTheme.error),
+            ),
+          ),
+        ),
+        data: (transactions) {
+          if (transactions.isEmpty) {
+            return const AppEmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: 'Chưa có giao dịch thanh toán',
+              description: 'Các lịch sử nộp phí VietQR Napas 247 sẽ hiển thị đầy đủ tại đây sau khi giao dịch.',
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            itemCount: transactions.length,
+            itemBuilder: (context, index) {
+              final tx = transactions[index];
+              final isSuccess = tx.isSuccess;
+
+              return AppCard(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            tx.title ?? (tx.isInvoice ? 'Thanh toán hóa đơn' : 'Thanh toán dịch vụ'),
+                            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          currencyFormat.format(tx.amount),
+                          style: context.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isSuccess ? AppStatusColors.paid : AppTheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          dateFormat.format(tx.createdAt),
+                          style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: (isSuccess ? AppStatusColors.paid : Colors.amber.shade800).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            tx.statusDisplayName,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: isSuccess ? AppStatusColors.paid : Colors.amber.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (tx.transactionCode.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Mã GD: ${tx.transactionCode}',
+                        style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

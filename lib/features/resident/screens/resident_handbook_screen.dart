@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_snack_bar.dart';
@@ -8,7 +10,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/models/emergency_contact_model.dart';
-import 'amenity_booking_screen.dart';
 import '../../../core/utils/error_formatter.dart';
 
 class ResidentHandbookScreen extends ConsumerStatefulWidget {
@@ -31,9 +32,9 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 4,
+      length: 3,
       vsync: this,
-      initialIndex: widget.initialTabIndex,
+      initialIndex: widget.initialTabIndex.clamp(0, 2),
     );
   }
 
@@ -104,15 +105,12 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          isScrollable: true,
           labelColor: AppTheme.primary,
           unselectedLabelColor: AppTheme.textSecondary,
           indicatorColor: AppTheme.primary,
-          tabAlignment: TabAlignment.start,
           tabs: const [
             Tab(icon: Icon(Icons.emergency_outlined), text: 'Đường dây nóng'),
             Tab(icon: Icon(Icons.gavel_outlined), text: 'Nội quy tòa nhà'),
-            Tab(icon: Icon(Icons.pool_outlined), text: 'Tiện ích chung'),
             Tab(icon: Icon(Icons.help_outline), text: 'Biểu phí & FAQ'),
           ],
         ),
@@ -122,7 +120,6 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         children: [
           _buildEmergencyContactsTab(),
           _buildBuildingRulesTab(),
-          _buildBuildingAmenitiesTab(),
           _buildFeeScheduleAndFaqTab(),
         ],
       ),
@@ -404,138 +401,7 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
   }
 
   // ===========================================================================
-  // Tab 3: Tiện Ích Chung
-  // ===========================================================================
-  Widget _buildBuildingAmenitiesTab() {
-    final amenitiesAsync = ref.watch(buildingAmenitiesProvider);
-
-    return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(buildingAmenitiesProvider),
-      child: amenitiesAsync.when(
-        data: (amenities) {
-          if (amenities.isEmpty) {
-            return const Center(
-              child: Text('Chưa có tiện ích nào được cập nhật.'),
-            );
-          }
-
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: amenities.length,
-                itemBuilder: (context, index) {
-                  final amenity = amenities[index];
-                  return AppCard(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                amenity.name,
-                                style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
-                              ),
-                            ),
-                            if (amenity.openHours != null &&
-                                amenity.openHours!.isNotEmpty)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppStatusColors.paid.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.access_time,
-                                        size: 14,
-                                        color: AppStatusColors.paid,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        amenity.openHours!,
-                                        style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppStatusColors.paid),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        if (amenity.description != null &&
-                            amenity.description!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            amenity.description!,
-                            style: context.bodyMedium?.copyWith(color: AppTheme.textPrimary, height: 1.4),
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            icon: const Icon(
-                              Icons.calendar_month_outlined,
-                              size: 16,
-                            ),
-                            label: Text(
-                              'Đặt lịch sử dụng',
-                              style: context.labelMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      AmenityBookingScreen(amenity: amenity),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
-      ),
-    );
-  }
-
-  // ===========================================================================
-  // Tab 4: Biểu Phí & FAQ
+  // Tab 3: Biểu Phí & FAQ
   // ===========================================================================
   Widget _buildFeeScheduleAndFaqTab() {
     return Center(
@@ -544,6 +410,45 @@ class _ResidentHandbookScreenState extends ConsumerState<ResidentHandbookScreen>
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // Lối tắt đến Tiện ích chung
+            AppCard(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(14),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => context.push(AppRoutes.residentAmenities),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.pool_rounded, color: AppTheme.primary, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Xem danh mục Tiện ích tòa nhà',
+                            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Đặt lịch Hồ bơi, BBQ, Gym và theo dõi ca sử dụng',
+                            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+                  ],
+                ),
+              ),
+            ),
             Text(
               'Biểu Phí Quản Lý & Vận Hành',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(

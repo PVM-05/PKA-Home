@@ -44,6 +44,7 @@ import '../../features/resident/screens/resident_handbook_screen.dart';
 import '../../features/resident/screens/notification_center_screen.dart';
 import '../../features/resident/screens/vehicle_management_screen.dart';
 import '../../features/resident/screens/amenity_booking_screen.dart';
+import '../../features/resident/screens/resident_amenities_screen.dart';
 import '../../features/resident/screens/resident_announcement_detail_screen.dart';
 import '../../features/resident/screens/payment_history_screen.dart';
 import '../../features/resident/screens/resident_meter_reading_screen.dart';
@@ -348,6 +349,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
               state: state,
               child: const VehicleManagementScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'amenities',
+            pageBuilder: (context, state) => AppPageTransitions.slideFromRight(
+              state: state,
+              child: const ResidentAmenitiesScreen(),
             ),
           ),
           GoRoute(
