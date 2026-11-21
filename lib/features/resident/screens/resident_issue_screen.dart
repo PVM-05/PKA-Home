@@ -83,9 +83,10 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
               isEmbedded: true,
             ),
             masterBuilder: (ctx, isMasterOnly) {
+              final masterColorScheme = Theme.of(ctx).colorScheme;
               if (issues.isEmpty) {
                 return RefreshIndicator(
-                  color: AppTheme.primary,
+                  color: masterColorScheme.primary,
                   onRefresh: () async {
                     HapticFeedback.lightImpact();
                     ref.invalidate(residentIssuePaginatedProvider);
@@ -104,7 +105,7 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
               }
 
               return RefreshIndicator(
-                color: AppTheme.primary,
+                color: masterColorScheme.primary,
                 onRefresh: () async {
                   HapticFeedback.lightImpact();
                   ref.invalidate(residentIssuePaginatedProvider);
@@ -115,21 +116,21 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                     if (scrollInfo.metrics.pixels >=
                         scrollInfo.metrics.maxScrollExtent - 200) {
                       try {
-                        ref.read(residentIssuePaginatedProvider.notifier).loadMore();
+                        ref
+                            .read(residentIssuePaginatedProvider.notifier)
+                            .loadMore();
                       } catch (_) {}
                     }
                     return false;
                   },
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(12, 16, 12, 88),
                     itemCount: issues.length,
                     itemBuilder: (context, index) {
                       final issue = issues[index];
-                      final isSelected = !isMasterOnly && issue.id == _selectedIssue?.id;
+                      final isSelected =
+                          !isMasterOnly && issue.id == _selectedIssue?.id;
                       return _buildIssueCard(
                         context,
                         ref,
@@ -190,14 +191,15 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
     WidgetRef ref,
     IssueModel issue,
   ) async {
+    final semanticError = AppTheme.getSemanticError(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: AppTheme.error),
-            SizedBox(width: 8),
-            Expanded(child: Text('Xác nhận xóa')),
+            Icon(Icons.warning_amber_rounded, color: semanticError),
+            const SizedBox(width: 8),
+            const Expanded(child: Text('Xác nhận xóa')),
           ],
         ),
         content: const Text(
@@ -206,12 +208,14 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
         ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Hủy'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
+              minimumSize: const Size(88, 48),
+              backgroundColor: AppTheme.textError,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -261,20 +265,27 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
     bool isSelected = false,
   }) {
     final formatDate = DateFormat('dd/MM/yyyy HH:mm');
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final paidColor = AppStatusColors.getPaid(context);
+    final semanticError = AppTheme.getSemanticError(context);
+    final semanticWarning = AppTheme.getSemanticWarning(context);
+    final semanticSecondary = AppTheme.getSemanticSecondary(context);
 
     Color statusColor;
     String statusText;
     switch (issue.status) {
       case 'resolved':
-        statusColor = AppTheme.success;
+        statusColor = paidColor;
         statusText = 'Đã xử lý';
         break;
       case 'in_progress':
-        statusColor = AppTheme.primary;
+        statusColor = colorScheme.primary;
         statusText = 'Đang xử lý';
         break;
       default:
-        statusColor = AppTheme.warning;
+        statusColor = AppStatusColors.getPending(context);
         statusText = 'Chờ tiếp nhận';
     }
 
@@ -282,28 +293,28 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
     String priorityText;
     switch (issue.priority) {
       case 'high':
-        priorityColor = AppTheme.error;
+        priorityColor = AppStatusColors.getPriorityHigh(context);
         priorityText = 'Khẩn cấp';
         break;
       case 'low':
-        priorityColor = AppTheme.success;
+        priorityColor = AppStatusColors.getPriorityLow(context);
         priorityText = 'Thấp';
         break;
       default:
-        priorityColor = AppTheme.warning;
+        priorityColor = AppStatusColors.getPriorityMedium(context);
         priorityText = 'Bình thường';
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Semantics(
-      label: 'Phản ánh sự cố: ${issue.description}, trạng thái $statusText, mức độ ưu tiên $priorityText, ngày tạo ${formatDate.format(issue.createdAt)}',
+      label:
+          'Phản ánh sự cố: ${issue.description}, trạng thái $statusText, mức độ ưu tiên $priorityText, ngày tạo ${formatDate.format(issue.createdAt)}',
       button: true,
       child: AppCard(
         margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-        borderColor: isSelected ? AppTheme.primary : null,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        borderColor: isSelected ? colorScheme.primary : null,
         child: InkWell(
+          borderRadius: BorderRadius.circular(12),
           onTap: () {
             if (isMasterOnly) {
               context.push(AppRoutes.residentIssueDetail, extra: issue);
@@ -319,17 +330,18 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time,
                     size: 14,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       formatDate.format(issue.createdAt),
                       style: context.labelSmall?.copyWith(
-                        color: AppTheme.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
@@ -341,14 +353,18 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                       label: 'Trạng thái: $statusText',
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
+                          horizontal: 8,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                          color: statusColor.withValues(
+                            alpha: isDark ? 0.2 : 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: statusColor.withValues(alpha: 0.3),
+                            color: statusColor.withValues(
+                              alpha: isDark ? 0.4 : 0.28,
+                            ),
                             width: 1,
                           ),
                         ),
@@ -365,69 +381,123 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                     ),
                   ),
                   if (issue.status == 'pending') ...[
-                    const SizedBox(width: 2),
                     SizedBox(
-                      width: 24,
-                      height: 24,
+                      width: 48,
+                      height: 48,
                       child: PopupMenuButton<String>(
-                            tooltip: 'Thao tác phản ánh',
-                            padding: EdgeInsets.zero,
-                            iconSize: 18,
-                            icon: const Icon(
-                              Icons.more_vert,
-                              size: 18,
-                              color: AppTheme.textSecondary,
+                        tooltip: 'Thao tác phản ánh',
+                        padding: EdgeInsets.zero,
+                        iconSize: 20,
+                        icon: Icon(
+                          Icons.more_vert,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            context.push(
+                              AppRoutes.residentEditIssue,
+                              extra: issue,
+                            );
+                          } else if (value == 'delete') {
+                            _confirmDeleteIssue(context, ref, issue);
+                          }
+                        },
+                        itemBuilder: (ctx) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.edit_outlined,
+                                  size: 18,
+                                  color: colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('Chỉnh sửa'),
+                              ],
                             ),
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              context.push(
-                                AppRoutes.residentEditIssue,
-                                extra: issue,
-                              );
-                            } else if (value == 'delete') {
-                              _confirmDeleteIssue(context, ref, issue);
-                            }
-                          },
-                          itemBuilder: (ctx) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.edit_outlined,
-                                    size: 18,
-                                    color: AppTheme.primary,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text('Chỉnh sửa'),
-                                ],
-                              ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                  color: semanticError,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Xóa phản ánh',
+                                  style: TextStyle(color: semanticError),
+                                ),
+                              ],
                             ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.delete_outline,
-                                    size: 18,
-                                    color: AppTheme.error,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Xóa phản ánh',
-                                    style: TextStyle(color: AppTheme.error),
-                                  ),
-                                ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(issue.description, style: context.bodyMedium),
+
+              if (issue.slaDeadline != null && issue.status != 'resolved') ...[
+                const SizedBox(height: 10),
+                Builder(
+                  builder: (_) {
+                    final slaColor = issue.isSlaBreached
+                        ? semanticError
+                        : (issue.isSlaWarning
+                              ? semanticWarning
+                              : semanticSecondary);
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: slaColor.withValues(alpha: isDark ? 0.18 : 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: slaColor.withValues(
+                            alpha: isDark ? 0.38 : 0.25,
+                          ),
+                        ),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              issue.isSlaBreached
+                                  ? Icons.timer_off_outlined
+                                  : (issue.isSlaWarning
+                                        ? Icons.warning_amber_rounded
+                                        : Icons.schedule),
+                              size: 13,
+                              color: slaColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              issue.slaRemainingFormatted,
+                              maxLines: 1,
+                              style: context.labelSmall?.copyWith(
+                                color: slaColor,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 12),
-                Text(issue.description, style: context.bodyMedium),
+              ],
 
               if (issue.reportImages.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -517,10 +587,10 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppStatusColors.paid.withValues(alpha: 0.08),
+                    color: paidColor.withValues(alpha: isDark ? 0.16 : 0.08),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppStatusColors.paid.withValues(alpha: 0.3),
+                      color: paidColor.withValues(alpha: isDark ? 0.4 : 0.3),
                     ),
                   ),
                   child: Column(
@@ -528,17 +598,19 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.verified,
                             size: 16,
-                            color: AppStatusColors.paid,
+                            color: paidColor,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            'Ảnh minh chứng đã khắc phục (Sau khi sửa)',
-                            style: context.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppStatusColors.paid,
+                          Expanded(
+                            child: Text(
+                              'Ảnh minh chứng đã khắc phục (Sau khi sửa)',
+                              style: context.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: paidColor,
+                              ),
                             ),
                           ),
                         ],
@@ -593,7 +665,7 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                         TextSpan(
                           text: 'Mức độ: ',
                           style: context.labelSmall?.copyWith(
-                            color: AppTheme.textSecondary,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           children: [
                             TextSpan(
@@ -617,20 +689,20 @@ class _ResidentIssueScreenState extends ConsumerState<ResidentIssueScreen> {
                       Icon(
                         Icons.forum_outlined,
                         size: 14,
-                        color: AppTheme.primary.withValues(alpha: 0.7),
+                        color: colorScheme.primary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Chi tiết',
                         style: context.labelSmall?.copyWith(
-                          color: AppTheme.primary.withValues(alpha: 0.7),
-                          fontWeight: FontWeight.w500,
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       Icon(
                         Icons.chevron_right,
                         size: 16,
-                        color: AppTheme.primary.withValues(alpha: 0.7),
+                        color: colorScheme.primary,
                       ),
                     ],
                   ),
