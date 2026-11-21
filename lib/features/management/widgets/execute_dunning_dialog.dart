@@ -274,11 +274,13 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                               color: isSelected ? tier.color : AppTheme.textSecondary,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              tier.label,
-                              style: context.bodyMedium?.copyWith(
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? tier.color : AppTheme.textPrimary,
+                            Flexible(
+                              child: Text(
+                                tier.label,
+                                style: context.bodyMedium?.copyWith(
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  color: isSelected ? tier.color : AppTheme.textPrimary,
+                                ),
                               ),
                             ),
                             if (isRecommended) ...[

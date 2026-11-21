@@ -90,8 +90,9 @@ void main() {
     // 1. Kiểm tra tiêu đề và các mục thao tác nhanh
     expect(find.textContaining('Ban Quản Lý'), findsOneWidget);
     expect(find.text('Thao tác nhanh'), findsOneWidget);
-    expect(find.text('Duyệt xe'), findsOneWidget);
-    expect(find.text('Giao dịch'), findsOneWidget);
+    expect(find.text('Duyệt liên kết'), findsOneWidget);
+    expect(find.text('Lập hóa đơn'), findsOneWidget);
+    expect(find.text('Xem tất cả'), findsWidgets);
 
     // 2. Kiểm tra khối Thanh toán gần đây
     expect(find.text('Thanh toán gần đây'), findsOneWidget);

@@ -7,6 +7,10 @@ import 'package:vivona/core/theme/app_spacing.dart';
 import 'package:vivona/core/theme/app_theme.dart';
 import 'package:vivona/core/widgets/app_card.dart';
 
+/// Danh mục dịch vụ & tiện ích dành cho cư dân:
+/// - Bố cục lưới 2 cột gọn gàng (2-column Grid) tiết kiệm ~40% chiều cao cuộn màn hình.
+/// - Nhãn chuẩn hóa "Phương tiện & Gửi xe" theo sơ đồ thông tin (IA) 2026.
+/// - Cảm ứng mượt mà và chuyển hướng nhanh.
 class ResidentHomeServicesSection extends StatelessWidget {
   const ResidentHomeServicesSection({super.key});
 
@@ -27,24 +31,22 @@ class ResidentHomeServicesSection extends StatelessWidget {
         borderRadius: AppRadius.r16,
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14.0,
-            vertical: 12.0,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
           child: Row(
             children: [
               Container(
-                padding: AppSpacing.p8,
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
                   borderRadius: AppRadius.r12,
                 ),
-                child: Icon(icon, color: color, size: 22),
+                child: Icon(icon, color: color, size: 20),
               ),
               AppSpacing.w8,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       title,
@@ -52,6 +54,7 @@ class ResidentHomeServicesSection extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -59,6 +62,7 @@ class ResidentHomeServicesSection extends StatelessWidget {
                       subtitle,
                       style: textTheme.bodySmall?.copyWith(
                         color: isDark ? Colors.white60 : AppTheme.textSecondary,
+                        fontSize: 11,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -79,57 +83,60 @@ class ResidentHomeServicesSection extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < 380;
-        Widget meterAndVehicleRow;
-        if (isNarrow) {
-          meterAndVehicleRow = Column(
-            children: [
-              _buildServiceCard(
-                context: context,
-                title: 'Số điện nước',
-                subtitle: 'Quét OCR & Gửi chỉ số',
-                icon: Icons.speed_outlined,
-                color: AppTheme.amber,
-                onTap: () => context.push(AppRoutes.residentMeterReading),
-              ),
-              AppSpacing.h8,
-              _buildServiceCard(
-                context: context,
-                title: 'Đăng ký gửi xe',
-                subtitle: 'Quản lý phương tiện',
-                icon: Icons.directions_car_filled_outlined,
-                color: AppTheme.sapphire,
-                onTap: () => context.push(AppRoutes.residentVehicles),
-              ),
-            ],
-          );
-        } else {
-          meterAndVehicleRow = Row(
-            children: [
-              Expanded(
-                child: _buildServiceCard(
-                  context: context,
-                  title: 'Số điện nước',
-                  subtitle: 'Quét OCR & Gửi chỉ số',
-                  icon: Icons.speed_outlined,
-                  color: AppTheme.amber,
-                  onTap: () => context.push(AppRoutes.residentMeterReading),
-                ),
-              ),
-              AppSpacing.w8,
-              Expanded(
-                child: _buildServiceCard(
-                  context: context,
-                  title: 'Đăng ký gửi xe',
-                  subtitle: 'Quản lý phương tiện',
-                  icon: Icons.directions_car_filled_outlined,
-                  color: AppTheme.sapphire,
-                  onTap: () => context.push(AppRoutes.residentVehicles),
-                ),
-              ),
-            ],
-          );
-        }
+        final items = [
+          _buildServiceCard(
+            context: context,
+            title: 'Số điện nước',
+            subtitle: 'Quét OCR & Gửi chỉ số',
+            icon: Icons.speed_outlined,
+            color: AppTheme.amber,
+            onTap: () => context.push(AppRoutes.residentMeterReading),
+          ),
+          _buildServiceCard(
+            context: context,
+            title: 'Phương tiện & Gửi xe',
+            subtitle: 'Quản lý phương tiện',
+            icon: Icons.directions_car_filled_outlined,
+            color: AppTheme.sapphire,
+            onTap: () => context.push(AppRoutes.residentVehicles),
+          ),
+          _buildServiceCard(
+            context: context,
+            title: 'Đón khách & Bưu kiện',
+            subtitle: 'Mã QR & PIN nhận hàng',
+            icon: Icons.mark_as_unread_outlined,
+            color: AppTheme.secondary,
+            onTap: () => context.push(AppRoutes.residentVisitorParcel),
+          ),
+          _buildServiceCard(
+            context: context,
+            title: 'Tiện ích chung',
+            subtitle: 'BBQ, Hồ bơi, Gym',
+            icon: Icons.pool_outlined,
+            color: AppTheme.emerald,
+            onTap: () => context.push(AppRoutes.residentHandbook, extra: 2),
+          ),
+          _buildServiceCard(
+            context: context,
+            title: 'Biểu quyết & Ý kiến',
+            subtitle: 'Biểu quyết & Kiến nghị',
+            icon: Icons.how_to_vote_outlined,
+            color: AppTheme.emerald,
+            onTap: () => context.push(AppRoutes.residentCommunity),
+          ),
+          _buildServiceCard(
+            context: context,
+            title: 'Bàn giao & Kiểm kê',
+            subtitle: 'Biên bản & Ký kiểm kê',
+            icon: Icons.assignment_turned_in_outlined,
+            color: AppTheme.primary,
+            onTap: () => context.push(AppRoutes.residentHandovers),
+          ),
+        ];
+
+        final isNarrow = constraints.maxWidth < 360;
+        final childAspectRatio =
+            isNarrow ? 2.1 : (constraints.maxWidth < 600 ? 2.4 : 3.0);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,42 +148,14 @@ class ResidentHomeServicesSection extends StatelessWidget {
               ),
             ),
             AppSpacing.h8,
-            meterAndVehicleRow,
-            AppSpacing.h8,
-            _buildServiceCard(
-              context: context,
-              title: 'Đón khách & Bưu kiện',
-              subtitle: 'Tạo mã QR đón khách & Mã PIN nhận hàng',
-              icon: Icons.mark_as_unread_outlined,
-              color: AppTheme.secondary,
-              onTap: () => context.push(AppRoutes.residentVisitorParcel),
-            ),
-            AppSpacing.h8,
-            _buildServiceCard(
-              context: context,
-              title: 'Biểu quyết & Ý kiến',
-              subtitle: 'Tham gia biểu quyết điện tử & Đóng góp kiến nghị',
-              icon: Icons.how_to_vote_outlined,
-              color: AppTheme.emerald,
-              onTap: () => context.push(AppRoutes.residentCommunity),
-            ),
-            AppSpacing.h8,
-            _buildServiceCard(
-              context: context,
-              title: 'Bàn giao & Kiểm kê',
-              subtitle: 'Biên bản nhận/trả căn hộ & Ký số kiểm kê tài sản',
-              icon: Icons.assignment_turned_in_outlined,
-              color: AppTheme.primary,
-              onTap: () => context.push(AppRoutes.residentHandovers),
-            ),
-            AppSpacing.h8,
-            _buildServiceCard(
-              context: context,
-              title: 'Tiện ích chung',
-              subtitle: 'BBQ, Hồ bơi, Phòng gym & Quy định sinh hoạt',
-              icon: Icons.pool_outlined,
-              color: AppTheme.emerald,
-              onTap: () => context.push(AppRoutes.residentHandbook, extra: 2),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: childAspectRatio,
+              children: items,
             ),
           ],
         )

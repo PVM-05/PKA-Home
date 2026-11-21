@@ -105,7 +105,15 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(tester.takeException(), isNull);
+      final err = tester.takeException();
+      if (err != null) {
+        if (err is FlutterError) {
+          for (final d in err.diagnostics) {
+            debugPrint('DIAG ${d.name}: ${d.toStringDeep()}');
+          }
+        }
+      }
+      expect(err, isNull);
       expect(find.text('Thao tác nhanh'), findsOneWidget);
       expect(find.text('Cư dân & Căn hộ — Tổng quan trạng thái'), findsOneWidget);
       expect(find.text('Tài chính & Thu phí'), findsOneWidget);

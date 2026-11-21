@@ -69,10 +69,29 @@ void main() {
     await tester.tap(seeAllBtn);
     await tester.pumpAndSettle();
 
-    // 3. Xác nhận Bottom Sheet hiển thị với 3 nhóm phân loại
+    // 3. Xác nhận Bottom Sheet hiển thị với các nhóm phân loại chuẩn B2B SaaS
     expect(find.text('Tất cả thao tác quản trị'), findsOneWidget);
-    expect(find.text('Cư dân & Căn hộ'), findsWidgets);
-    expect(find.text('Tài chính & Thu phí'), findsWidgets);
-    expect(find.text('Vận hành & Kỹ thuật'), findsWidgets);
+    expect(find.text('Vận hành tòa nhà'), findsWidgets);
+
+    await tester.scrollUntilVisible(
+      find.text('Tài chính & Kế toán'),
+      100,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Tài chính & Kế toán'), findsWidgets);
+
+    await tester.scrollUntilVisible(
+      find.text('Truyền thông & Cư dân'),
+      100,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Truyền thông & Cư dân'), findsWidgets);
+
+    await tester.scrollUntilVisible(
+      find.text('Hệ thống & Thiết lập'),
+      100,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Hệ thống & Thiết lập'), findsWidgets);
   });
 }

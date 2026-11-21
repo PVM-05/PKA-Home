@@ -109,33 +109,6 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ref.read(authProvider.notifier).logout();
-            },
-            child: const Text('Đăng xuất'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final currentAptId = ref.watch(selectedApartmentIdProvider);
@@ -457,22 +430,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                     );
                                   },
                                 ),
-                                const SizedBox(width: 4),
-                                IconButton(
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 36,
-                                    minHeight: 36,
-                                  ),
-                                  icon: const Icon(
-                                    Icons.logout_outlined,
-                                    color: Colors.white,
-                                    size: 22,
-                                  ),
-                                  tooltip: 'Đăng xuất',
-                                  onPressed: () => _showLogoutDialog(context),
-                                ),
+
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -548,11 +506,13 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                   const ResidentHomeServicesSection(),
                                   AppSpacing.h24,
                                   const ResidentUtilityConsumptionChartCard(),
+                                  AppSpacing.h24,
+                                  const MaintenanceFundCard(),
                                 ],
                               ),
                             ),
                             AppSpacing.w24,
-                            // Cột phải (40%): Cảnh báo gián đoạn + Quỹ bảo trì + [Phản ánh thường] + Thông báo
+                            // Cột phải (40%): Cảnh báo khẩn cấp + Gián đoạn thiết bị + [Phản ánh thường] + Bảng tin
                             Expanded(
                               flex: 4,
                               child: Column(
@@ -560,10 +520,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                                 children: [
                                   const StickyEmergencyBar(),
                                   const EquipmentInterruptionBanner(),
-                                  AppSpacing.h16,
-                                  const MaintenanceFundCard(),
                                   if (!isIssuePriority) ...[
-                                    AppSpacing.h24,
+                                    AppSpacing.h16,
                                     ResidentHomeLatestIssueCard(
                                       issueAsync: issueAsync,
                                       activeIssue: personalization.activeIssue,
@@ -588,6 +546,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const StickyEmergencyBar(),
+                          const EquipmentInterruptionBanner(),
                           if (personalization.showMeterReadingReminder) ...[
                             const MeterReadingReminderBanner(),
                             AppSpacing.h16,
@@ -599,10 +558,6 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                             onNavigateToInvoices: () => _onItemTapped(1),
                             onRetry: () => ref.invalidate(residentInvoiceProvider),
                           ),
-                          AppSpacing.h12,
-                          const MaintenanceFundCard(),
-                          AppSpacing.h20,
-                          const EquipmentInterruptionBanner(),
                           AppSpacing.h20,
                           ResidentHomeQuickActionsRow(
                             onPaymentTap: () => _onItemTapped(1),
@@ -629,6 +584,8 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                           const ResidentHomeServicesSection(),
                           AppSpacing.h24,
                           const ResidentUtilityConsumptionChartCard(),
+                          AppSpacing.h20,
+                          const MaintenanceFundCard(),
                           if (!isIssuePriority) ...[
                             AppSpacing.h24,
                             ResidentHomeLatestIssueCard(

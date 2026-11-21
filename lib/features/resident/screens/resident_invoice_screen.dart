@@ -35,6 +35,13 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hóa Đơn & Thanh Toán'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history_outlined),
+            tooltip: 'Lịch sử giao dịch VietQR',
+            onPressed: () => context.push(AppRoutes.residentPaymentHistory),
+          ),
+        ],
       ),
       body: invoiceState.when(
         data: (invoices) {

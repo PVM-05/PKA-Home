@@ -60,8 +60,16 @@ void main() {
       expect(service.resolveRouteFromNotification({'type': 'invoice_due_reminder'}), '/resident/invoices');
       expect(service.resolveRouteFromNotification({'type': 'issue_update'}), '/resident/issues');
       expect(service.resolveRouteFromNotification({'type': 'announcement'}), '/resident/handbook');
-      expect(service.resolveRouteFromNotification({'type': 'link_request'}), '/resident/notifications');
+      expect(service.resolveRouteFromNotification({'type': 'link_request'}), '/resident/link-request');
       expect(service.resolveRouteFromNotification({'type': 'unknown'}), '/resident/notifications');
+    });
+
+    test('resolveRouteFromNotification điều hướng chính xác cho Ban Quản Lý theo vai trò', () {
+      expect(service.resolveRouteFromNotification({'type': 'new_invoice'}, 'admin'), '/management/invoices');
+      expect(service.resolveRouteFromNotification({'type': 'issue_update'}, 'staff'), '/management/issues');
+      expect(service.resolveRouteFromNotification({'type': 'link_request'}, 'management'), '/management/link-requests');
+      expect(service.resolveRouteFromNotification({'type': 'equipment_maintenance'}, 'technician'), '/management/equipment');
+      expect(service.resolveRouteFromNotification({'type': 'unknown'}, 'accountant'), '/management');
     });
   });
 }

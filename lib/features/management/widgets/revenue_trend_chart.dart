@@ -21,25 +21,27 @@ class RevenueTrendChart extends ConsumerWidget {
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Tiêu đề
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // Tiêu đề & chú thích chống tràn layout trên màn hình hẹp
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 6,
               children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      const Icon(Icons.bar_chart_rounded, color: AppTheme.primary, size: 22),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Xu hướng thu phí 6 kỳ',
-                          style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.bar_chart_rounded, color: AppTheme.primary, size: 22),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Xu hướng thu phí 6 kỳ',
+                        style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 // Chú thích
                 Row(

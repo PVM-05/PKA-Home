@@ -19,7 +19,6 @@ import '../../../data/providers/management_provider.dart';
 import 'resident_management_screen.dart';
 import 'invoice_management_screen.dart';
 import 'issue_management_screen.dart';
-import 'announcement_management_screen.dart';
 import '../widgets/role_onboarding_dialog.dart';
 import '../widgets/revenue_trend_chart.dart';
 import '../widgets/all_quick_actions_sheet.dart';
@@ -280,7 +279,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     final currentUser = ref.watch(authProvider).value;
     final activeDelegations =
         ref.watch(activeDelegationsProvider).valueOrNull ?? [];
-    final isAdmin = currentUser?.isAdmin ?? false;
     final canManageInvoices = AppPermissions.invoiceManagement.allows(
       currentUser?.role,
       activeDelegations: activeDelegations,
@@ -392,15 +390,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             badgeCount: issueCount > 0 ? issueCount : null,
           ),
         ),
-      _ManagementTab(
-        key: 'announcements',
-        screen: const AnnouncementManagementScreen(),
-        adaptiveItem: const AdaptiveNavigationItem(
-          icon: Icons.notifications_outlined,
-          selectedIcon: Icons.notifications,
-          label: 'Thông báo',
-        ),
-      ),
     ];
 
     final currentIndex = _selectedIndex < tabs.length ? _selectedIndex : 0;
@@ -417,7 +406,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   const Flexible(
                     child: Text('Ban Quản Lý', overflow: TextOverflow.ellipsis),
                   ),
-                  if (currentUser != null) ...[
+                  if (currentUser != null &&
+                      MediaQuery.sizeOf(context).width >= 360) ...[
                     const SizedBox(width: 6),
                     Flexible(
                       child: Container(
@@ -452,10 +442,14 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               ),
               actions: [
                 ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 135),
+                  constraints: BoxConstraints(
+                    maxWidth:
+                        MediaQuery.sizeOf(context).width < 360 ? 100 : 135,
+                  ),
                   child: const BuildingSwitcherDropdown(),
                 ),
-                if (canViewAuditTrail)
+                if (canViewAuditTrail &&
+                    MediaQuery.sizeOf(context).width >= 360)
                   IconButton(
                     icon: const Icon(Icons.history),
                     onPressed: () {
@@ -468,16 +462,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   onSelected: (value) {
                     if (value == 'password') {
                       context.push(AppRoutes.changePassword);
-                    } else if (value == 'delegation') {
-                      context.push(AppRoutes.managementRoleDelegation);
-                    } else if (value == 'matrix') {
-                      context.push(AppRoutes.managementPermissionMatrix);
-                    } else if (value == 'equipment') {
-                      context.push(AppRoutes.managementEquipment);
-                    } else if (value == 'serviceRatings') {
-                      context.push(AppRoutes.managementServiceRatings);
-                    } else if (value == 'meterReadings') {
-                      context.push(AppRoutes.managementMeterReading);
                     } else if (value == 'fontSize') {
                       showFontSizeBottomSheet(context, ref);
                     } else if (value == 'theme') {
@@ -487,81 +471,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     }
                   },
                   itemBuilder: (BuildContext context) => [
-                    if (isAdmin)
-                      const PopupMenuItem(
-                        value: 'delegation',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.vpn_key_outlined,
-                              size: 20,
-                              color: Colors.purple,
-                            ),
-                            SizedBox(width: 8),
-                            Text('Quản lý ủy quyền'),
-                          ],
-                        ),
-                      ),
-                    if (canManageMeterReadings)
-                      const PopupMenuItem(
-                        value: 'meterReadings',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.speed_outlined,
-                              size: 20,
-                              color: AppStatusColors.pendingConfirmation,
-                            ),
-                            SizedBox(width: 8),
-                            Text('Duyệt số điện nước'),
-                          ],
-                        ),
-                      ),
-                    if (isAdmin)
-                      const PopupMenuItem(
-                        value: 'matrix',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.shield_outlined,
-                              size: 20,
-                              color: AppTheme.primary,
-                            ),
-                            SizedBox(width: 8),
-                            Text('Bảng phân quyền'),
-                          ],
-                        ),
-                      ),
-                    if (canManageEquipment)
-                      const PopupMenuItem(
-                        value: 'equipment',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.precision_manufacturing_outlined,
-                              size: 20,
-                              color: Colors.deepOrange,
-                            ),
-                            SizedBox(width: 8),
-                            Text('Bảo trì thiết bị'),
-                          ],
-                        ),
-                      ),
-                    if (canManageIssues)
-                      const PopupMenuItem(
-                        value: 'serviceRatings',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.star_rate_rounded,
-                              size: 20,
-                              color: Colors.amber,
-                            ),
-                            SizedBox(width: 8),
-                            Text('Đánh giá dịch vụ'),
-                          ],
-                        ),
-                      ),
                     const PopupMenuItem(
                       value: 'fontSize',
                       child: Row(
@@ -732,150 +641,47 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     );
 
     final List<Widget> quickActionItems = [];
-    if (isAdmin) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.person_add,
-          label: 'Duyệt liên kết',
-          color: AppTheme.primary,
-          onTap: () async {
-            await context.push(AppRoutes.managementLinkRequests);
-            ref.invalidate(pendingLinkRequestsCountProvider);
-            ref.invalidate(residentsProvider);
-          },
-          badgeCount: pendingLinkReqAsync.valueOrNull ?? 0,
-        ),
-      );
-    }
-    if (isAdmin) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.upload_file_outlined,
-          label: 'Nhập Excel',
-          color: Colors.teal,
-          onTap: () => context.push(AppRoutes.managementBatchImport),
-        ),
-      );
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.card_membership_outlined,
-          label: 'Gói cước',
-          color: Colors.purple,
-          onTap: () => context.push(AppRoutes.managementSubscription),
-        ),
-      );
-    }
-    if (canManageInvoices) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.analytics_outlined,
-          label: 'Báo cáo TC',
-          color: Colors.indigo,
-          onTap: () => context.push(AppRoutes.managementFinancialReport),
-        ),
-      );
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.table_chart_rounded,
-          label: 'Bàn kế toán',
-          color: Colors.blueGrey,
-          onTap: () => context.push(AppRoutes.managementAccountingWorkstation),
-        ),
-      );
-    }
-    if (canManageInvoices) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.receipt_long,
-          label: 'Lập hóa đơn',
-          color: AppTheme.secondary,
-          onTap: () => context.push(AppRoutes.managementCreateInvoice),
-        ),
-      );
-    }
-    if (canManageIssues) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.report_problem_outlined,
-          label: 'Xử lý sự cố',
-          color: Colors.orange,
-          onTap: () => context.push(AppRoutes.managementIssues),
-          badgeCount: pendingIssuesAsync.valueOrNull ?? 0,
-        ),
-      );
-    }
-    if (canManageMeterReadings) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.speed_outlined,
-          label: 'Duyệt điện nước',
-          color: AppStatusColors.pendingConfirmation,
-          onTap: () async {
-            await context.push(AppRoutes.managementMeterReading);
-            ref.invalidate(pendingMeterReadingsCountProvider);
-          },
-          badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
-        ),
-      );
-    }
-    if (canManageEquipment) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.precision_manufacturing_outlined,
-          label: 'Bảo trì TB',
-          color: Colors.deepOrange,
-          onTap: () => context.push(AppRoutes.managementEquipment),
-        ),
-      );
-    }
-    if (canApproveVehicles) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.two_wheeler_outlined,
-          label: 'Duyệt xe',
-          color: Colors.blueGrey,
-          onTap: () => context.push(AppRoutes.managementVehicleApproval),
-        ),
-      );
-    }
-    quickActionItems.add(
-      _buildQuickAction(
-        context,
-        icon: Icons.local_parking_rounded,
-        label: 'Bãi xe',
-        color: Colors.indigo,
-        onTap: () => context.push(AppRoutes.managementParking),
-      ),
-    );
-    quickActionItems.add(
-      _buildQuickAction(
-        context,
-        icon: Icons.desk_outlined,
-        label: 'Lễ tân',
-        color: Colors.deepOrange,
-        onTap: () => context.push(AppRoutes.managementFrontDesk),
-      ),
-    );
-    quickActionItems.add(
-      _buildQuickAction(
-        context,
-        icon: Icons.how_to_vote_outlined,
-        label: 'Cộng đồng',
-        color: Colors.blueGrey,
-        onTap: () => context.push(AppRoutes.managementCommunity),
-      ),
-    );
-    if (canManageIssues) {
+    final isAccountant = currentUser?.isAccountant ?? false;
+
+    if (isTechnician) {
+      if (canManageIssues) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.report_problem_outlined,
+            label: 'Xử lý sự cố',
+            color: Colors.orange,
+            onTap: () => context.push(AppRoutes.managementIssues),
+            badgeCount: pendingIssuesAsync.valueOrNull ?? 0,
+          ),
+        );
+      }
+      if (canManageMeterReadings) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.speed_outlined,
+            label: 'Duyệt điện nước',
+            color: AppStatusColors.pendingConfirmation,
+            onTap: () async {
+              await context.push(AppRoutes.managementMeterReading);
+              ref.invalidate(pendingMeterReadingsCountProvider);
+            },
+            badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
+          ),
+        );
+      }
+      if (canManageEquipment) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.precision_manufacturing_outlined,
+            label: 'Bảo trì TB',
+            color: Colors.deepOrange,
+            onTap: () => context.push(AppRoutes.managementEquipment),
+          ),
+        );
+      }
       quickActionItems.add(
         _buildQuickAction(
           context,
@@ -885,39 +691,139 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           onTap: () => context.push(AppRoutes.managementMaterials),
         ),
       );
-    }
-    if (canViewPaymentTransactions) {
       quickActionItems.add(
         _buildQuickAction(
           context,
-          icon: Icons.receipt_long_outlined,
-          label: 'Giao dịch',
-          color: Colors.deepPurple,
-          onTap: () => context.push(AppRoutes.managementPaymentTransactions),
-        ),
-      );
-    }
-    if (isAdmin) {
-      quickActionItems.add(
-        _buildQuickAction(
-          context,
-          icon: Icons.domain,
-          label: 'Căn hộ',
+          icon: Icons.assignment_turned_in_outlined,
+          label: 'Bàn giao',
           color: Colors.teal,
-          onTap: () => context.push(AppRoutes.managementApartments),
+          onTap: () => context.push(AppRoutes.managementHandovers),
+        ),
+      );
+    } else if (isAccountant) {
+      if (canManageInvoices) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.receipt_long,
+            label: 'Lập hóa đơn',
+            color: AppTheme.secondary,
+            onTap: () => context.push(AppRoutes.managementCreateInvoice),
+          ),
+        );
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.table_chart_rounded,
+            label: 'Bàn kế toán',
+            color: Colors.blueGrey,
+            onTap: () => context.push(AppRoutes.managementAccountingWorkstation),
+          ),
+        );
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.analytics_outlined,
+            label: 'Báo cáo TC',
+            color: Colors.indigo,
+            onTap: () => context.push(AppRoutes.managementFinancialReport),
+          ),
+        );
+      }
+      if (canManageMeterReadings) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.speed_outlined,
+            label: 'Duyệt điện nước',
+            color: AppStatusColors.pendingConfirmation,
+            onTap: () async {
+              await context.push(AppRoutes.managementMeterReading);
+              ref.invalidate(pendingMeterReadingsCountProvider);
+            },
+            badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
+          ),
+        );
+      }
+      if (canViewPaymentTransactions) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.receipt_long_outlined,
+            label: 'Giao dịch',
+            color: Colors.deepPurple,
+            onTap: () => context.push(AppRoutes.managementPaymentTransactions),
+          ),
+        );
+      }
+    } else {
+      // Admin / Ban Quản Lý
+      if (isAdmin) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.person_add,
+            label: 'Duyệt liên kết',
+            color: AppTheme.primary,
+            onTap: () async {
+              await context.push(AppRoutes.managementLinkRequests);
+              ref.invalidate(pendingLinkRequestsCountProvider);
+              ref.invalidate(residentsProvider);
+            },
+            badgeCount: pendingLinkReqAsync.valueOrNull ?? 0,
+          ),
+        );
+      }
+      if (canManageInvoices) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.receipt_long,
+            label: 'Lập hóa đơn',
+            color: AppTheme.secondary,
+            onTap: () => context.push(AppRoutes.managementCreateInvoice),
+          ),
+        );
+      }
+      if (canManageMeterReadings) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.speed_outlined,
+            label: 'Duyệt điện nước',
+            color: AppStatusColors.pendingConfirmation,
+            onTap: () async {
+              await context.push(AppRoutes.managementMeterReading);
+              ref.invalidate(pendingMeterReadingsCountProvider);
+            },
+            badgeCount: pendingMeterReadingsAsync.valueOrNull ?? 0,
+          ),
+        );
+      }
+      if (canManageIssues) {
+        quickActionItems.add(
+          _buildQuickAction(
+            context,
+            icon: Icons.report_problem_outlined,
+            label: 'Xử lý sự cố',
+            color: Colors.orange,
+            onTap: () => context.push(AppRoutes.managementIssues),
+            badgeCount: pendingIssuesAsync.valueOrNull ?? 0,
+          ),
+        );
+      }
+      quickActionItems.add(
+        _buildQuickAction(
+          context,
+          icon: Icons.desk_outlined,
+          label: 'Lễ tân',
+          color: Colors.deepOrange,
+          onTap: () => context.push(AppRoutes.managementFrontDesk),
         ),
       );
     }
-    quickActionItems.add(
-      _buildQuickAction(
-        context,
-        icon: Icons.assignment_turned_in_outlined,
-        label: 'Bàn giao',
-        color: Colors.teal,
-        onTap: () => context.push(AppRoutes.managementHandovers),
-      ),
-    );
-    // Nút mở Tất cả thao tác
+
+    // Nút mở Tất cả thao tác (luôn là slot thứ 6)
     quickActionItems.add(
       _buildQuickAction(
         context,
@@ -974,15 +880,23 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Cột trái (65%): Dải KPI tổng quan + Công việc cần xử lý ngay + Biểu đồ doanh thu & Tiến độ thu phí + Vận hành
+                      // Cột trái (65%): Dải KPI tương tác hành động + Việc cần xử lý ngay + Thống kê căn hộ + Doanh thu
                       Expanded(
                         flex: 65,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildApartmentResidentStats(
-                              isTechnician,
-                              pendingLinkReqAsync,
+                            _buildInteractiveKpiStrip(
+                              pendingInvoicesAsync: pendingConfirmationAsync,
+                              pendingIssuesAsync: pendingIssuesAsync,
+                              pendingMeterReadingsAsync:
+                                  pendingMeterReadingsAsync,
+                              pendingLinkReqAsync: pendingLinkReqAsync,
+                              canManageInvoices: canManageInvoices,
+                              canManageIssues: canManageIssues,
+                              canManageMeterReadings:
+                                  canManageMeterReadings,
+                              isAdmin: isAdmin,
                             ),
                             const SizedBox(height: 24),
                             _buildUrgentWorkSection(
@@ -996,6 +910,11 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                               canManageInvoices: canManageInvoices,
                               canManageMeterReadings:
                                   canManageMeterReadings,
+                            ),
+                            const SizedBox(height: 24),
+                            _buildApartmentResidentStats(
+                              isTechnician,
+                              pendingLinkReqAsync,
                             ),
                             const SizedBox(height: 24),
                             if (!isTechnician || canManageInvoices) ...[
@@ -1082,6 +1001,17 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     ),
                     const SizedBox(height: 12),
                     _buildQuickActionsGrid(quickActionItems),
+                    const SizedBox(height: 24),
+                    _buildInteractiveKpiStrip(
+                      pendingInvoicesAsync: pendingConfirmationAsync,
+                      pendingIssuesAsync: pendingIssuesAsync,
+                      pendingMeterReadingsAsync: pendingMeterReadingsAsync,
+                      pendingLinkReqAsync: pendingLinkReqAsync,
+                      canManageInvoices: canManageInvoices,
+                      canManageIssues: canManageIssues,
+                      canManageMeterReadings: canManageMeterReadings,
+                      isAdmin: isAdmin,
+                    ),
                     const SizedBox(height: 24),
                     _buildUrgentWorkSection(
                       allIssuesAsync: allIssuesAsync,
@@ -1254,13 +1184,66 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                     : 0) ??
                 0;
 
-            final hasUrgentWork =
-                urgentIssues.isNotEmpty ||
-                (pendingConfirmationCount > 0 && canManageInvoices) ||
-                (pendingLinkCount > 0 && isAdmin) ||
-                (pendingMeterCount > 0 && canManageMeterReadings);
+            final allUrgentCards = <Widget>[];
 
-            if (!hasUrgentWork) {
+            for (final issue in urgentIssues) {
+              allUrgentCards.add(
+                _buildUrgentCard(
+                  icon: Icons.warning,
+                  color: AppStatusColors.priorityHigh,
+                  title:
+                      'Phản ánh sự cố — Căn ${issue.apartment?.code ?? 'N/A'}',
+                  subtitle: issue.description,
+                  actionLabel: 'Xem ngay',
+                  onAction: () => context.push(AppRoutes.managementIssues),
+                ),
+              );
+            }
+            if (pendingConfirmationCount > 0 && canManageInvoices) {
+              allUrgentCards.add(
+                _buildUrgentCard(
+                  icon: Icons.receipt_long,
+                  color: Colors.purple,
+                  title: 'Hóa đơn chờ đối soát ($pendingConfirmationCount)',
+                  subtitle: 'Cư dân đã gửi minh chứng thanh toán',
+                  actionLabel: 'Đối soát',
+                  onAction: () => context.push(AppRoutes.managementInvoices),
+                ),
+              );
+            }
+            if (pendingLinkCount > 0 && isAdmin) {
+              allUrgentCards.add(
+                _buildUrgentCard(
+                  icon: Icons.person_add,
+                  color: AppTheme.primary,
+                  title: 'Yêu cầu liên kết căn hộ ($pendingLinkCount)',
+                  subtitle: 'Cư dân đăng ký thông tin căn hộ chờ duyệt',
+                  actionLabel: 'Duyệt ngay',
+                  onAction: () async {
+                    await context.push(AppRoutes.managementLinkRequests);
+                    ref.invalidate(pendingLinkRequestsCountProvider);
+                    ref.invalidate(residentsProvider);
+                  },
+                ),
+              );
+            }
+            if (pendingMeterCount > 0 && canManageMeterReadings) {
+              allUrgentCards.add(
+                _buildUrgentCard(
+                  icon: Icons.speed_outlined,
+                  color: AppStatusColors.pendingConfirmation,
+                  title: 'Chỉ số điện nước chờ duyệt ($pendingMeterCount)',
+                  subtitle: 'Cần xác nhận chỉ số để chốt kỳ thanh toán',
+                  actionLabel: 'Duyệt ngay',
+                  onAction: () async {
+                    await context.push(AppRoutes.managementMeterReading);
+                    ref.invalidate(pendingMeterReadingsCountProvider);
+                  },
+                ),
+              );
+            }
+
+            if (allUrgentCards.isEmpty) {
               return AppCard(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -1286,56 +1269,49 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
               );
             }
 
+            final visibleCards = allUrgentCards.take(3).toList();
+            final remainingCount = allUrgentCards.length - visibleCards.length;
+
             return Column(
               children: [
-                for (final issue in urgentIssues)
-                  _buildUrgentCard(
-                    icon: Icons.warning,
-                    color: AppStatusColors.priorityHigh,
-                    title: 'Phản ánh sự cố — Căn ${issue.apartment?.code ?? 'N/A'}',
-                    subtitle: issue.description,
-                    actionLabel: 'Xem ngay',
-                    onAction: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const IssueManagementScreen(),
+                ...visibleCards,
+                if (remainingCount > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      );
-                    },
-                  ),
-                if (pendingConfirmationCount > 0 && canManageInvoices)
-                  _buildUrgentCard(
-                    icon: Icons.receipt_long,
-                    color: Colors.purple,
-                    title: 'Hóa đơn chờ đối soát ($pendingConfirmationCount)',
-                    subtitle: 'Cư dân đã gửi minh chứng thanh toán',
-                    actionLabel: 'Đối soát',
-                    onAction: () => context.push(AppRoutes.managementInvoices),
-                  ),
-                if (pendingLinkCount > 0 && isAdmin)
-                  _buildUrgentCard(
-                    icon: Icons.person_add,
-                    color: AppTheme.primary,
-                    title: 'Yêu cầu liên kết căn hộ ($pendingLinkCount)',
-                    subtitle: 'Cư dân đăng ký thông tin căn hộ chờ duyệt',
-                    actionLabel: 'Duyệt ngay',
-                    onAction: () async {
-                      await context.push(AppRoutes.managementLinkRequests);
-                      ref.invalidate(pendingLinkRequestsCountProvider);
-                      ref.invalidate(residentsProvider);
-                    },
-                  ),
-                if (pendingMeterCount > 0 && canManageMeterReadings)
-                  _buildUrgentCard(
-                    icon: Icons.speed_outlined,
-                    color: AppStatusColors.pendingConfirmation,
-                    title: 'Chỉ số điện nước chờ duyệt ($pendingMeterCount)',
-                    subtitle: 'Cần xác nhận chỉ số để chốt kỳ thanh toán',
-                    actionLabel: 'Duyệt ngay',
-                    onAction: () async {
-                      await context.push(AppRoutes.managementMeterReading);
-                      ref.invalidate(pendingMeterReadingsCountProvider);
-                    },
+                        minimumSize: const Size.fromHeight(40),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                      onPressed: () => context.push(AppRoutes.managementIssues),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'Xem thêm $remainingCount việc cần xử lý khác',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
               ],
             );
@@ -1459,6 +1435,103 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildInteractiveKpiStrip({
+    required AsyncValue<int> pendingInvoicesAsync,
+    required AsyncValue<int> pendingIssuesAsync,
+    required AsyncValue<int> pendingMeterReadingsAsync,
+    required AsyncValue<int> pendingLinkReqAsync,
+    required bool canManageInvoices,
+    required bool canManageIssues,
+    required bool canManageMeterReadings,
+    required bool isAdmin,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Chỉ số hành động trọng tâm',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final int cols = width < 600 ? 2 : (width < 1100 ? 4 : 4);
+            final double ratio =
+                width < 360 ? 1.05 : (width < 600 ? 1.25 : 1.45);
+            return GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: cols,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: ratio,
+              children: [
+                StatCard(
+                  title: 'Hóa đơn chờ thu',
+                  value: pendingInvoicesAsync.when(
+                    data: (count) => '$count',
+                    loading: () => '...',
+                    error: (_, _) => '0',
+                  ),
+                  subtitle: 'Bấm đối soát',
+                  icon: Icons.receipt_long,
+                  color: AppTheme.secondary,
+                  onTap: () => context.push(AppRoutes.managementInvoices),
+                ),
+                StatCard(
+                  title: 'Sự cố đang mở',
+                  value: pendingIssuesAsync.when(
+                    data: (count) => '$count',
+                    loading: () => '...',
+                    error: (_, _) => '0',
+                  ),
+                  subtitle: 'Bấm xử lý',
+                  icon: Icons.report_problem_outlined,
+                  color: Colors.orange,
+                  onTap: () => context.push(AppRoutes.managementIssues),
+                ),
+                StatCard(
+                  title: 'Chỉ số chờ duyệt',
+                  value: pendingMeterReadingsAsync.when(
+                    data: (count) => '$count',
+                    loading: () => '...',
+                    error: (_, _) => '0',
+                  ),
+                  subtitle: 'Bấm duyệt số',
+                  icon: Icons.speed_outlined,
+                  color: AppStatusColors.pendingConfirmation,
+                  onTap: () async {
+                    await context.push(AppRoutes.managementMeterReading);
+                    ref.invalidate(pendingMeterReadingsCountProvider);
+                  },
+                ),
+                StatCard(
+                  title: 'Yêu cầu chờ duyệt',
+                  value: pendingLinkReqAsync.when(
+                    data: (count) => '$count',
+                    loading: () => '...',
+                    error: (_, _) => '0',
+                  ),
+                  subtitle: 'Bấm phê duyệt',
+                  icon: Icons.person_add_alt_1,
+                  color: AppTheme.primary,
+                  onTap: () async {
+                    await context.push(AppRoutes.managementLinkRequests);
+                    ref.invalidate(pendingLinkRequestsCountProvider);
+                    ref.invalidate(residentsProvider);
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 

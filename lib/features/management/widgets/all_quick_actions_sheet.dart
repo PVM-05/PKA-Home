@@ -8,6 +8,12 @@ import 'package:vivona/data/providers/dashboard_providers.dart';
 import 'package:vivona/data/providers/management_provider.dart';
 import 'package:vivona/data/providers/meter_reading_provider.dart';
 
+/// Bảng điều khiển tác vụ quản trị toàn diện ("Xem tất cả"):
+/// Phân nhóm theo 4 trụ cột nghiệp vụ chuẩn B2B PropTech SaaS:
+/// 1. Vận hành tòa nhà
+/// 2. Tài chính & Kế toán
+/// 3. Truyền thông & Cư dân (bao gồm Bảng tin thông báo chuyển từ tab bottom bar)
+/// 4. Hệ thống & Thiết lập
 void showAllQuickActionsSheet(
   BuildContext context, {
   required WidgetRef ref,
@@ -96,17 +102,170 @@ void showAllQuickActionsSheet(
                     vertical: 8,
                   ),
                   children: [
-                    // Nhóm 1: Cư dân & Căn hộ
+                    // Nhóm 1: Vận hành tòa nhà
                     _buildSheetSectionHeader(
                       context,
-                      'Cư dân & Căn hộ',
-                      Icons.groups_outlined,
+                      'Vận hành tòa nhà',
+                      Icons.domain_outlined,
+                    ),
+                    if (canManageIssues)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.report_problem_outlined,
+                        title: 'Xử lý sự cố',
+                        subtitle:
+                            'Tiếp nhận, phân công và khắc phục phản ánh cư dân',
+                        color: Colors.orange,
+                        badgeCount: pendingIssuesCount,
+                        onTap: () => context.push(AppRoutes.managementIssues),
+                      ),
+                    if (canManageEquipment)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.precision_manufacturing_outlined,
+                        title: 'Bảo trì thiết bị',
+                        subtitle:
+                            'Lập lịch và theo dõi bảo dưỡng thang máy, máy phát',
+                        color: Colors.deepOrange,
+                        onTap: () =>
+                            context.push(AppRoutes.managementEquipment),
+                      ),
+                    if (canManageAmenities)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.pool_outlined,
+                        title: 'Tiện ích chung',
+                        subtitle:
+                            'Hồ bơi, sân thể thao, BBQ và kiểm soát lượt đặt chỗ',
+                        color: Colors.teal.shade700,
+                        onTap: () =>
+                            context.push(AppRoutes.managementAmenities),
+                      ),
+                    _buildSheetActionItem(
+                      context: context,
+                      icon: Icons.local_parking_rounded,
+                      title: 'Bãi xe & Ô đỗ',
+                      subtitle:
+                          'Sơ đồ ô đỗ hầm, kiểm soát sức chứa và trạm soát vé',
+                      color: Colors.blue.shade700,
+                      onTap: () => context.push(AppRoutes.managementParking),
+                    ),
+                    if (canApproveVehicles)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.two_wheeler_outlined,
+                        title: 'Duyệt phương tiện',
+                        subtitle:
+                            'Xét duyệt hồ sơ gửi xe máy, ô tô của cư dân',
+                        color: Colors.blueGrey,
+                        onTap: () =>
+                            context.push(AppRoutes.managementVehicleApproval),
+                      ),
+                    _buildSheetActionItem(
+                      context: context,
+                      icon: Icons.desk_outlined,
+                      title: 'Lễ tân & An ninh sảnh',
+                      subtitle:
+                          'Đón khách, tiếp nhận bưu kiện shipper và mã PIN',
+                      color: Colors.deepOrange,
+                      onTap: () =>
+                          context.push(AppRoutes.managementFrontDesk),
+                    ),
+                    if (canManageIssues)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.inventory_2_outlined,
+                        title: 'Kho vật tư kỹ thuật',
+                        subtitle:
+                            'Định mức tồn kho, xuất kho bảo trì & trừ vật tư sự cố',
+                        color: Colors.teal,
+                        onTap: () =>
+                            context.push(AppRoutes.managementMaterials),
+                      ),
+
+                    const SizedBox(height: 14),
+                    // Nhóm 2: Tài chính & Kế toán
+                    _buildSheetSectionHeader(
+                      context,
+                      'Tài chính & Kế toán',
+                      Icons.account_balance_wallet_outlined,
+                    ),
+                    if (canManageInvoices)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.receipt_long,
+                        title: 'Lập hóa đơn',
+                        subtitle:
+                            'Tạo phiếu thu phí quản lý, điện, nước hàng tháng',
+                        color: AppTheme.secondary,
+                        onTap: () =>
+                            context.push(AppRoutes.managementCreateInvoice),
+                      ),
+                    if (canManageInvoices)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.table_chart_rounded,
+                        title: 'Bàn làm việc kế toán',
+                        subtitle:
+                            'Đối soát sao kê VietQR, thu tiền tại quầy và phiếu thu',
+                        color: Colors.blueGrey,
+                        onTap: () => context.push(
+                          AppRoutes.managementAccountingWorkstation,
+                        ),
+                      ),
+                    if (canManageMeterReadings)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.speed_outlined,
+                        title: 'Duyệt chỉ số điện nước',
+                        subtitle:
+                            'Kiểm tra và phê duyệt số điện nước công tơ',
+                        color: Colors.orange.shade900,
+                        badgeCount: pendingMeterCount,
+                        onTap: () async {
+                          await context.push(
+                            AppRoutes.managementMeterReading,
+                          );
+                          ref.invalidate(pendingMeterReadingsCountProvider);
+                        },
+                      ),
+                    if (canViewPaymentTransactions)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.receipt_long_outlined,
+                        title: 'Lịch sử giao dịch',
+                        subtitle:
+                            'Theo dõi dòng tiền và đối soát chuyển khoản VietQR',
+                        color: Colors.deepPurple,
+                        onTap: () => context.push(
+                          AppRoutes.managementPaymentTransactions,
+                        ),
+                      ),
+                    if (canManageInvoices)
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.analytics_outlined,
+                        title: 'Báo cáo tài chính & Sổ quỹ',
+                        subtitle:
+                            'Báo cáo doanh thu, công nợ lũy kế và quỹ bảo trì 2%',
+                        color: Colors.indigo,
+                        onTap: () => context.push(
+                          AppRoutes.managementFinancialReport,
+                        ),
+                      ),
+
+                    const SizedBox(height: 14),
+                    // Nhóm 3: Truyền thông & Cư dân
+                    _buildSheetSectionHeader(
+                      context,
+                      'Truyền thông & Cư dân',
+                      Icons.campaign_outlined,
                     ),
                     if (isAdmin)
                       _buildSheetActionItem(
                         context: context,
                         icon: Icons.person_add_outlined,
-                        title: 'Duyệt liên kết',
+                        title: 'Duyệt liên kết căn hộ',
                         subtitle:
                             'Phê duyệt tài khoản cư dân liên kết căn hộ',
                         color: AppTheme.primary,
@@ -138,6 +297,26 @@ void showAllQuickActionsSheet(
                       onTap: () =>
                           context.push(AppRoutes.managementHandovers),
                     ),
+                    _buildSheetActionItem(
+                      context: context,
+                      icon: Icons.campaign_rounded,
+                      title: 'Bảng tin thông báo',
+                      subtitle:
+                          'Soạn và phát thông báo tin tức, lịch cắt điện nước',
+                      color: AppTheme.primary,
+                      onTap: () =>
+                          context.push(AppRoutes.managementAnnouncements),
+                    ),
+                    _buildSheetActionItem(
+                      context: context,
+                      icon: Icons.how_to_vote_outlined,
+                      title: 'Cộng đồng & Biểu quyết',
+                      subtitle:
+                          'Biểu quyết điện tử Luật Nhà ở & Xử lý kiến nghị',
+                      color: Colors.blueGrey,
+                      onTap: () =>
+                          context.push(AppRoutes.managementCommunity),
+                    ),
                     if (canManageHandbook)
                       _buildSheetActionItem(
                         context: context,
@@ -147,145 +326,6 @@ void showAllQuickActionsSheet(
                         color: Colors.indigo,
                         onTap: () =>
                             context.push(AppRoutes.managementHandbook),
-                      ),
-
-                    const SizedBox(height: 12),
-                    // Nhóm 2: Tài chính & Thu phí
-                    _buildSheetSectionHeader(
-                      context,
-                      'Tài chính & Thu phí',
-                      Icons.account_balance_wallet_outlined,
-                    ),
-                    if (canManageInvoices)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.receipt_long,
-                        title: 'Lập hóa đơn',
-                        subtitle:
-                            'Tạo phiếu thu phí quản lý, điện, nước hàng tháng',
-                        color: AppTheme.secondary,
-                        onTap: () =>
-                            context.push(AppRoutes.managementCreateInvoice),
-                      ),
-                    if (canManageMeterReadings)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.speed_outlined,
-                        title: 'Duyệt chỉ số điện nước',
-                        subtitle:
-                            'Kiểm tra và phê duyệt số điện nước công tơ',
-                        color: Colors.orange.shade900,
-                        badgeCount: pendingMeterCount,
-                        onTap: () async {
-                          await context.push(
-                            AppRoutes.managementMeterReading,
-                          );
-                          ref.invalidate(pendingMeterReadingsCountProvider);
-                        },
-                      ),
-                    if (canViewPaymentTransactions)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.receipt_long_outlined,
-                        title: 'Lịch sử giao dịch',
-                        subtitle:
-                            'Theo dõi dòng tiền và đối soát chuyển khoản VietQR',
-                        color: Colors.deepPurple,
-                        onTap: () => context.push(
-                          AppRoutes.managementPaymentTransactions,
-                        ),
-                      ),
-
-                    const SizedBox(height: 12),
-                    // Nhóm 3: Vận hành & Kỹ thuật
-                    _buildSheetSectionHeader(
-                      context,
-                      'Vận hành & Kỹ thuật',
-                      Icons.build_circle_outlined,
-                    ),
-                    if (canManageIssues)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.report_problem_outlined,
-                        title: 'Xử lý sự cố',
-                        subtitle:
-                            'Tiếp nhận, phân công và khắc phục phản ánh cư dân',
-                        color: Colors.orange,
-                        badgeCount: pendingIssuesCount,
-                        onTap: () => context.push(AppRoutes.managementIssues),
-                      ),
-                    if (canManageAmenities)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.pool_outlined,
-                        title: 'Tiện ích chung',
-                        subtitle:
-                            'Hồ bơi, sân tennis, BBQ và kiểm soát lượt đặt chỗ',
-                        color: Colors.teal.shade700,
-                        onTap: () =>
-                            context.push(AppRoutes.managementAmenities),
-                      ),
-                    if (canManageEquipment)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.precision_manufacturing_outlined,
-                        title: 'Bảo trì thiết bị',
-                        subtitle:
-                            'Lập lịch và theo dõi bảo dưỡng thang máy, máy phát điện',
-                        color: Colors.deepOrange,
-                        onTap: () =>
-                            context.push(AppRoutes.managementEquipment),
-                      ),
-                    if (canApproveVehicles)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.two_wheeler_outlined,
-                        title: 'Duyệt phương tiện',
-                        subtitle:
-                            'Xét duyệt hồ sơ gửi xe máy, ô tô của cư dân',
-                        color: Colors.blueGrey,
-                        onTap: () =>
-                            context.push(AppRoutes.managementVehicleApproval),
-                      ),
-                    _buildSheetActionItem(
-                      context: context,
-                      icon: Icons.local_parking_rounded,
-                      title: 'Bãi xe & Ô đỗ',
-                      subtitle:
-                          'Sơ đồ ô đỗ hầm, kiểm soát sức chứa và trạm soát vé',
-                      color: Colors.blue.shade700,
-                      onTap: () => context.push(AppRoutes.managementParking),
-                    ),
-                    _buildSheetActionItem(
-                      context: context,
-                      icon: Icons.desk_outlined,
-                      title: 'Lễ tân & An ninh sảnh',
-                      subtitle:
-                          'Quét QR đón khách, tiếp nhận bưu kiện shipper và tra cứu mã PIN',
-                      color: Colors.deepOrange,
-                      onTap: () =>
-                          context.push(AppRoutes.managementFrontDesk),
-                    ),
-                    _buildSheetActionItem(
-                      context: context,
-                      icon: Icons.how_to_vote_outlined,
-                      title: 'Cộng đồng & Biểu quyết',
-                      subtitle:
-                          'Tổ chức biểu quyết điện tử Luật Nhà ở 2023 & Xử lý kiến nghị cư dân',
-                      color: Colors.blueGrey,
-                      onTap: () =>
-                          context.push(AppRoutes.managementCommunity),
-                    ),
-                    if (canManageIssues)
-                      _buildSheetActionItem(
-                        context: context,
-                        icon: Icons.inventory_2_outlined,
-                        title: 'Kho vật tư kỹ thuật',
-                        subtitle:
-                            'Định mức tồn, xuất kho bảo trì & trừ kho theo sự cố',
-                        color: Colors.teal,
-                        onTap: () =>
-                            context.push(AppRoutes.managementMaterials),
                       ),
                     if (canManageIssues)
                       _buildSheetActionItem(
@@ -298,6 +338,46 @@ void showAllQuickActionsSheet(
                         onTap: () =>
                             context.push(AppRoutes.managementServiceRatings),
                       ),
+
+                    const SizedBox(height: 14),
+                    // Nhóm 4: Hệ thống & Thiết lập
+                    _buildSheetSectionHeader(
+                      context,
+                      'Hệ thống & Thiết lập',
+                      Icons.tune_outlined,
+                    ),
+                    if (isAdmin) ...[
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.upload_file_outlined,
+                        title: 'Nhập Excel cư dân & căn hộ',
+                        subtitle:
+                            'Nhập dữ liệu hàng loạt từ file bảng tính Excel',
+                        color: Colors.teal,
+                        onTap: () =>
+                            context.push(AppRoutes.managementBatchImport),
+                      ),
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.badge_outlined,
+                        title: 'Danh sách kích hoạt',
+                        subtitle:
+                            'Theo dõi mã kích hoạt định danh tài khoản cư dân',
+                        color: Colors.indigo,
+                        onTap: () =>
+                            context.push(AppRoutes.managementActivationList),
+                      ),
+                      _buildSheetActionItem(
+                        context: context,
+                        icon: Icons.card_membership_outlined,
+                        title: 'Gói cước SaaS tòa nhà',
+                        subtitle:
+                            'Quản lý gói dịch vụ và thời hạn bản quyền phần mềm',
+                        color: Colors.purple,
+                        onTap: () =>
+                            context.push(AppRoutes.managementSubscription),
+                      ),
+                    ],
                     if (canManageRoleDelegations)
                       _buildSheetActionItem(
                         context: context,
