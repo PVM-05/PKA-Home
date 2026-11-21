@@ -1,10 +1,13 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_text_field.dart';
 import '../../../data/providers/resident_activation_provider.dart';
 
 class ResidentActivationScreen extends ConsumerStatefulWidget {
@@ -80,7 +83,10 @@ class _ResidentActivationScreenState
     final notifier = ref.read(residentActivationProvider.notifier);
 
     // Lắng nghe khi chuyển bước để xử lý timer
-    ref.listen<ResidentActivationState>(residentActivationProvider, (prev, next) {
+    ref.listen<ResidentActivationState>(residentActivationProvider, (
+      prev,
+      next,
+    ) {
       if (prev?.currentStep != ActivationStep.enterOtp &&
           next.currentStep == ActivationStep.enterOtp) {
         _startOtpTimer();
@@ -91,11 +97,12 @@ class _ResidentActivationScreenState
         _countdownTimer?.cancel();
       }
 
-      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
+      if (next.errorMessage != null &&
+          next.errorMessage != prev?.errorMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
-            backgroundColor: AppTheme.error,
+            backgroundColor: AppTheme.textError,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -106,11 +113,11 @@ class _ResidentActivationScreenState
       appBar: AppBar(
         title: const Text('Kích Hoạt Tài Khoản'),
         leading: IconButton(
+          tooltip: 'Quay lại',
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            if (state.currentStep == ActivationStep.enterOtp) {
-              notifier.reset();
-            } else if (state.currentStep == ActivationStep.setPassword) {
+            if (state.currentStep == ActivationStep.enterOtp ||
+                state.currentStep == ActivationStep.setPassword) {
               notifier.reset();
             } else {
               context.pop();
@@ -127,19 +134,22 @@ class _ResidentActivationScreenState
             if (isDesktop) {
               return Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 32,
+                  ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1100),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Cột trái: Hero Brand Showcase
                         Expanded(
                           flex: 5,
                           child: _buildHeroShowcase(context),
                         ),
                         const SizedBox(width: 32),
-                        // Cột phải: Form kích hoạt 4 bước
                         Expanded(
                           flex: 6,
                           child: Column(
@@ -148,10 +158,14 @@ class _ResidentActivationScreenState
                               _buildStepIndicator(state.currentStep),
                               const SizedBox(height: 28),
                               switch (state.currentStep) {
-                                ActivationStep.enterCode => _buildStep1EnterCode(state, notifier),
-                                ActivationStep.enterOtp => _buildStep2EnterOtp(state, notifier),
-                                ActivationStep.setPassword => _buildStep3SetPassword(state, notifier),
-                                ActivationStep.completed => _buildStep4Completed(state),
+                                ActivationStep.enterCode =>
+                                  _buildStep1EnterCode(state, notifier),
+                                ActivationStep.enterOtp =>
+                                  _buildStep2EnterOtp(state, notifier),
+                                ActivationStep.setPassword =>
+                                  _buildStep3SetPassword(state, notifier),
+                                ActivationStep.completed =>
+                                  _buildStep4Completed(state),
                               },
                             ],
                           ),
@@ -166,21 +180,29 @@ class _ResidentActivationScreenState
             // Bố cục Mobile (< 900dp)
             return Center(
               child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsets.all(contentPadding),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Thanh tiến trình 4 bước
                       _buildStepIndicator(state.currentStep),
                       const SizedBox(height: 28),
-
-                      // Nội dung từng bước
                       switch (state.currentStep) {
-                        ActivationStep.enterCode => _buildStep1EnterCode(state, notifier),
-                        ActivationStep.enterOtp => _buildStep2EnterOtp(state, notifier),
-                        ActivationStep.setPassword => _buildStep3SetPassword(state, notifier),
+                        ActivationStep.enterCode => _buildStep1EnterCode(
+                          state,
+                          notifier,
+                        ),
+                        ActivationStep.enterOtp => _buildStep2EnterOtp(
+                          state,
+                          notifier,
+                        ),
+                        ActivationStep.setPassword => _buildStep3SetPassword(
+                          state,
+                          notifier,
+                        ),
                         ActivationStep.completed => _buildStep4Completed(state),
                       },
                     ],
@@ -224,10 +246,10 @@ class _ResidentActivationScreenState
               Text(
                 'Vivona',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
               ),
             ],
           ),
@@ -244,13 +266,21 @@ class _ResidentActivationScreenState
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.verified_user_rounded, size: 14, color: AppTheme.sapphire),
+                const Icon(
+                  Icons.verified_user_rounded,
+                  size: 14,
+                  color: AppTheme.darkTextSecondaryAction,
+                ),
                 const SizedBox(width: 6),
-                Text(
-                  'Cổng Kích Hoạt Cư Dân Số Hóa',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    'Cổng Kích Hoạt Cư Dân Số Hóa',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -260,16 +290,16 @@ class _ResidentActivationScreenState
           Text(
             'Chào Mừng Cư Dân Đến Với\nKhông Gian Sống Thông Minh',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              height: 1.3,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             'Kích hoạt tài khoản để tiếp nhận mã căn hộ số hóa, tra cứu chỉ số điện nước minh bạch, nhận thông báo kịp thời và thanh toán phí dịch vụ tiện lợi.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white70,
+              color: Colors.white.withValues(alpha: 0.78),
               height: 1.5,
             ),
           ),
@@ -315,9 +345,13 @@ class _ResidentActivationScreenState
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
           ),
-          child: Icon(icon, size: 18, color: AppTheme.sapphire),
+          child: Icon(
+            icon,
+            size: 18,
+            color: AppTheme.darkTextSecondaryAction,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -335,7 +369,7 @@ class _ResidentActivationScreenState
               Text(
                 desc,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white70,
+                  color: Colors.white.withValues(alpha: 0.78),
                 ),
               ),
             ],
@@ -347,6 +381,9 @@ class _ResidentActivationScreenState
 
   // --- WIDGET TIẾN TRÌNH 4 BƯỚC ---
   Widget _buildStepIndicator(ActivationStep currentStep) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final paidColor = AppStatusColors.getPaid(context);
     final steps = [
       {'title': 'Mã mời', 'step': ActivationStep.enterCode},
       {'title': 'Xác thực', 'step': ActivationStep.enterOtp},
@@ -365,7 +402,9 @@ class _ResidentActivationScreenState
             child: Container(
               height: 2,
               margin: const EdgeInsets.only(bottom: 18),
-              color: isPassed ? AppTheme.primary : Colors.grey.shade300,
+              color: isPassed
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant,
             ),
           );
         }
@@ -384,14 +423,18 @@ class _ResidentActivationScreenState
                 radius: 13,
                 backgroundColor: isCurrent
                     ? AppTheme.primary
-                    : (isActive ? AppTheme.success : Colors.grey.shade300),
+                    : (isActive
+                          ? paidColor
+                          : colorScheme.surfaceContainerHighest),
                 child: isActive && !isCurrent
                     ? const Icon(Icons.check, size: 15, color: Colors.white)
                     : Text(
                         '${stepIndex + 1}',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isActive ? Colors.white : Colors.grey.shade700,
+                          color: isActive
+                              ? Colors.white
+                              : colorScheme.onSurfaceVariant,
                         ),
                       ),
               ),
@@ -401,9 +444,11 @@ class _ResidentActivationScreenState
                 child: Text(
                   stepItem['title'] as String,
                   maxLines: 1,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                    color: isCurrent ? AppTheme.primary : AppTheme.textSecondary,
+                    color: isCurrent
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -419,6 +464,10 @@ class _ResidentActivationScreenState
     ResidentActivationState state,
     ResidentActivationNotifier notifier,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return AppCard(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -429,10 +478,16 @@ class _ResidentActivationScreenState
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  color: colorScheme.primary.withValues(
+                    alpha: isDark ? 0.2 : 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.key_rounded, color: AppTheme.primary, size: 24),
+                child: Icon(
+                  Icons.key_rounded,
+                  color: colorScheme.primary,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -441,14 +496,14 @@ class _ResidentActivationScreenState
                   children: [
                     Text(
                       'Kích hoạt lần đầu',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       'Dành cho cư dân mới nhận bàn giao nhà',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -459,38 +514,37 @@ class _ResidentActivationScreenState
           const Divider(height: 28),
           Text(
             'Nhập Số điện thoại đã đăng ký với Ban Quản Lý và Mã kích hoạt trong thư mời hoặc phiếu bàn giao căn hộ.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               height: 1.4,
-              color: AppTheme.textPrimary,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 20),
 
-          TextField(
+          AppTextField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Số điện thoại cư dân (*)',
-              hintText: 'VD: 0901234567',
-              prefixIcon: Icon(Icons.phone_outlined),
-            ),
+            labelText: 'Số điện thoại cư dân (*)',
+            hintText: 'VD: 0901234567',
+            prefixIcon: const Icon(Icons.phone_outlined),
           ),
           const SizedBox(height: 16),
 
-          TextField(
+          AppTextField(
             controller: _activationCodeController,
             textCapitalization: TextCapitalization.characters,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(
-              labelText: 'Mã kích hoạt (*)',
-              hintText: 'VD: ACT-123456',
-              prefixIcon: Icon(Icons.confirmation_number_outlined),
-            ),
+            labelText: 'Mã kích hoạt (*)',
+            hintText: 'VD: ACT-123456',
+            prefixIcon: const Icon(Icons.confirmation_number_outlined),
           ),
           const SizedBox(height: 24),
 
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
             onPressed: state.isLoading
                 ? null
                 : () {
@@ -503,29 +557,38 @@ class _ResidentActivationScreenState
                 ? const SizedBox(
                     height: 20,
                     width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text('Tiếp tục xác thực OTP'),
                   ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           Center(
             child: TextButton(
+              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
               onPressed: () {
-                showDialog(
+                showDialog<void>(
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Hướng dẫn nhận mã kích hoạt'),
                     content: Text(
-                      'Mã kích hoạt (Activation Code) được cấp riêng cho từng cư dân khi nhận bàn giao căn hộ hoặc gửi qua tin nhắn SMS/Zalo từ Ban Quản Lý.\n\n'
+                      'Mã kích hoạt được cấp riêng cho từng cư dân khi nhận bàn giao căn hộ hoặc gửi qua tin nhắn SMS/Zalo từ Ban Quản Lý.\n\n'
                       'Nếu bạn chưa nhận được mã, vui lòng liên hệ trực tiếp Văn phòng Quản lý hoặc Hotline tòa nhà.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.bodySmall?.copyWith(height: 1.4),
                     ),
                     actions: [
                       TextButton(
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(64, 48),
+                        ),
                         onPressed: () => Navigator.pop(ctx),
                         child: const Text('Đã hiểu'),
                       ),
@@ -543,7 +606,9 @@ class _ResidentActivationScreenState
                       'Chưa có mã kích hoạt? Liên hệ BQL',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
                 ],
@@ -560,22 +625,28 @@ class _ResidentActivationScreenState
     ResidentActivationState state,
     ResidentActivationNotifier notifier,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final paidColor = AppStatusColors.getPaid(context);
+
     return AppCard(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Thẻ thông tin căn hộ nhận diện
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppTheme.success.withValues(alpha: 0.08),
+              color: paidColor.withValues(alpha: isDark ? 0.16 : 0.08),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.success.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: paidColor.withValues(alpha: isDark ? 0.4 : 0.25),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.check_circle_outline, color: AppTheme.success, size: 28),
+                Icon(Icons.check_circle_outline, color: paidColor, size: 28),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -583,15 +654,15 @@ class _ResidentActivationScreenState
                     children: [
                       Text(
                         'Chào mừng, ${state.fullName ?? "Cư dân"}!',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Hồ sơ gắn liền Căn hộ ${state.apartmentCode ?? ""}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.success,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: paidColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -605,9 +676,9 @@ class _ResidentActivationScreenState
 
           Text(
             state.otpHint != null
-                ? 'Môi trường phát triển: Mã OTP tự động điền (${state.otpHint}). Trên môi trường Production, hệ thống yêu cầu kết nối cổng SMS Brandname của Ban Quản Lý.'
+                ? 'Môi trường phát triển: Mã OTP tự động điền (${state.otpHint}). Trên môi trường vận hành thực tế, hệ thống gửi mã qua cổng SMS Brandname của Ban Quản Lý.'
                 : 'Vui lòng nhập mã OTP 6 chữ số để xác nhận quyền sử dụng.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
+            style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
           ),
           const SizedBox(height: 20),
 
@@ -616,31 +687,43 @@ class _ResidentActivationScreenState
             keyboardType: TextInputType.number,
             maxLength: 6,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.headlineMedium?.copyWith(
               letterSpacing: 8,
               fontWeight: FontWeight.bold,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Mã xác thực OTP',
               counterText: '',
-              prefixIcon: Icon(Icons.security),
+              filled: true,
+              fillColor: colorScheme.surfaceContainerLow,
+              prefixIcon: const Icon(Icons.security),
+              border: OutlineInputBorder(
+                borderRadius: AppTheme.radiusMd,
+                borderSide: BorderSide(color: colorScheme.outlineVariant),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: AppTheme.radiusMd,
+                borderSide: BorderSide(color: colorScheme.outlineVariant),
+              ),
             ),
           ),
           const SizedBox(height: 12),
 
-          // Bộ đếm thời gian hoặc nút gửi lại
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (!_canResendOtp)
                 Text(
                   'Gửi lại mã sau ${_secondsRemaining}s',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 )
               else
                 TextButton.icon(
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
                   icon: const Icon(Icons.refresh, size: 16),
                   label: const Text('Gửi lại mã OTP'),
                   onPressed: state.isLoading ? null : () => notifier.resendOtp(),
@@ -650,6 +733,9 @@ class _ResidentActivationScreenState
           const SizedBox(height: 20),
 
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
             onPressed: state.isLoading
                 ? null
                 : () => notifier.submitOtp(_otpController.text),
@@ -657,7 +743,10 @@ class _ResidentActivationScreenState
                 ? const SizedBox(
                     height: 20,
                     width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const FittedBox(
                     fit: BoxFit.scaleDown,
@@ -674,6 +763,9 @@ class _ResidentActivationScreenState
     ResidentActivationState state,
     ResidentActivationNotifier notifier,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return AppCard(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -681,69 +773,76 @@ class _ResidentActivationScreenState
         children: [
           Text(
             'Thiết lập mật khẩu đăng nhập',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             'Mật khẩu này sẽ được dùng để đăng nhập vào ứng dụng Vivona trong các lần tiếp theo.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.textSecondary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           const Divider(height: 24),
 
-          TextField(
+          AppTextField(
             controller: _passwordController,
             obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Mật khẩu mới (tối thiểu 6 ký tự) (*)',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: AppTheme.textSecondary,
-                ),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            labelText: 'Mật khẩu mới (tối thiểu 6 ký tự) (*)',
+            prefixIcon: const Icon(Icons.lock_outline),
+            textInputAction: TextInputAction.next,
+            suffixIcon: IconButton(
+              tooltip: _obscurePassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              icon: Icon(
+                _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                color: colorScheme.onSurfaceVariant,
               ),
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
           const SizedBox(height: 16),
 
-          TextField(
+          AppTextField(
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
-            decoration: InputDecoration(
-              labelText: 'Xác nhận lại mật khẩu (*)',
-              prefixIcon: const Icon(Icons.lock_reset_outlined),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureConfirmPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: AppTheme.textSecondary,
-                ),
-                onPressed: () =>
-                    setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+            labelText: 'Xác nhận lại mật khẩu (*)',
+            prefixIcon: const Icon(Icons.lock_reset_outlined),
+            textInputAction: TextInputAction.done,
+            suffixIcon: IconButton(
+              tooltip: _obscureConfirmPassword
+                  ? 'Hiện mật khẩu xác nhận'
+                  : 'Ẩn mật khẩu xác nhận',
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              icon: Icon(
+                _obscureConfirmPassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              onPressed: () => setState(
+                () => _obscureConfirmPassword = !_obscureConfirmPassword,
               ),
             ),
           ),
           const SizedBox(height: 16),
 
-          // Cờ bật sinh trắc học
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             title: Text(
               'Bật đăng nhập Sinh trắc học (Face ID / Vân tay)',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             subtitle: Text(
               'Cho phép mở khóa nhanh và bảo mật cho thiết bị này',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppTheme.textSecondary,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             value: state.isBiometricEnabled,
@@ -751,30 +850,37 @@ class _ResidentActivationScreenState
           ),
           const SizedBox(height: 8),
 
-          // Điều khoản quy chế chung cư
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: state.agreedToTerms,
-                onChanged: (val) => notifier.setAgreedToTerms(val ?? false),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(
-                    'Tôi đã đọc, hiểu rõ và đồng ý tuân thủ Nội quy & Quy chế quản lý sử dụng chung cư Vivona.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      height: 1.3,
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => notifier.setAgreedToTerms(!state.agreedToTerms),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: state.agreedToTerms,
+                    onChanged: (val) => notifier.setAgreedToTerms(val ?? false),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Text(
+                        'Tôi đã đọc, hiểu rõ và đồng ý tuân thủ Nội quy & Quy chế quản lý sử dụng chung cư Vivona.',
+                        style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
           const SizedBox(height: 20),
 
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+            ),
             onPressed: state.isLoading
                 ? null
                 : () {
@@ -787,7 +893,10 @@ class _ResidentActivationScreenState
                 ? const SizedBox(
                     height: 20,
                     width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const FittedBox(
                     fit: BoxFit.scaleDown,
@@ -801,6 +910,11 @@ class _ResidentActivationScreenState
 
   // --- BƯỚC 4: KÍCH HOẠT THÀNH CÔNG ---
   Widget _buildStep4Completed(ResidentActivationState state) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final paidColor = AppStatusColors.getPaid(context);
+
     return AppCard(
       padding: const EdgeInsets.all(28.0),
       child: Column(
@@ -809,16 +923,16 @@ class _ResidentActivationScreenState
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: AppTheme.success.withValues(alpha: 0.12),
+              color: paidColor.withValues(alpha: isDark ? 0.2 : 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.verified, size: 64, color: AppTheme.success),
+            child: Icon(Icons.verified, size: 64, color: paidColor),
           ),
           const SizedBox(height: 20),
 
           Text(
             'Kích Hoạt Thành Công!',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
@@ -827,9 +941,9 @@ class _ResidentActivationScreenState
           Text(
             'Tài khoản của cư dân ${state.fullName ?? ""} đã được kết nối chính thức với Căn hộ ${state.apartmentCode ?? ""}.',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: theme.textTheme.bodySmall?.copyWith(
               height: 1.4,
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),
@@ -837,9 +951,11 @@ class _ResidentActivationScreenState
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey.shade200),
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+                  : colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Column(
               children: [
@@ -859,10 +975,12 @@ class _ResidentActivationScreenState
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
               icon: const Icon(Icons.home),
               label: const Text('Bắt đầu trải nghiệm ngay'),
               onPressed: () {
-                // Chuyển về màn hình đăng nhập hoặc vào trang chủ cư dân
                 context.go(AppRoutes.login);
               },
             ),
@@ -873,23 +991,26 @@ class _ResidentActivationScreenState
   }
 
   Widget _buildSummaryRow(String label, String value) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.textSecondary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ),
         const SizedBox(width: 8),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+            color: colorScheme.onSurface,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],
