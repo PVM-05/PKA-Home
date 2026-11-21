@@ -19,7 +19,7 @@ final notificationsStreamProvider = StreamProvider.autoDispose<List<Notification
 /// Số lượng thông báo chưa đọc của người dùng hiện tại
 final unreadNotificationsCountProvider = Provider.autoDispose<int>((ref) {
   final notificationsAsync = ref.watch(notificationsStreamProvider);
-  return notificationsAsync.value?.where((n) => !n.isRead).length ?? 0;
+  return notificationsAsync.valueOrNull?.where((n) => !n.isRead).length ?? 0;
 });
 
 /// Bộ lọc loại thông báo hiện tại: 'ALL', 'UNREAD', 'INVOICE', 'BUILDING'
@@ -30,7 +30,7 @@ final filteredNotificationsProvider = Provider.autoDispose<List<NotificationMode
   final notificationsAsync = ref.watch(notificationsStreamProvider);
   final filter = ref.watch(notificationFilterTypeProvider);
 
-  final list = notificationsAsync.value ?? [];
+  final list = notificationsAsync.valueOrNull ?? [];
   switch (filter) {
     case 'UNREAD':
       return list.where((n) => !n.isRead).toList();

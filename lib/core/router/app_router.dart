@@ -548,6 +548,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
+            path: 'notifications',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const NotificationCenterScreen(),
+            ),
+          ),
+          GoRoute(
             path: 'role-delegation',
             pageBuilder: (context, state) =>
                 AppPageTransitions.slideFromRight(

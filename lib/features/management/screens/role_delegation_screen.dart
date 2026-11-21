@@ -206,8 +206,8 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                     onPressed: () => _confirmRevoke(item),
                                     style: TextButton.styleFrom(
                                       foregroundColor: AppTheme.error,
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: const Size(50, 30),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      minimumSize: const Size(64, 48),
                                     ),
                                     child: const Text('Thu hồi'),
                                   ),

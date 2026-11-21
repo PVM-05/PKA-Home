@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
@@ -12,7 +14,6 @@ import '../../../data/models/building_amenity_model.dart';
 import '../../../data/models/amenity_booking_model.dart';
 import '../../../data/providers/handbook_provider.dart';
 import '../../../data/providers/amenity_booking_provider.dart';
-import 'amenity_booking_screen.dart';
 
 /// Màn hình Quản lý & Đặt lịch Tiện ích chung dành cho Cư dân.
 /// Tách biệt độc lập khỏi Cẩm nang theo kiến trúc thông tin (IA) 2026:
@@ -242,12 +243,7 @@ class _ResidentAmenitiesScreenState extends ConsumerState<ResidentAmenitiesScree
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AmenityBookingScreen(amenity: amenity),
-                  ),
-                );
+                context.push(AppRoutes.residentAmenityBooking, extra: amenity);
               },
             ),
           ),

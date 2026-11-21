@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../../core/services/push_notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/models/notification_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/notification_provider.dart';
-import 'resident_invoice_screen.dart';
-import 'resident_issue_screen.dart';
 
 /// Màn hình Trung tâm Thông báo & Nhắc nhở dành cho Cư dân.
 class NotificationCenterScreen extends ConsumerStatefulWidget {
@@ -269,16 +269,12 @@ class _NotificationCard extends ConsumerWidget {
     final badgeText = _getStatusBadgeText();
 
     final cardBgColor = isUnread
-        ? (isDark ? theme.colorScheme.surface : Colors.white)
-        : (isDark
-              ? theme.colorScheme.surface.withValues(alpha: 0.6)
-              : Colors.grey.shade50);
+        ? theme.colorScheme.surface
+        : theme.colorScheme.surfaceContainerLow;
 
     final borderColor = isUnread
         ? iconColor.withValues(alpha: 0.5)
-        : (isDark
-              ? theme.dividerColor.withValues(alpha: 0.2)
-              : Colors.grey.shade200);
+        : theme.colorScheme.outlineVariant;
 
     return Card(
       elevation: 0,
@@ -297,14 +293,15 @@ class _NotificationCard extends ConsumerWidget {
           }
           if (!context.mounted) return;
 
-          if (notification.isInvoiceReminder) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ResidentInvoiceScreen()),
-            );
-          } else if (notification.type == 'issue_update') {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ResidentIssueScreen()),
-            );
+          final currentUser = ref.read(authProvider).valueOrNull;
+          final targetRoute = ref
+              .read(pushNotificationServiceProvider)
+              .resolveRouteFromNotification(
+                {'type': notification.type},
+                currentUser?.role,
+              );
+          if (targetRoute.isNotEmpty) {
+            context.push(targetRoute);
           }
         },
         child: Padding(

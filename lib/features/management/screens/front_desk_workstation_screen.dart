@@ -428,13 +428,13 @@ class _FrontDeskWorkstationScreenState
                                 onPressed: () =>
                                     _processVisitorCode(pass.passCode),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: AppStatusColors.paid,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
+                                    horizontal: 14,
+                                    vertical: 10,
                                   ),
-                                  minimumSize: const Size(60, 32),
+                                  minimumSize: const Size(72, 48),
                                 ),
                                 child: Text(
                                   'Vào',
@@ -454,15 +454,15 @@ class _FrontDeskWorkstationScreenState
                                   ref.invalidate(frontDeskStatsProvider);
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.orange.shade800,
+                                  foregroundColor: AppTheme.getSemanticWarning(context),
                                   side: BorderSide(
-                                    color: Colors.orange.shade800,
+                                    color: AppTheme.getSemanticWarning(context),
                                   ),
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
+                                    horizontal: 14,
+                                    vertical: 10,
                                   ),
-                                  minimumSize: const Size(60, 32),
+                                  minimumSize: const Size(72, 48),
                                 ),
                                 child: Text(
                                   'Rời tòa',
@@ -667,10 +667,10 @@ class _FrontDeskWorkstationScreenState
                                   backgroundColor: AppTheme.primary,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
+                                    horizontal: 14,
+                                    vertical: 10,
                                   ),
-                                  minimumSize: const Size(60, 32),
+                                  minimumSize: const Size(72, 48),
                                 ),
                               ),
                           ],

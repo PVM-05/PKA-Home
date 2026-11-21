@@ -50,6 +50,7 @@ class AppRoutes {
   static const String managementLinkRequests = '/management/link-requests';
   static const String managementHandbook = '/management/handbook';
   static const String managementAuditTrail = '/management/audit-trail';
+  static const String managementNotifications = '/management/notifications';
   static const String managementRoleDelegation = '/management/role-delegation';
   static const String managementPermissionMatrix = '/management/permission-matrix';
   static const String managementServiceRatings = '/management/service-ratings';

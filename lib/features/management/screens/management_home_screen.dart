@@ -448,8 +448,28 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   ),
                   child: const BuildingSwitcherDropdown(),
                 ),
+                if (MediaQuery.sizeOf(context).width >= 360)
+                  Builder(
+                    builder: (context) {
+                      final unreadNotifs =
+                          ref.watch(unreadNotificationsCountProvider);
+                      return IconButton(
+                        tooltip: 'Hộp thư thông báo',
+                        onPressed: () {
+                          context.push(AppRoutes.managementNotifications);
+                        },
+                        icon: Badge(
+                          isLabelVisible: unreadNotifs > 0,
+                          label: Text(
+                            unreadNotifs > 99 ? '99+' : '$unreadNotifs',
+                          ),
+                          child: const Icon(Icons.notifications_outlined),
+                        ),
+                      );
+                    },
+                  ),
                 if (canViewAuditTrail &&
-                    MediaQuery.sizeOf(context).width >= 360)
+                    MediaQuery.sizeOf(context).width >= 400)
                   IconButton(
                     icon: const Icon(Icons.history),
                     onPressed: () {
@@ -1348,11 +1368,10 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              minimumSize: const Size(80, 34),
-              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              minimumSize: const Size(88, 48),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
             onPressed: onAction,
