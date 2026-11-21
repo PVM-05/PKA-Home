@@ -29,7 +29,7 @@
 - [x] **1.4** `lib/core/widgets/unified_payment_sheet.dart` *(Tier 1)* — Cổng thanh toán VietQR / VNPay *(+ dọn ~40 màu cứng & tách bước)*
 - [x] **1.5** `lib/features/resident/screens/resident_issue_screen.dart` *(Tier 2)* — Danh sách Phản ánh & Sự cố
 - [x] **1.6** `lib/features/resident/screens/create_issue_screen.dart` & `edit_issue_screen.dart` *(Tier 2)* — Biểu mẫu gửi/sửa sự cố (`AppFormScaffold` & `AppTextField`)
-- [ ] **1.7** `lib/features/resident/screens/issue_detail_screen.dart` *(Tier 2)* — Tiến độ xử lý & trao đổi BQL *(+ dọn 34 màu cứng & tách timeline/comment)*
+- [x] **1.7** `lib/features/resident/screens/issue_detail_screen.dart` *(Tier 2)* — Tiến độ xử lý & trao đổi BQL *(+ dọn 34 màu cứng & tách timeline/comment)*
 
 ---
 

@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
 import '../../../core/theme/app_theme.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/photo_viewer_screen.dart';
-import '../../../core/widgets/app_storage_image.dart';
-import '../../../core/widgets/app_avatar.dart';
-import '../../../data/models/issue_model.dart';
-import '../../../data/providers/material_provider.dart';
 import '../../../data/models/issue_comment_model.dart';
+import '../../../data/models/issue_model.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/issue_comment_provider.dart';
 import '../../../data/providers/issue_rating_provider.dart';
 import '../../../data/repositories/issue_repository.dart';
-import '../widgets/issue_rating_bottom_sheet.dart';
-import '../../../core/utils/error_formatter.dart';
+import '../widgets/issue/issue_comment_section.dart';
+import '../widgets/issue/issue_detail_header_card.dart';
+import '../widgets/issue/issue_materials_card.dart';
+import '../widgets/issue/issue_rating_section.dart';
+import '../widgets/issue/issue_status_timeline.dart';
 
-/// Màn hình chi tiết phản ánh sự cố với timeline trạng thái và hệ thống comment.
-/// Hỗ trợ chuẩn B2B SaaS Impeccable Taste:
+/// Màn hình chi tiết phản ánh sự cố với timeline trạng thái và hệ thống trao đổi.
 /// - Desktop (>= 900dp): Split-Screen 2 cột (Cột trái: Thông tin & Tiến trình; Cột phải: Hộp trao đổi).
 /// - Mobile (< 900dp): Bố cục dọc tối ưu chống tràn 100% trên 320dp (Text Zoom 1.3x).
 class IssueDetailScreen extends ConsumerStatefulWidget {
@@ -76,7 +73,6 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
             content: content,
           );
       _commentController.clear();
-      // Scroll xuống cuối sau khi gửi comment
       Future.delayed(const Duration(milliseconds: 300), () {
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
@@ -91,7 +87,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
+            backgroundColor: AppTheme.textError,
           ),
         );
       }
@@ -105,7 +101,6 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
     final commentsAsync = ref.watch(issueCommentsProvider(widget.issue.id));
     final ratingAsync = ref.watch(issueRatingProvider(widget.issue.id));
     final currentUser = ref.watch(authProvider).valueOrNull;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = !widget.isEmbedded && screenWidth >= 900;
 
@@ -115,17 +110,18 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
         title: const Text('Chi tiết phản ánh'),
       ),
       body: isDesktop
-          ? _buildDesktopLayout(commentsAsync, ratingAsync, currentUser, isDark)
-          : _buildMobileLayout(commentsAsync, ratingAsync, currentUser, isDark),
+          ? _buildDesktopLayout(commentsAsync, ratingAsync, currentUser?.id)
+          : _buildMobileLayout(commentsAsync, ratingAsync, currentUser?.id),
     );
   }
 
   Widget _buildDesktopLayout(
     AsyncValue<List<IssueCommentModel>> commentsAsync,
     AsyncValue<IssueRatingModel?> ratingAsync,
-    dynamic currentUser,
-    bool isDark,
+    String? currentUserId,
   ) {
+    final isReporter = currentUserId == widget.issue.reporterId;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1200),
@@ -139,27 +135,31 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 width: 520,
                 child: ListView(
                   children: [
-                    _buildIssueHeader(isDark),
+                    IssueDetailHeaderCard(issue: widget.issue),
                     const SizedBox(height: 16),
                     if (widget.issue.reportImages.isNotEmpty) ...[
-                      _buildImageSection(
-                        'Ảnh phản ánh',
-                        widget.issue.reportImages,
+                      IssueDetailImagesSection(
+                        title: 'Ảnh phản ánh',
+                        imageUrls: widget.issue.reportImages,
                       ),
                       const SizedBox(height: 12),
                     ],
                     if (widget.issue.resolutionProofImages.isNotEmpty) ...[
-                      _buildImageSection(
-                        'Ảnh nghiệm thu',
-                        widget.issue.resolutionProofImages,
+                      IssueDetailImagesSection(
+                        title: 'Ảnh nghiệm thu',
+                        imageUrls: widget.issue.resolutionProofImages,
                       ),
                       const SizedBox(height: 12),
                     ],
                     const SizedBox(height: 16),
-                    _buildStatusTimeline(),
-                    _buildMaterialsSection(isDark),
+                    IssueStatusTimeline(issue: widget.issue),
+                    IssueMaterialsCard(issueId: widget.issue.id),
                     const SizedBox(height: 16),
-                    _buildRatingSection(ratingAsync, currentUser, isDark),
+                    IssueRatingSection(
+                      issue: widget.issue,
+                      ratingAsync: ratingAsync,
+                      isReporter: isReporter,
+                    ),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -173,7 +173,7 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16),
-                        child: _buildCommentHeader(commentsAsync),
+                        child: IssueCommentHeader(commentsAsync: commentsAsync),
                       ),
                       const Divider(height: 1),
                       Expanded(
@@ -181,16 +181,22 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                           controller: _scrollController,
                           padding: const EdgeInsets.all(16),
                           children: [
-                            _buildCommentBody(
-                              commentsAsync,
-                              currentUser,
-                              isDark,
+                            IssueCommentList(
+                              commentsAsync: commentsAsync,
+                              currentUserId: currentUserId,
                               isDesktop: true,
+                              onRetry: () => ref.invalidate(
+                                issueCommentsProvider(widget.issue.id),
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      _buildCommentInput(isDark),
+                      IssueCommentInputBar(
+                        controller: _commentController,
+                        isSending: _isSending,
+                        onSend: _sendComment,
+                      ),
                     ],
                   ),
                 ),
@@ -205,9 +211,10 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
   Widget _buildMobileLayout(
     AsyncValue<List<IssueCommentModel>> commentsAsync,
     AsyncValue<IssueRatingModel?> ratingAsync,
-    dynamic currentUser,
-    bool isDark,
+    String? currentUserId,
   ) {
+    final isReporter = currentUserId == widget.issue.reporterId;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
@@ -218,1218 +225,54 @@ class _IssueDetailScreenState extends ConsumerState<IssueDetailScreen> {
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _buildIssueHeader(isDark),
+                  IssueDetailHeaderCard(issue: widget.issue),
                   const SizedBox(height: 16),
                   if (widget.issue.reportImages.isNotEmpty) ...[
-                    _buildImageSection(
-                      'Ảnh phản ánh',
-                      widget.issue.reportImages,
+                    IssueDetailImagesSection(
+                      title: 'Ảnh phản ánh',
+                      imageUrls: widget.issue.reportImages,
                     ),
                     const SizedBox(height: 12),
                   ],
                   if (widget.issue.resolutionProofImages.isNotEmpty) ...[
-                    _buildImageSection(
-                      'Ảnh nghiệm thu',
-                      widget.issue.resolutionProofImages,
+                    IssueDetailImagesSection(
+                      title: 'Ảnh nghiệm thu',
+                      imageUrls: widget.issue.resolutionProofImages,
                     ),
                     const SizedBox(height: 12),
                   ],
                   const SizedBox(height: 16),
-                  _buildStatusTimeline(),
-                  _buildMaterialsSection(isDark),
+                  IssueStatusTimeline(issue: widget.issue),
+                  IssueMaterialsCard(issueId: widget.issue.id),
                   const SizedBox(height: 16),
-                  _buildRatingSection(ratingAsync, currentUser, isDark),
+                  IssueRatingSection(
+                    issue: widget.issue,
+                    ratingAsync: ratingAsync,
+                    isReporter: isReporter,
+                  ),
                   const SizedBox(height: 24),
-                  _buildCommentHeader(commentsAsync),
+                  IssueCommentHeader(commentsAsync: commentsAsync),
                   const SizedBox(height: 12),
-                  _buildCommentBody(
-                    commentsAsync,
-                    currentUser,
-                    isDark,
+                  IssueCommentList(
+                    commentsAsync: commentsAsync,
+                    currentUserId: currentUserId,
                     isDesktop: false,
+                    onRetry: () => ref.invalidate(
+                      issueCommentsProvider(widget.issue.id),
+                    ),
                   ),
                   const SizedBox(height: 80),
                 ],
               ),
             ),
-            _buildCommentInput(isDark),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCommentHeader(AsyncValue<List<IssueCommentModel>> commentsAsync) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.forum_outlined,
-          size: 20,
-          color: AppTheme.primary,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            'Trao đổi',
-            style: context.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        commentsAsync.whenOrNull(
-          data: (comments) => Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${comments.length}',
-              style: context.labelSmall?.copyWith(
-                color: AppTheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ) ?? const SizedBox.shrink(),
-      ],
-    );
-  }
-
-  Widget _buildCommentBody(
-    AsyncValue<List<IssueCommentModel>> commentsAsync,
-    dynamic currentUser,
-    bool isDark, {
-    required bool isDesktop,
-  }) {
-    return commentsAsync.when(
-      data: (comments) {
-        if (comments.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white10 : Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.chat_bubble_outline,
-                  size: 40,
-                  color: isDark
-                      ? Colors.white38
-                      : AppTheme.textSecondary,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Chưa có trao đổi nào.\nHãy gửi tin nhắn đầu tiên!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: isDark
-                        ? Colors.white60
-                        : AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        return Column(
-          children: comments.map((comment) {
-            final isMe = comment.userId == currentUser?.id;
-            return _buildCommentBubble(
-              comment,
-              isMe,
-              isDark,
-              isDesktop: isDesktop,
-            );
-          }).toList(),
-        );
-      },
-      loading: () => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: AppSkeletonShimmer.cardList(count: 3, itemHeight: 64),
-      ),
-      error: (e, _) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          formatErrorMessage(e),
-          style: const TextStyle(color: AppTheme.error),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIssueHeader(bool isDark) {
-    final issue = widget.issue;
-    final statusInfo = _getStatusInfo(issue.status);
-    final priorityInfo = _getPriorityInfo(issue.priority);
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-
-    return AppCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Trạng thái + Ưu tiên + Chuyên môn + SLA
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusInfo.color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: statusInfo.color.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusInfo.icon, size: 14, color: statusInfo.color),
-                    const SizedBox(width: 4),
-                    Text(
-                      statusInfo.label,
-                      style: context.labelSmall?.copyWith(
-                        color: statusInfo.color,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: priorityInfo.color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  priorityInfo.label,
-                  style: context.labelSmall?.copyWith(
-                    color: priorityInfo.color,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppTheme.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.handyman_outlined,
-                      size: 13,
-                      color: AppTheme.primary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      issue.categoryDisplayName,
-                      style: context.labelSmall?.copyWith(
-                        color: AppTheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (issue.slaDeadline != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: issue.isSlaBreached
-                        ? AppTheme.error.withValues(alpha: 0.1)
-                        : (issue.isSlaWarning
-                              ? Colors.orange.withValues(alpha: 0.1)
-                              : Colors.blue.withValues(alpha: 0.08)),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: issue.isSlaBreached
-                          ? AppTheme.error.withValues(alpha: 0.3)
-                          : (issue.isSlaWarning
-                                ? Colors.orange.withValues(alpha: 0.3)
-                                : Colors.blue.withValues(alpha: 0.2)),
-                    ),
-                  ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 240),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            issue.isSlaBreached
-                                ? Icons.timer_off_outlined
-                                : (issue.isSlaWarning
-                                      ? Icons.warning_amber_rounded
-                                      : Icons.access_time),
-                            size: 13,
-                            color: issue.isSlaBreached
-                                ? AppTheme.error
-                                : (issue.isSlaWarning
-                                      ? Colors.orange.shade800
-                                      : Colors.blue.shade800),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            issue.slaRemainingFormatted,
-                            maxLines: 1,
-                            style: context.labelSmall?.copyWith(
-                              color: issue.isSlaBreached
-                                  ? AppTheme.error
-                                  : (issue.isSlaWarning
-                                        ? Colors.orange.shade800
-                                        : Colors.blue.shade800),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Mô tả
-          Text(
-            issue.description,
-            style: (context.bodyLarge ?? const TextStyle()).copyWith(height: 1.5),
-          ),
-          const SizedBox(height: 12),
-
-          // Thông tin phụ
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
-            children: [
-              _buildInfoChip(
-                Icons.apartment_outlined,
-                'Căn hộ ${issue.apartment?.code ?? 'N/A'}',
-              ),
-              _buildInfoChip(
-                Icons.calendar_today_outlined,
-                dateFormat.format(issue.createdAt),
-              ),
-              if (issue.reporter != null)
-                _buildInfoChip(
-                  Icons.person_outline,
-                  issue.reporter!.fullName,
-                ),
-              if (issue.assignedStaff != null)
-                _buildInfoChip(
-                  Icons.engineering_outlined,
-                  'Phụ trách: ${issue.assignedStaff!.fullName}',
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(IconData icon, String text) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 260),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: AppTheme.textSecondary),
-            const SizedBox(width: 4),
-            Text(
-              text,
-              style: context.labelSmall?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImageSection(String title, List<String> imageUrls) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: context.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 80,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: imageUrls.length,
-            separatorBuilder: (_, index) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => PhotoViewerScreen(
-                        imageUrls: imageUrls,
-                        initialIndex: index,
-                      ),
-                    ),
-                  );
-                },
-                child: AppStorageImage(
-                  imageUrl: imageUrls[index],
-                  width: 80,
-                  height: 80,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusTimeline() {
-    final issue = widget.issue;
-    final steps = <_TimelineStep>[
-      _TimelineStep(
-        label: 'Đã gửi phản ánh',
-        date: issue.createdAt,
-        isCompleted: true,
-        icon: Icons.send,
-        color: AppTheme.primary,
-      ),
-      _TimelineStep(
-        label: 'Đang xử lý',
-        date: issue.status == 'in_progress' || issue.status == 'resolved'
-            ? issue.updatedAt
-            : null,
-        isCompleted:
-            issue.status == 'in_progress' || issue.status == 'resolved',
-        icon: Icons.engineering,
-        color: AppTheme.warning,
-      ),
-      _TimelineStep(
-        label: 'Đã giải quyết',
-        date: issue.status == 'resolved' ? issue.updatedAt : null,
-        isCompleted: issue.status == 'resolved',
-        icon: Icons.check_circle,
-        color: AppTheme.success,
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.timeline, size: 20, color: AppTheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              'Tiến trình xử lý',
-              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ...steps.asMap().entries.map((entry) {
-          final index = entry.key;
-          final step = entry.value;
-          final isLast = index == steps.length - 1;
-
-          return IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Dot + Line
-                SizedBox(
-                  width: 24,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: step.isCompleted
-                              ? step.color
-                              : Colors.grey.shade300,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          step.isCompleted ? step.icon : Icons.circle,
-                          size: 12,
-                          color: Colors.white,
-                        ),
-                      ),
-                      if (!isLast)
-                        Expanded(
-                          child: Container(
-                            width: 2,
-                            color: step.isCompleted
-                                ? step.color.withValues(alpha: 0.4)
-                                : Colors.grey.shade300,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Content
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          step.label,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: step.isCompleted
-                                ? null
-                                : AppTheme.textSecondary,
-                          ),
-                        ),
-                        if (step.date != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            DateFormat('dd/MM/yyyy HH:mm').format(step.date!),
-                            style: context.labelSmall?.copyWith(
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildRatingSection(
-    AsyncValue<IssueRatingModel?> ratingAsync,
-    dynamic currentUser,
-    bool isDark,
-  ) {
-    if (widget.issue.status != 'resolved') return const SizedBox.shrink();
-
-    final isReporter = currentUser?.id == widget.issue.reporterId;
-
-    return ratingAsync.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        child: AppSkeletonShimmer.rectangular(
-          height: 72,
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-      ),
-      error: (e, _) => const SizedBox.shrink(),
-      data: (rating) {
-        if (rating == null) {
-          if (!isReporter) return const SizedBox.shrink();
-
-          return AppCard(
-            borderColor: Colors.amber.withValues(alpha: 0.4),
-            color: Colors.amber.withValues(alpha: 0.05),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.star_rate_rounded,
-                        color: Colors.amber,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Đánh giá chất lượng dịch vụ',
-                            style: context.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Sự cố đã hoàn thành. Hãy chia sẻ cảm nhận của bạn!',
-                            style: context.labelSmall?.copyWith(
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                        ),
-                        builder: (_) => IssueRatingBottomSheet(
-                          issueReportId: widget.issue.id,
-                          reporterId: widget.issue.reporterId,
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.star_rate_rounded, size: 18),
-                    label: const Text('Đánh giá ngay'),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        // Đã có đánh giá
-        final label = IssueRatingModel.getSatisfactionLabel(
-          rating.overallRating,
-        );
-
-        return AppCard(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.verified_outlined,
-                        color: AppTheme.success,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Đánh giá dịch vụ',
-                        style: context.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (isReporter)
-                    IconButton(
-                      icon: const Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: AppTheme.primary,
-                      ),
-                      tooltip: 'Chỉnh sửa đánh giá',
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(20),
-                            ),
-                          ),
-                          builder: (_) => IssueRatingBottomSheet(
-                            issueReportId: widget.issue.id,
-                            reporterId: widget.issue.reporterId,
-                            initialRating: rating,
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.star_rate_rounded,
-                          size: 18,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${rating.overallRating.toStringAsFixed(1)} / 5.0',
-                          style: context.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    label,
-                    style: context.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: [
-                  _buildRatingChip('Tốc độ', rating.speedRating, isDark),
-                  _buildRatingChip('Thái độ', rating.attitudeRating, isDark),
-                  _buildRatingChip('Kỹ thuật', rating.qualityRating, isDark),
-                ],
-              ),
-              if (rating.comment != null &&
-                  rating.comment!.trim().isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white10 : Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '"${rating.comment}"',
-                    style: (context.bodySmall ?? const TextStyle()).copyWith(
-                      fontStyle: FontStyle.italic,
-                      color: isDark ? Colors.white70 : Colors.grey.shade800,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRatingChip(String title, int stars, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white10 : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isDark ? Colors.white12 : Colors.grey.shade300,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$title: ',
-            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
-          ),
-          Text(
-            '$stars',
-            style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const Icon(Icons.star_rate_rounded, size: 13, color: Colors.amber),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCommentBubble(
-    IssueCommentModel comment,
-    bool isMe,
-    bool isDark, {
-    required bool isDesktop,
-  }) {
-    final bubbleColor = isMe
-        ? AppTheme.primary.withValues(alpha: 0.1)
-        : (isDark ? Colors.white10 : Colors.grey.shade100);
-    final alignment = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final userName = comment.userName ?? 'Người dùng';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: isMe
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isMe) ...[
-            AppAvatar(name: userName, size: 32),
-            const SizedBox(width: 8),
-          ],
-          Flexible(
-            child: Column(
-              crossAxisAlignment: alignment,
-              children: [
-                // Tên + vai trò
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          userName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.labelSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: comment.isManagement
-                                ? AppTheme.primary
-                                : AppTheme.textSecondary,
-                          ),
-                        ),
-                      ),
-                      if (comment.isManagement) ...[
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            comment.roleDisplayName,
-                            style: context.labelSmall?.copyWith(
-                              color: AppTheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // Bubble
-                Container(
-                  constraints: BoxConstraints(
-                    maxWidth: isDesktop ? 480 : MediaQuery.of(context).size.width * 0.72,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: bubbleColor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(isMe ? 16 : 4),
-                      bottomRight: Radius.circular(isMe ? 4 : 16),
-                    ),
-                  ),
-                  child: Text(
-                    comment.content,
-                    style: (context.bodyMedium ?? const TextStyle()).copyWith(height: 1.4),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                // Thời gian
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    timeago.format(comment.createdAt, locale: 'vi'),
-                    style: context.labelSmall?.copyWith(
-                      color: isDark ? Colors.white38 : Colors.grey.shade500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (isMe) ...[
-            const SizedBox(width: 8),
-            AppAvatar(name: userName, size: 32),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCommentInput(bool isDark) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 8,
-        top: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 8,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(
-          top: BorderSide(
-            color: isDark ? Colors.white12 : Colors.grey.shade200,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
+            IssueCommentInputBar(
               controller: _commentController,
-              decoration: InputDecoration(
-                hintText: 'Nhập tin nhắn...',
-                hintStyle: TextStyle(
-                  color: isDark ? Colors.white38 : AppTheme.textSecondary,
-                ),
-                filled: true,
-                fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(
-                    color: AppTheme.primary,
-                    width: 1.5,
-                  ),
-                ),
-              ),
-              maxLines: 3,
-              minLines: 1,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _sendComment(),
+              isSending: _isSending,
+              onSend: _sendComment,
             ),
-          ),
-          const SizedBox(width: 8),
-          Material(
-            color: AppTheme.primary,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: _isSending ? null : _sendComment,
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: _isSending
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.send, color: Colors.white, size: 20),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-
-  _StatusInfo _getStatusInfo(String status) {
-    switch (status) {
-      case 'resolved':
-        return _StatusInfo('Đã xử lý', Icons.check_circle, AppTheme.success);
-      case 'in_progress':
-        return _StatusInfo('Đang xử lý', Icons.engineering, AppTheme.primary);
-      default:
-        return _StatusInfo(
-          'Chờ tiếp nhận',
-          Icons.pending_actions,
-          AppTheme.warning,
-        );
-    }
-  }
-
-  _PriorityInfo _getPriorityInfo(String priority) {
-    switch (priority) {
-      case 'high':
-        return _PriorityInfo('Khẩn cấp', AppStatusColors.priorityHigh);
-      case 'low':
-        return _PriorityInfo('Thấp', AppStatusColors.priorityLow);
-      default:
-        return _PriorityInfo('Trung bình', AppStatusColors.priorityMedium);
-    }
-  }
-
-  Widget _buildMaterialsSection(bool isDark) {
-    final materialsAsync = ref.watch(issueMaterialsProvider(widget.issue.id));
-    final currencyFormat = NumberFormat('#,###', 'vi_VN');
-
-    return materialsAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
-      data: (materials) {
-        if (materials.isEmpty) return const SizedBox.shrink();
-
-        final chargeableAmount = materials
-            .where((item) => item.isChargeable)
-            .fold<double>(0, (sum, item) => sum + item.totalAmount);
-
-        return AppCard(
-          margin: const EdgeInsets.only(top: 16),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.inventory_2_outlined,
-                    size: 20,
-                    color: AppTheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Vật tư kỹ thuật đã sử dụng',
-                      style: context.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${materials.length} mục',
-                      style: context.labelSmall?.copyWith(
-                        color: AppTheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ...materials.map((item) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isDark ? Colors.white12 : Colors.grey.shade200,
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.materialName,
-                              style: context.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Số lượng: ${item.quantity} ${item.unit} x ${currencyFormat.format(item.unitPrice)} đ',
-                              style: context.labelSmall?.copyWith(
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                            if (item.note != null &&
-                                item.note!.isNotEmpty) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                'Ghi chú: ${item.note}',
-                                style: context.labelSmall?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${currencyFormat.format(item.totalAmount)} đ',
-                            style: context.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: item.isChargeable
-                                  ? Colors.orange.withValues(alpha: 0.1)
-                                  : Colors.green.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              item.chargeableDisplayName,
-                              style: context.labelSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: item.isChargeable
-                                    ? Colors.orange.shade800
-                                    : Colors.green.shade800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }),
-              if (chargeableAmount > 0) ...[
-                const Divider(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Tổng tính vào hóa đơn kỳ tới:',
-                        style: context.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${currencyFormat.format(chargeableAmount)} đ',
-                      style: context.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _StatusInfo {
-  final String label;
-  final IconData icon;
-  final Color color;
-  const _StatusInfo(this.label, this.icon, this.color);
-}
-
-class _PriorityInfo {
-  final String label;
-  final Color color;
-  const _PriorityInfo(this.label, this.color);
-}
-
-class _TimelineStep {
-  final String label;
-  final DateTime? date;
-  final bool isCompleted;
-  final IconData icon;
-  final Color color;
-
-  const _TimelineStep({
-    required this.label,
-    this.date,
-    required this.isCompleted,
-    required this.icon,
-    required this.color,
-  });
 }
