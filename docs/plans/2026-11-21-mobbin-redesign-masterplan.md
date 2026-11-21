@@ -40,12 +40,12 @@
 - [x] **2.1** `lib/features/auth/screens/login_screen.dart` *(Tier 1)* — Đăng nhập
 - [x] **2.2** `lib/features/auth/screens/resident_activation_screen.dart` *(Tier 1)* — Kích hoạt tài khoản cư dân (Mã kích hoạt → OTP → Mật khẩu)
 - [x] **2.3** `lib/features/auth/screens/register_screen.dart` & `lib/features/resident/screens/link_request_screen.dart` *(Tier 2)* — Đăng ký & Yêu cầu liên kết căn hộ (`A0110`)
-- [ ] **2.4** Cụm bảo mật OTP / MFA / Mật khẩu *(Tier 3 — đồng bộ 1 khung chuẩn)*:
-  - [ ] `lib/features/auth/screens/mfa_challenge_screen.dart`
-  - [ ] `lib/features/auth/screens/forgot_password_screen.dart`
-  - [ ] `lib/features/auth/screens/verify_otp_screen.dart`
-  - [ ] `lib/features/auth/screens/reset_password_screen.dart`
-  - [ ] `lib/features/auth/screens/change_password_screen.dart`
+- [x] **2.4** Cụm bảo mật OTP / MFA / Mật khẩu *(Tier 3 — đồng bộ 1 khung chuẩn)*:
+  - [x] `lib/features/auth/screens/mfa_challenge_screen.dart`
+  - [x] `lib/features/auth/screens/forgot_password_screen.dart`
+  - [x] `lib/features/auth/screens/verify_otp_screen.dart`
+  - [x] `lib/features/auth/screens/reset_password_screen.dart`
+  - [x] `lib/features/auth/screens/change_password_screen.dart`
 - [ ] **2.5** `lib/features/resident/screens/resident_profile_screen.dart` *(Tier 2)* — Hồ sơ cá nhân, hiển thị & quyền riêng tư PDPL
 
 ---

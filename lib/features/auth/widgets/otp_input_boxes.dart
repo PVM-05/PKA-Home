@@ -113,6 +113,7 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
@@ -120,7 +121,7 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
         final spacing = (availableWidth < 300) ? 4.0 : 8.0;
         final maxForBoxes = availableWidth - (totalGaps * spacing);
         final boxWidth = (maxForBoxes / widget.length).clamp(32.0, 48.0);
-        final boxHeight = boxWidth * 1.18;
+        final boxHeight = (boxWidth * 1.18).clamp(48.0, 58.0);
         final fontSize = (boxWidth * 0.46).clamp(16.0, 22.0);
 
         return Row(
@@ -140,27 +141,37 @@ class _OtpInputBoxesState extends State<OtpInputBoxes> {
                   style: context.titleLarge?.copyWith(
                     fontSize: fontSize,
                     fontWeight: FontWeight.bold,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                   maxLength: 6, // Cho phép dán chuỗi dài để bắt trong onChanged
-                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                  buildCounter:
+                      (
+                        context, {
+                        required currentLength,
+                        required isFocused,
+                        maxLength,
+                      }) => null,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                   ],
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.zero,
                     filled: true,
-                    fillColor: Theme.of(context).colorScheme.surface,
+                    fillColor: colorScheme.surfaceContainerLow,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outlineVariant),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outlineVariant),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                      borderSide: BorderSide(
+                        color: colorScheme.primary,
+                        width: 2,
+                      ),
                     ),
                   ),
                   onChanged: (val) => _handleChanged(index, val),

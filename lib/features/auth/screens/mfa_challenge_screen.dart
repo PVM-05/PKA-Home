@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/router/app_router.dart';
 import '../../../core/security/mfa_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/providers/auth_provider.dart';
+import '../widgets/auth_security_card_layout.dart';
 
 /// Màn hình cổng bảo mật bắt buộc xác thực hai yếu tố (TOTP / AAL2 Gate)
 class MfaChallengeScreen extends ConsumerStatefulWidget {
@@ -94,14 +96,21 @@ class _MfaChallengeScreenState extends ConsumerState<MfaChallengeScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Hủy đăng nhập'),
-        content: const Text('Bạn có chắc chắn muốn hủy phiên đăng nhập hiện tại và quay về màn hình đăng nhập?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn hủy phiên đăng nhập hiện tại và quay về màn hình đăng nhập?',
+        ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Ở lại'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(88, 48),
+              backgroundColor: AppTheme.textError,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Đăng xuất'),
           ),
@@ -116,13 +125,7 @@ class _MfaChallengeScreenState extends ConsumerState<MfaChallengeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark
-        ? (Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface)
-        : Colors.white;
-    final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.1)
-        : AppTheme.border;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return PopScope(
       canPop: false,
@@ -132,106 +135,77 @@ class _MfaChallengeScreenState extends ConsumerState<MfaChallengeScreen> {
         }
       },
       child: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 440),
-                child: Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: borderColor),
-                    boxShadow: isDark ? null : AppShadows.softMd,
+        body: AuthSecurityCardLayout(
+          icon: Icons.security_rounded,
+          title: 'Xác thực hai bước',
+          subtitle:
+              'Tài khoản của bạn được bảo vệ bằng lớp xác thực nâng cao TOTP. Vui lòng mở ứng dụng Google Authenticator hoặc Microsoft Authenticator để lấy mã 6 chữ số.',
+          cardChild: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _codeController,
+                focusNode: _focusNode,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                maxLength: 6,
+                style: context.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 8,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(6),
+                ],
+                decoration: InputDecoration(
+                  counterText: '',
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerLow,
+                  hintText: '000000',
+                  hintStyle: context.headlineMedium?.copyWith(
+                    letterSpacing: 8,
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.security_rounded,
-                          size: 40,
-                          color: AppTheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Xác thực hai bước',
-                        style: context.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Tài khoản của bạn được bảo vệ bằng lớp xác thực nâng cao TOTP. Vui lòng mở ứng dụng Google Authenticator hoặc Microsoft Authenticator để lấy mã 6 chữ số.',
-                        style: context.bodyMedium?.copyWith(
-                          color: AppTheme.getTextSecondary(context),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 28),
-                      TextField(
-                        controller: _codeController,
-                        focusNode: _focusNode,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        maxLength: 6,
-                        style: context.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 8,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6),
-                        ],
-                        decoration: InputDecoration(
-                          counterText: '',
-                          hintText: '000000',
-                          hintStyle: context.headlineMedium?.copyWith(
-                            letterSpacing: 8,
-                            color: AppTheme.getTextSecondary(context).withValues(alpha: 0.4),
-                          ),
-                          prefixIcon: const Icon(Icons.pin_outlined),
-                          errorText: _errorMessage,
-                        ),
-                        onSubmitted: (_) => _handleVerify(),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleVerify,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text('Xác nhận đăng nhập'),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextButton.icon(
-                        onPressed: _isLoading ? null : _handleLogout,
-                        icon: const Icon(Icons.logout_rounded, size: 18),
-                        label: const Text('Đăng xuất / Đổi tài khoản'),
-                      ),
-                    ],
+                  prefixIcon: const Icon(Icons.pin_outlined),
+                  errorText: _errorMessage,
+                  border: OutlineInputBorder(
+                    borderRadius: AppTheme.radiusMd,
+                    borderSide: BorderSide(color: colorScheme.outlineVariant),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: AppTheme.radiusMd,
+                    borderSide: BorderSide(color: colorScheme.outlineVariant),
                   ),
                 ),
+                onSubmitted: (_) => _handleVerify(),
               ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                onPressed: _isLoading ? null : _handleVerify,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Xác nhận đăng nhập'),
+              ),
+            ],
+          ),
+          footer: Center(
+            child: TextButton.icon(
+              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+              onPressed: _isLoading ? null : _handleLogout,
+              icon: const Icon(Icons.logout_rounded, size: 18),
+              label: const Text('Đăng xuất / Đổi tài khoản'),
             ),
           ),
         ),
@@ -239,4 +213,3 @@ class _MfaChallengeScreenState extends ConsumerState<MfaChallengeScreen> {
     );
   }
 }
-
