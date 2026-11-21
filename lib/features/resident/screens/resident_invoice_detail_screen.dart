@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_skeleton_shimmer.dart';
-import '../../../core/utils/vietnamese_currency_words.dart';
-import '../../../core/utils/error_formatter.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/unified_payment_sheet.dart';
-import '../../../data/models/invoice_model.dart';
-import '../../../data/services/payment_service.dart';
-import '../../../data/providers/resident_invoice_provider.dart';
+import '../../../core/utils/document_pdf_builder.dart';
 import '../../../core/utils/invoice_fee_helper.dart';
 import '../../../core/utils/utility_fee_calculator.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/unified_payment_sheet.dart';
+import '../../../data/models/invoice_model.dart';
 import '../../../data/models/tiered_calculation_result_model.dart';
-import '../../../data/providers/fee_policy_providers.dart';
-import '../widgets/resident_ledger_history_sheet.dart';
-import '../widgets/tiered_fee_breakdown_dialog.dart';
-import '../../../core/utils/document_pdf_builder.dart';
+import '../../../data/providers/resident_invoice_provider.dart';
+import '../../../data/services/payment_service.dart';
 import '../../document/screens/document_preview_screen.dart';
+import '../widgets/invoice/resident_digital_receipt_sheet.dart';
+import '../widgets/invoice/resident_invoice_fee_item_card.dart';
+import '../widgets/invoice/resident_invoice_summary_card.dart';
+import '../widgets/tiered_fee_breakdown_dialog.dart';
 
 class ResidentInvoiceDetailScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
@@ -42,6 +41,7 @@ class _ResidentInvoiceDetailScreenState
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  bool _isOpeningPayment = false;
 
   @override
   void initState() {
@@ -85,6 +85,7 @@ class _ResidentInvoiceDetailScreenState
     ref.watch(residentInvoiceProvider);
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
+    final colorScheme = Theme.of(context).colorScheme;
     final detailState = ref.watch(
       residentInvoiceDetailProvider(widget.invoice.id),
     );
@@ -130,10 +131,10 @@ class _ResidentInvoiceDetailScreenState
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
-                                    _buildSummaryCard(
-                                      context,
-                                      formatCurrency,
-                                      formatDate,
+                                    ResidentInvoiceSummaryCard(
+                                      invoice: _invoice,
+                                      formatCurrency: formatCurrency,
+                                      formatDate: formatDate,
                                     ),
                                     const SizedBox(height: 20),
                                     _buildActionWidget(context, items),
@@ -152,16 +153,26 @@ class _ResidentInvoiceDetailScreenState
                                       'CHI TIẾT CÁC KHOẢN PHÍ',
                                       style: context.titleSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: AppTheme.textSecondary,
+                                        color: colorScheme.onSurfaceVariant,
                                         letterSpacing: 1.2,
                                       ),
                                     ),
                                     const SizedBox(height: 16),
                                     ...items.map(
-                                      (item) => _buildFeeItemCard(
-                                        context,
-                                        item,
-                                        formatCurrency,
+                                      (item) => ResidentInvoiceFeeItemCard(
+                                        item: item,
+                                        formatCurrency: formatCurrency,
+                                        onViewTieredBreakdown:
+                                            ({
+                                              required isElectricity,
+                                              required quantity,
+                                              required item,
+                                            }) => _showTieredBreakdownDialog(
+                                              context,
+                                              isElectricity: isElectricity,
+                                              quantity: quantity,
+                                              item: item,
+                                            ),
                                       ),
                                     ),
                                   ],
@@ -176,26 +187,36 @@ class _ResidentInvoiceDetailScreenState
                       return ListView(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                         children: [
-                          _buildSummaryCard(
-                            context,
-                            formatCurrency,
-                            formatDate,
+                          ResidentInvoiceSummaryCard(
+                            invoice: _invoice,
+                            formatCurrency: formatCurrency,
+                            formatDate: formatDate,
                           ),
                           const SizedBox(height: 28),
                           Text(
                             'CHI TIẾT CÁC KHOẢN PHÍ',
                             style: context.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textSecondary,
+                              color: colorScheme.onSurfaceVariant,
                               letterSpacing: 1.2,
                             ),
                           ),
                           const SizedBox(height: 16),
                           ...items.map(
-                            (item) => _buildFeeItemCard(
-                              context,
-                              item,
-                              formatCurrency,
+                            (item) => ResidentInvoiceFeeItemCard(
+                              item: item,
+                              formatCurrency: formatCurrency,
+                              onViewTieredBreakdown:
+                                  ({
+                                    required isElectricity,
+                                    required quantity,
+                                    required item,
+                                  }) => _showTieredBreakdownDialog(
+                                    context,
+                                    isElectricity: isElectricity,
+                                    quantity: quantity,
+                                    item: item,
+                                  ),
                             ),
                           ),
                         ],
@@ -213,10 +234,15 @@ class _ResidentInvoiceDetailScreenState
             AppSkeletonShimmer.cardList(count: 3, itemHeight: 120),
           ],
         ),
-        error: (error, stack) => Center(
-          child: Text(
-            formatErrorMessage(error),
-            style: const TextStyle(color: AppTheme.error),
+        error: (error, stack) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: AppErrorCard(
+              error: error,
+              onRetry: () => ref.invalidate(
+                residentInvoiceDetailProvider(widget.invoice.id),
+              ),
+            ),
           ),
         ),
       ),
@@ -264,506 +290,6 @@ class _ResidentInvoiceDetailScreenState
         ),
       );
     }
-  }
-
-  Widget _buildSummaryCard(
-    BuildContext context,
-    NumberFormat formatCurrency,
-    DateFormat formatDate,
-  ) {
-    Color statusColor;
-    String statusText;
-    IconData statusIcon;
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final dueDay = DateTime(
-      _invoice.dueDate.year,
-      _invoice.dueDate.month,
-      _invoice.dueDate.day,
-    );
-    final diffDays = today.difference(dueDay).inDays;
-    final isOverdue = _invoice.status == 'unpaid' && diffDays > 0;
-    final isDueToday = _invoice.status == 'unpaid' && diffDays == 0;
-
-    switch (_invoice.status) {
-      case 'paid':
-        statusColor = AppTheme.success;
-        statusText = 'Đã thanh toán';
-        statusIcon = Icons.check_circle;
-        break;
-      case 'pending_confirmation':
-        statusColor = AppTheme.warning;
-        statusText = 'Chờ xác nhận';
-        statusIcon = Icons.hourglass_top;
-        break;
-      default:
-        if (isOverdue) {
-          statusColor = AppTheme.error;
-          statusText = 'Quá hạn $diffDays ngày';
-          statusIcon = Icons.warning_amber_rounded;
-        } else if (isDueToday) {
-          statusColor = Colors.orange.shade800;
-          statusText = 'Đến hạn hôm nay';
-          statusIcon = Icons.access_time_filled;
-        } else {
-          statusColor = AppTheme.error;
-          statusText = 'Chưa thanh toán';
-          statusIcon = Icons.error_outline;
-        }
-    }
-    final latePenaltyAsync = isOverdue
-        ? ref.watch(calculatedLatePenaltyProvider(_invoice.id))
-        : null;
-    final latePenalty = isOverdue
-        ? (latePenaltyAsync?.valueOrNull ??
-              UtilityFeeCalculator.calculateLatePaymentPenalty(
-                invoiceId: _invoice.id,
-                totalAmount: _invoice.totalAmount,
-                dueDate: _invoice.dueDate,
-                asOfDate: DateTime.now(),
-              ))
-        : null;
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark
-        ? (Theme.of(context).cardTheme.color ??
-              Theme.of(context).colorScheme.surface)
-        : Colors.white;
-
-    final borderColor = isOverdue
-        ? AppTheme.error.withValues(alpha: isDark ? 0.7 : 0.5)
-        : isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.07);
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: isDark
-            ? null
-            : isOverdue
-                ? [
-                    BoxShadow(
-                      color: AppTheme.error.withValues(alpha: 0.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : AppShadows.softSm,
-      ),
-      child: Card(
-        elevation: 0,
-        color: cardBg,
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: borderColor,
-            width: isOverdue ? 1.5 : 1.0,
-          ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              colors: [
-                statusColor.withValues(alpha: isDark ? 0.2 : 0.1),
-                cardBg,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, color: statusColor, size: 20),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        statusText,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'TỔNG CỘNG',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Semantics(
-                  label:
-                      'Tổng tiền ${VietnameseCurrencyWords.toVietnameseWords(_invoice.totalAmount.toDouble())}',
-                  child: Text(
-                    formatCurrency.format(_invoice.totalAmount),
-                    style: context.displayMedium?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-            if (latePenalty != null && latePenalty.daysOverdue > 0) ...[
-              const SizedBox(height: 16),
-              _buildLatePenaltyWarningBox(latePenalty, formatCurrency),
-            ],
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 16),
-            _buildInfoRow(
-              Icons.calendar_today,
-              'Hạn thanh toán',
-              formatDate.format(_invoice.dueDate),
-            ),
-            const SizedBox(height: 12),
-            _buildInfoRow(
-              Icons.apartment,
-              'Căn hộ',
-              _invoice.apartment?.code ?? 'N/A',
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.history_edu_outlined, size: 18),
-                label: const Text('Lịch sử đối soát công nợ'),
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                ),
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                    ),
-                    builder: (_) => FractionallySizedBox(
-                      heightFactor: 0.7,
-                      child: ResidentLedgerHistorySheet(
-                        apartmentId: _invoice.apartmentId,
-                        apartmentCode: _invoice.apartment?.code ?? 'N/A',
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: AppTheme.textSecondary),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 5,
-          child: Text(
-            label,
-            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 6,
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLatePenaltyWarningBox(
-    LatePenaltyResultModel penalty,
-    NumberFormat formatCurrency,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.error.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.warning_amber_rounded,
-            color: AppTheme.error,
-            size: 22,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Cảnh báo trễ hạn',
-                      style: context.titleSmall?.copyWith(
-                        color: AppTheme.error,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.error,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Quá hạn ${penalty.daysOverdue} ngày',
-                        style: context.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Hóa đơn đã quá hạn thanh toán. Tiền lãi phạt trễ hạn ước tính: ${penalty.formattedPenaltyAmount} (0.05%/ngày).',
-                  style: context.bodySmall?.copyWith(
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                if (penalty.penaltyAmount > 0) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Tổng cộng kèm tiền phạt: ${formatCurrency.format(penalty.totalWithPenalty)}',
-                    style: context.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.error,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeeItemCard(
-    BuildContext context,
-    Map<String, dynamic> item,
-    NumberFormat formatCurrency,
-  ) {
-    final rawFeeType = item['fee_type'] as String?;
-    final feeDisplayName = InvoiceFeeHelper.getFeeName(rawFeeType);
-    final feeIcon = InvoiceFeeHelper.getFeeIcon(rawFeeType);
-    final feeColor = InvoiceFeeHelper.getFeeColor(rawFeeType);
-    final feeUnit = InvoiceFeeHelper.getFeeUnit(rawFeeType);
-
-    final qty = item['quantity'] ?? 1;
-    final qtyNum = (qty is num) ? qty : (num.tryParse(qty.toString()) ?? 1);
-    final qtyStr = (qty is num && qty == qty.roundToDouble())
-        ? qty.toInt().toString()
-        : qty.toString();
-
-    final feeTypeLower = (rawFeeType ?? '').toLowerCase().trim();
-    final noteText = '${item['note'] ?? ''} ${item['description'] ?? ''}'
-        .toLowerCase();
-
-    final isElectricity =
-        feeTypeLower == 'electricity' || feeTypeLower.contains('điện');
-    final isWater = feeTypeLower == 'water' || feeTypeLower.contains('nước');
-    final isTiered = isElectricity || isWater;
-
-    final isParking =
-        feeTypeLower.contains('parking') || feeTypeLower.contains('xe');
-    final isProratedParking =
-        isParking &&
-        (noteText.contains('ngày') ||
-            noteText.contains('pro-rata') ||
-            noteText.contains('prorated'));
-
-    return AppCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: feeColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(feeIcon, color: feeColor, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  feeDisplayName,
-                  style: context.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${formatCurrency.format(item['unit_price'] ?? 0)} x $qtyStr$feeUnit',
-                  style: context.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (isTiered) ...[
-                  const SizedBox(height: 6),
-                  InkWell(
-                    onTap: () {
-                      _showTieredBreakdownDialog(
-                        context,
-                        isElectricity: isElectricity,
-                        quantity: qtyNum,
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: feeColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: feeColor.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.tune_rounded, size: 13, color: feeColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Chi tiết bậc thang',
-                              style: context.labelSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: feeColor,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              size: 14,
-                              color: feeColor,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                if (isProratedParking) ...[
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.teal.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: Colors.teal.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.calendar_month_outlined,
-                            size: 13,
-                            color: Colors.teal,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Phí theo ngày lẻ',
-                            style: context.labelSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                formatCurrency.format(item['subtotal'] ?? 0),
-                style: context.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showTieredBreakdownDialog(
@@ -827,12 +353,15 @@ class _ResidentInvoiceDetailScreenState
     BuildContext context,
     List<Map<String, dynamic>> items,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final pendingColor = AppStatusColors.getPendingConfirmation(context);
+
     if (_invoice.status == 'unpaid') {
       return SizedBox(
         width: double.infinity,
-        height: 52,
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 52),
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
             elevation: 2,
@@ -844,6 +373,7 @@ class _ResidentInvoiceDetailScreenState
           label: Text(
             'THANH TOÁN NGAY',
             style: context.titleSmall?.copyWith(
+              color: Colors.white,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
             ),
@@ -856,54 +386,54 @@ class _ResidentInvoiceDetailScreenState
     } else if (_invoice.status == 'pending_confirmation') {
       return SizedBox(
         width: double.infinity,
-        height: 52,
         child: OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.orange, width: 1.5),
+            minimumSize: const Size(double.infinity, 52),
+            foregroundColor: pendingColor,
+            side: BorderSide(color: pendingColor, width: 1.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
           ),
-          icon: const Icon(
-            Icons.hourglass_top_rounded,
-            color: Colors.orange,
-          ),
+          icon: Icon(Icons.hourglass_top_rounded, color: pendingColor),
           label: Text(
             'ĐANG CHỜ BQL XÁC NHẬN (CHI TIẾT)',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: context.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.orange,
+              color: pendingColor,
             ),
           ),
           onPressed: () {
-            _showDigitalReceiptBottomSheet(context);
+            showResidentDigitalReceiptSheet(context, invoice: _invoice);
           },
         ),
       );
     } else if (_invoice.status == 'paid') {
       return SizedBox(
         width: double.infinity,
-        height: 52,
         child: OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: AppTheme.primary, width: 1.5),
+            minimumSize: const Size(double.infinity, 52),
+            foregroundColor: colorScheme.primary,
+            side: BorderSide(color: colorScheme.primary, width: 1.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
           ),
-          icon: const Icon(
-            Icons.receipt_outlined,
-            color: AppTheme.primary,
-          ),
+          icon: Icon(Icons.receipt_outlined, color: colorScheme.primary),
           label: Text(
             'XEM BIÊN NHẬN ĐIỆN TỬ',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: context.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
+              color: colorScheme.primary,
             ),
           ),
           onPressed: () {
-            _showDigitalReceiptBottomSheet(context);
+            showResidentDigitalReceiptSheet(context, invoice: _invoice);
           },
         ),
       );
@@ -921,18 +451,29 @@ class _ResidentInvoiceDetailScreenState
       return const SizedBox.shrink();
     }
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color:
-            Theme.of(context).cardTheme.color ??
-            Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            offset: const Offset(0, -3),
-            blurRadius: 12,
+        color: theme.cardTheme.color ?? colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outlineVariant.withValues(
+              alpha: isDark ? 0.6 : 0.7,
+            ),
           ),
-        ],
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  offset: const Offset(0, -3),
+                  blurRadius: 12,
+                ),
+              ],
       ),
       child: SafeArea(
         top: false,
@@ -950,8 +491,6 @@ class _ResidentInvoiceDetailScreenState
     );
   }
 
-  bool _isOpeningPayment = false;
-
   Future<void> _handlePayment(
     BuildContext context,
     List<Map<String, dynamic>> items,
@@ -963,7 +502,7 @@ class _ResidentInvoiceDetailScreenState
           content: Text(
             'Hóa đơn chưa được cấp mã thanh toán từ máy chủ. Vui lòng liên hệ Ban Quản Lý.',
           ),
-          backgroundColor: AppTheme.warning,
+          backgroundColor: AppTheme.textWarning,
         ),
       );
       return;
@@ -999,7 +538,7 @@ class _ResidentInvoiceDetailScreenState
               content: Text(
                 'Đã gửi thông báo thanh toán! Đang chờ Ban Quản Lý xác nhận. Mã: ${result.transactionCode}',
               ),
-              backgroundColor: Colors.orange.shade800,
+              backgroundColor: AppTheme.textWarning,
             ),
           );
         } else {
@@ -1008,7 +547,7 @@ class _ResidentInvoiceDetailScreenState
               content: Text(
                 'Thanh toán thành công! Mã GD: ${result.transactionCode}',
               ),
-              backgroundColor: AppTheme.success,
+              backgroundColor: AppTheme.textSuccess,
             ),
           );
         }
@@ -1016,233 +555,5 @@ class _ResidentInvoiceDetailScreenState
     } finally {
       _isOpeningPayment = false;
     }
-  }
-
-  Widget _buildCopyableRow(
-    BuildContext context, {
-    required String label,
-    required String value,
-    String? copyValue,
-    bool isHighlight = false,
-  }) {
-    return Row(
-      children: [
-        Text(
-          label,
-          style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-        ),
-        const Spacer(),
-        Flexible(
-          child: Text(
-            value,
-            style: context.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: isHighlight ? AppTheme.primary : AppTheme.textPrimary,
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-        if (copyValue != null) ...[
-          const SizedBox(width: 4),
-          InkWell(
-            onTap: () {
-              Clipboard.setData(ClipboardData(text: copyValue));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Đã sao chép: $copyValue'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-            borderRadius: BorderRadius.circular(4),
-            child: const Padding(
-              padding: EdgeInsets.all(4.0),
-              child: Icon(Icons.copy, size: 16, color: AppTheme.primary),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  void _showDigitalReceiptBottomSheet(BuildContext context) {
-    final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
-    final formatDate = DateFormat('dd/MM/yyyy HH:mm');
-    final isPaid = _invoice.status == 'paid';
-    final receiptCode =
-        'REC-${_invoice.id.length > 8 ? _invoice.id.substring(0, 8).toUpperCase() : _invoice.id.toUpperCase()}';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 4,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: (isPaid ? AppTheme.success : AppTheme.warning)
-                          .withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      isPaid ? Icons.verified : Icons.hourglass_top,
-                      color: isPaid ? AppTheme.success : AppTheme.warning,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    isPaid ? 'BIÊN NHẬN THANH TOÁN' : 'XÁC NHẬN CHUYỂN KHOẢN',
-                    style: context.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                isPaid
-                    ? 'Giao dịch đã được Ban Quản Lý phê duyệt hợp lệ'
-                    : 'Đã gửi yêu cầu đối soát, BQL đang kiểm tra giao dịch',
-                style: context.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Theme.of(context).colorScheme.surface
-                      : AppTheme.background,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isDark ? Colors.white12 : Colors.grey.shade200,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    _buildCopyableRow(
-                      context,
-                      label: 'Mã biên nhận',
-                      value: receiptCode,
-                      copyValue: receiptCode,
-                    ),
-                    const Divider(height: 16),
-                    _buildCopyableRow(
-                      context,
-                      label: 'Căn hộ',
-                      value: _invoice.apartment?.code ?? 'N/A',
-                    ),
-                    const Divider(height: 16),
-                    _buildCopyableRow(
-                      context,
-                      label: 'Kỳ thu',
-                      value: _invoice.period,
-                    ),
-                    const Divider(height: 16),
-                    _buildCopyableRow(
-                      context,
-                      label: 'Số tiền thanh toán',
-                      value: formatCurrency.format(_invoice.totalAmount),
-                      isHighlight: true,
-                    ),
-                    const Divider(height: 16),
-                    _buildCopyableRow(
-                      context,
-                      label: 'Phương thức',
-                      value: _invoice.paymentMethod == 'sepay' ||
-                              _invoice.paymentMethod == 'VIETQR' ||
-                              _invoice.paymentMethod == 'bank_transfer'
-                          ? 'Chuyển khoản VietQR (Napas 247)'
-                          : (_invoice.paymentMethod == 'cash' ||
-                                  _invoice.paymentMethod == 'CASH'
-                              ? 'Tiền mặt tại BQL'
-                              : (_invoice.paymentMethod ??
-                                  'Chuyển khoản trực tuyến')),
-                    ),
-                    if (_invoice.transactionCode != null) ...[
-                      const Divider(height: 16),
-                      _buildCopyableRow(
-                        context,
-                        label: 'Mã giao dịch',
-                        value: _invoice.transactionCode!,
-                        copyValue: _invoice.transactionCode!,
-                      ),
-                    ],
-                    const Divider(height: 16),
-                    _buildCopyableRow(
-                      context,
-                      label: 'Thời gian',
-                      value: formatDate.format(
-                        (_invoice.updatedAt ?? _invoice.createdAt).toLocal(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: AppTheme.primary,
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: const Icon(Icons.copy, color: Colors.white, size: 18),
-                label: const Text(
-                  'Sao chép thông tin biên nhận',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () {
-                  final summary =
-                      'BIÊN NHẬN THANH TOÁN VIVONA\n'
-                      'Mã: $receiptCode\n'
-                      'Căn hộ: ${_invoice.apartment?.code ?? "N/A"}\n'
-                      'Kỳ: ${_invoice.period}\n'
-                      'Số tiền: ${formatCurrency.format(_invoice.totalAmount)}\n'
-                      'Trạng thái: ${isPaid ? "Đã thanh toán" : "Chờ xác nhận"}\n'
-                      'Thời gian: ${formatDate.format((_invoice.updatedAt ?? _invoice.createdAt).toLocal())}';
-                  Clipboard.setData(ClipboardData(text: summary));
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã sao chép toàn bộ thông tin biên nhận'),
-                      backgroundColor: AppTheme.success,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 }
