@@ -24,7 +24,7 @@
 *Ưu tiên số 1: Tác động trực tiếp đến 100% cư dân hàng ngày và tỷ lệ thu phí đúng hạn.*
 
 - [x] **1.1** `lib/features/resident/screens/resident_home_screen.dart` *(Tier 1)* — Trang chủ Cư dân (phân cấp thẻ hóa đơn đến hạn, nhịp lưới dịch vụ, biểu đồ điện nước)
-- [ ] **1.2** `lib/features/resident/screens/resident_invoice_screen.dart` *(Tier 1)* — Danh sách Hóa đơn & Tab Giao dịch VietQR
+- [x] **1.2** `lib/features/resident/screens/resident_invoice_screen.dart` *(Tier 1)* — Danh sách Hóa đơn & Tab Giao dịch VietQR
 - [ ] **1.3** `lib/features/resident/screens/resident_invoice_detail_screen.dart` *(Tier 1)* — Chi tiết Hóa đơn & sao kê khoản phí *(+ tách widget bảng kê)*
 - [ ] **1.4** `lib/core/widgets/unified_payment_sheet.dart` *(Tier 1)* — Cổng thanh toán VietQR / VNPay *(+ dọn ~40 màu cứng & tách bước)*
 - [ ] **1.5** `lib/features/resident/screens/resident_issue_screen.dart` *(Tier 2)* — Danh sách Phản ánh & Sự cố

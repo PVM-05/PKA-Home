@@ -13,7 +13,6 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/adaptive_master_detail_layout.dart';
 import '../../../core/utils/app_haptics.dart';
-import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/payment_provider.dart';
 import '../../../data/providers/resident_invoice_provider.dart';
 import '../../../data/models/invoice_model.dart';
@@ -127,17 +126,24 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
               length: 3,
               child: Column(
                 children: [
-                  const TabBar(
-                    labelColor: AppTheme.primary,
-                    unselectedLabelColor: AppTheme.textSecondary,
-                    indicatorColor: AppTheme.primary,
-                    tabs: [
+                  TabBar(
+                    labelColor: Theme.of(ctx).colorScheme.primary,
+                    unselectedLabelColor:
+                        Theme.of(ctx).colorScheme.onSurfaceVariant,
+                    indicatorColor: Theme.of(ctx).colorScheme.primary,
+                    tabs: const [
                       Tab(
                         icon: Icon(Icons.pending_actions_outlined),
                         text: 'Cần thanh toán',
                       ),
-                      Tab(icon: Icon(Icons.history_outlined), text: 'Lịch sử đã đóng'),
-                      Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Giao dịch'),
+                      Tab(
+                        icon: Icon(Icons.history_outlined),
+                        text: 'Lịch sử đã đóng',
+                      ),
+                      Tab(
+                        icon: Icon(Icons.receipt_long_outlined),
+                        text: 'Giao dịch',
+                      ),
                     ],
                   ),
                   Expanded(
@@ -150,7 +156,6 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                           emptyMessage:
                               'Tuyệt vời! Bạn không còn hóa đơn nào cần thanh toán.',
                           emptyIcon: Icons.check_circle_outline,
-                          emptyColor: AppStatusColors.paid,
                         ),
                         _buildInvoiceList(
                           ctx,
@@ -158,7 +163,6 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                           isMasterOnly: isMasterOnly,
                           emptyMessage: 'Chưa có lịch sử hóa đơn đã thanh toán.',
                           emptyIcon: Icons.receipt_long_outlined,
-                          emptyColor: AppTheme.textSecondary,
                         ),
                         _buildTransactionsList(ctx, isMasterOnly: isMasterOnly),
                       ],
@@ -197,10 +201,9 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
     required bool isMasterOnly,
     required String emptyMessage,
     required IconData emptyIcon,
-    required Color emptyColor,
   }) {
     return RefreshIndicator(
-      color: AppTheme.primary,
+      color: Theme.of(context).colorScheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
         ref.invalidate(residentInvoicePaginatedProvider);
@@ -258,7 +261,11 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
   }) {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final semanticError = AppTheme.getSemanticError(context);
+    final semanticWarning = AppTheme.getSemanticWarning(context);
 
     Color statusColor;
     String statusText;
@@ -289,11 +296,11 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
         break;
       default:
         if (isOverdue) {
-          statusColor = AppTheme.error;
+          statusColor = semanticError;
           statusText = 'Quá hạn $overdueDays ngày';
           statusIcon = Icons.warning_amber_rounded;
         } else if (isDueToday) {
-          statusColor = Colors.orange.shade800;
+          statusColor = semanticWarning;
           statusText = 'Đến hạn hôm nay';
           statusIcon = Icons.access_time_filled;
         } else {
@@ -304,9 +311,9 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
     }
 
     final borderColor = isSelected
-        ? AppTheme.primary
+        ? colorScheme.primary
         : (isOverdue
-            ? AppTheme.error.withValues(alpha: isDark ? 0.7 : 0.5)
+            ? semanticError.withValues(alpha: isDark ? 0.7 : 0.5)
             : null);
 
     final spokenAmount =
@@ -391,10 +398,8 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                         'Hạn thanh toán',
                         style: context.labelSmall?.copyWith(
                           color: isOverdue
-                              ? AppTheme.error
-                              : isDark
-                                  ? Colors.white60
-                                  : AppTheme.textSecondary,
+                              ? semanticError
+                              : colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -403,8 +408,9 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: isOverdue ? AppTheme.error : null,
+                          fontWeight: FontWeight.w600,
+                          color: isOverdue ? semanticError : null,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                     ],
@@ -418,7 +424,7 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                       Text(
                         'Tổng tiền',
                         style: context.labelSmall?.copyWith(
-                          color: isDark ? Colors.white60 : AppTheme.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -430,8 +436,9 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                           style: context.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: isOverdue
-                                ? AppTheme.error
-                                : AppTheme.primary,
+                                ? semanticError
+                                : colorScheme.primary,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ),
@@ -446,13 +453,25 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
     );
   }
 
-  Widget _buildTransactionsList(BuildContext context, {required bool isMasterOnly}) {
+  Widget _buildTransactionsList(
+    BuildContext context, {
+    required bool isMasterOnly,
+  }) {
     final transactionsAsync = ref.watch(paymentTransactionsProvider);
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final paidColor = AppStatusColors.getPaid(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(paymentTransactionsProvider),
+      color: colorScheme.primary,
+      onRefresh: () async {
+        HapticFeedback.lightImpact();
+        ref.invalidate(paymentTransactionsProvider);
+      },
       child: transactionsAsync.when(
         loading: () => ListView(
           padding: const EdgeInsets.all(16),
@@ -460,22 +479,32 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
             AppSkeletonShimmer.cardList(count: 4, itemHeight: 90),
           ],
         ),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Text(
-              formatErrorMessage(err),
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.error),
+        error: (err, _) => Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: AppErrorCard(
+              error: err,
+              onRetry: () => ref.invalidate(paymentTransactionsProvider),
             ),
           ),
         ),
         data: (transactions) {
           if (transactions.isEmpty) {
-            return const AppEmptyState(
-              icon: Icons.receipt_long_outlined,
-              title: 'Chưa có giao dịch thanh toán',
-              description: 'Các lịch sử nộp phí VietQR Napas 247 sẽ hiển thị đầy đủ tại đây sau khi giao dịch.',
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: const Center(
+                    child: AppEmptyState(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'Chưa có giao dịch thanh toán',
+                      description:
+                          'Các lịch sử nộp phí VietQR Napas 247 sẽ hiển thị đầy đủ tại đây sau khi giao dịch.',
+                    ),
+                  ),
+                ),
+              ],
             );
           }
 
@@ -485,6 +514,7 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
             itemBuilder: (context, index) {
               final tx = transactions[index];
               final isSuccess = tx.isSuccess;
+              final txStatusColor = isSuccess ? paidColor : warningColor;
 
               return AppCard(
                 margin: const EdgeInsets.only(bottom: 10),
@@ -497,17 +527,34 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            tx.title ?? (tx.isInvoice ? 'Thanh toán hóa đơn' : 'Thanh toán dịch vụ'),
-                            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                            tx.title ??
+                                (tx.isInvoice
+                                    ? 'Thanh toán hóa đơn'
+                                    : 'Thanh toán dịch vụ'),
+                            style: context.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Text(
-                          currencyFormat.format(tx.amount),
-                          style: context.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: isSuccess ? AppStatusColors.paid : AppTheme.primary,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              currencyFormat.format(tx.amount),
+                              style: context.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isSuccess
+                                    ? paidColor
+                                    : colorScheme.primary,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -516,31 +563,94 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          dateFormat.format(tx.createdAt),
-                          style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: (isSuccess ? AppStatusColors.paid : Colors.amber.shade800).withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
+                        Expanded(
                           child: Text(
-                            tx.statusDisplayName,
-                            style: context.labelSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: isSuccess ? AppStatusColors.paid : Colors.amber.shade800,
+                            dateFormat.format(tx.createdAt),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: txStatusColor.withValues(
+                                alpha: isDark ? 0.2 : 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: txStatusColor.withValues(
+                                  alpha: isDark ? 0.35 : 0.2,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              tx.statusDisplayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.labelSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: txStatusColor,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                     if (tx.transactionCode.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Mã GD: ${tx.transactionCode}',
-                        style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Mã GD: ${tx.transactionCode}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Sao chép mã giao dịch',
+                            constraints: const BoxConstraints(
+                              minWidth: 48,
+                              minHeight: 48,
+                            ),
+                            icon: Icon(
+                              Icons.copy_rounded,
+                              size: 16,
+                              color: colorScheme.primary,
+                            ),
+                            onPressed: () {
+                              AppHaptics.selection();
+                              Clipboard.setData(
+                                ClipboardData(text: tx.transactionCode),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Đã sao chép mã giao dịch: ${tx.transactionCode}',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ],
