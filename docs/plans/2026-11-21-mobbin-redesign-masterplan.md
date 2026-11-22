@@ -12,7 +12,7 @@
 2. **Preserve list cố định:** Giữ nguyên nghiệp vụ, phân quyền RBAC, trạng thái dữ liệu, tên trường tiếng Việt và toàn bộ kiểm thử đang pass.
 3. **1 hướng kiến trúc thống nhất:** Tập trung vào phân cấp thị giác rõ ràng, độ tương phản WCAG AA, vùng chạm $\ge 48\text{dp}$ và khả năng co giãn 320dp–1440dp.
 4. **Dọn nợ kỹ thuật song song:** Với file $>1.200$ dòng, tách widget con theo trách nhiệm; loại bỏ màu cứng phá vỡ Dark Mode; ưu tiên widget lõi (`AppCard`, `AppSearchField`, `AppTextField`, `AppFormScaffold`, `AppEmptyState`, `AppSkeletonShimmer`, `AppUnsavedChangesGuard`).
-5. **Cổng nghiệm thu trước khi merge mỗi Đợt vào `main`:**
+5. **Cổng nghiệm thu trước khi commit & push mỗi Đợt lên `main`:**
    - `dart analyze` = **0 lỗi, 0 cảnh báo**
    - `flutter test --no-pub` = **100% pass** (gồm responsive `320dp` @ zoom `1.3x`, desktop `1440dp`, Light & Dark Mode)
    - Chạy `graphify update .` sau khi chỉnh sửa code.
@@ -50,7 +50,7 @@
 
 ---
 
-## Đợt 3 — Dịch Vụ & Đời Sống Cư Dân (`feat/mobbin-wave-3-resident-services`)
+## Đợt 3 — Dịch Vụ & Đời Sống Cư Dân (`main`)
 
 - [ ] **3.1** `lib/features/resident/screens/resident_meter_reading_screen.dart` *(Tier 2)* — Chốt chỉ số điện nước + OCR *(+ tách file con)*
 - [ ] **3.2** `lib/features/resident/screens/vehicle_management_screen.dart` *(Tier 2)* — Phương tiện & Gửi xe *(+ tách thẻ xe & modal đăng ký)*
@@ -67,7 +67,7 @@
 
 ---
 
-## Đợt 4 — Điều Hành & Tác Nghiệp Ban Quản Lý (`feat/mobbin-wave-4-management-ops`)
+## Đợt 4 — Điều Hành & Tác Nghiệp Ban Quản Lý (`main`)
 
 - [ ] **4.1** `lib/features/management/screens/management_home_screen.dart` *(Tier 1)* — Trạm điều hành BQL *(+ tách widget con)*
 - [ ] **4.2** `lib/features/management/screens/front_desk_workstation_screen.dart` *(Tier 1)* — Trạm Lễ tân / Bảo vệ (quét vé QR & bưu kiện tốc độ cao)
@@ -82,7 +82,7 @@
 
 ---
 
-## Đợt 5 — Tài Chính, Hóa Đơn & Kế Toán BQL (`feat/mobbin-wave-5-management-finance`)
+## Đợt 5 — Tài Chính, Hóa Đơn & Kế Toán BQL (`main`)
 
 - [ ] **5.1** `lib/features/management/screens/accounting_web_workstation_screen.dart` *(Tier 1)* — Trạm kế toán & đối soát SePay/VietQR
 - [ ] **5.2** `lib/features/management/screens/invoice_management_screen.dart` & `management_invoice_detail_screen.dart` *(Tier 1)* — Quản lý & chi tiết hóa đơn BQL
@@ -96,7 +96,7 @@
 
 ---
 
-## Đợt 6 — Kỹ Thuật, Bàn Giao, Truyền Thông, Quản Trị & Tài Liệu (`feat/mobbin-wave-6-tech-gov-docs`)
+## Đợt 6 — Kỹ Thuật, Bàn Giao, Truyền Thông, Quản Trị & Tài Liệu (`main`)
 
 - [ ] **6.1** Kỹ thuật & Vật tư *(Tier 2–3)*:
   - [ ] `lib/features/management/screens/equipment_management_screen.dart`

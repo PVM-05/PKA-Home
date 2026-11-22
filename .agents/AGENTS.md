@@ -18,8 +18,8 @@ Agent chủ động áp dụng đúng các kỹ năng cốt lõi hiện có tron
 - **`brainstorming`**: Hỏi đáp, lập phương án và chốt thiết kế trước khi code tính năng mới.
 - **`writing-plans`**: Viết kế hoạch thực thi rõ ràng cho các tác vụ nhiều bước.
 
-**B. Quy trình Git & Branch (Flexible Git Workflow)**
-- **`using-git-worktrees` / `finishing-a-development-branch`**: Chủ động tạo nhánh (`feature/*`, `fix/*`, `refactor/*`, `docs/*`) hoặc worktree khi triển khai tính năng/refactor lớn để cô lập rủi ro; sau khi kiểm thử đạt chuẩn thì merge về `main` (với sửa lỗi nhỏ có thể commit trực tiếp vào `main`).
+**B. Quy trình Git (Direct-to-Main Workflow)**
+- **Chỉ làm việc trên `main`**: Không tạo nhánh phụ hay git worktree. Sau khi vượt qua cổng kiểm thử (`dart analyze` + `flutter test`), commit và push thẳng lên `main`.
 - **`caveman-commit`**: Viết commit message ngắn gọn theo chuẩn Conventional Commits.
 
 **C. Quy trình Debug & Kiểm thử (Testing)**

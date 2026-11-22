@@ -38,7 +38,7 @@ lib/
 - **Mã phòng/căn hộ**: Sử dụng định dạng chuẩn `A0110` / `a0110` (Block + Tầng 2 chữ số + Phòng 2 chữ số) trong placeholder, validate và mock data thay vì dạng `A101`.
 
 ## 3. Git workflow
-- **Branch**: Hỗ trợ tạo nhánh tính năng/sửa lỗi (`feature/*`, `fix/*`, `refactor/*`, `docs/*`) hoặc worktree khi làm tác vụ lớn để dễ rà soát và cô lập thay đổi, sau đó merge vào `main` khi đã pass test. Các sửa lỗi nhỏ (hotfix) có thể commit trực tiếp vào `main`.
+- **Branch**: Chỉ dùng nhánh `main` duy nhất. Không tạo branch phụ hay git worktree; sau khi kiểm thử (`dart analyze` và `flutter test`) đạt chuẩn thì commit và push thẳng lên `main`.
 - **Commit message**: Dạng `<loại>: <mô tả ngắn>` (loại gồm feat, fix, docs, refactor, style, test, chore). VD: `feat: thêm màn hình xem chi tiết hóa đơn`
 
 ## 4. Quy tắc quản lý trạng thái (Riverpod)
