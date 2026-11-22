@@ -18,7 +18,12 @@ class ResidentPreviousMeterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final electricAccent = AppTheme.getSemanticWarning(context);
+    final waterAccent = colorScheme.primary;
 
     return AppCard(
       child: Column(
@@ -26,9 +31,9 @@ class ResidentPreviousMeterCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.history_toggle_off,
-                color: AppTheme.primary,
+                color: colorScheme.primary,
               ),
               AppSpacing.w8,
               Expanded(
@@ -47,102 +52,22 @@ class ResidentPreviousMeterCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Container(
-                  padding: AppSpacing.p12,
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: AppRadius.r12,
-                    border: Border.all(
-                      color: Colors.amber.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.bolt,
-                            color: Colors.amber.shade800,
-                            size: 20,
-                          ),
-                          AppSpacing.w4,
-                          Expanded(
-                            child: Text(
-                              'Điện cũ',
-                              style: textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.h6,
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '$oldElec kWh',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _PreviousMeterTile(
+                  icon: Icons.bolt,
+                  label: 'Điện cũ',
+                  value: '$oldElec kWh',
+                  accentColor: electricAccent,
+                  isDark: isDark,
                 ),
               ),
               AppSpacing.w12,
               Expanded(
-                child: Container(
-                  padding: AppSpacing.p12,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: AppRadius.r12,
-                    border: Border.all(
-                      color: Colors.blue.shade200,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.water_drop,
-                            color: Colors.blue.shade800,
-                            size: 20,
-                          ),
-                          AppSpacing.w4,
-                          Expanded(
-                            child: Text(
-                              'Nước cũ',
-                              style: textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.h6,
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '$oldWater m³',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _PreviousMeterTile(
+                  icon: Icons.water_drop,
+                  label: 'Nước cũ',
+                  value: '$oldWater m³',
+                  accentColor: waterAccent,
+                  isDark: isDark,
                 ),
               ),
             ],
@@ -153,3 +78,74 @@ class ResidentPreviousMeterCard extends StatelessWidget {
   }
 }
 
+class _PreviousMeterTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color accentColor;
+  final bool isDark;
+
+  const _PreviousMeterTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.accentColor,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: AppSpacing.p12,
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: isDark ? 0.14 : 0.08),
+        borderRadius: AppRadius.r12,
+        border: Border.all(
+          color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: accentColor,
+                size: 20,
+              ),
+              AppSpacing.w4,
+              Expanded(
+                child: Text(
+                  label,
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.h6,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: accentColor,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
