@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_radius.dart';
 import 'package:vivona/core/theme/app_spacing.dart';
 import 'package:vivona/core/theme/app_theme.dart';
+import 'package:vivona/core/widgets/app_card.dart';
 import 'package:vivona/data/models/parking_slot_model.dart';
 import 'package:vivona/data/models/vehicle_model.dart';
 
@@ -51,206 +52,209 @@ class ResidentVehicleCard extends StatelessWidget {
         )
         .firstOrNull;
 
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).cardColor,
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final vehicleAccent = vehicle.isMotorbike
+        ? warningColor
+        : colorScheme.primary;
+
+    final Color statusColor;
+    if (vehicle.isApproved) {
+      statusColor = AppStatusColors.getPaid(context);
+    } else if (vehicle.isRejected) {
+      statusColor = AppStatusColors.getRejected(context);
+    } else {
+      statusColor = AppStatusColors.getPending(context);
+    }
+
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.r16,
-        side: BorderSide(
-          color: vehicle.isRejected
-              ? AppTheme.error.withValues(alpha: 0.3)
-              : Theme.of(context).dividerColor,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hàng 1: Icon xe + Biển số + Badge trạng thái + Nút thao tác
-            Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: vehicle.isMotorbike
-                        ? Colors.orange.shade50
-                        : Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    vehicle.isMotorbike
-                        ? Icons.two_wheeler_outlined
-                        : Icons.directions_car_outlined,
-                    color: vehicle.isMotorbike
-                        ? Colors.orange.shade700
-                        : AppTheme.primary,
-                    size: 20,
-                  ),
+      borderColor: vehicle.isRejected
+          ? errorColor.withValues(alpha: isDark ? 0.5 : 0.35)
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: vehicleAccent.withValues(alpha: isDark ? 0.18 : 0.10),
+                  borderRadius: AppRadius.r12,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          border: Border.all(
-                            color: Colors.grey.shade400,
-                          ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          vehicle.plateNumber,
-                          style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: vehicle.isApproved
-                              ? AppStatusColors.paid.withValues(alpha: 0.12)
-                              : vehicle.isRejected
-                              ? AppTheme.error.withValues(alpha: 0.12)
-                              : AppStatusColors.pending.withValues(
-                                  alpha: 0.12,
-                                ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          vehicle.statusDisplayName,
-                          style: textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: vehicle.isApproved
-                                ? AppStatusColors.paid
-                                : vehicle.isRejected
-                                ? AppTheme.error
-                                : AppStatusColors.pending,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: Icon(
+                  vehicle.isMotorbike
+                      ? Icons.two_wheeler_outlined
+                      : Icons.directions_car_outlined,
+                  color: vehicleAccent,
+                  size: 22,
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+              ),
+              AppSpacing.w10,
+              Expanded(
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
+                  runSpacing: 6,
                   children: [
-                    if (vehicle.isPending) ...[
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        icon: const Icon(
-                          Icons.edit_outlined,
-                          color: AppTheme.primary,
-                          size: 20,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerLow,
+                        border: Border.all(
+                          color: colorScheme.outlineVariant,
                         ),
-                        tooltip: 'Sửa thông tin xe',
-                        onPressed: onEdit,
+                        borderRadius: AppRadius.r8,
                       ),
-                      AppSpacing.w8,
-                    ],
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon: Icon(
-                        vehicle.isRejected
-                            ? Icons.delete_forever_outlined
-                            : Icons.delete_outline,
-                        color: AppTheme.error,
-                        size: 20,
+                      child: Text(
+                        vehicle.plateNumber,
+                        style: textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                          color: colorScheme.onSurface,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
-                      tooltip: vehicle.isRejected
-                          ? 'Xóa bản ghi xe bị từ chối'
-                          : 'Hủy đăng ký xe',
-                      onPressed: onDelete,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(
+                          alpha: isDark ? 0.18 : 0.12,
+                        ),
+                        borderRadius: AppRadius.r8,
+                      ),
+                      child: Text(
+                        vehicle.statusDisplayName,
+                        style: textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Hàng 2: Tên xe & Model
-            Row(
-              children: [
-                Text(
-                  vehicle.vehicleTypeName,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade800,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (vehicle.brandModel != null &&
-                    vehicle.brandModel!.trim().isNotEmpty) ...[
-                  Expanded(
-                    child: Text(
-                      ' • ${vehicle.brandModel!.trim()}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w500,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (vehicle.isPending)
+                    IconButton(
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
                       ),
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
+                      tooltip: 'Sửa thông tin xe',
+                      onPressed: onEdit,
                     ),
+                  IconButton(
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                    icon: Icon(
+                      vehicle.isRejected
+                          ? Icons.delete_forever_outlined
+                          : Icons.delete_outline,
+                      color: errorColor,
+                      size: 20,
+                    ),
+                    tooltip: vehicle.isRejected
+                        ? 'Xóa bản ghi xe bị từ chối'
+                        : 'Hủy đăng ký xe',
+                    onPressed: onDelete,
                   ),
                 ],
-              ],
-            ),
-            AppSpacing.h4,
-            // Hàng 3: Biểu phí & Ngày đăng ký
-            Text(
-              'Biểu phí: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng • Ngày đăng ký: ${_dateFormat.format(vehicle.createdAt)}',
-              style: textTheme.labelSmall?.copyWith(
-                color: Colors.grey.shade600,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            ],
+          ),
+          AppSpacing.h8,
+          Row(
+            children: [
+              Text(
+                vehicle.vehicleTypeName,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (vehicle.brandModel != null &&
+                  vehicle.brandModel!.trim().isNotEmpty)
+                Expanded(
+                  child: Text(
+                    ' • ${vehicle.brandModel!.trim()}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          AppSpacing.h4,
+          Text(
+            'Biểu phí: ${_currencyFormat.format(vehicle.monthlyFee)}/tháng • Ngày đăng ký: ${_dateFormat.format(vehicle.createdAt)}',
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
-            const SizedBox(height: 6),
-            // Hàng 4: Slot ô đỗ & Ảnh cà vẹt xe (Wrap)
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if ((slotNum != null && slotNum.isNotEmpty) ||
+              assignedSlot != null ||
+              (vehicle.hasRegistrationImage && onPhotoView != null)) ...[
+            AppSpacing.h8,
             Wrap(
               spacing: 8,
-              runSpacing: 6,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 if ((slotNum != null && slotNum.isNotEmpty) ||
-                    assignedSlot != null) ...[
+                    assignedSlot != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 10,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(6),
+                      color: colorScheme.primary.withValues(
+                        alpha: isDark ? 0.16 : 0.08,
+                      ),
+                      borderRadius: AppRadius.r8,
                       border: Border.all(
-                        color: AppTheme.primary.withValues(alpha: 0.2),
+                        color: colorScheme.primary.withValues(
+                          alpha: isDark ? 0.35 : 0.22,
+                        ),
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.local_parking,
-                          size: 14,
-                          color: AppTheme.primary,
+                          size: 16,
+                          color: colorScheme.primary,
                         ),
                         AppSpacing.w4,
                         Flexible(
@@ -258,7 +262,7 @@ class ResidentVehicleCard extends StatelessWidget {
                             'Vị trí ô đỗ: ${(slotNum != null && slotNum.isNotEmpty) ? slotNum : assignedSlot!.slotNumber}${assignedSlot != null ? ' (Tầng ${assignedSlot.zone})' : ''}',
                             style: textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
+                              color: colorScheme.primary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -266,92 +270,86 @@ class ResidentVehicleCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                ],
-                if (vehicle.hasRegistrationImage && onPhotoView != null) ...[
-                  InkWell(
-                    onTap: onPhotoView,
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Colors.blue.shade200,
+                if (vehicle.hasRegistrationImage && onPhotoView != null)
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colorScheme.primary,
+                      side: BorderSide(
+                        color: colorScheme.primary.withValues(
+                          alpha: isDark ? 0.45 : 0.3,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.badge_outlined,
-                            size: 13,
-                            color: AppTheme.primary,
-                          ),
-                          AppSpacing.w4,
-                          Text(
-                            'Xem ảnh cà vẹt xe',
-                            style: textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.primary,
-                            ),
-                          ),
-                          AppSpacing.w4,
-                          const Icon(
-                            Icons.open_in_new,
-                            size: 11,
-                            color: AppTheme.primary,
-                          ),
-                        ],
+                      backgroundColor: colorScheme.primary.withValues(
+                        alpha: isDark ? 0.14 : 0.06,
+                      ),
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
                       ),
                     ),
+                    onPressed: onPhotoView,
+                    icon: const Icon(Icons.badge_outlined, size: 16),
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Xem ảnh cà vẹt xe',
+                          style: textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        AppSpacing.w4,
+                        Icon(
+                          Icons.open_in_new,
+                          size: 13,
+                          color: colorScheme.primary,
+                        ),
+                      ],
+                    ),
                   ),
-                ],
               ],
             ),
-            // Lý do từ chối nếu bị từ chối
-            if (vehicle.isRejected) ...[
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.error.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppTheme.error.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 16,
-                      color: AppTheme.error,
-                    ),
-                    AppSpacing.w8,
-                    Expanded(
-                      child: Text(
-                        'Lý do từ chối: ${vehicle.hasRejectionReason ? vehicle.rejectionReason! : 'Không đủ điều kiện cấp thẻ xe theo quy chế tòa nhà.'}',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: AppTheme.error,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
+          ],
+          if (vehicle.isRejected) ...[
+            AppSpacing.h12,
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: errorColor.withValues(alpha: isDark ? 0.14 : 0.08),
+                borderRadius: AppRadius.r8,
+                border: Border.all(
+                  color: errorColor.withValues(alpha: isDark ? 0.4 : 0.25),
                 ),
               ),
-            ],
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 18,
+                    color: errorColor,
+                  ),
+                  AppSpacing.w8,
+                  Expanded(
+                    child: Text(
+                      'Lý do từ chối: ${vehicle.hasRejectionReason ? vehicle.rejectionReason! : 'Không đủ điều kiện cấp thẻ xe theo quy chế tòa nhà.'}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: errorColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 }
-
