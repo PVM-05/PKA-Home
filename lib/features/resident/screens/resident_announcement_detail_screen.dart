@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
@@ -41,19 +44,19 @@ class _ResidentAnnouncementDetailScreenState
     }
   }
 
-  Color _getCategoryColor(String category) {
+  Color _getCategoryColor(BuildContext context, String category) {
+    final colorScheme = Theme.of(context).colorScheme;
     switch (category) {
       case 'emergency':
-        return AppTheme.error;
+        return AppTheme.getSemanticError(context);
       case 'elevator_maintenance':
-        return Colors.orange.shade800;
       case 'utility_outage':
-        return Colors.deepOrange;
+        return AppTheme.getSemanticWarning(context);
       case 'resident_meeting':
-        return Colors.purple;
+        return AppTheme.getSemanticSecondary(context);
       case 'general':
       default:
-        return AppTheme.primary;
+        return colorScheme.primary;
     }
   }
 
@@ -82,12 +85,21 @@ class _ResidentAnnouncementDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final announcement = widget.announcement;
     final dateFormat = DateFormat('dd/MM/yyyy - HH:mm');
     final formattedDate = dateFormat.format(announcement.createdAt);
 
-    final catColor = _getCategoryColor(announcement.category);
+    final catColor = _getCategoryColor(context, announcement.category);
     final catIcon = _getCategoryIcon(announcement.category);
+    final errorColor = AppTheme.getSemanticError(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final scheduleAccent = announcement.isOngoing
+        ? warningColor
+        : colorScheme.primary;
 
     return Scaffold(
       appBar: AppBar(
@@ -98,18 +110,22 @@ class _ResidentAnnouncementDetailScreenState
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 20.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Thẻ tiêu đề và trạng thái
                 AppCard(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: AppSpacing.p20,
                   borderColor: announcement.isUrgent
-                      ? AppTheme.error.withValues(alpha: 0.45)
+                      ? errorColor.withValues(alpha: isDark ? 0.55 : 0.45)
                       : (announcement.isPinned
-                          ? AppTheme.primary.withValues(alpha: 0.35)
-                          : null),
+                            ? colorScheme.primary.withValues(
+                                alpha: isDark ? 0.45 : 0.35,
+                              )
+                            : null),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -118,13 +134,21 @@ class _ResidentAnnouncementDetailScreenState
                         runSpacing: 6,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          // Badge Danh mục
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: catColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: catColor.withValues(alpha: 0.3)),
+                              color: catColor.withValues(
+                                alpha: isDark ? 0.18 : 0.10,
+                              ),
+                              borderRadius: AppRadius.r8,
+                              border: Border.all(
+                                color: catColor.withValues(
+                                  alpha: isDark ? 0.45 : 0.30,
+                                ),
+                              ),
                             ),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -132,9 +156,10 @@ class _ResidentAnnouncementDetailScreenState
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(catIcon, size: 14, color: catColor),
-                                  const SizedBox(width: 5),
+                                  AppSpacing.w6,
                                   Text(
-                                    announcement.categoryDisplayName.toUpperCase(),
+                                    announcement.categoryDisplayName
+                                        .toUpperCase(),
                                     style: context.labelSmall?.copyWith(
                                       color: catColor,
                                       fontWeight: FontWeight.bold,
@@ -146,24 +171,37 @@ class _ResidentAnnouncementDetailScreenState
                           ),
                           if (announcement.isPinned)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: Colors.amber.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.amber.shade300),
+                                color: warningColor.withValues(
+                                  alpha: isDark ? 0.18 : 0.10,
+                                ),
+                                borderRadius: AppRadius.r8,
+                                border: Border.all(
+                                  color: warningColor.withValues(
+                                    alpha: isDark ? 0.45 : 0.35,
+                                  ),
+                                ),
                               ),
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.push_pin, size: 13, color: Colors.amber),
-                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.push_pin,
+                                      size: 13,
+                                      color: warningColor,
+                                    ),
+                                    AppSpacing.w4,
                                     Text(
                                       'Đã ghim',
                                       style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                                        color: warningColor,
                                       ),
                                     ),
                                   ],
@@ -172,24 +210,37 @@ class _ResidentAnnouncementDetailScreenState
                             ),
                           if (announcement.isOngoing)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: Colors.green.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.green.shade300),
+                                color: successColor.withValues(
+                                  alpha: isDark ? 0.18 : 0.10,
+                                ),
+                                borderRadius: AppRadius.r8,
+                                border: Border.all(
+                                  color: successColor.withValues(
+                                    alpha: isDark ? 0.45 : 0.35,
+                                  ),
+                                ),
                               ),
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.radio_button_checked, size: 12, color: Colors.green.shade700),
-                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.radio_button_checked,
+                                      size: 12,
+                                      color: successColor,
+                                    ),
+                                    AppSpacing.w4,
                                     Text(
                                       'Đang diễn ra',
                                       style: context.labelSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.green.shade800,
+                                        color: successColor,
                                       ),
                                     ),
                                   ],
@@ -198,16 +249,18 @@ class _ResidentAnnouncementDetailScreenState
                             ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      AppSpacing.h12,
                       Text(
                         announcement.title,
                         style: context.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           height: 1.3,
-                          color: announcement.isUrgent ? AppTheme.error : AppTheme.textPrimary,
+                          color: announcement.isUrgent
+                              ? errorColor
+                              : colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      AppSpacing.h12,
                       Wrap(
                         alignment: WrapAlignment.spaceBetween,
                         crossAxisAlignment: WrapCrossAlignment.center,
@@ -220,25 +273,39 @@ class _ResidentAnnouncementDetailScreenState
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.access_time, size: 15, color: AppTheme.textSecondary),
-                                const SizedBox(width: 6),
+                                Icon(
+                                  Icons.access_time,
+                                  size: 15,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                AppSpacing.w6,
                                 Text(
                                   formattedDate,
-                                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                                  style: context.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(6),
+                              color: colorScheme.primary.withValues(
+                                alpha: isDark ? 0.18 : 0.08,
+                              ),
+                              borderRadius: AppRadius.r8,
                             ),
                             child: Text(
                               'Ban Quản Lý',
                               style: context.labelSmall?.copyWith(
-                                color: AppTheme.primary,
+                                color: colorScheme.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -249,13 +316,17 @@ class _ResidentAnnouncementDetailScreenState
                   ),
                 ),
 
-                // Khung giờ sự kiện / bảo trì (nếu có)
-                if (announcement.eventStartAt != null && announcement.eventEndAt != null) ...[
-                  const SizedBox(height: 16),
+                if (announcement.eventStartAt != null &&
+                    announcement.eventEndAt != null) ...[
+                  AppSpacing.h16,
                   AppCard(
-                    color: announcement.isOngoing ? Colors.orange.shade50 : Colors.blue.shade50,
-                    borderColor: announcement.isOngoing ? Colors.orange.shade300 : Colors.blue.shade200,
-                    padding: const EdgeInsets.all(16),
+                    color: scheduleAccent.withValues(
+                      alpha: isDark ? 0.14 : 0.08,
+                    ),
+                    borderColor: scheduleAccent.withValues(
+                      alpha: isDark ? 0.45 : 0.30,
+                    ),
+                    padding: AppSpacing.p16,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -264,26 +335,27 @@ class _ResidentAnnouncementDetailScreenState
                             Icon(
                               Icons.calendar_month_outlined,
                               size: 18,
-                              color: announcement.isOngoing ? Colors.orange.shade900 : Colors.blue.shade900,
+                              color: scheduleAccent,
                             ),
-                            const SizedBox(width: 8),
+                            AppSpacing.w8,
                             Expanded(
                               child: Text(
                                 'Khung thời gian thực hiện',
                                 style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: announcement.isOngoing ? Colors.orange.shade900 : Colors.blue.shade900,
+                                  color: scheduleAccent,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        AppSpacing.h8,
                         Text(
                           'Bắt đầu: ${DateFormat('HH:mm - dd/MM/yyyy').format(announcement.eventStartAt!)}\nKết thúc: ${DateFormat('HH:mm - dd/MM/yyyy').format(announcement.eventEndAt!)}',
                           style: context.bodySmall?.copyWith(
-                            height: 1.4,
-                            color: announcement.isOngoing ? Colors.orange.shade900 : Colors.blue.shade900,
+                            height: 1.45,
+                            color: colorScheme.onSurface,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -291,108 +363,103 @@ class _ResidentAnnouncementDetailScreenState
                   ),
                 ],
 
-                // Thẻ Hotline Kỹ thuật viên (nếu có)
-                if (announcement.hotlineContact != null && announcement.hotlineContact!.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                if (announcement.hotlineContact != null &&
+                    announcement.hotlineContact!.isNotEmpty) ...[
+                  AppSpacing.h16,
                   AppCard(
-                    color: Colors.green.shade50,
-                    borderColor: Colors.green.shade300,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    color: successColor.withValues(alpha: isDark ? 0.14 : 0.08),
+                    borderColor: successColor.withValues(
+                      alpha: isDark ? 0.45 : 0.30,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final isCompact = constraints.maxWidth < 360;
-
-                        if (isCompact) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade100,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(Icons.phone_in_talk, color: Colors.green.shade800, size: 20),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Hotline kỹ thuật viên trực ban',
-                                          style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          announcement.hotlineContact!,
-                                          style: context.titleSmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green.shade900,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade700,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                ),
-                                icon: const Icon(Icons.call, size: 16),
-                                label: Text('Gọi ngay', style: context.labelMedium),
-                                onPressed: () => _makePhoneCall(announcement.hotlineContact!),
-                              ),
-                            ],
-                          );
-                        }
-
-                        return Row(
+                        final hotlineInfo = Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: AppSpacing.p8,
                               decoration: BoxDecoration(
-                                color: Colors.green.shade100,
+                                color: successColor.withValues(
+                                  alpha: isDark ? 0.22 : 0.14,
+                                ),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(Icons.phone_in_talk, color: Colors.green.shade800, size: 20),
+                              child: Icon(
+                                Icons.phone_in_talk,
+                                color: successColor,
+                                size: 20,
+                              ),
                             ),
-                            const SizedBox(width: 12),
+                            AppSpacing.w12,
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'Hotline kỹ thuật viên trực ban',
-                                    style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                                    style: context.labelSmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  AppSpacing.h4,
                                   Text(
                                     announcement.hotlineContact!,
                                     style: context.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.green.shade900,
+                                      color: successColor,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green.shade700,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              ),
-                              icon: const Icon(Icons.call, size: 16),
-                              label: Text('Gọi ngay', style: context.labelMedium),
-                              onPressed: () => _makePhoneCall(announcement.hotlineContact!),
+                          ],
+                        );
+
+                        final callButton = ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.textSuccess,
+                            foregroundColor: colorScheme.onPrimary,
+                            minimumSize: const Size(0, 48),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
                             ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppRadius.r12,
+                            ),
+                          ),
+                          icon: const Icon(Icons.call, size: 18),
+                          label: const Text(
+                            'Gọi ngay',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () =>
+                              _makePhoneCall(announcement.hotlineContact!),
+                        );
+
+                        if (isCompact) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              hotlineInfo,
+                              AppSpacing.h12,
+                              callButton,
+                            ],
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            Expanded(child: hotlineInfo),
+                            AppSpacing.w8,
+                            callButton,
                           ],
                         );
                       },
@@ -400,24 +467,27 @@ class _ResidentAnnouncementDetailScreenState
                   ),
                 ],
 
-                const SizedBox(height: 16),
+                AppSpacing.h16,
 
-                // Thẻ nội dung chi tiết
                 AppCard(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: AppSpacing.p20,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.article_outlined, color: AppTheme.primary, size: 20),
-                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.article_outlined,
+                            color: colorScheme.primary,
+                            size: 20,
+                          ),
+                          AppSpacing.w8,
                           Expanded(
                             child: Text(
                               'Nội dung thông báo',
                               style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.textPrimary,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -428,7 +498,7 @@ class _ResidentAnnouncementDetailScreenState
                         announcement.content,
                         style: context.bodyMedium?.copyWith(
                           height: 1.6,
-                          color: AppTheme.textPrimary,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],

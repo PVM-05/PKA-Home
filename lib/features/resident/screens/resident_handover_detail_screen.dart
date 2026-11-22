@@ -2,10 +2,16 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
+
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/handover_pdf_builder.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/signature_pad_dialog.dart';
 import '../../../data/models/apartment_handover_model.dart';
@@ -29,7 +35,7 @@ class _ResidentHandoverDetailScreenState
     extends ConsumerState<ResidentHandoverDetailScreen> {
   bool _isActionLoading = false;
 
-  void _openResidentSignaturePad() async {
+  Future<void> _openResidentSignaturePad() async {
     final bytes = await showDialog<Uint8List>(
       context: context,
       builder: (_) => const SignaturePadDialog(
@@ -52,10 +58,7 @@ class _ResidentHandoverDetailScreenState
         }
       } catch (e) {
         if (mounted) {
-          AppSnackBar.showError(
-            context,
-            'Lỗi ký xác nhận: $e',
-          );
+          AppSnackBar.showError(context, 'Lỗi ký xác nhận: $e');
         }
       } finally {
         if (mounted) setState(() => _isActionLoading = false);
@@ -63,75 +66,85 @@ class _ResidentHandoverDetailScreenState
     }
   }
 
-  void _openDisputeDialog() {
+  Future<void> _openDisputeDialog() async {
     final disputeController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Gửi ý kiến / Khiếu nại biên bản'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nếu bạn thấy thông tin kiểm kê hoặc chỉ số chưa chính xác, hãy nhập phản hồi để BQL kiểm tra lại:',
-              style: ctx.bodyMedium,
+    try {
+      final disputeText = await showDialog<String>(
+        context: context,
+        builder: (ctx) {
+          final colorScheme = Theme.of(ctx).colorScheme;
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
+            title: const Text('Gửi ý kiến / Khiếu nại biên bản'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Nếu bạn thấy thông tin kiểm kê hoặc chỉ số chưa chính xác, hãy nhập phản hồi để BQL kiểm tra lại:',
+                  style: ctx.bodyMedium,
+                ),
+                AppSpacing.h12,
+                TextField(
+                  controller: disputeController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Nội dung phản ánh',
+                    hintText:
+                        'VD: Chỉ số nước ghi nhầm, bồn rửa mặt đã bị xước từ trước...',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: disputeController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Nội dung phản ánh',
-                hintText:
-                    'VD: Chỉ số nước ghi nhầm, bồn rửa mặt đã bị xước từ trước...',
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Hủy'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final text = disputeController.text.trim();
-              if (text.isEmpty) return;
-              Navigator.of(ctx).pop();
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.textError,
+                  foregroundColor: colorScheme.onError,
+                  minimumSize: const Size(0, 48),
+                ),
+                onPressed: () {
+                  final text = disputeController.text.trim();
+                  if (text.isEmpty) return;
+                  Navigator.of(ctx).pop(text);
+                },
+                child: const Text('Gửi khiếu nại'),
+              ),
+            ],
+          );
+        },
+      );
 
-              setState(() => _isActionLoading = true);
-              try {
-                final repo = ref.read(handoverRepositoryProvider);
-                await repo.disputeByResident(widget.handoverId, text);
-                ref.invalidate(handoverDetailProvider(widget.handoverId));
-                if (mounted) {
-                  AppSnackBar.showWarning(
-                    context,
-                    'Đã gửi phản hồi khiếu nại tới BQL!',
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  AppSnackBar.showError(
-                    context,
-                    'Lỗi gửi khiếu nại: $e',
-                  );
-                }
-              } finally {
-                if (mounted) setState(() => _isActionLoading = false);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Gửi khiếu nại'),
-          ),
-        ],
-      ),
-    );
+      if (disputeText == null || disputeText.isEmpty || !mounted) return;
+
+      setState(() => _isActionLoading = true);
+      try {
+        final repo = ref.read(handoverRepositoryProvider);
+        await repo.disputeByResident(widget.handoverId, disputeText);
+        ref.invalidate(handoverDetailProvider(widget.handoverId));
+        if (mounted) {
+          AppSnackBar.showWarning(
+            context,
+            'Đã gửi phản hồi khiếu nại tới BQL!',
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackBar.showError(context, 'Lỗi gửi khiếu nại: $e');
+        }
+      } finally {
+        if (mounted) setState(() => _isActionLoading = false);
+      }
+    } finally {
+      disputeController.dispose();
+    }
   }
 
   @override
@@ -147,6 +160,7 @@ class _ResidentHandoverDetailScreenState
         actions: [
           if (handoverData != null)
             IconButton(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               icon: const Icon(Icons.picture_as_pdf),
               tooltip: 'Xuất file PDF',
               onPressed: () async {
@@ -173,7 +187,15 @@ class _ResidentHandoverDetailScreenState
         data: (handover) {
           if (handover == null) {
             return const Center(
-              child: Text('Không tìm thấy thông tin biên bản bàn giao'),
+              child: Padding(
+                padding: AppSpacing.p24,
+                child: AppEmptyState(
+                  icon: Icons.assignment_late_outlined,
+                  title: 'Không tìm thấy thông tin biên bản bàn giao',
+                  description:
+                      'Biên bản có thể đã bị thu hồi hoặc chưa được phân quyền xem.',
+                ),
+              ),
             );
           }
 
@@ -182,41 +204,39 @@ class _ResidentHandoverDetailScreenState
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: AppSpacing.p24,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Cột trái: Thông tin tổng quan, Chỉ số, Bảng cọc, Chữ ký
                       Expanded(
                         flex: 5,
                         child: SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _buildOverviewCard(handover),
-                              const SizedBox(height: 16),
-                              _buildMetersCard(handover),
+                              _buildOverviewCard(context, handover),
+                              AppSpacing.h16,
+                              _buildMetersCard(context, handover),
                               if (handover.handoverType == 'move_out') ...[
-                                const SizedBox(height: 16),
-                                _buildDepositCard(handover),
+                                AppSpacing.h16,
+                                _buildDepositCard(context, handover),
                               ],
-                              const SizedBox(height: 16),
-                              _buildActionSection(handover),
+                              AppSpacing.h16,
+                              _buildActionSection(context, handover),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 24),
-                      // Cột phải: Danh sách hạng mục kiểm kê
+                      AppSpacing.w24,
                       Expanded(
                         flex: 7,
                         child: SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _buildItemsSectionHeader(handover),
-                              const SizedBox(height: 12),
-                              _buildItemsList(handover),
+                              _buildItemsSectionHeader(context, handover),
+                              AppSpacing.h12,
+                              _buildItemsList(context, handover),
                             ],
                           ),
                         ),
@@ -228,46 +248,67 @@ class _ResidentHandoverDetailScreenState
             );
           }
 
-          // Mobile layout (< 900dp)
           return Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
+              constraints: const BoxConstraints(maxWidth: 640),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.p16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildOverviewCard(handover),
-                    const SizedBox(height: 16),
-                    _buildMetersCard(handover),
+                    _buildOverviewCard(context, handover),
+                    AppSpacing.h16,
+                    _buildMetersCard(context, handover),
                     if (handover.handoverType == 'move_out') ...[
-                      const SizedBox(height: 16),
-                      _buildDepositCard(handover),
+                      AppSpacing.h16,
+                      _buildDepositCard(context, handover),
                     ],
-                    const SizedBox(height: 16),
-                    _buildItemsSectionHeader(handover),
-                    const SizedBox(height: 12),
-                    _buildItemsList(handover),
-                    const SizedBox(height: 24),
-                    _buildActionSection(handover),
-                    const SizedBox(height: 32),
+                    AppSpacing.h16,
+                    _buildItemsSectionHeader(context, handover),
+                    AppSpacing.h12,
+                    _buildItemsList(context, handover),
+                    AppSpacing.h24,
+                    _buildActionSection(context, handover),
+                    AppSpacing.h32,
                   ],
                 ),
               ),
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [AppSkeletonShimmer.cardList(count: 3, itemHeight: 130)],
+        ),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: AppSpacing.p24,
+            child: AppErrorCard(
+              error: err,
+              onRetry: () =>
+                  ref.invalidate(handoverDetailProvider(widget.handoverId)),
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildOverviewCard(ApartmentHandoverModel handover) {
-    Color statusColor = AppTheme.textSecondary;
-    if (handover.isConfirmed) statusColor = AppStatusColors.paid;
-    if (handover.isPendingResident) statusColor = AppTheme.warning;
-    if (handover.isDisputed) statusColor = AppTheme.error;
+  Widget _buildOverviewCard(
+    BuildContext context,
+    ApartmentHandoverModel handover,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final errorColor = AppTheme.getSemanticError(context);
+
+    Color statusColor = colorScheme.onSurfaceVariant;
+    if (handover.isConfirmed) statusColor = AppStatusColors.getPaid(context);
+    if (handover.isPendingResident) {
+      statusColor = AppTheme.getSemanticWarning(context);
+    }
+    if (handover.isDisputed) statusColor = errorColor;
 
     return AppCard(
       child: Column(
@@ -280,23 +321,24 @@ class _ResidentHandoverDetailScreenState
                   handover.reportCode,
                   style: context.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
+                    color: colorScheme.primary,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              AppSpacing.w8,
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 120),
+                constraints: const BoxConstraints(maxWidth: 130),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
+                    color: statusColor.withValues(alpha: isDark ? 0.18 : 0.12),
+                    borderRadius: AppRadius.r8,
                   ),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -312,7 +354,7 @@ class _ResidentHandoverDetailScreenState
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          AppSpacing.h8,
           Wrap(
             spacing: 8,
             runSpacing: 4,
@@ -331,29 +373,28 @@ class _ResidentHandoverDetailScreenState
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          AppSpacing.h4,
           Text(
             'Nhân viên BQL: ${handover.staffName ?? 'Ban Quản Lý'} • Ngày: ${handover.handoverDate.day}/${handover.handoverDate.month}/${handover.handoverDate.year}',
             style: context.bodySmall?.copyWith(
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurfaceVariant,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           if (handover.residentNotes != null &&
               handover.residentNotes!.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            AppSpacing.h8,
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: AppSpacing.p8,
               decoration: BoxDecoration(
-                color: AppTheme.error.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(6),
+                color: errorColor.withValues(alpha: isDark ? 0.14 : 0.08),
+                borderRadius: AppRadius.r8,
               ),
               child: Text(
                 'Ý kiến phản hồi: ${handover.residentNotes}',
-                style: context.labelSmall?.copyWith(
-                  color: AppTheme.error,
-                ),
+                style: context.labelSmall?.copyWith(color: errorColor),
               ),
             ),
           ],
@@ -362,59 +403,52 @@ class _ResidentHandoverDetailScreenState
     );
   }
 
-  Widget _buildMetersCard(ApartmentHandoverModel handover) {
+  Widget _buildMetersCard(
+    BuildContext context,
+    ApartmentHandoverModel handover,
+  ) {
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Chỉ số đồng hồ chốt bàn giao',
-            style: context.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           LayoutBuilder(
             builder: (context, constraints) {
               final isVeryNarrow = constraints.maxWidth < 280;
+              final elecBox = _buildMeterBox(
+                context: context,
+                icon: Icons.bolt,
+                color: warningColor,
+                label: 'Chỉ số điện: ${handover.initialElectricityReading} kWh',
+              );
+              final waterBox = _buildMeterBox(
+                context: context,
+                icon: Icons.water_drop,
+                color: primaryColor,
+                label: 'Chỉ số nước: ${handover.initialWaterReading} m³',
+              );
+
               if (isVeryNarrow) {
                 return Column(
                   children: [
-                    _buildMeterBox(
-                      icon: Icons.bolt,
-                      color: Colors.amber.shade800,
-                      label:
-                          'Chỉ số điện: ${handover.initialElectricityReading} kWh',
-                    ),
-                    const SizedBox(height: 8),
-                    _buildMeterBox(
-                      icon: Icons.water_drop,
-                      color: Colors.blue.shade700,
-                      label:
-                          'Chỉ số nước: ${handover.initialWaterReading} m³',
-                    ),
+                    elecBox,
+                    AppSpacing.h8,
+                    waterBox,
                   ],
                 );
               }
               return Row(
                 children: [
-                  Expanded(
-                    child: _buildMeterBox(
-                      icon: Icons.bolt,
-                      color: Colors.amber.shade800,
-                      label:
-                          'Chỉ số điện: ${handover.initialElectricityReading} kWh',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildMeterBox(
-                      icon: Icons.water_drop,
-                      color: Colors.blue.shade700,
-                      label:
-                          'Chỉ số nước: ${handover.initialWaterReading} m³',
-                    ),
-                  ),
+                  Expanded(child: elecBox),
+                  AppSpacing.w8,
+                  Expanded(child: waterBox),
                 ],
               );
             },
@@ -425,26 +459,32 @@ class _ResidentHandoverDetailScreenState
   }
 
   Widget _buildMeterBox({
+    required BuildContext context,
     required IconData icon,
     required Color color,
     required String label,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: isDark ? 0.14 : 0.08),
+        borderRadius: AppRadius.r8,
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.35 : 0.22),
+        ),
       ),
       child: Column(
         children: [
           Icon(icon, color: color, size: 26),
-          const SizedBox(height: 4),
+          AppSpacing.h4,
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               label,
               style: context.labelMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -453,18 +493,22 @@ class _ResidentHandoverDetailScreenState
     );
   }
 
-  Widget _buildDepositCard(ApartmentHandoverModel handover) {
+  Widget _buildDepositCard(
+    BuildContext context,
+    ApartmentHandoverModel handover,
+  ) {
+    final errorColor = AppTheme.getSemanticError(context);
+    final successColor = AppStatusColors.getPaid(context);
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Chiết tính hoàn trả tiền đặt cọc',
-            style: context.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           Row(
             children: [
               const Expanded(child: Text('Tiền cọc ban đầu:')),
@@ -472,12 +516,15 @@ class _ResidentHandoverDetailScreenState
                 fit: BoxFit.scaleDown,
                 child: Text(
                   _formatCurrency(handover.depositHeld),
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          AppSpacing.h6,
           Row(
             children: [
               const Expanded(child: Text('Khấu trừ hư hại thiết bị:')),
@@ -485,9 +532,10 @@ class _ResidentHandoverDetailScreenState
                 fit: BoxFit.scaleDown,
                 child: Text(
                   '-${_formatCurrency(handover.totalDeduction)}',
-                  style: const TextStyle(
-                    color: AppTheme.error,
+                  style: TextStyle(
+                    color: errorColor,
                     fontWeight: FontWeight.bold,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ),
@@ -509,8 +557,9 @@ class _ResidentHandoverDetailScreenState
                 child: Text(
                   _formatCurrency(handover.depositRefundCalculated),
                   style: context.titleMedium?.copyWith(
-                    color: AppStatusColors.paid,
+                    color: successColor,
                     fontWeight: FontWeight.bold,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ),
@@ -521,29 +570,34 @@ class _ResidentHandoverDetailScreenState
     );
   }
 
-  Widget _buildItemsSectionHeader(ApartmentHandoverModel handover) {
+  Widget _buildItemsSectionHeader(
+    BuildContext context,
+    ApartmentHandoverModel handover,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: [
         Expanded(
           child: Text(
             'Danh sách hạng mục kiểm kê',
-            style: context.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
-        const SizedBox(width: 8),
+        AppSpacing.w8,
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
+            color: colorScheme.primary.withValues(alpha: isDark ? 0.18 : 0.10),
+            borderRadius: AppRadius.r8,
           ),
           child: Text(
             '${handover.items.length} hạng mục',
             style: context.labelSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
+              color: colorScheme.primary,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ),
@@ -551,7 +605,10 @@ class _ResidentHandoverDetailScreenState
     );
   }
 
-  Widget _buildItemsList(ApartmentHandoverModel handover) {
+  Widget _buildItemsList(
+    BuildContext context,
+    ApartmentHandoverModel handover,
+  ) {
     if (handover.items.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
@@ -565,15 +622,17 @@ class _ResidentHandoverDetailScreenState
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: handover.items.length,
-      separatorBuilder: (_, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final item = handover.items[index];
-        return _buildItemCard(item);
-      },
+      separatorBuilder: (_, _) => AppSpacing.h8,
+      itemBuilder: (context, index) =>
+          _buildItemCard(context, handover.items[index]),
     );
   }
 
-  Widget _buildItemCard(HandoverItemModel item) {
+  Widget _buildItemCard(BuildContext context, HandoverItemModel item) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
+    final successColor = AppStatusColors.getPaid(context);
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -590,7 +649,7 @@ class _ResidentHandoverDetailScreenState
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              AppSpacing.w8,
               Chip(
                 padding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
@@ -601,7 +660,7 @@ class _ResidentHandoverDetailScreenState
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          AppSpacing.h6,
           Wrap(
             spacing: 8,
             runSpacing: 4,
@@ -611,9 +670,7 @@ class _ResidentHandoverDetailScreenState
               Text(
                 'Tình trạng: ${item.conditionDisplayName}',
                 style: context.bodySmall?.copyWith(
-                  color: item.hasDamage
-                      ? AppTheme.error
-                      : AppStatusColors.paid,
+                  color: item.hasDamage ? errorColor : successColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -621,18 +678,19 @@ class _ResidentHandoverDetailScreenState
                 Text(
                   'Phí: ${_formatCurrency(item.repairCost)}',
                   style: context.bodySmall?.copyWith(
-                    color: AppTheme.error,
+                    color: errorColor,
                     fontWeight: FontWeight.bold,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
             ],
           ),
           if (item.note != null && item.note!.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            AppSpacing.h4,
             Text(
               'Ghi chú: ${item.note}',
               style: context.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurfaceVariant,
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -643,27 +701,36 @@ class _ResidentHandoverDetailScreenState
     );
   }
 
-  Widget _buildActionSection(ApartmentHandoverModel handover) {
+  Widget _buildActionSection(
+    BuildContext context,
+    ApartmentHandoverModel handover,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final successColor = AppStatusColors.getPaid(context);
+    final errorColor = AppTheme.getSemanticError(context);
+
     if (handover.isConfirmed) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.p16,
         decoration: BoxDecoration(
-          color: AppStatusColors.paid.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
+          color: successColor.withValues(alpha: isDark ? 0.14 : 0.10),
+          borderRadius: AppRadius.r12,
           border: Border.all(
-            color: AppStatusColors.paid.withValues(alpha: 0.3),
+            color: successColor.withValues(alpha: isDark ? 0.45 : 0.30),
           ),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.verified, color: AppStatusColors.paid, size: 24),
-            SizedBox(width: 8),
+            Icon(Icons.verified, color: successColor, size: 24),
+            AppSpacing.w8,
             Flexible(
               child: Text(
                 'Biên bản đã được hai bên ký xác nhận thành công',
-                style: TextStyle(
-                  color: AppStatusColors.paid,
+                style: context.bodyMedium?.copyWith(
+                  color: successColor,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -687,31 +754,40 @@ class _ResidentHandoverDetailScreenState
                 'Ký tên xác nhận',
                 style: context.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: colorScheme.onPrimary,
+              minimumSize: const Size(double.infinity, 48),
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
             ),
           ),
-          const SizedBox(height: 8),
+          AppSpacing.h8,
           OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: errorColor,
+              side: BorderSide(color: errorColor.withValues(alpha: 0.6)),
+              minimumSize: const Size(double.infinity, 48),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
+            ),
             onPressed: _isActionLoading ? null : _openDisputeDialog,
-            icon: const Icon(
+            icon: Icon(
               Icons.feedback_outlined,
-              color: AppTheme.error,
+              color: errorColor,
               size: 18,
             ),
-            label: const FittedBox(
+            label: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 'Có ý kiến / Khiếu nại',
-                style: TextStyle(color: AppTheme.error),
+                style: TextStyle(
+                  color: errorColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),

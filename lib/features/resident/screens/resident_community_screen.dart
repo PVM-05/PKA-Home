@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
-import '../../../core/widgets/app_state_view.dart';
-import '../../../data/models/poll_model.dart';
 import '../../../data/models/petition_model.dart';
+import '../../../data/models/poll_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/community_provider.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
@@ -32,10 +38,18 @@ class _ResidentCommunityScreenState
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -58,7 +72,7 @@ class _ResidentCommunityScreenState
   }
 
   void _openVoteSheet(PollModel poll, String apartmentId) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -67,14 +81,14 @@ class _ResidentCommunityScreenState
   }
 
   void _openPollResultDialog(PollModel poll) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => PollResultDialog(poll: poll),
     );
   }
 
   void _openCreatePetitionSheet(String apartmentId) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -86,18 +100,20 @@ class _ResidentCommunityScreenState
     final authUser = ref.read(authProvider).valueOrNull;
     if (authUser == null) {
       if (mounted) {
-        AppSnackBar.showError(context, 'Vui lòng đăng nhập để đồng thuận kiến nghị');
+        AppSnackBar.showError(
+          context,
+          'Vui lòng đăng nhập để đồng thuận kiến nghị',
+        );
       }
       return;
     }
-    final userId = authUser.id;
 
     try {
       final repo = ref.read(communityRepositoryProvider);
       final res = await repo.endorsePetition(
         petitionId: petition.id,
         apartmentId: apartmentId,
-        userId: userId,
+        userId: authUser.id,
       );
 
       if (res['success'] == true) {
@@ -109,12 +125,16 @@ class _ResidentCommunityScreenState
           )),
         );
         if (mounted) {
-          AppSnackBar.showSuccess(context, 'Đã ghi nhận sự đồng thuận của căn hộ bạn');
+          AppSnackBar.showSuccess(
+            context,
+            'Đã ghi nhận sự đồng thuận của căn hộ bạn',
+          );
         }
-      } else {
-        if (mounted) {
-          AppSnackBar.showError(context, res['message'] ?? 'Thao tác không thành công');
-        }
+      } else if (mounted) {
+        AppSnackBar.showError(
+          context,
+          res['message'] ?? 'Thao tác không thành công',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -125,18 +145,19 @@ class _ResidentCommunityScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final apartmentId = _getEffectiveApartmentId();
 
     if (apartmentId == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Biểu Quyết & Cộng Đồng')),
-        body: Center(
+        body: const Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: AppStateView.emptyContent(
+            padding: AppSpacing.p24,
+            child: AppEmptyState(
               icon: Icons.how_to_vote_outlined,
               title: 'Chưa chọn căn hộ',
-              message:
+              description:
                   'Vui lòng chọn hoặc liên kết căn hộ để tham gia biểu quyết và gửi kiến nghị.',
             ),
           ),
@@ -149,10 +170,10 @@ class _ResidentCommunityScreenState
         title: const Text('Biểu Quyết & Cộng Đồng'),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppTheme.primary,
+          indicatorColor: colorScheme.primary,
           indicatorWeight: 3,
-          labelColor: AppTheme.primary,
-          unselectedLabelColor: Colors.grey,
+          labelColor: colorScheme.primary,
+          unselectedLabelColor: colorScheme.onSurfaceVariant,
           labelStyle: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           tabs: const [
             Tab(
@@ -177,7 +198,7 @@ class _ResidentCommunityScreenState
           ? FloatingActionButton.extended(
               onPressed: () => _openCreatePetitionSheet(apartmentId),
               backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: colorScheme.onPrimary,
               icon: const Icon(Icons.edit_note_rounded),
               label: const Text('Gửi Kiến Nghị'),
             )
@@ -195,198 +216,275 @@ class _ResidentCommunityScreenState
       onRefresh: () async {
         ref.invalidate(pollsProvider((status: null, apartmentId: apartmentId)));
       },
-      child: pollsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
-        data: (polls) {
-          if (polls.isEmpty) {
-            return const Center(
-              child: Text('Hiện không có cuộc biểu quyết hoặc khảo sát nào'),
-            );
-          }
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: pollsAsync.when(
+            loading: () => ListView(
+              padding: AppSpacing.p16,
+              children: [
+                AppSkeletonShimmer.cardList(count: 3, itemHeight: 160),
+              ],
+            ),
+            error: (err, _) => Center(
+              child: Padding(
+                padding: AppSpacing.p24,
+                child: AppErrorCard(
+                  error: err,
+                  onRetry: () => ref.invalidate(
+                    pollsProvider((status: null, apartmentId: apartmentId)),
+                  ),
+                ),
+              ),
+            ),
+            data: (polls) {
+              if (polls.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 64,
+                  ),
+                  children: const [
+                    AppEmptyState(
+                      icon: Icons.how_to_vote_outlined,
+                      title: 'Hiện không có cuộc biểu quyết hoặc khảo sát nào',
+                      description:
+                          'Khi Ban Quản Lý mở đợt lấy ý kiến hoặc Hội nghị nhà chung cư, thông tin sẽ hiển thị tại đây.',
+                    ),
+                  ],
+                );
+              }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: polls.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final poll = polls[index];
-              return _buildPollCard(poll, apartmentId);
+              return ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: AppSpacing.p16,
+                itemCount: polls.length,
+                separatorBuilder: (_, _) => AppSpacing.h12,
+                itemBuilder: (context, index) =>
+                    _buildPollCard(context, polls[index], apartmentId),
+              );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildPollCard(PollModel poll, String apartmentId) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Text(
-                    poll.pollCode,
-                    style: context.labelSmall?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
+  Widget _buildPollCard(
+    BuildContext context,
+    PollModel poll,
+    String apartmentId,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final typeAccent = poll.isOfficialAssembly
+        ? AppTheme.getSemanticSecondary(context)
+        : colorScheme.primary;
+
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerLow,
+                  borderRadius: AppRadius.r8,
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Text(
+                  poll.pollCode,
+                  style: context.labelSmall?.copyWith(
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
-                const SizedBox(width: 8),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: typeAccent.withValues(alpha: isDark ? 0.18 : 0.10),
+                  borderRadius: AppRadius.r8,
+                  border: Border.all(
+                    color: typeAccent.withValues(alpha: isDark ? 0.45 : 0.30),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      poll.isOfficialAssembly
+                          ? Icons.gavel_rounded
+                          : Icons.poll_outlined,
+                      size: 14,
+                      color: typeAccent,
+                    ),
+                    AppSpacing.w4,
+                    Flexible(
+                      child: Text(
+                        poll.isOfficialAssembly
+                            ? 'Nghị quyết chính thức (Hội nghị nhà chung cư)'
+                            : 'Khảo sát ý kiến',
+                        style: context.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: typeAccent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (poll.hasVoted)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
+                    horizontal: 10,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: poll.isOfficialAssembly
-                        ? Colors.deepPurple.withValues(alpha: 0.1)
-                        : Colors.blue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    color: successColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                    borderRadius: AppRadius.r12,
                     border: Border.all(
-                      color: poll.isOfficialAssembly
-                          ? Colors.deepPurple.shade300
-                          : Colors.blue.shade300,
+                      color: successColor.withValues(
+                        alpha: isDark ? 0.45 : 0.30,
+                      ),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        poll.isOfficialAssembly
-                            ? Icons.gavel_rounded
-                            : Icons.poll_outlined,
-                        size: 13,
-                        color: poll.isOfficialAssembly
-                            ? Colors.deepPurple.shade700
-                            : Colors.blue.shade700,
+                        Icons.check_circle_outline,
+                        size: 14,
+                        color: successColor,
                       ),
-                      const SizedBox(width: 4),
+                      AppSpacing.w4,
                       Text(
-                        poll.isOfficialAssembly
-                            ? 'Nghị quyết chính thức (Hội nghị nhà chung cư)'
-                            : 'Khảo sát ý kiến',
-                        style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: poll.isOfficialAssembly ? Colors.deepPurple.shade700 : Colors.blue.shade700),
+                        'Đã biểu quyết',
+                        style: context.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: successColor,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const Spacer(),
-                if (poll.hasVoted)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(
+                      alpha: isDark ? 0.18 : 0.10,
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.green.withValues(alpha: 0.3),
+                    borderRadius: AppRadius.r12,
+                  ),
+                  child: Text(
+                    poll.statusDisplayName,
+                    style: context.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          AppSpacing.h12,
+          Text(
+            poll.title,
+            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          if (poll.description != null && poll.description!.isNotEmpty) ...[
+            AppSpacing.h6,
+            Text(
+              poll.description!,
+              style: context.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          AppSpacing.h12,
+          Container(
+            width: double.infinity,
+            padding: AppSpacing.p12,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLow,
+              borderRadius: AppRadius.r8,
+              border: Border.all(color: colorScheme.outlineVariant),
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 6,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.balance_rounded,
+                      size: 16,
+                      color: colorScheme.primary,
+                    ),
+                    AppSpacing.w6,
+                    Text(
+                      poll.voteWeightDisplayName,
+                      style: context.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.check_circle_outline, size: 14, color: Colors.green), const SizedBox(width: 4), Text('Đã biểu quyết', style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.green)),],),
-                  )
-                else
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      poll.statusDisplayName,
-                      style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
-                    ),
+                  ],
+                ),
+                Text(
+                  'Hạn chót: ${_dateFormat.format(poll.endTime)}',
+                  style: context.labelSmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
+                ),
               ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              poll.title,
-              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            if (poll.description != null && poll.description!.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                poll.description!,
-                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.balance_rounded,
-                    size: 16,
-                    color: AppTheme.primary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    poll.voteWeightDisplayName,
-                    style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'Hạn chót: ${_dateFormat.format(poll.endTime)}',
-                    style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (poll.hasVoted || poll.isClosed) ...[
-                  OutlinedButton.icon(
+          ),
+          AppSpacing.h12,
+          Align(
+            alignment: Alignment.centerRight,
+            child: poll.hasVoted || poll.isClosed
+                ? OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                    ),
                     onPressed: () => _openPollResultDialog(poll),
                     icon: const Icon(Icons.bar_chart_rounded, size: 18),
                     label: const Text('Xem Kết Quả'),
-                  ),
-                ] else ...[
-                  ElevatedButton.icon(
+                  )
+                : ElevatedButton.icon(
                     onPressed: () => _openVoteSheet(poll, apartmentId),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: colorScheme.onPrimary,
+                      minimumSize: const Size(0, 48),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: AppRadius.r12,
                       ),
                     ),
                     icon: const Icon(Icons.how_to_vote_rounded, size: 18),
                     label: const Text('Tham Gia Biểu Quyết'),
                   ),
-                ],
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -411,151 +509,221 @@ class _ResidentCommunityScreenState
           )),
         );
       },
-      child: petitionsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
-        data: (petitions) {
-          if (petitions.isEmpty) {
-            return const Center(
-              child: Text('Chưa có kiến nghị nào từ cộng đồng cư dân'),
-            );
-          }
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: petitionsAsync.when(
+            loading: () => ListView(
+              padding: AppSpacing.p16,
+              children: [
+                AppSkeletonShimmer.cardList(count: 3, itemHeight: 150),
+              ],
+            ),
+            error: (err, _) => Center(
+              child: Padding(
+                padding: AppSpacing.p24,
+                child: AppErrorCard(
+                  error: err,
+                  onRetry: () => ref.invalidate(
+                    petitionsProvider((
+                      status: null,
+                      category: null,
+                      apartmentId: apartmentId,
+                    )),
+                  ),
+                ),
+              ),
+            ),
+            data: (petitions) {
+              if (petitions.isEmpty) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 64,
+                  ),
+                  children: const [
+                    AppEmptyState(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      title: 'Chưa có kiến nghị nào từ cộng đồng cư dân',
+                      description:
+                          'Bạn có thể gửi đề xuất cải thiện dịch vụ hoặc đồng thuận với kiến nghị của cư dân khác.',
+                    ),
+                  ],
+                );
+              }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: petitions.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final pet = petitions[index];
-              return _buildPetitionCard(pet, apartmentId);
+              return ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+                itemCount: petitions.length,
+                separatorBuilder: (_, _) => AppSpacing.h12,
+                itemBuilder: (context, index) =>
+                    _buildPetitionCard(context, petitions[index], apartmentId),
+              );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildPetitionCard(PetitionModel petition, String apartmentId) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    petition.petitionCode,
-                    style: context.labelSmall?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    petition.statusDisplayName,
-                    style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              petition.title,
-              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              petition.content,
-              style: context.bodyMedium?.copyWith(color: AppTheme.textPrimary),
-            ),
-            const SizedBox(height: 12),
+  Widget _buildPetitionCard(
+    BuildContext context,
+    PetitionModel petition,
+    String apartmentId,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final successColor = AppTheme.getSemanticSuccess(context);
 
-            // Phản hồi của BQL (nếu có)
-            if (petition.officialResponse != null &&
-                petition.officialResponse!.isNotEmpty) ...[
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.green.withValues(alpha: 0.3),
-                  ),
+                  color: colorScheme.surfaceContainerLow,
+                  borderRadius: AppRadius.r8,
+                  border: Border.all(color: colorScheme.outlineVariant),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [const Icon(Icons.verified_outlined, size: 16, color: Colors.green), const SizedBox(width: 6), Text('Phản hồi từ Ban Quản Lý:', style: context.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.green)),],),
-                    const SizedBox(height: 4),
-                    Text(
-                      petition.officialResponse!,
-                      style: context.bodyMedium,
-                    ),
-                  ],
+                child: Text(
+                  petition.petitionCode,
+                  style: context.labelSmall?.copyWith(
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(
+                    alpha: isDark ? 0.18 : 0.10,
+                  ),
+                  borderRadius: AppRadius.r12,
+                ),
+                child: Text(
+                  petition.statusDisplayName,
+                  style: context.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ),
             ],
-
-            // Nút đồng thuận
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  petition.categoryDisplayName,
-                  style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+          ),
+          AppSpacing.h12,
+          Text(
+            petition.title,
+            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          AppSpacing.h6,
+          Text(
+            petition.content,
+            style: context.bodyMedium?.copyWith(color: colorScheme.onSurface),
+          ),
+          AppSpacing.h12,
+          if (petition.officialResponse != null &&
+              petition.officialResponse!.isNotEmpty) ...[
+            Container(
+              padding: AppSpacing.p12,
+              decoration: BoxDecoration(
+                color: successColor.withValues(alpha: isDark ? 0.14 : 0.08),
+                borderRadius: AppRadius.r8,
+                border: Border.all(
+                  color: successColor.withValues(alpha: isDark ? 0.45 : 0.30),
                 ),
-                ElevatedButton.icon(
-                  onPressed: petition.isEndorsedByMe
-                      ? null
-                      : () => _endorse(petition, apartmentId),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: petition.isEndorsedByMe
-                        ? Colors.grey[200]
-                        : AppTheme.primary,
-                    foregroundColor: petition.isEndorsedByMe
-                        ? Colors.grey[700]
-                        : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.verified_outlined,
+                        size: 16,
+                        color: successColor,
+                      ),
+                      AppSpacing.w6,
+                      Expanded(
+                        child: Text(
+                          'Phản hồi từ Ban Quản Lý:',
+                          style: context.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: successColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  icon: Icon(
-                    petition.isEndorsedByMe
-                        ? Icons.thumb_up_alt_rounded
-                        : Icons.thumb_up_alt_outlined,
-                    size: 16,
-                  ),
-                  label: Text(
-                    petition.isEndorsedByMe
-                        ? 'Đã đồng thuận (${petition.endorsementCount})'
-                        : 'Đồng thuận (${petition.endorsementCount})',
-                    style: context.labelMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
+                  AppSpacing.h4,
+                  Text(petition.officialResponse!, style: context.bodyMedium),
+                ],
+              ),
             ),
+            AppSpacing.h12,
           ],
-        ),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              Text(
+                petition.categoryDisplayName,
+                style: context.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: petition.isEndorsedByMe
+                    ? null
+                    : () => _endorse(petition, apartmentId),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: petition.isEndorsedByMe
+                      ? colorScheme.surfaceContainerHighest
+                      : AppTheme.primary,
+                  foregroundColor: petition.isEndorsedByMe
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.onPrimary,
+                  minimumSize: const Size(0, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+                icon: Icon(
+                  petition.isEndorsedByMe
+                      ? Icons.thumb_up_alt_rounded
+                      : Icons.thumb_up_alt_outlined,
+                  size: 18,
+                ),
+                label: Text(
+                  petition.isEndorsedByMe
+                      ? 'Đã đồng thuận (${petition.endorsementCount})'
+                      : 'Đồng thuận (${petition.endorsementCount})',
+                  style: context.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: petition.isEndorsedByMe
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onPrimary,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

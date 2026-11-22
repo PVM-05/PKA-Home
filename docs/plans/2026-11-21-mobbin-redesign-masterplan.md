@@ -52,18 +52,18 @@
 
 ## Đợt 3 — Dịch Vụ & Đời Sống Cư Dân (`main`)
 
-- [ ] **3.1** `lib/features/resident/screens/resident_meter_reading_screen.dart` *(Tier 2)* — Chốt chỉ số điện nước + OCR *(+ tách file con)*
-- [ ] **3.2** `lib/features/resident/screens/vehicle_management_screen.dart` *(Tier 2)* — Phương tiện & Gửi xe *(+ tách thẻ xe & modal đăng ký)*
-- [ ] **3.3** `lib/features/resident/screens/resident_visitor_parcel_screen.dart` *(Tier 2)* — Thẻ QR đón khách & Mã PIN nhận bưu kiện
-- [ ] **3.4** `lib/features/resident/screens/resident_amenities_screen.dart` & `amenity_booking_screen.dart` *(Tier 2)* — Danh mục & Đặt lịch tiện ích tòa nhà
-- [ ] **3.5** Nhóm tra cứu & cộng đồng *(Tier 3)*:
-  - [ ] `lib/features/resident/screens/notification_center_screen.dart`
-  - [ ] `lib/features/resident/screens/resident_handbook_screen.dart`
-  - [ ] `lib/features/resident/screens/resident_announcement_detail_screen.dart`
-  - [ ] `lib/features/resident/screens/resident_community_screen.dart`
-  - [ ] `lib/features/resident/screens/payment_history_screen.dart`
-  - [ ] `lib/features/resident/screens/resident_handover_screen.dart`
-  - [ ] `lib/features/resident/screens/resident_handover_detail_screen.dart`
+- [x] **3.1** `lib/features/resident/screens/resident_meter_reading_screen.dart` *(Tier 2)* — Chốt chỉ số điện nước + OCR *(+ tách file con)*
+- [x] **3.2** `lib/features/resident/screens/vehicle_management_screen.dart` *(Tier 2)* — Phương tiện & Gửi xe *(+ tách thẻ xe & modal đăng ký)*
+- [x] **3.3** `lib/features/resident/screens/resident_visitor_parcel_screen.dart` *(Tier 2)* — Thẻ QR đón khách & Mã PIN nhận bưu kiện
+- [x] **3.4** `lib/features/resident/screens/resident_amenities_screen.dart` & `amenity_booking_screen.dart` *(Tier 2)* — Danh mục & Đặt lịch tiện ích tòa nhà
+- [x] **3.5** Nhóm tra cứu & cộng đồng *(Tier 3)*:
+  - [x] `lib/features/resident/screens/notification_center_screen.dart`
+  - [x] `lib/features/resident/screens/resident_handbook_screen.dart`
+  - [x] `lib/features/resident/screens/resident_announcement_detail_screen.dart`
+  - [x] `lib/features/resident/screens/resident_community_screen.dart`
+  - [x] `lib/features/resident/screens/payment_history_screen.dart`
+  - [x] `lib/features/resident/screens/resident_handover_screen.dart`
+  - [x] `lib/features/resident/screens/resident_handover_detail_screen.dart`
 
 ---
 

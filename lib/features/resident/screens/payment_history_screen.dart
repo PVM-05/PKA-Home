@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/payment_transaction_model.dart';
 import '../../../data/providers/payment_provider.dart';
 
@@ -29,6 +34,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final transactionsAsync = ref.watch(paymentTransactionsProvider);
 
     return Scaffold(
@@ -49,72 +55,106 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             }
           }).toList();
 
-          return Column(
-            children: [
-              // Thanh bộ lọc ngang
-              Container(
-                color: Theme.of(context).cardColor,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    _buildFilterChip(
-                      label: 'Tất cả (${transactions.length})',
-                      isSelected: _currentFilter == _PaymentFilter.all,
-                      onTap: () =>
-                          setState(() => _currentFilter = _PaymentFilter.all),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 840),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    color: colorScheme.surface,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
                     ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      label: 'Hóa đơn ($invoiceCount)',
-                      icon: Icons.home_outlined,
-                      isSelected: _currentFilter == _PaymentFilter.invoice,
-                      onTap: () => setState(
-                        () => _currentFilter = _PaymentFilter.invoice,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip(
+                            context: context,
+                            label: 'Tất cả (${transactions.length})',
+                            isSelected: _currentFilter == _PaymentFilter.all,
+                            onTap: () => setState(
+                              () => _currentFilter = _PaymentFilter.all,
+                            ),
+                          ),
+                          AppSpacing.w8,
+                          _buildFilterChip(
+                            context: context,
+                            label: 'Hóa đơn ($invoiceCount)',
+                            icon: Icons.home_outlined,
+                            isSelected:
+                                _currentFilter == _PaymentFilter.invoice,
+                            onTap: () => setState(
+                              () => _currentFilter = _PaymentFilter.invoice,
+                            ),
+                          ),
+                          AppSpacing.w8,
+                          _buildFilterChip(
+                            context: context,
+                            label: 'Dịch vụ ($serviceCount)',
+                            icon: Icons.sports_tennis_outlined,
+                            isSelected:
+                                _currentFilter == _PaymentFilter.service,
+                            onTap: () => setState(
+                              () => _currentFilter = _PaymentFilter.service,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      label: 'Dịch vụ ($serviceCount)',
-                      icon: Icons.sports_tennis_outlined,
-                      isSelected: _currentFilter == _PaymentFilter.service,
-                      onTap: () => setState(
-                        () => _currentFilter = _PaymentFilter.service,
-                      ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        ref.invalidate(paymentTransactionsProvider);
+                      },
+                      child: filteredList.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 64,
+                              ),
+                              children: const [
+                                AppEmptyState(
+                                  icon: Icons.receipt_long_outlined,
+                                  title: 'Chưa có giao dịch thanh toán nào',
+                                  description:
+                                      'Các hóa đơn và lịch đặt dịch vụ đã thanh toán sẽ hiển thị ở đây.',
+                                ),
+                              ],
+                            )
+                          : ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: AppSpacing.p16,
+                              itemCount: filteredList.length,
+                              itemBuilder: (context, index) =>
+                                  _buildTransactionCard(
+                                    context,
+                                    filteredList[index],
+                                  ),
+                            ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Divider(height: 1),
-
-              // Danh sách giao dịch
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(paymentTransactionsProvider);
-                  },
-                  child: filteredList.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: filteredList.length,
-                          itemBuilder: (context, index) {
-                            final tx = filteredList[index];
-                            return _buildTransactionCard(context, tx);
-                          },
-                        ),
-                ),
-              ),
-            ],
+            ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [AppSkeletonShimmer.cardList(count: 4, itemHeight: 100)],
+        ),
         error: (e, _) => Center(
-          child: Text(
-            formatErrorMessage(e),
-            style: const TextStyle(color: AppTheme.error),
+          child: Padding(
+            padding: AppSpacing.p24,
+            child: AppErrorCard(
+              error: e,
+              onRetry: () => ref.invalidate(paymentTransactionsProvider),
+            ),
           ),
         ),
       ),
@@ -122,48 +162,44 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   }
 
   Widget _buildFilterChip({
+    required BuildContext context,
     required String label,
     IconData? icon,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primary
-              : (Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.grey.shade100),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppTheme.primary : Colors.transparent,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                size: 15,
-                color: isSelected ? Colors.white : AppTheme.textSecondary,
-              ),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: context.bodySmall?.copyWith(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? Colors.white : AppTheme.textPrimary,
-              ),
-            ),
-          ],
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ChoiceChip(
+      materialTapTargetSize: MaterialTapTargetSize.padded,
+      selected: isSelected,
+      showCheckmark: false,
+      selectedColor: AppTheme.primary,
+      backgroundColor: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? AppTheme.primary : colorScheme.outlineVariant,
         ),
       ),
+      avatar: icon != null
+          ? Icon(
+              icon,
+              size: 16,
+              color: isSelected
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurfaceVariant,
+            )
+          : null,
+      label: Text(
+        label,
+        style: context.bodySmall?.copyWith(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+      onSelected: (_) => onTap(),
     );
   }
 
@@ -171,8 +207,17 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     BuildContext context,
     PaymentTransactionModel tx,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final isInvoice = tx.isInvoice;
-    final iconColor = isInvoice ? AppTheme.primary : Colors.deepOrange;
+    final iconColor = isInvoice
+        ? colorScheme.primary
+        : AppTheme.getSemanticWarning(context);
+    final statusColor = tx.isSuccess
+        ? AppTheme.getSemanticSuccess(context)
+        : AppTheme.getSemanticError(context);
+
     final iconData = isInvoice
         ? Icons.receipt_long_rounded
         : (tx.title?.toLowerCase().contains('bơi') ?? false
@@ -183,15 +228,15 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.p16,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: AppSpacing.p12,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
+              color: iconColor.withValues(alpha: isDark ? 0.18 : 0.10),
+              borderRadius: AppRadius.r12,
             ),
             child: Icon(iconData, color: iconColor, size: 24),
           ),
@@ -207,35 +252,39 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+                AppSpacing.h4,
                 Text(
                   _dateFormat.format(tx.createdAt),
-                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                  style: context.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
-                const SizedBox(height: 6),
+                AppSpacing.h6,
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 2,
+                    vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(6),
+                    color: colorScheme.surfaceContainerLow,
+                    borderRadius: AppRadius.r8,
+                    border: Border.all(color: colorScheme.outlineVariant),
                   ),
                   child: Text(
                     tx.transactionCode,
                     style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
+                      color: colorScheme.onSurface,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          AppSpacing.w10,
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -243,62 +292,29 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                 _currencyFormat.format(tx.amount),
                 style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
-              const SizedBox(height: 6),
+              AppSpacing.h6,
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     tx.isSuccess ? Icons.check_circle : Icons.error,
-                    size: 14,
-                    color: tx.isSuccess ? AppTheme.success : AppTheme.error,
+                    size: 15,
+                    color: statusColor,
                   ),
-                  const SizedBox(width: 4),
+                  AppSpacing.w4,
                   Text(
                     tx.statusDisplayName,
                     style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: tx.isSuccess ? AppTheme.success : AppTheme.error,
+                      color: statusColor,
                     ),
                   ),
                 ],
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.receipt_long_outlined,
-              size: 40,
-              color: AppTheme.primary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Chưa có giao dịch thanh toán nào',
-            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Các hóa đơn và lịch đặt dịch vụ đã thanh toán sẽ hiển thị ở đây',
-            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

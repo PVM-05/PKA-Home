@@ -3,9 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
 import '../../../core/services/push_notification_service.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/models/notification_model.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -30,6 +36,7 @@ class _NotificationCenterScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final notificationsAsync = ref.watch(notificationsStreamProvider);
     final filteredNotifications = ref.watch(filteredNotificationsProvider);
     final activeFilter = ref.watch(notificationFilterTypeProvider);
@@ -43,7 +50,8 @@ class _NotificationCenterScreenState
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.done_all, color: AppTheme.primary),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            icon: Icon(Icons.done_all, color: colorScheme.primary),
             tooltip: 'Đánh dấu tất cả đã đọc',
             onPressed: user == null
                 ? null
@@ -61,100 +69,70 @@ class _NotificationCenterScreenState
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Thanh lọc danh mục
-          _buildFilterChips(activeFilter),
-
-          // Nội dung danh sách
-          Expanded(
-            child: notificationsAsync.when(
-              data: (allNotifications) {
-                if (allNotifications.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.notifications_none,
-                              size: 64,
-                              color: AppTheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Chưa có thông báo nào',
-                            style: context.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 840),
+          child: Column(
+            children: [
+              _buildFilterChips(context, activeFilter),
+              Expanded(
+                child: notificationsAsync.when(
+                  data: (allNotifications) {
+                    if (allNotifications.isEmpty) {
+                      return const AppEmptyState(
+                        icon: Icons.notifications_none,
+                        title: 'Chưa có thông báo nào',
+                        description:
                             'Bạn sẽ nhận được thông báo tự động khi có hóa đơn mới, lịch nhắc hạn thanh toán hoặc thông báo khẩn cấp từ Ban Quản Lý.',
-                            textAlign: TextAlign.center,
-                            style: context.bodyMedium?.copyWith(
-                              color: AppTheme.textSecondary,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+                      );
+                    }
 
-                if (filteredNotifications.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Text(
-                        'Không có thông báo nào phù hợp với bộ lọc đã chọn',
-                        style: context.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ),
-                  );
-                }
+                    if (filteredNotifications.isEmpty) {
+                      return const AppEmptyState(
+                        icon: Icons.filter_list_off_outlined,
+                        title: 'Không có thông báo phù hợp',
+                        description:
+                            'Không có thông báo nào phù hợp với bộ lọc đã chọn.',
+                      );
+                    }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredNotifications.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final item = filteredNotifications[index];
-                    return _NotificationCard(notification: item);
+                    return ListView.separated(
+                      padding: AppSpacing.p16,
+                      itemCount: filteredNotifications.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) => _NotificationCard(
+                        notification: filteredNotifications[index],
+                      ),
+                    );
                   },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Lỗi tải thông báo: $err',
-                    style: const TextStyle(color: AppTheme.error),
+                  loading: () => ListView(
+                    padding: AppSpacing.p16,
+                    children: [
+                      AppSkeletonShimmer.cardList(count: 4, itemHeight: 96),
+                    ],
+                  ),
+                  error: (err, _) => Center(
+                    child: Padding(
+                      padding: AppSpacing.p16,
+                      child: AppErrorCard(
+                        error: err,
+                        onRetry: () =>
+                            ref.invalidate(notificationsStreamProvider),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildFilterChips(String activeFilter) {
-    final filters = [
+  Widget _buildFilterChips(BuildContext context, String activeFilter) {
+    final colorScheme = Theme.of(context).colorScheme;
+    const filters = [
       {'key': 'ALL', 'label': 'Tất cả'},
       {'key': 'UNREAD', 'label': 'Chưa đọc'},
       {'key': 'INVOICE', 'label': 'Hóa đơn & Phí'},
@@ -162,32 +140,37 @@ class _NotificationCenterScreenState
     ];
 
     return Container(
-      height: 48,
+      height: 52,
       margin: const EdgeInsets.only(top: 8, bottom: 4),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: filters.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => AppSpacing.w8,
         itemBuilder: (context, index) {
           final filter = filters[index];
           final isSelected = activeFilter == filter['key'];
           return ChoiceChip(
+            materialTapTargetSize: MaterialTapTargetSize.padded,
             label: Text(
               filter['label']!,
               style: context.bodySmall?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? Colors.white : AppTheme.textSecondary,
+                color: isSelected
+                    ? colorScheme.onPrimary
+                    : colorScheme.onSurfaceVariant,
               ),
             ),
             selected: isSelected,
             selectedColor: AppTheme.primary,
-            backgroundColor: Colors.grey.shade100,
+            backgroundColor: colorScheme.surfaceContainerLow,
             showCheckmark: false,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: isSelected ? AppTheme.primary : Colors.grey.shade300,
+                color: isSelected
+                    ? AppTheme.primary
+                    : colorScheme.outlineVariant,
               ),
             ),
             onSelected: (selected) {
@@ -208,23 +191,22 @@ class _NotificationCard extends ConsumerWidget {
 
   const _NotificationCard({required this.notification});
 
-  Color _getIconColor() {
+  Color _getIconColor(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     switch (notification.type) {
       case 'invoice_overdue':
-        return AppTheme.error;
+        return AppTheme.getSemanticError(context);
       case 'invoice_due_today':
-        return AppTheme.warning;
+      case 'equipment_maintenance':
+        return AppTheme.getSemanticWarning(context);
       case 'invoice_due_soon':
       case 'invoice_due_reminder':
-        return AppStatusColors.unpaid;
+        return AppStatusColors.getUnpaid(context);
       case 'new_invoice':
-        return AppTheme.primary;
-      case 'equipment_maintenance':
-        return AppTheme.warning;
+        return colorScheme.primary;
       case 'issue_update':
-        return AppTheme.secondary;
       default:
-        return AppTheme.secondary;
+        return AppTheme.getSemanticSecondary(context);
     }
   }
 
@@ -263,28 +245,29 @@ class _NotificationCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final iconColor = _getIconColor();
+    final iconColor = _getIconColor(context);
     final isUnread = !notification.isRead;
     final badgeText = _getStatusBadgeText();
 
     final cardBgColor = isUnread
-        ? theme.colorScheme.surface
-        : theme.colorScheme.surfaceContainerLow;
+        ? colorScheme.surface
+        : colorScheme.surfaceContainerLow;
 
     final borderColor = isUnread
-        ? iconColor.withValues(alpha: 0.5)
-        : theme.colorScheme.outlineVariant;
+        ? iconColor.withValues(alpha: isDark ? 0.6 : 0.45)
+        : colorScheme.outlineVariant;
 
     return Card(
       elevation: 0,
       color: cardBgColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.r16,
         side: BorderSide(color: borderColor, width: isUnread ? 1.5 : 1.0),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.r16,
         onTap: () async {
           if (isUnread) {
             await ref
@@ -305,22 +288,19 @@ class _NotificationCard extends ConsumerWidget {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: AppSpacing.p16,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Icon loại thông báo
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: iconColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                  borderRadius: AppRadius.r12,
                 ),
                 child: Icon(_getIconData(), color: iconColor, size: 22),
               ),
-              const SizedBox(width: 12),
-
-              // Nội dung thông báo
+              AppSpacing.w12,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,25 +315,29 @@ class _NotificationCard extends ConsumerWidget {
                                   ? FontWeight.bold
                                   : FontWeight.w600,
                               color: isUnread
-                                  ? (isDark
-                                        ? Colors.white
-                                        : AppTheme.textPrimary)
-                                  : (isDark ? Colors.white70 : Colors.black87),
+                                  ? colorScheme.onSurface
+                                  : colorScheme.onSurface.withValues(
+                                      alpha: 0.78,
+                                    ),
                             ),
                           ),
                         ),
                         if (badgeText != null) ...[
-                          const SizedBox(width: 6),
+                          AppSpacing.w6,
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: iconColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
+                              color: iconColor.withValues(
+                                alpha: isDark ? 0.18 : 0.10,
+                              ),
+                              borderRadius: AppRadius.r8,
                               border: Border.all(
-                                color: iconColor.withValues(alpha: 0.3),
+                                color: iconColor.withValues(
+                                  alpha: isDark ? 0.45 : 0.30,
+                                ),
                               ),
                             ),
                             child: Text(
@@ -366,36 +350,35 @@ class _NotificationCard extends ConsumerWidget {
                           ),
                         ],
                         if (isUnread) ...[
-                          const SizedBox(width: 6),
+                          AppSpacing.w6,
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.primary,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary,
                               shape: BoxShape.circle,
                             ),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    AppSpacing.h6,
                     Text(
                       notification.body,
                       style: context.bodySmall?.copyWith(
-                        color: isDark
-                            ? Colors.white60
-                            : (isUnread
-                                  ? AppTheme.textSecondary
-                                  : Colors.grey.shade600),
+                        color: colorScheme.onSurfaceVariant,
                         height: 1.4,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    AppSpacing.h8,
                     Text(
                       _formatNotificationTime(notification.createdAt),
                       style: context.labelSmall?.copyWith(
-                        color: Colors.grey.shade500,
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.8,
+                        ),
                         fontWeight: FontWeight.w500,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
@@ -418,8 +401,7 @@ class _NotificationCard extends ConsumerWidget {
       } catch (_) {
         return timeago.format(dateTime);
       }
-    } else {
-      return DateFormat('dd/MM/yyyy HH:mm').format(dateTime.toLocal());
     }
+    return DateFormat('dd/MM/yyyy HH:mm').format(dateTime.toLocal());
   }
 }
