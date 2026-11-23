@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_skeleton_shimmer.dart';
-import '../../../core/utils/vietnamese_currency_words.dart';
-import '../../../core/utils/error_formatter.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../data/models/invoice_model.dart';
-import '../../../data/providers/management_provider.dart';
-import '../../../data/providers/invoice_items_provider.dart';
-import '../../../data/providers/payment_provider.dart';
-import 'edit_invoice_screen.dart';
-import '../../../core/utils/invoice_fee_helper.dart';
-import '../../../core/widgets/electronic_receipt_sheet.dart';
 import '../../../core/utils/document_pdf_builder.dart';
+import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/invoice_fee_helper.dart';
+import '../../../core/utils/vietnamese_currency_words.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/widgets/electronic_receipt_sheet.dart';
+import '../../../data/models/invoice_model.dart';
+import '../../../data/providers/invoice_items_provider.dart';
+import '../../../data/providers/management_provider.dart';
+import '../../../data/providers/payment_provider.dart';
 import '../../document/screens/document_preview_screen.dart';
+import 'edit_invoice_screen.dart';
 
 /// Màn hình chi tiết hóa đơn & đối soát phía Ban Quản Lý.
-/// Hỗ trợ chuẩn B2B SaaS Impeccable Taste:
-/// - Desktop (>= 900dp): Workstation Split-Screen 2 cột (Cột trái: Tóm tắt & Cụm hành động; Cột phải: Bảng chi tiết phí).
-/// - Mobile (< 900dp): Bố cục dọc tối ưu, thanh đáy heightFactor: 1.0 chống chiếm trọn màn hình, chống tràn 100% trên 320dp (Text Zoom 1.3x).
 class ManagementInvoiceDetailScreen extends ConsumerWidget {
   final InvoiceModel invoice;
 
@@ -31,8 +33,9 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDate = DateFormat('dd/MM/yyyy');
     final detailState = ref.watch(invoiceDetailProvider(invoice.id));
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isDesktop = screenWidth >= 900;
+    final errorColor = AppTheme.getSemanticError(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +66,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           ),
           if (!invoice.isPaid)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppTheme.error),
+              icon: Icon(Icons.delete_outline, color: errorColor),
               tooltip: 'Xóa hóa đơn',
               onPressed: () => _confirmDeleteInvoice(context, ref),
             ),
@@ -72,18 +75,33 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       body: detailState.when(
         data: (items) {
           if (isDesktop) {
-            return _buildDesktopLayout(context, ref, items, formatCurrency, formatDate);
+            return _buildDesktopLayout(
+              context,
+              ref,
+              items,
+              formatCurrency,
+              formatDate,
+            );
           }
-          return _buildMobileLayout(context, ref, items, formatCurrency, formatDate);
+          return _buildMobileLayout(
+            context,
+            ref,
+            items,
+            formatCurrency,
+            formatDate,
+          );
         },
-        loading: () => Padding(
-          padding: const EdgeInsets.all(16),
-          child: AppSkeletonShimmer.cardList(count: 4, itemHeight: 90),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [AppSkeletonShimmer.cardList(count: 4, itemHeight: 90)],
         ),
         error: (error, stack) => Center(
-          child: Text(
-            formatErrorMessage(error),
-            style: const TextStyle(color: AppTheme.error),
+          child: Padding(
+            padding: AppSpacing.p16,
+            child: AppErrorCard(
+              error: error,
+              onRetry: () => ref.invalidate(invoiceDetailProvider(invoice.id)),
+            ),
           ),
         ),
       ),
@@ -97,6 +115,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     NumberFormat formatCurrency,
     DateFormat formatDate,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1300),
@@ -111,34 +131,34 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                 child: ListView(
                   children: [
                     _buildSummaryCard(context, formatCurrency, formatDate),
-                    const SizedBox(height: 16),
+                    AppSpacing.h16,
                     _buildDesktopActionPanel(context, ref, items),
-                    const SizedBox(height: 40),
+                    AppSpacing.h40,
                   ],
                 ),
               ),
-              const SizedBox(width: 24),
+              AppSpacing.w24,
               // Cột phải: Danh mục chi tiết các khoản phí
               Expanded(
                 child: AppCard(
-                  padding: const EdgeInsets.all(20),
+                  padding: AppSpacing.p20,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.receipt_long_outlined,
                             size: 20,
-                            color: AppTheme.primary,
+                            color: colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          AppSpacing.w8,
                           Expanded(
                             child: Text(
                               'CHI TIẾT CÁC KHOẢN PHÍ',
                               style: context.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.textPrimary,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -148,25 +168,30 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: colorScheme.primary.withValues(alpha: 0.1),
+                              borderRadius: AppRadius.r12,
                             ),
                             child: Text(
                               '${items.length} mục',
-                              style: context.labelSmall?.copyWith(
-                                color: AppTheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: context.labelSmall
+                                  ?.copyWith(
+                                    color: colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  )
+                                  .tabularFigures(),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      AppSpacing.h16,
                       const Divider(),
                       Expanded(
                         child: ListView(
                           children: items
-                              .map((item) => _buildFeeItem(context, item, formatCurrency))
+                              .map(
+                                (item) =>
+                                    _buildFeeItem(context, item, formatCurrency),
+                              )
                               .toList(),
                         ),
                       ),
@@ -188,6 +213,8 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     NumberFormat formatCurrency,
     DateFormat formatDate,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
@@ -195,21 +222,21 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.p16,
                 children: [
                   _buildSummaryCard(context, formatCurrency, formatDate),
-                  const SizedBox(height: 24),
+                  AppSpacing.h24,
                   Row(
                     children: [
                       Expanded(
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.receipt_long_outlined,
                               size: 18,
-                              color: AppTheme.textSecondary,
+                              color: colorScheme.onSurfaceVariant,
                             ),
-                            const SizedBox(width: 6),
+                            AppSpacing.w6,
                             Expanded(
                               child: Text(
                                 'CHI TIẾT CÁC KHOẢN PHÍ',
@@ -217,25 +244,29 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: context.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: AppTheme.textSecondary,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      AppSpacing.w8,
                       Text(
                         '${items.length} mục',
-                        style: context.labelSmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: context.labelSmall
+                            ?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            )
+                            .tabularFigures(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  ...items.map((item) => _buildFeeItem(context, item, formatCurrency)),
+                  AppSpacing.h12,
+                  ...items.map(
+                    (item) => _buildFeeItem(context, item, formatCurrency),
+                  ),
                   const SizedBox(height: 80),
                 ],
               ),
@@ -247,9 +278,14 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, NumberFormat formatCurrency, DateFormat formatDate) {
-    Color statusColor;
-    String statusText;
+  Widget _buildSummaryCard(
+    BuildContext context,
+    NumberFormat formatCurrency,
+    DateFormat formatDate,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final Color statusColor;
+    final String statusText;
 
     switch (invoice.status) {
       case 'paid':
@@ -266,46 +302,62 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     }
 
     return AppCard(
-      color: statusColor.withValues(alpha: 0.05),
+      color: statusColor.withValues(alpha: 0.06),
       borderColor: statusColor.withValues(alpha: 0.4),
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.p16,
       child: Column(
         children: [
-          const Text(
+          Text(
             'TỔNG CỘNG',
-            style: TextStyle(
-              color: AppTheme.textSecondary,
+            style: context.labelLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
+          AppSpacing.h8,
           Semantics(
-            label: 'Tổng tiền ${formatCurrency.format(invoice.totalAmount)}, tức ${VietnameseCurrencyWords.toVietnameseWords(invoice.totalAmount)}',
+            label:
+                'Tổng tiền ${formatCurrency.format(invoice.totalAmount)}, tức ${VietnameseCurrencyWords.toVietnameseWords(invoice.totalAmount)}',
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 formatCurrency.format(invoice.totalAmount),
-                style: (context.headlineMedium ?? const TextStyle()).copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: statusColor,
-                ),
+                style: context.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.bold, color: statusColor)
+                    .tabularFigures(),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           const Divider(),
-          const SizedBox(height: 16),
-          _buildInfoRow('Trạng thái', statusText, valueColor: statusColor),
-          const SizedBox(height: 8),
-          _buildInfoRow('Hạn thanh toán', formatDate.format(invoice.dueDate)),
-          const SizedBox(height: 8),
-          _buildInfoRow('Căn hộ', invoice.apartment?.code ?? 'N/A'),
+          AppSpacing.h16,
+          _buildInfoRow(
+            context,
+            'Trạng thái',
+            statusText,
+            valueColor: statusColor,
+          ),
+          AppSpacing.h8,
+          _buildInfoRow(
+            context,
+            'Hạn thanh toán',
+            formatDate.format(invoice.dueDate),
+          ),
+          AppSpacing.h8,
+          _buildInfoRow(context, 'Căn hộ', invoice.apartment?.code ?? 'N/A'),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value, {
+    Color? valueColor,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -313,20 +365,24 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           flex: 5,
           child: Text(
             label,
-            style: const TextStyle(color: AppTheme.textSecondary),
+            style: context.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        const SizedBox(width: 8),
+        AppSpacing.w8,
         Expanded(
           flex: 6,
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: valueColor,
-            ),
+            style: context.bodyMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: valueColor ?? colorScheme.onSurface,
+                )
+                .tabularFigures(),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -334,7 +390,12 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFeeItem(BuildContext context, Map<String, dynamic> item, NumberFormat formatCurrency) {
+  Widget _buildFeeItem(
+    BuildContext context,
+    Map<String, dynamic> item,
+    NumberFormat formatCurrency,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
     final rawFeeType = item['fee_type'] as String?;
     final feeDisplayName = InvoiceFeeHelper.getFeeName(rawFeeType);
     final feeIcon = InvoiceFeeHelper.getFeeIcon(rawFeeType);
@@ -350,21 +411,23 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
+          bottom: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: AppSpacing.p8,
             decoration: BoxDecoration(
               color: feeColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: AppRadius.r12,
             ),
             child: Icon(feeIcon, color: feeColor, size: 20),
           ),
-          const SizedBox(width: 12),
+          AppSpacing.w12,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,23 +445,23 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   '${formatCurrency.format(item['unit_price'] ?? 0)} x $qtyStr$feeUnit',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.labelSmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
+                  style: context.labelSmall
+                      ?.copyWith(color: colorScheme.onSurfaceVariant)
+                      .tabularFigures(),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          AppSpacing.w8,
           Flexible(
             child: Text(
               formatCurrency.format(item['subtotal'] ?? 0),
               textAlign: TextAlign.right,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: context.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold)
+                  .tabularFigures(),
             ),
           ),
         ],
@@ -414,9 +477,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     final isPending = invoice.status == 'pending_confirmation';
     final isUnpaid = invoice.status == 'unpaid';
     final isPaid = invoice.status == 'paid';
+    final colorScheme = Theme.of(context).colorScheme;
 
     return AppCard(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.p16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -424,20 +488,19 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
             'THAO TÁC NGHIỆP VỤ',
             style: context.labelMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurfaceVariant,
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 14),
+          AppSpacing.h12,
           if (isPaid) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                minimumSize: const Size(0, 48),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
               ),
               icon: const Icon(Icons.receipt_long, size: 18),
               label: const Text(
@@ -449,17 +512,16 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                 invoice: invoice,
               ),
             ),
-            const SizedBox(height: 10),
+            AppSpacing.h12,
           ],
           if (isPending || isUnpaid) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.success,
-                foregroundColor: Colors.white,
+                backgroundColor: AppTheme.textSuccess,
+                foregroundColor: colorScheme.onPrimary,
+                minimumSize: const Size(0, 48),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
               ),
               icon: const Icon(Icons.check_circle_outline, size: 18),
               label: Text(
@@ -470,26 +532,24 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
               ),
               onPressed: () => _confirmPayment(context, ref, isPending),
             ),
-            const SizedBox(height: 10),
+            AppSpacing.h12,
           ],
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 48),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
             ),
             icon: const Icon(Icons.print_outlined, size: 18),
             label: const Text('In ấn / Xuất PDF (A4 & 80mm)'),
             onPressed: () => _showPrintExportBottomSheet(context, items),
           ),
-          const SizedBox(height: 10),
+          AppSpacing.h12,
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 48),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
             ),
             icon: const Icon(Icons.edit_outlined, size: 18),
             label: const Text('Chỉnh sửa thông tin hóa đơn'),
@@ -519,6 +579,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final barColor = theme.cardTheme.color ?? colorScheme.surfaceContainerLow;
+
     if (isPaid) {
       return Center(
         heightFactor: 1.0,
@@ -526,11 +590,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           constraints: const BoxConstraints(maxWidth: 600),
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color ??
-                  Theme.of(context).scaffoldBackgroundColor,
+              color: barColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
+                  color: colorScheme.shadow.withValues(alpha: 0.12),
                   offset: const Offset(0, -3),
                   blurRadius: 12,
                 ),
@@ -539,23 +602,29 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       elevation: 2,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: AppRadius.r14,
                       ),
                     ),
                     icon: const Icon(Icons.receipt_long, size: 20),
                     label: Text(
                       'XEM BIÊN LAI THU TIỀN',
-                      style: context.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                      style: context.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimary,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     onPressed: () => showElectronicReceiptSheet(
@@ -589,11 +658,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
         constraints: const BoxConstraints(maxWidth: 600),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color ??
-                Theme.of(context).scaffoldBackgroundColor,
+            color: barColor,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: colorScheme.shadow.withValues(alpha: 0.12),
                 offset: const Offset(0, -3),
                 blurRadius: 12,
               ),
@@ -602,17 +670,20 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
           child: SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               child: SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.success,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppTheme.textSuccess,
+                    foregroundColor: colorScheme.onPrimary,
                     elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: AppRadius.r14,
                     ),
                   ),
                   icon: const Icon(Icons.check_circle_outline, size: 20),
@@ -622,6 +693,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                       buttonLabel,
                       style: context.labelLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -648,110 +720,133 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.check_circle_outline, color: AppTheme.success),
-              SizedBox(width: 8),
-              Expanded(child: Text('Xác nhận thu tiền')),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+        builder: (dialogCtx, setDialogState) {
+          final colorScheme = Theme.of(dialogCtx).colorScheme;
+          final successColor = AppTheme.getSemanticSuccess(dialogCtx);
+          final warningColor = AppTheme.getSemanticWarning(dialogCtx);
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
+            title: Row(
               children: [
-                const Text(
-                  'Vui lòng kiểm tra và xác nhận phương thức đã nhận đủ:',
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '• Căn hộ: ${invoice.apartment?.code ?? "Chưa rõ"}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text('• Kỳ phí: ${invoice.period}'),
-                      const SizedBox(height: 4),
-                      Text(
-                        '• Số tiền: ${NumberFormat.currency(locale: "vi_VN", symbol: "đ").format(invoice.totalAmount)}',
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (isPending) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '• Cư dân đã báo: ${isCashRequest ? "Nộp tiền mặt tại BQL" : "Chuyển khoản (VietQR)"}',
-                          style: TextStyle(
-                            color: AppTheme.warning,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'Hình thức thanh toán thực thu:',
-                  style: context.labelMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                // ignore: deprecated_member_use
-                RadioListTile<String>(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: const Text('Tiền mặt (CASH)'),
-                  value: 'CASH',
-                  // ignore: deprecated_member_use
-                  groupValue: selectedMethod,
-                  // ignore: deprecated_member_use
-                  onChanged: (val) {
-                    if (val != null) setDialogState(() => selectedMethod = val);
-                  },
-                ),
-                // ignore: deprecated_member_use
-                RadioListTile<String>(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: const Text('Chuyển khoản (BANK_TRANSFER)'),
-                  value: 'BANK_TRANSFER',
-                  // ignore: deprecated_member_use
-                  groupValue: selectedMethod,
-                  // ignore: deprecated_member_use
-                  onChanged: (val) {
-                    if (val != null) setDialogState(() => selectedMethod = val);
-                  },
-                ),
+                Icon(Icons.check_circle_outline, color: successColor),
+                AppSpacing.w8,
+                const Expanded(child: Text('Xác nhận thu tiền')),
               ],
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.success,
-                foregroundColor: Colors.white,
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Vui lòng kiểm tra và xác nhận phương thức đã nhận đủ:',
+                  ),
+                  AppSpacing.h12,
+                  Container(
+                    width: double.infinity,
+                    padding: AppSpacing.p12,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.35,
+                      ),
+                      borderRadius: AppRadius.r8,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• Căn hộ: ${invoice.apartment?.code ?? "Chưa rõ"}',
+                          style: dialogCtx.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.bold)
+                              .tabularFigures(),
+                        ),
+                        AppSpacing.h4,
+                        Text(
+                          '• Kỳ phí: ${invoice.period}',
+                          style: dialogCtx.bodyMedium?.tabularFigures(),
+                        ),
+                        AppSpacing.h4,
+                        Text(
+                          '• Số tiền: ${NumberFormat.currency(locale: "vi_VN", symbol: "đ").format(invoice.totalAmount)}',
+                          style: dialogCtx.bodyMedium
+                              ?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              )
+                              .tabularFigures(),
+                        ),
+                        if (isPending) ...[
+                          AppSpacing.h4,
+                          Text(
+                            '• Cư dân đã báo: ${isCashRequest ? "Nộp tiền mặt tại BQL" : "Chuyển khoản (VietQR)"}',
+                            style: dialogCtx.bodySmall?.copyWith(
+                              color: warningColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  AppSpacing.h12,
+                  Text(
+                    'Hình thức thanh toán thực thu:',
+                    style: dialogCtx.labelMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  AppSpacing.h6,
+                  // ignore: deprecated_member_use
+                  RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: const Text('Tiền mặt (CASH)'),
+                    value: 'CASH',
+                    // ignore: deprecated_member_use
+                    groupValue: selectedMethod,
+                    // ignore: deprecated_member_use
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => selectedMethod = val);
+                      }
+                    },
+                  ),
+                  // ignore: deprecated_member_use
+                  RadioListTile<String>(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: const Text('Chuyển khoản (BANK_TRANSFER)'),
+                    value: 'BANK_TRANSFER',
+                    // ignore: deprecated_member_use
+                    groupValue: selectedMethod,
+                    // ignore: deprecated_member_use
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => selectedMethod = val);
+                      }
+                    },
+                  ),
+                ],
               ),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Xác nhận đã thu'),
             ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogCtx).pop(false),
+                child: const Text('Hủy'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.textSuccess,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(0, 48),
+                ),
+                onPressed: () => Navigator.of(dialogCtx).pop(true),
+                child: const Text('Xác nhận đã thu'),
+              ),
+            ],
+          );
+        },
       ),
     );
 
@@ -762,9 +857,10 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       final methodTitle = selectedMethod == 'CASH'
           ? 'Tiền mặt'
           : 'Chuyển khoản';
-      final txnTitle = 'Thanh toán hóa đơn kỳ ${invoice.period} ($methodTitle)';
+      final txnTitle =
+          'Thanh toán hóa đơn kỳ ${invoice.period} ($methodTitle)';
 
-      // Sử dụng recordManualPayment thay thế cho recordPaymentTransaction để đảm bảo tính nguyên tử (atomic transaction)
+      // Sử dụng recordManualPayment để đảm bảo tính nguyên tử (atomic transaction)
       await repo.recordManualPayment(
         invoiceId: invoice.id,
         paymentMethod: selectedMethod,
@@ -774,22 +870,15 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
       ref.invalidate(invoicesProvider);
       ref.invalidate(paymentTransactionsProvider);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Xác nhận thu tiền ($methodTitle) thành công.'),
-            backgroundColor: AppTheme.success,
-          ),
+        AppSnackBar.showSuccess(
+          context,
+          'Xác nhận thu tiền ($methodTitle) thành công.',
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(formatErrorMessage(e)),
-            backgroundColor: AppTheme.error,
-          ),
-        );
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     }
   }
@@ -801,14 +890,18 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     final periodSlug = invoice.period.replaceAll('/', '_');
     final aptCode = invoice.apartment?.code ?? invoice.apartmentId;
 
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (bottomSheetContext) {
+        final colorScheme = Theme.of(bottomSheetContext).colorScheme;
+        final successColor = AppTheme.getSemanticSuccess(bottomSheetContext);
+        final warningColor = AppTheme.getSemanticWarning(bottomSheetContext);
+
         return SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -817,32 +910,32 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: AppSpacing.p8,
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: AppRadius.r8,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.print_outlined,
-                        color: AppTheme.primary,
+                        color: colorScheme.primary,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    AppSpacing.w12,
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Tùy chọn In ấn & Xuất chứng từ',
-                            style: context.titleMedium?.copyWith(
+                            style: bottomSheetContext.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                           Text(
                             'Chọn mẫu định dạng tài liệu cần xuất hoặc in',
-                            style: context.bodySmall?.copyWith(
-                              color: AppTheme.textSecondary,
+                            style: bottomSheetContext.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -850,12 +943,12 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                AppSpacing.h16,
                 const Divider(),
                 ListTile(
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.description_outlined,
-                    color: AppTheme.primary,
+                    color: colorScheme.primary,
                   ),
                   title: const Text(
                     'Hóa đơn dịch vụ (Khổ A4)',
@@ -883,10 +976,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(
-                    Icons.verified_outlined,
-                    color: AppTheme.success,
-                  ),
+                  leading: Icon(Icons.verified_outlined, color: successColor),
                   title: const Text(
                     'Biên lai thu tiền điện tử (Khổ A4)',
                     style: TextStyle(fontWeight: FontWeight.w600),
@@ -913,9 +1003,9 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.receipt_long_outlined,
-                    color: AppTheme.warning,
+                    color: warningColor,
                   ),
                   title: const Text(
                     'Phiếu in nhiệt quầy thu ngân (Cuộn 80mm)',
@@ -955,40 +1045,42 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     if (invoice.isPaid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Hóa đơn đã thanh toán là bất biến. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn phí, vui lòng tạo Phiếu giảm trừ (Credit Note).',
-          ),
-          backgroundColor: AppTheme.warning,
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Hóa đơn đã thanh toán là bất biến. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn phí, vui lòng tạo Phiếu giảm trừ (Credit Note).',
       );
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Xác nhận xóa hóa đơn'),
-        content: Text(
-          'Bạn có chắc chắn muốn xóa hóa đơn kỳ ${invoice.period} của căn hộ ${invoice.apartment?.code ?? ''}?\n\nToàn bộ các khoản phí liên quan sẽ bị xóa và không thể khôi phục.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-              foregroundColor: Colors.white,
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
+          title: const Text('Xác nhận xóa hóa đơn'),
+          content: SingleChildScrollView(
+            child: Text(
+              'Bạn có chắc chắn muốn xóa hóa đơn kỳ ${invoice.period} của căn hộ ${invoice.apartment?.code ?? ''}?\n\nToàn bộ các khoản phí liên quan sẽ bị xóa và không thể khôi phục.',
             ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xóa'),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+                minimumSize: const Size(0, 48),
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && context.mounted) {
@@ -996,22 +1088,12 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
         await ref.read(managementRepositoryProvider).deleteInvoice(invoice.id);
         ref.invalidate(invoicesProvider);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã xóa hóa đơn thành công!'),
-              backgroundColor: AppTheme.success,
-            ),
-          );
+          AppSnackBar.showSuccess(context, 'Đã xóa hóa đơn thành công!');
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(formatErrorMessage(e)),
-              backgroundColor: AppTheme.error,
-            ),
-          );
+          AppSnackBar.showError(context, formatErrorMessage(e));
         }
       }
     }

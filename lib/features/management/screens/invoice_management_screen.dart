@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_state_view.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_search_field.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../data/models/invoice_model.dart';
@@ -38,7 +42,8 @@ class _InvoiceManagementScreenState
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _statusFilter = 'all'; // 'all', 'pending_confirmation', 'unpaid', 'paid'
+  String _statusFilter =
+      'all'; // 'all', 'pending_confirmation', 'unpaid', 'paid'
   bool _isExporting = false;
 
   @override
@@ -59,25 +64,16 @@ class _InvoiceManagementScreenState
       buildingName: buildingName,
       period: period,
     );
+    if (!mounted) return;
     setState(() => _isExporting = false);
 
-    if (mounted) {
-      if (path != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã xuất báo cáo đối soát Excel thành công!'),
-            backgroundColor: AppTheme.success,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lỗi khi xuất file Excel.'),
-            backgroundColor: AppTheme.error,
-          ),
-        );
-      }
+    if (path != null) {
+      AppSnackBar.showSuccess(
+        context,
+        'Đã xuất báo cáo đối soát Excel thành công!',
+      );
+    } else {
+      AppSnackBar.showError(context, 'Lỗi khi xuất file Excel.');
     }
   }
 
@@ -115,6 +111,7 @@ class _InvoiceManagementScreenState
         .length;
     final unpaidCount = allInvoices.where((i) => i.status == 'unpaid').length;
     final paidCount = allInvoices.where((i) => i.status == 'paid').length;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return RoleGuard(
       permission: AppPermissions.invoiceManagement,
@@ -139,7 +136,7 @@ class _InvoiceManagementScreenState
                 tooltip: 'Tùy chọn khác',
                 onSelected: (value) {
                   if (value == 'bulk') {
-                    showDialog(
+                    showDialog<void>(
                       context: context,
                       builder: (_) => const BulkInvoiceDialog(),
                     );
@@ -148,40 +145,46 @@ class _InvoiceManagementScreenState
                     if (invoices != null && invoices.isNotEmpty) {
                       _exportExcel(_filterInvoices(invoices));
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Không có dữ liệu để xuất Excel.'),
-                        ),
+                      AppSnackBar.showWarning(
+                        context,
+                        'Không có dữ liệu để xuất Excel.',
                       );
                     }
                   }
                 },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'bulk',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.auto_awesome,
-                          size: 20,
-                          color: AppTheme.primary,
-                        ),
-                        SizedBox(width: 10),
-                        Text('Tạo HĐ hàng loạt'),
-                      ],
+                itemBuilder: (ctx) {
+                  final menuScheme = Theme.of(ctx).colorScheme;
+                  return [
+                    PopupMenuItem(
+                      value: 'bulk',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            size: 20,
+                            color: menuScheme.primary,
+                          ),
+                          AppSpacing.w10,
+                          const Text('Tạo HĐ hàng loạt'),
+                        ],
+                      ),
                     ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'export',
-                    child: Row(
-                      children: [
-                        Icon(Icons.download, size: 20, color: AppTheme.primary),
-                        SizedBox(width: 10),
-                        Text('Xuất báo cáo Excel'),
-                      ],
+                    PopupMenuItem(
+                      value: 'export',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.download,
+                            size: 20,
+                            color: menuScheme.primary,
+                          ),
+                          AppSpacing.w10,
+                          const Text('Xuất báo cáo Excel'),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ];
+                },
               ),
           ],
         ),
@@ -209,6 +212,9 @@ class _InvoiceManagementScreenState
                         emptyMessage: 'Chưa có hóa đơn nào được tạo.',
                         emptyIcon: Icons.receipt_long_outlined,
                         actionButton: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                          ),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -220,7 +226,7 @@ class _InvoiceManagementScreenState
                           label: const Text('Lập hóa đơn mới'),
                         ),
                         skeletonBuilder: (_) => ListView(
-                          padding: const EdgeInsets.all(16),
+                          padding: AppSpacing.p16,
                           children: const [
                             InvoiceCardSkeleton(),
                             InvoiceCardSkeleton(),
@@ -256,11 +262,12 @@ class _InvoiceManagementScreenState
               MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()),
             );
           },
-          backgroundColor: AppTheme.primary,
-          icon: const Icon(Icons.add, color: Colors.white),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          icon: const Icon(Icons.add),
           label: const Text(
             'Lập hóa đơn',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -291,20 +298,20 @@ class _InvoiceManagementScreenState
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildFilterChip('all', 'Tất cả ($allCount)', null),
-          const SizedBox(width: 8),
+          AppSpacing.w8,
           _buildFilterChip(
             'pending_confirmation',
             'Chờ xác nhận ($pendingConfirmationCount)',
             AppStatusColors.getPendingConfirmation(context),
             hasBadge: pendingConfirmationCount > 0,
           ),
-          const SizedBox(width: 8),
+          AppSpacing.w8,
           _buildFilterChip(
             'unpaid',
             'Đang nợ ($unpaidCount)',
             AppStatusColors.getUnpaid(context),
           ),
-          const SizedBox(width: 8),
+          AppSpacing.w8,
           _buildFilterChip(
             'paid',
             'Đã thanh toán ($paidCount)',
@@ -319,15 +326,9 @@ class _InvoiceManagementScreenState
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
         child: Row(
           children: [
-            Expanded(
-              flex: 4,
-              child: searchField,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 6,
-              child: filterRow,
-            ),
+            Expanded(flex: 4, child: searchField),
+            AppSpacing.w16,
+            Expanded(flex: 6, child: filterRow),
           ],
         ),
       );
@@ -344,30 +345,30 @@ class _InvoiceManagementScreenState
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: filterRow,
         ),
-        const SizedBox(height: 6),
+        AppSpacing.h6,
       ],
     );
   }
 
   Widget _buildEmptyFilterView() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return RefreshIndicator(
-      color: AppTheme.primary,
+      color: colorScheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
         ref.invalidate(invoicesProvider);
       },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: const Center(
-              child: AppEmptyState(
-                icon: Icons.search_off_outlined,
-                title: 'Không tìm thấy hóa đơn nào',
-                description: 'Không có hóa đơn nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm hiện tại.',
-              ),
-            ),
+        padding: AppSpacing.p24,
+        children: const [
+          SizedBox(height: 48),
+          AppEmptyState(
+            icon: Icons.search_off_outlined,
+            title: 'Không tìm thấy hóa đơn nào',
+            description:
+                'Không có hóa đơn nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm hiện tại.',
           ),
         ],
       ),
@@ -375,13 +376,14 @@ class _InvoiceManagementScreenState
   }
 
   Widget _buildDesktopWorkstation(List<InvoiceModel> filtered) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.black.withValues(alpha: 0.07);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
+    final pendingConfirmColor = AppStatusColors.getPendingConfirmation(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return RefreshIndicator(
-      color: AppTheme.primary,
+      color: colorScheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
         ref.invalidate(invoicesProvider);
@@ -391,12 +393,9 @@ class _InvoiceManagementScreenState
         children: [
           Container(
             decoration: BoxDecoration(
-              color: isDark
-                  ? (Theme.of(context).cardTheme.color ??
-                      Theme.of(context).colorScheme.surface)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
+              color: colorScheme.surfaceContainerLow,
+              borderRadius: AppRadius.r16,
+              border: Border.all(color: colorScheme.outlineVariant),
               boxShadow: isDark ? null : AppShadows.softSm,
             ),
             clipBehavior: Clip.antiAlias,
@@ -406,223 +405,244 @@ class _InvoiceManagementScreenState
                 constraints: const BoxConstraints(minWidth: 900),
                 child: DataTable(
                   headingRowColor: WidgetStateProperty.all(
-                    isDark
-                        ? Colors.white.withValues(alpha: 0.03)
-                        : Colors.black.withValues(alpha: 0.02),
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
                   ),
                   headingRowHeight: 48,
                   dataRowMinHeight: 56,
-                  dataRowMaxHeight: 64,
+                  dataRowMaxHeight: 68,
                   horizontalMargin: 20,
                   columnSpacing: 24,
                   columns: [
                     DataColumn(
                       label: Text(
                         'CĂN HỘ',
-                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: context.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     DataColumn(
                       label: Text(
                         'KỲ PHÍ',
-                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: context.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     DataColumn(
                       label: Text(
                         'TỔNG TIỀN',
-                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: context.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     DataColumn(
                       label: Text(
                         'HẠN THANH TOÁN',
-                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: context.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     DataColumn(
                       label: Text(
                         'TRẠNG THÁI',
-                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: context.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     DataColumn(
                       label: Text(
                         'THAO TÁC',
-                        style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: context.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
                   rows: filtered.map((invoice) {
                     final isPending = invoice.status == 'pending_confirmation';
-                    final statusColor = _getStatusColor(context, invoice.status);
-                final statusText = _getStatusText(invoice.status);
-
-                return DataRow(
-                  onSelectChanged: (_) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ManagementInvoiceDetailScreen(
-                          invoice: invoice,
-                        ),
-                      ),
+                    final isOverdueUnpaid =
+                        invoice.dueDate.isBefore(DateTime.now()) &&
+                        invoice.status == 'unpaid';
+                    final statusColor = _getStatusColor(
+                      context,
+                      invoice.status,
                     );
-                  },
-                  cells: [
-                    DataCell(
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.domain,
-                              color: AppTheme.primary,
-                              size: 18,
-                            ),
+                    final statusText = _getStatusText(invoice.status);
+
+                    return DataRow(
+                      onSelectChanged: (_) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ManagementInvoiceDetailScreen(invoice: invoice),
                           ),
-                          const SizedBox(width: 10),
+                        );
+                      },
+                      cells: [
+                        DataCell(
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: AppSpacing.p8,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  borderRadius: AppRadius.r8,
+                                ),
+                                child: Icon(
+                                  Icons.domain,
+                                  color: colorScheme.primary,
+                                  size: 18,
+                                ),
+                              ),
+                              AppSpacing.w10,
+                              Text(
+                                invoice.apartment?.code ?? 'N/A',
+                                style: context.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.bold)
+                                    .tabularFigures(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        DataCell(
                           Text(
-                            invoice.apartment?.code ?? 'N/A',
-                            style: context.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        invoice.period,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        _currencyFormat.format(invoice.totalAmount),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        _dateFormat.format(invoice.dueDate),
-                        style: TextStyle(
-                          color: invoice.dueDate.isBefore(DateTime.now()) &&
-                                  invoice.status == 'unpaid'
-                              ? AppTheme.error
-                              : AppTheme.textSecondary,
-                          fontWeight:
-                              invoice.dueDate.isBefore(DateTime.now()) &&
-                                      invoice.status == 'unpaid'
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    DataCell(
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: statusColor.withValues(alpha: 0.3),
-                            width: 1,
+                            invoice.period,
+                            style: context.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600)
+                                .tabularFigures(),
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: statusColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              statusText,
-                              style: context.labelSmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                        DataCell(
+                          Text(
+                            _currencyFormat.format(invoice.totalAmount),
+                            style: context.bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                )
+                                .tabularFigures(),
+                          ),
                         ),
-                      ),
-                    ),
-                    DataCell(
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              isPending
-                                  ? Icons.fact_check_outlined
-                                  : Icons.visibility_outlined,
-                              size: 20,
-                              color: isPending
-                                  ? AppStatusColors.getPendingConfirmation(context)
-                                  : AppTheme.primary,
+                        DataCell(
+                          Text(
+                            _dateFormat.format(invoice.dueDate),
+                            style: context.bodyMedium
+                                ?.copyWith(
+                                  color: isOverdueUnpaid
+                                      ? errorColor
+                                      : colorScheme.onSurfaceVariant,
+                                  fontWeight: isOverdueUnpaid
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                )
+                                .tabularFigures(),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
                             ),
-                            tooltip: isPending
-                                ? 'Đối soát & Phê duyệt'
-                                : 'Xem chi tiết',
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => ManagementInvoiceDetailScreen(
-                                    invoice: invoice,
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.12),
+                              borderRadius: AppRadius.r16,
+                              border: Border.all(
+                                color: statusColor.withValues(alpha: 0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: statusColor,
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.edit_outlined,
-                              size: 20,
-                              color: AppTheme.textSecondary,
-                            ),
-                            tooltip: 'Chỉnh sửa',
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => EditInvoiceScreen(
-                                    invoice: invoice,
+                                AppSpacing.w6,
+                                Text(
+                                  statusText,
+                                  style: context.labelSmall?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                          if (!invoice.isPaid)
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                size: 20,
-                                color: AppTheme.error,
-                              ),
-                              tooltip: 'Xóa hóa đơn',
-                              onPressed: () => _confirmDeleteInvoice(invoice),
+                              ],
                             ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
+                          ),
+                        ),
+                        DataCell(
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  isPending
+                                      ? Icons.fact_check_outlined
+                                      : Icons.visibility_outlined,
+                                  size: 20,
+                                  color: isPending
+                                      ? pendingConfirmColor
+                                      : colorScheme.primary,
+                                ),
+                                tooltip: isPending
+                                    ? 'Đối soát & Phê duyệt'
+                                    : 'Xem chi tiết',
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ManagementInvoiceDetailScreen(
+                                            invoice: invoice,
+                                          ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.edit_outlined,
+                                  size: 20,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                tooltip: 'Chỉnh sửa',
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          EditInvoiceScreen(invoice: invoice),
+                                    ),
+                                  );
+                                },
+                              ),
+                              if (!invoice.isPaid)
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.delete_outline,
+                                    size: 20,
+                                    color: errorColor,
+                                  ),
+                                  tooltip: 'Xóa hóa đơn',
+                                  onPressed: () =>
+                                      _confirmDeleteInvoice(invoice),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
             ),
@@ -633,16 +653,19 @@ class _InvoiceManagementScreenState
   }
 
   Widget _buildMobileCardList(List<InvoiceModel> filtered) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
+    final pendingConfirmColor = AppStatusColors.getPendingConfirmation(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RefreshIndicator(
-      color: AppTheme.primary,
+      color: colorScheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
         ref.invalidate(invoicesProvider);
       },
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
         itemCount: filtered.length,
         itemBuilder: (context, index) {
           final invoice = filtered[index];
@@ -656,12 +679,12 @@ class _InvoiceManagementScreenState
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(14),
             child: InkWell(
+              borderRadius: AppRadius.r12,
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => ManagementInvoiceDetailScreen(
-                      invoice: invoice,
-                    ),
+                    builder: (_) =>
+                        ManagementInvoiceDetailScreen(invoice: invoice),
                   ),
                 );
               },
@@ -677,25 +700,27 @@ class _InvoiceManagementScreenState
                             Icon(
                               Icons.domain,
                               color: isPending
-                                  ? AppStatusColors.getPendingConfirmation(context)
-                                  : AppTheme.primary,
+                                  ? pendingConfirmColor
+                                  : colorScheme.primary,
                               size: 20,
                             ),
-                            const SizedBox(width: 8),
+                            AppSpacing.w8,
                             Flexible(
                               child: Text(
                                 'Căn hộ ${invoice.apartment?.code ?? 'N/A'}',
-                                style: context.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: isPending
-                                      ? AppStatusColors.getPendingConfirmation(context)
-                                      : null,
-                                ),
+                                style: context.titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: isPending
+                                          ? pendingConfirmColor
+                                          : colorScheme.onSurface,
+                                    )
+                                    .tabularFigures(),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             if (isNew) ...[
-                              const SizedBox(width: 6),
+                              AppSpacing.w6,
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 6,
@@ -703,12 +728,12 @@ class _InvoiceManagementScreenState
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppStatusColors.getPaid(context),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: AppRadius.r4,
                                 ),
                                 child: Text(
                                   'MỚI',
                                   style: context.labelSmall?.copyWith(
-                                    color: Colors.white,
+                                    color: colorScheme.onPrimary,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: -0.2,
                                   ),
@@ -719,20 +744,18 @@ class _InvoiceManagementScreenState
                         ),
                       ),
                       PopupMenuButton<String>(
-                        icon: const Icon(
+                        tooltip: 'Tùy chọn hóa đơn',
+                        icon: Icon(
                           Icons.more_vert,
                           size: 20,
-                          color: AppTheme.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
                         onSelected: (value) {
                           if (value == 'edit') {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => EditInvoiceScreen(
-                                  invoice: invoice,
-                                ),
+                                builder: (_) =>
+                                    EditInvoiceScreen(invoice: invoice),
                               ),
                             );
                           } else if (value == 'delete') {
@@ -751,21 +774,19 @@ class _InvoiceManagementScreenState
                             ),
                           ),
                           if (!invoice.isPaid)
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'delete',
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.delete,
-                                    color: AppTheme.error,
+                                    color: errorColor,
                                     size: 18,
                                   ),
-                                  SizedBox(width: 8),
+                                  AppSpacing.w8,
                                   Text(
                                     'Xóa',
-                                    style: TextStyle(
-                                      color: AppTheme.error,
-                                    ),
+                                    style: TextStyle(color: errorColor),
                                   ),
                                 ],
                               ),
@@ -774,7 +795,7 @@ class _InvoiceManagementScreenState
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  AppSpacing.h8,
 
                   // Hàng trạng thái & kỳ phí
                   Row(
@@ -784,13 +805,13 @@ class _InvoiceManagementScreenState
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
-                            vertical: 3,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: statusColor.withValues(
                               alpha: isDark ? 0.2 : 0.1,
                             ),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: AppRadius.r6,
                             border: Border.all(
                               color: statusColor.withValues(alpha: 0.3),
                               width: 1,
@@ -807,21 +828,21 @@ class _InvoiceManagementScreenState
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      AppSpacing.w8,
                       Flexible(
                         child: Text(
                           'Kỳ: ${invoice.period}',
-                          style: context.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w600)
+                              .tabularFigures(),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  AppSpacing.h12,
 
-                  // Hàng số tiền & nút hành động (Bọc chống tràn tuyệt đối)
+                  // Hàng số tiền & nút hành động
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -831,14 +852,16 @@ class _InvoiceManagementScreenState
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Số tiền: ${_currencyFormat.format(invoice.totalAmount)}',
-                            style: context.titleSmall?.copyWith(
-                              color: AppTheme.error,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: context.titleSmall
+                                ?.copyWith(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.bold,
+                                )
+                                .tabularFigures(),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      AppSpacing.w8,
                       Flexible(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
@@ -847,8 +870,8 @@ class _InvoiceManagementScreenState
                             isPending ? 'Duyệt →' : 'Xem >',
                             style: context.labelSmall?.copyWith(
                               color: isPending
-                                  ? AppStatusColors.getPendingConfirmation(context)
-                                  : AppTheme.primary,
+                                  ? pendingConfirmColor
+                                  : colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -872,8 +895,8 @@ class _InvoiceManagementScreenState
     bool hasBadge = false,
   }) {
     final isSelected = _statusFilter == filterKey;
-    final color = highlightColor ?? AppTheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = highlightColor ?? colorScheme.primary;
 
     return FilterChip(
       selected: isSelected,
@@ -881,45 +904,31 @@ class _InvoiceManagementScreenState
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+            child: Text(label, overflow: TextOverflow.ellipsis, maxLines: 1),
           ),
           if (hasBadge && !isSelected) ...[
-            const SizedBox(width: 4),
+            AppSpacing.w4,
             Container(
               width: 8,
               height: 8,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
           ],
         ],
       ),
-      labelStyle: context.labelSmall?.copyWith(
-        color: isSelected ? Colors.white : AppTheme.textPrimary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      backgroundColor: isDark
-          ? (Theme.of(context).cardTheme.color ??
-              Theme.of(context).colorScheme.surface)
-          : Colors.white,
+      labelStyle: context.labelSmall
+          ?.copyWith(
+            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          )
+          .tabularFigures(),
+      backgroundColor: colorScheme.surfaceContainerLow,
       selectedColor: color,
-      checkmarkColor: Colors.white,
+      checkmarkColor: colorScheme.onPrimary,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.r20,
         side: BorderSide(
-          color: isSelected
-              ? color
-              : (hasBadge
-                  ? color
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : Colors.black.withValues(alpha: 0.1))),
+          color: (isSelected || hasBadge) ? color : colorScheme.outlineVariant,
           width: hasBadge ? 1.5 : 1.0,
         ),
       ),
@@ -955,40 +964,42 @@ class _InvoiceManagementScreenState
 
   Future<void> _confirmDeleteInvoice(InvoiceModel invoice) async {
     if (invoice.isPaid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Hóa đơn đã thanh toán là bất biến và đã hạch toán kế toán. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn tiền, vui lòng lập Phiếu giảm trừ (Credit Note).',
-          ),
-          backgroundColor: AppTheme.warning,
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppSnackBar.showWarning(
+        context,
+        'Hóa đơn đã thanh toán là bất biến và đã hạch toán kế toán. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn tiền, vui lòng lập Phiếu giảm trừ (Credit Note).',
       );
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Xác nhận xóa hóa đơn'),
-        content: Text(
-          'Bạn có chắc chắn muốn xóa hóa đơn kỳ ${invoice.period} của căn hộ ${invoice.apartment?.code ?? ''}?\n\nToàn bộ các khoản phí liên quan sẽ bị xóa và không thể khôi phục.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-              foregroundColor: Colors.white,
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
+          title: const Text('Xác nhận xóa hóa đơn'),
+          content: SingleChildScrollView(
+            child: Text(
+              'Bạn có chắc chắn muốn xóa hóa đơn kỳ ${invoice.period} của căn hộ ${invoice.apartment?.code ?? ''}?\n\nToàn bộ các khoản phí liên quan sẽ bị xóa và không thể khôi phục.',
             ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xóa'),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+                minimumSize: const Size(0, 48),
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && mounted) {
@@ -996,21 +1007,11 @@ class _InvoiceManagementScreenState
         await ref.read(managementRepositoryProvider).deleteInvoice(invoice.id);
         ref.invalidate(invoicesProvider);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã xóa hóa đơn thành công!'),
-              backgroundColor: AppTheme.success,
-            ),
-          );
+          AppSnackBar.showSuccess(context, 'Đã xóa hóa đơn thành công!');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(formatErrorMessage(e)),
-              backgroundColor: AppTheme.error,
-            ),
-          );
+          AppSnackBar.showError(context, formatErrorMessage(e));
         }
       }
     }
