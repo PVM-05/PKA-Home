@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../data/models/meter_reading_submission_model.dart';
 
@@ -28,10 +29,18 @@ class ManagementSubmissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color statusColor = AppTheme.warning;
-    if (item.isApproved) statusColor = AppStatusColors.paid;
-    if (item.isRejected) statusColor = AppTheme.error;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
 
+    Color statusColor = warningColor;
+    if (item.isApproved) statusColor = successColor;
+    if (item.isRejected) statusColor = errorColor;
+
+    final anomalyColor = item.isDangerAnomaly ? errorColor : warningColor;
     final formatter = dateFormat ?? DateFormat('dd/MM/yyyy HH:mm');
 
     return AppCard(
@@ -44,14 +53,14 @@ class ManagementSubmissionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppSpacing.p8,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  color: colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: AppRadius.r8,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.apartment,
-                  color: AppTheme.primary,
+                  color: colorScheme.primary,
                   size: 20,
                 ),
               ),
@@ -62,17 +71,17 @@ class ManagementSubmissionCard extends StatelessWidget {
                   children: [
                     Text(
                       'Căn hộ ${item.apartmentCode ?? ''}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold)
+                          .tabularFigures(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Kỳ: ${item.period} • Gửi lúc ${formatter.format(item.createdAt)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant)
+                          .tabularFigures(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -81,11 +90,11 @@ class ManagementSubmissionCard extends StatelessWidget {
               ),
               AppSpacing.w8,
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 90),
+                constraints: const BoxConstraints(maxWidth: 96),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 3,
+                    horizontal: 8,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
@@ -95,10 +104,10 @@ class ManagementSubmissionCard extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       item.statusDisplayName,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: statusColor,
-                          ),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
                     ),
                   ),
                 ),
@@ -112,26 +121,24 @@ class ManagementSubmissionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: successColor.withValues(alpha: 0.1),
                 borderRadius: AppRadius.r8,
-                border: Border.all(color: Colors.green.shade300),
+                border: Border.all(color: successColor.withValues(alpha: 0.35)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.receipt_long,
-                    size: 16,
-                    color: Colors.green.shade700,
-                  ),
+                  Icon(Icons.receipt_long, size: 16, color: successColor),
                   AppSpacing.w6,
                   Flexible(
                     child: Text(
                       'Đã xuất hóa đơn ${item.invoiceId != null ? "(${item.invoiceId})" : ""}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      style: theme.textTheme.labelSmall
+                          ?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.green.shade800,
-                          ),
+                            color: successColor,
+                          )
+                          .tabularFigures(),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -142,16 +149,12 @@ class ManagementSubmissionCard extends StatelessWidget {
 
           // Banner cảnh báo bất thường AI/OCR nếu có
           if (item.hasAnomaly) ...[
-            const SizedBox(height: 10),
+            AppSpacing.h12,
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: AppSpacing.p12,
               decoration: BoxDecoration(
-                color: item.isDangerAnomaly
-                    ? AppTheme.error.withValues(alpha: 0.08)
-                    : Colors.orange.withValues(alpha: 0.08),
-                border: Border.all(
-                  color: item.isDangerAnomaly ? AppTheme.error : Colors.orange,
-                ),
+                color: anomalyColor.withValues(alpha: 0.08),
+                border: Border.all(color: anomalyColor.withValues(alpha: 0.4)),
                 borderRadius: AppRadius.r8,
               ),
               child: Column(
@@ -164,21 +167,16 @@ class ManagementSubmissionCard extends StatelessWidget {
                             ? Icons.error_outline
                             : Icons.warning_amber_rounded,
                         size: 16,
-                        color: item.isDangerAnomaly
-                            ? AppTheme.error
-                            : Colors.orange.shade800,
+                        color: anomalyColor,
                       ),
                       AppSpacing.w6,
                       Expanded(
                         child: Text(
                           'Phát hiện bất thường: ${item.anomalySeverityDisplayName}',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: item.isDangerAnomaly
-                                        ? AppTheme.error
-                                        : Colors.orange.shade900,
-                                  ),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: anomalyColor,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -189,11 +187,9 @@ class ManagementSubmissionCard extends StatelessWidget {
                     AppSpacing.h4,
                     Text(
                       item.anomalyReason!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: item.isDangerAnomaly
-                                ? AppTheme.error
-                                : Colors.orange.shade900,
-                          ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: anomalyColor,
+                      ),
                     ),
                   ],
                   if (item.previousElectricReading != null ||
@@ -201,9 +197,9 @@ class ManagementSubmissionCard extends StatelessWidget {
                     AppSpacing.h4,
                     Text(
                       '• Đối chiếu cũ: Điện ${item.previousElectricReading ?? '—'} kWh (TB: ${item.avgElectricUsage ?? '—'}) | Nước ${item.previousWaterReading ?? '—'} m³ (TB: ${item.avgWaterUsage ?? '—'})',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
+                      style: theme.textTheme.labelSmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant)
+                          .tabularFigures(),
                     ),
                   ],
                 ],
@@ -219,156 +215,36 @@ class ManagementSubmissionCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: AppRadius.r8,
-                    border: Border.all(color: Colors.amber.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.bolt,
-                            color: Colors.amber.shade800,
-                            size: 18,
-                          ),
-                          AppSpacing.w4,
-                          Expanded(
-                            child: Text(
-                              'Điện (kWh)',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.h6,
-                      Text(
-                        '${item.electricReading} kWh',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.amber.shade900,
-                                ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.electricImageUrl != null) ...[
-                        AppSpacing.h6,
-                        GestureDetector(
-                          onTap: () => onShowImage(
-                            'Ảnh công tơ điện - Căn ${item.apartmentCode}',
-                            item.electricImageUrl!,
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.image,
-                                size: 14,
-                                color: AppTheme.primary,
-                              ),
-                              AppSpacing.w4,
-                              Text(
-                                'Xem ảnh',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                      color: AppTheme.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
+                child: _buildUtilityTile(
+                  context: context,
+                  icon: Icons.bolt,
+                  accentColor: warningColor,
+                  label: 'Điện (kWh)',
+                  value: '${item.electricReading} kWh',
+                  imageUrl: item.electricImageUrl,
+                  onTapImage: item.electricImageUrl == null
+                      ? null
+                      : () => onShowImage(
+                          'Ảnh công tơ điện - Căn ${item.apartmentCode}',
+                          item.electricImageUrl!,
                         ),
-                      ],
-                    ],
-                  ),
                 ),
               ),
               AppSpacing.w12,
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: AppRadius.r8,
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.water_drop,
-                            color: Colors.blue.shade800,
-                            size: 18,
-                          ),
-                          AppSpacing.w4,
-                          Expanded(
-                            child: Text(
-                              'Nước (m³)',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.h6,
-                      Text(
-                        '${item.waterReading} m³',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue.shade900,
-                                ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.waterImageUrl != null) ...[
-                        AppSpacing.h6,
-                        GestureDetector(
-                          onTap: () => onShowImage(
-                            'Ảnh công tơ nước - Căn ${item.apartmentCode}',
-                            item.waterImageUrl!,
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.image,
-                                size: 14,
-                                color: AppTheme.primary,
-                              ),
-                              AppSpacing.w4,
-                              Text(
-                                'Xem ảnh',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(
-                                      color: AppTheme.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
+                child: _buildUtilityTile(
+                  context: context,
+                  icon: Icons.water_drop,
+                  accentColor: secondaryColor,
+                  label: 'Nước (m³)',
+                  value: '${item.waterReading} m³',
+                  imageUrl: item.waterImageUrl,
+                  onTapImage: item.waterImageUrl == null
+                      ? null
+                      : () => onShowImage(
+                          'Ảnh công tơ nước - Căn ${item.apartmentCode}',
+                          item.waterImageUrl!,
                         ),
-                      ],
-                    ],
-                  ),
                 ),
               ),
             ],
@@ -381,9 +257,9 @@ class ManagementSubmissionCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Người gửi: ${item.submitterName}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -391,9 +267,9 @@ class ManagementSubmissionCard extends StatelessWidget {
                 Flexible(
                   child: Text(
                     'Độ tin cậy OCR: ${(item.ocrConfidence * 100).toStringAsFixed(1)}%',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                    style: theme.textTheme.labelSmall
+                        ?.copyWith(color: colorScheme.onSurfaceVariant)
+                        .tabularFigures(),
                     textAlign: TextAlign.end,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -403,27 +279,25 @@ class ManagementSubmissionCard extends StatelessWidget {
           ],
 
           if (item.isRejected && item.rejectReason != null) ...[
-            const SizedBox(height: 10),
+            AppSpacing.h12,
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: AppSpacing.p12,
               decoration: BoxDecoration(
-                color: AppTheme.error.withValues(alpha: 0.08),
+                color: errorColor.withValues(alpha: 0.08),
                 borderRadius: AppRadius.r8,
+                border: Border.all(color: errorColor.withValues(alpha: 0.25)),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: AppTheme.error,
-                  ),
+                  Icon(Icons.info_outline, size: 16, color: errorColor),
                   AppSpacing.w6,
                   Expanded(
                     child: Text(
                       'Lý do từ chối: ${item.rejectReason}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.error,
-                          ),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: errorColor,
+                      ),
                     ),
                   ),
                 ],
@@ -439,8 +313,9 @@ class ManagementSubmissionCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.error,
-                      side: const BorderSide(color: AppTheme.error),
+                      foregroundColor: errorColor,
+                      side: BorderSide(color: errorColor),
+                      minimumSize: const Size(0, 48),
                       shape: AppRadius.shapeSm,
                     ),
                     icon: const Icon(Icons.close, size: 18),
@@ -455,8 +330,9 @@ class ManagementSubmissionCard extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      minimumSize: const Size(0, 48),
                       shape: AppRadius.shapeSm,
                     ),
                     icon: const Icon(Icons.check, size: 18),
@@ -474,5 +350,82 @@ class ManagementSubmissionCard extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _buildUtilityTile({
+    required BuildContext context,
+    required IconData icon,
+    required Color accentColor,
+    required String label,
+    required String value,
+    required String? imageUrl,
+    required VoidCallback? onTapImage,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: AppSpacing.p12,
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.08),
+        borderRadius: AppRadius.r8,
+        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: accentColor, size: 18),
+              AppSpacing.w4,
+              Expanded(
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.h6,
+          Text(
+            value,
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold, color: accentColor)
+                .tabularFigures(),
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (imageUrl != null && onTapImage != null) ...[
+            AppSpacing.h6,
+            InkWell(
+              onTap: onTapImage,
+              borderRadius: AppRadius.r6,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.image, size: 14, color: colorScheme.primary),
+                    AppSpacing.w4,
+                    Flexible(
+                      child: Text(
+                        'Xem ảnh',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

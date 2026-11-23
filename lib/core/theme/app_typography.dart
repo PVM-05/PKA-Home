@@ -43,6 +43,13 @@ extension AppTypographyExtension on BuildContext {
       Theme.of(this).brightness == Brightness.dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 }
 
+/// Tiện ích mở rộng trên [TextStyle] cho số liệu đồng độ rộng (tabular figures)
+extension AppTextStyleTabularExtension on TextStyle {
+  TextStyle tabularFigures() => copyWith(
+        fontFeatures: const [FontFeature.tabularFigures()],
+      );
+}
+
 /// Lớp hằng số kích thước Typography chuẩn (Theme Spec)
 class AppTypography {
   const AppTypography._();

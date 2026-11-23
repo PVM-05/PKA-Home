@@ -69,16 +69,16 @@
 
 ## Đợt 4 — Điều Hành & Tác Nghiệp Ban Quản Lý (`main`)
 
-- [ ] **4.1** `lib/features/management/screens/management_home_screen.dart` *(Tier 1)* — Trạm điều hành BQL *(+ tách widget con)*
-- [ ] **4.2** `lib/features/management/screens/front_desk_workstation_screen.dart` *(Tier 1)* — Trạm Lễ tân / Bảo vệ (quét vé QR & bưu kiện tốc độ cao)
-- [ ] **4.3** `lib/features/management/screens/issue_management_screen.dart` *(Tier 1)* — Điều phối sự cố & cảnh báo SLA *(+ tách thẻ sự cố)*
-- [ ] **4.4** `lib/features/management/screens/resident_management_screen.dart` & `apartment_management_screen.dart` *(Tier 2)* — Quản lý cư dân & căn hộ *(+ tách file con)*
-- [ ] **4.5** Nhóm hàng chờ duyệt & vận hành *(Tier 2–3)*:
-  - [ ] `lib/features/management/screens/link_request_management_screen.dart`
-  - [ ] `lib/features/management/screens/management_meter_reading_screen.dart`
-  - [ ] `lib/features/management/screens/vehicle_approval_screen.dart`
-  - [ ] `lib/features/management/screens/parking_management_screen.dart`
-  - [ ] `lib/features/management/screens/amenity_management_screen.dart`
+- [x] **4.1** `lib/features/management/screens/management_home_screen.dart` *(Tier 1)* — Trạm điều hành BQL *(+ tách widget con)*
+- [x] **4.2** `lib/features/management/screens/front_desk_workstation_screen.dart` *(Tier 1)* — Trạm Lễ tân / Bảo vệ (quét vé QR & bưu kiện tốc độ cao)
+- [x] **4.3** `lib/features/management/screens/issue_management_screen.dart` *(Tier 1)* — Điều phối sự cố & cảnh báo SLA *(+ tách thẻ sự cố)*
+- [x] **4.4** `lib/features/management/screens/resident_management_screen.dart` & `apartment_management_screen.dart` *(Tier 2)* — Quản lý cư dân & căn hộ *(+ tách file con)*
+- [x] **4.5** Nhóm hàng chờ duyệt & vận hành *(Tier 2–3)*:
+  - [x] `lib/features/management/screens/link_request_management_screen.dart`
+  - [x] `lib/features/management/screens/management_meter_reading_screen.dart`
+  - [x] `lib/features/management/screens/vehicle_approval_screen.dart`
+  - [x] `lib/features/management/screens/parking_management_screen.dart`
+  - [x] `lib/features/management/screens/amenity_management_screen.dart`
 
 ---
 

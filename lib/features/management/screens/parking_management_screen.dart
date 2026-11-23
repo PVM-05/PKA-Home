@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+
+import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
-import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/apartment_model.dart';
 import '../../../data/models/parking_slot_model.dart';
@@ -44,182 +50,236 @@ class _ParkingManagementScreenState
     super.dispose();
   }
 
+  void _refreshAll() {
+    ref.invalidate(parkingSlotsProvider);
+    ref.invalidate(parkingCapacityStatsProvider);
+    ref.invalidate(activeVisitorTicketsProvider);
+  }
+
   void _showCheckInDialog() {
     final plateController = TextEditingController();
     final noteController = TextEditingController();
     String selectedType = 'motorcycle';
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.login_rounded, color: AppTheme.primary),
-              SizedBox(width: 8),
-              Text('Check-in Xe Vãng Lai'),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        builder: (dialogCtx, setDialogState) {
+          final colorScheme = Theme.of(dialogCtx).colorScheme;
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
+            title: Row(
               children: [
-                TextField(
-                  controller: plateController,
-                  textCapitalization: TextCapitalization.characters,
-                  decoration: const InputDecoration(
-                    labelText: 'Biển số xe',
-                    hintText: 'Ví dụ: 30A-999.88',
-                    prefixIcon: Icon(Icons.pin_outlined),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Loại phương tiện:',
-                  style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ChoiceChip(
-                        label: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.two_wheeler, size: 16),
-                            SizedBox(width: 6),
-                            Text('Xe máy'),
-                          ],
-                        ),
-                        selected: selectedType == 'motorcycle',
-                        onSelected: (val) {
-                          if (val) {
-                            setDialogState(() => selectedType = 'motorcycle');
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ChoiceChip(
-                        label: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.directions_car, size: 16),
-                            SizedBox(width: 6),
-                            Text('Ô tô'),
-                          ],
-                        ),
-                        selected: selectedType == 'car',
-                        onSelected: (val) {
-                          if (val) setDialogState(() => selectedType = 'car');
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: noteController,
-                  decoration: const InputDecoration(
-                    labelText: 'Ghi chú / Khách phòng nào',
-                    hintText: 'Ví dụ: Khách thăm phòng A0101...',
-                    prefixIcon: Icon(Icons.note_alt_outlined),
-                  ),
-                ),
+                Icon(Icons.login_rounded, color: colorScheme.primary),
+                AppSpacing.w8,
+                const Expanded(child: Text('Check-in Xe Vãng Lai')),
               ],
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Hủy'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: plateController,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: const InputDecoration(
+                      labelText: 'Biển số xe',
+                      hintText: 'Ví dụ: 30A-999.88',
+                      prefixIcon: Icon(Icons.pin_outlined),
+                    ),
+                  ),
+                  AppSpacing.h16,
+                  Text(
+                    'Loại phương tiện:',
+                    style: dialogCtx.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  AppSpacing.h8,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ChoiceChip(
+                          label: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.two_wheeler, size: 16),
+                              SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Xe máy',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          selected: selectedType == 'motorcycle',
+                          onSelected: (val) {
+                            if (val) {
+                              setDialogState(() => selectedType = 'motorcycle');
+                            }
+                          },
+                        ),
+                      ),
+                      AppSpacing.w8,
+                      Expanded(
+                        child: ChoiceChip(
+                          label: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.directions_car, size: 16),
+                              SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Ô tô',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          selected: selectedType == 'car',
+                          onSelected: (val) {
+                            if (val) {
+                              setDialogState(() => selectedType = 'car');
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppSpacing.h16,
+                  TextField(
+                    controller: noteController,
+                    decoration: const InputDecoration(
+                      labelText: 'Ghi chú / Khách phòng nào',
+                      hintText: 'Ví dụ: Khách thăm phòng A0110...',
+                      prefixIcon: Icon(Icons.note_alt_outlined),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final plate = plateController.text.trim().toUpperCase();
-                if (plate.isEmpty) return;
-                Navigator.pop(ctx);
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogCtx),
+                child: const Text('Hủy'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(0, 48),
+                ),
+                onPressed: () async {
+                  final plate = plateController.text.trim().toUpperCase();
+                  if (plate.isEmpty) return;
+                  Navigator.pop(dialogCtx);
 
-                final repo = ref.read(parkingRepositoryProvider);
-                final res = await repo.createVisitorTicket(
-                  licensePlate: plate,
-                  vehicleType: selectedType,
-                  note: noteController.text.trim(),
-                );
+                  final repo = ref.read(parkingRepositoryProvider);
+                  final res = await repo.createVisitorTicket(
+                    licensePlate: plate,
+                    vehicleType: selectedType,
+                    note: noteController.text.trim(),
+                  );
 
-                if (mounted) {
-                  ref.invalidate(activeVisitorTicketsProvider);
-                  ref.invalidate(parkingCapacityStatsProvider);
-                  if (res['success'] == true &&
-                      res['ticket'] is VisitorParkingTicketModel) {
-                    _showTicketDetailModal(
-                      res['ticket'] as VisitorParkingTicketModel,
-                    );
+                  if (mounted) {
+                    ref.invalidate(activeVisitorTicketsProvider);
+                    ref.invalidate(parkingCapacityStatsProvider);
+                    if (res['success'] == true &&
+                        res['ticket'] is VisitorParkingTicketModel) {
+                      _showTicketDetailModal(
+                        res['ticket'] as VisitorParkingTicketModel,
+                      );
+                    }
                   }
-                }
-              },
-              child: const Text('Tạo Vé Xe'),
-            ),
-          ],
-        ),
+                },
+                child: const Text('Tạo Vé Xe'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   void _showTicketDetailModal(VisitorParkingTicketModel ticket) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Vé Xe Điện Tử: ${ticket.ticketCode}',
-              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: AppSpacing.p24,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Vé Xe Điện Tử: ${ticket.ticketCode}',
+                  style: ctx.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold)
+                      .tabularFigures(),
+                  textAlign: TextAlign.center,
+                ),
+                AppSpacing.h8,
+                Text(
+                  'Biển số: ${ticket.licensePlate} (${ticket.displayVehicleType})',
+                  style: ctx.titleSmall
+                      ?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.primary,
+                      )
+                      .tabularFigures(),
+                ),
+                AppSpacing.h16,
+                Container(
+                  padding: AppSpacing.p12,
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius: AppRadius.r12,
+                    border: Border.all(color: colorScheme.outlineVariant),
+                  ),
+                  child: SizedBox(
+                    height: 180,
+                    width: 180,
+                    child: QrImageView(
+                      data: ticket.qrPayload,
+                      version: QrVersions.auto,
+                      size: 180,
+                    ),
+                  ),
+                ),
+                AppSpacing.h12,
+                Text(
+                  'Giờ vào: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
+                  style: ctx.bodySmall
+                      ?.copyWith(color: colorScheme.onSurfaceVariant)
+                      .tabularFigures(),
+                ),
+                AppSpacing.h20,
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                    ),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Đóng'),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Biển số: ${ticket.licensePlate} (${ticket.displayVehicleType})',
-              style: context.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 180,
-              width: 180,
-              child: QrImageView(
-                data: ticket.qrPayload,
-                version: QrVersions.auto,
-                size: 180,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Giờ vào: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
-              style: context.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Đóng'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  void _showCheckoutDialog(VisitorParkingTicketModel ticket) async {
+  Future<void> _showCheckoutDialog(VisitorParkingTicketModel ticket) async {
     final repo = ref.read(parkingRepositoryProvider);
     final feeRes = await repo.calculateVisitorFee(ticket.id);
     final fee = (feeRes['fee_amount'] as num?)?.toDouble() ?? ticket.feeAmount;
@@ -230,77 +290,93 @@ class _ParkingManagementScreenState
 
     if (!mounted) return;
 
-    showDialog(
+    await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.receipt_long, color: AppTheme.primary),
-            SizedBox(width: 8),
-            Text('Check-out & Thu Phí'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Biển số: ${ticket.licensePlate}',
-              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text('Loại xe: ${ticket.displayVehicleType}'),
-            Text('Thời gian đã đỗ: $hours giờ'),
-            const Divider(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
+          title: Row(
+            children: [
+              Icon(Icons.receipt_long, color: colorScheme.primary),
+              AppSpacing.w8,
+              const Expanded(child: Text('Check-out & Thu Phí')),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Tổng tiền thu:',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
                 Text(
-                  formattedFee,
-                  style: context.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
+                  'Biển số: ${ticket.licensePlate}',
+                  style: ctx.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)
+                      .tabularFigures(),
+                ),
+                AppSpacing.h6,
+                Text('Loại xe: ${ticket.displayVehicleType}'),
+                Text('Thời gian đã đỗ: $hours giờ'),
+                const Divider(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Tổng tiền thu:',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      formattedFee,
+                      style: ctx.titleLarge
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          )
+                          .tabularFigures(),
+                    ),
+                  ],
                 ),
               ],
             ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Hủy'),
+            ),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await repo.checkoutVisitorTicket(
+                  ticketId: ticket.id,
+                  paymentMethod: 'cash',
+                );
+                ref.invalidate(activeVisitorTicketsProvider);
+                ref.invalidate(parkingCapacityStatsProvider);
+              },
+              child: const Text('Thu Tiền Mặt'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                minimumSize: const Size(0, 48),
+              ),
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await repo.checkoutVisitorTicket(
+                  ticketId: ticket.id,
+                  paymentMethod: 'vietqr',
+                );
+                ref.invalidate(activeVisitorTicketsProvider);
+                ref.invalidate(parkingCapacityStatsProvider);
+              },
+              child: const Text('Quét VietQR'),
+            ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          OutlinedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await repo.checkoutVisitorTicket(
-                ticketId: ticket.id,
-                paymentMethod: 'cash',
-              );
-              ref.invalidate(activeVisitorTicketsProvider);
-              ref.invalidate(parkingCapacityStatsProvider);
-            },
-            child: const Text('Thu Tiền Mặt'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await repo.checkoutVisitorTicket(
-                ticketId: ticket.id,
-                paymentMethod: 'vietqr',
-              );
-              ref.invalidate(activeVisitorTicketsProvider);
-              ref.invalidate(parkingCapacityStatsProvider);
-            },
-            child: const Text('Quét VietQR'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -310,14 +386,18 @@ class _ParkingManagementScreenState
     final plateController = TextEditingController();
     final customAptCodeController = TextEditingController();
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          final approvedVehiclesAsync = ref.watch(allVehiclesProvider('approved'));
+        builder: (dialogCtx, setDialogState) {
+          final approvedVehiclesAsync = ref.watch(
+            allVehiclesProvider('approved'),
+          );
           final apartmentsAsync = ref.watch(apartmentsProvider);
+          final colorScheme = Theme.of(dialogCtx).colorScheme;
 
           return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
             title: Text('Gán Ô Đỗ ${slot.slotNumber}'),
             content: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 450),
@@ -328,16 +408,19 @@ class _ParkingManagementScreenState
                   children: [
                     Text(
                       'Loại ô đỗ: ${slot.slotType == 'car' ? 'Ô tô' : 'Xe máy'} | Khu vực: ${slot.zone}',
-                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                      style: dialogCtx.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    AppSpacing.h16,
 
                     // 1. Chọn từ danh sách xe đã phê duyệt
                     approvedVehiclesAsync.when(
                       data: (vehicles) {
-                        // Lọc xe cùng loại với ô đỗ (car hoặc motorbike) nếu có
                         final matchedVehicles = vehicles.where((v) {
-                          if (slot.slotType == 'car') return v.vehicleType == 'car';
+                          if (slot.slotType == 'car') {
+                            return v.vehicleType == 'car';
+                          }
                           return v.vehicleType != 'car';
                         }).toList();
 
@@ -369,8 +452,11 @@ class _ParkingManagementScreenState
                               selectedVehicle = val;
                               if (val != null) {
                                 plateController.text = val.licensePlate;
-                                final apartments = apartmentsAsync.valueOrNull ?? [];
-                                final aptMatch = apartments.where((a) => a.id == val.apartmentId).firstOrNull;
+                                final apartments =
+                                    apartmentsAsync.valueOrNull ?? [];
+                                final aptMatch = apartments
+                                    .where((a) => a.id == val.apartmentId)
+                                    .firstOrNull;
                                 if (aptMatch != null) {
                                   selectedApartment = aptMatch;
                                   customAptCodeController.text = aptMatch.code;
@@ -381,9 +467,9 @@ class _ParkingManagementScreenState
                         );
                       },
                       loading: () => const LinearProgressIndicator(),
-                      error: (err, st) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     ),
-                    const SizedBox(height: 12),
+                    AppSpacing.h12,
 
                     // 2. Chọn căn hộ sở hữu từ danh mục thực tế
                     apartmentsAsync.when(
@@ -399,11 +485,14 @@ class _ParkingManagementScreenState
                           items: apartments.map((apt) {
                             return DropdownMenuItem(
                               value: apt,
-                              child: Text('Căn hộ ${apt.code} (${apt.buildingCode})'),
+                              child: Text(
+                                'Căn hộ ${apt.code} (${apt.buildingCode})',
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             );
                           }).toList(),
                           onChanged: selectedVehicle != null
-                              ? null // Đã khóa theo xe
+                              ? null
                               : (apt) {
                                   setDialogState(() {
                                     selectedApartment = apt;
@@ -415,7 +504,7 @@ class _ParkingManagementScreenState
                         );
                       },
                       loading: () => const LinearProgressIndicator(),
-                      error: (err, st) => TextField(
+                      error: (_, _) => TextField(
                         controller: customAptCodeController,
                         decoration: const InputDecoration(
                           labelText: 'Mã căn hộ *',
@@ -424,7 +513,7 @@ class _ParkingManagementScreenState
                         textCapitalization: TextCapitalization.characters,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    AppSpacing.h12,
 
                     // 3. Biển số xe
                     TextField(
@@ -455,17 +544,20 @@ class _ParkingManagementScreenState
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx),
+                onPressed: () => Navigator.pop(dialogCtx),
                 child: const Text('Hủy'),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(0, 48),
                 ),
                 onPressed: () async {
                   final plate = plateController.text.trim().toUpperCase();
-                  final aptCode = selectedApartment?.code ?? customAptCodeController.text.trim().toUpperCase();
+                  final aptCode =
+                      selectedApartment?.code ??
+                      customAptCodeController.text.trim().toUpperCase();
                   final aptId = selectedApartment?.id ?? '';
 
                   if (plate.isEmpty || aptCode.isEmpty) {
@@ -476,7 +568,7 @@ class _ParkingManagementScreenState
                     return;
                   }
 
-                  Navigator.pop(ctx);
+                  Navigator.pop(dialogCtx);
 
                   final vehicleId = selectedVehicle?.id ?? '';
                   final targetApartmentId = aptId.isNotEmpty ? aptId : aptCode;
@@ -513,151 +605,164 @@ class _ParkingManagementScreenState
   @override
   Widget build(BuildContext context) {
     final statsAsync = ref.watch(parkingCapacityStatsProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return RoleGuard(
       permission: AppPermissions.parkingManagement,
       child: Scaffold(
         appBar: AppBar(
-        title: const FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text('Quản Lý Bãi Xe & Ô Đỗ'),
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.grid_view_rounded), text: 'Sơ đồ Ô đỗ'),
-            Tab(
-              icon: Icon(Icons.local_parking_rounded),
-              text: 'Trạm soát vé cổng',
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Quản Lý Bãi Xe & Ô Đỗ'),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Làm mới',
+              onPressed: _refreshAll,
             ),
           ],
+          bottom: TabBar(
+            controller: _tabController,
+            labelColor: colorScheme.primary,
+            unselectedLabelColor: colorScheme.onSurfaceVariant,
+            indicatorColor: colorScheme.primary,
+            tabs: const [
+              Tab(icon: Icon(Icons.grid_view_rounded), text: 'Sơ đồ Ô đỗ'),
+              Tab(
+                icon: Icon(Icons.local_parking_rounded),
+                text: 'Trạm soát vé cổng',
+              ),
+            ],
+          ),
         ),
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1400),
-          child: Column(
-            children: [
-              // KPI strip sức chứa
-              statsAsync.when(
-                data: (stats) => Container(
-                  color: Colors.grey.shade50,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isNarrow = constraints.maxWidth < 420;
-                      if (isNarrow) {
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: Column(
+              children: [
+                // KPI strip sức chứa
+                statsAsync.when(
+                  data: (stats) => Container(
+                    color: colorScheme.surfaceContainerLowest,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isNarrow = constraints.maxWidth < 420;
+                        if (isNarrow) {
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildKpiBox(
+                                    icon: Icons.directions_car,
+                                    label: 'Ô tô hầm',
+                                    value:
+                                        '${stats.carOccupied}/${stats.carTotal}',
+                                    subtext: 'Trống ${stats.carAvailable}',
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                                AppSpacing.w8,
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildKpiBox(
+                                    icon: Icons.two_wheeler,
+                                    label: 'Xe máy hầm',
+                                    value:
+                                        '${stats.motoOccupied}/${stats.motoTotal}',
+                                    subtext: 'Trống ${stats.motoAvailable}',
+                                    color: secondaryColor,
+                                  ),
+                                ),
+                                AppSpacing.w8,
+                                SizedBox(
+                                  width: 140,
+                                  child: _buildKpiBox(
+                                    icon: Icons.confirmation_number_outlined,
+                                    label: 'Xe vãng lai',
+                                    value: '${stats.visitorCount}',
+                                    subtext: 'Đang gửi',
+                                    color: warningColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12,
                           ),
                           child: Row(
                             children: [
-                              SizedBox(
-                                width: 135,
+                              Expanded(
                                 child: _buildKpiBox(
                                   icon: Icons.directions_car,
                                   label: 'Ô tô hầm',
                                   value:
                                       '${stats.carOccupied}/${stats.carTotal}',
                                   subtext: 'Trống ${stats.carAvailable}',
-                                  color: AppTheme.primary,
+                                  color: colorScheme.primary,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              SizedBox(
-                                width: 135,
+                              AppSpacing.w10,
+                              Expanded(
                                 child: _buildKpiBox(
                                   icon: Icons.two_wheeler,
                                   label: 'Xe máy hầm',
                                   value:
                                       '${stats.motoOccupied}/${stats.motoTotal}',
                                   subtext: 'Trống ${stats.motoAvailable}',
-                                  color: Colors.teal,
+                                  color: secondaryColor,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              SizedBox(
-                                width: 135,
+                              AppSpacing.w10,
+                              Expanded(
                                 child: _buildKpiBox(
                                   icon: Icons.confirmation_number_outlined,
                                   label: 'Xe vãng lai',
                                   value: '${stats.visitorCount}',
                                   subtext: 'Đang gửi',
-                                  color: Colors.orange,
+                                  color: warningColor,
                                 ),
                               ),
                             ],
                           ),
                         );
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _buildKpiBox(
-                                icon: Icons.directions_car,
-                                label: 'Ô tô hầm',
-                                value:
-                                    '${stats.carOccupied}/${stats.carTotal}',
-                                subtext: 'Trống ${stats.carAvailable}',
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _buildKpiBox(
-                                icon: Icons.two_wheeler,
-                                label: 'Xe máy hầm',
-                                value:
-                                    '${stats.motoOccupied}/${stats.motoTotal}',
-                                subtext: 'Trống ${stats.motoAvailable}',
-                                color: Colors.teal,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _buildKpiBox(
-                                icon: Icons.confirmation_number_outlined,
-                                label: 'Xe vãng lai',
-                                value: '${stats.visitorCount}',
-                                subtext: 'Đang gửi',
-                                color: Colors.orange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                      },
+                    ),
+                  ),
+                  loading: () => const SizedBox(
+                    height: 76,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+
+                // Nội dung 2 tabs
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [_buildSlotsTab(), _buildGateWorkstationTab()],
                   ),
                 ),
-                loading: () => const SizedBox(
-                  height: 70,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                error: (_, _) => const SizedBox.shrink(),
-              ),
-
-              // Nội dung 2 tabs
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [_buildSlotsTab(), _buildGateWorkstationTab()],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildKpiBox({
     required IconData icon,
@@ -666,12 +771,14 @@ class _ParkingManagementScreenState
     required String subtext,
     required Color color,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: AppSpacing.p12,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade300),
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: AppRadius.r12,
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -680,12 +787,12 @@ class _ParkingManagementScreenState
           Row(
             children: [
               Icon(icon, size: 16, color: color),
-              const SizedBox(width: 4),
+              AppSpacing.w4,
               Expanded(
                 child: Text(
                   label,
                   style: context.labelSmall?.copyWith(
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -693,21 +800,22 @@ class _ParkingManagementScreenState
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          AppSpacing.h4,
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: context.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: context.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold, color: color)
+                  .tabularFigures(),
             ),
           ),
           Text(
             subtext,
-            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+            style: context.labelSmall
+                ?.copyWith(color: colorScheme.onSurfaceVariant)
+                .tabularFigures(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -725,26 +833,34 @@ class _ParkingManagementScreenState
         // Thanh bộ lọc
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Tìm số ô, biển số, mã căn...',
-                    prefixIcon: Icon(Icons.search),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  onChanged: (val) {
-                    ref.read(parkingFilterProvider.notifier).state = filter
-                        .copyWith(searchQuery: val);
-                  },
-                ),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Tìm số ô, biển số, mã căn...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      tooltip: 'Xóa tìm kiếm',
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        ref.read(parkingFilterProvider.notifier).state = filter
+                            .copyWith(searchQuery: '');
+                        setState(() {});
+                      },
+                    )
+                  : null,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
               ),
-            ],
+            ),
+            onChanged: (val) {
+              ref.read(parkingFilterProvider.notifier).state = filter.copyWith(
+                searchQuery: val,
+              );
+              setState(() {});
+            },
           ),
         ),
 
@@ -762,7 +878,7 @@ class _ParkingManagementScreenState
                       const ParkingFilter();
                 },
               ),
-              const SizedBox(width: 6),
+              AppSpacing.w6,
               FilterChip(
                 label: const Text('Tầng B1'),
                 selected: filter.zone == 'B1',
@@ -771,7 +887,7 @@ class _ParkingManagementScreenState
                       .copyWith(zone: val ? 'B1' : null);
                 },
               ),
-              const SizedBox(width: 6),
+              AppSpacing.w6,
               FilterChip(
                 label: const Text('Tầng B2'),
                 selected: filter.zone == 'B2',
@@ -780,7 +896,7 @@ class _ParkingManagementScreenState
                       .copyWith(zone: val ? 'B2' : null);
                 },
               ),
-              const SizedBox(width: 6),
+              AppSpacing.w6,
               FilterChip(
                 label: const Text('Ô tô'),
                 selected: filter.type == 'car',
@@ -789,7 +905,7 @@ class _ParkingManagementScreenState
                       .copyWith(type: val ? 'car' : null);
                 },
               ),
-              const SizedBox(width: 6),
+              AppSpacing.w6,
               FilterChip(
                 label: const Text('Xe máy'),
                 selected: filter.type == 'motorcycle',
@@ -804,37 +920,54 @@ class _ParkingManagementScreenState
 
         // Lưới các ô đỗ
         Expanded(
-          child: slotsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('Lỗi: $err')),
-            data: (slots) {
-              if (slots.isEmpty) {
-                return const Center(
-                  child: Text('Không có ô đỗ nào phù hợp tiêu chí tìm kiếm'),
-                );
-              }
-
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final isNarrow = constraints.maxWidth < 420;
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 240,
-                          mainAxisExtent: isNarrow ? 155 : 145,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                    itemCount: slots.length,
-                    itemBuilder: (context, index) {
-                      final slot = slots[index];
-                      return _buildSlotCard(slot);
-                    },
+          child: RefreshIndicator(
+            onRefresh: () async => _refreshAll(),
+            child: slotsAsync.when(
+              loading: () => ListView(
+                padding: AppSpacing.p16,
+                children: [
+                  AppSkeletonShimmer.cardList(count: 4, itemHeight: 110),
+                ],
+              ),
+              error: (err, _) => Center(
+                child: AppErrorCard(error: err, onRetry: _refreshAll),
+              ),
+              data: (slots) {
+                if (slots.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 60),
+                      AppEmptyState(
+                        icon: Icons.local_parking_outlined,
+                        title: 'Không có ô đỗ phù hợp',
+                        description:
+                            'Không có ô đỗ nào phù hợp tiêu chí tìm kiếm',
+                      ),
+                    ],
                   );
-                },
-              );
-            },
+                }
+
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 420;
+                    return GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: AppSpacing.p16,
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 250,
+                        mainAxisExtent: isNarrow ? 168 : 156,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemCount: slots.length,
+                      itemBuilder: (context, index) =>
+                          _buildSlotCard(slots[index]),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -842,26 +975,26 @@ class _ParkingManagementScreenState
   }
 
   Widget _buildSlotCard(ParkingSlotModel slot) {
-    Color cardColor;
-    Color borderColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
 
+    final Color accentColor;
     if (slot.isOccupied) {
-      cardColor = AppTheme.primary.withValues(alpha: 0.05);
-      borderColor = AppTheme.primary.withValues(alpha: 0.3);
+      accentColor = colorScheme.primary;
     } else if (slot.isMaintenance) {
-      cardColor = Colors.orange.withValues(alpha: 0.05);
-      borderColor = Colors.orange.withValues(alpha: 0.3);
+      accentColor = warningColor;
     } else {
-      cardColor = Colors.green.withValues(alpha: 0.05);
-      borderColor = Colors.green.withValues(alpha: 0.3);
+      accentColor = successColor;
     }
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: AppSpacing.p12,
       decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
+        color: accentColor.withValues(alpha: 0.06),
+        borderRadius: AppRadius.r12,
+        border: Border.all(color: accentColor.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -872,18 +1005,18 @@ class _ParkingManagementScreenState
               Expanded(
                 child: Text(
                   slot.slotNumber,
-                  style: context.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: context.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)
+                      .tabularFigures(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 4),
+              AppSpacing.w4,
               Icon(
                 slot.isCar ? Icons.directions_car : Icons.two_wheeler,
                 size: 16,
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -893,10 +1026,12 @@ class _ParkingManagementScreenState
               alignment: Alignment.centerLeft,
               child: Text(
                 slot.licensePlate ?? 'Đã có xe',
-                style: context.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
+                style: context.bodySmall
+                    ?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    )
+                    .tabularFigures(),
               ),
             ),
             Row(
@@ -904,30 +1039,37 @@ class _ParkingManagementScreenState
                 Expanded(
                   child: Text(
                     slot.apartmentCode ?? 'Căn hộ',
-                    style: context.labelSmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: context.labelSmall
+                        ?.copyWith(color: colorScheme.onSurfaceVariant)
+                        .tabularFigures(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 4),
+                AppSpacing.w4,
                 ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 55),
+                  constraints: const BoxConstraints(maxWidth: 72),
                   child: InkWell(
+                    borderRadius: AppRadius.r6,
                     onTap: () async {
                       final repo = ref.read(parkingRepositoryProvider);
                       await repo.releaseSlot(slot.id);
                       ref.invalidate(parkingSlotsProvider);
                       ref.invalidate(parkingCapacityStatsProvider);
                     },
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        'Giải phóng',
-                        style: context.labelSmall?.copyWith(
-                          color: AppTheme.error,
-                          fontWeight: FontWeight.bold,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 6,
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Giải phóng',
+                          style: context.labelSmall?.copyWith(
+                            color: errorColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -940,9 +1082,7 @@ class _ParkingManagementScreenState
               slot.displayStatus,
               style: context.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: slot.isAvailable
-                    ? Colors.green.shade700
-                    : Colors.orange.shade700,
+                color: slot.isAvailable ? successColor : warningColor,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -950,14 +1090,21 @@ class _ParkingManagementScreenState
             Align(
               alignment: Alignment.centerRight,
               child: InkWell(
+                borderRadius: AppRadius.r6,
                 onTap: () => _showAssignSlotDialog(slot),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    'Gán xe',
-                    style: context.labelSmall?.copyWith(
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.bold,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 6,
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Gán xe',
+                      style: context.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -971,176 +1118,208 @@ class _ParkingManagementScreenState
 
   Widget _buildGateWorkstationTab() {
     final ticketsAsync = ref.watch(activeVisitorTicketsProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return Column(
       children: [
         // Thanh tác vụ gác cổng
         Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _showCheckInDialog,
-                  icon: const Icon(Icons.add_circle_outline),
-                  label: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text('Check-in Xe Vào'),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
+          padding: AppSpacing.p16,
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _showCheckInDialog,
+              icon: const Icon(Icons.add_circle_outline),
+              label: const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Check-in Xe Vào'),
               ),
-            ],
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                minimumSize: const Size(0, 48),
+              ),
+            ),
           ),
         ),
 
         // Danh sách xe đang gửi
         Expanded(
-          child: ticketsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('Lỗi: $err')),
-            data: (tickets) {
-              if (tickets.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'Hiện không có xe vãng lai nào đang gửi trong bãi',
-                  ),
-                );
-              }
+          child: RefreshIndicator(
+            onRefresh: () async => _refreshAll(),
+            child: ticketsAsync.when(
+              loading: () => ListView(
+                padding: AppSpacing.p16,
+                children: [
+                  AppSkeletonShimmer.cardList(count: 3, itemHeight: 130),
+                ],
+              ),
+              error: (err, _) => Center(
+                child: AppErrorCard(error: err, onRetry: _refreshAll),
+              ),
+              data: (tickets) {
+                if (tickets.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 60),
+                      AppEmptyState(
+                        icon: Icons.directions_car_outlined,
+                        title: 'Chưa có xe vãng lai',
+                        description:
+                            'Hiện không có xe vãng lai nào đang gửi trong bãi',
+                      ),
+                    ],
+                  );
+                }
 
-              return ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                itemCount: tickets.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final ticket = tickets[index];
-                  return AppCard(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    ticket.isCar
-                                        ? Icons.directions_car
-                                        : Icons.two_wheeler,
-                                    color: AppTheme.primary,
+                return ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount: tickets.length,
+                  separatorBuilder: (_, _) => AppSpacing.h12,
+                  itemBuilder: (context, index) {
+                    final ticket = tickets[index];
+                    return AppCard(
+                      padding: AppSpacing.p16,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      ticket.isCar
+                                          ? Icons.directions_car
+                                          : Icons.two_wheeler,
+                                      color: colorScheme.primary,
+                                    ),
+                                    AppSpacing.w8,
+                                    Expanded(
+                                      child: Text(
+                                        ticket.licensePlate,
+                                        style: context.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            )
+                                            .tabularFigures(),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              AppSpacing.w8,
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 96),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
+                                  decoration: BoxDecoration(
+                                    color: warningColor.withValues(alpha: 0.12),
+                                    borderRadius: AppRadius.r6,
+                                  ),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
                                     child: Text(
-                                      ticket.licensePlate,
-                                      style: context.titleMedium?.copyWith(
+                                      ticket.displayStatus,
+                                      style: context.labelSmall?.copyWith(
+                                        color: warningColor,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 95),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    ticket.displayStatus,
-                                    style: context.labelSmall?.copyWith(
-                                      color: Colors.orange,
-                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 4,
-                          children: [
-                            Text(
-                              'Loại xe: ${ticket.displayVehicleType}',
-                              style: context.bodySmall?.copyWith(
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                            Text(
-                              'Mã vé: ${ticket.ticketCode}',
-                              style: context.bodySmall?.copyWith(
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Vào lúc: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
-                          style: context.bodySmall?.copyWith(
-                            color: AppTheme.textSecondary,
+                            ],
                           ),
-                        ),
-                        if (ticket.note != null && ticket.note!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
+                          AppSpacing.h8,
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 4,
+                            children: [
+                              Text(
+                                'Loại xe: ${ticket.displayVehicleType}',
+                                style: context.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                'Mã vé: ${ticket.ticketCode}',
+                                style: context.bodySmall
+                                    ?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    )
+                                    .tabularFigures(),
+                              ),
+                            ],
+                          ),
+                          AppSpacing.h4,
                           Text(
-                            'Ghi chú: ${ticket.note}',
-                            style: context.bodySmall?.copyWith(
-                              fontStyle: FontStyle.italic,
+                            'Vào lúc: ${DateFormat('dd/MM/yyyy HH:mm').format(ticket.checkInAt)}',
+                            style: context.bodySmall
+                                ?.copyWith(color: colorScheme.onSurfaceVariant)
+                                .tabularFigures(),
+                          ),
+                          if (ticket.note != null &&
+                              ticket.note!.isNotEmpty) ...[
+                            AppSpacing.h4,
+                            Text(
+                              'Ghi chú: ${ticket.note}',
+                              style: context.bodySmall?.copyWith(
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
+                          ],
+                          const Divider(height: 20),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  minimumSize: const Size(0, 48),
+                                ),
+                                onPressed: () => _showTicketDetailModal(ticket),
+                                icon: const Icon(Icons.qr_code, size: 18),
+                                label: const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text('Xem mã QR vé'),
+                                ),
+                              ),
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colorScheme.primary,
+                                  foregroundColor: colorScheme.onPrimary,
+                                  minimumSize: const Size(0, 48),
+                                ),
+                                onPressed: () => _showCheckoutDialog(ticket),
+                                icon: const Icon(Icons.payment, size: 18),
+                                label: const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text('Check-out & Thu tiền'),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                        const Divider(height: 20),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          alignment: WrapAlignment.spaceBetween,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            TextButton.icon(
-                              onPressed: () => _showTicketDetailModal(ticket),
-                              icon: const Icon(Icons.qr_code, size: 18),
-                              label: const FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text('Xem mã QR vé'),
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: () => _showCheckoutDialog(ticket),
-                              icon: const Icon(Icons.payment, size: 18),
-                              label: const FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text('Check-out & Thu tiền'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ],
