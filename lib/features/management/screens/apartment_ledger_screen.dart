@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/apartment_ledger_entry_model.dart';
 import '../../../data/providers/accounting_providers.dart';
 import '../widgets/close_period_dialog.dart';
@@ -27,6 +35,11 @@ class ApartmentLedgerScreen extends ConsumerStatefulWidget {
 class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
   String? _selectedPeriod;
 
+  void _refreshAll() {
+    ref.invalidate(apartmentBalanceProvider(widget.apartmentId));
+    ref.invalidate(apartmentLedgerEntriesProvider(widget.apartmentId));
+  }
+
   @override
   Widget build(BuildContext context) {
     final balanceAsync = ref.watch(
@@ -35,6 +48,8 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
     final entriesAsync = ref.watch(
       apartmentLedgerEntriesProvider(widget.apartmentId),
     );
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -43,204 +58,226 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Làm mới',
-            onPressed: () {
-              ref.invalidate(apartmentBalanceProvider(widget.apartmentId));
-              ref.invalidate(
-                apartmentLedgerEntriesProvider(widget.apartmentId),
-              );
-            },
+            onPressed: _refreshAll,
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(apartmentBalanceProvider(widget.apartmentId));
-          ref.invalidate(apartmentLedgerEntriesProvider(widget.apartmentId));
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Header căn hộ & Tòa nhà
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: RefreshIndicator(
+            onRefresh: () async => _refreshAll(),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: AppSpacing.p16,
               children: [
+                // Header căn hộ & Sổ phụ
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(Icons.apartment, color: Colors.blueGrey),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Căn hộ: ${widget.apartmentCode}',
-                      style: context.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.apartment,
+                            color: colorScheme.primary,
+                          ),
+                          AppSpacing.w8,
+                          Flexible(
+                            child: Text(
+                              'Căn hộ: ${widget.apartmentCode}',
+                              style: context.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold)
+                                  .tabularFigures(),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    AppSpacing.w8,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.6,
+                        ),
+                        borderRadius: AppRadius.r16,
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Text(
+                        'Sổ Phụ Công Nợ',
+                        style: context.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.blueGrey.shade200),
-                  ),
-                  child: Text(
-                    'Sổ Phụ Công Nợ',
-                    style: context.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blueGrey,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                AppSpacing.h16,
 
-            // Card Tổng quan số dư công nợ
-            balanceAsync.when(
-              data: (balance) => _buildBalanceCard(context, balance),
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              error: (err, stack) => Card(
-                color: Colors.red.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Lỗi tải số dư: $err',
-                    style: const TextStyle(color: Colors.red),
+                // Card Tổng quan số dư công nợ
+                balanceAsync.when(
+                  data: (balance) => _buildBalanceCard(context, balance),
+                  loading: () => Padding(
+                    padding: AppSpacing.p8,
+                    child: AppSkeletonShimmer.cardList(
+                      count: 1,
+                      itemHeight: 110,
+                    ),
+                  ),
+                  error: (err, _) => AppErrorCard(
+                    error: err,
+                    onRetry: _refreshAll,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
+                AppSpacing.h16,
 
-            // Action Buttons (Lập phiếu điều chỉnh & Khóa sổ kỳ)
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.edit_note),
-                    label: const Text('Lập phiếu điều chỉnh'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => CreateCreditNoteDialog(
-                          buildingId: widget.buildingId,
-                          apartmentId: widget.apartmentId,
-                          apartmentCode: widget.apartmentCode,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(
-                      Icons.lock_clock_outlined,
-                      color: Colors.orange,
-                    ),
-                    label: const Text(
-                      'Khóa sổ kỳ kế toán',
-                      style: TextStyle(color: Colors.orange),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.orange),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => ClosePeriodDialog(
-                          buildingId: widget.buildingId,
-                          initialPeriod: _selectedPeriod,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Danh sách bút toán dòng thời gian
-            Text(
-              'Lịch Sử Bút Toán Công Nợ (Append-Only)',
-              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            entriesAsync.when(
-              data: (entries) {
-                if (entries.isEmpty) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(
-                        child: Text(
-                          'Chưa có phát sinh bút toán sổ cái cho căn hộ này.',
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                // Action Buttons (Lập phiếu điều chỉnh & Khóa sổ kỳ)
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 420;
+                    final adjustButton = ElevatedButton.icon(
+                      icon: const Icon(Icons.edit_note),
+                      label: const Text('Lập phiếu điều chỉnh'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        minimumSize: const Size(0, 48),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                    ),
-                  );
-                }
+                      onPressed: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (_) => CreateCreditNoteDialog(
+                            buildingId: widget.buildingId,
+                            apartmentId: widget.apartmentId,
+                            apartmentCode: widget.apartmentCode,
+                          ),
+                        );
+                      },
+                    );
 
-                return Column(
-                  children: entries
-                      .map((entry) => _buildLedgerItemCard(context, entry))
-                      .toList(),
-                );
-              },
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator(),
+                    final closePeriodButton = OutlinedButton.icon(
+                      icon: Icon(
+                        Icons.lock_clock_outlined,
+                        color: warningColor,
+                      ),
+                      label: Text(
+                        'Khóa sổ kỳ kế toán',
+                        style: TextStyle(color: warningColor),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: warningColor),
+                        minimumSize: const Size(0, 48),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (_) => ClosePeriodDialog(
+                            buildingId: widget.buildingId,
+                            initialPeriod: _selectedPeriod,
+                          ),
+                        );
+                      },
+                    );
+
+                    if (isNarrow) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          adjustButton,
+                          AppSpacing.h8,
+                          closePeriodButton,
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      children: [
+                        Expanded(child: adjustButton),
+                        AppSpacing.w8,
+                        Expanded(child: closePeriodButton),
+                      ],
+                    );
+                  },
                 ),
-              ),
-              error: (err, stack) => Card(
-                color: Colors.red.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Lỗi tải danh sách bút toán: $err',
-                    style: const TextStyle(color: Colors.red),
+                AppSpacing.h24,
+
+                // Danh sách bút toán dòng thời gian
+                Text(
+                  'Lịch Sử Bút Toán Công Nợ (Append-Only)',
+                  style: context.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+                AppSpacing.h8,
+
+                entriesAsync.when(
+                  data: (entries) {
+                    if (entries.isEmpty) {
+                      return const AppCard(
+                        padding: AppSpacing.p24,
+                        child: AppEmptyState(
+                          icon: Icons.receipt_long_outlined,
+                          title: 'Chưa có phát sinh bút toán',
+                          description:
+                              'Chưa có phát sinh bút toán sổ cái cho căn hộ này.',
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: entries
+                          .map((entry) => _buildLedgerItemCard(context, entry))
+                          .toList(),
+                    );
+                  },
+                  loading: () => Padding(
+                    padding: AppSpacing.p8,
+                    child: AppSkeletonShimmer.cardList(
+                      count: 3,
+                      itemHeight: 110,
+                    ),
+                  ),
+                  error: (err, _) => AppErrorCard(
+                    error: err,
+                    onRetry: _refreshAll,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildBalanceCard(BuildContext context, double balance) {
-    Color statusColor;
-    String statusText;
-    IconData statusIcon;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+
+    final Color statusColor;
+    final String statusText;
+    final IconData statusIcon;
 
     if (balance > 0) {
-      statusColor = Colors.deepOrange;
+      statusColor = warningColor;
       statusText = 'Còn nợ';
       statusIcon = Icons.warning_amber_rounded;
     } else if (balance == 0) {
-      statusColor = Colors.green;
+      statusColor = successColor;
       statusText = 'Đã thanh toán đủ';
       statusIcon = Icons.check_circle_outline;
     } else {
-      statusColor = Colors.blue;
+      statusColor = secondaryColor;
       statusText = 'Nộp thừa/Ký quỹ';
       statusIcon = Icons.savings_outlined;
     }
@@ -250,63 +287,65 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
       symbol: 'đ',
     ).format(balance.abs());
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Số dư công nợ hiện tại',
-                  style: context.bodyMedium?.copyWith(
-                    color: Colors.black54,
-                    fontWeight: FontWeight.w500,
-                  ),
+    return AppCard(
+      padding: AppSpacing.p16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              Text(
+                'Số dư công nợ hiện tại',
+                style: context.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(statusIcon, size: 14, color: statusColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        statusText,
-                        style: context.labelSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: statusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              balance < 0 ? '- $formattedMoney' : formattedMoney,
-              style: context.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: statusColor,
               ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: AppRadius.r12,
+                  border: Border.all(
+                    color: statusColor.withValues(alpha: 0.45),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 14, color: statusColor),
+                    AppSpacing.w4,
+                    Text(
+                      statusText,
+                      style: context.labelSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.h8,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              balance < 0 ? '- $formattedMoney' : formattedMoney,
+              style: context.headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.bold, color: statusColor)
+                  .tabularFigures(),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -315,89 +354,102 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
     BuildContext context,
     ApartmentLedgerEntryModel entry,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+
     final isDebit = entry.isDebit;
     final prefix = isDebit ? '+' : '-';
-    final amountColor = isDebit ? Colors.deepOrange : Colors.green;
+    final amountColor = isDebit ? warningColor : successColor;
 
-    return Card(
+    return AppCard(
       margin: const EdgeInsets.symmetric(vertical: 6),
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  entry.entryCode,
-                  style: context.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey,
-                  ),
+      padding: AppSpacing.p12,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              Text(
+                entry.entryCode,
+                style: context.labelMedium
+                    ?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    )
+                    .tabularFigures(),
+              ),
+              Text(
+                entry.formattedCreatedAtWithTime,
+                style: context.labelSmall
+                    ?.copyWith(color: colorScheme.onSurfaceVariant)
+                    .tabularFigures(),
+              ),
+            ],
+          ),
+          AppSpacing.h6,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: amountColor.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r6,
                 ),
-                Text(
-                  entry.formattedCreatedAtWithTime,
-                  style: context.labelSmall?.copyWith(color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    entry.entryTypeVietnamese,
-                    style: context.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: amountColor,
-                    ),
-                  ),
-                ),
-                Text(
-                  '$prefix${entry.formattedAmount}',
-                  style: context.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                child: Text(
+                  entry.entryTypeVietnamese,
+                  style: context.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                     color: amountColor,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              entry.description,
-              style: context.bodySmall?.copyWith(color: Colors.black87),
-            ),
-            const Divider(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Kỳ: ${entry.formattedPeriod}',
-                  style: context.labelSmall?.copyWith(color: Colors.black54),
-                ),
-                Text(
-                  'Dư nợ sau GD: ${entry.formattedBalanceAfter}',
-                  style: context.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blueGrey,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              Text(
+                '$prefix${entry.formattedAmount}',
+                style: context.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold, color: amountColor)
+                    .tabularFigures(),
+              ),
+            ],
+          ),
+          AppSpacing.h6,
+          Text(
+            entry.description,
+            style: context.bodySmall?.copyWith(color: colorScheme.onSurface),
+          ),
+          const Divider(height: 16),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              Text(
+                'Kỳ: ${entry.formattedPeriod}',
+                style: context.labelSmall
+                    ?.copyWith(color: colorScheme.onSurfaceVariant)
+                    .tabularFigures(),
+              ),
+              Text(
+                'Dư nợ sau GD: ${entry.formattedBalanceAfter}',
+                style: context.labelSmall
+                    ?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.primary,
+                    )
+                    .tabularFigures(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

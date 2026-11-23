@@ -84,15 +84,15 @@
 
 ## Đợt 5 — Tài Chính, Hóa Đơn & Kế Toán BQL (`main`)
 
-- [ ] **5.1** `lib/features/management/screens/accounting_web_workstation_screen.dart` *(Tier 1)* — Trạm kế toán & đối soát SePay/VietQR
-- [ ] **5.2** `lib/features/management/screens/invoice_management_screen.dart` & `management_invoice_detail_screen.dart` *(Tier 1)* — Quản lý & chi tiết hóa đơn BQL
-- [ ] **5.3** `lib/features/management/screens/create_invoice_screen.dart` & `edit_invoice_screen.dart` *(Tier 2)* — Lập & chỉnh sửa hóa đơn
-- [ ] **5.4** Nhóm báo cáo, biểu phí & sổ quỹ *(Tier 3)*:
-  - [ ] `lib/features/management/screens/financial_report_screen.dart`
-  - [ ] `lib/features/management/screens/management_payment_transactions_screen.dart`
-  - [ ] `lib/features/management/screens/fee_policy_management_screen.dart`
-  - [ ] `lib/features/management/screens/maintenance_fund_ledger_screen.dart`
-  - [ ] `lib/features/management/screens/apartment_ledger_screen.dart`
+- [x] **5.1** `lib/features/management/screens/accounting_web_workstation_screen.dart` *(Tier 1)* — Trạm kế toán & đối soát SePay/VietQR
+- [x] **5.2** `lib/features/management/screens/invoice_management_screen.dart` & `management_invoice_detail_screen.dart` *(Tier 1)* — Quản lý & chi tiết hóa đơn BQL
+- [x] **5.3** `lib/features/management/screens/create_invoice_screen.dart` & `edit_invoice_screen.dart` *(Tier 2)* — Lập & chỉnh sửa hóa đơn
+- [x] **5.4** Nhóm báo cáo, biểu phí & sổ quỹ *(Tier 3)*:
+  - [x] `lib/features/management/screens/financial_report_screen.dart`
+  - [x] `lib/features/management/screens/management_payment_transactions_screen.dart`
+  - [x] `lib/features/management/screens/fee_policy_management_screen.dart`
+  - [x] `lib/features/management/screens/maintenance_fund_ledger_screen.dart`
+  - [x] `lib/features/management/screens/apartment_ledger_screen.dart`
 
 ---
 

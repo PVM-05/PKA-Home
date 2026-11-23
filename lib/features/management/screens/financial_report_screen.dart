@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
+import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/excel_export_helper.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
-import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../data/models/debt_risk_score_model.dart';
 import '../../../data/models/financial_aging_report_model.dart';
 import '../../../data/providers/financial_report_provider.dart';
-import '../../../data/models/debt_risk_score_model.dart';
 import '../widgets/debt_risk_radar_tab.dart';
 import '../widgets/execute_dunning_dialog.dart';
 import 'apartment_ledger_screen.dart';
@@ -25,7 +31,6 @@ class FinancialReportScreen extends ConsumerStatefulWidget {
 
 class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
   bool _isExporting = false;
-
   final _moneyFormat = NumberFormat('#,##0', 'vi_VN');
 
   Future<void> _handleExportExcel(FinancialAgingReportModel report) async {
@@ -38,6 +43,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
       );
 
       if (!mounted) return;
+      final colorScheme = Theme.of(context).colorScheme;
 
       if (filePath != null) {
         AppSnackBar.showSuccess(
@@ -45,7 +51,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
           'Đã xuất báo cáo thành công: ${filePath.split('/').last}',
           action: SnackBarAction(
             label: 'Chia sẻ',
-            textColor: Colors.white,
+            textColor: colorScheme.onPrimary,
             onPressed: () {
               ExcelExportHelper.shareFile(
                 filePath,
@@ -63,10 +69,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.showError(
-          context,
-          'Lỗi khi xuất file: $e',
-        );
+        AppSnackBar.showError(context, 'Lỗi khi xuất file: $e');
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -80,7 +83,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
         : (overdueDays > 15 ? DunningTier.tier2 : DunningTier.tier1);
     final riskScore = (overdueDays * 2).clamp(0, 100);
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => ExecuteDunningDialog(
         buildingId: buildingId ?? 'bld-default',
@@ -106,199 +109,171 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
       child: DefaultTabController(
         length: 2,
         child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Báo cáo Tài chính & Tuổi nợ',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          bottom: const TabBar(
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(
-                icon: Icon(Icons.analytics_outlined),
-                text: 'Tuổi nợ & Dòng tiền',
+          appBar: AppBar(
+            title: const Text(
+              'Báo cáo Tài chính & Tuổi nợ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            bottom: const TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              tabs: [
+                Tab(
+                  icon: Icon(Icons.analytics_outlined),
+                  text: 'Tuổi nợ & Dòng tiền',
+                ),
+                Tab(
+                  icon: Icon(Icons.radar_rounded),
+                  text: 'Radar Rủi ro nợ AI',
+                ),
+              ],
+            ),
+            actions: [
+              reportAsync.when(
+                data: (report) => IconButton(
+                  icon: _isExporting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.file_download_outlined),
+                  tooltip: 'Xuất file Excel đối soát',
+                  onPressed: _isExporting
+                      ? null
+                      : () => _handleExportExcel(report),
+                ),
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
-              Tab(icon: Icon(Icons.radar_rounded), text: 'Radar Rủi ro nợ AI'),
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded),
+                tooltip: 'Làm mới dữ liệu',
+                onPressed: () => ref.refresh(financialAgingReportProvider),
+              ),
             ],
           ),
-          actions: [
-            reportAsync.when(
-              data: (report) => IconButton(
-                icon: _isExporting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.file_download_outlined),
-                tooltip: 'Xuất file Excel đối soát',
-                onPressed: _isExporting
-                    ? null
-                    : () => _handleExportExcel(report),
-              ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded),
-              tooltip: 'Làm mới dữ liệu',
-              onPressed: () => ref.refresh(financialAgingReportProvider),
-            ),
-          ],
-        ),
-        body: TabBarView(
-          children: [
-            reportAsync.when(
-              data: (report) => RefreshIndicator(
-                onRefresh: () async =>
-                    ref.refresh(financialAgingReportProvider),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isDesktop = constraints.maxWidth >= 900;
+          body: TabBarView(
+            children: [
+              reportAsync.when(
+                data: (report) => RefreshIndicator(
+                  onRefresh: () async =>
+                      ref.refresh(financialAgingReportProvider),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isDesktop = constraints.maxWidth >= 900;
 
-                    return Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1400),
-                        child: ListView(
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                            // 1. Bộ lọc Kỳ thu
-                            _buildFilterSection(filter),
-                            const SizedBox(height: 16),
+                      return Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1400),
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: AppSpacing.p16,
+                            children: [
+                              // 1. Bộ lọc Kỳ thu
+                              _buildFilterSection(filter),
+                              AppSpacing.h16,
 
-                            // 2. Thẻ KPI Dòng tiền & Tỷ lệ thu
-                            _buildKpiSection(context, report.summary),
-                            const SizedBox(height: 20),
+                              // 2. Thẻ KPI Dòng tiền & Tỷ lệ thu
+                              _buildKpiSection(context, report.summary),
+                              AppSpacing.h20,
 
-                            if (isDesktop) ...[
-                              // Bố cục Split-Screen trên Executive Workstation
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Cột trái: 4 xô tuổi nợ & Thống kê theo Block
-                                  Expanded(
-                                    flex: 5,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _buildAgingBucketsSection(
-                                          context,
-                                          report.agingBuckets,
-                                          filter.bucketFilter,
-                                        ),
-                                        if (report
-                                            .collectionByBlock
-                                            .isNotEmpty) ...[
-                                          const SizedBox(height: 20),
-                                          _buildBlockCollectionSection(
+                              if (isDesktop) ...[
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 5,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          _buildAgingBucketsSection(
                                             context,
-                                            report.collectionByBlock,
+                                            report.agingBuckets,
+                                            filter.bucketFilter,
                                           ),
+                                          if (report
+                                              .collectionByBlock
+                                              .isNotEmpty) ...[
+                                            AppSpacing.h20,
+                                            _buildBlockCollectionSection(
+                                              context,
+                                              report.collectionByBlock,
+                                            ),
+                                          ],
                                         ],
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 20),
-                                  // Cột phải: Danh sách căn hộ nợ đọng
-                                  Expanded(
-                                    flex: 7,
-                                    child: _buildDebtorsSection(
-                                      context,
-                                      report.filterBuildingId ?? '',
-                                      debtors,
-                                      filter.bucketFilter,
+                                    AppSpacing.w20,
+                                    Expanded(
+                                      flex: 7,
+                                      child: _buildDebtorsSection(
+                                        context,
+                                        report.filterBuildingId ?? '',
+                                        debtors,
+                                        filter.bucketFilter,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ] else ...[
-                              // Bố cục Single-Column trên Mobile
-                              _buildAgingBucketsSection(
-                                context,
-                                report.agingBuckets,
-                                filter.bucketFilter,
-                              ),
-                              const SizedBox(height: 20),
-
-                              if (report.collectionByBlock.isNotEmpty) ...[
-                                _buildBlockCollectionSection(
-                                  context,
-                                  report.collectionByBlock,
+                                  ],
                                 ),
-                                const SizedBox(height: 20),
+                              ] else ...[
+                                _buildAgingBucketsSection(
+                                  context,
+                                  report.agingBuckets,
+                                  filter.bucketFilter,
+                                ),
+                                AppSpacing.h20,
+                                if (report.collectionByBlock.isNotEmpty) ...[
+                                  _buildBlockCollectionSection(
+                                    context,
+                                    report.collectionByBlock,
+                                  ),
+                                  AppSpacing.h20,
+                                ],
+                                _buildDebtorsSection(
+                                  context,
+                                  report.filterBuildingId ?? '',
+                                  debtors,
+                                  filter.bucketFilter,
+                                ),
                               ],
-
-                              _buildDebtorsSection(
-                                context,
-                                report.filterBuildingId ?? '',
-                                debtors,
-                                filter.bucketFilter,
-                              ),
+                              AppSpacing.h32,
                             ],
-                            const SizedBox(height: 32),
-                          ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-              loading: () => const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                loading: () => ListView(
+                  padding: AppSpacing.p16,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Đang tổng hợp báo cáo tài chính...'),
+                    AppSkeletonShimmer.cardList(count: 4, itemHeight: 110),
                   ],
                 ),
-              ),
-              error: (err, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: AppTheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Không thể tải báo cáo: $err',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppTheme.textPrimary),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: () =>
-                            ref.refresh(financialAgingReportProvider),
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Thử lại'),
-                      ),
-                    ],
+                error: (err, _) => Center(
+                  child: Padding(
+                    padding: AppSpacing.p24,
+                    child: AppErrorCard(
+                      error: err,
+                      onRetry: () => ref.refresh(financialAgingReportProvider),
+                    ),
                   ),
                 ),
               ),
-            ),
-            DebtRiskRadarTab(
-              buildingId: reportAsync.maybeWhen(
-                data: (r) => r.filterBuildingId ?? 'bld-default',
-                orElse: () => 'bld-default',
+              DebtRiskRadarTab(
+                buildingId: reportAsync.maybeWhen(
+                  data: (r) => r.filterBuildingId ?? 'bld-default',
+                  orElse: () => 'bld-default',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   List<String> _generateRecentPeriods({int count = 6}) {
     final now = DateTime.now();
@@ -309,95 +284,78 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
   }
 
   Widget _buildFilterSection(FinancialReportFilter filter) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isNarrow = constraints.maxWidth < 320;
           final periods = _generateRecentPeriods();
+          final dropdown = DropdownButtonHideUnderline(
+            child: DropdownButton<String?>(
+              value: filter.period,
+              isExpanded: true,
+              hint: const Text('Tất cả các kỳ'),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Tất cả các kỳ'),
+                ),
+                for (final period in periods)
+                  DropdownMenuItem<String?>(
+                    value: period,
+                    child: Text('Tháng $period'),
+                  ),
+              ],
+              onChanged: (val) {
+                ref
+                    .read(financialReportFilterProvider.notifier)
+                    .update((state) => state.copyWith(period: val));
+              },
+            ),
+          );
+
           if (isNarrow) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.filter_alt_outlined,
-                      color: AppTheme.primary,
+                      color: colorScheme.primary,
                       size: 20,
                     ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Kỳ đối soát:',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    AppSpacing.w8,
+                    const Expanded(
+                      child: Text(
+                        'Kỳ đối soát:',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String?>(
-                    value: filter.period,
-                    isExpanded: true,
-                    hint: const Text('Tất cả các kỳ'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Tất cả các kỳ'),
-                      ),
-                      for (final period in periods)
-                        DropdownMenuItem<String?>(
-                          value: period,
-                          child: Text('Tháng $period'),
-                        ),
-                    ],
-                    onChanged: (val) {
-                      ref
-                          .read(financialReportFilterProvider.notifier)
-                          .update((state) => state.copyWith(period: val));
-                    },
-                  ),
-                ),
+                AppSpacing.h8,
+                dropdown,
               ],
             );
           }
+
           return Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.filter_alt_outlined,
-                color: AppTheme.primary,
+                color: colorScheme.primary,
                 size: 20,
               ),
-              const SizedBox(width: 8),
+              AppSpacing.w8,
               const Text(
                 'Kỳ đối soát:',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String?>(
-                    value: filter.period,
-                    isExpanded: true,
-                    hint: const Text('Tất cả các kỳ'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Tất cả các kỳ'),
-                      ),
-                      for (final period in periods)
-                        DropdownMenuItem<String?>(
-                          value: period,
-                          child: Text('Tháng $period'),
-                        ),
-                    ],
-                    onChanged: (val) {
-                      ref
-                          .read(financialReportFilterProvider.notifier)
-                          .update((state) => state.copyWith(period: val));
-                    },
-                  ),
-                ),
-              ),
+              AppSpacing.w12,
+              Expanded(child: dropdown),
             ],
           );
         },
@@ -405,7 +363,16 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     );
   }
 
-  Widget _buildKpiSection(BuildContext context, FinancialAgingSummaryModel summary) {
+  Widget _buildKpiSection(
+    BuildContext context,
+    FinancialAgingSummaryModel summary,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -414,10 +381,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
           style: context.labelMedium?.copyWith(
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
-            color: AppTheme.textSecondary,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 10),
+        AppSpacing.h12,
         LayoutBuilder(
           builder: (context, constraints) {
             final isDesktop = constraints.maxWidth >= 900;
@@ -441,7 +408,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                   value: '${_moneyFormat.format(summary.totalBilled)} đ',
                   subtitle: '${summary.totalInvoiceCount} hóa đơn',
                   icon: Icons.receipt_long_outlined,
-                  color: AppTheme.primary,
+                  color: colorScheme.primary,
                 ),
                 _buildKpiCard(
                   context,
@@ -449,7 +416,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                   value: '${_moneyFormat.format(summary.actualCollected)} đ',
                   subtitle: '${summary.paidInvoiceCount} hóa đơn',
                   icon: Icons.check_circle_outline,
-                  color: AppTheme.success,
+                  color: successColor,
                 ),
                 _buildKpiCard(
                   context,
@@ -457,7 +424,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                   value: '${_moneyFormat.format(summary.totalOutstanding)} đ',
                   subtitle: '${summary.unpaidInvoiceCount} hóa đơn',
                   icon: Icons.pending_actions_outlined,
-                  color: AppTheme.error,
+                  color: errorColor,
                 ),
                 _buildKpiCard(
                   context,
@@ -465,7 +432,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                   value: '${summary.collectionRate}%',
                   subtitle: 'Mục tiêu: >= 95%',
                   icon: Icons.pie_chart_outline,
-                  color: summary.collectionRate >= 80 ? Colors.teal : Colors.orange,
+                  color: summary.collectionRate >= 80
+                      ? secondaryColor
+                      : warningColor,
                 ),
               ],
             );
@@ -483,8 +452,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     required IconData icon,
     required Color color,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return AppCard(
-      padding: const EdgeInsets.all(12),
+      padding: AppSpacing.p12,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -496,7 +467,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                 child: Text(
                   title,
                   style: context.labelSmall?.copyWith(
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -510,15 +481,16 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: context.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: context.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold, color: color)
+                  .tabularFigures(),
             ),
           ),
           Text(
             subtitle,
-            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+            style: context.labelSmall
+                ?.copyWith(color: colorScheme.onSurfaceVariant)
+                .tabularFigures(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -533,9 +505,14 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     String? activeBucket,
   ) {
     final totalDebt = buckets.totalDebt > 0 ? buckets.totalDebt : 1.0;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
 
     return AppCard(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.p16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -550,23 +527,22 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                 style: context.labelMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
                 'Tổng nợ: ${_moneyFormat.format(buckets.totalDebt)} đ',
-                style: context.labelSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.error,
-                ),
+                style: context.labelSmall
+                    ?.copyWith(fontWeight: FontWeight.bold, color: errorColor)
+                    .tabularFigures(),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
 
           // Thanh phân bổ tỷ lệ phần trăm
           ClipRRect(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: AppRadius.r6,
             child: SizedBox(
               height: 12,
               child: Row(
@@ -575,40 +551,39 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                     flex: ((buckets.amount0To30 / totalDebt) * 100)
                         .round()
                         .clamp(1, 100),
-                    child: Container(color: Colors.green),
+                    child: Container(color: successColor),
                   ),
                   Expanded(
                     flex: ((buckets.amount31To60 / totalDebt) * 100)
                         .round()
                         .clamp(1, 100),
-                    child: Container(color: Colors.amber),
+                    child: Container(color: secondaryColor),
                   ),
                   Expanded(
                     flex: ((buckets.amount61To90 / totalDebt) * 100)
                         .round()
                         .clamp(1, 100),
-                    child: Container(color: Colors.orange),
+                    child: Container(color: warningColor),
                   ),
                   Expanded(
                     flex: ((buckets.amountOver90 / totalDebt) * 100)
                         .round()
                         .clamp(1, 100),
-                    child: Container(color: Colors.red),
+                    child: Container(color: errorColor),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
 
-          // 4 Thẻ xô nợ bấm chọn được
           _buildBucketRow(
             context,
             label: '0 - 30 ngày',
             description: 'Trong hạn / Mới phát sinh',
             amount: buckets.amount0To30,
             count: buckets.count0To30,
-            color: Colors.green,
+            color: successColor,
             bucketKey: '0_30',
             isSelected: activeBucket == '0_30',
           ),
@@ -619,7 +594,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             description: 'Quá hạn mức 1 (Cần đôn đốc)',
             amount: buckets.amount31To60,
             count: buckets.count31To60,
-            color: Colors.amber.shade700,
+            color: secondaryColor,
             bucketKey: '31_60',
             isSelected: activeBucket == '31_60',
           ),
@@ -630,7 +605,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             description: 'Quá hạn mức 2 (Cảnh báo dịch vụ)',
             amount: buckets.amount61To90,
             count: buckets.count61To90,
-            color: Colors.orange.shade800,
+            color: warningColor,
             bucketKey: '61_90',
             isSelected: activeBucket == '61_90',
           ),
@@ -641,7 +616,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             description: 'Nợ xấu / Khó đòi (Nghiêm trọng)',
             amount: buckets.amountOver90,
             count: buckets.countOver90,
-            color: Colors.red.shade700,
+            color: errorColor,
             bucketKey: 'over_90',
             isSelected: activeBucket == 'over_90',
           ),
@@ -660,8 +635,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     required String bucketKey,
     required bool isSelected,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return InkWell(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: AppRadius.r8,
       onTap: () {
         ref
             .read(financialReportFilterProvider.notifier)
@@ -671,12 +648,10 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? color.withValues(alpha: 0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? color.withValues(alpha: 0.08) : null,
+          borderRadius: AppRadius.r8,
           border: isSelected ? Border.all(color: color, width: 1.5) : null,
         ),
         child: Row(
@@ -686,7 +661,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
               height: 10,
               decoration: BoxDecoration(shape: BoxShape.circle, color: color),
             ),
-            const SizedBox(width: 10),
+            AppSpacing.w10,
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,19 +670,19 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                     label,
                     style: context.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? color : AppTheme.textPrimary,
+                      color: isSelected ? color : colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     description,
                     style: context.labelSmall?.copyWith(
-                      color: AppTheme.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            AppSpacing.w8,
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -715,17 +690,16 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     '${_moneyFormat.format(amount)} đ',
-                    style: context.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                    style: context.bodySmall
+                        ?.copyWith(fontWeight: FontWeight.bold, color: color)
+                        .tabularFigures(),
                   ),
                 ),
                 Text(
                   '$count hóa đơn',
-                  style: context.labelSmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
+                  style: context.labelSmall
+                      ?.copyWith(color: colorScheme.onSurfaceVariant)
+                      .tabularFigures(),
                 ),
               ],
             ),
@@ -735,9 +709,16 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     );
   }
 
-  Widget _buildBlockCollectionSection(BuildContext context, List<BlockCollectionRateModel> blocks) {
+  Widget _buildBlockCollectionSection(
+    BuildContext context,
+    List<BlockCollectionRateModel> blocks,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+
     return AppCard(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.p16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -746,17 +727,17 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             style: context.labelMedium?.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 0.8,
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 12),
-          for (final block in blocks) ...[
+          AppSpacing.h12,
+          for (final block in blocks)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 children: [
                   SizedBox(
-                    width: 70,
+                    width: 72,
                     child: Text(
                       'Block ${block.blockName}',
                       style: context.bodySmall?.copyWith(
@@ -766,37 +747,38 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                   ),
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: AppRadius.r4,
                       child: LinearProgressIndicator(
                         value: block.collectionRate / 100,
-                        backgroundColor: AppTheme.surface,
+                        backgroundColor: colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           block.collectionRate >= 80
-                              ? AppTheme.success
-                              : AppTheme.warning,
+                              ? successColor
+                              : warningColor,
                         ),
                         minHeight: 8,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  AppSpacing.w12,
                   SizedBox(
-                    width: 50,
+                    width: 54,
                     child: Text(
                       '${block.collectionRate}%',
                       textAlign: TextAlign.end,
-                      style: context.labelSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: block.collectionRate >= 80
-                            ? AppTheme.success
-                            : AppTheme.warning,
-                      ),
+                      style: context.labelSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: block.collectionRate >= 80
+                                ? successColor
+                                : warningColor,
+                          )
+                          .tabularFigures(),
                     ),
                   ),
                 ],
               ),
             ),
-          ],
         ],
       ),
     );
@@ -808,6 +790,9 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     List<DebtorApartmentModel> debtors,
     String? activeBucket,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -819,11 +804,13 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
           children: [
             Text(
               'DANH SÁCH CĂN HỘ NỢ (${debtors.length})',
-              style: context.labelMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
-                color: AppTheme.textSecondary,
-              ),
+              style: context.labelMedium
+                  ?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                    color: colorScheme.onSurfaceVariant,
+                  )
+                  .tabularFigures(),
             ),
             if (activeBucket != null)
               TextButton(
@@ -836,22 +823,14 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
               ),
           ],
         ),
-        const SizedBox(height: 10),
+        AppSpacing.h12,
         if (debtors.isEmpty)
           const AppCard(
-            padding: EdgeInsets.all(24),
-            child: Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: 40,
-                    color: AppTheme.success,
-                  ),
-                  SizedBox(height: 8),
-                  Text('Không có căn hộ nào nợ đọng trong bộ lọc này'),
-                ],
-              ),
+            padding: AppSpacing.p24,
+            child: AppEmptyState(
+              icon: Icons.check_circle_outline,
+              title: 'Không có căn hộ nợ đọng',
+              description: 'Không có căn hộ nào nợ đọng trong bộ lọc này',
             ),
           )
         else
@@ -859,10 +838,11 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: debtors.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            separatorBuilder: (_, _) => AppSpacing.h12,
             itemBuilder: (ctx, index) {
               final debtor = debtors[index];
               final isOver90 = debtor.isSevereRisk;
+              final badgeColor = isOver90 ? errorColor : colorScheme.primary;
 
               return AppCard(
                 padding: const EdgeInsets.all(14),
@@ -877,22 +857,20 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: isOver90
-                                ? AppTheme.error.withValues(alpha: 0.12)
-                                : AppTheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
+                            color: badgeColor.withValues(alpha: 0.12),
+                            borderRadius: AppRadius.r6,
                           ),
                           child: Text(
                             debtor.apartmentCode,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: isOver90
-                                  ? AppTheme.error
-                                  : AppTheme.primary,
-                            ),
+                            style: context.labelMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: badgeColor,
+                                )
+                                .tabularFigures(),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        AppSpacing.w8,
                         Expanded(
                           flex: 3,
                           child: Text(
@@ -904,7 +882,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        AppSpacing.w8,
                         Flexible(
                           flex: 2,
                           child: FittedBox(
@@ -912,18 +890,20 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                             alignment: Alignment.centerRight,
                             child: Text(
                               '${_moneyFormat.format(debtor.totalDebt)} đ',
-                              style: context.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: isOver90
-                                    ? AppTheme.error
-                                    : AppTheme.textPrimary,
-                              ),
+                              style: context.bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: isOver90
+                                        ? errorColor
+                                        : colorScheme.onSurface,
+                                  )
+                                  .tabularFigures(),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    AppSpacing.h6,
                     Wrap(
                       alignment: WrapAlignment.spaceBetween,
                       crossAxisAlignment: WrapCrossAlignment.center,
@@ -932,83 +912,84 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
                       children: [
                         Text(
                           'Quá hạn: ${debtor.maxDaysOverdue} ngày (${debtor.unpaidInvoicesCount} hóa đơn)',
-                          style: context.labelSmall?.copyWith(
-                            color: isOver90
-                                ? AppTheme.error
-                                : AppTheme.textSecondary,
-                            fontWeight: isOver90
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
+                          style: context.labelSmall
+                              ?.copyWith(
+                                color: isOver90
+                                    ? errorColor
+                                    : colorScheme.onSurfaceVariant,
+                                fontWeight: isOver90
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              )
+                              .tabularFigures(),
                         ),
                         if (debtor.ownerPhone.isNotEmpty)
                           Text(
                             debtor.ownerPhone,
-                            style: context.labelSmall?.copyWith(
-                              color: AppTheme.textSecondary,
-                            ),
+                            style: context.labelSmall
+                                ?.copyWith(color: colorScheme.onSurfaceVariant)
+                                .tabularFigures(),
                           ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      alignment: WrapAlignment.end,
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            minimumSize: Size.zero,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ApartmentLedgerScreen(
-                                  buildingId: buildingId,
-                                  apartmentId: debtor.apartmentId,
-                                  apartmentCode: debtor.apartmentCode,
-                                ),
+                    AppSpacing.h12,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.account_balance_wallet_outlined,
-                            size: 14,
-                          ),
-                          label: Text(
-                            'Sổ cái',
-                            style: context.labelSmall,
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isOver90
-                                ? AppTheme.error
-                                : AppTheme.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                              minimumSize: const Size(0, 48),
                             ),
-                            minimumSize: Size.zero,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ApartmentLedgerScreen(
+                                    buildingId: buildingId,
+                                    apartmentId: debtor.apartmentId,
+                                    apartmentCode: debtor.apartmentCode,
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.account_balance_wallet_outlined,
+                              size: 16,
+                            ),
+                            label: Text('Sổ cái', style: context.labelSmall),
                           ),
-                          onPressed: () =>
-                              _showReminderDialog(debtor, buildingId),
-                          icon: const Icon(
-                            Icons.notifications_active_outlined,
-                            size: 14,
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isOver90
+                                  ? colorScheme.error
+                                  : colorScheme.primary,
+                              foregroundColor: isOver90
+                                  ? colorScheme.onError
+                                  : colorScheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              minimumSize: const Size(0, 48),
+                            ),
+                            onPressed: () =>
+                                _showReminderDialog(debtor, buildingId),
+                            icon: const Icon(
+                              Icons.notifications_active_outlined,
+                              size: 16,
+                            ),
+                            label: Text('Nhắc nợ', style: context.labelSmall),
                           ),
-                          label: Text(
-                            'Nhắc nợ',
-                            style: context.labelSmall,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

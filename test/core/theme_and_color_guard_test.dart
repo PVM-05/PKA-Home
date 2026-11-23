@@ -162,6 +162,9 @@ void main() {
       'lib/features/management/widgets/close_period_dialog.dart',
       'lib/features/management/widgets/receive_parcel_sheet.dart',
       'lib/features/management/widgets/amenity_quick_check_in_dialog.dart',
+      // Đợt 5: Các module con tách từ Trạm kế toán & Lập hóa đơn
+      'lib/features/management/widgets/accounting/accounting_sepay_reconciliation_view.dart',
+      'lib/features/management/widgets/invoice/create_invoice_fee_cards.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {
