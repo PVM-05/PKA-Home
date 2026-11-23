@@ -2,23 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
-import '../../../core/utils/validators.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/utils/utility_fee_calculator.dart';
-import '../../../core/constants/permissions.dart';
-import '../../../core/widgets/role_guard.dart';
+import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_unsaved_changes_guard.dart';
-import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/role_guard.dart';
+import '../../../data/models/apartment_model.dart';
+import '../../../data/providers/fee_schedule_provider.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
-import '../../../data/providers/fee_schedule_provider.dart';
-import '../../../data/models/apartment_model.dart';
+import '../widgets/invoice/create_invoice_fee_cards.dart';
 
 class CreateInvoiceScreen extends ConsumerStatefulWidget {
   const CreateInvoiceScreen({super.key});
@@ -46,13 +51,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   // Tiền điện
   final _elecQtyController = TextEditingController();
   final _elecPriceController = TextEditingController(text: '3.500');
-  bool _isTieredElectricity = false; // true: EVN 6 bậc, false: Đơn giá cố định
+  bool _isTieredElectricity = false;
 
   // Tiền nước
   final _waterQtyController = TextEditingController();
   final _waterPriceController = TextEditingController(text: '18.000');
 
-  // Phí gửi xe (Theo quy định tòa nhà: 100.000đ/xe máy, 1.200.000đ/ô tô)
+  // Phí gửi xe
   final _motorbikeQtyController = TextEditingController();
   final _carQtyController = TextEditingController();
 
@@ -60,8 +65,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
   double _carFee = AppConstants.kCarFee;
   bool _hasLoadedRates = false;
   bool _isFixedRent = false;
-  bool _isDraft = false; // true: Lưu nháp (pending), false: Phát hành ngay (unpaid)
-
+  bool _isDraft = false;
   bool _isSubmitting = false;
 
   bool get _hasUnsavedChanges =>
@@ -77,7 +81,6 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     _periodController.text =
         '${now.month.toString().padLeft(2, '0')}/${now.year}';
 
-    // Thêm listener để tự động tính lại tổng khi có thay đổi
     _managementPriceController.addListener(_updateState);
     _elecQtyController.addListener(_updateState);
     _elecPriceController.addListener(_updateState);
@@ -132,7 +135,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
   void _applyFeeRates(Map<String, double> rates) {
     if (rates.containsKey('management')) {
-      _managementPriceController.text = formatMoney(rates['management']!.round());
+      _managementPriceController.text = formatMoney(
+        rates['management']!.round(),
+      );
     }
     if (rates.containsKey('electricity')) {
       _elecPriceController.text = formatMoney(rates['electricity']!.round());
@@ -246,12 +251,17 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       }
 
       if (items.isEmpty) {
-        AppSnackBar.showWarning(context, 'Hóa đơn phải có ít nhất 1 loại phí > 0');
+        AppSnackBar.showWarning(
+          context,
+          'Hóa đơn phải có ít nhất 1 loại phí > 0',
+        );
         setState(() => _isSubmitting = false);
         return;
       }
 
-      await ref.read(managementRepositoryProvider).createInvoice(
+      await ref
+          .read(managementRepositoryProvider)
+          .createInvoice(
             _selectedApartment!.id,
             _periodController.text.trim(),
             _dueDate,
@@ -259,7 +269,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             status: _isDraft ? 'pending' : 'unpaid',
           );
 
-      ref.invalidate(invoicesProvider); // Làm mới danh sách hóa đơn
+      ref.invalidate(invoicesProvider);
 
       if (mounted) {
         final successMsg = _isDraft
@@ -270,7 +280,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       }
     } on PostgrestException catch (pe) {
       if (mounted) {
-        final isDuplicate = pe.code == '23505' ||
+        final isDuplicate =
+            pe.code == '23505' ||
             pe.message.contains('uq_invoice_apartment_period') ||
             (pe.details?.toString().contains('uq_invoice_apartment_period') ??
                 false);
@@ -282,7 +293,8 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     } catch (e) {
       if (mounted) {
         final errorStr = e.toString();
-        final isDuplicate = errorStr.contains('23505') ||
+        final isDuplicate =
+            errorStr.contains('23505') ||
             errorStr.contains('uq_invoice_apartment_period');
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
@@ -317,10 +329,12 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     }
 
     final apartmentsAsync = ref.watch(apartmentsProvider);
-    final total = _getManagementTotal() +
+    final total =
+        _getManagementTotal() +
         _getElecTotal() +
         _getWaterTotal() +
         _getParkingTotal();
+    final formattedTotal = _currencyFormat.format(total);
 
     return RoleGuard(
       permission: AppPermissions.invoiceManagement,
@@ -328,136 +342,222 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         hasUnsavedChanges: _hasUnsavedChanges && !_isSubmitting,
         child: Scaffold(
           appBar: AppBar(title: const Text('Lập hóa đơn mới')),
-        body: SafeArea(
-          child: apartmentsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(
-              child: AppErrorCard(
-                error: err,
-                onRetry: () => ref.invalidate(apartmentsProvider),
+          body: SafeArea(
+            child: apartmentsAsync.when(
+              loading: () => ListView(
+                padding: AppSpacing.p16,
+                children: [
+                  AppSkeletonShimmer.cardList(count: 4, itemHeight: 120),
+                ],
               ),
-            ),
-            data: (apartments) {
-              final occupiedApartments =
-                  apartments.where((a) => !a.isEmpty).toList();
-              final buildings = occupiedApartments
-                  .map((a) => a.buildingCode.toUpperCase())
-                  .where((b) => b.isNotEmpty)
-                  .toSet()
-                  .toList()
-                ..sort();
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: AppSpacing.p16,
+                  child: AppErrorCard(
+                    error: err,
+                    onRetry: () => ref.invalidate(apartmentsProvider),
+                  ),
+                ),
+              ),
+              data: (apartments) {
+                final occupiedApartments = apartments
+                    .where((a) => !a.isEmpty)
+                    .toList();
+                final buildings =
+                    occupiedApartments
+                        .map((a) => a.buildingCode.toUpperCase())
+                        .where((b) => b.isNotEmpty)
+                        .toSet()
+                        .toList()
+                      ..sort();
 
-              if (_selectedBuilding == null && buildings.isNotEmpty) {
-                _selectedBuilding = buildings.first;
-              }
+                if (_selectedBuilding == null && buildings.isNotEmpty) {
+                  _selectedBuilding = buildings.first;
+                }
 
-              final displayedApartments = occupiedApartments
-                  .where(
-                    (a) =>
-                        _selectedBuilding == null ||
-                        a.buildingCode.toUpperCase() == _selectedBuilding,
-                  )
-                  .toList()
-                ..sort((a, b) => a.code.compareTo(b.code));
+                final displayedApartments =
+                    occupiedApartments
+                        .where(
+                          (a) =>
+                              _selectedBuilding == null ||
+                              a.buildingCode.toUpperCase() == _selectedBuilding,
+                        )
+                        .toList()
+                      ..sort((a, b) => a.code.compareTo(b.code));
 
-              final currentSelectedApartment =
-                  displayedApartments.contains(_selectedApartment)
-                      ? _selectedApartment
-                      : null;
+                final currentSelectedApartment =
+                    displayedApartments.contains(_selectedApartment)
+                    ? _selectedApartment
+                    : null;
 
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1400),
-                  child: Form(
-                    key: _formKey,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isDesktop = constraints.maxWidth >= 900;
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: Form(
+                      key: _formKey,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isDesktop = constraints.maxWidth >= 900;
+                          final isCompact = constraints.maxWidth < 420;
 
-                        if (isDesktop) {
+                          final managementCard =
+                              CreateInvoiceManagementFeeCard(
+                                isCompact: isCompact,
+                                isFixedRent: _isFixedRent,
+                                selectedApartment: _selectedApartment,
+                                managementPriceController:
+                                    _managementPriceController,
+                                formattedTotal: _currencyFormat.format(
+                                  _getManagementTotal(),
+                                ),
+                                onModeChanged: (isFixed) {
+                                  setState(() {
+                                    _isFixedRent = isFixed;
+                                    if (!isFixed) {
+                                      _managementPriceController.text =
+                                          '16.500';
+                                    } else if (_selectedApartment?.rentPrice !=
+                                            null &&
+                                        _selectedApartment!.rentPrice! > 0) {
+                                      _managementPriceController.text =
+                                          formatMoney(
+                                            _selectedApartment!.rentPrice!
+                                                .round(),
+                                          );
+                                    }
+                                  });
+                                },
+                              );
+
+                          final electricityCard =
+                              CreateInvoiceElectricityFeeCard(
+                                isCompact: isCompact,
+                                isTieredElectricity: _isTieredElectricity,
+                                elecQtyController: _elecQtyController,
+                                elecPriceController: _elecPriceController,
+                                currencyFormat: _currencyFormat,
+                                formattedTotal: _currencyFormat.format(
+                                  _getElecTotal(),
+                                ),
+                                onModeChanged: (isTiered) {
+                                  setState(
+                                    () => _isTieredElectricity = isTiered,
+                                  );
+                                },
+                              );
+
+                          final waterCard = CreateInvoiceWaterFeeCard(
+                            isCompact: isCompact,
+                            waterQtyController: _waterQtyController,
+                            waterPriceController: _waterPriceController,
+                            formattedTotal: _currencyFormat.format(
+                              _getWaterTotal(),
+                            ),
+                          );
+
+                          final parkingCard = CreateInvoiceParkingFeeCard(
+                            isCompact: isCompact,
+                            motorbikeQtyController: _motorbikeQtyController,
+                            carQtyController: _carQtyController,
+                            motorbikeFee: _motorbikeFee,
+                            carFee: _carFee,
+                            currencyFormat: _currencyFormat,
+                            formattedTotal: _currencyFormat.format(
+                              _getParkingTotal(),
+                            ),
+                          );
+
+                          final summaryCard = CreateInvoiceSummarySubmitCard(
+                            formattedTotal: formattedTotal,
+                            isDraft: _isDraft,
+                            isSubmitting: _isSubmitting,
+                            onDraftChanged: (draft) {
+                              setState(() => _isDraft = draft);
+                            },
+                            onSubmit: _submit,
+                          );
+
+                          if (isDesktop) {
+                            return SingleChildScrollView(
+                              padding: AppSpacing.p24,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 5,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        _buildGeneralInfoCard(
+                                          occupiedApartments,
+                                          buildings,
+                                          displayedApartments,
+                                          currentSelectedApartment,
+                                          isCompact,
+                                        ),
+                                        AppSpacing.h20,
+                                        summaryCard,
+                                      ],
+                                    ),
+                                  ),
+                                  AppSpacing.w24,
+                                  Expanded(
+                                    flex: 7,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        managementCard,
+                                        AppSpacing.h16,
+                                        electricityCard,
+                                        AppSpacing.h16,
+                                        waterCard,
+                                        AppSpacing.h16,
+                                        parkingCard,
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
                           return SingleChildScrollView(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            padding: AppSpacing.p16,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                // Cột trái: Thông tin căn hộ & Tổng cộng
-                                Expanded(
-                                  flex: 5,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      _buildGeneralInfoCard(
-                                        occupiedApartments,
-                                        buildings,
-                                        displayedApartments,
-                                        currentSelectedApartment,
-                                        constraints,
-                                      ),
-                                      const SizedBox(height: 20),
-                                      _buildSummaryAndSubmitCard(total),
-                                    ],
-                                  ),
+                                _buildGeneralInfoCard(
+                                  occupiedApartments,
+                                  buildings,
+                                  displayedApartments,
+                                  currentSelectedApartment,
+                                  isCompact,
                                 ),
-                                const SizedBox(width: 24),
-                                // Cột phải: Các khoản mục phí chi tiết
-                                Expanded(
-                                  flex: 7,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      _buildManagementFeeCard(constraints),
-                                      const SizedBox(height: 16),
-                                      _buildElectricityFeeCard(constraints),
-                                      const SizedBox(height: 16),
-                                      _buildWaterFeeCard(constraints),
-                                      const SizedBox(height: 16),
-                                      _buildParkingFeeCard(constraints),
-                                    ],
-                                  ),
-                                ),
+                                AppSpacing.h16,
+                                managementCard,
+                                AppSpacing.h16,
+                                electricityCard,
+                                AppSpacing.h16,
+                                waterCard,
+                                AppSpacing.h16,
+                                parkingCard,
+                                AppSpacing.h24,
+                                summaryCard,
+                                AppSpacing.h40,
                               ],
                             ),
                           );
-                        }
-
-                        // Giao diện Mobile / Tablet (< 900dp)
-                        return SingleChildScrollView(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildGeneralInfoCard(
-                                occupiedApartments,
-                                buildings,
-                                displayedApartments,
-                                currentSelectedApartment,
-                                constraints,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildManagementFeeCard(constraints),
-                              const SizedBox(height: 16),
-                              _buildElectricityFeeCard(constraints),
-                              const SizedBox(height: 16),
-                              _buildWaterFeeCard(constraints),
-                              const SizedBox(height: 16),
-                              _buildParkingFeeCard(constraints),
-                              const SizedBox(height: 24),
-                              _buildSummaryAndSubmitCard(total),
-                              const SizedBox(height: 40),
-                            ],
-                          ),
-                        );
-                      },
+                        },
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -467,9 +567,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     List<String> buildings,
     List<ApartmentModel> displayedApartments,
     ApartmentModel? currentSelectedApartment,
-    BoxConstraints constraints,
+    bool isCompact,
   ) {
-    final isCompact = constraints.maxWidth < 420;
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return AppCard(
       child: Column(
@@ -478,51 +579,52 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppSpacing.p8,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  borderRadius: AppTheme.radiusSm,
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r8,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.apartment_rounded,
-                  color: AppTheme.primary,
+                  color: colorScheme.primary,
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 10),
+              AppSpacing.w10,
               Expanded(
                 child: Text(
                   'Thông tin chung',
                   style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           if (occupiedApartments.isEmpty)
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: AppSpacing.p12,
               decoration: BoxDecoration(
-                color: AppTheme.warningBackground,
-                borderRadius: AppTheme.radiusSm,
-                border: Border.all(color: AppTheme.warningBorder),
+                color: warningColor.withValues(alpha: 0.1),
+                borderRadius: AppRadius.r8,
+                border: Border.all(color: warningColor.withValues(alpha: 0.35)),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.warning_amber_rounded,
-                    color: AppTheme.warningText,
+                    color: warningColor,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  AppSpacing.w8,
                   Expanded(
                     child: Text(
                       'Không có căn hộ nào đang có người ở. Vui lòng kiểm tra lại danh sách cư dân.',
                       style: context.bodySmall?.copyWith(
-                        color: AppTheme.warningText,
+                        color: warningColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -536,48 +638,42 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 'Chọn Tòa nhà:',
                 style: context.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 8),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: buildings.map((b) {
-                    final isSelected = _selectedBuilding == b;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: ChoiceChip(
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        label: Text(
-                          'Tòa $b',
-                          style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : AppTheme.textPrimary,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: AppTheme.primary,
-                        backgroundColor: AppTheme.background,
-                        onSelected: (selected) {
-                          if (selected && _selectedBuilding != b) {
-                            setState(() {
-                              _selectedBuilding = b;
-                              _selectedApartment = null;
-                            });
-                          }
-                        },
+              AppSpacing.h8,
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: buildings.map((b) {
+                  final isSelected = _selectedBuilding == b;
+                  return ChoiceChip(
+                    label: Text(
+                      'Tòa $b',
+                      style: context.labelMedium?.copyWith(
+                        color: isSelected
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
-                    );
-                  }).toList(),
-                ),
+                    ),
+                    selected: isSelected,
+                    selectedColor: colorScheme.primary,
+                    backgroundColor: colorScheme.surfaceContainerLow,
+                    onSelected: (selected) {
+                      if (selected && _selectedBuilding != b) {
+                        setState(() {
+                          _selectedBuilding = b;
+                          _selectedApartment = null;
+                        });
+                      }
+                    },
+                  );
+                }).toList(),
               ),
-              const SizedBox(height: 12),
+              AppSpacing.h12,
             ],
             DropdownButtonFormField<ApartmentModel>(
               key: ValueKey(_selectedBuilding),
@@ -592,6 +688,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                   value: apt,
                   child: Text(
                     '${apt.code} (${apt.area ?? 0} m²)',
+                    style: context.bodyMedium?.tabularFigures(),
                     overflow: TextOverflow.ellipsis,
                   ),
                 );
@@ -603,8 +700,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                       val.rentPrice != null &&
                       val.rentPrice! > 0) {
                     _isFixedRent = true;
-                    _managementPriceController.text =
-                        val.rentPrice!.toInt().toString();
+                    _managementPriceController.text = val.rentPrice!
+                        .toInt()
+                        .toString();
                   }
                 });
                 if (val != null) {
@@ -614,13 +712,15 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                         .getVehicleCounts(val.id);
                     final motorbikes = counts['motorbike'] ?? 0;
                     final cars = counts['car'] ?? 0;
-                    _motorbikeQtyController.text =
-                        motorbikes > 0 ? motorbikes.toString() : '';
-                    _carQtyController.text =
-                        cars > 0 ? cars.toString() : '';
+                    _motorbikeQtyController.text = motorbikes > 0
+                        ? motorbikes.toString()
+                        : '';
+                    _carQtyController.text = cars > 0 ? cars.toString() : '';
                     if (mounted) setState(() {});
                   } catch (e) {
-                    debugPrint('Không thể tự động tải số lượng xe căn hộ ${val.code}: $e');
+                    debugPrint(
+                      'Không thể tự động tải số lượng xe căn hộ ${val.code}: $e',
+                    );
                     if (mounted) {
                       AppSnackBar.showWarning(
                         context,
@@ -630,35 +730,35 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                   }
                 }
               },
-              validator: (val) =>
-                  val == null ? 'Vui lòng chọn căn hộ' : null,
+              validator: (val) => val == null ? 'Vui lòng chọn căn hộ' : null,
             ),
           ],
           if (_selectedApartment != null &&
               !_isFixedRent &&
               (_selectedApartment!.area == null ||
                   _selectedApartment!.area! <= 0)) ...[
-            const SizedBox(height: 12),
+            AppSpacing.h12,
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: AppSpacing.p12,
               decoration: BoxDecoration(
-                color: AppTheme.warningBackground,
-                borderRadius: AppTheme.radiusSm,
-                border: Border.all(color: AppTheme.warningBorder),
+                color: warningColor.withValues(alpha: 0.1),
+                borderRadius: AppRadius.r8,
+                border: Border.all(color: warningColor.withValues(alpha: 0.35)),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.warning_amber_rounded,
-                    color: AppTheme.warningText,
+                    color: warningColor,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  AppSpacing.w8,
                   Expanded(
                     child: Text(
                       'Căn hộ này chưa có diện tích (0 m²). Tiền phí quản lý sẽ bằng 0 đ.',
                       style: context.bodySmall?.copyWith(
-                        color: AppTheme.warningText,
+                        color: warningColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -667,7 +767,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           if (isCompact) ...[
             TextFormField(
               controller: _periodController,
@@ -679,15 +779,19 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               validator: validateInvoicePeriod,
               autovalidateMode: AutovalidateMode.onUserInteraction,
             ),
-            const SizedBox(height: 12),
+            AppSpacing.h12,
             InkWell(
+              borderRadius: AppRadius.r8,
               onTap: () => _selectDueDate(context),
               child: InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Hạn thanh toán',
                   prefixIcon: Icon(Icons.event_outlined),
                 ),
-                child: Text(DateFormat('dd/MM/yyyy').format(_dueDate)),
+                child: Text(
+                  DateFormat('dd/MM/yyyy').format(_dueDate),
+                  style: context.bodyMedium?.tabularFigures(),
+                ),
               ),
             ),
           ] else ...[
@@ -705,668 +809,26 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
                 ),
-                const SizedBox(width: 16),
+                AppSpacing.w16,
                 Expanded(
                   child: InkWell(
+                    borderRadius: AppRadius.r8,
                     onTap: () => _selectDueDate(context),
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'Hạn thanh toán',
                         prefixIcon: Icon(Icons.event_outlined),
                       ),
-                      child: Text(DateFormat('dd/MM/yyyy').format(_dueDate)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildManagementFeeCard(BoxConstraints constraints) {
-    final isCompact = constraints.maxWidth < 420;
-
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            children: [
-              Text(
-                _isFixedRent ? 'Tiền thuê phòng' : 'Phí quản lý',
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              Text(
-                _currencyFormat.format(_getManagementTotal()),
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ChoiceChip(
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  label: const Text('Theo diện tích m²'),
-                  selected: !_isFixedRent,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _isFixedRent = false;
-                        _managementPriceController.text = '16.500';
-                      });
-                    }
-                  },
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  label: const Text('Tiền phòng cố định'),
-                  selected: _isFixedRent,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _isFixedRent = true;
-                        if (_selectedApartment?.rentPrice != null &&
-                            _selectedApartment!.rentPrice! > 0) {
-                          _managementPriceController.text =
-                              formatMoney(_selectedApartment!.rentPrice!.round());
-                        }
-                      });
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (isCompact) ...[
-            TextFormField(
-              initialValue: _isFixedRent
-                  ? '1 phòng'
-                  : (_selectedApartment?.area?.toString() ?? '0'),
-              readOnly: true,
-              key: ValueKey('${_selectedApartment?.id}_$_isFixedRent'),
-              decoration: InputDecoration(
-                labelText: _isFixedRent ? 'Số lượng' : 'Diện tích (m²)',
-                filled: true,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _managementPriceController,
-              decoration: InputDecoration(
-                labelText: _isFixedRent
-                    ? 'Tiền thuê (đ/tháng)'
-                    : 'Đơn giá (đ/m²)',
-                suffixText: 'đ',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [MoneyInputFormatter()],
-              validator: (v) => (v == null || parseMoney(v) <= 0)
-                  ? 'Vui lòng nhập ${_isFixedRent ? "tiền thuê phòng" : "đơn giá quản lý"} hợp lệ'
-                  : null,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-          ] else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: _isFixedRent
-                        ? '1 phòng'
-                        : (_selectedApartment?.area?.toString() ?? '0'),
-                    readOnly: true,
-                    key: ValueKey('${_selectedApartment?.id}_$_isFixedRent'),
-                    decoration: InputDecoration(
-                      labelText: _isFixedRent ? 'Số lượng' : 'Diện tích (m²)',
-                      filled: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _managementPriceController,
-                    decoration: InputDecoration(
-                      labelText: _isFixedRent
-                          ? 'Tiền thuê (đ/tháng)'
-                          : 'Đơn giá (đ/m²)',
-                      suffixText: 'đ',
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [MoneyInputFormatter()],
-                    validator: (v) => (v == null || parseMoney(v) <= 0)
-                        ? 'Vui lòng nhập ${_isFixedRent ? "tiền thuê phòng" : "đơn giá quản lý"} hợp lệ'
-                        : null,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildElectricityFeeCard(BoxConstraints constraints) {
-    final isCompact = constraints.maxWidth < 420;
-    final elecQty = double.tryParse(_elecQtyController.text) ?? 0.0;
-    final tieredResult = _isTieredElectricity && elecQty > 0
-        ? UtilityFeeCalculator.calculateElectricityEVN6Tiers(elecQty)
-        : null;
-
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            children: [
-              Text(
-                'Tiền điện',
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              Text(
-                _currencyFormat.format(_getElecTotal()),
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ChoiceChip(
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  label: const Text('Đơn giá phẳng'),
-                  selected: !_isTieredElectricity,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() => _isTieredElectricity = false);
-                    }
-                  },
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  label: const Text('Biểu giá EVN 6 bậc'),
-                  selected: _isTieredElectricity,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() => _isTieredElectricity = true);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (_isTieredElectricity) ...[
-            TextFormField(
-              controller: _elecQtyController,
-              decoration: const InputDecoration(
-                labelText: 'Số điện tiêu thụ (kWh)',
-                suffixText: 'kWh',
-                prefixIcon: Icon(Icons.bolt),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) => validateNonNegativeNumber(v, 'Số điện'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.info_outline, size: 16, color: Colors.orange),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Tính tự động theo biểu giá điện sinh hoạt 6 bậc EVN',
-                        style: context.labelSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (tieredResult != null && tieredResult.breakdown.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    ...tieredResult.breakdown.map((b) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${b.name}: ${b.formattedUnits} kWh × ${_currencyFormat.format(b.rate)}',
-                                style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
-                              ),
-                              Text(
-                                _currencyFormat.format(b.amount),
-                                style: context.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        )),
-                  ],
-                ],
-              ),
-            ),
-          ] else if (isCompact) ...[
-            TextFormField(
-              controller: _elecQtyController,
-              decoration: const InputDecoration(
-                labelText: 'Số điện tiêu thụ (kWh)',
-                suffixText: 'kWh',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) =>
-                  validateNonNegativeNumber(v, 'Số điện'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _elecPriceController,
-              decoration: const InputDecoration(
-                labelText: 'Đơn giá (đ/kWh)',
-                suffixText: 'đ',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [MoneyInputFormatter()],
-              validator: (v) => (v == null || parseMoney(v) <= 0)
-                  ? 'Vui lòng nhập đơn giá điện hợp lệ'
-                  : null,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-          ] else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _elecQtyController,
-                    decoration: const InputDecoration(
-                      labelText: 'Số điện tiêu thụ (kWh)',
-                      suffixText: 'kWh',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        validateNonNegativeNumber(v, 'Số điện'),
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _elecPriceController,
-                    decoration: const InputDecoration(
-                      labelText: 'Đơn giá (đ/kWh)',
-                      suffixText: 'đ',
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [MoneyInputFormatter()],
-                    validator: (v) => (v == null || parseMoney(v) <= 0)
-                        ? 'Vui lòng nhập đơn giá điện hợp lệ'
-                        : null,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWaterFeeCard(BoxConstraints constraints) {
-    final isCompact = constraints.maxWidth < 420;
-
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            children: [
-              Text(
-                'Tiền nước',
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              Text(
-                _currencyFormat.format(_getWaterTotal()),
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (isCompact) ...[
-            TextFormField(
-              controller: _waterQtyController,
-              decoration: const InputDecoration(
-                labelText: 'Số khối nước (m³)',
-                suffixText: 'm³',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) =>
-                  validateNonNegativeNumber(v, 'Số khối nước'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _waterPriceController,
-              decoration: const InputDecoration(
-                labelText: 'Đơn giá (đ/m³)',
-                suffixText: 'đ',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [MoneyInputFormatter()],
-              validator: (v) => (v == null || parseMoney(v) <= 0)
-                  ? 'Vui lòng nhập đơn giá nước hợp lệ'
-                  : null,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-          ] else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _waterQtyController,
-                    decoration: const InputDecoration(
-                      labelText: 'Số khối nước (m³)',
-                      suffixText: 'm³',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        validateNonNegativeNumber(v, 'Số khối nước'),
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _waterPriceController,
-                    decoration: const InputDecoration(
-                      labelText: 'Đơn giá (đ/m³)',
-                      suffixText: 'đ',
-                    ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [MoneyInputFormatter()],
-                    validator: (v) => (v == null || parseMoney(v) <= 0)
-                        ? 'Vui lòng nhập đơn giá nước hợp lệ'
-                        : null,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildParkingFeeCard(BoxConstraints constraints) {
-    final isCompact = constraints.maxWidth < 420;
-
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            children: [
-              Text(
-                'Phí gửi xe',
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              Text(
-                _currencyFormat.format(_getParkingTotal()),
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (isCompact) ...[
-            TextFormField(
-              controller: _motorbikeQtyController,
-              decoration: InputDecoration(
-                labelText:
-                    'Số xe máy (${_currencyFormat.format(_motorbikeFee)}/xe)',
-                prefixIcon: const Icon(Icons.two_wheeler_outlined),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) =>
-                  validateNonNegativeInt(v, 'Số xe máy'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _carQtyController,
-              decoration: InputDecoration(
-                labelText:
-                    'Số ô tô (${_currencyFormat.format(_carFee)}/xe)',
-                prefixIcon: const Icon(Icons.directions_car_outlined),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) =>
-                  validateNonNegativeInt(v, 'Số ô tô'),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-          ] else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _motorbikeQtyController,
-                    decoration: InputDecoration(
-                      labelText:
-                          'Số xe máy (${_currencyFormat.format(_motorbikeFee)}/xe)',
-                      prefixIcon: const Icon(Icons.two_wheeler_outlined),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        validateNonNegativeInt(v, 'Số xe máy'),
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _carQtyController,
-                    decoration: InputDecoration(
-                      labelText:
-                          'Số ô tô (${_currencyFormat.format(_carFee)}/xe)',
-                      prefixIcon: const Icon(Icons.directions_car_outlined),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        validateNonNegativeInt(v, 'Số ô tô'),
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 8),
-          Text(
-            'Hệ thống tự động điền số xe theo dữ liệu đăng ký phương tiện của căn hộ.',
-            style: context.labelSmall?.copyWith(
-              color: AppTheme.textSecondary.withValues(alpha: 0.8),
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryAndSubmitCard(double total) {
-    return AppCard(
-      color: AppTheme.primary.withValues(alpha: 0.05),
-      borderColor: AppTheme.primary.withValues(alpha: 0.25),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            children: [
-              Text(
-                'TỔNG CỘNG',
-                style: context.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
-                ),
-              ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  _currencyFormat.format(total),
-                  style: context.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-          // Tùy chọn trạng thái hóa đơn
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppTheme.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Trạng thái phát hành:',
-                  style: context.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ChoiceChip(
-                        avatar: const Icon(Icons.send_rounded, size: 16),
-                        label: const Text('Phát hành ngay'),
-                        selected: !_isDraft,
-                        onSelected: (val) {
-                          if (val) setState(() => _isDraft = false);
-                        },
+                      child: Text(
+                        DateFormat('dd/MM/yyyy').format(_dueDate),
+                        style: context.bodyMedium?.tabularFigures(),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ChoiceChip(
-                        avatar: const Icon(Icons.drafts_outlined, size: 16),
-                        label: const Text('Lưu bản nháp'),
-                        selected: _isDraft,
-                        onSelected: (val) {
-                          if (val) setState(() => _isDraft = true);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _isDraft
-                      ? 'Bản nháp được lưu để soát xét nội bộ, cư dân chưa nhìn thấy hóa đơn này.'
-                      : 'Hóa đơn sẽ được phát hành ngay lập tức tới cư dân kèm thông báo thanh toán.',
-                  style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: _isDraft ? Colors.blueGrey.shade700 : AppTheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.radiusMd,
-              ),
-            ),
-            onPressed: _isSubmitting ? null : _submit,
-            child: _isSubmitting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : Text(
-                    _isDraft ? 'LƯU BẢN NHÁP HÓA ĐƠN' : 'XÁC NHẬN PHÁT HÀNH HÓA ĐƠN',
-                    style: context.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-          ),
+          ],
         ],
       ),
     );

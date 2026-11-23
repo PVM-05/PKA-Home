@@ -2,20 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
+import '../../../core/utils/invoice_fee_helper.dart';
+import '../../../core/utils/money_formatter.dart';
+import '../../../core/utils/validators.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_unsaved_changes_guard.dart';
-import '../../../core/utils/error_formatter.dart';
-import '../../../core/utils/validators.dart';
-import '../../../core/utils/money_formatter.dart';
-import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../data/models/invoice_model.dart';
-import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/invoice_items_provider.dart';
-import '../../../core/utils/invoice_fee_helper.dart';
+import '../../../data/providers/management_provider.dart';
 
 class EditInvoiceScreen extends ConsumerStatefulWidget {
   final InvoiceModel invoice;
@@ -38,15 +43,15 @@ class _EditableFeeItem {
     required double unitPrice,
     required double quantity,
     required VoidCallback onChanged,
-  })  : feeTypeController = TextEditingController(text: feeName),
-        unitPriceController = TextEditingController(
-          text: formatMoney(unitPrice.toInt(), includeSymbol: false),
-        ),
-        quantityController = TextEditingController(
-          text: quantity % 1 == 0
-              ? quantity.toInt().toString()
-              : quantity.toString(),
-        ) {
+  }) : feeTypeController = TextEditingController(text: feeName),
+       unitPriceController = TextEditingController(
+         text: formatMoney(unitPrice.toInt(), includeSymbol: false),
+       ),
+       quantityController = TextEditingController(
+         text: quantity % 1 == 0
+             ? quantity.toInt().toString()
+             : quantity.toString(),
+       ) {
     feeTypeController.addListener(onChanged);
     unitPriceController.addListener(onChanged);
     quantityController.addListener(onChanged);
@@ -123,6 +128,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   }
 
   void _addNewItem() {
+    if (widget.invoice.isPaid || widget.invoice.status == 'paid') return;
     setState(() {
       _hasModified = true;
       _items.add(
@@ -138,6 +144,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   }
 
   void _removeItem(int index) {
+    if (widget.invoice.isPaid || widget.invoice.status == 'paid') return;
     if (_items.length <= 1) {
       AppSnackBar.showWarning(
         context,
@@ -208,7 +215,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(managementRepositoryProvider).updateInvoice(
+      await ref
+          .read(managementRepositoryProvider)
+          .updateInvoice(
             invoiceId: widget.invoice.id,
             period: _periodController.text.trim(),
             dueDate: _dueDate,
@@ -220,15 +229,13 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
       ref.invalidate(invoiceDetailProvider(widget.invoice.id));
 
       if (mounted) {
-        AppSnackBar.showSuccess(
-          context,
-          'Cập nhật hóa đơn thành công!',
-        );
+        AppSnackBar.showSuccess(context, 'Cập nhật hóa đơn thành công!');
         Navigator.of(context).pop(true);
       }
     } on PostgrestException catch (pe) {
       if (mounted) {
-        final isDuplicate = pe.code == '23505' ||
+        final isDuplicate =
+            pe.code == '23505' ||
             pe.message.contains('uq_invoice_apartment_period') ||
             (pe.details?.toString().contains('uq_invoice_apartment_period') ??
                 false);
@@ -240,7 +247,8 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
     } catch (e) {
       if (mounted) {
         final errorStr = e.toString();
-        final isDuplicate = errorStr.contains('23505') ||
+        final isDuplicate =
+            errorStr.contains('23505') ||
             errorStr.contains('uq_invoice_apartment_period');
         final errorText = isDuplicate
             ? 'Hóa đơn kỳ này đã tồn tại cho căn hộ đã chọn.'
@@ -262,81 +270,88 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
         hasUnsavedChanges: _hasModified && !_isSubmitting,
         child: Scaffold(
           appBar: AppBar(title: Text('Sửa Hóa đơn ${widget.invoice.period}')),
-        body: SafeArea(
-          child: detailAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(
-              child: Text(
-                'Lỗi tải chi tiết: ${formatErrorMessage(err)}',
-                style: const TextStyle(color: AppTheme.error),
+          body: SafeArea(
+            child: detailAsync.when(
+              loading: () => ListView(
+                padding: AppSpacing.p16,
+                children: [
+                  AppSkeletonShimmer.cardList(count: 4, itemHeight: 120),
+                ],
               ),
-            ),
-            data: (rawItems) {
-              _initializeItems(rawItems);
-
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1400),
-                  child: Form(
-                    key: _formKey,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isDesktop = constraints.maxWidth >= 900;
-
-                        if (isDesktop) {
-                          return SingleChildScrollView(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Cột trái: Thông tin chung & Tổng tiền mới
-                                Expanded(
-                                  flex: 5,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      _buildGeneralInfoCard(constraints),
-                                      const SizedBox(height: 20),
-                                      _buildTotalAndSubmitCard(),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                // Cột phải: Chi tiết các khoản phí
-                                Expanded(
-                                  flex: 7,
-                                  child: _buildFeeItemsCard(constraints),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        // Giao diện Mobile / Tablet (< 900dp)
-                        return SingleChildScrollView(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildGeneralInfoCard(constraints),
-                              const SizedBox(height: 16),
-                              _buildFeeItemsCard(constraints),
-                              const SizedBox(height: 20),
-                              _buildTotalAndSubmitCard(),
-                              const SizedBox(height: 32),
-                            ],
-                          ),
-                        );
-                      },
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: AppSpacing.p16,
+                  child: AppErrorCard(
+                    error: err,
+                    onRetry: () => ref.invalidate(
+                      invoiceDetailProvider(widget.invoice.id),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+              data: (rawItems) {
+                _initializeItems(rawItems);
+
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: Form(
+                      key: _formKey,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isDesktop = constraints.maxWidth >= 900;
+
+                          if (isDesktop) {
+                            return SingleChildScrollView(
+                              padding: AppSpacing.p24,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 5,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        _buildGeneralInfoCard(constraints),
+                                        AppSpacing.h20,
+                                        _buildTotalAndSubmitCard(),
+                                      ],
+                                    ),
+                                  ),
+                                  AppSpacing.w24,
+                                  Expanded(
+                                    flex: 7,
+                                    child: _buildFeeItemsCard(constraints),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          return SingleChildScrollView(
+                            padding: AppSpacing.p16,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildGeneralInfoCard(constraints),
+                                AppSpacing.h16,
+                                _buildFeeItemsCard(constraints),
+                                AppSpacing.h20,
+                                _buildTotalAndSubmitCard(),
+                                AppSpacing.h32,
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -344,6 +359,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   Widget _buildGeneralInfoCard(BoxConstraints constraints) {
     final isCompact = constraints.maxWidth < 420;
     final isPaid = widget.invoice.isPaid || widget.invoice.status == 'paid';
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final successColor = AppTheme.getSemanticSuccess(context);
 
     return AppCard(
       child: Column(
@@ -352,21 +370,22 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
           if (isPaid)
             Container(
               margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(12),
+              padding: AppSpacing.p12,
               decoration: BoxDecoration(
-                color: Colors.amber.shade50,
-                borderRadius: AppTheme.radiusSm,
-                border: Border.all(color: Colors.amber.shade700),
+                color: warningColor.withValues(alpha: 0.1),
+                borderRadius: AppRadius.r8,
+                border: Border.all(color: warningColor.withValues(alpha: 0.4)),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.lock_rounded, color: Colors.amber.shade900, size: 22),
-                  const SizedBox(width: 10),
+                  Icon(Icons.lock_rounded, color: warningColor, size: 22),
+                  AppSpacing.w10,
                   Expanded(
                     child: Text(
                       'Hóa đơn đã thanh toán. Theo chuẩn mực kế toán, số liệu đã hạch toán là bất biến. Để điều chỉnh, vui lòng tạo Phiếu giảm trừ (Credit Note).',
                       style: context.bodySmall?.copyWith(
-                        color: Colors.amber.shade900,
+                        color: warningColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -377,36 +396,38 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppSpacing.p8,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  borderRadius: AppTheme.radiusSm,
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r8,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.receipt_long_rounded,
-                  color: AppTheme.primary,
+                  color: colorScheme.primary,
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 10),
+              AppSpacing.w10,
               Expanded(
                 child: Text(
                   'Thông tin chung',
                   style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: AppTheme.background,
-              borderRadius: AppTheme.radiusSm,
-              border: Border.all(color: AppTheme.border),
+              color: colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.45,
+              ),
+              borderRadius: AppRadius.r8,
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Wrap(
               alignment: WrapAlignment.spaceBetween,
@@ -417,16 +438,18 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.apartment_rounded,
-                      color: AppTheme.primary,
+                      color: colorScheme.primary,
                       size: 20,
                     ),
-                    const SizedBox(width: 8),
+                    AppSpacing.w8,
                     Flexible(
                       child: Text(
                         'Căn hộ: ${widget.invoice.apartment?.code ?? 'N/A'}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: context.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)
+                            .tabularFigures(),
                       ),
                     ),
                   ],
@@ -434,14 +457,14 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                 if (widget.invoice.apartment?.area != null)
                   Text(
                     '${widget.invoice.apartment!.area} m²',
-                    style: context.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: context.bodySmall
+                        ?.copyWith(color: colorScheme.onSurfaceVariant)
+                        .tabularFigures(),
                   ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          AppSpacing.h16,
           if (isCompact) ...[
             TextFormField(
               controller: _periodController,
@@ -454,15 +477,19 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
               validator: validateInvoicePeriod,
               autovalidateMode: AutovalidateMode.onUserInteraction,
             ),
-            const SizedBox(height: 12),
+            AppSpacing.h12,
             InkWell(
+              borderRadius: AppRadius.r8,
               onTap: isPaid ? null : _selectDueDate,
               child: InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Hạn thanh toán',
                   prefixIcon: Icon(Icons.event_outlined),
                 ),
-                child: Text(_dateFormat.format(_dueDate)),
+                child: Text(
+                  _dateFormat.format(_dueDate),
+                  style: context.bodyMedium?.tabularFigures(),
+                ),
               ),
             ),
           ] else ...[
@@ -481,30 +508,43 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
                 ),
-                const SizedBox(width: 12),
+                AppSpacing.w12,
                 Expanded(
                   child: InkWell(
+                    borderRadius: AppRadius.r8,
                     onTap: isPaid ? null : _selectDueDate,
                     child: InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'Hạn thanh toán',
                         prefixIcon: Icon(Icons.event_outlined),
                       ),
-                      child: Text(_dateFormat.format(_dueDate)),
+                      child: Text(
+                        _dateFormat.format(_dueDate),
+                        style: context.bodyMedium?.tabularFigures(),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ],
-          const SizedBox(height: 14),
+          AppSpacing.h16,
           if (isPaid)
             InputDecorator(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Trạng thái hóa đơn',
-                prefixIcon: Icon(Icons.check_circle_rounded, color: AppTheme.success),
+                prefixIcon: Icon(
+                  Icons.check_circle_rounded,
+                  color: successColor,
+                ),
               ),
-              child: const Text('Đã thanh toán (Khóa sổ kế toán)', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.success)),
+              child: Text(
+                'Đã thanh toán (Khóa sổ kế toán)',
+                style: context.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: successColor,
+                ),
+              ),
             )
           else
             DropdownButtonFormField<String>(
@@ -523,10 +563,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                   value: 'pending_confirmation',
                   child: Text('Chờ xác nhận'),
                 ),
-                DropdownMenuItem(
-                  value: 'cancelled',
-                  child: Text('Đã hủy'),
-                ),
+                DropdownMenuItem(value: 'cancelled', child: Text('Đã hủy')),
               ],
               onChanged: (val) {
                 if (val != null) setState(() => _status = val);
@@ -539,7 +576,9 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
   Widget _buildFeeItemsCard(BoxConstraints constraints) {
     final isCompact = constraints.maxWidth < 420;
-    final isPaid = widget.invoice.isPaid;
+    final isPaid = widget.invoice.isPaid || widget.invoice.status == 'paid';
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
 
     return AppCard(
       child: Column(
@@ -549,36 +588,37 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
+            runSpacing: 4,
             children: [
               Text(
                 'Chi tiết các khoản phí',
                 style: context.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               TextButton.icon(
-                onPressed: _addNewItem,
+                onPressed: isPaid ? null : _addNewItem,
                 icon: const Icon(Icons.add_circle_outline, size: 18),
                 label: const Text('Thêm phí'),
                 style: TextButton.styleFrom(
-                  foregroundColor: AppTheme.primary,
-                  visualDensity: VisualDensity.compact,
+                  foregroundColor: colorScheme.primary,
+                  minimumSize: const Size(0, 48),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           ..._items.asMap().entries.map((entry) {
             final idx = entry.key;
             final item = entry.value;
             return Container(
-              margin: const EdgeInsets.only(bottom: 12.0),
-              padding: const EdgeInsets.all(12.0),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: AppSpacing.p12,
               decoration: BoxDecoration(
-                color: AppTheme.background,
-                borderRadius: AppTheme.radiusSm,
-                border: Border.all(color: AppTheme.border),
+                color: colorScheme.surfaceContainerLowest,
+                borderRadius: AppRadius.r8,
+                border: Border.all(color: colorScheme.outlineVariant),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -588,6 +628,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                       Expanded(
                         child: TextFormField(
                           controller: item.feeTypeController,
+                          enabled: !isPaid,
                           decoration: const InputDecoration(
                             labelText: 'Tên loại phí',
                             isDense: true,
@@ -598,22 +639,24 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           ),
                           validator: (val) =>
                               (val == null || val.trim().isEmpty)
-                                  ? 'Nhập tên loại phí'
-                                  : null,
+                              ? 'Nhập tên loại phí'
+                              : null,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.delete_outline,
-                          color: AppTheme.error,
+                          color: isPaid
+                              ? colorScheme.onSurface.withValues(alpha: 0.38)
+                              : errorColor,
                           size: 20,
                         ),
                         tooltip: 'Xóa khoản phí',
-                        onPressed: () => _removeItem(idx),
+                        onPressed: isPaid ? null : () => _removeItem(idx),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  AppSpacing.h12,
                   if (isCompact) ...[
                     TextFormField(
                       controller: item.unitPriceController,
@@ -628,13 +671,15 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           vertical: 8,
                         ),
                       ),
-                      validator: (val) =>
-                          parseMoney(val ?? '') <= 0 ? 'Vui lòng nhập đơn giá' : null,
+                      validator: (val) => parseMoney(val ?? '') <= 0
+                          ? 'Vui lòng nhập đơn giá'
+                          : null,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
-                    const SizedBox(height: 8),
+                    AppSpacing.h8,
                     TextFormField(
                       controller: item.quantityController,
+                      enabled: !isPaid,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
@@ -646,30 +691,30 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                           vertical: 8,
                         ),
                       ),
-                      validator: (val) => validateNonNegativeNumber(
-                        val,
-                        'Số lượng',
-                        true,
-                      ),
+                      validator: (val) =>
+                          validateNonNegativeNumber(val, 'Số lượng', true),
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
-                    const SizedBox(height: 8),
+                    AppSpacing.h8,
                     Wrap(
                       alignment: WrapAlignment.spaceBetween,
                       crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
                       children: [
                         Text(
                           'Thành tiền:',
                           style: context.labelSmall?.copyWith(
-                            color: AppTheme.textSecondary,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         Text(
                           _currencyFormat.format(item.subtotal),
-                          style: context.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
-                          ),
+                          style: context.bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              )
+                              .tabularFigures(),
                         ),
                       ],
                     ),
@@ -691,20 +736,20 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                                 vertical: 8,
                               ),
                             ),
-                            validator: (val) =>
-                                parseMoney(val ?? '') <= 0 ? 'Vui lòng nhập đơn giá' : null,
+                            validator: (val) => parseMoney(val ?? '') <= 0
+                                ? 'Vui lòng nhập đơn giá'
+                                : null,
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        AppSpacing.w8,
                         Expanded(
                           flex: 2,
                           child: TextFormField(
                             controller: item.quantityController,
                             enabled: !isPaid,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
+                            keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
@@ -724,7 +769,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                                 AutovalidateMode.onUserInteraction,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        AppSpacing.w8,
                         Expanded(
                           flex: 3,
                           child: Column(
@@ -733,17 +778,19 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                               Text(
                                 'Thành tiền',
                                 style: context.labelSmall?.copyWith(
-                                  color: AppTheme.textSecondary,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   _currencyFormat.format(item.subtotal),
-                                  style: context.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textPrimary,
-                                  ),
+                                  style: context.labelMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.onSurface,
+                                      )
+                                      .tabularFigures(),
                                 ),
                               ),
                             ],
@@ -763,10 +810,11 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
 
   Widget _buildTotalAndSubmitCard() {
     final isPaid = widget.invoice.isPaid || widget.invoice.status == 'paid';
+    final colorScheme = Theme.of(context).colorScheme;
 
     return AppCard(
-      color: AppTheme.primary.withValues(alpha: 0.05),
-      borderColor: AppTheme.primary.withValues(alpha: 0.25),
+      color: colorScheme.primary.withValues(alpha: 0.06),
+      borderColor: colorScheme.primary.withValues(alpha: 0.25),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -774,52 +822,62 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
+            runSpacing: 4,
             children: [
               Text(
                 'TỔNG CỘNG MỚI',
                 style: context.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
+                  color: colorScheme.primary,
                 ),
               ),
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
                   _currencyFormat.format(_totalAmount),
-                  style: context.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
+                  style: context.headlineMedium
+                      ?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      )
+                      .tabularFigures(),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           const Divider(height: 1),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           ElevatedButton(
             style: ElevatedButton.styleFrom(
+              minimumSize: const Size(0, 48),
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: isPaid ? Colors.grey.shade400 : AppTheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.radiusMd,
-              ),
+              backgroundColor: isPaid
+                  ? colorScheme.surfaceContainerHighest
+                  : colorScheme.primary,
+              foregroundColor: isPaid
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: AppRadius.r12),
             ),
             onPressed: (_isSubmitting || isPaid) ? null : _submit,
             child: _isSubmitting
-                ? const SizedBox(
+                ? SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                     ),
                   )
                 : Text(
                     isPaid ? 'HÓA ĐƠN ĐÃ KHÓA SỔ (BẤT BIẾN)' : 'LƯU THAY ĐỔI',
+                    textAlign: TextAlign.center,
                     style: context.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: isPaid
+                          ? colorScheme.onSurfaceVariant
+                          : colorScheme.onPrimary,
                     ),
                   ),
           ),
