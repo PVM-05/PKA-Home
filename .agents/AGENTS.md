@@ -31,3 +31,18 @@ Agent chủ động áp dụng đúng các kỹ năng cốt lõi hiện có tron
 - **`thiet-ke-giao-dien` / `impeccable`**: Bảo đảm chuẩn UI/UX 100% tiếng Việt, Dark Mode, WCAG AA, vùng chạm $\ge 48\text{dp}$.
 - **`flutter-*` / `dart-*` cốt lõi**: Responsive layout, xử lý lỗi layout, unit/widget test và phân tích tĩnh.
 - **`graphify` / `caveman`**: Tra cứu cấu trúc dự án qua đồ thị tri thức và giao tiếp súc tích để tối ưu token.
+
+## 3. Quy tắc Gợi ý & Nhắc Chuyển Đổi Model (Model Routing)
+Agent **không thể tự đổi model** của cuộc hội thoại chính trong giao diện người dùng (chỉ có thể chọn model cấp subagent khi gọi `invoke_subagent` hoặc điều phối worker khi người dùng chủ động chạy `/swarm`). Vì vậy, Agent **PHẢI chủ động nhắc ngắn gọn 1 dòng** ở đầu hoặc cuối pha chuyển việc mỗi khi tác vụ tiếp theo phù hợp đổi model:
+
+| Giai đoạn / Tác vụ | Model ưu tiên | Model thay thế |
+| :--- | :--- | :--- |
+| Lên kế hoạch, thiết kế kiến trúc, PRD/SRS, schema Supabase & RLS | **Orchestrator (Gemini 4 Neon Extra High)** | **Claude Opus 5.5** |
+| Code tính năng mới, redesign UI/UX hàng loạt, tách file lớn | **Gemini 4 Neon (High)** | **Claude Sonnet 5.5** |
+| Gỡ bug phức tạp / đa tầng (Offline Sync, RLS/SQL, race condition, tài chính) | **Claude Opus 5.5** | **Orchestrator (Gemini 4 Neon Extra High)** |
+| Sửa lỗi phổ thông (overflow, compile, fail widget test) | **Claude Sonnet 5.5** | **Gemini 4 Neon (High)** / **Gemini 4 Argon** |
+| Review chéo & audit bảo mật / edge-case trước khi phát hành | **Đổi sang họ model khác với model đã code** *(VD: Gemini ↔ Claude Opus 5.5)* | **Claude Sonnet 5.5** |
+| Tác vụ nhẹ & lặp lại (thêm test theo mẫu, dọn `dart analyze`, cập nhật docs/SOP) | **Gemini 4 Argon (Medium)** | **Gemini 4 Hydrogen** / **Gemini 3.8 Flash** |
+| Dự phòng khi chạm giới hạn quota / nháp độc lập | **GPT-OSS 120B (Medium)** | **Gemini 3.8 Flash** |
+
+- **Cách nhắc**: Khi sắp chuyển pha (VD: chuẩn bị vào Đợt 5 tài chính/kế toán, chuẩn bị debug sâu, chuẩn bị review chéo hoặc chỉ dọn docs/test), kèm 1 dòng ngắn: `Gợi ý đổi model: <Tên Model> cho bước <lý do ngắn>.` — không tự ý dừng công việc nếu người dùng đã ra lệnh thực thi ngay.
