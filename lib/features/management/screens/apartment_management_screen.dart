@@ -1,22 +1,23 @@
-import '../../../core/router/route_names.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/error_formatter.dart';
-import '../../../core/utils/validators.dart';
-import '../../../data/providers/management_provider.dart';
-import '../../../data/models/apartment_model.dart';
-import '../../../core/supabase_config.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/constants/permissions.dart';
-import '../../../core/widgets/role_guard.dart';
+import '../../../core/router/route_names.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_search_field.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/role_guard.dart';
+import '../../../data/models/apartment_model.dart';
 import '../../../data/models/batch_import_model.dart';
 import '../../../data/providers/batch_import_provider.dart';
-import '../widgets/apartment_contract_sheet.dart';
-import '../widgets/create_apartment_invitation_sheet.dart';
+import '../../../data/providers/management_provider.dart';
+import '../widgets/apartment/apartment_management_dialogs.dart';
 import '../widgets/apartment/management_apartment_grid_card.dart';
 
 class ApartmentManagementScreen extends ConsumerStatefulWidget {
@@ -31,15 +32,37 @@ class _ApartmentManagementScreenState
     extends ConsumerState<ApartmentManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String? _selectedBuilding; // null = tất cả tòa
-  int? _selectedFloor; // null = tất cả tầng
-  String _statusFilter = 'all'; // 'all', 'empty', 'occupied'
+  String? _selectedBuilding;
+  int? _selectedFloor;
+  String _statusFilter = 'all';
   bool _isGridView = true;
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _downloadApartmentTemplate(
+    BuildContext context, {
+    required bool isCsv,
+  }) async {
+    final notifier = ref.read(batchImportProvider.notifier);
+    final path = isCsv
+        ? await notifier.downloadCsvTemplate(BatchImportType.apartments)
+        : await notifier.downloadTemplate(BatchImportType.apartments);
+
+    if (path != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Đã tạo file mẫu ${isCsv ? "CSV" : "Excel"} thành công',
+          ),
+          backgroundColor: AppTheme.textSuccess,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -62,46 +85,56 @@ class _ApartmentManagementScreenState
                   _downloadApartmentTemplate(context, isCsv: true);
                 }
               },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'excel',
-                  child: Row(
-                    children: [
-                      Icon(Icons.table_view_outlined, color: AppTheme.primary, size: 20),
-                      SizedBox(width: 8),
-                      Text('Tải file mẫu Excel (.xlsx)'),
-                    ],
+              itemBuilder: (ctx) {
+                final cs = Theme.of(ctx).colorScheme;
+                final sec = AppTheme.getSemanticSecondary(ctx);
+                return [
+                  PopupMenuItem(
+                    value: 'excel',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.table_view_outlined,
+                          color: cs.primary,
+                          size: 20,
+                        ),
+                        AppSpacing.w8,
+                        const Text('Tải file mẫu Excel (.xlsx)'),
+                      ],
+                    ),
                   ),
-                ),
-                const PopupMenuItem(
-                  value: 'csv',
-                  child: Row(
-                    children: [
-                      Icon(Icons.description_outlined, color: AppTheme.secondary, size: 20),
-                      SizedBox(width: 8),
-                      Text('Tải file mẫu CSV (.csv)'),
-                    ],
+                  PopupMenuItem(
+                    value: 'csv',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.description_outlined,
+                          color: sec,
+                          size: 20,
+                        ),
+                        AppSpacing.w8,
+                        const Text('Tải file mẫu CSV (.csv)'),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ];
+              },
             ),
             IconButton(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               icon: const Icon(Icons.upload_file),
               tooltip: 'Nhập Excel/CSV',
               onPressed: () => context.push(AppRoutes.managementBatchImport),
             ),
             IconButton(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               icon: Icon(
                 _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
               ),
               tooltip: _isGridView
                   ? 'Chuyển sang danh sách'
                   : 'Chuyển sang dạng lưới',
-              onPressed: () {
-                setState(() {
-                  _isGridView = !_isGridView;
-                });
-              },
+              onPressed: () => setState(() => _isGridView = !_isGridView),
             ),
           ],
         ),
@@ -115,121 +148,62 @@ class _ApartmentManagementScreenState
                 return apartmentsAsync.when(
                   data: (allApartments) {
                     if (allApartments.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primary.withValues(alpha: 0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.apartment_outlined,
-                                  size: 64,
-                                  color: AppTheme.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                'Chưa có dữ liệu căn hộ trong hệ thống',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Hạ tầng tòa nhà đang trống. Bạn có thể tải file mẫu Excel hoặc CSV để nhập nhanh danh sách căn hộ theo lô.',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: AppTheme.textSecondary,
-                                    ),
-                              ),
-                              const SizedBox(height: 24),
-                              Wrap(
-                                spacing: 12,
-                                runSpacing: 12,
-                                alignment: WrapAlignment.center,
-                                children: [
-                                  OutlinedButton.icon(
-                                    icon: const Icon(Icons.download),
-                                    label: const Text('Tải mẫu Excel/CSV'),
-                                    onPressed: () =>
-                                        _showDownloadTemplateSheet(context),
-                                  ),
-                                  ElevatedButton.icon(
-                                    icon: const Icon(Icons.upload_file),
-                                    label: const Text('Nhập từ Excel/CSV'),
-                                    onPressed: () => context.push(
-                                      AppRoutes.managementBatchImport,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                      return _buildEmptyOnboardingState(context);
                     }
 
-                    // 1. Danh sách các Tòa nhà duy nhất
-                    final buildings = allApartments
-                        .map((a) => a.buildingCode.toUpperCase())
-                        .where((b) => b.isNotEmpty)
-                        .toSet()
-                        .toList()
-                      ..sort();
+                    final buildings =
+                        allApartments
+                            .map((a) => a.buildingCode.toUpperCase())
+                            .where((b) => b.isNotEmpty)
+                            .toSet()
+                            .toList()
+                          ..sort();
 
-                    // 2. Danh sách các Tầng theo Tòa nhà đang chọn
-                    final floors = allApartments
-                        .where(
-                          (a) =>
-                              _selectedBuilding == null ||
-                              a.buildingCode.toUpperCase() == _selectedBuilding,
-                        )
-                        .map((a) => a.floorNumber)
-                        .toSet()
-                        .toList()
-                      ..sort();
+                    final floors =
+                        allApartments
+                            .where(
+                              (a) =>
+                                  _selectedBuilding == null ||
+                                  a.buildingCode.toUpperCase() ==
+                                      _selectedBuilding,
+                            )
+                            .map((a) => a.floorNumber)
+                            .toSet()
+                            .toList()
+                          ..sort();
 
-                    // 3. Lọc danh sách căn hộ theo các tiêu chí
-                    final filteredApartments = allApartments.where((apt) {
-                      if (_searchQuery.isNotEmpty) {
-                        if (!apt.code.toLowerCase().contains(
-                              _searchQuery.toLowerCase(),
-                            )) {
-                          return false;
-                        }
-                      }
+                    final filteredApartments =
+                        allApartments.where((apt) {
+                          if (_searchQuery.isNotEmpty &&
+                              !apt.code.toLowerCase().contains(
+                                _searchQuery.toLowerCase(),
+                              )) {
+                            return false;
+                          }
+                          if (_selectedBuilding != null &&
+                              apt.buildingCode.toUpperCase() !=
+                                  _selectedBuilding) {
+                            return false;
+                          }
+                          if (_selectedFloor != null &&
+                              apt.floorNumber != _selectedFloor) {
+                            return false;
+                          }
+                          if (_statusFilter == 'empty' && !apt.isEmpty) {
+                            return false;
+                          }
+                          if (_statusFilter == 'occupied' && apt.isEmpty) {
+                            return false;
+                          }
+                          return true;
+                        }).toList()..sort((a, b) => a.code.compareTo(b.code));
 
-                      if (_selectedBuilding != null &&
-                          apt.buildingCode.toUpperCase() != _selectedBuilding) {
-                        return false;
-                      }
-
-                      if (_selectedFloor != null &&
-                          apt.floorNumber != _selectedFloor) {
-                        return false;
-                      }
-
-                      if (_statusFilter == 'empty' && !apt.isEmpty) return false;
-                      if (_statusFilter == 'occupied' && apt.isEmpty) return false;
-
-                      return true;
-                    }).toList()
-                      ..sort((a, b) => a.code.compareTo(b.code));
-
-                    final emptyCount =
-                        allApartments.where((a) => a.isEmpty).length;
-                    final occupiedCount =
-                        allApartments.where((a) => !a.isEmpty).length;
+                    final emptyCount = allApartments
+                        .where((a) => a.isEmpty)
+                        .length;
+                    final occupiedCount = allApartments
+                        .where((a) => !a.isEmpty)
+                        .length;
 
                     if (isDesktop) {
                       return _buildDesktopApartmentWorkstation(
@@ -237,17 +211,16 @@ class _ApartmentManagementScreenState
                         allApartments,
                         filteredApartments,
                         buildings,
-                        floors,
                         emptyCount,
                         occupiedCount,
                       );
                     }
 
+                    final colorScheme = Theme.of(context).colorScheme;
                     return Column(
                       children: [
-                        // Khu vực bộ lọc phân cấp Mobile
                         Container(
-                          color: Theme.of(context).cardColor,
+                          color: colorScheme.surface,
                           padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,184 +229,41 @@ class _ApartmentManagementScreenState
                                 controller: _searchController,
                                 hintText:
                                     'Tìm theo mã căn hộ (VD: A0110, B0502)...',
-                                onChanged: (val) {
-                                  setState(() => _searchQuery = val.trim());
-                                },
-                                onClear: () {
-                                  setState(() => _searchQuery = '');
-                                },
+                                onChanged: (val) =>
+                                    setState(() => _searchQuery = val.trim()),
+                                onClear: () =>
+                                    setState(() => _searchQuery = ''),
                               ),
-                              const SizedBox(height: 8),
-
-                              // Cấp 1: Chọn Tòa nhà
-                              Row(
-                                children: [
-                                  Text(
-                                    'Tòa nhà:',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppTheme.textSecondary,
-                                        ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: [
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(right: 6.0),
-                                            child: ChoiceChip(
-                                              label: const Text('Tất cả'),
-                                              selected: _selectedBuilding == null,
-                                              onSelected: (selected) {
-                                                if (selected) {
-                                                  setState(() {
-                                                    _selectedBuilding = null;
-                                                    _selectedFloor = null;
-                                                  });
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                          ...buildings.map((b) {
-                                            final isSelected =
-                                                _selectedBuilding == b;
-                                            return Padding(
-                                              padding: const EdgeInsets.only(
-                                                right: 6.0,
-                                              ),
-                                              child: ChoiceChip(
-                                                label: Text('Tòa $b'),
-                                                selected: isSelected,
-                                                selectedColor: AppTheme.primary,
-                                                labelStyle: TextStyle(
-                                                  color: isSelected
-                                                      ? Colors.white
-                                                      : AppTheme.textPrimary,
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                ),
-                                                onSelected: (selected) {
-                                                  setState(() {
-                                                    _selectedBuilding =
-                                                        selected ? b : null;
-                                                    _selectedFloor = null;
-                                                  });
-                                                },
-                                              ),
-                                            );
-                                          }),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-
-                              // Cấp 2: Chọn Số Tầng
+                              AppSpacing.h8,
+                              _buildBuildingFilterRow(context, buildings),
+                              AppSpacing.h6,
                               if (floors.isNotEmpty) ...[
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Số tầng: ',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppTheme.textSecondary,
-                                          ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                right: 6.0,
-                                              ),
-                                              child: ChoiceChip(
-                                                label: const Text('Tất cả tầng'),
-                                                selected: _selectedFloor == null,
-                                                onSelected: (selected) {
-                                                  if (selected) {
-                                                    setState(
-                                                      () => _selectedFloor = null,
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                            ),
-                                            ...floors.map((floor) {
-                                              final isSelected =
-                                                  _selectedFloor == floor;
-                                              final floorLabel =
-                                                  'Tầng ${floor.toString().padLeft(2, '0')}';
-                                              return Padding(
-                                                padding: const EdgeInsets.only(
-                                                  right: 6.0,
-                                                ),
-                                                child: ChoiceChip(
-                                                  label: Text(floorLabel),
-                                                  selected: isSelected,
-                                                  selectedColor:
-                                                      AppTheme.secondary,
-                                                  labelStyle: TextStyle(
-                                                    color: isSelected
-                                                        ? Colors.white
-                                                        : AppTheme.textPrimary,
-                                                    fontWeight: isSelected
-                                                        ? FontWeight.bold
-                                                        : FontWeight.normal,
-                                                  ),
-                                                  onSelected: (selected) {
-                                                    setState(() {
-                                                      _selectedFloor =
-                                                          selected ? floor : null;
-                                                    });
-                                                  },
-                                                ),
-                                              );
-                                            }),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
+                                _buildFloorFilterRow(context, floors),
+                                AppSpacing.h6,
                               ],
-
-                              // Cấp 3: Lọc trạng thái
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
                                     _buildStatusChip(
+                                      context,
                                       'all',
                                       'Tất cả (${allApartments.length})',
                                       null,
                                     ),
-                                    const SizedBox(width: 8),
+                                    AppSpacing.w8,
                                     _buildStatusChip(
+                                      context,
                                       'empty',
                                       'Còn trống ($emptyCount)',
-                                      AppStatusColors.paid,
+                                      AppStatusColors.getPaid(context),
                                     ),
-                                    const SizedBox(width: 8),
+                                    AppSpacing.w8,
                                     _buildStatusChip(
+                                      context,
                                       'occupied',
                                       'Đã có chủ ($occupiedCount)',
-                                      AppTheme.primary,
+                                      colorScheme.primary,
                                     ),
                                   ],
                                 ),
@@ -441,35 +271,34 @@ class _ApartmentManagementScreenState
                             ],
                           ),
                         ),
-
                         const Divider(height: 1),
-
-                        // Danh sách / Lưới hiển thị các căn hộ
                         Expanded(
                           child: RefreshIndicator(
-                            onRefresh: () async {
-                              ref.invalidate(apartmentsProvider);
-                            },
+                            onRefresh: () async =>
+                                ref.invalidate(apartmentsProvider),
                             child: filteredApartments.isEmpty
                                 ? _buildEmptyFilteredView(context)
                                 : _isGridView
-                                    ? _buildGridView(filteredApartments)
-                                    : _buildListView(filteredApartments),
+                                ? _buildGridView(filteredApartments)
+                                : _buildListView(filteredApartments),
                           ),
                         ),
                       ],
                     );
                   },
                   loading: () => ListView(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppSpacing.p16,
                     children: [
                       AppSkeletonShimmer.cardList(count: 4, itemHeight: 96),
                     ],
                   ),
                   error: (e, _) => Center(
-                    child: Text(
-                      formatErrorMessage(e),
-                      style: const TextStyle(color: AppTheme.error),
+                    child: Padding(
+                      padding: AppSpacing.p24,
+                      child: AppErrorCard(
+                        error: e,
+                        onRetry: () => ref.invalidate(apartmentsProvider),
+                      ),
                     ),
                   ),
                 );
@@ -479,7 +308,7 @@ class _ApartmentManagementScreenState
         ),
         floatingActionButton: FloatingActionButton.extended(
           heroTag: 'apartment_management_fab',
-          onPressed: () => _showApartmentDialog(context, ref),
+          onPressed: () => showApartmentFormDialog(context, ref),
           icon: const Icon(Icons.add),
           label: const Text('Thêm căn hộ'),
         ),
@@ -487,45 +316,242 @@ class _ApartmentManagementScreenState
     );
   }
 
+  Widget _buildEmptyOnboardingState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Center(
+      child: Padding(
+        padding: AppSpacing.p24,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: AppSpacing.p20,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(
+                  alpha: isDark ? 0.18 : 0.10,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.apartment_outlined,
+                size: 64,
+                color: colorScheme.primary,
+              ),
+            ),
+            AppSpacing.h20,
+            Text(
+              'Chưa có dữ liệu căn hộ trong hệ thống',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            AppSpacing.h8,
+            Text(
+              'Hạ tầng tòa nhà đang trống. Bạn có thể tải file mẫu Excel hoặc CSV để nhập nhanh danh sách căn hộ theo lô.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            AppSpacing.h24,
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                  ),
+                  icon: const Icon(Icons.download),
+                  label: const Text('Tải mẫu Excel/CSV'),
+                  onPressed: () => showDownloadApartmentTemplateSheet(
+                    context,
+                    onExcel: () =>
+                        _downloadApartmentTemplate(context, isCsv: false),
+                    onCsv: () =>
+                        _downloadApartmentTemplate(context, isCsv: true),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    minimumSize: const Size(0, 48),
+                  ),
+                  icon: const Icon(Icons.upload_file),
+                  label: const Text('Nhập từ Excel/CSV'),
+                  onPressed: () =>
+                      context.push(AppRoutes.managementBatchImport),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBuildingFilterRow(
+    BuildContext context,
+    List<String> buildings,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Row(
+      children: [
+        Text(
+          'Tòa nhà:',
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        AppSpacing.w8,
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: ChoiceChip(
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    label: const Text('Tất cả'),
+                    selected: _selectedBuilding == null,
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() {
+                          _selectedBuilding = null;
+                          _selectedFloor = null;
+                        });
+                      }
+                    },
+                  ),
+                ),
+                ...buildings.map((b) {
+                  final isSelected = _selectedBuilding == b;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: ChoiceChip(
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                      label: Text('Tòa $b'),
+                      selected: isSelected,
+                      selectedColor: AppTheme.primary,
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedBuilding = selected ? b : null;
+                          _selectedFloor = null;
+                        });
+                      },
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFloorFilterRow(BuildContext context, List<int> floors) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Row(
+      children: [
+        Text(
+          'Số tầng: ',
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        AppSpacing.w8,
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: ChoiceChip(
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    label: const Text('Tất cả tầng'),
+                    selected: _selectedFloor == null,
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() => _selectedFloor = null);
+                      }
+                    },
+                  ),
+                ),
+                ...floors.map((floor) {
+                  final isSelected = _selectedFloor == floor;
+                  final floorLabel = 'Tầng ${floor.toString().padLeft(2, '0')}';
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: ChoiceChip(
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                      label: Text(floorLabel),
+                      selected: isSelected,
+                      selectedColor: AppTheme.secondary,
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                      onSelected: (selected) {
+                        setState(() => _selectedFloor = selected ? floor : null);
+                      },
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildEmptyFilteredView(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.4,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.search_off_rounded,
-                  size: 56,
-                  color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Không tìm thấy căn hộ phù hợp bộ lọc',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _searchController.clear();
-                      _searchQuery = '';
-                      _selectedBuilding = null;
-                      _selectedFloor = null;
-                      _statusFilter = 'all';
-                    });
-                  },
-                  child: const Text('Đặt lại bộ lọc'),
-                ),
-              ],
-            ),
-          ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+        AppEmptyState(
+          icon: Icons.search_off_rounded,
+          title: 'Không tìm thấy căn hộ phù hợp bộ lọc',
+          description:
+              'Vui lòng thử từ khóa khác hoặc đặt lại bộ lọc tòa nhà và tầng.',
+          actionLabel: 'Đặt lại bộ lọc',
+          onAction: () {
+            setState(() {
+              _searchController.clear();
+              _searchQuery = '';
+              _selectedBuilding = null;
+              _selectedFloor = null;
+              _statusFilter = 'all';
+            });
+          },
         ),
       ],
     );
@@ -536,64 +562,71 @@ class _ApartmentManagementScreenState
     List<ApartmentModel> allApartments,
     List<ApartmentModel> filteredApartments,
     List<String> buildings,
-    List<int> floors,
     int emptyCount,
     int occupiedCount,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final paidColor = AppStatusColors.getPaid(context);
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+    final errorColor = AppTheme.getSemanticError(context);
+
     final occupancyRate = allApartments.isNotEmpty
         ? (occupiedCount / allApartments.length) * 100
         : 0.0;
 
     return RefreshIndicator(
-      onRefresh: () async {
-        ref.invalidate(apartmentsProvider);
-      },
+      onRefresh: () async => ref.invalidate(apartmentsProvider),
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.p16,
         children: [
-          // KPI Quick Stats Row
           Row(
             children: [
               Expanded(
                 child: _buildKpiBox(
+                  context,
                   'Tổng số căn hộ',
                   '${allApartments.length} căn',
-                  AppTheme.primary,
+                  colorScheme.primary,
                   Icons.apartment,
                 ),
               ),
-              const SizedBox(width: 12),
+              AppSpacing.w12,
               Expanded(
                 child: _buildKpiBox(
+                  context,
                   'Đã có cư dân',
                   '$occupiedCount căn',
-                  AppTheme.primary,
+                  colorScheme.primary,
                   Icons.home,
                 ),
               ),
-              const SizedBox(width: 12),
+              AppSpacing.w12,
               Expanded(
                 child: _buildKpiBox(
+                  context,
                   'Căn hộ trống',
                   '$emptyCount căn',
-                  AppStatusColors.paid,
+                  paidColor,
                   Icons.meeting_room_outlined,
                 ),
               ),
-              const SizedBox(width: 12),
+              AppSpacing.w12,
               Expanded(
                 child: _buildKpiBox(
+                  context,
                   'Tỷ lệ lấp đầy',
                   '${occupancyRate.toStringAsFixed(1)}%',
-                  occupancyRate >= 80 ? Colors.green : Colors.orange,
+                  occupancyRate >= 80 ? successColor : warningColor,
                   Icons.pie_chart_outline,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // Desktop Filter Bar Card
+          AppSpacing.h16,
           AppCard(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -606,36 +639,36 @@ class _ApartmentManagementScreenState
                       child: AppSearchField(
                         controller: _searchController,
                         hintText: 'Tìm theo mã căn hộ (VD: A0110)...',
-                        onChanged: (val) {
-                          setState(() => _searchQuery = val.trim());
-                        },
-                        onClear: () {
-                          setState(() => _searchQuery = '');
-                        },
+                        onChanged: (val) =>
+                            setState(() => _searchQuery = val.trim()),
+                        onClear: () => setState(() => _searchQuery = ''),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    AppSpacing.w16,
                     Expanded(
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
                             _buildStatusChip(
+                              context,
                               'all',
                               'Tất cả (${allApartments.length})',
                               null,
                             ),
-                            const SizedBox(width: 8),
+                            AppSpacing.w8,
                             _buildStatusChip(
+                              context,
                               'empty',
                               'Còn trống ($emptyCount)',
-                              AppStatusColors.paid,
+                              paidColor,
                             ),
-                            const SizedBox(width: 8),
+                            AppSpacing.w8,
                             _buildStatusChip(
+                              context,
                               'occupied',
                               'Đã có chủ ($occupiedCount)',
-                              AppTheme.primary,
+                              colorScheme.primary,
                             ),
                           ],
                         ),
@@ -643,73 +676,12 @@ class _ApartmentManagementScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text(
-                      'Tòa nhà: ',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textSecondary,
-                          ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 6.0),
-                              child: ChoiceChip(
-                                label: const Text('Tất cả'),
-                                selected: _selectedBuilding == null,
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() {
-                                      _selectedBuilding = null;
-                                      _selectedFloor = null;
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                            ...buildings.map((b) {
-                              final isSelected = _selectedBuilding == b;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 6.0),
-                                child: ChoiceChip(
-                                  label: Text('Tòa $b'),
-                                  selected: isSelected,
-                                  selectedColor: AppTheme.primary,
-                                  labelStyle: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : AppTheme.textPrimary,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                  onSelected: (selected) {
-                                    setState(() {
-                                      _selectedBuilding = selected ? b : null;
-                                      _selectedFloor = null;
-                                    });
-                                  },
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                AppSpacing.h12,
+                _buildBuildingFilterRow(context, buildings),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-
-          // Desktop Table View
+          AppSpacing.h16,
           AppCard(
             padding: EdgeInsets.zero,
             child: SingleChildScrollView(
@@ -720,12 +692,7 @@ class _ApartmentManagementScreenState
                   columnSpacing: 16,
                   horizontalMargin: 16,
                   headingRowColor: WidgetStateProperty.all(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.3),
+                    colorScheme.surfaceContainerLow,
                   ),
                   columns: const [
                     DataColumn(
@@ -766,26 +733,39 @@ class _ApartmentManagementScreenState
                     ),
                   ],
                   rows: filteredApartments.map((apt) {
-                    final statusColor =
-                        apt.isEmpty ? AppStatusColors.paid : AppTheme.primary;
-                    final statusText =
-                        apt.isEmpty ? 'Còn trống' : 'Đã có chủ';
+                    final statusColor = apt.isEmpty
+                        ? paidColor
+                        : colorScheme.primary;
+                    final statusText = apt.isEmpty ? 'Còn trống' : 'Đã có chủ';
 
                     return DataRow(
                       cells: [
                         DataCell(
                           Text(
                             apt.code,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
                           ),
                         ),
                         DataCell(Text('Tòa ${apt.buildingCode}')),
                         DataCell(
                           Text(
                             'Tầng ${apt.floorNumber.toString().padLeft(2, '0')}',
+                            style: const TextStyle(
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
                           ),
                         ),
-                        DataCell(Text('${apt.area ?? 0} m²')),
+                        DataCell(
+                          Text(
+                            '${apt.area ?? 0} m²',
+                            style: const TextStyle(
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                        ),
                         DataCell(
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -793,21 +773,22 @@ class _ApartmentManagementScreenState
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: statusColor.withValues(
+                                alpha: isDark ? 0.18 : 0.10,
+                              ),
+                              borderRadius: AppRadius.r12,
                               border: Border.all(
-                                color: statusColor.withValues(alpha: 0.3),
+                                color: statusColor.withValues(
+                                  alpha: isDark ? 0.45 : 0.30,
+                                ),
                               ),
                             ),
                             child: Text(
                               statusText,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: statusColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: statusColor,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -816,37 +797,48 @@ class _ApartmentManagementScreenState
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(
+                                constraints: const BoxConstraints(
+                                  minWidth: 48,
+                                  minHeight: 48,
+                                ),
+                                icon: Icon(
                                   Icons.visibility_outlined,
                                   size: 18,
-                                  color: AppTheme.primary,
+                                  color: colorScheme.primary,
                                 ),
                                 tooltip: 'Chi tiết căn hộ',
-                                onPressed: () =>
-                                    _showApartmentDetailsModal(context, ref, apt),
+                                onPressed: () => _openDetails(apt),
                               ),
                               IconButton(
-                                icon: const Icon(
+                                constraints: const BoxConstraints(
+                                  minWidth: 48,
+                                  minHeight: 48,
+                                ),
+                                icon: Icon(
                                   Icons.edit_outlined,
                                   size: 18,
-                                  color: AppTheme.secondary,
+                                  color: secondaryColor,
                                 ),
                                 tooltip: 'Chỉnh sửa',
-                                onPressed: () => _showApartmentDialog(
+                                onPressed: () => showApartmentFormDialog(
                                   context,
                                   ref,
                                   apartment: apt,
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(
+                                constraints: const BoxConstraints(
+                                  minWidth: 48,
+                                  minHeight: 48,
+                                ),
+                                icon: Icon(
                                   Icons.delete_outline,
                                   size: 18,
-                                  color: AppTheme.error,
+                                  color: errorColor,
                                 ),
                                 tooltip: 'Xóa',
                                 onPressed: () =>
-                                    _deleteApartment(context, ref, apt),
+                                    showDeleteApartmentDialog(context, ref, apt),
                               ),
                             ],
                           ),
@@ -863,18 +855,32 @@ class _ApartmentManagementScreenState
     );
   }
 
+  void _openDetails(ApartmentModel apt) {
+    showApartmentDetailsSheet(
+      context,
+      ref,
+      apt,
+      onEdit: () => showApartmentFormDialog(context, ref, apartment: apt),
+      onDelete: () => showDeleteApartmentDialog(context, ref, apt),
+    );
+  }
+
   Widget _buildKpiBox(
+    BuildContext context,
     String title,
     String value,
     Color color,
     IconData icon,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        color: color.withValues(alpha: isDark ? 0.16 : 0.08),
+        borderRadius: AppRadius.r12,
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.42 : 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -882,29 +888,30 @@ class _ApartmentManagementScreenState
           Row(
             children: [
               Icon(icon, size: 14, color: color),
-              const SizedBox(width: 4),
+              AppSpacing.w4,
               Expanded(
                 child: Text(
                   title,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          AppSpacing.h4,
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: color,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ],
@@ -912,78 +919,96 @@ class _ApartmentManagementScreenState
     );
   }
 
-  Widget _buildStatusChip(String status, String label, Color? activeColor) {
+  Widget _buildStatusChip(
+    BuildContext context,
+    String status,
+    String label,
+    Color? activeColor,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = _statusFilter == status;
-    final color = activeColor ?? AppTheme.primary;
+    final color = activeColor ?? colorScheme.primary;
+
     return ChoiceChip(
+      materialTapTargetSize: MaterialTapTargetSize.padded,
       label: Text(label),
       selected: isSelected,
-      selectedColor: color.withValues(alpha: 0.15),
+      selectedColor: color.withValues(alpha: isDark ? 0.25 : 0.15),
       labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: isSelected ? color : AppTheme.textSecondary,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
+        color: isSelected ? color : colorScheme.onSurfaceVariant,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
       backgroundColor: Colors.transparent,
-      side: BorderSide(color: isSelected ? color : Colors.grey.shade300),
+      side: BorderSide(
+        color: isSelected ? color : colorScheme.outlineVariant,
+      ),
       onSelected: (selected) {
-        if (selected) {
-          setState(() => _statusFilter = status);
-        }
+        if (selected) setState(() => _statusFilter = status);
       },
     );
   }
 
   Widget _buildGridView(List<ApartmentModel> apartments) {
     return GridView.builder(
-      padding: const EdgeInsets.all(12),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: AppSpacing.p12,
       physics: const AlwaysScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 240,
-        childAspectRatio: 0.95,
+        childAspectRatio: 0.92,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
       itemCount: apartments.length,
       itemBuilder: (context, index) {
         final apt = apartments[index];
-
         return ManagementApartmentGridCard(
           apartment: apt,
-          onTap: () => _showApartmentDetailsModal(context, ref, apt),
-          onEdit: () => _showApartmentDialog(context, ref, apartment: apt),
-          onDelete: () => _deleteApartment(context, ref, apt),
+          onTap: () => _openDetails(apt),
+          onEdit: () => showApartmentFormDialog(context, ref, apartment: apt),
+          onDelete: () => showDeleteApartmentDialog(context, ref, apt),
         );
       },
     );
   }
 
   Widget _buildListView(List<ApartmentModel> apartments) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final paidColor = AppStatusColors.getPaid(context);
+    final errorColor = AppTheme.getSemanticError(context);
+
     return ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: apartments.length,
       itemBuilder: (context, index) {
         final apt = apartments[index];
-        final statusColor =
-            apt.isEmpty ? AppStatusColors.paid : AppTheme.primary;
+        final statusColor = apt.isEmpty ? paidColor : colorScheme.primary;
         final statusText = apt.isEmpty ? 'Còn trống' : 'Đã có chủ';
 
         return AppCard(
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          onTap: () => _showApartmentDetailsModal(context, ref, apt),
+          onTap: () => _openDetails(apt),
           child: Row(
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: statusColor.withValues(alpha: 0.15),
+                backgroundColor: statusColor.withValues(
+                  alpha: isDark ? 0.2 : 0.14,
+                ),
                 child: Icon(
                   apt.isEmpty ? Icons.apartment_outlined : Icons.home,
                   color: statusColor,
                   size: 18,
                 ),
               ),
-              const SizedBox(width: 10),
+              AppSpacing.w10,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -992,40 +1017,40 @@ class _ApartmentManagementScreenState
                       children: [
                         Text(
                           'Căn ${apt.code}',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
-                        const SizedBox(width: 6),
+                        AppSpacing.w6,
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
+                            color: statusColor.withValues(
+                              alpha: isDark ? 0.18 : 0.10,
+                            ),
+                            borderRadius: AppRadius.r8,
                           ),
                           child: Text(
                             statusText,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: statusColor,
-                                ),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    AppSpacing.h4,
                     Text(
                       'Tòa ${apt.buildingCode} • Tầng ${apt.floorNumber.toString().padLeft(2, '0')} • ${apt.area ?? 0} m²',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -1035,31 +1060,29 @@ class _ApartmentManagementScreenState
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    padding: EdgeInsets.zero,
+                    tooltip: 'Chỉnh sửa',
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
-                    iconSize: 18,
-                    icon: const Icon(
+                    iconSize: 20,
+                    icon: Icon(
                       Icons.edit_outlined,
-                      color: AppTheme.primary,
+                      color: colorScheme.primary,
                     ),
                     onPressed: () =>
-                        _showApartmentDialog(context, ref, apartment: apt),
+                        showApartmentFormDialog(context, ref, apartment: apt),
                   ),
                   IconButton(
-                    padding: EdgeInsets.zero,
+                    tooltip: 'Xóa',
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
-                    iconSize: 18,
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: AppTheme.error,
-                    ),
-                    onPressed: () => _deleteApartment(context, ref, apt),
+                    iconSize: 20,
+                    icon: Icon(Icons.delete_outline, color: errorColor),
+                    onPressed: () =>
+                        showDeleteApartmentDialog(context, ref, apt),
                   ),
                 ],
               ),
@@ -1067,624 +1090,6 @@ class _ApartmentManagementScreenState
           ),
         );
       },
-    );
-  }
-
-  void _showApartmentDetailsModal(
-    BuildContext context,
-    WidgetRef ref,
-    ApartmentModel apt,
-  ) async {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return FutureBuilder<List<Map<String, dynamic>>>(
-          future: SupabaseConfig.client
-              .from('residents_apartments')
-              .select('relation_role, users(id, full_name, phone)')
-              .eq('apartment_id', apt.id),
-          builder: (context, snapshot) {
-            final residents = snapshot.data ?? [];
-            final isLoading =
-                snapshot.connectionState == ConnectionState.waiting;
-
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.domain,
-                            color: AppTheme.primary,
-                            size: 28,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Chi tiết Căn hộ ${apt.code}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: apt.isEmpty
-                              ? AppStatusColors.paid.withValues(alpha: 0.15)
-                              : AppTheme.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          apt.isEmpty ? 'Còn trống' : 'Đã có chủ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(
-                                color: apt.isEmpty
-                                    ? AppStatusColors.paid
-                                    : AppTheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildDetailTile(
-                          'Tòa nhà',
-                          'Tòa ${apt.buildingCode}',
-                          Icons.apartment,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildDetailTile(
-                          'Số tầng',
-                          'Tầng ${apt.floorNumber}',
-                          Icons.layers,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildDetailTile(
-                          'Diện tích',
-                          '${apt.area ?? 0} m²',
-                          Icons.square_foot,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  Text(
-                    'Cư dân đang sinh sống:',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (isLoading)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(12),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  else if (residents.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'Chưa có cư dân nào liên kết với căn hộ này.',
-                        style: TextStyle(color: AppTheme.textSecondary),
-                      ),
-                    )
-                  else
-                    ...residents.map((r) {
-                      final user = r['users'] as Map<String, dynamic>? ?? {};
-                      final role = r['relation_role'] == 'owner'
-                          ? 'Chủ hộ'
-                          : 'Người thuê / Ở cùng';
-                      return ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        leading: const CircleAvatar(
-                          radius: 16,
-                          child: Icon(Icons.person, size: 18),
-                        ),
-                        title: Text(
-                          user['full_name'] ?? 'Không tên',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          'SĐT: ${user['phone'] ?? 'Chưa cập nhật'} • $role',
-                        ),
-                      );
-                    }),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          icon: const Icon(
-                            Icons.qr_code_2_rounded,
-                            color: AppTheme.primary,
-                          ),
-                          label: const Text(
-                            'Mã mời',
-                            style: TextStyle(color: AppTheme.primary),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20),
-                                ),
-                              ),
-                              builder: (_) => CreateApartmentInvitationSheet(
-                                apartmentId: apt.id,
-                                apartmentCode: apt.code,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          icon: const Icon(
-                            Icons.assignment_outlined,
-                            color: AppTheme.primary,
-                          ),
-                          label: const Text(
-                            'Hợp đồng & Lưu trú',
-                            style: TextStyle(color: AppTheme.primary),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20),
-                                ),
-                              ),
-                              builder: (_) => ApartmentContractSheet(
-                                apartmentId: apt.id,
-                                apartmentCode: apt.code,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Sửa căn hộ'),
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            _showApartmentDialog(context, ref, apartment: apt);
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.error,
-                            foregroundColor: Colors.white,
-                          ),
-                          icon: const Icon(Icons.delete_outline),
-                          label: const Text('Xóa căn hộ'),
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            _deleteApartment(context, ref, apt);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildDetailTile(String label, String value, IconData icon) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 14, color: AppTheme.textSecondary),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
-    );
-  }
-
-  void _showApartmentDialog(
-    BuildContext context,
-    WidgetRef ref, {
-    ApartmentModel? apartment,
-  }) {
-    final isEditing = apartment != null;
-    final codeController = TextEditingController(text: apartment?.code ?? '');
-    final areaController = TextEditingController(
-      text: apartment?.area?.toString() ?? '',
-    );
-    final buildingController = TextEditingController(
-      text:
-          apartment?.buildingCode ??
-          (apartment != null && apartment.code.isNotEmpty
-              ? apartment.code[0].toUpperCase()
-              : 'A'),
-    );
-    final floorController = TextEditingController(
-      text:
-          apartment?.floorNumber.toString() ??
-          (apartment != null && apartment.code.length >= 3
-              ? (int.tryParse(apartment.code.substring(1, 3)) ?? 1).toString()
-              : '1'),
-    );
-    final formKey = GlobalKey<FormState>();
-    bool isSaving = false;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(isEditing ? 'Cập nhật Căn hộ' : 'Thêm Căn hộ mới'),
-              content: Form(
-                key: formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: codeController,
-                        decoration: const InputDecoration(
-                          labelText: 'Mã căn hộ (VD: A0110)',
-                          prefixIcon: Icon(Icons.tag),
-                        ),
-                        textCapitalization: TextCapitalization.characters,
-                        validator: validateApartmentCode,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        onChanged: (val) {
-                          final trimmed = val.trim().toUpperCase();
-                          if (trimmed.length >= 3 && !isEditing) {
-                            final b = trimmed[0];
-                            final f = int.tryParse(trimmed.substring(1, 3));
-                            if (f != null) {
-                              setDialogState(() {
-                                buildingController.text = b;
-                                floorController.text = f.toString();
-                              });
-                            }
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: buildingController,
-                              decoration: const InputDecoration(
-                                labelText: 'Tòa nhà (Block)',
-                                prefixIcon: Icon(Icons.business_outlined),
-                              ),
-                              textCapitalization: TextCapitalization.characters,
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'Bắt buộc'
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextFormField(
-                              controller: floorController,
-                              decoration: const InputDecoration(
-                                labelText: 'Tầng',
-                                prefixIcon: Icon(Icons.layers_outlined),
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (v) {
-                                if (v == null || v.trim().isEmpty) {
-                                  return 'Bắt buộc';
-                                }
-                                final n = int.tryParse(v.trim());
-                                if (n == null || n <= 0) return 'Số hợp lệ';
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: areaController,
-                        decoration: const InputDecoration(
-                          labelText: 'Diện tích (m²)',
-                          prefixIcon: Icon(Icons.square_foot),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: validateArea,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Hủy'),
-                ),
-                ElevatedButton(
-                  onPressed: isSaving
-                      ? null
-                      : () async {
-                          if (!(formKey.currentState?.validate() ?? false)) {
-                            return;
-                          }
-
-                          setDialogState(() => isSaving = true);
-                          final code = codeController.text.trim().toUpperCase();
-                          final area = double.parse(areaController.text.trim());
-                          final building = buildingController.text
-                              .trim()
-                              .toUpperCase();
-                          final floor =
-                              int.tryParse(floorController.text.trim()) ?? 1;
-
-                          final repo = ref.read(managementRepositoryProvider);
-                          try {
-                            if (isEditing) {
-                              await repo.updateApartment(
-                                apartment.id,
-                                code,
-                                area,
-                                buildingCode: building,
-                                floorNumber: floor,
-                              );
-                            } else {
-                              await repo.createApartment(
-                                code,
-                                area,
-                                buildingCode: building,
-                                floorNumber: floor,
-                              );
-                            }
-                            ref.invalidate(apartmentsProvider);
-                            if (context.mounted) Navigator.pop(context);
-                          } catch (e) {
-                            setDialogState(() => isSaving = false);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(formatErrorMessage(e)),
-                                  backgroundColor: AppTheme.error,
-                                ),
-                              );
-                            }
-                          }
-                        },
-                  child: isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Lưu'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _deleteApartment(
-    BuildContext context,
-    WidgetRef ref,
-    ApartmentModel apt,
-  ) {
-    if (!apt.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Không thể xóa căn hộ đã có cư dân sinh sống! Vui lòng hủy liên kết cư dân trước.',
-          ),
-          backgroundColor: AppTheme.warning,
-        ),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: AppTheme.error),
-            SizedBox(width: 8),
-            Expanded(child: Text('Xác nhận xóa')),
-          ],
-        ),
-        content: Text(
-          'Bạn có chắc chắn muốn xóa căn hộ ${apt.code}? Thao tác này không thể hoàn tác.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () async {
-              try {
-                await ref
-                    .read(managementRepositoryProvider)
-                    .deleteApartment(apt.id);
-                ref.invalidate(apartmentsProvider);
-                if (context.mounted) Navigator.pop(context);
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(formatErrorMessage(e)),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Xóa căn hộ'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _downloadApartmentTemplate(
-    BuildContext context, {
-    required bool isCsv,
-  }) async {
-    final notifier = ref.read(batchImportProvider.notifier);
-    final path = isCsv
-        ? await notifier.downloadCsvTemplate(BatchImportType.apartments)
-        : await notifier.downloadTemplate(BatchImportType.apartments);
-
-    if (path != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Đã tạo file mẫu ${isCsv ? "CSV" : "Excel"} thành công',
-          ),
-          backgroundColor: AppTheme.success,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  void _showDownloadTemplateSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Chọn định dạng file mẫu',
-              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'File mẫu bao gồm các cột chuẩn hóa: Mã Căn Hộ (*), Diện Tích (m2) (*), Trạng Thái Trống.',
-              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppTheme.success.withValues(alpha: 0.12),
-                child: const Icon(Icons.table_view, color: AppTheme.success),
-              ),
-              title: const Text(
-                'File mẫu Excel (.xlsx)',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text('Phù hợp cho Microsoft Excel hoặc WPS'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _downloadApartmentTemplate(context, isCsv: false);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
-                child: const Icon(Icons.description, color: AppTheme.primary),
-              ),
-              title: const Text(
-                'File mẫu CSV (.csv)',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text(
-                'Định dạng văn bản thuần UTF-8, tương thích Google Sheets và hệ thống khác',
-              ),
-              onTap: () {
-                Navigator.pop(ctx);
-                _downloadApartmentTemplate(context, isCsv: true);
-              },
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
     );
   }
 }

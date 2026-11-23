@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../data/models/apartment_model.dart';
 
 /// Card dạng Grid hiển thị thông tin căn hộ
@@ -22,18 +22,26 @@ class ManagementApartmentGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor =
-        apartment.isEmpty ? AppStatusColors.paid : AppTheme.primary;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final errorColor = AppTheme.getSemanticError(context);
+
+    final statusColor = apartment.isEmpty
+        ? AppStatusColors.getPaid(context)
+        : colorScheme.primary;
     final statusText = apartment.isEmpty ? 'Còn trống' : 'Đã có chủ';
 
     return Card(
       elevation: 0,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.r14,
         side: BorderSide(
           color: apartment.isEmpty
-              ? Colors.grey.shade200
-              : AppTheme.primary.withValues(alpha: 0.25),
+              ? colorScheme.outlineVariant
+              : colorScheme.primary.withValues(alpha: isDark ? 0.45 : 0.28),
           width: apartment.isEmpty ? 1 : 1.5,
         ),
       ),
@@ -55,15 +63,18 @@ class ManagementApartmentGridCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
+                      color: statusColor.withValues(
+                        alpha: isDark ? 0.18 : 0.10,
+                      ),
                       borderRadius: AppRadius.r6,
                     ),
                     child: Text(
                       apartment.code,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: statusColor,
-                          ),
+                      style: textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                   AppSpacing.w4,
@@ -74,15 +85,17 @@ class ManagementApartmentGridCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.1),
+                        color: statusColor.withValues(
+                          alpha: isDark ? 0.18 : 0.10,
+                        ),
                         borderRadius: AppRadius.r6,
                       ),
                       child: Text(
                         statusText,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: statusColor,
-                            ),
+                        style: textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -94,19 +107,19 @@ class ManagementApartmentGridCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.square_foot,
                         size: 13,
-                        color: AppTheme.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       AppSpacing.w4,
                       Expanded(
                         child: Text(
                           '${apartment.area ?? 0} m²',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppTheme.textSecondary,
-                                  ),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -115,19 +128,19 @@ class ManagementApartmentGridCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.layers_outlined,
                         size: 13,
-                        color: AppTheme.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       AppSpacing.w4,
                       Expanded(
                         child: Text(
                           'Tòa ${apartment.buildingCode} - Tầng ${apartment.floorNumber.toString().padLeft(2, '0')}',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppTheme.textSecondary,
-                                  ),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -138,30 +151,33 @@ class ManagementApartmentGridCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  InkWell(
-                    onTap: onEdit,
-                    borderRadius: BorderRadius.circular(20),
-                    child: const Padding(
-                      padding: EdgeInsets.all(3.0),
-                      child: Icon(
-                        Icons.edit_outlined,
-                        size: 17,
-                        color: AppTheme.primary,
-                      ),
+                  IconButton(
+                    tooltip: 'Chỉnh sửa căn hộ',
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
                     ),
+                    padding: EdgeInsets.zero,
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: colorScheme.primary,
+                    ),
+                    onPressed: onEdit,
                   ),
-                  AppSpacing.w6,
-                  InkWell(
-                    onTap: onDelete,
-                    borderRadius: BorderRadius.circular(20),
-                    child: const Padding(
-                      padding: EdgeInsets.all(3.0),
-                      child: Icon(
-                        Icons.delete_outline,
-                        size: 17,
-                        color: AppTheme.error,
-                      ),
+                  IconButton(
+                    tooltip: 'Xóa căn hộ',
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
                     ),
+                    padding: EdgeInsets.zero,
+                    icon: Icon(
+                      Icons.delete_outline,
+                      size: 18,
+                      color: errorColor,
+                    ),
+                    onPressed: onDelete,
                   ),
                 ],
               ),
@@ -172,4 +188,3 @@ class ManagementApartmentGridCard extends StatelessWidget {
     );
   }
 }
-

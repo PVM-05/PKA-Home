@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../data/models/apartment_model.dart';
 import '../../../../data/models/resident_model.dart';
@@ -33,12 +33,17 @@ class ManagementResidentListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
     final hasApartments =
         resident.apartments.isNotEmpty || resident.apartment != null;
 
     return AppCard(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.all(12.0),
+      padding: AppSpacing.p12,
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,10 +58,10 @@ class ManagementResidentListCard extends StatelessWidget {
                   resident.fullName.isNotEmpty
                       ? resident.fullName[0].toUpperCase()
                       : '?',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: roleColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: textTheme.titleMedium?.copyWith(
+                    color: roleColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               AppSpacing.w10,
@@ -66,30 +71,27 @@ class ManagementResidentListCard extends StatelessWidget {
                   children: [
                     Text(
                       resident.fullName,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     AppSpacing.h4,
                     if (resident.email != null && resident.email!.isNotEmpty)
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.email_outlined,
                             size: 13,
-                            color: AppTheme.textSecondary,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           AppSpacing.w4,
                           Expanded(
                             child: Text(
                               resident.email!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppTheme.textSecondary,
-                                  ),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -98,21 +100,21 @@ class ManagementResidentListCard extends StatelessWidget {
                     if (resident.phone != null && resident.phone!.isNotEmpty)
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.phone_outlined,
                             size: 13,
-                            color: AppTheme.textSecondary,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           AppSpacing.w4,
                           Expanded(
                             child: Text(
                               resident.phone!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppTheme.textSecondary,
-                                  ),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -127,20 +129,19 @@ class ManagementResidentListCard extends StatelessWidget {
                               : Icons.domain_disabled_outlined,
                           size: 14,
                           color: hasApartments
-                              ? AppTheme.success
-                              : AppTheme.textSecondary,
+                              ? successColor
+                              : colorScheme.onSurfaceVariant,
                         ),
                         AppSpacing.w4,
                         Expanded(
                           child: Text(
                             resident.apartmentSummary,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: hasApartments
-                                          ? AppTheme.success
-                                          : AppTheme.textSecondary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                            style: textTheme.bodySmall?.copyWith(
+                              color: hasApartments
+                                  ? successColor
+                                  : colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -154,30 +155,28 @@ class ManagementResidentListCard extends StatelessWidget {
                 children: [
                   if (isCurrentUserAdmin)
                     IconButton(
-                      padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
+                        minWidth: 48,
+                        minHeight: 48,
                       ),
                       iconSize: 20,
                       tooltip: 'Phân quyền vai trò',
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.manage_accounts_outlined,
-                        color: AppTheme.secondary,
+                        color: secondaryColor,
                       ),
                       onPressed: onChangeRole,
                     ),
                   IconButton(
-                    padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
                     iconSize: 20,
                     tooltip: 'Gán căn hộ',
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.add_home_work_outlined,
-                      color: AppTheme.primary,
+                      color: colorScheme.primary,
                     ),
                     onPressed: onAssignApartment,
                   ),
@@ -189,14 +188,10 @@ class ManagementResidentListCard extends StatelessWidget {
           Wrap(
             spacing: 6,
             runSpacing: 4,
-            children: [
-              roleChip,
-              statusChip,
-            ],
+            children: [roleChip, statusChip],
           ),
         ],
       ),
     );
   }
 }
-

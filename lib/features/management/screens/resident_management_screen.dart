@@ -1,28 +1,28 @@
-import 'dart:math';
-import '../../../core/router/route_names.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/action_runner.dart';
-import '../../../core/utils/error_formatter.dart';
-import '../../../core/widgets/app_state_view.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_search_field.dart';
+import '../../../core/widgets/app_state_view.dart';
+import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/shimmer_loading.dart';
-import '../../../data/providers/management_provider.dart';
-import '../../../data/models/resident_model.dart';
 import '../../../data/models/apartment_model.dart';
+import '../../../data/models/resident_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/dashboard_providers.dart'
     show pendingLinkRequestsCountProvider;
-import '../../../core/constants/permissions.dart';
-import '../../../core/widgets/role_guard.dart';
-import 'link_request_management_screen.dart';
+import '../../../data/providers/management_provider.dart';
+import '../widgets/resident/management_resident_list_card.dart';
+import '../widgets/resident/resident_management_dialogs.dart';
 import '../widgets/resident_360_detail_sheet.dart';
 import '../widgets/resident_activation_management_sheet.dart';
-import '../widgets/resident/management_resident_list_card.dart';
+import 'link_request_management_screen.dart';
 
 class ResidentManagementScreen extends ConsumerStatefulWidget {
   const ResidentManagementScreen({super.key});
@@ -82,720 +82,25 @@ class _ResidentManagementScreenState
     }
   }
 
-  Color _getRoleColor(String role) {
-    switch (role) {
-      case 'admin':
-      case 'management':
-        return AppTheme.primary;
-      case 'accountant':
-        return Colors.purple;
-      case 'technician':
-        return Colors.orange;
-      case 'resident':
-        return Colors.teal;
-      default:
-        return AppTheme.textSecondary;
+  Future<void> _openFilterSheet(BuildContext context) async {
+    final result = await showResidentFilterBottomSheet(
+      context,
+      currentRole: _selectedRoleFilter,
+      currentStatus: _selectedStatusFilter,
+      currentApartment: _selectedApartmentFilter,
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _selectedRoleFilter = result.role;
+        _selectedStatusFilter = result.status;
+        _selectedApartmentFilter = result.apartment;
+      });
     }
-  }
-
-  void _showCreateUserDialog(
-    BuildContext context,
-    List<ApartmentModel> apartments,
-  ) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => _CreateUserDialog(apartments: apartments),
-    );
-  }
-
-  void _showChangeRoleDialog(BuildContext context, ResidentModel resident) {
-    final currentUserId = ref.read(authProvider).value?.id;
-    final isSelf = resident.id == currentUserId;
-
-    String selectedRole = resident.role == 'management'
-        ? 'admin'
-        : resident.role;
-    final roles = [
-      {
-        'value': 'admin',
-        'label': 'Quản trị viên',
-        'desc': 'Toàn quyền quản trị và phân quyền hệ thống',
-      },
-      {
-        'value': 'accountant',
-        'label': 'Kế toán',
-        'desc': 'Quản lý tài chính, lập hóa đơn & cư dân',
-      },
-      {
-        'value': 'technician',
-        'label': 'Kỹ thuật viên',
-        'desc': 'Tiếp nhận & xử lý phản ánh sự cố',
-      },
-      {
-        'value': 'resident',
-        'label': 'Cư dân',
-        'desc': 'Cư dân sinh hoạt tại căn hộ chung cư',
-      },
-    ];
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Text(
-              'Phân quyền cho ${resident.fullName}',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isSelf)
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: AppStatusColors.priorityHigh.withValues(
-                          alpha: 0.1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppStatusColors.priorityHigh.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.shield_outlined,
-                            color: AppStatusColors.priorityHigh,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Đây là tài khoản của bạn. Không thể tự hạ quyền Quản trị viên để tránh mất quyền quản trị.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppStatusColors.priorityHigh,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ...roles.map((r) {
-                    final isSelected = selectedRole == r['value'];
-                    final roleColor = _getRoleColor(r['value']!);
-                    final isDisabled = isSelf && r['value'] != 'admin';
-
-                    return Opacity(
-                      opacity: isDisabled ? 0.45 : 1.0,
-                      child: InkWell(
-                        onTap: isDisabled
-                            ? () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Không thể tự hạ quyền Quản trị viên của chính mình.',
-                                    ),
-                                    duration: Duration(seconds: 2),
-                                    backgroundColor: AppTheme.error,
-                                  ),
-                                );
-                              }
-                            : () {
-                                setDialogState(
-                                  () => selectedRole = r['value']!,
-                                );
-                              },
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? roleColor.withValues(alpha: 0.1)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSelected
-                                  ? roleColor
-                                  : Colors.grey.shade300,
-                              width: isSelected ? 1.5 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isSelected
-                                    ? Icons.radio_button_checked
-                                    : Icons.radio_button_unchecked,
-                                color: isSelected
-                                    ? roleColor
-                                    : AppTheme.textSecondary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          r['label']!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                fontWeight: isSelected
-                                                    ? FontWeight.bold
-                                                    : FontWeight.w500,
-                                                color: isSelected
-                                                    ? roleColor
-                                                    : AppTheme.textPrimary,
-                                              ),
-                                        ),
-                                        if (isDisabled) ...[
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '(Bị khóa)',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall
-                                                ?.copyWith(
-                                                  color: AppTheme.error,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      r['desc']!,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: AppTheme.textSecondary,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Hủy',
-                  style: TextStyle(color: AppTheme.textSecondary),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                ),
-                onPressed: () async {
-                  if (isSelf && selectedRole != 'admin') {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Không thể tự hạ quyền Quản trị viên của chính mình.',
-                        ),
-                        backgroundColor: AppTheme.error,
-                      ),
-                    );
-                    return;
-                  }
-
-                  if (selectedRole != resident.role) {
-                    final oldRoleLabel = roles.firstWhere(
-                      (r) => r['value'] == resident.role,
-                      orElse: () => {'label': resident.role},
-                    )['label'];
-                    final newRoleLabel = roles.firstWhere(
-                      (r) => r['value'] == selectedRole,
-                      orElse: () => {'label': selectedRole},
-                    )['label'];
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (confirmContext) => AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        title: Row(
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
-                              color: AppTheme.warning,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Xác nhận đổi vai trò',
-                                style: Theme.of(confirmContext)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        content: Text(
-                          'Bạn có chắc chắn muốn thay đổi vai trò của "${resident.fullName}" từ "$oldRoleLabel" sang "$newRoleLabel"? Thao tác này sẽ cập nhật ngay quyền truy cập và chức năng của tài khoản.',
-                          style: Theme.of(confirmContext).textTheme.bodyMedium,
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pop(confirmContext, false),
-                            child: const Text(
-                              'Hủy',
-                              style: TextStyle(color: AppTheme.textSecondary),
-                            ),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                            ),
-                            onPressed: () =>
-                                Navigator.pop(confirmContext, true),
-                            child: const Text(
-                              'Xác nhận',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (confirm != true) return;
-                  }
-
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                  try {
-                    await ref
-                        .read(managementRepositoryProvider)
-                        .updateUserRole(resident.id, selectedRole);
-                    ref.invalidate(residentsProvider);
-                    if (resident.id == ref.read(authProvider).value?.id) {
-                      ref.invalidate(authProvider);
-                    }
-                    if (context.mounted) {
-                      final selectedLabel = roles.firstWhere(
-                        (r) => r['value'] == selectedRole,
-                      )['label'];
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Đã cập nhật vai trò của ${resident.fullName} thành $selectedLabel!',
-                          ),
-                          backgroundColor: AppTheme.success,
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(formatErrorMessage(e)),
-                          backgroundColor: AppTheme.error,
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: const Text(
-                  'Lưu thay đổi',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showAssignApartmentDialog(
-    BuildContext context,
-    ResidentModel resident,
-    List<ApartmentModel> apartments,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            'Gán căn hộ cho ${resident.fullName}',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: apartments.length,
-              itemBuilder: (context, index) {
-                final apt = apartments[index];
-                return Card(
-                  elevation: 0,
-                  color: AppTheme.background,
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.domain,
-                      color: apt.isEmpty
-                          ? AppTheme.primary
-                          : AppTheme.textSecondary,
-                    ),
-                    title: Text(
-                      'Căn hộ ${apt.code}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      apt.isEmpty ? 'Đang trống' : 'Đã có người ở',
-                      style: TextStyle(
-                        color: apt.isEmpty ? AppTheme.success : AppTheme.error,
-                      ),
-                    ),
-                    onTap: () async {
-                      Navigator.of(context).pop();
-                      try {
-                        await ref
-                            .read(managementRepositoryProvider)
-                            .assignResidentToApartment(resident.id, apt.id);
-                        ref.invalidate(residentsProvider);
-                        ref.invalidate(apartmentsProvider);
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Gán căn hộ thành công!'),
-                            backgroundColor: AppTheme.success,
-                          ),
-                        );
-                      } catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(formatErrorMessage(e)),
-                            backgroundColor: AppTheme.error,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Hủy',
-                style: TextStyle(color: AppTheme.textSecondary),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showFilterBottomSheet(BuildContext context) {
-    String draftRole = _selectedRoleFilter;
-    String draftStatus = _selectedStatusFilter;
-    String draftApartment = _selectedApartmentFilter;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetCtx) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade400,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Bộ lọc người dùng',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.of(sheetCtx).pop(),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 1),
-                    const SizedBox(height: 12),
-
-                    // Nhóm: Vai trò
-                    Text(
-                      'Vai trò',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        _buildSheetChoiceChip('Tất cả', draftRole == 'all', () {
-                          setSheetState(() => draftRole = 'all');
-                        }),
-                        _buildSheetChoiceChip(
-                          'Cư dân',
-                          draftRole == 'resident',
-                          () {
-                            setSheetState(() => draftRole = 'resident');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Quản trị viên',
-                          draftRole == 'admin',
-                          () {
-                            setSheetState(() => draftRole = 'admin');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Kế toán',
-                          draftRole == 'accountant',
-                          () {
-                            setSheetState(() => draftRole = 'accountant');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Kỹ thuật viên',
-                          draftRole == 'technician',
-                          () {
-                            setSheetState(() => draftRole = 'technician');
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Nhóm: Trạng thái
-                    Text(
-                      'Trạng thái',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        _buildSheetChoiceChip(
-                          'Tất cả',
-                          draftStatus == 'all',
-                          () {
-                            setSheetState(() => draftStatus = 'all');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Đang hoạt động',
-                          draftStatus == 'active',
-                          () {
-                            setSheetState(() => draftStatus = 'active');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Đã khóa',
-                          draftStatus == 'locked',
-                          () {
-                            setSheetState(() => draftStatus = 'locked');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Đã vô hiệu hóa',
-                          draftStatus == 'deactivated',
-                          () {
-                            setSheetState(() => draftStatus = 'deactivated');
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Nhóm: Căn hộ
-                    Text(
-                      'Căn hộ',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        _buildSheetChoiceChip(
-                          'Tất cả',
-                          draftApartment == 'all',
-                          () {
-                            setSheetState(() => draftApartment = 'all');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Đã gán căn hộ',
-                          draftApartment == 'assigned',
-                          () {
-                            setSheetState(() => draftApartment = 'assigned');
-                          },
-                        ),
-                        _buildSheetChoiceChip(
-                          'Chưa gán căn hộ',
-                          draftApartment == 'unassigned',
-                          () {
-                            setSheetState(() => draftApartment = 'unassigned');
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Nút Đặt lại & Áp dụng
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                            onPressed: () {
-                              setSheetState(() {
-                                draftRole = 'all';
-                                draftStatus = 'all';
-                                draftApartment = 'all';
-                              });
-                            },
-                            child: const Text('Đặt lại'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _selectedRoleFilter = draftRole;
-                                _selectedStatusFilter = draftStatus;
-                                _selectedApartmentFilter = draftApartment;
-                              });
-                              Navigator.of(sheetCtx).pop();
-                            },
-                            child: const Text(
-                              'Áp dụng',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildSheetChoiceChip(
-    String label,
-    bool isSelected,
-    VoidCallback onSelected,
-  ) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? Colors.white : AppTheme.textPrimary,
-          ),
-      selectedColor: AppTheme.primary,
-      backgroundColor: AppTheme.background,
-      onSelected: (_) => onSelected(),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final residentsAsync = ref.watch(residentsProvider);
     final apartmentsAsync = ref.watch(apartmentsProvider);
     final isCurrentUserAdmin = ref.watch(authProvider).value?.isAdmin ?? false;
@@ -855,12 +160,14 @@ class _ResidentManagementScreenState
           title: const Text('Quản lý Cư dân'),
           actions: [
             IconButton(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               icon: const Icon(Icons.key_rounded),
               tooltip: 'Mã kích hoạt & Thư mời cư dân',
               onPressed: () => ResidentActivationManagementSheet.show(context),
             ),
             if (isCurrentUserAdmin)
               IconButton(
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 icon: linkCount > 0
                     ? Badge(
                         label: Text('$linkCount'),
@@ -883,17 +190,15 @@ class _ResidentManagementScreenState
         floatingActionButton: isCurrentUserAdmin
             ? FloatingActionButton.extended(
                 backgroundColor: AppTheme.primary,
-                icon: const Icon(Icons.person_add_alt_1, color: Colors.white),
+                foregroundColor: colorScheme.onPrimary,
+                icon: const Icon(Icons.person_add_alt_1),
                 label: const Text(
                   'Thêm người dùng',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onPressed: () {
                   final apartments = apartmentsAsync.value ?? [];
-                  _showCreateUserDialog(context, apartments);
+                  showCreateResidentUserDialog(context, apartments);
                 },
               )
             : null,
@@ -905,7 +210,6 @@ class _ResidentManagementScreenState
                 final isDesktop = constraints.maxWidth >= 900;
                 return Column(
                   children: [
-                    // Search & Filter Toolbar
                     _buildResidentToolbar(
                       context,
                       isDesktop: isDesktop,
@@ -913,14 +217,8 @@ class _ResidentManagementScreenState
                       totalCount: allResidents.length,
                       hasData: residentsAsync.hasValue,
                     ),
-
-                    // Active Filters Chips
-                    if (_activeFilterCount > 0)
-                      _buildActiveFilterChips(),
-
-                    const SizedBox(height: 4),
-
-                    // Main List/Table
+                    if (_activeFilterCount > 0) _buildActiveFilterChips(),
+                    AppSpacing.h4,
                     Expanded(
                       child: AppStateView<List<ResidentModel>>(
                         asyncValue: residentsAsync,
@@ -981,6 +279,52 @@ class _ResidentManagementScreenState
     required int totalCount,
     required bool hasData,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final filterButton = OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
+      ),
+      onPressed: () => _openFilterSheet(context),
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.filter_list, size: 18),
+          if (_activeFilterCount > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+        ],
+      ),
+      label: Text(
+        _activeFilterCount > 0 ? 'Bộ lọc ($_activeFilterCount)' : 'Bộ lọc',
+      ),
+    );
+
+    final countText = Text(
+      hasData
+          ? 'Hiển thị $filteredCount/$totalCount người dùng'
+          : 'Đang tải người dùng...',
+      style: textTheme.bodySmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: colorScheme.onSurfaceVariant,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+      overflow: TextOverflow.ellipsis,
+    );
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: isDesktop
@@ -991,64 +335,15 @@ class _ResidentManagementScreenState
                   child: AppSearchField(
                     controller: _searchController,
                     hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
-                    onChanged: (val) {
-                      setState(() => _searchQuery = val.toLowerCase().trim());
-                    },
-                    onClear: () {
-                      setState(() => _searchQuery = '');
-                    },
+                    onChanged: (val) =>
+                        setState(() => _searchQuery = val.toLowerCase().trim()),
+                    onClear: () => setState(() => _searchQuery = ''),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    hasData
-                        ? 'Hiển thị $filteredCount/$totalCount người dùng'
-                        : 'Đang tải người dùng...',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textSecondary,
-                        ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () => _showFilterBottomSheet(context),
-                  icon: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      const Icon(Icons.filter_list, size: 18),
-                      if (_activeFilterCount > 0)
-                        Positioned(
-                          right: -4,
-                          top: -4,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  label: Text(
-                    _activeFilterCount > 0
-                        ? 'Bộ lọc ($_activeFilterCount)'
-                        : 'Bộ lọc',
-                  ),
-                ),
+                AppSpacing.w16,
+                Expanded(child: countText),
+                AppSpacing.w12,
+                filterButton,
               ],
             )
           : Column(
@@ -1056,69 +351,17 @@ class _ResidentManagementScreenState
                 AppSearchField(
                   controller: _searchController,
                   hintText: 'Tìm theo tên, email, SĐT hoặc mã căn hộ...',
-                  onChanged: (val) {
-                    setState(() => _searchQuery = val.toLowerCase().trim());
-                  },
-                  onClear: () {
-                    setState(() => _searchQuery = '');
-                  },
+                  onChanged: (val) =>
+                      setState(() => _searchQuery = val.toLowerCase().trim()),
+                  onClear: () => setState(() => _searchQuery = ''),
                 ),
-                const SizedBox(height: 6),
+                AppSpacing.h6,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Text(
-                        hasData
-                            ? 'Hiển thị $filteredCount/$totalCount người dùng'
-                            : 'Đang tải người dùng...',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textSecondary,
-                            ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () => _showFilterBottomSheet(context),
-                      icon: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          const Icon(Icons.filter_list, size: 16),
-                          if (_activeFilterCount > 0)
-                            Positioned(
-                              right: -3,
-                              top: -3,
-                              child: Container(
-                                width: 7,
-                                height: 7,
-                                decoration: const BoxDecoration(
-                                  color: AppTheme.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      label: Text(
-                        _activeFilterCount > 0
-                            ? 'Bộ lọc ($_activeFilterCount)'
-                            : 'Bộ lọc',
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ),
+                    Expanded(child: countText),
+                    AppSpacing.w8,
+                    filterButton,
                   ],
                 ),
               ],
@@ -1140,9 +383,7 @@ class _ResidentManagementScreenState
                   'Vai trò: ${_getRoleLabel(_selectedRoleFilter)}',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
-                onDeleted: () {
-                  setState(() => _selectedRoleFilter = 'all');
-                },
+                onDeleted: () => setState(() => _selectedRoleFilter = 'all'),
                 deleteIcon: const Icon(Icons.cancel, size: 16),
               ),
             ),
@@ -1154,9 +395,7 @@ class _ResidentManagementScreenState
                   'Trạng thái: ${_getStatusLabel(_selectedStatusFilter)}',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
-                onDeleted: () {
-                  setState(() => _selectedStatusFilter = 'all');
-                },
+                onDeleted: () => setState(() => _selectedStatusFilter = 'all'),
                 deleteIcon: const Icon(Icons.cancel, size: 16),
               ),
             ),
@@ -1168,9 +407,8 @@ class _ResidentManagementScreenState
                   'Căn hộ: ${_selectedApartmentFilter == 'assigned' ? 'Đã gán' : 'Chưa gán'}',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
-                onDeleted: () {
-                  setState(() => _selectedApartmentFilter = 'all');
-                },
+                onDeleted: () =>
+                    setState(() => _selectedApartmentFilter = 'all'),
                 deleteIcon: const Icon(Icons.cancel, size: 16),
               ),
             ),
@@ -1196,7 +434,7 @@ class _ResidentManagementScreenState
 
   Widget _buildEmptyResidentsView(BuildContext context) {
     return RefreshIndicator(
-      color: AppTheme.primary,
+      color: Theme.of(context).colorScheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
         ref.invalidate(residentsProvider);
@@ -1205,32 +443,12 @@ class _ResidentManagementScreenState
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.border.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.person_search,
-                    size: 48,
-                    color: AppTheme.textSecondary.withValues(alpha: 0.6),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Không tìm thấy người dùng nào phù hợp',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary,
-                      ),
-                ),
-              ],
-            ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+          const AppEmptyState(
+            icon: Icons.person_search,
+            title: 'Không tìm thấy người dùng nào phù hợp',
+            description:
+                'Vui lòng thử lại với từ khóa khác hoặc đặt lại bộ lọc đang áp dụng.',
           ),
         ],
       ),
@@ -1243,15 +461,19 @@ class _ResidentManagementScreenState
     List<ApartmentModel> apartments,
     bool isCurrentUserAdmin,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+
     return RefreshIndicator(
-      color: AppTheme.primary,
+      color: colorScheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
         ref.invalidate(residentsProvider);
         ref.invalidate(apartmentsProvider);
       },
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.p16,
         children: [
           AppCard(
             padding: EdgeInsets.zero,
@@ -1263,12 +485,7 @@ class _ResidentManagementScreenState
                   columnSpacing: 16,
                   horizontalMargin: 16,
                   headingRowColor: WidgetStateProperty.all(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.3),
+                    colorScheme.surfaceContainerLow,
                   ),
                   columns: const [
                     DataColumn(
@@ -1309,60 +526,59 @@ class _ResidentManagementScreenState
                     ),
                   ],
                   rows: residents.map((resident) {
-                    final roleColor = _getRoleColor(resident.role);
+                    final roleColor = getResidentRoleColor(
+                      context,
+                      resident.role,
+                    );
+                    final hasApt =
+                        resident.apartments.isNotEmpty ||
+                        resident.apartment != null;
+
                     return DataRow(
                       cells: [
-                        // Người dùng
                         DataCell(
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: roleColor.withValues(alpha: 0.15),
+                                backgroundColor: roleColor.withValues(
+                                  alpha: 0.15,
+                                ),
                                 child: Text(
                                   resident.fullName.isNotEmpty
                                       ? resident.fullName[0].toUpperCase()
                                       : '?',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
+                                  style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(
                                         color: roleColor,
                                         fontWeight: FontWeight.bold,
                                       ),
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              AppSpacing.w10,
                               Text(
                                 resident.fullName,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
                         ),
-
-                        // Vai trò
-                        DataCell(_buildRoleChip(resident)),
-
-                        // Trạng thái
-                        DataCell(_buildStatusChip(resident)),
-
-                        // Căn hộ liên kết
+                        DataCell(_buildRoleChip(context, resident)),
+                        DataCell(_buildStatusChip(context, resident)),
                         DataCell(
                           Text(
                             resident.apartmentSummary,
                             style: TextStyle(
-                              color: resident.apartments.isNotEmpty ||
-                                      resident.apartment != null
-                                  ? AppTheme.success
-                                  : AppTheme.textSecondary,
+                              color: hasApt
+                                  ? successColor
+                                  : colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-
-                        // Liên hệ
                         DataCell(
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1378,55 +594,71 @@ class _ResidentManagementScreenState
                                   resident.phone!.isNotEmpty)
                                 Text(
                                   resident.phone!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
-                                        color: AppTheme.textSecondary,
+                                        color: colorScheme.onSurfaceVariant,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
                                       ),
                                 ),
                             ],
                           ),
                         ),
-
-                        // Thao tác
                         DataCell(
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (isCurrentUserAdmin)
                                 IconButton(
-                                  icon: const Icon(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 48,
+                                    minHeight: 48,
+                                  ),
+                                  icon: Icon(
                                     Icons.manage_accounts_outlined,
                                     size: 18,
-                                    color: AppTheme.secondary,
+                                    color: secondaryColor,
                                   ),
                                   tooltip: 'Phân quyền vai trò',
-                                  onPressed: () =>
-                                      _showChangeRoleDialog(context, resident),
+                                  onPressed: () => showChangeResidentRoleDialog(
+                                    context,
+                                    ref,
+                                    resident,
+                                  ),
                                 ),
                               IconButton(
-                                icon: const Icon(
+                                constraints: const BoxConstraints(
+                                  minWidth: 48,
+                                  minHeight: 48,
+                                ),
+                                icon: Icon(
                                   Icons.add_home_work_outlined,
                                   size: 18,
-                                  color: AppTheme.primary,
+                                  color: colorScheme.primary,
                                 ),
                                 tooltip: 'Gán căn hộ',
-                                onPressed: () => _showAssignApartmentDialog(
-                                  context,
-                                  resident,
-                                  apartments,
-                                ),
+                                onPressed: () =>
+                                    showAssignResidentApartmentDialog(
+                                      context,
+                                      ref,
+                                      resident,
+                                      apartments,
+                                    ),
                               ),
                               IconButton(
-                                icon: const Icon(
+                                constraints: const BoxConstraints(
+                                  minWidth: 48,
+                                  minHeight: 48,
+                                ),
+                                icon: Icon(
                                   Icons.visibility_outlined,
                                   size: 18,
-                                  color: AppTheme.textSecondary,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                                 tooltip: 'Xem chi tiết 360',
                                 onPressed: () async {
-                                  await showModalBottomSheet(
+                                  await showModalBottomSheet<void>(
                                     context: context,
                                     isScrollControlled: true,
                                     builder: (_) => Resident360DetailSheet(
@@ -1459,25 +691,25 @@ class _ResidentManagementScreenState
     bool isCurrentUserAdmin,
   ) {
     return RefreshIndicator(
-      color: AppTheme.primary,
+      color: Theme.of(context).colorScheme.primary,
       onRefresh: () async {
         HapticFeedback.lightImpact();
         ref.invalidate(residentsProvider);
         ref.invalidate(apartmentsProvider);
       },
       child: ListView.builder(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 80),
         itemCount: residents.length,
         itemBuilder: (context, index) {
           final resident = residents[index];
-
           return ManagementResidentListCard(
             resident: resident,
             apartments: apartments,
             isCurrentUserAdmin: isCurrentUserAdmin,
             onTap: () async {
-              await showModalBottomSheet(
+              await showModalBottomSheet<void>(
                 context: context,
                 isScrollControlled: true,
                 builder: (_) => Resident360DetailSheet(resident: resident),
@@ -1485,414 +717,76 @@ class _ResidentManagementScreenState
               ref.invalidate(residentsProvider);
               ref.invalidate(apartmentsProvider);
             },
-            onChangeRole: () => _showChangeRoleDialog(context, resident),
-            onAssignApartment: () => _showAssignApartmentDialog(
+            onChangeRole: () =>
+                showChangeResidentRoleDialog(context, ref, resident),
+            onAssignApartment: () => showAssignResidentApartmentDialog(
               context,
+              ref,
               resident,
               apartments,
             ),
-            roleColor: _getRoleColor(resident.role),
-            roleChip: _buildRoleChip(resident),
-            statusChip: _buildStatusChip(resident),
+            roleColor: getResidentRoleColor(context, resident.role),
+            roleChip: _buildRoleChip(context, resident),
+            statusChip: _buildStatusChip(context, resident),
           );
         },
       ),
     );
   }
 
-  Widget _buildRoleChip(ResidentModel resident) {
+  Widget _buildRoleChip(BuildContext context, ResidentModel resident) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final roleColor = getResidentRoleColor(context, resident.role);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _getRoleColor(resident.role).withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
+        color: roleColor.withValues(alpha: isDark ? 0.18 : 0.12),
+        borderRadius: AppRadius.r8,
         border: Border.all(
-          color: _getRoleColor(resident.role).withValues(alpha: 0.4),
+          color: roleColor.withValues(alpha: isDark ? 0.45 : 0.35),
         ),
       ),
       child: Text(
         resident.roleDisplayName,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: _getRoleColor(resident.role),
-              fontWeight: FontWeight.bold,
-            ),
+          color: roleColor,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  Widget _buildStatusChip(ResidentModel resident) {
-    Color color;
-    String text;
+  Widget _buildStatusChip(BuildContext context, ResidentModel resident) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color color;
+    final String text;
     if (!resident.isActive) {
-      color = Colors.grey;
+      color = colorScheme.onSurfaceVariant;
       text = 'Đã vô hiệu hóa';
     } else if (resident.isLocked) {
-      color = AppTheme.error;
+      color = AppTheme.getSemanticError(context);
       text = 'Đã khóa';
     } else {
-      color = AppStatusColors.paid;
+      color = AppStatusColors.getPaid(context);
       text = 'Hoạt động';
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        color: color.withValues(alpha: isDark ? 0.18 : 0.12),
+        borderRadius: AppRadius.r8,
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.45 : 0.35)),
       ),
       child: Text(
         text,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-      ),
-    );
-  }
-}
-
-class _CreateUserDialog extends ConsumerStatefulWidget {
-  final List<ApartmentModel> apartments;
-
-  const _CreateUserDialog({required this.apartments});
-
-  @override
-  ConsumerState<_CreateUserDialog> createState() => _CreateUserDialogState();
-}
-
-class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  final _adminPassCtrl = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  String _role = 'resident';
-  String? _apartmentId;
-  String _relationRole = 'owner';
-  bool _obscurePass = true;
-  bool _obscureAdminPass = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _passCtrl.text = _generateSecurePassword();
-  }
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _phoneCtrl.dispose();
-    _passCtrl.dispose();
-    _adminPassCtrl.dispose();
-    super.dispose();
-  }
-
-  String _generateSecurePassword() {
-    final rand = Random.secure();
-    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    const lower = 'abcdefghjkmnpqrstuvwxyz';
-    const digits = '23456789';
-    const specials = '@#%&*!';
-    final p1 = List.generate(3, (_) => upper[rand.nextInt(upper.length)]).join();
-    final p2 = List.generate(4, (_) => lower[rand.nextInt(lower.length)]).join();
-    final p3 = List.generate(2, (_) => digits[rand.nextInt(digits.length)]).join();
-    final p4 = specials[rand.nextInt(specials.length)];
-    final list = (p1 + p2 + p3 + p4).split('')..shuffle(rand);
-    return list.join();
-  }
-
-  bool get _isPrivilegedRole =>
-      _role == 'admin' || _role == 'accountant' || _role == 'technician';
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        children: [
-          const Icon(Icons.person_add_alt_1, color: AppTheme.primary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Tạo tài khoản mới',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-        ],
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Họ và tên *',
-                  prefixIcon: Icon(Icons.person_outline),
-                ),
-                validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Vui lòng nhập họ tên'
-                    : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _emailCtrl,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email đăng nhập *',
-                  prefixIcon: Icon(Icons.email_outlined),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Vui lòng nhập email';
-                  }
-                  if (!v.contains('@') || !v.contains('.')) {
-                    return 'Email không hợp lệ';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _phoneCtrl,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Số điện thoại',
-                  prefixIcon: Icon(Icons.phone_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _passCtrl,
-                obscureText: _obscurePass,
-                decoration: InputDecoration(
-                  labelText: 'Mật khẩu khởi tạo *',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  helperText:
-                      'Mật khẩu tạm thời. Cư dân có thể đổi sau khi đăng nhập.',
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          _obscurePass ? Icons.visibility_off : Icons.visibility,
-                          size: 20,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscurePass = !_obscurePass),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.refresh, size: 20),
-                        tooltip: 'Tạo mật khẩu ngẫu nhiên mới',
-                        onPressed: () => setState(
-                          () => _passCtrl.text = _generateSecurePassword(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                validator: (v) =>
-                    (v == null || v.length < 6) ? 'Mật khẩu ít nhất 6 ký tự' : null,
-              ),
-              const SizedBox(height: 14),
-              DropdownButtonFormField<String>(
-                initialValue: _role,
-                decoration: const InputDecoration(
-                  labelText: 'Vai trò tài khoản',
-                  prefixIcon: Icon(Icons.badge_outlined),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'resident', child: Text('Cư dân')),
-                  DropdownMenuItem(
-                      value: 'admin', child: Text('Quản trị viên (Admin)')),
-                  DropdownMenuItem(value: 'accountant', child: Text('Kế toán')),
-                  DropdownMenuItem(
-                      value: 'technician', child: Text('Kỹ thuật viên')),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() {
-                      _role = val;
-                      if (_role != 'resident') {
-                        _apartmentId = null;
-                      }
-                    });
-                  }
-                },
-              ),
-              if (_role == 'resident') ...[
-                const SizedBox(height: 14),
-                DropdownButtonFormField<String?>(
-                  initialValue: _apartmentId,
-                  decoration: const InputDecoration(
-                    labelText: 'Căn hộ ban đầu (tùy chọn)',
-                    prefixIcon: Icon(Icons.domain),
-                  ),
-                  items: [
-                    const DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('Không gán căn hộ ngay'),
-                    ),
-                    ...widget.apartments.map(
-                      (apt) => DropdownMenuItem<String?>(
-                        value: apt.id,
-                        child: Text(
-                          'Căn hộ ${apt.code} (${apt.isEmpty ? 'Trống' : 'Đang ở'})',
-                        ),
-                      ),
-                    ),
-                  ],
-                  onChanged: (val) => setState(() => _apartmentId = val),
-                ),
-                if (_apartmentId != null) ...[
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _relationRole,
-                    decoration: const InputDecoration(
-                      labelText: 'Quan hệ với căn hộ',
-                      prefixIcon: Icon(Icons.home_outlined),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'owner', child: Text('Chủ hộ')),
-                      DropdownMenuItem(value: 'member', child: Text('Thành viên')),
-                      DropdownMenuItem(value: 'tenant', child: Text('Người thuê')),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _relationRole = val);
-                      }
-                    },
-                  ),
-                ],
-              ],
-              if (_isPrivilegedRole) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.warning.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border:
-                        Border.all(color: AppTheme.warning.withValues(alpha: 0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.security, color: AppTheme.warning, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Xác thực quyền quản trị',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.brown,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Tài khoản này có đặc quyền quản trị hệ thống. Vui lòng nhập mật khẩu xác nhận của Quản trị viên hiện tại.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.brown,
-                            ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _adminPassCtrl,
-                        obscureText: _obscureAdminPass,
-                        decoration: InputDecoration(
-                          labelText: 'Mật khẩu quản trị viên xác thực *',
-                          prefixIcon: const Icon(Icons.admin_panel_settings),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureAdminPass
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              size: 18,
-                            ),
-                            onPressed: () => setState(
-                              () => _obscureAdminPass = !_obscureAdminPass,
-                            ),
-                          ),
-                          isDense: true,
-                        ),
-                        validator: (v) {
-                          if (_isPrivilegedRole &&
-                              (v == null || v.trim().isEmpty)) {
-                            return 'Bắt buộc xác thực mật khẩu quản trị';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
+          color: color,
+          fontWeight: FontWeight.bold,
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.upload_file),
-          tooltip: 'Nhập Excel',
-          onPressed: () => context.push(AppRoutes.managementBatchImport),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Hủy', style: TextStyle(color: AppTheme.textSecondary)),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
-          onPressed: () async {
-            if (!_formKey.currentState!.validate()) return;
-            final fullName = _nameCtrl.text.trim();
-            final email = _emailCtrl.text.trim();
-            final password = _passCtrl.text;
-            final phone =
-                _phoneCtrl.text.trim().isNotEmpty ? _phoneCtrl.text.trim() : null;
-            final role = _role;
-            final apartmentId = _apartmentId;
-            final relationRole = _relationRole;
-
-            Navigator.pop(context);
-
-            await runAction(
-              context,
-              () async {
-                await ref.read(managementRepositoryProvider).createUser(
-                      email: email,
-                      password: password,
-                      fullName: fullName,
-                      phone: phone,
-                      role: role,
-                      apartmentId: apartmentId,
-                      relationRole: relationRole,
-                    );
-                ref.invalidate(residentsProvider);
-                ref.invalidate(apartmentsProvider);
-                return 'Đã tạo tài khoản cho $fullName thành công!';
-              },
-              actionName: 'Tạo tài khoản người dùng',
-            );
-          },
-          child: const Text('Tạo tài khoản', style: TextStyle(color: Colors.white)),
-        ),
-      ],
     );
   }
 }
