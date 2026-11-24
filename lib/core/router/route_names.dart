@@ -12,6 +12,7 @@ class AppRoutes {
   static const String verifyOtp = '/verify-otp';
   static const String resetPassword = '/reset-password';
   static const String mfaChallenge = '/mfa-challenge';
+  static const String documentLookup = '/document-lookup';
 
   // Resident
   static const String residentHome = '/resident';

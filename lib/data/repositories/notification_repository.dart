@@ -70,6 +70,18 @@ class NotificationRepository {
     );
   }
 
+  /// Hủy đăng ký FCM device token khi đăng xuất để tránh lộ thông báo trên thiết bị dùng chung
+  Future<void> unregisterFcmToken({
+    required String userId,
+    String? token,
+  }) async {
+    var query = _client.from('user_fcm_tokens').delete().eq('user_id', userId);
+    if (token != null && token.isNotEmpty) {
+      query = query.eq('token', token);
+    }
+    await query;
+  }
+
   /// Kích hoạt quét nhắc hạn thủ công (dành cho Ban Quản Lý hoặc trigger khẩn cấp)
   Future<int> triggerInvoiceRemindersScan({String? buildingId}) async {
     final result = await _client.rpc(

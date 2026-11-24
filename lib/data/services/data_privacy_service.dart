@@ -44,7 +44,7 @@ class SupabaseDataPrivacySource implements DataPrivacySource {
   Future<List<Map<String, dynamic>>> fetchVehicles(String userId) async {
     final res = await _db
         .from('vehicles')
-        .select('id, plate_number, vehicle_type, status, created_at')
+        .select('id, license_plate, vehicle_type, status, created_at')
         .eq('user_id', userId);
     return List<Map<String, dynamic>>.from(res as List);
   }

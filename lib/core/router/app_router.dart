@@ -1,3 +1,4 @@
+import '../../features/document/screens/document_lookup_screen.dart';
 import '../../features/management/screens/community_management_screen.dart';
 import '../../features/management/screens/front_desk_workstation_screen.dart';
 import '../../features/management/screens/maintenance_materials_screen.dart';
@@ -109,6 +110,10 @@ final Map<String, PermissionItem> _managementRoutePermissions = {
 
   AppRoutes.managementAmenities: AppPermissions.amenityManagement,
   AppRoutes.managementHandbook: AppPermissions.handbookManagement,
+  AppRoutes.managementAnnouncements: AppPermissions.announcementManagement,
+  AppRoutes.managementFrontDesk: AppPermissions.frontDeskWorkstation,
+  AppRoutes.managementCommunity: AppPermissions.communityManagement,
+  AppRoutes.managementServiceRatings: AppPermissions.serviceRatingOverview,
   AppRoutes.managementAuditTrail: AppPermissions.auditTrail,
   AppRoutes.managementRoleDelegation: AppPermissions.roleDelegation,
   AppRoutes.managementPermissionMatrix: AppPermissions.permissionMatrix,
@@ -142,12 +147,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == AppRoutes.register ||
           state.matchedLocation == AppRoutes.residentActivation ||
           state.matchedLocation == AppRoutes.forgotPassword;
+      final isPublicRoute = state.matchedLocation == AppRoutes.documentLookup;
       final isRecoveryRoute = state.matchedLocation == AppRoutes.verifyOtp ||
           state.matchedLocation == AppRoutes.resetPassword;
       final needsMfa = ref.read(mfaChallengeRequiredProvider);
 
       // Đang loading auth state → không redirect
       if (authState.isLoading) return null;
+
+      // Tuyến công khai (tra cứu xác thực hóa đơn/biên lai điện tử qua QR)
+      if (isPublicRoute) return null;
 
       // Đang trong luồng khôi phục mật khẩu (xác thực OTP hoặc đặt lại mật khẩu) → không tự redirect ra trang chủ
       if (isRecoveryRoute) return null;
@@ -248,6 +257,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           child: const MfaChallengeScreen(),
         ),
       ),
+      GoRoute(
+        path: AppRoutes.documentLookup,
+        pageBuilder: (context, state) {
+          final initialCode = state.uri.queryParameters['code'] ??
+              (state.extra is String ? state.extra as String : null);
+          return AppPageTransitions.fade(
+            state: state,
+            child: DocumentLookupScreen(initialLookupCode: initialCode),
+          );
+        },
+      ),
 
       // ─── Resident Routes ───
       GoRoute(
@@ -267,7 +287,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'detail',
                 pageBuilder: (context, state) {
-                  final invoice = state.extra as InvoiceModel;
+                  final invoice = state.extra is InvoiceModel ? state.extra as InvoiceModel : null;
+                  if (invoice == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.residentInvoices,
+                      label: 'Quay lại danh sách hóa đơn',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child: ResidentInvoiceDetailScreen(invoice: invoice),
@@ -294,7 +321,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'edit',
                 pageBuilder: (context, state) {
-                  final issue = state.extra as IssueModel;
+                  final issue = state.extra is IssueModel ? state.extra as IssueModel : null;
+                  if (issue == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.residentIssues,
+                      label: 'Quay lại danh sách phản ánh',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child: EditIssueScreen(issue: issue),
@@ -304,7 +338,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'detail',
                 pageBuilder: (context, state) {
-                  final issue = state.extra as IssueModel;
+                  final issue = state.extra is IssueModel ? state.extra as IssueModel : null;
+                  if (issue == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.residentIssues,
+                      label: 'Quay lại danh sách phản ánh',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child: IssueDetailScreen(issue: issue),
@@ -361,7 +402,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'amenity-booking',
             pageBuilder: (context, state) {
-              final amenity = state.extra as BuildingAmenityModel;
+              final amenity = state.extra is BuildingAmenityModel
+                  ? state.extra as BuildingAmenityModel
+                  : null;
+              if (amenity == null) {
+                return _missingExtraFallbackPage(
+                  state: state,
+                  fallbackRoute: AppRoutes.residentAmenities,
+                  label: 'Quay lại danh sách tiện ích',
+                );
+              }
               return AppPageTransitions.slideFromRight(
                 state: state,
                 child: AmenityBookingScreen(amenity: amenity),
@@ -371,7 +421,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'announcement',
             pageBuilder: (context, state) {
-              final announcement = state.extra as AnnouncementModel;
+              final announcement = state.extra is AnnouncementModel
+                  ? state.extra as AnnouncementModel
+                  : null;
+              if (announcement == null) {
+                return _missingExtraFallbackPage(
+                  state: state,
+                  fallbackRoute: AppRoutes.residentHome,
+                  label: 'Quay lại trang chủ',
+                );
+              }
               return AppPageTransitions.slideFromRight(
                 state: state,
                 child: ResidentAnnouncementDetailScreen(
@@ -467,7 +526,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'edit',
                 pageBuilder: (context, state) {
-                  final invoice = state.extra as InvoiceModel;
+                  final invoice = state.extra is InvoiceModel ? state.extra as InvoiceModel : null;
+                  if (invoice == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.managementInvoices,
+                      label: 'Quay lại quản lý hóa đơn',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child: EditInvoiceScreen(invoice: invoice),
@@ -477,7 +543,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'detail',
                 pageBuilder: (context, state) {
-                  final invoice = state.extra as InvoiceModel;
+                  final invoice = state.extra is InvoiceModel ? state.extra as InvoiceModel : null;
+                  if (invoice == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.managementInvoices,
+                      label: 'Quay lại quản lý hóa đơn',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child:
@@ -498,7 +571,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'detail',
                 pageBuilder: (context, state) {
-                  final issue = state.extra as IssueModel;
+                  final issue = state.extra is IssueModel ? state.extra as IssueModel : null;
+                  if (issue == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.managementIssues,
+                      label: 'Quay lại quản lý sự cố',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child: IssueDetailScreen(issue: issue),
@@ -598,7 +678,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'detail',
                 pageBuilder: (context, state) {
-                  final equipment = state.extra as BuildingEquipmentModel;
+                  final equipment = state.extra is BuildingEquipmentModel
+                      ? state.extra as BuildingEquipmentModel
+                      : null;
+                  if (equipment == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.managementEquipment,
+                      label: 'Quay lại danh sách thiết bị',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child: EquipmentDetailScreen(equipment: equipment),
@@ -714,15 +803,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'workstation',
                 pageBuilder: (context, state) {
-                  final extra = state.extra as Map<String, dynamic>? ?? {};
+                  final extra = state.extra is Map<String, dynamic>
+                      ? state.extra as Map<String, dynamic>
+                      : null;
+                  final buildingId = extra?['buildingId'] as String?;
+                  final apartmentId = extra?['apartmentId'] as String?;
+                  final apartmentCode = extra?['apartmentCode'] as String?;
+                  if (buildingId == null || apartmentId == null || apartmentCode == null) {
+                    return _missingExtraFallbackPage(
+                      state: state,
+                      fallbackRoute: AppRoutes.managementHandovers,
+                      label: 'Quay lại quản lý bàn giao',
+                    );
+                  }
                   return AppPageTransitions.slideFromRight(
                     state: state,
                     child: InspectionWorkstationScreen(
-                      buildingId: (extra['buildingId'] as String?) ?? 'bld-01',
-                      apartmentId: (extra['apartmentId'] as String?) ?? 'apt-01',
-                      apartmentCode: (extra['apartmentCode'] as String?) ?? 'A0110',
-                      initialType: extra['initialType'] as String?,
-                      existingHandoverId: extra['existingHandoverId'] as String?,
+                      buildingId: buildingId,
+                      apartmentId: apartmentId,
+                      apartmentCode: apartmentCode,
+                      initialType: extra?['initialType'] as String?,
+                      existingHandoverId: extra?['existingHandoverId'] as String?,
                     ),
                   );
                 },
@@ -739,11 +840,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Trang "${state.matchedLocation}" không tồn tại.',
-                style: const TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 16),
               ElevatedButton(
@@ -757,6 +862,48 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
+
+Page<void> _missingExtraFallbackPage({
+  required GoRouterState state,
+  required String fallbackRoute,
+  required String label,
+}) {
+  return AppPageTransitions.fade(
+    state: state,
+    child: Builder(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: const Text('Phiên dữ liệu đã làm mới')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.refresh_rounded,
+                  size: 56,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Dữ liệu chi tiết không còn trong bộ nhớ trình duyệt sau khi tải lại trang.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: () => context.go(fallbackRoute),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  label: Text(label),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 /// Wrapper để kiểm tra link status của cư dân trước khi hiển thị
 /// home screen. Nếu chưa liên kết → hiển thị LinkRequestScreen.

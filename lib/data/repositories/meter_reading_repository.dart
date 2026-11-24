@@ -61,18 +61,18 @@ class MeterReadingRepository {
       final file = File(imagePath);
       if (await file.exists()) {
         final bytes = await file.readAsBytes();
-        await _client.storage.from('meter-images').uploadBinary(
+        await _client.storage.from('meter-readings').uploadBinary(
           fileName,
           bytes,
           fileOptions: FileOptions(contentType: 'image/$validExt', upsert: true),
         );
-        return _client.storage.from('meter-images').getPublicUrl(fileName);
+        return _client.storage.from('meter-readings').getPublicUrl(fileName);
       }
     } catch (_) {
       // Fallback khi Storage chưa sẵn sàng hoặc môi trường cục bộ: trả về URL storage chuẩn từ client cấu hình
     }
 
-    return _client.storage.from('meter-images').getPublicUrl(fileName);
+    return _client.storage.from('meter-readings').getPublicUrl(fileName);
   }
 
   /// Cư dân gửi khai báo chỉ số điện nước mới (kèm độ tin cậy OCR và cảnh báo bất thường)

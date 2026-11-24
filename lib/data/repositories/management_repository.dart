@@ -238,8 +238,10 @@ class ManagementRepository {
         'p_items': items,
       },
     );
-    final invoiceId = response is Map ? response['invoice_id'] as String? : null;
-    if (invoiceId != null && status != 'unpaid') {
+    final String? invoiceId = response is String
+        ? response
+        : (response is Map ? response['invoice_id'] as String? : null);
+    if (invoiceId != null && invoiceId.isNotEmpty && status != 'unpaid') {
       await _client
           .from('invoices')
           .update({'status': status, 'updated_at': DateTime.now().toIso8601String()})
@@ -253,28 +255,17 @@ class ManagementRepository {
     required String invoiceId,
     String? note,
   }) async {
-    final now = DateTime.now().toIso8601String();
-    final invRes = await _client
-        .from('invoices')
-        .select('id, apartment_id, total_amount, status')
-        .eq('id', invoiceId)
-        .single();
-    final aptId = invRes['apartment_id'];
-
-    await _client.from('invoices').update({
-      'status': 'paid',
-      'paid_at': now,
-      'payment_method': 'VietQR',
-      'payment_reference': 'MANUAL_MATCH_$transactionId',
-      'updated_at': now,
-    }).eq('id', invoiceId);
-
-    await _client.from('payment_transactions').update({
-      'status': 'SUCCESS',
-      'invoice_id': invoiceId,
-      'apartment_id': aptId,
-      'updated_at': now,
-    }).eq('id', transactionId);
+    final response = await _client.rpc(
+      'reconcile_unmatched_payment_transaction',
+      params: {
+        'p_transaction_id': transactionId,
+        'p_invoice_id': invoiceId,
+        'p_note': note,
+      },
+    );
+    if (response is Map && response['success'] != true) {
+      throw Exception(response['message'] ?? 'Không thể đối soát giao dịch thanh toán.');
+    }
   }
 
   Future<void> deleteInvoice(String invoiceId) async {
@@ -609,7 +600,7 @@ class ManagementRepository {
   Future<List<IssueRatingModel>> fetchAllRatings() async {
     final response = await _client
         .from('issue_ratings')
-        .select('*, users:reporter_id(full_name)')
+        .select('*, users:user_id(full_name)')
         .order('created_at', ascending: false);
 
     return (response as List).map((e) => IssueRatingModel.fromJson(e)).toList();

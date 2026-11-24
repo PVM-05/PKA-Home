@@ -59,7 +59,11 @@ class VisitorPassTokenService {
   static const String _tokenPrefix = 'VIVONAPASS.v1.';
   static const String _legacyV1Prefix = 'PKAPASS.v1.';
   static const String _legacyPrefix = 'PKAPASS:';
-  static const String _defaultPepper = 'Vivona@SecurityPassSignaturePepper#2026';
+  static const String _envPepper = String.fromEnvironment('VISITOR_PASS_SECRET');
+  static const String _fallbackPepper = 'Vivona@SecurityPassSignaturePepper#2026';
+
+  static String get _effectiveDefaultPepper =>
+      _envPepper.isNotEmpty ? _envPepper : _fallbackPepper;
 
   /// Sinh chuỗi QR đã ký mật mã học cho vé khách
   static String generateSignedQrPayload({
@@ -70,7 +74,7 @@ class VisitorPassTokenService {
     String? secretKey,
   }) {
     final effectiveNonce = nonce ?? _generateRandomNonce();
-    final effectiveKey = secretKey ?? _defaultPepper;
+    final effectiveKey = secretKey ?? _effectiveDefaultPepper;
 
     final issuedAtEpoch = issuedAt.millisecondsSinceEpoch ~/ 1000;
     final expiresAtEpoch = expiresAt.millisecondsSinceEpoch ~/ 1000;
@@ -81,18 +85,25 @@ class VisitorPassTokenService {
     return '$_tokenPrefix$passCode.$issuedAtEpoch.$expiresAtEpoch.$effectiveNonce.$signature';
   }
 
-  /// Xác thực và trích xuất dữ liệu từ mã QR đã quét
+  /// Xác thực và trích xuất dữ liệu từ mã QR đã quét.
+  /// Mặc định từ chối định dạng cũ không có chữ ký (`PKAPASS:`) để chống hạ cấp bảo mật (downgrade bypass).
   static VisitorPassTokenResult verifyAndParseQrPayload(
     String qrPayload, {
     DateTime? now,
     String? secretKey,
+    bool allowLegacyUnsigned = false,
   }) {
     final trimmed = qrPayload.trim();
     final currentTime = now ?? DateTime.now();
-    final effectiveKey = secretKey ?? _defaultPepper;
+    final effectiveKey = secretKey ?? _effectiveDefaultPepper;
 
-    // 1. Kiểm tra định dạng Legacy (tương thích ngược)
+    // 1. Định dạng Legacy không chữ ký: mặc định bị từ chối trên production
     if (trimmed.startsWith(_legacyPrefix)) {
+      if (!allowLegacyUnsigned) {
+        return VisitorPassTokenResult.invalid(
+          'Mã vé định dạng cũ không có chữ ký số đã bị vô hiệu hóa để bảo mật. Vui lòng xuất lại vé QR mới.',
+        );
+      }
       final parts = trimmed.split(':');
       if (parts.length >= 2 && parts[1].isNotEmpty) {
         return VisitorPassTokenResult.valid(

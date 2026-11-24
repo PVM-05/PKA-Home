@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/push_notification_service.dart';
 import '../../core/security/mfa_service.dart';
+import '../../core/sync/sync_providers.dart';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 
@@ -125,9 +126,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
 
   Future<void> logout() async {
     _isManualLogout = true;
+    final outgoingUserId = state.valueOrNull?.id ?? _repository.currentUser?.id;
     _ref?.read(sessionExpiredNoticeProvider.notifier).state = false;
     _ref?.read(mfaChallengeRequiredProvider.notifier).state = false;
     try {
+      // 1. Hủy đăng ký FCM token thiết bị cho tài khoản đang thoát (chống lộ push trên thiết bị dùng chung)
+      if (outgoingUserId != null && _ref != null) {
+        await _ref.read(pushNotificationServiceProvider).unregisterDeviceToken(outgoingUserId);
+      }
+      // 2. Xóa sạch hàng đợi Offline Sync để ngăn phát lại thao tác của tài khoản cũ dưới phiên mới
+      if (_ref != null) {
+        try {
+          await _ref.read(offlineSyncQueueStorageProvider).clearAll();
+        } catch (_) {}
+      }
       await _repository.logout();
     } catch (_) {
       _isManualLogout = false;

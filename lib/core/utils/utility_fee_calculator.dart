@@ -208,9 +208,31 @@ class UtilityFeeCalculator {
   }) {
     final rate = max(0.0, monthlyRate.toDouble());
 
-    final parts = period.split('-');
-    final year = int.tryParse(parts[0]) ?? DateTime.now().year;
-    final month = int.tryParse(parts[1]) ?? DateTime.now().month;
+    int year = DateTime.now().year;
+    int month = DateTime.now().month;
+    if (period.contains('-')) {
+      final parts = period.split('-');
+      if (parts.length >= 2) {
+        year = int.tryParse(parts[0].trim()) ?? year;
+        month = int.tryParse(parts[1].trim()) ?? month;
+      }
+    } else if (period.contains('/')) {
+      final parts = period.split('/');
+      if (parts.length >= 2) {
+        final p0 = int.tryParse(parts[0].trim());
+        final p1 = int.tryParse(parts[1].trim());
+        if (p0 != null && p1 != null) {
+          if (p0 > 12) {
+            year = p0;
+            month = p1;
+          } else {
+            month = p0;
+            year = p1;
+          }
+        }
+      }
+    }
+    month = month.clamp(1, 12);
 
     final periodStart = DateTime(year, month, 1);
     final nextMonth = month == 12

@@ -18,7 +18,25 @@ class VehicleRepository {
     return fileName;
   }
 
-  /// Trích xuất hoặc lấy URL công khai của ảnh đăng ký xe
+  /// Tạo Signed URL bảo mật có thời hạn cho ảnh Giấy đăng ký xe trong bucket private `vehicle-docs`
+  Future<String> getSignedRegistrationImageUrl(
+    String? urlOrPath, {
+    int expiresInSeconds = 3600,
+  }) async {
+    if (urlOrPath == null || urlOrPath.trim().isEmpty) return '';
+    if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+      return urlOrPath;
+    }
+    try {
+      return await _client.storage
+          .from('vehicle-docs')
+          .createSignedUrl(urlOrPath, expiresInSeconds);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Trích xuất hoặc lấy URL ảnh đăng ký xe (tương thích ngược; ưu tiên [getSignedRegistrationImageUrl] cho private bucket)
   String getRegistrationImageUrl(String? urlOrPath) {
     if (urlOrPath == null || urlOrPath.trim().isEmpty) return '';
     if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {

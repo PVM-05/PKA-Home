@@ -334,7 +334,23 @@ class HandoverRepository {
     );
   }
 
-  /// Trích xuất URL hình ảnh hoặc chữ ký
+  /// Tạo Signed URL tạm thời cho tài liệu/chữ ký trong bucket riêng tư `handover-docs`
+  Future<String> getSignedDocumentUrl(
+    String? path, {
+    int expiresInSeconds = 3600,
+  }) async {
+    if (path == null || path.trim().isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    try {
+      return await _supabase.storage
+          .from('handover-docs')
+          .createSignedUrl(path, expiresInSeconds);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Trích xuất URL hình ảnh hoặc chữ ký (khuyến nghị dùng [getSignedDocumentUrl] cho bucket private)
   String getDocumentUrl(String? path) {
     if (path == null || path.trim().isEmpty) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;

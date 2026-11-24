@@ -206,6 +206,38 @@ class AppPermissions {
     allowedRoles: ['admin'],
   );
 
+  static const announcementManagement = PermissionItem(
+    key: 'announcement_management',
+    name: 'Quản trị thông báo & Phát sóng',
+    category: 'Thông tin & Cẩm nang',
+    description: 'Soạn thảo, phát hành thông báo thường và khẩn cấp đến cư dân tòa nhà.',
+    allowedRoles: ['admin', 'management'],
+  );
+
+  static const frontDeskWorkstation = PermissionItem(
+    key: 'front_desk_workstation',
+    name: 'Trạm lễ tân & An ninh sảnh',
+    category: 'Vận hành & An ninh',
+    description: 'Quét vé QR khách viếng thăm, tiếp nhận và bàn giao bưu kiện cư dân.',
+    allowedRoles: ['admin', 'management', 'staff', 'receptionist', 'security'],
+  );
+
+  static const communityManagement = PermissionItem(
+    key: 'community_management',
+    name: 'Quản trị biểu quyết & Kiến nghị',
+    category: 'Thông tin & Cẩm nang',
+    description: 'Tạo cuộc biểu quyết Hội nghị nhà chung cư và phản hồi kiến nghị cư dân.',
+    allowedRoles: ['admin', 'management'],
+  );
+
+  static const serviceRatingOverview = PermissionItem(
+    key: 'service_rating_overview',
+    name: 'Tổng quan đánh giá chất lượng dịch vụ',
+    category: 'Tiện ích & Dịch vụ',
+    description: 'Theo dõi mức độ hài lòng của cư dân và phản hồi xử lý sự cố.',
+    allowedRoles: ['admin', 'management'],
+  );
+
   static const List<PermissionItem> all = [
     invoiceManagement,
     issueManagement,
@@ -213,6 +245,10 @@ class AppPermissions {
     linkRequestManagement,
     apartmentManagement,
     handbookManagement,
+    announcementManagement,
+    frontDeskWorkstation,
+    communityManagement,
+    serviceRatingOverview,
     roleDelegation,
     vehicleApproval,
     meterReadingManagement,

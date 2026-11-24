@@ -57,7 +57,7 @@ class _FrontDeskWorkstationScreenState
       context,
       title: 'Quét vé khách vào/ra',
       hintText: 'Căn chỉnh mã QR vé khách trong khung hình',
-      manualInputHint: 'VD: VP-202611-00001 hoặc mã token PKAPASS',
+      manualInputHint: 'VD: VP-202611-00001 hoặc mã token VIVONAPASS',
     );
     if (scannedCode != null && scannedCode.isNotEmpty) {
       await _processVisitorCode(scannedCode);
@@ -69,7 +69,7 @@ class _FrontDeskWorkstationScreenState
     String code = trimmed;
     String? qrPayload;
 
-    if (trimmed.startsWith('PKAPASS')) {
+    if (trimmed.startsWith('VIVONAPASS') || trimmed.startsWith('PKAPASS')) {
       final parseResult = VisitorPassTokenService.verifyAndParseQrPayload(
         trimmed,
       );

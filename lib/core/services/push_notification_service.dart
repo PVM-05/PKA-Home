@@ -367,6 +367,24 @@ class PushNotificationService {
     }
   }
 
+  /// Hủy đăng ký FCM token của thiết bị hiện tại khi đăng xuất (bảo vệ quyền riêng tư trên thiết bị dùng chung)
+  Future<void> unregisterDeviceToken(String userId) async {
+    try {
+      String? currentToken;
+      if (isFirebaseInitialized) {
+        currentToken = await FirebaseMessaging.instance.getToken();
+      }
+      await _notificationRepo.unregisterFcmToken(
+        userId: userId,
+        token: currentToken,
+      );
+    } catch (e) {
+      debugPrint('Bỏ qua hủy đăng ký FCM token khi đăng xuất: $e');
+    } finally {
+      dispose();
+    }
+  }
+
   /// Đăng ký Token thiết bị thủ công vào Supabase CSDL
   Future<void> registerTokenManually({
     required String userId,
