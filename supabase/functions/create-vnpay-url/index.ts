@@ -7,7 +7,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") || "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -148,33 +148,23 @@ serve(async (req: Request) => {
       });
     }
 
-    // 5. Kiểm tra phân quyền RBAC (bao gồm vai trò ủy quyền qua RPC get_effective_user_role)
-    let effectiveRole = "resident";
-    const { data: rpcRole } = await supabase.rpc("get_effective_user_role", {
-      p_user_id: userId,
+    // 5. Kiểm tra phân quyền RBAC nghiêm ngặt theo đúng tòa nhà (Tenant-Scoped)
+    const { data: hasStaffAccess } = await supabase.rpc("has_building_role", {
       p_building_id: buildingId,
+      p_required_roles: ["admin", "management", "manager", "owner", "accountant"],
+      p_user_id: userId,
     });
 
-    if (rpcRole) {
-      effectiveRole = rpcRole;
-    } else {
-      const { data: appUser } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle();
-      effectiveRole = appUser?.role ?? "resident";
-    }
-
-    const isStaffOrManagement = ["admin", "management", "accountant"].includes(effectiveRole);
+    const isStaffOrManagement = hasStaffAccess === true;
 
     if (!isStaffOrManagement) {
-      // Nếu là cư dân, bắt buộc phải thuộc căn hộ của hóa đơn
+      // Nếu không phải nhân sự tài chính của chính tòa nhà này, bắt buộc phải là cư dân active thuộc căn hộ của hóa đơn
       const { data: linkRecord } = await supabase
         .from("residents_apartments")
         .select("id")
         .eq("user_id", userId)
         .eq("apartment_id", invoice.apartment_id)
+        .eq("status", "active")
         .limit(1)
         .maybeSingle();
 
@@ -246,8 +236,10 @@ serve(async (req: Request) => {
 
     const returnUrl = Deno.env.get("VNPAY_RETURN_URL") || "https://vivona.web.app/payment-result";
     const vnpAmount = Math.round(remainingAmount * 100).toString();
-    const txnRef = invoice.payment_code;
     const createDate = formatVnpayDate(new Date());
+    // Mỗi lần khởi tạo phiên thanh toán VNPay phải có vnp_TxnRef duy nhất (<payment_code>_<HHmmss>)
+    const attemptSuffix = createDate.slice(-6) + Math.floor(Math.random() * 90 + 10).toString();
+    const txnRef = `${invoice.payment_code}_${attemptSuffix}`;
 
     const params: Record<string, string> = {
       vnp_Version: "2.1.0",

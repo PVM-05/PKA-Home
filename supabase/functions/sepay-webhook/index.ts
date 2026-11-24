@@ -6,9 +6,18 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") || "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-sepay-key",
 };
+
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
 
 serve(async (req: Request) => {
   // Xử lý Preflight CORS Request
@@ -58,9 +67,9 @@ serve(async (req: Request) => {
       );
     }
 
-    // Tùy chọn kiểm tra Master Key ở vành đai (nếu môi trường yêu cầu khóa bảo vệ cổng chung)
+    // Tùy chọn kiểm tra Master Key ở vành đai bằng so sánh hằng thời gian
     const masterEnvKey = Deno.env.get("SEPAY_WEBHOOK_MASTER_KEY");
-    if (masterEnvKey && apiKey !== masterEnvKey) {
+    if (masterEnvKey && !constantTimeEqual(apiKey, masterEnvKey)) {
       console.warn("[SePay Webhook Security]: API Key không khớp với SEPAY_WEBHOOK_MASTER_KEY.");
       return new Response(
         JSON.stringify({

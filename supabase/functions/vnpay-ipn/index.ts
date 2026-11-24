@@ -6,9 +6,18 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") || "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
 
 /**
  * Tính toán chữ ký HMAC-SHA512 theo chuẩn VNPay
@@ -113,49 +122,52 @@ serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 3. Tìm cấu hình Secret Key tương ứng với TMN Code (2 bước độc lập qua building_id)
-    let hashSecret = Deno.env.get("VNPAY_HASH_SECRET") || "";
+    // 3. Tìm cấu hình Secret Key tương ứng với TMN Code (Fail-Closed & Tenant-Scoped theo building_id)
+    let hashSecret = "";
+    let verifiedBuildingId: string | null = null;
 
-    if (tmnCode) {
-      const { data: configData } = await supabase
-        .from("building_payment_configs")
-        .select("building_id, vnpay_is_active")
-        .eq("vnpay_tmn_code", tmnCode)
-        .eq("vnpay_is_active", true)
-        .limit(1)
+    if (!tmnCode) {
+      return new Response(
+        JSON.stringify({ RspCode: "01", Message: "Thieu ma merchant vnp_TmnCode" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { data: configData } = await supabase
+      .from("building_payment_configs")
+      .select("building_id, vnpay_is_active")
+      .eq("vnpay_tmn_code", tmnCode)
+      .eq("vnpay_is_active", true)
+      .limit(1)
+      .maybeSingle();
+
+    if (configData && configData.building_id) {
+      verifiedBuildingId = configData.building_id;
+      const { data: secretData } = await supabase
+        .from("building_payment_secrets")
+        .select("vnpay_hash_secret")
+        .eq("building_id", configData.building_id)
         .maybeSingle();
 
-      if (configData && configData.building_id) {
-        const { data: secretData } = await supabase
-          .from("building_payment_secrets")
-          .select("vnpay_hash_secret")
-          .eq("building_id", configData.building_id)
-          .maybeSingle();
-
-        if (secretData && secretData.vnpay_hash_secret) {
-          hashSecret = secretData.vnpay_hash_secret;
-        }
+      if (secretData && secretData.vnpay_hash_secret) {
+        hashSecret = secretData.vnpay_hash_secret;
       }
     }
 
-    if (!hashSecret) {
-      console.error(`[VNPay IPN]: Khong tim thay hash_secret cho TMN Code: ${tmnCode}`);
+    if (!hashSecret || !verifiedBuildingId) {
+      console.error(`[VNPay IPN]: Khong tim thay cau hinh active cho TMN Code: ${tmnCode}`);
       return new Response(
         JSON.stringify({ RspCode: "01", Message: "Khong tim thay cau hinh merchant hoac chua kich hoat" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // 4. Kiểm tra chữ ký số HMAC-SHA512
+    // 4. Kiểm tra chữ ký số HMAC-SHA512 bằng so sánh hằng thời gian (không log expectedHash)
     const signData = buildVnpaySignData(params);
     const expectedHash = await computeHmacSha512(hashSecret, signData);
 
-    if (expectedHash.toLowerCase() !== secureHash.toLowerCase()) {
-      console.error("[VNPay IPN]: Sai chu ky HMAC-SHA512!", {
-        expected: expectedHash,
-        received: secureHash,
-        signData: signData,
-      });
+    if (!constantTimeEqual(expectedHash.toLowerCase(), secureHash.toLowerCase())) {
+      console.error(`[VNPay IPN]: Sai chu ky HMAC-SHA512 cho TMN=${tmnCode}, TxnRef=${txnRef}`);
       return new Response(
         JSON.stringify({ RspCode: "97", Message: "Chu ky khong hop le (Invalid Checksum)" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -163,7 +175,6 @@ serve(async (req: Request) => {
     }
 
     // 5. Kiểm tra kết quả giao dịch từ VNPay
-    // Nếu mã phản hồi khác '00', giao dịch không thành công
     if (responseCode !== "00" || (transactionStatus && transactionStatus !== "00")) {
       console.warn(`[VNPay IPN]: Giao dich that bai tai VNPay. Ma loi: ${responseCode}`);
       return new Response(
@@ -174,16 +185,19 @@ serve(async (req: Request) => {
 
     // 6. Số tiền VNPay trả về nhân 100 lần (VND * 100)
     const amount = Number(amountStr) / 100;
+    const basePaymentCode = txnRef.split("_")[0] || txnRef;
 
-    // 7. Gọi RPC `process_bank_payment_webhook` bảo mật bằng Service Role
+    // 7. Gọi RPC `process_bank_payment_webhook` kèm verified_building_id chống Cross-Tenant Spoofing
     const { data: rpcResult, error: rpcError } = await supabase.rpc(
       "process_bank_payment_webhook",
       {
         p_payload: {
           gateway_transaction_id: transactionNo || txnRef,
-          content: orderInfo || txnRef,
+          content: orderInfo || basePaymentCode,
           amount: amount,
-          payment_code: txnRef,
+          payment_code: basePaymentCode,
+          verified_building_id: verifiedBuildingId,
+          vnp_txn_ref: txnRef,
           vnp_bank_code: params["vnp_BankCode"] || "",
           vnp_pay_date: params["vnp_PayDate"] || "",
           raw_gateway: "VNPAY",

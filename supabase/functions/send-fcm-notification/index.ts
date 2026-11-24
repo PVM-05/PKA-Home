@@ -150,12 +150,15 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Xác thực nguồn gọi an toàn: Service Role, Webhook Secret hoặc kiểm tra chéo bản ghi CSDL
+    // Xác thực nguồn gọi an toàn: Service Role, Webhook Secret hoặc đọc bản ghi xác thực từ CSDL
     const authHeader = req.headers.get("Authorization");
     const webhookSecret = req.headers.get("x-webhook-secret");
     const expectedSecret = Deno.env.get("FCM_WEBHOOK_SECRET");
-    const isServiceRole = authHeader === `Bearer ${supabaseServiceKey}`;
+    const isServiceRole = Boolean(supabaseServiceKey && authHeader === `Bearer ${supabaseServiceKey}`);
     const isSecretMatch = Boolean(expectedSecret && webhookSecret === expectedSecret);
+
+    // Luôn lấy nội dung thực tế từ CSDL (không bao giờ tin title/body từ request bên ngoài)
+    let authoritativeNotif = notification;
 
     if (!isServiceRole && !isSecretMatch) {
       if (!notification.id) {
@@ -164,20 +167,24 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Kiểm tra chéo: Bản ghi thông báo phải thực sự tồn tại trong CSDL và gắn đúng recipient user_id
+      // Kiểm tra chéo: Bản ghi thông báo phải thực sự tồn tại, chưa đọc, mới phát sinh trong 5 phút và khớp recipient
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const { data: dbNotif, error: verifyError } = await supabase
         .from("notifications")
-        .select("id, user_id")
+        .select("id, user_id, title, body, type, created_at, is_read")
         .eq("id", notification.id)
         .eq("user_id", notification.user_id)
+        .eq("is_read", false)
+        .gte("created_at", fiveMinutesAgo)
         .maybeSingle();
 
       if (verifyError || !dbNotif) {
-        return new Response(JSON.stringify({ error: "Forbidden: Notification record does not exist or recipient mismatch" }), {
+        return new Response(JSON.stringify({ error: "Forbidden: Notification record invalid, expired, or recipient mismatch" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      authoritativeNotif = dbNotif;
     }
 
     // 1. Lấy danh sách FCM token còn hiệu lực của user
@@ -224,13 +231,13 @@ serve(async (req) => {
               message: {
                 token: token,
                 notification: {
-                  title: notification.title || "Thông báo mới",
-                  body: notification.body || notification.content || "",
+                  title: authoritativeNotif.title || "Thông báo mới",
+                  body: authoritativeNotif.body || authoritativeNotif.content || "",
                 },
                 data: {
-                  notification_id: String(notification.id ?? ""),
-                  type: String(notification.type ?? "general"),
-                  created_at: String(notification.created_at ?? ""),
+                  notification_id: String(authoritativeNotif.id ?? ""),
+                  type: String(authoritativeNotif.type ?? "general"),
+                  created_at: String(authoritativeNotif.created_at ?? ""),
                 },
               },
             }),
