@@ -165,6 +165,8 @@ void main() {
       // Đợt 5: Các module con tách từ Trạm kế toán & Lập hóa đơn
       'lib/features/management/widgets/accounting/accounting_sepay_reconciliation_view.dart',
       'lib/features/management/widgets/invoice/create_invoice_fee_cards.dart',
+      // Đợt 6: Các module con tách từ Quản lý Thông báo
+      'lib/features/management/widgets/announcement/announcement_dialogs.dart',
     ];
 
     test('Guardrail: Mọi file trong whitelist đều phải tồn tại trên đĩa', () {

@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 
 /// Màn hình xem trước chứng từ PDF tích hợp xem trực quan,
@@ -21,15 +20,20 @@ class DocumentPreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           title,
-          style: context.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: Colors.white),
+          style: context.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onPrimary,
+          ),
         ),
         elevation: 0,
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
       body: SafeArea(
         child: PdfPreview(
@@ -39,9 +43,9 @@ class DocumentPreviewScreen extends StatelessWidget {
           allowPrinting: true,
           allowSharing: true,
           canChangePageFormat: false,
-          loadingWidget: const Center(
+          loadingWidget: Center(
             child: CircularProgressIndicator(
-              color: AppTheme.primary,
+              color: colorScheme.primary,
             ),
           ),
           build: buildPdf,

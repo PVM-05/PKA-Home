@@ -98,24 +98,24 @@
 
 ## Đợt 6 — Kỹ Thuật, Bàn Giao, Truyền Thông, Quản Trị & Tài Liệu (`main`)
 
-- [ ] **6.1** Kỹ thuật & Vật tư *(Tier 2–3)*:
-  - [ ] `lib/features/management/screens/equipment_management_screen.dart`
-  - [ ] `lib/features/management/screens/equipment_detail_screen.dart`
-  - [ ] `lib/features/management/screens/maintenance_materials_screen.dart`
-- [ ] **6.2** Bàn giao & Kiểm kê *(Tier 2)*:
-  - [ ] `lib/features/management/screens/handover_management_screen.dart`
-  - [ ] `lib/features/management/screens/inspection_workstation_screen.dart`
-- [ ] **6.3** Truyền thông & Đánh giá *(Tier 2–3)*:
-  - [ ] `lib/features/management/screens/announcement_management_screen.dart` *(+ dọn 31 màu cứng)*
-  - [ ] `lib/features/management/screens/handbook_management_screen.dart`
-  - [ ] `lib/features/management/screens/community_management_screen.dart`
-  - [ ] `lib/features/management/screens/service_rating_overview_screen.dart`
-- [ ] **6.4** Quản trị Hệ thống & SaaS *(Tier 3)*:
-  - [ ] `lib/features/management/screens/audit_trail_screen.dart`
-  - [ ] `lib/features/management/screens/role_delegation_screen.dart`
-  - [ ] `lib/features/management/screens/permission_matrix_screen.dart`
-  - [ ] `lib/features/management/screens/batch_import_center_screen.dart`
-  - [ ] `lib/features/management/screens/subscription_management_screen.dart`
-- [ ] **6.5** Tra cứu Tài liệu *(Tier 3)*:
-  - [ ] `lib/features/document/screens/document_lookup_screen.dart`
-  - [ ] `lib/features/document/screens/document_preview_screen.dart`
+- [x] **6.1** Kỹ thuật & Vật tư *(Tier 2–3)*:
+  - [x] `lib/features/management/screens/equipment_management_screen.dart`
+  - [x] `lib/features/management/screens/equipment_detail_screen.dart`
+  - [x] `lib/features/management/screens/maintenance_materials_screen.dart`
+- [x] **6.2** Bàn giao & Kiểm kê *(Tier 2)*:
+  - [x] `lib/features/management/screens/handover_management_screen.dart`
+  - [x] `lib/features/management/screens/inspection_workstation_screen.dart`
+- [x] **6.3** Truyền thông & Đánh giá *(Tier 2–3)*:
+  - [x] `lib/features/management/screens/announcement_management_screen.dart` *(+ dọn 31 màu cứng)*
+  - [x] `lib/features/management/screens/handbook_management_screen.dart`
+  - [x] `lib/features/management/screens/community_management_screen.dart`
+  - [x] `lib/features/management/screens/service_rating_overview_screen.dart`
+- [x] **6.4** Quản trị Hệ thống & SaaS *(Tier 3)*:
+  - [x] `lib/features/management/screens/audit_trail_screen.dart`
+  - [x] `lib/features/management/screens/role_delegation_screen.dart`
+  - [x] `lib/features/management/screens/permission_matrix_screen.dart`
+  - [x] `lib/features/management/screens/batch_import_center_screen.dart`
+  - [x] `lib/features/management/screens/subscription_management_screen.dart`
+- [x] **6.5** Tra cứu Tài liệu *(Tier 3)*:
+  - [x] `lib/features/document/screens/document_lookup_screen.dart`
+  - [x] `lib/features/document/screens/document_preview_screen.dart`
