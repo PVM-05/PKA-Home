@@ -244,42 +244,56 @@ class ResidentActivationNotifier extends StateNotifier<ResidentActivationState> 
 
     try {
       String authUserId;
-      final virtualEmail = '${state.phone}@pka.home';
+      final virtualEmail = '${state.phone}@vivona.vn';
 
-      // 1. Đăng ký tài khoản trong Supabase Auth
-      try {
-        final authRes = await SupabaseConfig.client.auth.signUp(
-          email: virtualEmail,
-          password: password,
-          data: {
-            'phone': state.phone,
-            'full_name': state.fullName,
-            'role': 'resident',
-          },
-        );
-
-        if (authRes.user != null) {
-          authUserId = authRes.user!.id;
-        } else {
-          // Nếu đã tồn tại tài khoản Auth, thử đăng nhập
-          final loginRes = await SupabaseConfig.client.auth.signInWithPassword(
-            email: virtualEmail,
-            password: password,
-          );
-          authUserId = loginRes.user?.id ?? '';
-        }
-      } catch (authErr) {
-        // Fallback thử đăng nhập nếu tài khoản auth đã được tạo
+      // 1. Đăng ký tài khoản trong Supabase Auth (chỉ fallback offline khi Supabase chưa cấu hình trong môi trường kiểm thử)
+      if (!SupabaseConfig.isConfigured) {
+        authUserId = 'auth-${state.phone}';
+      } else {
         try {
-          final loginRes = await SupabaseConfig.client.auth.signInWithPassword(
+          final authRes = await SupabaseConfig.client.auth.signUp(
             email: virtualEmail,
             password: password,
+            data: {
+              'phone': state.phone,
+              'full_name': state.fullName,
+            },
           );
-          authUserId = loginRes.user?.id ?? '';
+
+          if (authRes.user != null) {
+            authUserId = authRes.user!.id;
+          } else {
+            final loginRes = await SupabaseConfig.client.auth.signInWithPassword(
+              email: virtualEmail,
+              password: password,
+            );
+            authUserId = loginRes.user?.id ?? '';
+          }
         } catch (_) {
-          // Trong môi trường mock/offline
-          authUserId = 'auth-${state.phone}';
+          // Thử đăng nhập nếu tài khoản Auth đã tồn tại trước đó
+          try {
+            final loginRes = await SupabaseConfig.client.auth.signInWithPassword(
+              email: virtualEmail,
+              password: password,
+            );
+            authUserId = loginRes.user?.id ?? '';
+          } catch (_) {
+            state = state.copyWith(
+              isLoading: false,
+              errorMessage:
+                  'Không thể khởi tạo tài khoản xác thực cho số điện thoại này. Vui lòng kiểm tra kết nối hoặc liên hệ Ban Quản Lý.',
+            );
+            return false;
+          }
         }
+      }
+
+      if (authUserId.isEmpty) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Không thể lấy mã định danh tài khoản sau khi đăng ký.',
+        );
+        return false;
       }
 
       // 2. Gọi RPC hoàn tất kích hoạt trên Database

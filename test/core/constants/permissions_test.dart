@@ -91,8 +91,8 @@ void main() {
       expect(AppPermissions.permissionMatrix.allows('technician'), isFalse);
     });
 
-    test('AppPermissions.all contains all 22 permissions with valid metadata', () {
-      expect(AppPermissions.all.length, equals(22));
+    test('AppPermissions.all contains all 26 permissions with valid metadata', () {
+      expect(AppPermissions.all.length, equals(26));
       for (final item in AppPermissions.all) {
         expect(item.key.isNotEmpty, isTrue);
         expect(item.name.isNotEmpty, isTrue);

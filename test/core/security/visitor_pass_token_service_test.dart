@@ -75,19 +75,28 @@ void main() {
       expect(result.errorMessage?.toLowerCase(), contains('chữ ký'));
     });
 
-    test('nhận diện và tương thích ngược với mã vé legacy PKAPASS:code:random', () {
+    test('từ chối mặc định mã vé legacy không chữ ký PKAPASS: và chỉ chấp nhận khi bật allowLegacyUnsigned', () {
       const legacyPayload = 'PKAPASS:VP-202611-00005:a1b2c3d4';
 
-      final result = VisitorPassTokenService.verifyAndParseQrPayload(
+      final blockedResult = VisitorPassTokenService.verifyAndParseQrPayload(
         legacyPayload,
         now: now,
         secretKey: testSecret,
       );
+      expect(blockedResult.isValid, isFalse);
+      expect(blockedResult.errorMessage, contains('vô hiệu hóa'));
 
-      expect(result.isValid, isTrue);
-      expect(result.isLegacyFormat, isTrue);
-      expect(result.passCode, 'VP-202611-00005');
-      expect(result.errorMessage, isNull);
+      final optInResult = VisitorPassTokenService.verifyAndParseQrPayload(
+        legacyPayload,
+        now: now,
+        secretKey: testSecret,
+        allowLegacyUnsigned: true,
+      );
+
+      expect(optInResult.isValid, isTrue);
+      expect(optInResult.isLegacyFormat, isTrue);
+      expect(optInResult.passCode, 'VP-202611-00005');
+      expect(optInResult.errorMessage, isNull);
     });
 
     test('nhận diện và xác thực hợp lệ với định dạng legacy PKAPASS.v1.', () {

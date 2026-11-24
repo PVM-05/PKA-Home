@@ -35,6 +35,13 @@ class MockVehicleBillingRepository implements VehicleRepository {
   Future<int> getActiveMotorbikeCount(String apartmentId) async => 0;
 
   @override
+  Future<String> getSignedRegistrationImageUrl(
+    String? urlOrPath, {
+    int expiresInSeconds = 3600,
+  }) async =>
+      urlOrPath ?? '';
+
+  @override
   Future<List<VehicleModel>> getAllVehicles({String? status}) async => [];
 
   @override

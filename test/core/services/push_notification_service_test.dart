@@ -30,6 +30,12 @@ class MockNotificationRepository implements NotificationRepository {
   Future<void> markAllAsRead(String userId) async {}
 
   @override
+  Future<void> unregisterFcmToken({
+    required String userId,
+    String? token,
+  }) async {}
+
+  @override
   Future<void> registerFcmToken({
     required String userId,
     required String token,

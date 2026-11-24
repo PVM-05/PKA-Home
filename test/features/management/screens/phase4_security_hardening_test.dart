@@ -5,8 +5,8 @@ import 'package:vivona/data/models/resident_model.dart';
 
 void main() {
   group('Giai Đoạn 4: Hardening Bảo Mật, Phân Quyền & An Toàn Thao Tác Tests', () {
-    test('P0-#19: Hệ thống phân quyền RBAC có đầy đủ 22 quyền quản trị cốt lõi', () {
-      expect(AppPermissions.all.length, equals(22));
+    test('P0-#19: Hệ thống phân quyền RBAC có đầy đủ 26 quyền quản trị cốt lõi', () {
+      expect(AppPermissions.all.length, equals(26));
 
       // Kiểm tra quyền bãi xe
       expect(AppPermissions.parkingManagement.allowedRoles, contains('management'));

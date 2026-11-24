@@ -41,6 +41,13 @@ class MockVehicleRepository implements VehicleRepository {
   }
 
   @override
+  Future<String> getSignedRegistrationImageUrl(
+    String? urlOrPath, {
+    int expiresInSeconds = 3600,
+  }) async =>
+      urlOrPath ?? '';
+
+  @override
   Future<List<VehicleModel>> getAllVehicles({String? status}) async {
     final list = [
       VehicleModel(
