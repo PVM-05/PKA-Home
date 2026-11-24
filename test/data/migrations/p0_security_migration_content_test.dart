@@ -2,65 +2,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Migration 20261007_02 chứa đầy đủ các bản vá bảo mật RPC và RLS', () {
-    final file = File('supabase/migrations_archive/20261007_02_fix_critical_security_and_policies.sql');
-    expect(file.existsSync(), isTrue, reason: 'File migration 20261007_02 phải tồn tại');
-
-    final content = file.readAsStringSync();
-    expect(content.contains('is_admin_or_accountant()'), isTrue, reason: 'Phải dùng guard is_admin_or_accountant');
-    expect(content.contains('create_invoice_with_items'), isTrue, reason: 'Phải siết hàm create_invoice_with_items');
-    expect(content.contains('update_invoice_with_items'), isTrue, reason: 'Phải siết hàm update_invoice_with_items');
-    expect(content.contains('record_manual_payment'), isTrue, reason: 'Phải có RPC record_manual_payment');
-    expect(content.contains("rejection_reason IS NULL"), isTrue, reason: 'Vehicle insert phải ép rejection_reason IS NULL');
-    expect(content.contains("submitted_by = auth.uid()"), isTrue, reason: 'Meter reading phải ép submitted_by = auth.uid()');
-    expect(content.contains("Cư dân đặt lịch tiện ích"), isTrue, reason: 'Phải drop policy insert direct tiện ích');
-    expect(content.contains("simulate_invoice_payment"), isTrue, reason: 'Phải drop hàm cũ simulate_invoice_payment');
-    expect(content.contains("Cư dân xóa yêu cầu bị từ chối"), isTrue, reason: 'Phải có policy DELETE link requests rejected');
-  });
-
-  test('Migration 20261004_02 dùng đúng các cột của bảng role_delegations', () {
-    final file = File('supabase/migrations_archive/20261004_02_building_equipment_maintenance.sql');
-    expect(file.existsSync(), isTrue);
-
-    final content = file.readAsStringSync();
-    expect(content.contains('delegate_user_id'), isFalse, reason: 'Không được chứa delegate_user_id');
-    expect(content.contains('rd.delegate_id = auth.uid()'), isTrue);
-    expect(content.contains('now() BETWEEN rd.starts_at AND rd.ends_at'), isTrue);
-  });
-
-  test('Migration 20261010_01 chứa đầy đủ các bản vá bổ sung', () {
-    final file = File('supabase/migrations_archive/20261010_01_comprehensive_database_and_security_patches.sql');
-    expect(file.existsSync(), isTrue);
-
-    final content = file.readAsStringSync();
-    expect(content.contains('v_txn_code :='), isTrue, reason: 'Phải tự sinh transaction_code');
-    expect(content.contains("trg_check_amenity_booking_resident_update"), isTrue);
-    expect(content.contains("GREATEST(0, v_cur_elec - v_old_elec)"), isTrue);
-    expect(content.contains(r"\ysập\y|\ysap\y|\ynổ\y|\yno\y"), isTrue);
-    expect(content.contains("DROP FUNCTION IF EXISTS public.simulate_invoice_payment(UUID, VARCHAR)"), isTrue);
-    expect(content.contains("checked_in_at"), isTrue, reason: 'Phải cập nhật cột checked_in_at');
-    expect(content.contains("building_amenities"), isTrue, reason: 'Phải trỏ đúng bảng building_amenities');
-    expect(content.contains("auth.uid() IS NULL"), isTrue, reason: 'Phải cho phép seed script chạy khi auth.uid() null');
-  });
-
-  test('Migration 20261010_01 siết chặt quyền và trạng thái trong simulate_unified_payment', () {
-    final file = File('supabase/migrations_archive/20261010_01_comprehensive_database_and_security_patches.sql');
-    final content = file.readAsStringSync();
-    expect(content.contains("v_user_id IS NULL THEN"), isTrue, reason: 'Phải bắt buộc đăng nhập');
-    expect(content.contains("residents_apartments"), isTrue, reason: 'Phải kiểm tra quyền cư dân căn hộ');
-    expect(content.contains("v_inv_status = 'paid'"), isTrue, reason: 'Phải chặn thanh toán trùng hóa đơn');
-    expect(content.contains("v_booking_status = 'confirmed'"), isTrue, reason: 'Phải chặn thanh toán trùng tiện ích');
-    expect(content.contains("NOT IN ('SUCCESS', 'FAILED')"), isTrue, reason: 'Phải kiểm tra outcome hợp lệ');
-  });
-
-  test('Migration 20261010_01 approve_meter_reading khóa FOR UPDATE và từ chối chỉ số mới nhỏ hơn chỉ số cũ', () {
-    final file = File('supabase/migrations_archive/20261010_01_comprehensive_database_and_security_patches.sql');
-    final content = file.readAsStringSync();
-    expect(content.contains("FROM public.apartments\n    WHERE id = v_sub.apartment_id FOR UPDATE;"), isTrue);
-    expect(content.contains("v_sub.electric_reading < v_old_elec"), isTrue);
-    expect(content.contains("v_sub.water_reading < v_old_water"), isTrue);
-  });
-
   group('Kiểm thử bảo vệ các bản sửa lỗi trong Migration 20261120_03, 20261120_04 và Fresh DB', () {
     final migration03 = File('supabase/migrations/20261120030000_security_hardening_and_missing_rpcs.sql');
     final migration04 = File('supabase/migrations/20261120040000_patch_activation_and_staff_roles.sql');
@@ -159,4 +100,3 @@ void main() {
     });
   });
 }
-

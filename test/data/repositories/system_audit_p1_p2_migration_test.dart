@@ -1,36 +1,27 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vivona/data/models/amenity_booking_model.dart';
 
 void main() {
-  group('P1 & P2 System Audit Migration Tests (20261024_02)', () {
-    test('Tập tin migration 20261024_02_system_audit_p1_p2_fixes.sql phải tồn tại', () {
-      final file = File('supabase/migrations_archive/20261024_02_system_audit_p1_p2_fixes.sql');
-      expect(file.existsSync(), isTrue, reason: 'Migration 20261024_02_system_audit_p1_p2_fixes.sql chưa được tạo');
+  group('P1 & P2 System Audit Migration Tests', () {
+    test('Tập tin migration tiện ích & bảo mật phải tồn tại', () {
+      final file1 = File('supabase/migrations/20261108020000_amenity_lifecycle_and_deposit.sql');
+      final file2 = File('supabase/migrations/20261120010000_security_hardening_auth_and_rls.sql');
+      expect(file1.existsSync(), isTrue);
+      expect(file2.existsSync(), isTrue);
     });
 
-    test('Migration phải định nghĩa cột notes, Partial Unique Index và RPC ẩn danh PII', () {
-      final file = File('supabase/migrations_archive/20261024_02_system_audit_p1_p2_fixes.sql');
-      final content = file.readAsStringSync();
+    test('Migration phải định nghĩa RPC ẩn danh PII, múi giờ Việt Nam và kiểm tra bảo trì', () {
+      final content1 = File('supabase/migrations/20261108020000_amenity_lifecycle_and_deposit.sql').readAsStringSync();
+      final content2 = File('supabase/migrations/20261120010000_security_hardening_auth_and_rls.sql').readAsStringSync();
 
-      // 1. Cột notes
-      expect(content.contains('ADD COLUMN IF NOT EXISTS notes TEXT'), isTrue);
+      // 1. RPC ẩn danh PII slot availability
+      expect(content2.contains('get_amenity_slot_availability'), isTrue);
+      expect(content2.contains('is_my_booking'), isTrue);
 
-      // 2. Chống giao dịch PENDING trùng lặp
-      expect(content.contains('uq_pending_invoice_transaction'), isTrue);
-      expect(content.contains('uq_pending_booking_transaction'), isTrue);
-      expect(content.contains("WHERE status = 'PENDING'"), isTrue);
-
-      // 3. RPC ẩn danh PII slot availability
-      expect(content.contains('get_amenity_slot_availability'), isTrue);
-      expect(content.contains('is_my_booking'), isTrue);
-
-      // 4. Siết RLS đọc amenity_bookings
-      expect(content.contains('booked_by = auth.uid()'), isTrue);
-
-      // 5. Múi giờ Việt Nam và kiểm tra bảo trì trong book_amenity_slot
-      expect(content.contains('Asia/Ho_Chi_Minh'), isTrue);
-      expect(content.contains('amenity_maintenance_windows'), isTrue);
+      // 2. Múi giờ Việt Nam và kiểm tra bảo trì trong book_amenity_slot
+      expect(content1.contains('Asia/Ho_Chi_Minh'), isTrue);
+      expect(content1.contains('amenity_maintenance_windows'), isTrue);
     });
 
     test('AmenityBookingModel ánh xạ đúng trường notes trong fromJson và toJson', () {

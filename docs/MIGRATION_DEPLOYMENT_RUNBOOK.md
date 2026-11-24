@@ -1,10 +1,10 @@
 # Vivona — Kịch Bản Kiểm Thử & Triển Khai Push Migration An Toàn
 ## (Staging Trước, Production Sau — Chuẩn Bị Ngày 21/11/2026)
 
-> **MÃ NGUỒN KIỂM CHỨNG:** Git commit `6cd75d0` (Nhánh `main`)  
-> **QUY MÔ MIGRATION:** 44 tệp migration đã chuẩn hóa timestamp 14 chữ số duy nhất (`YYYYMMDDHH0000`)  
+> **MÃ NGUỒN KIỂM CHỨNG:** Git commit `8950322` (Nhánh `main`)  
+> **QUY MÔ MIGRATION:** 46 tệp migration chính thức chuẩn hóa timestamp 14 chữ số (`20261027010000` → `20261124020000`, đã dọn bỏ hoàn toàn `migrations_archive` cũ)  
 > **DỰ ÁN ĐÍCH (REMOTE):** `Ứng Dụng Quản Lý Chung Cư` (Project Ref: `vpgimjyyechhuofjghsb`) — Environment: `production`  
-> **MỤC ĐÍCH TÀI LIỆU:** Cung cấp quy trình vận hành tiêu chuẩn (SOP Runbook) cho Kỹ sư Vận hành / Agent Triển khai đưa toàn bộ các bản vá bảo mật (C1–C5), 22 RPCs cốt lõi (§0) và cấu trúc dữ liệu mới lên cơ sở dữ liệu thực tế mà không gây gián đoạn dịch vụ hoặc xung đột dữ liệu.
+> **MỤC ĐÍCH TÀI LIỆU:** Cung cấp quy trình vận hành tiêu chuẩn (SOP Runbook) cho Kỹ sư Vận hành / Agent Triển khai đưa toàn bộ các bản vá bảo mật đa cơ sở (Multi-Tenant RLS), chống nâng quyền, toàn vẹn thanh toán SePay/VNPay, lưu vết PDPL 2026 và 4 Edge Functions lên cơ sở dữ liệu thực tế an toàn 100%.
 
 ---
 
@@ -356,3 +356,20 @@ Xác nhận lại: Gọi `verify_activation_code` trên môi trường Productio
 3. Extension `pgcrypto`: Trỏ trực tiếp schema `extensions` cho `gen_random_bytes` và cấu hình `search_path`.
 4. Bảng mở rộng (`building_rules`, `emergency_contacts`, `issue_ratings`): Thêm `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`.
 5. Đổi kiểu dữ liệu trả về: Bổ sung `DROP FUNCTION IF EXISTS` cho `get_building_activation_list` và 9 RPCs kế toán.
+
+---
+
+## 10. Nhật Ký Triển Khai Đợt Hardening Thương Mại Hóa (24/11/2026)
+
+### 10.1. Phạm Vi Đợt Triển Khai 24/11/2026
+1. **Database Migrations (`npx --yes supabase db push --remote --yes`) — Hoàn tất 46/46 migrations**:
+   - `20261124010000_align_remaining_enum_values.sql`: Bổ sung giá trị `'cancelled'` vào `public.vehicle_status` và `public.meter_submission_status` trong một transaction độc lập.
+   - `20261124020000_commercial_security_rls_and_payment_hardening.sql`:
+     - Tách hàm `public.is_super_admin()` và `public.is_building_staff(p_building_id, p_required_roles)` tích hợp cưỡng chế MFA AAL2 và ủy quyền có thời hạn (`role_delegations`).
+     - Xóa bỏ toàn bộ policy `USING (true)` trên `public.users` và 35+ bảng nghiệp vụ; thiết lập RLS cách ly tuyệt đối theo `building_id` / `organization_id` (`can_access_building`, `can_access_apartment`).
+     - Thu hồi quyền cư dân tự `INSERT` vào `payment_transactions`; đồng bộ cộng dồn thanh toán từng phần (`PARTIAL_PAID`), chặn gạch nợ hóa đơn `cancelled`, và tự động ghi Có (`CREDIT`) tiền nộp thừa vào `apartment_ledger_entries` qua `fn_credit_overpayment_to_ledger`.
+     - Ban hành RPC đối soát giao dịch nguyên tử `reconcile_unmatched_payment_transaction` và bảng/RPC lưu vết pháp lý `user_pdpl_consents` / `record_pdpl_consent` theo Luật Bảo vệ dữ liệu cá nhân 2026.
+     - Chuyển bucket `vehicle-docs` sang `public = false`, khóa view `v_parcels_secure` với `security_invoker = true` và ẩn `pickup_pin_hash`, áp dụng `SET search_path = public, pg_catalog` cho 100% hàm `SECURITY DEFINER`.
+2. **Edge Functions (`npx --yes supabase functions deploy create-vnpay-url vnpay-ipn sepay-webhook send-fcm-notification --remote --yes`)**:
+   - Đã triển khai thành công cả 4 hàm lên project `vpgimjyyechhuofjghsb` (Production).
+

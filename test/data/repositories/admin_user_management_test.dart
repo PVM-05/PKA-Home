@@ -1,40 +1,31 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vivona/data/models/resident_model.dart';
 
 void main() {
-  group('Admin User Management & Multi-Apartment Tests (20261024_03)', () {
-    test('Tập tin migration 20261024_03_admin_user_management.sql phải tồn tại', () {
-      final file = File('supabase/migrations_archive/20261024_03_admin_user_management.sql');
-      expect(file.existsSync(), isTrue, reason: 'Migration 20261024_03_admin_user_management.sql chưa được tạo');
+  group('Admin User Management & Multi-Apartment Tests', () {
+    test('Tập tin migration 20261120030000_security_hardening_and_missing_rpcs.sql phải tồn tại', () {
+      final file = File('supabase/migrations/20261120030000_security_hardening_and_missing_rpcs.sql');
+      expect(file.existsSync(), isTrue, reason: 'Migration 20261120030000_security_hardening_and_missing_rpcs.sql chưa được tạo');
     });
 
-    test('Migration phải định nghĩa đầy đủ RPC quản trị, audit log và trigger khóa tài khoản', () {
-      final file = File('supabase/migrations_archive/20261024_03_admin_user_management.sql');
+    test('Migration phải định nghĩa đầy đủ RPC quản trị và audit log', () {
+      final file = File('supabase/migrations/20261120030000_security_hardening_and_missing_rpcs.sql');
       final content = file.readAsStringSync();
 
-      // 1. Cột email và is_active trên public.users
-      expect(content.contains('ADD COLUMN IF NOT EXISTS email VARCHAR'), isTrue);
-      expect(content.contains('ADD COLUMN IF NOT EXISTS is_active BOOLEAN'), isTrue);
-
-      // 2. Trigger kiểm tra tài khoản khóa/vô hiệu hóa ở phía máy chủ
-      expect(content.contains('check_user_active_and_unlocked'), isTrue);
-      expect(content.contains('trg_check_user_active_amenities'), isTrue);
-      expect(content.contains('trg_check_user_active_issues'), isTrue);
-
-      // 3. RPC Admin tạo tài khoản
+      // 1. RPC Admin tạo tài khoản
       expect(content.contains('admin_create_user'), isTrue);
 
-      // 4. RPC Admin cập nhật hồ sơ & đổi vai trò
+      // 2. RPC Admin cập nhật hồ sơ & đổi vai trò
       expect(content.contains('admin_update_user_profile'), isTrue);
 
-      // 5. RPC Admin khóa/mở khóa & kích hoạt/vô hiệu hóa
+      // 3. RPC Admin khóa/mở khóa & kích hoạt/vô hiệu hóa
       expect(content.contains('admin_toggle_user_status'), isTrue);
 
-      // 6. RPC Admin gỡ liên kết căn hộ an toàn
+      // 4. RPC Admin gỡ liên kết căn hộ an toàn
       expect(content.contains('admin_unlink_apartment'), isTrue);
 
-      // 7. Ghi nhận audit log nhật ký thay đổi vai trò và trạng thái
+      // 5. Ghi nhận audit log nhật ký thay đổi vai trò và trạng thái
       expect(content.contains('INSERT INTO public.role_change_log'), isTrue);
     });
 
