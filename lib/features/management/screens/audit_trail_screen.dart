@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../../core/constants/permissions.dart';
+import '../../../core/supabase_config.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_state_view.dart';
-import '../../../core/constants/permissions.dart';
 import '../../../core/widgets/role_guard.dart';
-import '../../../core/supabase_config.dart';
-import '../../../data/providers/auth_provider.dart';
-import '../../../data/models/user_model.dart';
 import '../../../data/models/audit_log_model.dart';
+import '../../../data/models/user_model.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../widgets/technician_performance_card.dart';
 
 class AuditLogItem {
@@ -38,7 +40,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
   ref,
 ) async {
   final client = SupabaseConfig.client;
-  List<AuditLogItem> logs = [];
+  final List<AuditLogItem> logs = [];
   int failedSources = 0;
   Object? lastError;
 
@@ -50,7 +52,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         .order('created_at', ascending: false)
         .limit(50);
 
-    for (var row in (auditLogsRes as List)) {
+    for (final row in (auditLogsRes as List)) {
       final model = AuditLogModel.fromJson(row);
       Color c = AppTheme.primary;
       IconData icon = Icons.history;
@@ -100,7 +102,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         .order('updated_at', ascending: false)
         .limit(10);
 
-    for (var row in (invoicesRes as List)) {
+    for (final row in (invoicesRes as List)) {
       final apt = (row['apartments'] as Map?)?['code'] ?? 'N/A';
       final rawDate = row['updated_at'] ?? row['created_at'];
       if (rawDate == null) continue;
@@ -135,7 +137,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
     debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
   }
 
-  // 2. Fetch Issues
+  // 3. Fetch Issues
   try {
     final issuesRes = await client
         .from('issue_reports')
@@ -145,7 +147,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         .order('updated_at', ascending: false)
         .limit(10);
 
-    for (var row in (issuesRes as List)) {
+    for (final row in (issuesRes as List)) {
       final apt = (row['apartments'] as Map?)?['code'] ?? 'N/A';
       final rawDate = row['updated_at'] ?? row['created_at'];
       if (rawDate == null) continue;
@@ -181,7 +183,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
     debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
   }
 
-  // 3. Fetch Link Requests
+  // 4. Fetch Link Requests
   try {
     final linksRes = await client
         .from('apartment_link_requests')
@@ -191,7 +193,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         .order('updated_at', ascending: false)
         .limit(10);
 
-    for (var row in (linksRes as List)) {
+    for (final row in (linksRes as List)) {
       final apt = (row['apartments'] as Map?)?['code'] ?? 'N/A';
       final name = (row['users'] as Map?)?['full_name'] ?? 'Cư dân';
       final rawDate = row['updated_at'] ?? row['created_at'];
@@ -228,7 +230,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
     debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
   }
 
-  // 4. Fetch Role Change Logs
+  // 5. Fetch Role Change Logs
   try {
     final roleLogsRes = await client
         .from('role_change_log')
@@ -238,7 +240,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         .order('changed_at', ascending: false)
         .limit(10);
 
-    for (var row in (roleLogsRes as List)) {
+    for (final row in (roleLogsRes as List)) {
       final targetName = (row['target'] as Map?)?['full_name'] ?? 'Người dùng';
       final changerName =
           (row['changer'] as Map?)?['full_name'] ?? 'Quản trị viên';
@@ -266,7 +268,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
     debugPrint('[AuditTrail] Lỗi truy vấn nguồn nhật ký: $e');
   }
 
-  // 5. Fetch Role Delegations
+  // 6. Fetch Role Delegations
   try {
     final delegationRes = await client
         .from('role_delegations')
@@ -276,7 +278,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
         .order('created_at', ascending: false)
         .limit(10);
 
-    for (var row in (delegationRes as List)) {
+    for (final row in (delegationRes as List)) {
       final delegatorName =
           (row['delegator'] as Map?)?['full_name'] ?? 'Quản trị viên';
       final delegateName = (row['delegate'] as Map?)?['full_name'] ?? 'Nhân sự';
@@ -322,11 +324,12 @@ class AuditTrailScreen extends ConsumerStatefulWidget {
 }
 
 class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
-  String _selectedCategory = 'all'; // all, invoice, issue, link, rbac
+  String _selectedCategory = 'all'; // all, invoice, issue, link, rbac, vehicle
   bool _onlyMyActions = false;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final auditAsync = ref.watch(auditTrailProvider);
     final currentUser = ref.watch(authProvider).valueOrNull;
     final isAdmin = currentUser?.isAdmin ?? false;
@@ -342,186 +345,209 @@ class _AuditTrailScreenState extends ConsumerState<AuditTrailScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        body: Column(
-          children: [
-            // Filter Chips Row
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  _buildFilterChip('all', 'Tất cả'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('invoice', 'Hóa đơn'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('issue', 'Sự cố'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('link', 'Liên kết'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('vehicle', 'Thẻ xe'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('rbac', 'Phân quyền'),
-                  const SizedBox(width: 12),
-                  FilterChip(
-                    selected: _onlyMyActions,
-                    avatar: Icon(
-                      Icons.person,
-                      size: 16,
-                      color: _onlyMyActions ? Colors.white : AppTheme.primary,
-                    ),
-                    label: const Text('Của tôi'),
-                    labelStyle: context.bodySmall?.copyWith(
-                      color: _onlyMyActions
-                          ? Colors.white
-                          : AppTheme.textPrimary,
-                      fontWeight: _onlyMyActions
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                    backgroundColor: Colors.white,
-                    selectedColor: AppTheme.primary,
-                    onSelected: (selected) {
-                      setState(() => _onlyMyActions = selected);
-                    },
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: Column(
+              children: [
+                // Filter Chips Row
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-                ],
-              ),
-            ),
-
-            // Main content
-            Expanded(
-              child: AppStateView<List<AuditLogItem>>(
-                asyncValue: auditAsync,
-                emptyMessage: 'Chưa có hoạt động nào phù hợp.',
-                emptyIcon: Icons.history,
-                onRetry: () => ref.invalidate(auditTrailProvider),
-                dataBuilder: (rawLogs) {
-                  // Áp dụng bộ lọc
-                  var filtered = rawLogs;
-                  if (_selectedCategory != 'all') {
-                    filtered = filtered
-                        .where((l) => l.category == _selectedCategory)
-                        .toList();
-                  }
-                  if (_onlyMyActions && currentUser != null) {
-                    filtered = filtered
-                        .where((l) => l.changedBy == currentUser.id)
-                        .toList();
-                  }
-
-                  if (filtered.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'Không tìm thấy hoạt động nào phù hợp bộ lọc.',
-                        style: TextStyle(color: AppTheme.textSecondary),
+                  child: Row(
+                    children: [
+                      _buildFilterChip('all', 'Tất cả'),
+                      AppSpacing.w8,
+                      _buildFilterChip('invoice', 'Hóa đơn'),
+                      AppSpacing.w8,
+                      _buildFilterChip('issue', 'Sự cố'),
+                      AppSpacing.w8,
+                      _buildFilterChip('link', 'Liên kết'),
+                      AppSpacing.w8,
+                      _buildFilterChip('vehicle', 'Thẻ xe'),
+                      AppSpacing.w8,
+                      _buildFilterChip('rbac', 'Phân quyền'),
+                      AppSpacing.w12,
+                      FilterChip(
+                        selected: _onlyMyActions,
+                        avatar: Icon(
+                          Icons.person,
+                          size: 16,
+                          color: _onlyMyActions
+                              ? colorScheme.onPrimary
+                              : colorScheme.primary,
+                        ),
+                        label: const Text('Của tôi'),
+                        labelStyle: context.bodySmall?.copyWith(
+                          color: _onlyMyActions
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
+                          fontWeight: _onlyMyActions
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                        backgroundColor: colorScheme.surface,
+                        selectedColor: colorScheme.primary,
+                        checkmarkColor: colorScheme.onPrimary,
+                        onSelected: (selected) {
+                          setState(() => _onlyMyActions = selected);
+                        },
                       ),
-                    );
-                  }
+                    ],
+                  ),
+                ),
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: (isAdmin ? 1 : 0) + filtered.length,
-                    itemBuilder: (context, index) {
-                      // Thẻ hiệu suất KTV hiển thị ở vị trí đầu tiên cho Admin
-                      if (isAdmin && index == 0) {
-                        return const TechnicianPerformanceCard();
+                // Main content
+                Expanded(
+                  child: AppStateView<List<AuditLogItem>>(
+                    asyncValue: auditAsync,
+                    emptyMessage: 'Chưa có hoạt động nào phù hợp.',
+                    emptyIcon: Icons.history,
+                    onRetry: () => ref.invalidate(auditTrailProvider),
+                    dataBuilder: (rawLogs) {
+                      var filtered = rawLogs;
+                      if (_selectedCategory != 'all') {
+                        filtered = filtered
+                            .where((l) => l.category == _selectedCategory)
+                            .toList();
+                      }
+                      if (_onlyMyActions && currentUser != null) {
+                        filtered = filtered
+                            .where((l) => l.changedBy == currentUser.id)
+                            .toList();
                       }
 
-                      final logIndex = isAdmin ? index - 1 : index;
-                      final log = filtered[logIndex];
-                      final relativeTime = timeago.format(
-                        log.updatedAt,
-                        locale: 'vi',
-                      );
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Timeline indicator
-                            Column(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: log.color.withValues(alpha: 0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    log.icon,
-                                    color: log.color,
-                                    size: 20,
-                                  ),
-                                ),
-                                if (logIndex < filtered.length - 1)
-                                  Container(
-                                    width: 2,
-                                    height: 40,
-                                    color: Colors.grey.withValues(alpha: 0.2),
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                  ),
-                              ],
+                      if (filtered.isEmpty) {
+                        return ListView(
+                          padding: AppSpacing.p16,
+                          children: const [
+                            AppEmptyState(
+                              icon: Icons.filter_alt_off_outlined,
+                              title: 'Không có hoạt động phù hợp',
+                              description:
+                                  'Không tìm thấy hoạt động nào phù hợp bộ lọc.',
                             ),
-                            const SizedBox(width: 16),
-                            // Content
-                            Expanded(
-                              child: Column(
+                          ],
+                        );
+                      }
+
+                      return RefreshIndicator(
+                        onRefresh: () async =>
+                            ref.refresh(auditTrailProvider.future),
+                        child: ListView.builder(
+                          padding: AppSpacing.p16,
+                          itemCount: (isAdmin ? 1 : 0) + filtered.length,
+                          itemBuilder: (context, index) {
+                            if (isAdmin && index == 0) {
+                              return const TechnicianPerformanceCard();
+                            }
+
+                            final logIndex = isAdmin ? index - 1 : index;
+                            final log = filtered[logIndex];
+                            final relativeTime = timeago.format(
+                              log.updatedAt,
+                              locale: 'vi',
+                            );
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    log.title,
-                                    style: context.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  // Timeline indicator
+                                  Column(
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: log.color.withValues(
+                                            alpha: 0.12,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          log.icon,
+                                          color: log.color,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      if (logIndex < filtered.length - 1)
+                                        Container(
+                                          width: 2,
+                                          height: 40,
+                                          color: colorScheme.outlineVariant,
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 4,
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    log.subtitle,
-                                    style: const TextStyle(
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    relativeTime,
-                                    style: context.labelSmall?.copyWith(
-                                      color: log.color,
+                                  AppSpacing.w16,
+                                  // Content
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          log.title,
+                                          style: context.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        AppSpacing.h4,
+                                        Text(
+                                          log.subtitle,
+                                          style: context.bodySmall?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        AppSpacing.h4,
+                                        Text(
+                                          relativeTime,
+                                          style: context.labelSmall
+                                              ?.tabularFigures()
+                                              .copyWith(color: log.color),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildFilterChip(String category, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = _selectedCategory == category;
     return FilterChip(
       selected: isSelected,
       label: Text(label),
       labelStyle: context.bodySmall?.copyWith(
-        color: isSelected ? Colors.white : AppTheme.textPrimary,
+        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
-      backgroundColor: Colors.white,
-      selectedColor: AppTheme.primary,
+      backgroundColor: colorScheme.surface,
+      selectedColor: colorScheme.primary,
+      checkmarkColor: colorScheme.onPrimary,
       onSelected: (selected) {
         if (selected) {
           setState(() => _selectedCategory = category);

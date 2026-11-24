@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
@@ -29,7 +31,13 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
     final residents = await ref.read(residentsProvider.future);
     // P0-#14: Chỉ cho phép ủy quyền cho nhân sự nội bộ thuộc BQL (kế toán, kỹ thuật viên, lễ tân, an ninh...)
     // Tuyệt đối không cho phép ủy quyền chức năng BQL cho cư dân (resident, tenant...)
-    const allowedStaffRoles = {'accountant', 'technician', 'receptionist', 'security', 'staff'};
+    const allowedStaffRoles = {
+      'accountant',
+      'technician',
+      'receptionist',
+      'security',
+      'staff',
+    };
     final eligibleUsers = residents
         .where((r) => allowedStaffRoles.contains(r.role))
         .toList();
@@ -44,55 +52,70 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
       return;
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (modalContext) => _CreateDelegationSheet(eligibleUsers: eligibleUsers),
+      builder: (modalContext) =>
+          _CreateDelegationSheet(eligibleUsers: eligibleUsers),
     );
   }
 
   void _confirmRevoke(RoleDelegationModel delegation) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Thu hồi ủy quyền?'),
-        content: Text(
-          'Bạn có chắc chắn muốn kết thúc sớm quyền "${delegation.roleDisplayName}" của ${delegation.delegateName ?? "nhân viên này"} không?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy'),
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        final errorColor = AppTheme.getSemanticError(ctx);
+        return AlertDialog(
+          title: const Text('Thu hồi ủy quyền?'),
+          content: Text(
+            'Bạn có chắc chắn muốn kết thúc sớm quyền "${delegation.roleDisplayName}" của ${delegation.delegateName ?? "nhân viên này"} không?',
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await runAction(
-                context,
-                () async {
-                  await ref
-                      .read(managementRepositoryProvider)
-                      .revokeDelegation(delegation.id);
-                  ref.invalidate(delegationsListProvider);
-                  return 'Đã thu hồi ủy quyền thành công!';
-                },
-                actionName: 'Thu hồi ủy quyền',
-              );
-            },
-            child: const Text('Thu hồi', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: errorColor,
+                foregroundColor: colorScheme.onError,
+                minimumSize: const Size(0, 44),
+              ),
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+                await runAction(
+                  context,
+                  () async {
+                    await ref
+                        .read(managementRepositoryProvider)
+                        .revokeDelegation(delegation.id);
+                    ref.invalidate(delegationsListProvider);
+                    return 'Đã thu hồi ủy quyền thành công!';
+                  },
+                  actionName: 'Thu hồi ủy quyền',
+                );
+              },
+              child: const Text('Thu hồi'),
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
     final delegationsAsync = ref.watch(delegationsListProvider);
 
     return RoleGuard(
@@ -115,31 +138,32 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1000),
                 child: RefreshIndicator(
-                  onRefresh: () async => ref.invalidate(delegationsListProvider),
+                  onRefresh: () async =>
+                      ref.invalidate(delegationsListProvider),
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppSpacing.p16,
                     itemCount: delegations.length,
                     itemBuilder: (context, index) {
                       final item = delegations[index];
                       final isActive = item.isActive;
 
-                      Color statusColor = Colors.grey;
+                      Color statusColor = colorScheme.onSurfaceVariant;
                       String statusText = 'Đã kết thúc';
                       if (isActive) {
-                        statusColor = AppTheme.success;
+                        statusColor = successColor;
                         statusText = 'Đang hiệu lực';
                       } else if (item.isUpcoming) {
-                        statusColor = Colors.orange;
+                        statusColor = warningColor;
                         statusText = 'Sắp diễn ra';
                       }
 
                       final roleColor = item.delegatedRole == 'accountant'
-                          ? Colors.purple
-                          : Colors.orange;
+                          ? secondaryColor
+                          : warningColor;
 
                       return AppCard(
                         margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
+                        padding: AppSpacing.p16,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -160,8 +184,10 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: roleColor.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(6),
+                                        color: roleColor.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        borderRadius: AppRadius.r6,
                                       ),
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
@@ -180,8 +206,10 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: statusColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(6),
+                                        color: statusColor.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: AppRadius.r6,
                                         border: Border.all(
                                           color: statusColor.withValues(
                                             alpha: 0.4,
@@ -205,53 +233,58 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
                                   TextButton(
                                     onPressed: () => _confirmRevoke(item),
                                     style: TextButton.styleFrom(
-                                      foregroundColor: AppTheme.error,
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      foregroundColor: errorColor,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
                                       minimumSize: const Size(64, 48),
                                     ),
                                     child: const Text('Thu hồi'),
                                   ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            AppSpacing.h12,
                             Text(
                               'Người nhận: ${item.delegateName ?? "N/A"}',
                               style: context.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            AppSpacing.h4,
                             Text(
                               'Người ủy quyền: ${item.delegatorName ?? "Quản trị viên"}',
                               style: context.bodySmall?.copyWith(
-                                color: AppTheme.textSecondary,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            AppSpacing.h8,
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.access_time,
                                   size: 16,
-                                  color: AppTheme.textSecondary,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
-                                const SizedBox(width: 6),
+                                AppSpacing.w6,
                                 Expanded(
                                   child: Text(
                                     '${_dateFormat.format(item.startsAt)} -> ${_dateFormat.format(item.endsAt)}',
-                                    style: context.bodySmall,
+                                    style: context.bodySmall?.tabularFigures(),
                                   ),
                                 ),
                               ],
                             ),
                             if (item.note != null && item.note!.isNotEmpty) ...[
-                              const SizedBox(height: 8),
+                              AppSpacing.h8,
                               Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.all(8),
+                                padding: AppSpacing.p8,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  borderRadius: BorderRadius.circular(6),
+                                  color: colorScheme.surfaceContainerLowest,
+                                  borderRadius: AppRadius.r6,
+                                  border: Border.all(
+                                    color: colorScheme.outlineVariant,
+                                  ),
                                 ),
                                 child: Text(
                                   'Lý do: ${item.note}',
@@ -274,12 +307,10 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
         floatingActionButton: FloatingActionButton.extended(
           heroTag: 'create_delegation_fab',
           onPressed: () => _showCreateDelegationDialog(context),
-          backgroundColor: AppTheme.primary,
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            'Thêm ủy quyền',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          icon: const Icon(Icons.add),
+          label: const Text('Thêm ủy quyền'),
         ),
       ),
     );
@@ -292,10 +323,12 @@ class _CreateDelegationSheet extends ConsumerStatefulWidget {
   const _CreateDelegationSheet({required this.eligibleUsers});
 
   @override
-  ConsumerState<_CreateDelegationSheet> createState() => _CreateDelegationSheetState();
+  ConsumerState<_CreateDelegationSheet> createState() =>
+      _CreateDelegationSheetState();
 }
 
-class _CreateDelegationSheetState extends ConsumerState<_CreateDelegationSheet> {
+class _CreateDelegationSheetState
+    extends ConsumerState<_CreateDelegationSheet> {
   late String _selectedUserId;
   String _selectedRole = 'accountant';
   DateTime _startsAt = DateTime.now();
@@ -316,184 +349,253 @@ class _CreateDelegationSheetState extends ConsumerState<_CreateDelegationSheet> 
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Tạo Ủy Quyền Vai Trò BQL',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
+    final colorScheme = Theme.of(context).colorScheme;
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Tạo Ủy Quyền Vai Trò BQL',
+                      style: context.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const Divider(),
+              AppSpacing.h12,
+
+              // Chọn nhân sự
+              Text(
+                'Nhân sự nhận ủy quyền *',
+                style: context.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              AppSpacing.h6,
+              DropdownButtonFormField<String>(
+                initialValue: _selectedUserId,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 12),
-
-            // Chọn nhân sự
-            const Text(
-              'Nhân sự nhận ủy quyền *',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              initialValue: _selectedUserId,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
-              items: widget.eligibleUsers.map((u) {
-                return DropdownMenuItem(
-                  value: u.id,
-                  child: Text('${u.fullName} (${u.roleDisplayName})'),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedUserId = val);
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Chọn vai trò tạm thời
-            const Text(
-              'Vai trò ủy quyền tạm thời *',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              initialValue: _selectedRole,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'accountant',
-                  child: Row(
-                    children: [
-                      Icon(Icons.receipt_long, color: Colors.purple, size: 18),
-                      SizedBox(width: 8),
-                      Text('Kế toán (Quản lý hóa đơn & Sổ cái)'),
-                    ],
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'technician',
-                  child: Row(
-                    children: [
-                      Icon(Icons.build_circle, color: Colors.orange, size: 18),
-                      SizedBox(width: 8),
-                      Text('Kỹ thuật viên (Sự cố & Bàn giao)'),
-                    ],
-                  ),
-                ),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedRole = val);
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Thời hạn ủy quyền
-            const Text(
-              'Thời hạn ủy quyền *',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              leading: const Icon(Icons.calendar_today, color: AppTheme.primary),
-              title: Text(
-                '${DateFormat('dd/MM/yyyy').format(_startsAt)} - ${DateFormat('dd/MM/yyyy').format(_endsAt)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: const Text('Bấm để chọn khoảng ngày'),
-              onTap: () async {
-                final picked = await showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime.now().subtract(const Duration(days: 1)),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                  initialDateRange: DateTimeRange(start: _startsAt, end: _endsAt),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _startsAt = DateTime(picked.start.year, picked.start.month, picked.start.day, 0, 0);
-                    _endsAt = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Ghi chú
-            const Text(
-              'Lý do / Căn cứ ủy quyền',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _noteController,
-              decoration: const InputDecoration(
-                hintText: 'VD: Thay thế nhân sự nghỉ phép, hỗ trợ đột xuất...',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 24),
-
-            // Nút xác nhận
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await runAction(
-                    context,
-                    () async {
-                      await ref.read(managementRepositoryProvider).createDelegation(
-                            delegateId: _selectedUserId,
-                            delegatedRole: _selectedRole,
-                            startsAt: _startsAt,
-                            endsAt: _endsAt,
-                            note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
-                          );
-                      ref.invalidate(delegationsListProvider);
-                      return 'Tạo ủy quyền vai trò thành công!';
-                    },
-                    actionName: 'Tạo ủy quyền vai trò',
+                items: widget.eligibleUsers.map((u) {
+                  return DropdownMenuItem(
+                    value: u.id,
+                    child: Text(
+                      '${u.fullName} (${u.roleDisplayName})',
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedUserId = val);
                 },
-                child: const Text(
-                  'XÁC NHẬN ỦY QUYỀN',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              AppSpacing.h16,
+
+              // Chọn vai trò tạm thời
+              Text(
+                'Vai trò ủy quyền tạm thời *',
+                style: context.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-          ],
+              AppSpacing.h6,
+              DropdownButtonFormField<String>(
+                initialValue: _selectedRole,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'accountant',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.receipt_long,
+                          color: secondaryColor,
+                          size: 18,
+                        ),
+                        AppSpacing.w8,
+                        const Expanded(
+                          child: Text(
+                            'Kế toán (Quản lý hóa đơn & Sổ cái)',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'technician',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.build_circle,
+                          color: warningColor,
+                          size: 18,
+                        ),
+                        AppSpacing.w8,
+                        const Expanded(
+                          child: Text(
+                            'Kỹ thuật viên (Sự cố & Bàn giao)',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedRole = val);
+                },
+              ),
+              AppSpacing.h16,
+
+              // Thời hạn ủy quyền
+              Text(
+                'Thời hạn ủy quyền *',
+                style: context.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              AppSpacing.h6,
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppRadius.r8,
+                  side: BorderSide(color: colorScheme.outlineVariant),
+                ),
+                leading: Icon(
+                  Icons.calendar_today,
+                  color: colorScheme.primary,
+                ),
+                title: Text(
+                  '${DateFormat('dd/MM/yyyy').format(_startsAt)} - ${DateFormat('dd/MM/yyyy').format(_endsAt)}',
+                  style: context.bodyMedium?.tabularFigures().copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text('Bấm để chọn khoảng ngày'),
+                onTap: () async {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime.now().subtract(const Duration(days: 1)),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    initialDateRange: DateTimeRange(
+                      start: _startsAt,
+                      end: _endsAt,
+                    ),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _startsAt = DateTime(
+                        picked.start.year,
+                        picked.start.month,
+                        picked.start.day,
+                        0,
+                        0,
+                      );
+                      _endsAt = DateTime(
+                        picked.end.year,
+                        picked.end.month,
+                        picked.end.day,
+                        23,
+                        59,
+                        59,
+                      );
+                    });
+                  }
+                },
+              ),
+              AppSpacing.h16,
+
+              // Ghi chú
+              Text(
+                'Lý do / Căn cứ ủy quyền',
+                style: context.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              AppSpacing.h6,
+              TextField(
+                controller: _noteController,
+                decoration: const InputDecoration(
+                  hintText:
+                      'VD: Thay thế nhân sự nghỉ phép, hỗ trợ đột xuất...',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              AppSpacing.h24,
+
+              // Nút xác nhận
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await runAction(
+                      context,
+                      () async {
+                        await ref
+                            .read(managementRepositoryProvider)
+                            .createDelegation(
+                              delegateId: _selectedUserId,
+                              delegatedRole: _selectedRole,
+                              startsAt: _startsAt,
+                              endsAt: _endsAt,
+                              note: _noteController.text.trim().isEmpty
+                                  ? null
+                                  : _noteController.text.trim(),
+                            );
+                        ref.invalidate(delegationsListProvider);
+                        return 'Tạo ủy quyền vai trò thành công!';
+                      },
+                      actionName: 'Tạo ủy quyền vai trò',
+                    );
+                  },
+                  child: const Text('XÁC NHẬN ỦY QUYỀN'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
