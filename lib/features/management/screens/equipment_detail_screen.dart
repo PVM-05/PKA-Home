@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/accounting_voucher_dialog.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../data/models/building_equipment_model.dart';
 import '../../../data/models/equipment_maintenance_task_model.dart';
@@ -78,7 +83,8 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
     }
 
     final activeBuilding = ref.read(activeBuildingProvider).valueOrNull;
-    final buildingId = (activeBuilding?.id != null && activeBuilding!.id.isNotEmpty)
+    final buildingId =
+        (activeBuilding?.id != null && activeBuilding!.id.isNotEmpty)
         ? activeBuilding.id
         : (_equipment.building.length == 36 ? _equipment.building : null);
 
@@ -96,62 +102,75 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.error),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Lập phiếu chi Quỹ bảo trì',
-                style: ctx.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+      builder: (ctx) {
+        final dialogScheme = Theme.of(ctx).colorScheme;
+        final errorColor = AppTheme.getSemanticError(ctx);
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.account_balance_wallet_outlined,
+                color: errorColor,
+              ),
+              AppSpacing.w8,
+              Expanded(
+                child: Text(
+                  'Lập phiếu chi Quỹ bảo trì',
+                  style: ctx.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Xác nhận lập phiếu chi từ Quỹ bảo trì 2% cho hạng mục sau:',
+                  style: ctx.bodySmall?.copyWith(
+                    color: dialogScheme.onSurfaceVariant,
+                  ),
+                ),
+                AppSpacing.h12,
+                Text(
+                  'Thiết bị: ${_equipment.name} (${_equipment.code})',
+                  style: ctx.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                AppSpacing.h4,
+                Text('Công việc: ${task.title}'),
+                AppSpacing.h4,
+                Text('Đơn vị nhận: $vendorName'),
+                AppSpacing.h8,
+                Text(
+                  'Số tiền chi: ${_currencyFormat.format(task.cost)}',
+                  style: ctx.titleMedium?.tabularFigures().copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: errorColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: errorColor,
+                foregroundColor: dialogScheme.onError,
+                minimumSize: const Size(0, 44),
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Xác nhận chi'),
             ),
           ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Xác nhận lập phiếu chi từ Quỹ bảo trì 2% cho hạng mục sau:',
-              style: ctx.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Thiết bị: ${_equipment.name} (${_equipment.code})',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text('Công việc: ${task.title}'),
-            const SizedBox(height: 4),
-            Text('Đơn vị nhận: $vendorName'),
-            const SizedBox(height: 8),
-            Text(
-              'Số tiền chi: ${_currencyFormat.format(task.cost)}',
-              style: ctx.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.error,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xác nhận chi'),
-          ),
-        ],
-      ),
+        );
+      },
     );
 
     if (confirmed == true && mounted) {
@@ -213,23 +232,31 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
   Future<void> _confirmDelete() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Xác nhận xóa thiết bị'),
-        content: Text(
-          'Bạn có chắc chắn muốn xóa "${_equipment.name}" (${_equipment.code}) không? Toàn bộ lịch sử bảo trì liên quan cũng sẽ bị xóa.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Hủy'),
+      builder: (ctx) {
+        final dialogScheme = Theme.of(ctx).colorScheme;
+        final errorColor = AppTheme.getSemanticError(ctx);
+        return AlertDialog(
+          title: const Text('Xác nhận xóa thiết bị'),
+          content: Text(
+            'Bạn có chắc chắn muốn xóa "${_equipment.name}" (${_equipment.code}) không? Toàn bộ lịch sử bảo trì liên quan cũng sẽ bị xóa.',
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xóa thiết bị'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: errorColor,
+                foregroundColor: dialogScheme.onError,
+                minimumSize: const Size(0, 44),
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Xóa thiết bị'),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true) {
@@ -254,21 +281,27 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final upcomingColor = AppTheme.getSemanticSecondary(context);
+
     final tasksAsync = ref.watch(equipmentTasksProvider(_equipment.id));
 
-    Color badgeColor;
+    final Color badgeColor;
     switch (_equipment.status) {
       case 'operational':
-        badgeColor = AppTheme.success;
+        badgeColor = successColor;
         break;
       case 'under_maintenance':
-        badgeColor = AppTheme.warning;
+        badgeColor = warningColor;
         break;
       case 'degraded':
-        badgeColor = AppTheme.error;
+        badgeColor = errorColor;
         break;
       default:
-        badgeColor = Colors.grey;
+        badgeColor = colorScheme.onSurfaceVariant;
     }
 
     return Scaffold(
@@ -281,200 +314,227 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
             onPressed: _openEditDialog,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppTheme.error),
+            icon: Icon(Icons.delete_outline, color: errorColor),
             tooltip: 'Xóa thiết bị',
             onPressed: _confirmDelete,
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Thẻ tóm tắt thông số thiết bị
-            AppCard(
-              padding: const EdgeInsets.all(16),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(equipmentTasksProvider(_equipment.id));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: AppSpacing.p16,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          _equipment.code,
-                          style: context.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _equipment.categoryDisplayName,
-                          style: context.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: badgeColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          _equipment.statusDisplayName,
-                          style: context.bodySmall?.copyWith(
-                            color: badgeColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  _buildInfoRow('Tòa nhà', _equipment.building),
-                  _buildInfoRow('Vị trí lắp đặt', _equipment.location),
-                  _buildInfoRow(
-                    'Chu kỳ bảo dưỡng',
-                    '${_equipment.maintenanceIntervalDays} ngày/lần',
-                  ),
-                  _buildInfoRow(
-                    'Lần bảo dưỡng gần nhất',
-                    _equipment.lastMaintenanceDate != null
-                        ? _dateFormat.format(_equipment.lastMaintenanceDate!)
-                        : 'Chưa có',
-                  ),
-                  _buildInfoRow(
-                    'Hạn bảo dưỡng tiếp theo',
-                    _equipment.nextMaintenanceDate != null
-                        ? _dateFormat.format(_equipment.nextMaintenanceDate!)
-                        : 'Chưa có',
-                    isHighlight:
-                        _equipment.isUpcomingMaintenance ||
-                        _equipment.isOverdueMaintenance,
-                    highlightColor: _equipment.isOverdueMaintenance
-                        ? AppTheme.error
-                        : Colors.purple,
-                  ),
-                  if (_equipment.specifications != null) ...[
-                    const Divider(height: 16),
-                    Text(
-                      'Thông số kỹ thuật:',
-                      style: context.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _equipment.specifications!,
-                      style: context.bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Lịch sử bảo trì & Hạch toán chi phí
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Lịch sử bảo trì & sửa chữa',
-                    style: context.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: _openCreateTaskDialog,
-                  icon: const Icon(Icons.add, size: 16),
-                  label: const Text('Lập phiếu mới'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            tasksAsync.when(
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              error: (e, _) => Center(child: Text(formatErrorMessage(e))),
-              data: (tasks) {
-                if (tasks.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Center(
-                      child: Text(
-                        'Chưa có phiếu bảo trì nào cho thiết bị này.',
-                        style: TextStyle(color: AppTheme.textSecondary),
-                      ),
-                    ),
-                  );
-                }
-
-                final totalCost = tasks
-                    .where((t) => t.isCompleted)
-                    .fold<double>(0.0, (sum, t) => sum + t.cost);
-
-                return Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Tổng chi phí bảo dưỡng đã hoàn thành:',
-                              style: context.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
+                  // Thẻ tóm tắt thông số thiết bị
+                  AppCard(
+                    padding: AppSpacing.p16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: AppRadius.r6,
+                              ),
+                              child: Text(
+                                _equipment.code,
+                                style: context.titleSmall
+                                    ?.tabularFigures()
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.primary,
+                                    ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
+                            AppSpacing.w8,
+                            Expanded(
+                              child: Text(
+                                _equipment.categoryDisplayName,
+                                style: context.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            AppSpacing.w8,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeColor.withValues(alpha: 0.15),
+                                borderRadius: AppRadius.r12,
+                              ),
+                              child: Text(
+                                _equipment.statusDisplayName,
+                                style: context.bodySmall?.copyWith(
+                                  color: badgeColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 24),
+                        _buildInfoRow('Tòa nhà', _equipment.building),
+                        _buildInfoRow('Vị trí lắp đặt', _equipment.location),
+                        _buildInfoRow(
+                          'Chu kỳ bảo dưỡng',
+                          '${_equipment.maintenanceIntervalDays} ngày/lần',
+                        ),
+                        _buildInfoRow(
+                          'Lần bảo dưỡng gần nhất',
+                          _equipment.lastMaintenanceDate != null
+                              ? _dateFormat.format(
+                                  _equipment.lastMaintenanceDate!,
+                                )
+                              : 'Chưa có',
+                        ),
+                        _buildInfoRow(
+                          'Hạn bảo dưỡng tiếp theo',
+                          _equipment.nextMaintenanceDate != null
+                              ? _dateFormat.format(
+                                  _equipment.nextMaintenanceDate!,
+                                )
+                              : 'Chưa có',
+                          isHighlight:
+                              _equipment.isUpcomingMaintenance ||
+                              _equipment.isOverdueMaintenance,
+                          highlightColor: _equipment.isOverdueMaintenance
+                              ? errorColor
+                              : upcomingColor,
+                        ),
+                        if (_equipment.specifications != null) ...[
+                          const Divider(height: 16),
                           Text(
-                            _currencyFormat.format(totalCost),
-                            style: context.titleMedium?.copyWith(
+                            'Thông số kỹ thuật:',
+                            style: context.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
+                            ),
+                          ),
+                          AppSpacing.h4,
+                          Text(
+                            _equipment.specifications!,
+                            style: context.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    ...tasks.map((t) => _buildTaskHistoryItem(t)),
-                  ],
-                );
-              },
+                  ),
+                  AppSpacing.h16,
+
+                  // Lịch sử bảo trì & Hạch toán chi phí
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Lịch sử bảo trì & sửa chữa',
+                        style: context.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, 48),
+                        ),
+                        onPressed: _openCreateTaskDialog,
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Lập phiếu mới'),
+                      ),
+                    ],
+                  ),
+                  AppSpacing.h12,
+
+                  tasksAsync.when(
+                    loading: () => AppSkeletonShimmer.cardList(
+                      count: 2,
+                      itemHeight: 100,
+                    ),
+                    error: (e, _) => AppErrorCard(
+                      error: e,
+                      onRetry: () =>
+                          ref.invalidate(equipmentTasksProvider(_equipment.id)),
+                    ),
+                    data: (tasks) {
+                      if (tasks.isEmpty) {
+                        return const AppEmptyState(
+                          icon: Icons.build_circle_outlined,
+                          title: 'Chưa có lịch sử bảo trì',
+                          description:
+                              'Chưa có phiếu bảo trì nào cho thiết bị này.',
+                        );
+                      }
+
+                      final totalCost = tasks
+                          .where((t) => t.isCompleted)
+                          .fold<double>(0.0, (sum, t) => sum + t.cost);
+
+                      return Column(
+                        children: [
+                          Container(
+                            padding: AppSpacing.p12,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withValues(
+                                alpha: 0.08,
+                              ),
+                              borderRadius: AppRadius.r8,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Tổng chi phí bảo dưỡng đã hoàn thành:',
+                                    style: context.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                AppSpacing.w8,
+                                Text(
+                                  _currencyFormat.format(totalCost),
+                                  style: context.titleMedium
+                                      ?.tabularFigures()
+                                      .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme.primary,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          AppSpacing.h12,
+                          ...tasks.map((t) => _buildTaskHistoryItem(t)),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -486,22 +546,26 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
     bool isHighlight = false,
     Color? highlightColor,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: context.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
+          Expanded(
+            child: Text(
+              label,
+              style: context.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
+          AppSpacing.w12,
           Text(
             value,
-            style: context.bodyMedium?.copyWith(
+            style: context.bodyMedium?.tabularFigures().copyWith(
               fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
-              color: isHighlight ? highlightColor : AppTheme.textPrimary,
+              color: isHighlight ? highlightColor : colorScheme.onSurface,
             ),
           ),
         ],
@@ -510,19 +574,25 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
   }
 
   Widget _buildTaskHistoryItem(EquipmentMaintenanceTaskModel task) {
-    Color badgeColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final paidColor = AppStatusColors.getPaid(context);
+
+    final Color badgeColor;
     switch (task.status) {
       case 'completed':
-        badgeColor = AppTheme.success;
+        badgeColor = successColor;
         break;
       case 'in_progress':
-        badgeColor = AppTheme.warning;
+        badgeColor = warningColor;
         break;
       case 'cancelled':
-        badgeColor = Colors.grey;
+        badgeColor = colorScheme.onSurfaceVariant;
         break;
       default:
-        badgeColor = AppTheme.primary;
+        badgeColor = colorScheme.primary;
     }
 
     final dateFormat = DateFormat('dd/MM/yyyy');
@@ -530,11 +600,12 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: AppCard(
-        padding: const EdgeInsets.all(12),
+        padding: AppSpacing.p12,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
@@ -544,14 +615,15 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                     ),
                   ),
                 ),
+                AppSpacing.w8,
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
+                    horizontal: 8,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: AppRadius.r8,
                   ),
                   child: Text(
                     task.statusDisplayName,
@@ -563,35 +635,38 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
-            Row(
+            AppSpacing.h6,
+            Wrap(
+              spacing: 12,
+              runSpacing: 4,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
                   '${task.taskTypeDisplayName} • ${dateFormat.format(task.scheduledStart)}',
-                  style: context.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
+                  style: context.bodySmall?.tabularFigures().copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const Spacer(),
                 Text(
                   _currencyFormat.format(task.cost),
-                  style: context.titleSmall?.copyWith(
+                  style: context.titleSmall?.tabularFigures().copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
             if (task.vendorName != null) ...[
-              const SizedBox(height: 4),
+              AppSpacing.h4,
               Text(
                 'Đơn vị thực hiện: ${task.vendorName} (${task.vendorContact ?? "N/A"})',
                 style: context.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
             if (task.notes != null) ...[
-              const SizedBox(height: 4),
+              AppSpacing.h4,
               Text(
                 'Ghi chú: ${task.notes!}',
                 style: context.bodySmall?.copyWith(
@@ -600,35 +675,35 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               ),
             ],
             if (task.isCompleted && task.cost > 0) ...[
-              const SizedBox(height: 8),
+              AppSpacing.h8,
               Align(
                 alignment: Alignment.centerRight,
                 child: _disbursedTaskIds.contains(task.id)
                     ? Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
-                          vertical: 4,
+                          vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppStatusColors.paid.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
+                          color: paidColor.withValues(alpha: 0.1),
+                          borderRadius: AppRadius.r6,
                           border: Border.all(
-                            color: AppStatusColors.paid.withValues(alpha: 0.3),
+                            color: paidColor.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle,
                               size: 14,
-                              color: AppStatusColors.paid,
+                              color: paidColor,
                             ),
-                            const SizedBox(width: 4),
+                            AppSpacing.w4,
                             Text(
                               'Đã giải ngân Quỹ bảo trì',
                               style: context.labelMedium?.copyWith(
-                                color: AppStatusColors.paid,
+                                color: paidColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -637,11 +712,12 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
                       )
                     : OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.error,
-                          side: const BorderSide(color: AppTheme.error),
+                          foregroundColor: errorColor,
+                          side: BorderSide(color: errorColor),
+                          minimumSize: const Size(0, 48),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                            horizontal: 12,
+                            vertical: 8,
                           ),
                         ),
                         icon: const Icon(Icons.receipt_long_outlined, size: 16),

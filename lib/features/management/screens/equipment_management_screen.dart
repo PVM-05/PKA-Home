@@ -4,10 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
 import '../../../core/router/route_names.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/building_equipment_model.dart';
@@ -51,11 +56,19 @@ class _EquipmentManagementScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_handleTabChanged);
+  }
+
+  void _handleTabChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -110,6 +123,7 @@ class _EquipmentManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final equipmentsAsync = ref.watch(equipmentListProvider);
     final tasksAsync = ref.watch(equipmentTasksProvider(null));
     final selectedBuilding =
@@ -136,95 +150,144 @@ class _EquipmentManagementScreenState
             ],
           ),
         ),
-        body: Column(
-          children: [
-            // Bộ lọc Tòa nhà và Phân loại
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Column(
+              children: [
+                // Bộ lọc Tòa nhà và Phân loại
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: colorScheme.outlineVariant,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: selectedBuilding,
+                            items: _buildings
+                                .map(
+                                  (b) => DropdownMenuItem(
+                                    value: b,
+                                    child: Text(
+                                      'Tòa: $b',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) {
+                              ref
+                                  .read(equipmentFilterBuildingProvider.notifier)
+                                  .state = val == 'Tất cả'
+                                  ? null
+                                  : val;
+                            },
+                          ),
+                        ),
+                      ),
+                      AppSpacing.w12,
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: selectedCategory,
+                            items: _categories
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                    value: c['value'],
+                                    child: Text(
+                                      c['label']!,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) {
+                              ref
+                                  .read(equipmentFilterCategoryProvider.notifier)
+                                  .state = val == 'Tất cả'
+                                  ? null
+                                  : val;
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: selectedBuilding,
-                        items: _buildings
-                            .map(
-                              (b) => DropdownMenuItem(
-                                value: b,
-                                child: Text('Tòa: $b'),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (val) {
-                          ref
-                              .read(equipmentFilterBuildingProvider.notifier)
-                              .state = val == 'Tất cả'
-                              ? null
-                              : val;
-                        },
+                // Nội dung 2 tab
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Tab 1: Danh mục thiết bị
+                      equipmentsAsync.when(
+                        loading: () => ListView(
+                          padding: AppSpacing.p16,
+                          children: [
+                            AppSkeletonShimmer.cardList(
+                              count: 3,
+                              itemHeight: 120,
+                            ),
+                          ],
+                        ),
+                        error: (e, _) => ListView(
+                          padding: AppSpacing.p16,
+                          children: [
+                            AppErrorCard(
+                              error: e,
+                              onRetry: () =>
+                                  ref.invalidate(equipmentListProvider),
+                            ),
+                          ],
+                        ),
+                        data: (equipments) => _buildEquipmentsTab(equipments),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: selectedCategory,
-                        items: _categories
-                            .map(
-                              (c) => DropdownMenuItem(
-                                value: c['value'],
-                                child: Text(c['label']!),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (val) {
-                          ref
-                              .read(equipmentFilterCategoryProvider.notifier)
-                              .state = val == 'Tất cả'
-                              ? null
-                              : val;
-                        },
+                      // Tab 2: Lịch & Phiếu bảo trì
+                      tasksAsync.when(
+                        loading: () => ListView(
+                          padding: AppSpacing.p16,
+                          children: [
+                            AppSkeletonShimmer.cardList(
+                              count: 3,
+                              itemHeight: 136,
+                            ),
+                          ],
+                        ),
+                        error: (e, _) => ListView(
+                          padding: AppSpacing.p16,
+                          children: [
+                            AppErrorCard(
+                              error: e,
+                              onRetry: () =>
+                                  ref.invalidate(equipmentTasksProvider(null)),
+                            ),
+                          ],
+                        ),
+                        data: (tasks) => equipmentsAsync.maybeWhen(
+                          data: (equipments) =>
+                              _buildTasksTab(tasks, equipments),
+                          orElse: () => _buildTasksTab(tasks, []),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // Nội dung 2 tab
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Tab 1: Danh mục thiết bị
-                  equipmentsAsync.when(
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(child: Text(formatErrorMessage(e))),
-                    data: (equipments) => _buildEquipmentsTab(equipments),
-                  ),
-                  // Tab 2: Lịch & Phiếu bảo trì
-                  tasksAsync.when(
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(child: Text(formatErrorMessage(e))),
-                    data: (tasks) => equipmentsAsync.maybeWhen(
-                      data: (equipments) => _buildTasksTab(tasks, equipments),
-                      orElse: () => _buildTasksTab(tasks, []),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
@@ -244,6 +307,11 @@ class _EquipmentManagementScreenState
   }
 
   Widget _buildEquipmentsTab(List<BuildingEquipmentModel> equipments) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final upcomingColor = AppTheme.getSemanticSecondary(context);
+
     final total = equipments.length;
     final operational = equipments
         .where((e) => e.status == 'operational')
@@ -254,77 +322,114 @@ class _EquipmentManagementScreenState
     return RefreshIndicator(
       onRefresh: () async => ref.refresh(equipmentListProvider.future),
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.p16,
         children: [
-          // Thẻ KPI tổng quan
-          Row(
-            children: [
-              _buildKpiCard('Tổng số', '$total', AppTheme.primary),
-              const SizedBox(width: 8),
-              _buildKpiCard('Hoạt động tốt', '$operational', AppTheme.success),
-              const SizedBox(width: 8),
-              _buildKpiCard('Đang bảo trì', '$underMaint', AppTheme.warning),
-              const SizedBox(width: 8),
-              _buildKpiCard('Sắp đến hạn', '$upcoming', Colors.purple),
-            ],
+          // Thẻ KPI tổng quan responsive
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final cards = [
+                _buildKpiCard('Tổng số', '$total', colorScheme.primary),
+                _buildKpiCard('Hoạt động tốt', '$operational', successColor),
+                _buildKpiCard('Đang bảo trì', '$underMaint', warningColor),
+                _buildKpiCard('Sắp đến hạn', '$upcoming', upcomingColor),
+              ];
+              if (constraints.maxWidth < 520) {
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: cards[0]),
+                        AppSpacing.w8,
+                        Expanded(child: cards[1]),
+                      ],
+                    ),
+                    AppSpacing.h8,
+                    Row(
+                      children: [
+                        Expanded(child: cards[2]),
+                        AppSpacing.w8,
+                        Expanded(child: cards[3]),
+                      ],
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: cards[0]),
+                  AppSpacing.w8,
+                  Expanded(child: cards[1]),
+                  AppSpacing.w8,
+                  Expanded(child: cards[2]),
+                  AppSpacing.w8,
+                  Expanded(child: cards[3]),
+                ],
+              );
+            },
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           if (equipments.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32.0),
-                child: Text('Không có thiết bị nào phù hợp với bộ lọc.'),
-              ),
+            const AppEmptyState(
+              icon: Icons.precision_manufacturing_outlined,
+              title: 'Chưa có thiết bị phù hợp',
+              description: 'Không có thiết bị nào phù hợp với bộ lọc.',
             )
           else
             ...equipments.map((eq) => _buildEquipmentCard(eq)),
-          const SizedBox(height: 72),
+          const SizedBox(height: 80),
         ],
       ),
     );
   }
 
   Widget _buildKpiCard(String label, String value, Color color) {
-    return Expanded(
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: context.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return AppCard(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: context.titleLarge?.tabularFigures().copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: context.labelSmall?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
+          ),
+          AppSpacing.h4,
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildEquipmentCard(BuildingEquipmentModel eq) {
-    Color badgeColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final upcomingColor = AppTheme.getSemanticSecondary(context);
+
+    final Color badgeColor;
     switch (eq.status) {
       case 'operational':
-        badgeColor = AppTheme.success;
+        badgeColor = successColor;
         break;
       case 'under_maintenance':
-        badgeColor = AppTheme.warning;
+        badgeColor = warningColor;
         break;
       case 'degraded':
-        badgeColor = AppTheme.error;
+        badgeColor = errorColor;
         break;
       default:
-        badgeColor = Colors.grey;
+        badgeColor = colorScheme.onSurfaceVariant;
     }
 
     final nextMaintText = eq.nextMaintenanceDate != null
@@ -334,16 +439,17 @@ class _EquipmentManagementScreenState
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.r12,
         onTap: () {
           context.push(AppRoutes.managementEquipmentDetail, extra: eq);
         },
         child: AppCard(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.p16,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -351,18 +457,18 @@ class _EquipmentManagementScreenState
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: AppRadius.r6,
                     ),
                     child: Text(
                       eq.code,
-                      style: context.bodyMedium?.copyWith(
+                      style: context.bodyMedium?.tabularFigures().copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  AppSpacing.w8,
                   Expanded(
                     child: Text(
                       eq.name,
@@ -371,6 +477,7 @@ class _EquipmentManagementScreenState
                       ),
                     ),
                   ),
+                  AppSpacing.w8,
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -378,7 +485,7 @@ class _EquipmentManagementScreenState
                     ),
                     decoration: BoxDecoration(
                       color: badgeColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: AppRadius.r12,
                     ),
                     child: Text(
                       eq.statusDisplayName,
@@ -390,26 +497,27 @@ class _EquipmentManagementScreenState
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              AppSpacing.h8,
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.location_on_outlined,
                     size: 16,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 4),
+                  AppSpacing.w4,
                   Expanded(
                     child: Text(
                       '${eq.location} (${eq.building})',
                       style: context.bodyMedium?.copyWith(
-                        color: AppTheme.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
+                  AppSpacing.w8,
                   Text(
                     'Định kỳ: ${eq.maintenanceIntervalDays} ngày',
-                    style: context.bodySmall?.copyWith(
+                    style: context.bodySmall?.tabularFigures().copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -419,43 +527,47 @@ class _EquipmentManagementScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        eq.isOverdueMaintenance
-                            ? Icons.warning_amber
-                            : (eq.isUpcomingMaintenance
-                                  ? Icons.alarm
-                                  : Icons.event_available),
-                        size: 16,
-                        color: eq.isOverdueMaintenance
-                            ? AppTheme.error
-                            : (eq.isUpcomingMaintenance
-                                  ? Colors.purple
-                                  : AppTheme.textSecondary),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Hạn bảo dưỡng: $nextMaintText',
-                        style: context.bodyMedium?.copyWith(
-                          fontWeight:
-                              (eq.isOverdueMaintenance ||
-                                  eq.isUpcomingMaintenance)
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: eq.isOverdueMaintenance
-                              ? AppTheme.error
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          eq.isOverdueMaintenance
+                              ? Icons.warning_amber
                               : (eq.isUpcomingMaintenance
-                                    ? Colors.purple
-                                    : AppTheme.textPrimary),
+                                    ? Icons.alarm
+                                    : Icons.event_available),
+                          size: 16,
+                          color: eq.isOverdueMaintenance
+                              ? errorColor
+                              : (eq.isUpcomingMaintenance
+                                    ? upcomingColor
+                                    : colorScheme.onSurfaceVariant),
                         ),
-                      ),
-                    ],
+                        AppSpacing.w4,
+                        Expanded(
+                          child: Text(
+                            'Hạn bảo dưỡng: $nextMaintText',
+                            style: context.bodyMedium?.tabularFigures().copyWith(
+                              fontWeight:
+                                  (eq.isOverdueMaintenance ||
+                                      eq.isUpcomingMaintenance)
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: eq.isOverdueMaintenance
+                                  ? errorColor
+                                  : (eq.isUpcomingMaintenance
+                                        ? upcomingColor
+                                        : colorScheme.onSurface),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right,
                     size: 18,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -471,25 +583,17 @@ class _EquipmentManagementScreenState
     List<BuildingEquipmentModel> equipments,
   ) {
     if (tasks.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      return RefreshIndicator(
+        onRefresh: () async => ref.refresh(equipmentTasksProvider(null).future),
+        child: ListView(
+          padding: AppSpacing.p16,
           children: [
-            const Icon(
-              Icons.assignment_turned_in_outlined,
-              size: 64,
-              color: AppTheme.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Chưa có phiếu bảo trì nào được lập.',
-              style: TextStyle(color: AppTheme.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => _openCreateTaskDialog(equipments),
-              icon: const Icon(Icons.add),
-              label: const Text('Lập phiếu mới ngay'),
+            AppEmptyState(
+              icon: Icons.assignment_turned_in_outlined,
+              title: 'Chưa có phiếu bảo trì',
+              description: 'Chưa có phiếu bảo trì nào được lập.',
+              actionLabel: 'Lập phiếu mới ngay',
+              onAction: () => _openCreateTaskDialog(equipments),
             ),
           ],
         ),
@@ -499,10 +603,10 @@ class _EquipmentManagementScreenState
     return RefreshIndicator(
       onRefresh: () async => ref.refresh(equipmentTasksProvider(null).future),
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.p16,
         itemCount: tasks.length + 1,
         itemBuilder: (context, index) {
-          if (index == tasks.length) return const SizedBox(height: 72);
+          if (index == tasks.length) return const SizedBox(height: 80);
           final task = tasks[index];
           return _buildTaskCard(task);
         },
@@ -511,19 +615,23 @@ class _EquipmentManagementScreenState
   }
 
   Widget _buildTaskCard(EquipmentMaintenanceTaskModel task) {
-    Color badgeColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+
+    final Color badgeColor;
     switch (task.status) {
       case 'completed':
-        badgeColor = AppTheme.success;
+        badgeColor = successColor;
         break;
       case 'in_progress':
-        badgeColor = AppTheme.warning;
+        badgeColor = warningColor;
         break;
       case 'cancelled':
-        badgeColor = Colors.grey;
+        badgeColor = colorScheme.onSurfaceVariant;
         break;
       default:
-        badgeColor = AppTheme.primary;
+        badgeColor = colorScheme.primary;
     }
 
     final dateFormat = DateFormat('HH:mm dd/MM');
@@ -531,11 +639,12 @@ class _EquipmentManagementScreenState
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: AppCard(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.p16,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
@@ -545,6 +654,7 @@ class _EquipmentManagementScreenState
                     ),
                   ),
                 ),
+                AppSpacing.w8,
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -552,7 +662,7 @@ class _EquipmentManagementScreenState
                   ),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppRadius.r12,
                   ),
                   child: Text(
                     task.statusDisplayName,
@@ -564,92 +674,104 @@ class _EquipmentManagementScreenState
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            AppSpacing.h6,
             if (task.equipmentName != null)
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.precision_manufacturing,
                     size: 15,
-                    color: AppTheme.primary,
+                    color: colorScheme.primary,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${task.equipmentCode ?? ""} - ${task.equipmentName}',
-                    style: context.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.primary,
+                  AppSpacing.w4,
+                  Expanded(
+                    child: Text(
+                      '${task.equipmentCode ?? ""} - ${task.equipmentName}',
+                      style: context.bodyMedium?.tabularFigures().copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
                 ],
               ),
-            const SizedBox(height: 8),
-            Row(
+            AppSpacing.h8,
+            Wrap(
+              spacing: 12,
+              runSpacing: 4,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Icon(
-                  Icons.schedule,
-                  size: 15,
-                  color: AppTheme.textSecondary,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.schedule,
+                      size: 15,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    AppSpacing.w4,
+                    Text(
+                      '${dateFormat.format(task.scheduledStart)} - ${dateFormat.format(task.scheduledEnd)}',
+                      style: context.bodySmall?.tabularFigures().copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  '${dateFormat.format(task.scheduledStart)} - ${dateFormat.format(task.scheduledEnd)}',
-                  style: context.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const Spacer(),
                 Text(
                   _currencyFormat.format(task.cost),
-                  style: context.titleSmall?.copyWith(
+                  style: context.titleSmall?.tabularFigures().copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
             if (task.vendorName != null || task.technicianName != null) ...[
-              const SizedBox(height: 4),
+              AppSpacing.h4,
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.engineering_outlined,
                     size: 15,
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    task.vendorName != null
-                        ? 'Nhà thầu: ${task.vendorName}'
-                        : 'Kỹ thuật: ${task.technicianName}',
-                    style: context.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
+                  AppSpacing.w4,
+                  Expanded(
+                    child: Text(
+                      task.vendorName != null
+                          ? 'Nhà thầu: ${task.vendorName}'
+                          : 'Kỹ thuật: ${task.technicianName}',
+                      style: context.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
               ),
             ],
             if (task.affectsService) ...[
-              const SizedBox(height: 6),
+              AppSpacing.h6,
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppTheme.warning.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
+                  color: warningColor.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r6,
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.warning_amber_rounded,
                       size: 14,
-                      color: AppTheme.warning,
+                      color: warningColor,
                     ),
-                    const SizedBox(width: 6),
+                    AppSpacing.w6,
                     Expanded(
                       child: Text(
                         task.serviceInterruptionNote ??
                             'Tạm ngưng phục vụ trong thời gian bảo trì',
                         style: context.labelMedium?.copyWith(
-                          color: AppTheme.warning,
+                          color: warningColor,
                         ),
                       ),
                     ),
@@ -659,45 +781,59 @@ class _EquipmentManagementScreenState
             ],
             const Divider(height: 16),
             // Nút thao tác nhanh trạng thái
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (task.status == 'pending') ...[
-                  OutlinedButton.icon(
-                    onPressed: () => _updateTaskStatus(task, 'cancelled'),
-                    icon: const Icon(Icons.cancel_outlined, size: 16),
-                    label: const Text('Hủy'),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    onPressed: () => _updateTaskStatus(task, 'in_progress'),
-                    icon: const Icon(Icons.play_arrow, size: 16),
-                    label: const Text('Bắt đầu'),
-                  ),
-                ] else if (task.status == 'in_progress') ...[
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.success,
-                    ),
-                    onPressed: () => _updateTaskStatus(task, 'completed'),
-                    icon: const Icon(Icons.check_circle_outline, size: 16),
-                    label: const Text('Nghiệm thu hoàn tất'),
-                  ),
-                ] else if (task.status == 'completed') ...[
-                  Row(
-                    children: [
-                      const Icon(Icons.check, size: 16, color: AppTheme.success),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Đã cập nhật chu kỳ kế tiếp',
-                        style: context.labelMedium?.copyWith(
-                          color: AppTheme.success,
-                        ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (task.status == 'pending') ...[
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
                       ),
-                    ],
-                  ),
+                      onPressed: () => _updateTaskStatus(task, 'cancelled'),
+                      icon: const Icon(Icons.cancel_outlined, size: 16),
+                      label: const Text('Hủy'),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
+                      ),
+                      onPressed: () => _updateTaskStatus(task, 'in_progress'),
+                      icon: const Icon(Icons.play_arrow, size: 16),
+                      label: const Text('Bắt đầu'),
+                    ),
+                  ] else if (task.status == 'in_progress') ...[
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: successColor,
+                        foregroundColor: colorScheme.onPrimary,
+                        minimumSize: const Size(0, 44),
+                      ),
+                      onPressed: () => _updateTaskStatus(task, 'completed'),
+                      icon: const Icon(Icons.check_circle_outline, size: 16),
+                      label: const Text('Nghiệm thu hoàn tất'),
+                    ),
+                  ] else if (task.status == 'completed') ...[
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check, size: 16, color: successColor),
+                        AppSpacing.w4,
+                        Text(
+                          'Đã cập nhật chu kỳ kế tiếp',
+                          style: context.labelMedium?.copyWith(
+                            color: successColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ],
         ),
