@@ -2,15 +2,17 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/constants/permissions.dart';
 import '../../../core/supabase_config.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/signature_pad_dialog.dart';
-import '../../../core/constants/permissions.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../core/widgets/signature_pad_dialog.dart';
 import '../../../data/models/apartment_handover_model.dart';
 import '../../../data/models/handover_item_model.dart';
 import '../../../data/providers/handover_provider.dart';
@@ -56,8 +58,7 @@ class _InspectionWorkstationScreenState
   bool _isConfirmedOrCompleted = false;
   bool _isLoading = false;
 
-  bool get _effectiveReadOnly =>
-      widget.isReadOnly || _isConfirmedOrCompleted;
+  bool get _effectiveReadOnly => widget.isReadOnly || _isConfirmedOrCompleted;
 
   @override
   void initState() {
@@ -81,8 +82,9 @@ class _InspectionWorkstationScreenState
   Future<void> _loadInitialData() async {
     final repo = ref.read(handoverRepositoryProvider);
     if (widget.existingHandoverId != null) {
-      final existing =
-          await repo.fetchHandoverDetail(widget.existingHandoverId!);
+      final existing = await repo.fetchHandoverDetail(
+        widget.existingHandoverId!,
+      );
       if (existing != null && mounted) {
         setState(() {
           _handoverType = existing.handoverType;
@@ -208,7 +210,8 @@ class _InspectionWorkstationScreenState
       final reportCode = 'HO-$dateStr-$randSuffix';
 
       final handoverModel = ApartmentHandoverModel(
-        id: widget.existingHandoverId ??
+        id:
+            widget.existingHandoverId ??
             'ho_${DateTime.now().millisecondsSinceEpoch}',
         apartmentId: widget.apartmentId,
         buildingId: widget.buildingId,
@@ -258,86 +261,92 @@ class _InspectionWorkstationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final paidColor = AppStatusColors.getPaid(context);
     final isDesktop = MediaQuery.sizeOf(context).width >= 900;
 
     return RoleGuard(
       permission: AppPermissions.handoverManagement,
       child: Scaffold(
         appBar: AppBar(
-        title: const FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text('Trạm kiểm kê & bàn giao'),
-        ),
-        elevation: 0.5,
-        actions: [
-          // P0-#3: Khóa văn bản nếu biên bản đã xác nhận/hoàn tất
-          if (_effectiveReadOnly)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppStatusColors.paid.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: AppStatusColors.paid.withValues(alpha: 0.3),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Trạm kiểm kê & bàn giao'),
+          ),
+          elevation: 0.5,
+          actions: [
+            // P0-#3: Khóa văn bản nếu biên bản đã xác nhận/hoàn tất
+            if (_effectiveReadOnly)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: paidColor.withValues(alpha: 0.12),
+                      borderRadius: AppRadius.r6,
+                      border: Border.all(
+                        color: paidColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.lock, size: 14, color: paidColor),
+                        AppSpacing.w4,
+                        Text(
+                          'Đã duyệt (Bất biến)',
+                          style: context.labelSmall?.copyWith(
+                            color: paidColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.lock, size: 14, color: AppStatusColors.paid),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Đã duyệt (Bất biến)',
-                        style: context.labelSmall?.copyWith(
-                          color: AppStatusColors.paid,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _saveAndSendToResident,
+                  icon: const Icon(Icons.send, size: 16),
+                  label: const Text('Gửi cư dân'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                   ),
                 ),
               ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _saveAndSendToResident,
-                icon: const Icon(Icons.send, size: 16),
-                label: const Text('Gửi cư dân'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          ],
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: isDesktop
+                      ? _buildDesktopLayout()
+                      : _buildMobileLayout(),
                 ),
               ),
-            ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1400),
-                child: isDesktop
-                    ? _buildDesktopLayout()
-                    : _buildMobileLayout(),
-              ),
-            ),
       ),
     );
   }
 
   Widget _buildDesktopLayout() {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: AppSpacing.p24,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -349,19 +358,19 @@ class _InspectionWorkstationScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildApartmentOverviewCard(),
-                  const SizedBox(height: 16),
+                  AppSpacing.h16,
                   _buildMetersCard(),
                   if (_handoverType == 'move_out') ...[
-                    const SizedBox(height: 16),
+                    AppSpacing.h16,
                     _buildDepositCard(),
                   ],
-                  const SizedBox(height: 16),
+                  AppSpacing.h16,
                   _buildStaffSignatureCard(),
                 ],
               ),
             ),
           ),
-          const SizedBox(width: 24),
+          AppSpacing.w24,
           // Cột phải: Danh mục kiểm kê tài sản
           Expanded(
             flex: 7,
@@ -370,7 +379,7 @@ class _InspectionWorkstationScreenState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildItemsHeader(),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   _buildItemsList(),
                 ],
               ),
@@ -383,30 +392,31 @@ class _InspectionWorkstationScreenState
 
   Widget _buildMobileLayout() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.p16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildApartmentOverviewCard(),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           _buildMetersCard(),
           if (_handoverType == 'move_out') ...[
-            const SizedBox(height: 16),
+            AppSpacing.h16,
             _buildDepositCard(),
           ],
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           _buildItemsHeader(),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           _buildItemsList(),
-          const SizedBox(height: 20),
+          AppSpacing.h20,
           _buildStaffSignatureCard(),
-          const SizedBox(height: 32),
+          AppSpacing.h32,
         ],
       ),
     );
   }
 
   Widget _buildApartmentOverviewCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,22 +424,25 @@ class _InspectionWorkstationScreenState
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppSpacing.p8,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r8,
                 ),
-                child: const Icon(Icons.apartment,
-                    size: 28, color: AppTheme.primary),
+                child: Icon(
+                  Icons.apartment,
+                  size: 28,
+                  color: colorScheme.primary,
+                ),
               ),
-              const SizedBox(width: 10),
+              AppSpacing.w10,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Căn hộ ${widget.apartmentCode}',
-                      style: context.titleLarge?.copyWith(
+                      style: context.titleLarge?.tabularFigures().copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
@@ -440,7 +453,7 @@ class _InspectionWorkstationScreenState
                           ? 'Nhận nhà (Move-in)'
                           : 'Trả nhà (Move-out)',
                       style: context.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -450,21 +463,24 @@ class _InspectionWorkstationScreenState
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           DropdownButtonFormField<String>(
             initialValue: _handoverType,
             isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Loại bàn giao',
               isDense: true,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             ),
             items: const [
               DropdownMenuItem(
-                  value: 'move_in', child: Text('Nhận nhà (Move-in)')),
+                value: 'move_in',
+                child: Text('Nhận nhà (Move-in)'),
+              ),
               DropdownMenuItem(
-                  value: 'move_out', child: Text('Trả nhà (Move-out)')),
+                value: 'move_out',
+                child: Text('Trả nhà (Move-out)'),
+              ),
             ],
             onChanged: _effectiveReadOnly
                 ? null
@@ -478,6 +494,8 @@ class _InspectionWorkstationScreenState
   }
 
   Widget _buildMetersCard() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,7 +504,7 @@ class _InspectionWorkstationScreenState
             'Chốt chỉ số đồng hồ bàn giao',
             style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           LayoutBuilder(
             builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 360;
@@ -496,24 +514,29 @@ class _InspectionWorkstationScreenState
                     TextField(
                       controller: _electricityController,
                       readOnly: _effectiveReadOnly,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Chỉ số điện (kWh) *',
                         hintText: 'Nhập số công tơ điện...',
-                        prefixIcon: Icon(Icons.bolt, color: Colors.amber),
+                        prefixIcon: Icon(Icons.bolt, color: warningColor),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    AppSpacing.h12,
                     TextField(
                       controller: _waterController,
                       readOnly: _effectiveReadOnly,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Chỉ số nước (m³) *',
                         hintText: 'Nhập số đồng hồ nước...',
-                        prefixIcon: Icon(Icons.water_drop, color: Colors.blue),
+                        prefixIcon: Icon(
+                          Icons.water_drop,
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -525,26 +548,31 @@ class _InspectionWorkstationScreenState
                     child: TextField(
                       controller: _electricityController,
                       readOnly: _effectiveReadOnly,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Chỉ số điện (kWh) *',
                         hintText: 'Nhập số điện...',
-                        prefixIcon: Icon(Icons.bolt, color: Colors.amber),
+                        prefixIcon: Icon(Icons.bolt, color: warningColor),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  AppSpacing.w12,
                   Expanded(
                     child: TextField(
                       controller: _waterController,
                       readOnly: _effectiveReadOnly,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Chỉ số nước (m³) *',
                         hintText: 'Nhập số nước...',
-                        prefixIcon: Icon(Icons.water_drop, color: Colors.blue),
+                        prefixIcon: Icon(
+                          Icons.water_drop,
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -558,6 +586,10 @@ class _InspectionWorkstationScreenState
   }
 
   Widget _buildDepositCard() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
+    final paidColor = AppStatusColors.getPaid(context);
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,7 +598,7 @@ class _InspectionWorkstationScreenState
             'Chiết tính hoàn tiền đặt cọc',
             style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           TextField(
             controller: _depositController,
             readOnly: _effectiveReadOnly,
@@ -579,13 +611,13 @@ class _InspectionWorkstationScreenState
               prefixIcon: Icon(Icons.account_balance_wallet),
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: AppSpacing.p12,
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade200),
+              color: colorScheme.surfaceContainerLowest,
+              borderRadius: AppRadius.r8,
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Column(
               children: [
@@ -598,8 +630,8 @@ class _InspectionWorkstationScreenState
                     const Text('Tổng tiền trừ hư hại/thiếu:'),
                     Text(
                       '-${_formatCurrency(_totalDeduction)}',
-                      style: const TextStyle(
-                        color: AppTheme.error,
+                      style: context.bodyMedium?.tabularFigures().copyWith(
+                        color: errorColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -612,14 +644,16 @@ class _InspectionWorkstationScreenState
                   alignment: WrapAlignment.spaceBetween,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       'Số tiền cọc hoàn trả cư dân:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: context.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       _formatCurrency(_depositRefund),
-                      style: context.titleMedium?.copyWith(
-                        color: AppStatusColors.paid,
+                      style: context.titleMedium?.tabularFigures().copyWith(
+                        color: paidColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -655,17 +689,22 @@ class _InspectionWorkstationScreenState
   }
 
   Widget _buildItemsList() {
+    final colorScheme = Theme.of(context).colorScheme;
     if (_items.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(24),
+        padding: AppSpacing.p24,
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          color: colorScheme.surfaceContainerLowest,
+          borderRadius: AppRadius.r12,
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             'Chưa có hạng mục kiểm kê nào. Bấm "Thêm món đồ" để tạo mới.',
+            style: context.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
           ),
         ),
       );
@@ -675,7 +714,7 @@ class _InspectionWorkstationScreenState
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _items.length,
-      separatorBuilder: (_, index) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => AppSpacing.h8,
       itemBuilder: (context, index) {
         final item = _items[index];
         return _buildItemCard(item, index);
@@ -709,7 +748,7 @@ class _InspectionWorkstationScreenState
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              AppSpacing.w8,
               Chip(
                 padding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
@@ -720,15 +759,14 @@ class _InspectionWorkstationScreenState
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          AppSpacing.h8,
           DropdownButtonFormField<String>(
             initialValue: item.condition,
             isExpanded: true,
             decoration: const InputDecoration(
               labelText: 'Tình trạng tài sản',
               isDense: true,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             ),
             items: const [
               DropdownMenuItem(
@@ -739,14 +777,8 @@ class _InspectionWorkstationScreenState
                 value: 'minor_scratch',
                 child: Text('Trầy xước nhẹ'),
               ),
-              DropdownMenuItem(
-                value: 'damaged',
-                child: Text('Hư hỏng'),
-              ),
-              DropdownMenuItem(
-                value: 'missing',
-                child: Text('Thất lạc'),
-              ),
+              DropdownMenuItem(value: 'damaged', child: Text('Hư hỏng')),
+              DropdownMenuItem(value: 'missing', child: Text('Thất lạc')),
             ],
             // P0-#4: Khi đổi sang 'good', tự động xóa chi phí sửa chữa để tránh trừ cọc sai
             onChanged: _effectiveReadOnly
@@ -767,7 +799,7 @@ class _InspectionWorkstationScreenState
                   },
           ),
           if (item.hasDamage) ...[
-            const SizedBox(height: 8),
+            AppSpacing.h8,
             TextField(
               controller: costCtrl,
               readOnly: _effectiveReadOnly,
@@ -792,6 +824,7 @@ class _InspectionWorkstationScreenState
   }
 
   Widget _buildStaffSignatureCard() {
+    final paidColor = AppStatusColors.getPaid(context);
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -800,7 +833,7 @@ class _InspectionWorkstationScreenState
             'Xác nhận đại diện Ban Quản Lý',
             style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.h12,
           TextField(
             controller: _staffNotesController,
             readOnly: _effectiveReadOnly,
@@ -810,7 +843,7 @@ class _InspectionWorkstationScreenState
               hintText: 'Nhập ghi chú tổng thể khi bàn giao...',
             ),
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           Wrap(
             spacing: 12,
             runSpacing: 8,
@@ -818,35 +851,37 @@ class _InspectionWorkstationScreenState
             children: [
               if (!_effectiveReadOnly)
                 OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                  ),
                   onPressed: _openSignaturePad,
                   icon: const Icon(Icons.draw),
                   label: Text(
-                    _staffSignatureBytes != null
-                        ? 'Ký lại BQL'
-                        : 'Ký tên BQL',
+                    _staffSignatureBytes != null ? 'Ký lại BQL' : 'Ký tên BQL',
                   ),
                 ),
               if (_staffSignatureBytes != null ||
                   (_existingStaffSigUrl != null &&
                       _existingStaffSigUrl!.isNotEmpty))
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppStatusColors.paid.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    color: paidColor.withValues(alpha: 0.1),
+                    borderRadius: AppRadius.r6,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_circle,
-                          color: AppStatusColors.paid, size: 16),
-                      const SizedBox(width: 4),
+                      Icon(Icons.check_circle, color: paidColor, size: 16),
+                      AppSpacing.w4,
                       Flexible(
                         child: Text(
                           'Đã có chữ ký BQL',
                           style: context.labelSmall?.copyWith(
-                            color: AppStatusColors.paid,
+                            color: paidColor,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
@@ -859,23 +894,24 @@ class _InspectionWorkstationScreenState
               if (_existingResidentSigUrl != null &&
                   _existingResidentSigUrl!.isNotEmpty)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppStatusColors.paid.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    color: paidColor.withValues(alpha: 0.1),
+                    borderRadius: AppRadius.r6,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.verified,
-                          color: AppStatusColors.paid, size: 16),
-                      const SizedBox(width: 4),
+                      Icon(Icons.verified, color: paidColor, size: 16),
+                      AppSpacing.w4,
                       Flexible(
                         child: Text(
                           'Cư dân đã ký nhận',
                           style: context.labelSmall?.copyWith(
-                            color: AppStatusColors.paid,
+                            color: paidColor,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
@@ -901,46 +937,46 @@ class _InspectionWorkstationScreenState
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Thêm món đồ kiểm kê'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Tên món đồ (VD: Tủ lạnh)',
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Tên món đồ (VD: Tủ lạnh)',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: area,
-                decoration: const InputDecoration(labelText: 'Khu vực phòng'),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'living_room',
-                    child: Text('Phòng khách'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'bedroom',
-                    child: Text('Phòng ngủ'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'kitchen',
-                    child: Text('Nhà bếp'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'bathroom',
-                    child: Text('Nhà vệ sinh'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'balcony',
-                    child: Text('Ban công / Logia'),
-                  ),
-                ],
-                onChanged: (val) {
-                  if (val != null) setDialogState(() => area = val);
-                },
-              ),
-            ],
+                AppSpacing.h12,
+                DropdownButtonFormField<String>(
+                  initialValue: area,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Khu vực phòng'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'living_room',
+                      child: Text('Phòng khách'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'bedroom',
+                      child: Text('Phòng ngủ'),
+                    ),
+                    DropdownMenuItem(value: 'kitchen', child: Text('Nhà bếp')),
+                    DropdownMenuItem(
+                      value: 'bathroom',
+                      child: Text('Nhà vệ sinh'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'balcony',
+                      child: Text('Ban công / Logia'),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => area = val);
+                  },
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -948,6 +984,9 @@ class _InspectionWorkstationScreenState
               child: const Text('Hủy'),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(0, 44),
+              ),
               onPressed: () {
                 final name = nameController.text.trim();
                 if (name.isEmpty) return;
