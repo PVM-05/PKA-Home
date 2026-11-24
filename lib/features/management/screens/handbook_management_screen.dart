@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_snack_bar.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../data/providers/handbook_provider.dart';
-import '../../../data/models/emergency_contact_model.dart';
-import '../../../data/models/building_rule_model.dart';
-import '../../../data/models/building_amenity_model.dart';
-import '../../../core/constants/permissions.dart';
-import '../../../core/widgets/role_guard.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_snack_bar.dart';
+import '../../../core/widgets/role_guard.dart';
+import '../../../data/models/building_amenity_model.dart';
+import '../../../data/models/building_rule_model.dart';
+import '../../../data/models/emergency_contact_model.dart';
+import '../../../data/providers/handbook_provider.dart';
 
 class HandbookManagementScreen extends ConsumerStatefulWidget {
   const HandbookManagementScreen({super.key});
@@ -40,6 +45,8 @@ class _HandbookManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return RoleGuard(
       permission: AppPermissions.handbookManagement,
       child: Scaffold(
@@ -47,9 +54,9 @@ class _HandbookManagementScreenState
           title: const Text('Quản Lý Cẩm Nang Tòa Nhà'),
           bottom: TabBar(
             controller: _tabController,
-            labelColor: AppTheme.primary,
-            unselectedLabelColor: AppTheme.textSecondary,
-            indicatorColor: AppTheme.primary,
+            labelColor: colorScheme.primary,
+            unselectedLabelColor: colorScheme.onSurfaceVariant,
+            indicatorColor: colorScheme.primary,
             tabs: const [
               Tab(icon: Icon(Icons.emergency_outlined), text: 'Đường dây nóng'),
               Tab(icon: Icon(Icons.gavel_outlined), text: 'Nội quy'),
@@ -67,8 +74,8 @@ class _HandbookManagementScreenState
         ),
         floatingActionButton: FloatingActionButton(
           heroTag: 'handbook_management_fab',
-          backgroundColor: AppTheme.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           onPressed: () {
             final currentTab = _tabController.index;
             if (currentTab == 0) {
@@ -90,6 +97,8 @@ class _HandbookManagementScreenState
   // Tab 1: Đường Dây Nóng
   // ===========================================================================
   Widget _buildEmergencyContactsTab() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
     final contactsAsync = ref.watch(emergencyContactsProvider);
 
     return RefreshIndicator(
@@ -97,10 +106,16 @@ class _HandbookManagementScreenState
       child: contactsAsync.when(
         data: (contacts) {
           if (contacts.isEmpty) {
-            return const Center(
-              child: Text(
-                'Chưa có thông tin đường dây nóng. Bấm + để thêm mới.',
-              ),
+            return ListView(
+              padding: AppSpacing.p16,
+              children: const [
+                AppEmptyState(
+                  icon: Icons.emergency_outlined,
+                  title: 'Chưa có đường dây nóng',
+                  description:
+                      'Chưa có thông tin đường dây nóng. Bấm + để thêm mới.',
+                ),
+              ],
             );
           }
 
@@ -121,24 +136,26 @@ class _HandbookManagementScreenState
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppTheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            borderRadius: AppRadius.r12,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.phone_in_talk,
-                            color: AppTheme.primary,
+                            color: colorScheme.primary,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        AppSpacing.w12,
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 contact.name,
-                                style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                style: context.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              const SizedBox(height: 4),
+                              AppSpacing.h4,
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 4,
@@ -146,54 +163,72 @@ class _HandbookManagementScreenState
                                 children: [
                                   Text(
                                     'SĐT: ${contact.phone}',
-                                    style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                                    style: context.bodySmall
+                                        ?.tabularFigures()
+                                        .copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.primary.withValues(alpha: 0.08),
-                                      borderRadius: BorderRadius.circular(4),
+                                      color: colorScheme.primary.withValues(
+                                        alpha: 0.08,
+                                      ),
+                                      borderRadius: AppRadius.r4,
                                     ),
                                     child: Text(
                                       contact.contactTypeDisplayName,
                                       style: context.labelSmall?.copyWith(
-                                        color: AppTheme.primary,
+                                        color: colorScheme.primary,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
                                   Text(
                                     'Thứ tự: ${contact.displayOrder}',
-                                    style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                                    style: context.labelSmall
+                                        ?.tabularFigures()
+                                        .copyWith(
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
                                   ),
                                 ],
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        AppSpacing.w4,
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.edit_outlined,
-                                color: AppTheme.primary,
+                                color: colorScheme.primary,
                                 size: 20,
                               ),
                               padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                              onPressed: () => _showContactDialog(contact: contact),
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              onPressed: () =>
+                                  _showContactDialog(contact: contact),
                               tooltip: 'Chỉnh sửa',
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.delete_outline,
-                                color: AppTheme.error,
+                                color: errorColor,
                                 size: 20,
                               ),
                               padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
                               onPressed: () => _confirmDelete(
                                 title: 'Xóa đường dây nóng',
                                 message:
@@ -217,8 +252,21 @@ class _HandbookManagementScreenState
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 80),
+          ],
+        ),
+        error: (e, _) => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppErrorCard(
+              error: e,
+              onRetry: () => ref.invalidate(emergencyContactsProvider),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -237,9 +285,7 @@ class _HandbookManagementScreenState
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
           title: Text(
             isEditing ? 'Chỉnh sửa đường dây nóng' : 'Thêm đường dây nóng',
           ),
@@ -258,7 +304,7 @@ class _HandbookManagementScreenState
                         ? 'Vui lòng nhập tên'
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   TextFormField(
                     controller: phoneController,
                     keyboardType: TextInputType.phone,
@@ -269,9 +315,10 @@ class _HandbookManagementScreenState
                         ? 'Vui lòng nhập số điện thoại'
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   DropdownButtonFormField<String>(
                     initialValue: contactType,
+                    isExpanded: true,
                     decoration: const InputDecoration(labelText: 'Phân loại'),
                     items: const [
                       DropdownMenuItem(
@@ -295,7 +342,7 @@ class _HandbookManagementScreenState
                       if (val != null) setDialogState(() => contactType = val);
                     },
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   TextFormField(
                     controller: orderController,
                     keyboardType: TextInputType.number,
@@ -313,6 +360,7 @@ class _HandbookManagementScreenState
               child: const Text('Hủy'),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   Navigator.pop(ctx);
@@ -364,6 +412,8 @@ class _HandbookManagementScreenState
   // Tab 2: Nội Quy Tòa Nhà
   // ===========================================================================
   Widget _buildBuildingRulesTab() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
     final rulesAsync = ref.watch(buildingRulesProvider);
 
     return RefreshIndicator(
@@ -371,8 +421,15 @@ class _HandbookManagementScreenState
       child: rulesAsync.when(
         data: (rules) {
           if (rules.isEmpty) {
-            return const Center(
-              child: Text('Chưa có nội quy. Bấm + để thêm mới.'),
+            return ListView(
+              padding: AppSpacing.p16,
+              children: const [
+                AppEmptyState(
+                  icon: Icons.gavel_outlined,
+                  title: 'Chưa có nội quy tòa nhà',
+                  description: 'Chưa có nội quy. Bấm + để thêm mới.',
+                ),
+              ],
             );
           }
 
@@ -386,7 +443,7 @@ class _HandbookManagementScreenState
                   final rule = rules[index];
                   return AppCard(
                     margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16.0),
+                    padding: AppSpacing.p16,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -396,34 +453,40 @@ class _HandbookManagementScreenState
                             Expanded(
                               child: Text(
                                 '${index + 1}. ${rule.title}',
-                                style: context.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: context.titleSmall
+                                    ?.tabularFigures()
+                                    .copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            AppSpacing.w4,
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.edit_outlined,
-                                    color: AppTheme.primary,
+                                    color: colorScheme.primary,
                                     size: 20,
                                   ),
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 32,
+                                    minHeight: 32,
+                                  ),
                                   onPressed: () => _showRuleDialog(rule: rule),
                                   tooltip: 'Chỉnh sửa',
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.delete_outline,
-                                    color: AppTheme.error,
+                                    color: errorColor,
                                     size: 20,
                                   ),
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 32,
+                                    minHeight: 32,
+                                  ),
                                   onPressed: () => _confirmDelete(
                                     title: 'Xóa nội quy',
                                     message:
@@ -441,11 +504,11 @@ class _HandbookManagementScreenState
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        AppSpacing.h8,
                         Text(
                           rule.content,
                           style: context.bodyMedium?.copyWith(
-                            color: Colors.grey.shade700,
+                            color: colorScheme.onSurfaceVariant,
                             height: 1.5,
                           ),
                         ),
@@ -457,8 +520,21 @@ class _HandbookManagementScreenState
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 96),
+          ],
+        ),
+        error: (e, _) => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppErrorCard(
+              error: e,
+              onRetry: () => ref.invalidate(buildingRulesProvider),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -475,7 +551,7 @@ class _HandbookManagementScreenState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
         title: Text(isEditing ? 'Chỉnh sửa nội quy' : 'Thêm nội quy mới'),
         content: SingleChildScrollView(
           child: Form(
@@ -492,7 +568,7 @@ class _HandbookManagementScreenState
                       ? 'Vui lòng nhập tiêu đề'
                       : null,
                 ),
-                const SizedBox(height: 12),
+                AppSpacing.h12,
                 TextFormField(
                   controller: contentController,
                   maxLines: 4,
@@ -503,7 +579,7 @@ class _HandbookManagementScreenState
                       ? 'Vui lòng nhập nội dung'
                       : null,
                 ),
-                const SizedBox(height: 12),
+                AppSpacing.h12,
                 TextFormField(
                   controller: orderController,
                   keyboardType: TextInputType.number,
@@ -521,6 +597,7 @@ class _HandbookManagementScreenState
             child: const Text('Hủy'),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
                 Navigator.pop(ctx);
@@ -569,6 +646,11 @@ class _HandbookManagementScreenState
   // Tab 3: Tiện Ích Tòa Nhà
   // ===========================================================================
   Widget _buildBuildingAmenitiesTab() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final paidColor = AppStatusColors.getPaid(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+    final errorColor = AppTheme.getSemanticError(context);
     final amenitiesAsync = ref.watch(buildingAmenitiesProvider);
 
     return RefreshIndicator(
@@ -576,8 +658,15 @@ class _HandbookManagementScreenState
       child: amenitiesAsync.when(
         data: (amenities) {
           if (amenities.isEmpty) {
-            return const Center(
-              child: Text('Chưa có tiện ích nào. Bấm + để thêm mới.'),
+            return ListView(
+              padding: AppSpacing.p16,
+              children: const [
+                AppEmptyState(
+                  icon: Icons.pool_outlined,
+                  title: 'Chưa có tiện ích nào',
+                  description: 'Chưa có tiện ích nào. Bấm + để thêm mới.',
+                ),
+              ],
             );
           }
 
@@ -591,7 +680,7 @@ class _HandbookManagementScreenState
                   final amenity = amenities[index];
                   return AppCard(
                     margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16.0),
+                    padding: AppSpacing.p16,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -603,34 +692,40 @@ class _HandbookManagementScreenState
                                 amenity.name,
                                 style: context.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: AppTheme.primary,
+                                  color: colorScheme.primary,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            AppSpacing.w4,
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.edit_outlined,
-                                    color: AppTheme.primary,
+                                    color: colorScheme.primary,
                                     size: 20,
                                   ),
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 32,
+                                    minHeight: 32,
+                                  ),
                                   onPressed: () =>
                                       _showAmenityDialog(amenity: amenity),
                                   tooltip: 'Chỉnh sửa',
                                 ),
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.delete_outline,
-                                    color: AppTheme.error,
+                                    color: errorColor,
                                     size: 20,
                                   ),
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 32,
+                                    minHeight: 32,
+                                  ),
                                   onPressed: () => _confirmDelete(
                                     title: 'Xóa tiện ích',
                                     message:
@@ -648,7 +743,7 @@ class _HandbookManagementScreenState
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        AppSpacing.h8,
                         Wrap(
                           spacing: 8,
                           runSpacing: 6,
@@ -661,26 +756,28 @@ class _HandbookManagementScreenState
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppStatusColors.paid.withAlpha(25),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: paidColor.withValues(alpha: 0.1),
+                                  borderRadius: AppRadius.r8,
                                 ),
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(
+                                      Icon(
                                         Icons.access_time,
                                         size: 14,
-                                        color: AppStatusColors.paid,
+                                        color: paidColor,
                                       ),
-                                      const SizedBox(width: 4),
+                                      AppSpacing.w4,
                                       Text(
                                         amenity.openHours!,
-                                        style: context.labelSmall?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppStatusColors.paid,
-                                        ),
+                                        style: context.labelSmall
+                                            ?.tabularFigures()
+                                            .copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: paidColor,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -692,8 +789,10 @@ class _HandbookManagementScreenState
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withAlpha(25),
-                                borderRadius: BorderRadius.circular(8),
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: AppRadius.r8,
                               ),
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
@@ -705,17 +804,19 @@ class _HandbookManagementScreenState
                                           ? Icons.groups_outlined
                                           : Icons.lock_clock_outlined,
                                       size: 14,
-                                      color: AppTheme.primary,
+                                      color: colorScheme.primary,
                                     ),
-                                    const SizedBox(width: 4),
+                                    AppSpacing.w4,
                                     Text(
                                       amenity.isShared
                                           ? 'Dùng chung (${amenity.maxCapacity} người)'
                                           : 'Bao trọn khung giờ',
-                                      style: context.labelSmall?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.primary,
-                                      ),
+                                      style: context.labelSmall
+                                          ?.tabularFigures()
+                                          .copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: colorScheme.primary,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -728,15 +829,17 @@ class _HandbookManagementScreenState
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withAlpha(25),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: secondaryColor.withValues(alpha: 0.1),
+                                  borderRadius: AppRadius.r8,
                                 ),
                                 child: Text(
                                   'Phí: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.feeAmount)}',
-                                  style: context.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.blue,
-                                  ),
+                                  style: context.labelSmall
+                                      ?.tabularFigures()
+                                      .copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: secondaryColor,
+                                      ),
                                 ),
                               ),
                             if (amenity.requiresDeposit &&
@@ -747,26 +850,28 @@ class _HandbookManagementScreenState
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.withAlpha(35),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: warningColor.withValues(alpha: 0.12),
+                                  borderRadius: AppRadius.r8,
                                 ),
                                 child: Text(
                                   'Cọc: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0).format(amenity.depositAmount)}',
-                                  style: context.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.brown,
-                                  ),
+                                  style: context.labelSmall
+                                      ?.tabularFigures()
+                                      .copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: warningColor,
+                                      ),
                                 ),
                               ),
                           ],
                         ),
                         if (amenity.description != null &&
                             amenity.description!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
+                          AppSpacing.h8,
                           Text(
                             amenity.description!,
                             style: context.bodyMedium?.copyWith(
-                              color: Colors.grey.shade700,
+                              color: colorScheme.onSurfaceVariant,
                               height: 1.4,
                             ),
                           ),
@@ -779,8 +884,21 @@ class _HandbookManagementScreenState
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(formatErrorMessage(e))),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 112),
+          ],
+        ),
+        error: (e, _) => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppErrorCard(
+              error: e,
+              onRetry: () => ref.invalidate(buildingAmenitiesProvider),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -818,9 +936,7 @@ class _HandbookManagementScreenState
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
           title: Text(isEditing ? 'Chỉnh sửa tiện ích' : 'Thêm tiện ích mới'),
           content: SingleChildScrollView(
             child: Form(
@@ -838,9 +954,10 @@ class _HandbookManagementScreenState
                         ? 'Vui lòng nhập tên tiện ích'
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   DropdownButtonFormField<String>(
                     initialValue: bookingType,
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Hình thức đặt chỗ',
                     ),
@@ -860,7 +977,7 @@ class _HandbookManagementScreenState
                       }
                     },
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   TextFormField(
                     controller: capacityController,
                     keyboardType: TextInputType.number,
@@ -877,7 +994,7 @@ class _HandbookManagementScreenState
                       return null;
                     },
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   TextFormField(
                     controller: durationController,
                     keyboardType: TextInputType.number,
@@ -892,14 +1009,14 @@ class _HandbookManagementScreenState
                       return null;
                     },
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   TextFormField(
                     controller: hoursController,
                     decoration: const InputDecoration(
                       labelText: 'Giờ mở cửa (VD: 06:00 - 21:00)',
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.h12,
                   Row(
                     children: [
                       Expanded(
@@ -911,7 +1028,7 @@ class _HandbookManagementScreenState
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      AppSpacing.w8,
                       Expanded(
                         child: TextFormField(
                           controller: orderController,
@@ -923,7 +1040,7 @@ class _HandbookManagementScreenState
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  AppSpacing.h8,
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Yêu cầu đặt cọc trước'),
@@ -946,7 +1063,7 @@ class _HandbookManagementScreenState
                         return null;
                       },
                     ),
-                    const SizedBox(height: 12),
+                    AppSpacing.h12,
                   ],
                   TextFormField(
                     controller: descController,
@@ -965,6 +1082,7 @@ class _HandbookManagementScreenState
               child: const Text('Hủy'),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   Navigator.pop(ctx);
@@ -1040,37 +1158,42 @@ class _HandbookManagementScreenState
   }) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-              foregroundColor: Colors.white,
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        final errorColor = AppTheme.getSemanticError(ctx);
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Hủy'),
             ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              try {
-                await onConfirm();
-                if (mounted) {
-                  AppSnackBar.showSuccess(context, successMessage);
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: errorColor,
+                foregroundColor: colorScheme.onError,
+                minimumSize: const Size(0, 44),
+              ),
+              onPressed: () async {
+                Navigator.pop(ctx);
+                try {
+                  await onConfirm();
+                  if (mounted) {
+                    AppSnackBar.showSuccess(context, successMessage);
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    AppSnackBar.showError(context, formatErrorMessage(e));
+                  }
                 }
-              } catch (e) {
-                if (mounted) {
-                  AppSnackBar.showError(context, formatErrorMessage(e));
-                }
-              }
-            },
-            child: const Text('Xóa'),
-          ),
-        ],
-      ),
+              },
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

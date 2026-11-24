@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../data/models/poll_model.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/petition_model.dart';
+import '../../../data/models/poll_model.dart';
 import '../../../data/providers/community_provider.dart';
 import '../widgets/create_poll_sheet.dart';
 import '../widgets/poll_result_dialog.dart';
@@ -27,11 +33,19 @@ class _CommunityManagementScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_handleTabChanged);
+  }
+
+  void _handleTabChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -40,7 +54,6 @@ class _CommunityManagementScreenState
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => const CreatePollSheet(),
     );
   }
@@ -61,15 +74,17 @@ class _CommunityManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cộng Đồng & Biểu Quyết'),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppTheme.primary,
+          indicatorColor: colorScheme.primary,
           indicatorWeight: 3,
-          labelColor: AppTheme.primary,
-          unselectedLabelColor: Colors.grey,
+          labelColor: colorScheme.primary,
+          unselectedLabelColor: colorScheme.onSurfaceVariant,
           labelStyle: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           tabs: const [
             Tab(icon: Icon(Icons.how_to_vote_outlined), text: 'Biểu Quyết'),
@@ -77,22 +92,27 @@ class _CommunityManagementScreenState
           ],
         ),
       ),
-      body: Column(
-        children: [
-          _buildStatsHeader(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [_buildPollsTab(), _buildPetitionsTab()],
-            ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: Column(
+            children: [
+              _buildStatsHeader(),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [_buildPollsTab(), _buildPetitionsTab()],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       floatingActionButton: _tabController.index == 0
           ? FloatingActionButton.extended(
               onPressed: _openCreatePollSheet,
-              backgroundColor: AppTheme.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               icon: const Icon(Icons.add_rounded),
               label: const Text('Tạo Biểu Quyết'),
             )
@@ -102,13 +122,17 @@ class _CommunityManagementScreenState
 
   // ─── DẢI KPI THỜI GIAN THỰC ───
   Widget _buildStatsHeader() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
     final statsAsync = ref.watch(communityStatsProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        color: colorScheme.surface,
+        border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
       ),
       child: statsAsync.when(
         loading: () => const SizedBox(
@@ -117,41 +141,58 @@ class _CommunityManagementScreenState
         ),
         error: (_, _) => const SizedBox.shrink(),
         data: (stats) {
-          return Row(
-            children: [
-              Expanded(
-                child: _buildStatItem(
-                  label: 'Đang mở',
-                  value: '${stats['activePolls'] ?? 0}',
-                  icon: Icons.how_to_vote_rounded,
-                  color: AppTheme.primary,
-                ),
-              ),
-              Expanded(
-                child: _buildStatItem(
-                  label: 'Tổng biểu quyết',
-                  value: '${stats['totalPolls'] ?? 0}',
-                  icon: Icons.ballot_outlined,
-                  color: Colors.blueGrey,
-                ),
-              ),
-              Expanded(
-                child: _buildStatItem(
-                  label: 'Kiến nghị chờ',
-                  value: '${stats['pendingPetitions'] ?? 0}',
-                  icon: Icons.pending_actions_rounded,
-                  color: Colors.orange,
-                ),
-              ),
-              Expanded(
-                child: _buildStatItem(
-                  label: 'Đã giải quyết',
-                  value: '${stats['resolvedPetitions'] ?? 0}',
-                  icon: Icons.task_alt_rounded,
-                  color: Colors.green,
-                ),
-              ),
-            ],
+          final items = [
+            _buildStatItem(
+              label: 'Đang mở',
+              value: '${stats['activePolls'] ?? 0}',
+              icon: Icons.how_to_vote_rounded,
+              color: colorScheme.primary,
+            ),
+            _buildStatItem(
+              label: 'Tổng biểu quyết',
+              value: '${stats['totalPolls'] ?? 0}',
+              icon: Icons.ballot_outlined,
+              color: secondaryColor,
+            ),
+            _buildStatItem(
+              label: 'Kiến nghị chờ',
+              value: '${stats['pendingPetitions'] ?? 0}',
+              icon: Icons.pending_actions_rounded,
+              color: warningColor,
+            ),
+            _buildStatItem(
+              label: 'Đã giải quyết',
+              value: '${stats['resolvedPetitions'] ?? 0}',
+              icon: Icons.task_alt_rounded,
+              color: successColor,
+            ),
+          ];
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 480) {
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: items[0]),
+                        Expanded(child: items[1]),
+                      ],
+                    ),
+                    AppSpacing.h8,
+                    Row(
+                      children: [
+                        Expanded(child: items[2]),
+                        Expanded(child: items[3]),
+                      ],
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: items.map((w) => Expanded(child: w)).toList(),
+              );
+            },
           );
         },
       ),
@@ -164,12 +205,13 @@ class _CommunityManagementScreenState
     required IconData icon,
     required Color color,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: AppRadius.r12,
       ),
       child: Column(
         children: [
@@ -177,17 +219,26 @@ class _CommunityManagementScreenState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 14, color: color),
-              const SizedBox(width: 4),
-              Text(
-                value,
-                style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color),
+              AppSpacing.w4,
+              Flexible(
+                child: Text(
+                  value,
+                  style: context.titleMedium?.tabularFigures().copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+            style: context.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -207,21 +258,43 @@ class _CommunityManagementScreenState
         ref.invalidate(communityStatsProvider);
       },
       child: pollsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 140),
+          ],
+        ),
+        error: (err, _) => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppErrorCard(
+              error: err,
+              onRetry: () => ref.invalidate(
+                pollsProvider((status: null, apartmentId: null)),
+              ),
+            ),
+          ],
+        ),
         data: (polls) {
           if (polls.isEmpty) {
-            return const Center(child: Text('Chưa có cuộc biểu quyết nào'));
+            return ListView(
+              padding: AppSpacing.p16,
+              children: const [
+                AppEmptyState(
+                  icon: Icons.how_to_vote_outlined,
+                  title: 'Chưa có cuộc biểu quyết nào',
+                  description:
+                      'Bấm "Tạo Biểu Quyết" để khảo sát ý kiến cư dân toàn khu.',
+                ),
+              ],
+            );
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.p16,
             itemCount: polls.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final poll = polls[index];
-              return _buildPollCard(poll);
-            },
+            separatorBuilder: (_, _) => AppSpacing.h12,
+            itemBuilder: (context, index) => _buildPollCard(polls[index]),
           );
         },
       ),
@@ -229,118 +302,142 @@ class _CommunityManagementScreenState
   }
 
   Widget _buildPollCard(PollModel poll) {
-    Color statusColor = poll.isActive ? Colors.green : Colors.grey;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final statusColor = poll.isActive
+        ? successColor
+        : colorScheme.onSurfaceVariant;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Text(
-                    poll.pollCode,
-                    style: context.labelSmall?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
+    return AppCard(
+      padding: AppSpacing.p16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: AppRadius.r6,
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Text(
+                  poll.pollCode,
+                  style: context.labelSmall?.tabularFigures().copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(
-                    poll.statusDisplayName,
-                    style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: statusColor),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r12,
+                  border: Border.all(
+                    color: statusColor.withValues(alpha: 0.3),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              poll.title,
-              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            if (poll.description != null && poll.description!.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                poll.description!,
-                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                child: Text(
+                  poll.statusDisplayName,
+                  style: context.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
+                ),
               ),
             ],
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
+          ),
+          AppSpacing.h12,
+          Text(
+            poll.title,
+            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          if (poll.description != null && poll.description!.isNotEmpty) ...[
+            AppSpacing.h6,
+            Text(
+              poll.description!,
+              style: context.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.balance_rounded,
-                    size: 16,
-                    color: AppTheme.primary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Quyền biểu quyết: ${poll.voteWeightDisplayName}',
-                    style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'Hạn: ${_dateFormat.format(poll.endTime)}',
-                    style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
-                  ),
-                ],
-              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ],
+          AppSpacing.h12,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLowest,
+              borderRadius: AppRadius.r8,
+              border: Border.all(color: colorScheme.outlineVariant),
+            ),
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 4,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(
-                  '${poll.options.length} phương án lựa chọn',
-                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _openPollResultDialog(poll),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.balance_rounded,
+                      size: 16,
+                      color: colorScheme.primary,
                     ),
+                    AppSpacing.w6,
+                    Text(
+                      'Quyền biểu quyết: ${poll.voteWeightDisplayName}',
+                      style: context.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Hạn: ${_dateFormat.format(poll.endTime)}',
+                  style: context.labelSmall?.tabularFigures().copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                  icon: const Icon(Icons.bar_chart_rounded, size: 18),
-                  label: const Text('Xem Kết Quả'),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          AppSpacing.h12,
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                '${poll.options.length} phương án lựa chọn',
+                style: context.bodySmall?.tabularFigures().copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _openPollResultDialog(poll),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(0, 44),
+                  shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
+                ),
+                icon: const Icon(Icons.bar_chart_rounded, size: 18),
+                label: const Text('Xem Kết Quả'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -359,23 +456,47 @@ class _CommunityManagementScreenState
         ref.invalidate(communityStatsProvider);
       },
       child: petitionsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
+        loading: () => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppSkeletonShimmer.cardList(count: 3, itemHeight: 140),
+          ],
+        ),
+        error: (err, _) => ListView(
+          padding: AppSpacing.p16,
+          children: [
+            AppErrorCard(
+              error: err,
+              onRetry: () => ref.invalidate(
+                petitionsProvider((
+                  status: null,
+                  category: null,
+                  apartmentId: null,
+                )),
+              ),
+            ),
+          ],
+        ),
         data: (petitions) {
           if (petitions.isEmpty) {
-            return const Center(
-              child: Text('Không có kiến nghị nào từ cư dân'),
+            return ListView(
+              padding: AppSpacing.p16,
+              children: const [
+                AppEmptyState(
+                  icon: Icons.feedback_outlined,
+                  title: 'Chưa có kiến nghị cư dân',
+                  description: 'Không có kiến nghị nào từ cư dân.',
+                ),
+              ],
             );
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.p16,
             itemCount: petitions.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final pet = petitions[index];
-              return _buildPetitionCard(pet);
-            },
+            separatorBuilder: (_, _) => AppSpacing.h12,
+            itemBuilder: (context, index) =>
+                _buildPetitionCard(petitions[index]),
           );
         },
       ),
@@ -383,200 +504,221 @@ class _CommunityManagementScreenState
   }
 
   Widget _buildPetitionCard(PetitionModel petition) {
-    Color statusColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+    final errorColor = AppTheme.getSemanticError(context);
+    final secondaryColor = AppTheme.getSemanticSecondary(context);
+
+    final Color statusColor;
     switch (petition.status) {
       case 'resolved':
-        statusColor = Colors.green;
+        statusColor = successColor;
         break;
       case 'in_progress':
-        statusColor = Colors.orange;
+        statusColor = warningColor;
         break;
       case 'rejected':
-        statusColor = AppTheme.error;
+        statusColor = errorColor;
         break;
       case 'acknowledged':
-        statusColor = Colors.blue;
+        statusColor = colorScheme.primary;
         break;
       case 'pending':
       default:
-        statusColor = Colors.purple;
+        statusColor = secondaryColor;
         break;
     }
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.grey[300]!),
-                      ),
-                      child: Text(
-                        petition.petitionCode,
-                        style: context.labelSmall?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.bold),
+    return AppCard(
+      padding: AppSpacing.p16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: AppRadius.r6,
+                      border: Border.all(color: colorScheme.outlineVariant),
+                    ),
+                    child: Text(
+                      petition.petitionCode,
+                      style: context.labelSmall?.tabularFigures().copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        petition.apartmentCode ?? 'Căn hộ',
-                        style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                  ),
+                  AppSpacing.w8,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: AppRadius.r6,
+                    ),
+                    child: Text(
+                      petition.apartmentCode ?? 'Căn hộ',
+                      style: context.labelSmall?.tabularFigures().copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
                       ),
                     ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
                   ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(
-                    petition.statusDisplayName,
-                    style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: statusColor),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              petition.title,
-              style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              petition.content,
-              style: context.bodyMedium?.copyWith(color: AppTheme.textPrimary),
-            ),
-            const SizedBox(height: 12),
-
-            // Dải đồng thuận & Chuyên mục
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.thumb_up_alt_outlined,
-                        size: 14,
-                        color: Colors.blue,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${petition.endorsementCount} đồng thuận',
-                        style: context.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.blue),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '• ${petition.categoryDisplayName}',
-                  style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
-                ),
-              ],
-            ),
-
-            // Phản hồi của BQL (nếu có)
-            if (petition.officialResponse != null &&
-                petition.officialResponse!.isNotEmpty) ...[
-              const SizedBox(height: 12),
+                ],
+              ),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r12,
                   border: Border.all(
-                    color: Colors.green.withValues(alpha: 0.3),
+                    color: statusColor.withValues(alpha: 0.3),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Text(
+                  petition.statusDisplayName,
+                  style: context.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.h12,
+          Text(
+            petition.title,
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          AppSpacing.h6,
+          Text(
+            petition.content,
+            style: context.bodyMedium?.copyWith(color: colorScheme.onSurface),
+          ),
+          AppSpacing.h12,
+
+          // Dải đồng thuận & Chuyên mục
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r6,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.verified_outlined,
-                          size: 16,
-                          color: Colors.green,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Phản hồi chính thức từ Ban Quản Lý:',
-                          style: context.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
+                    Icon(
+                      Icons.thumb_up_alt_outlined,
+                      size: 14,
+                      color: colorScheme.primary,
                     ),
-                    const SizedBox(height: 4),
+                    AppSpacing.w4,
                     Text(
-                      petition.officialResponse!,
-                      style: context.bodyMedium,
+                      '${petition.endorsementCount} đồng thuận',
+                      style: context.labelSmall?.tabularFigures().copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-            const SizedBox(height: 12),
-
-            // Nút xử lý
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () => _openRespondPetitionDialog(petition),
-                  icon: const Icon(Icons.edit_note_rounded, size: 18),
-                  label: const Text('Phản Hồi & Xử Lý'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+              Text(
+                '• ${petition.categoryDisplayName}',
+                style: context.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
-              ],
+              ),
+            ],
+          ),
+
+          // Phản hồi của BQL (nếu có)
+          if (petition.officialResponse != null &&
+              petition.officialResponse!.isNotEmpty) ...[
+            AppSpacing.h12,
+            Container(
+              padding: AppSpacing.p12,
+              decoration: BoxDecoration(
+                color: successColor.withValues(alpha: 0.08),
+                borderRadius: AppRadius.r8,
+                border: Border.all(
+                  color: successColor.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.verified_outlined,
+                        size: 16,
+                        color: successColor,
+                      ),
+                      AppSpacing.w6,
+                      Expanded(
+                        child: Text(
+                          'Phản hồi chính thức từ Ban Quản Lý:',
+                          style: context.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: successColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  AppSpacing.h4,
+                  Text(
+                    petition.officialResponse!,
+                    style: context.bodyMedium,
+                  ),
+                ],
+              ),
             ),
           ],
-        ),
+          AppSpacing.h12,
+
+          // Nút xử lý
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: () => _openRespondPetitionDialog(petition),
+              icon: const Icon(Icons.edit_note_rounded, size: 18),
+              label: const Text('Phản Hồi & Xử Lý'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+                minimumSize: const Size(0, 44),
+                shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

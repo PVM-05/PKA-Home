@@ -3,12 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/permissions.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_empty_state.dart';
+import '../../../core/widgets/app_error_card.dart';
+import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/issue_rating_model.dart';
 import '../../../data/providers/issue_rating_provider.dart';
-import '../../../core/utils/error_formatter.dart';
 
 /// Màn hình Khảo sát & Đánh giá dịch vụ sự cố dành cho Ban Quản Lý
 class ServiceRatingOverviewScreen extends ConsumerStatefulWidget {
@@ -25,48 +30,46 @@ class _ServiceRatingOverviewScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final ratingsAsync = ref.watch(allIssueRatingsProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return RoleGuard(
       permission: AppPermissions.issueManagement,
       child: Scaffold(
         appBar: AppBar(title: const Text('Đánh giá chất lượng dịch vụ')),
         body: ratingsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: AppTheme.error,
-                ),
-                const SizedBox(height: 12),
-                Text(formatErrorMessage(err), textAlign: TextAlign.center),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => ref.invalidate(allIssueRatingsProvider),
-                  child: const Text('Thử lại'),
-                ),
-              ],
-            ),
+          loading: () => ListView(
+            padding: AppSpacing.p16,
+            children: [
+              AppSkeletonShimmer.cardList(count: 3, itemHeight: 132),
+            ],
+          ),
+          error: (err, _) => ListView(
+            padding: AppSpacing.p16,
+            children: [
+              AppErrorCard(
+                error: err,
+                onRetry: () => ref.invalidate(allIssueRatingsProvider),
+              ),
+            ],
           ),
           data: (ratings) {
             if (ratings.isEmpty) {
               return RefreshIndicator(
-                color: AppTheme.primary,
+                color: colorScheme.primary,
                 onRefresh: () async {
                   HapticFeedback.lightImpact();
                   ref.invalidate(allIssueRatingsProvider);
                 },
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.7,
-                      child: _buildEmptyState(context),
+                  padding: AppSpacing.p16,
+                  children: const [
+                    AppEmptyState(
+                      icon: Icons.star_outline_rounded,
+                      title: 'Chưa có lượt đánh giá nào',
+                      description:
+                          'Khi cư dân hoàn thành đánh giá các sự cố kỹ thuật, kết quả khảo sát và thống kê KPI sẽ hiển thị tại đây.',
                     ),
                   ],
                 ),
@@ -90,8 +93,8 @@ class _ServiceRatingOverviewScreenState
             final highSatisfactionCount = ratings
                 .where((r) => r.overallRating >= 4.0)
                 .length;
-            final satisfactionRate =
-                (highSatisfactionCount / totalRatings * 100).toStringAsFixed(0);
+            final satisfactionRate = (highSatisfactionCount / totalRatings * 100)
+                .toStringAsFixed(0);
 
             // Áp dụng bộ lọc
             final filteredRatings = ratings.where((r) {
@@ -103,73 +106,79 @@ class _ServiceRatingOverviewScreenState
               return true;
             }).toList();
 
-            return RefreshIndicator(
-              color: AppTheme.primary,
-              onRefresh: () async {
-                HapticFeedback.lightImpact();
-                ref.invalidate(allIssueRatingsProvider);
-              },
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // ─── Header: Tổng quan KPI & Điểm số ───
-                  _buildKpiCard(
-                    context,
-                    avgOverall: avgOverall,
-                    satisfactionRate: satisfactionRate,
-                    totalRatings: totalRatings,
-                    avgSpeed: avgSpeed,
-                    avgAttitude: avgAttitude,
-                    avgQuality: avgQuality,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ─── Thanh lọc FilterChips ───
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip(context, 'all', 'Tất cả (${ratings.length})'),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(
-                          context,
-                          '5_star',
-                          '5 sao (${ratings.where((r) => r.overallRating >= 4.8).length})',
-                        ),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(
-                          context,
-                          '4_star',
-                          '4 sao (${ratings.where((r) => r.overallRating >= 3.8 && r.overallRating < 4.8).length})',
-                        ),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(
-                          context,
-                          'low_star',
-                          'Cần cải thiện (<4★) (${ratings.where((r) => r.overallRating < 3.8).length})',
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ─── Danh sách từng đánh giá ───
-                  if (filteredRatings.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(32),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Không có đánh giá nào phù hợp với bộ lọc đã chọn',
-                        style: TextStyle(color: Colors.grey.shade600),
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: RefreshIndicator(
+                  color: colorScheme.primary,
+                  onRefresh: () async {
+                    HapticFeedback.lightImpact();
+                    ref.invalidate(allIssueRatingsProvider);
+                  },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: AppSpacing.p16,
+                    children: [
+                      // ─── Header: Tổng quan KPI & Điểm số ───
+                      _buildKpiCard(
+                        context,
+                        avgOverall: avgOverall,
+                        satisfactionRate: satisfactionRate,
+                        totalRatings: totalRatings,
+                        avgSpeed: avgSpeed,
+                        avgAttitude: avgAttitude,
+                        avgQuality: avgQuality,
                       ),
-                    )
-                  else
-                    ...filteredRatings.map(
-                      (rating) => _buildRatingItemCard(context, rating, isDark),
-                    ),
-                ],
+                      AppSpacing.h16,
+
+                      // ─── Thanh lọc FilterChips ───
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip(
+                              context,
+                              'all',
+                              'Tất cả (${ratings.length})',
+                            ),
+                            AppSpacing.w8,
+                            _buildFilterChip(
+                              context,
+                              '5_star',
+                              '5 sao (${ratings.where((r) => r.overallRating >= 4.8).length})',
+                            ),
+                            AppSpacing.w8,
+                            _buildFilterChip(
+                              context,
+                              '4_star',
+                              '4 sao (${ratings.where((r) => r.overallRating >= 3.8 && r.overallRating < 4.8).length})',
+                            ),
+                            AppSpacing.w8,
+                            _buildFilterChip(
+                              context,
+                              'low_star',
+                              'Cần cải thiện (<4★) (${ratings.where((r) => r.overallRating < 3.8).length})',
+                            ),
+                          ],
+                        ),
+                      ),
+                      AppSpacing.h16,
+
+                      // ─── Danh sách từng đánh giá ───
+                      if (filteredRatings.isEmpty)
+                        const AppEmptyState(
+                          icon: Icons.filter_alt_off_outlined,
+                          title: 'Không có đánh giá phù hợp',
+                          description:
+                              'Không có đánh giá nào phù hợp với bộ lọc đã chọn.',
+                        )
+                      else
+                        ...filteredRatings.map(
+                          (rating) => _buildRatingItemCard(context, rating),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
@@ -179,16 +188,17 @@ class _ServiceRatingOverviewScreenState
   }
 
   Widget _buildFilterChip(BuildContext context, String key, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = _selectedFilter == key;
     return FilterChip(
       selected: isSelected,
       label: Text(label),
-      labelStyle: context.labelMedium?.copyWith(
+      labelStyle: context.labelMedium?.tabularFigures().copyWith(
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? Colors.white : AppTheme.textPrimary,
+        color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
       ),
-      selectedColor: AppTheme.primary,
-      checkmarkColor: Colors.white,
+      selectedColor: colorScheme.primary,
+      checkmarkColor: colorScheme.onPrimary,
       onSelected: (_) {
         HapticFeedback.selectionClick();
         setState(() => _selectedFilter = key);
@@ -204,29 +214,21 @@ class _ServiceRatingOverviewScreenState
     required double avgSpeed,
     required double avgAttitude,
     required double avgQuality,
-    required bool isDark,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white10 : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.white12 : Colors.grey.shade200,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
+
+    return AppCard(
+      padding: AppSpacing.p16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,24 +236,27 @@ class _ServiceRatingOverviewScreenState
                   Text(
                     'Điểm dịch vụ toàn khu',
                     style: context.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  AppSpacing.h4,
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.star_rate_rounded,
-                        color: Colors.amber,
+                        color: warningColor,
                         size: 28,
                       ),
-                      const SizedBox(width: 4),
+                      AppSpacing.w4,
                       Text(
                         '${avgOverall.toStringAsFixed(1)} / 5.0',
-                        style: context.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber,
-                        ),
+                        style: context.headlineMedium
+                            ?.tabularFigures()
+                            .copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: warningColor,
+                            ),
                       ),
                     ],
                   ),
@@ -263,30 +268,30 @@ class _ServiceRatingOverviewScreenState
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: successColor.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r12,
                 ),
                 child: Column(
                   children: [
                     Text(
                       '$satisfactionRate%',
-                      style: context.titleLarge?.copyWith(
+                      style: context.titleLarge?.tabularFigures().copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.success,
+                        color: successColor,
                       ),
                     ),
                     Text(
                       'Tỷ lệ hài lòng',
-                      style: context.labelSmall?.copyWith(color: AppTheme.success),
+                      style: context.labelSmall?.copyWith(color: successColor),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          AppSpacing.h16,
           const Divider(),
-          const SizedBox(height: 8),
+          AppSpacing.h8,
 
           // 3 Tiêu chí trung bình
           Row(
@@ -303,21 +308,27 @@ class _ServiceRatingOverviewScreenState
   }
 
   Widget _buildMetricColumn(BuildContext context, String title, double score) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
     return Column(
       children: [
         Text(
           title,
-          style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+          style: context.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
-        const SizedBox(height: 4),
+        AppSpacing.h4,
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.star_rate_rounded, size: 15, color: Colors.amber),
+            Icon(Icons.star_rate_rounded, size: 15, color: warningColor),
             const SizedBox(width: 2),
             Text(
               score.toStringAsFixed(1),
-              style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: context.bodyMedium?.tabularFigures().copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -328,179 +339,138 @@ class _ServiceRatingOverviewScreenState
   Widget _buildRatingItemCard(
     BuildContext context,
     IssueRatingModel rating,
-    bool isDark,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final label = IssueRatingModel.getSatisfactionLabel(rating.overallRating);
 
-    return Card(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Căn hộ + Tên cư dân + Ngày
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+      padding: AppSpacing.p16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Căn hộ + Tên cư dân + Ngày
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: AppRadius.r8,
+                ),
+                child: Text(
+                  rating.reporterName ?? 'Cư dân',
+                  style: context.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ),
+              Text(
+                dateFormat.format(rating.createdAt),
+                style: context.labelSmall?.tabularFigures().copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.h12,
+
+          // Điểm số & nhãn
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: warningColor.withValues(alpha: 0.15),
+                  borderRadius: AppRadius.r8,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        rating.reporterName ?? 'Cư dân',
-                        style: context.labelSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
-                        ),
+                    Icon(
+                      Icons.star_rate_rounded,
+                      size: 16,
+                      color: warningColor,
+                    ),
+                    AppSpacing.w4,
+                    Text(
+                      '${rating.overallRating.toStringAsFixed(1)} / 5.0',
+                      style: context.labelMedium?.tabularFigures().copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: warningColor,
                       ),
                     ),
                   ],
                 ),
-                Text(
-                  dateFormat.format(rating.createdAt),
-                  style: context.labelSmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Điểm số & nhãn
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.star_rate_rounded,
-                        size: 16,
-                        color: Colors.amber,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${rating.overallRating.toStringAsFixed(1)} / 5.0',
-                        style: context.labelMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: context.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Breakdown
-            Row(
-              children: [
-                _buildSmallChip(context, 'Tốc độ', rating.speedRating),
-                const SizedBox(width: 8),
-                _buildSmallChip(context, 'Thái độ', rating.attitudeRating),
-                const SizedBox(width: 8),
-                _buildSmallChip(context, 'Kỹ thuật', rating.qualityRating),
-              ],
-            ),
-
-            // Lời nhận xét
-            if (rating.comment != null &&
-                rating.comment!.trim().isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white10 : Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '"${rating.comment}"',
-                  style: context.bodySmall?.copyWith(
-                    fontStyle: FontStyle.italic,
-                    color: isDark ? Colors.white70 : Colors.grey.shade800,
-                  ),
+              ),
+              Text(
+                label,
+                style: context.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
+          ),
+          AppSpacing.h12,
+
+          // Breakdown
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              _buildSmallChip(context, 'Tốc độ', rating.speedRating),
+              _buildSmallChip(context, 'Thái độ', rating.attitudeRating),
+              _buildSmallChip(context, 'Kỹ thuật', rating.qualityRating),
+            ],
+          ),
+
+          // Lời nhận xét
+          if (rating.comment != null && rating.comment!.trim().isNotEmpty) ...[
+            AppSpacing.h12,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLowest,
+                borderRadius: AppRadius.r8,
+                border: Border.all(color: colorScheme.outlineVariant),
+              ),
+              child: Text(
+                '"${rating.comment}"',
+                style: context.bodySmall?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildSmallChip(BuildContext context, String title, int score) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Text(
       '$title: $score★',
-      style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.star_outline_rounded,
-                size: 56,
-                color: Colors.amber,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Chưa có lượt đánh giá nào',
-              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Khi cư dân hoàn thành đánh giá các sự cố kỹ thuật, kết quả khảo sát và thống kê KPI sẽ hiển thị tại đây.',
-              textAlign: TextAlign.center,
-              style: context.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-                height: 1.4,
-              ),
-            ),
-          ],
-        ),
+      style: context.labelSmall?.tabularFigures().copyWith(
+        color: colorScheme.onSurfaceVariant,
       ),
     );
   }
