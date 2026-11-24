@@ -593,6 +593,9 @@ CREATE POLICY "maintenance_windows_read" ON public.amenity_maintenance_windows
         )
     );
 
+ALTER TABLE public.building_equipments
+    ADD COLUMN IF NOT EXISTS building_id UUID REFERENCES public.buildings(id) ON DELETE SET NULL;
+
 DROP POLICY IF EXISTS "building_equipments_read" ON public.building_equipments;
 CREATE POLICY "building_equipments_read" ON public.building_equipments
     FOR SELECT TO authenticated
@@ -684,10 +687,27 @@ CREATE POLICY "poll_options_read_tenant" ON public.poll_options
         )
     );
 
+ALTER TABLE public.resident_petitions
+    ADD COLUMN IF NOT EXISTS building_id UUID REFERENCES public.buildings(id) ON DELETE CASCADE;
+
+UPDATE public.resident_petitions rp
+SET building_id = a.building_id
+FROM public.apartments a
+WHERE rp.apartment_id = a.id
+  AND rp.building_id IS NULL;
+
 DROP POLICY IF EXISTS "Anyone authenticated can view petitions" ON public.resident_petitions;
 CREATE POLICY "petitions_read_tenant" ON public.resident_petitions
     FOR SELECT TO authenticated
-    USING (building_id IS NULL OR public.can_access_building(building_id));
+    USING (
+        (building_id IS NOT NULL AND public.can_access_building(building_id))
+        OR (apartment_id IS NOT NULL AND public.can_access_apartment(apartment_id))
+        OR (
+            building_id IS NULL
+            AND apartment_id IS NOT NULL
+            AND public.can_access_building((SELECT a.building_id FROM public.apartments a WHERE a.id = resident_petitions.apartment_id))
+        )
+    );
 
 DROP POLICY IF EXISTS "Anyone authenticated can view endorsements" ON public.petition_endorsements;
 CREATE POLICY "endorsements_read_tenant" ON public.petition_endorsements
@@ -695,8 +715,12 @@ CREATE POLICY "endorsements_read_tenant" ON public.petition_endorsements
     USING (
         EXISTS (
             SELECT 1 FROM public.resident_petitions rp
+            LEFT JOIN public.apartments a ON a.id = rp.apartment_id
             WHERE rp.id = petition_endorsements.petition_id
-              AND (rp.building_id IS NULL OR public.can_access_building(rp.building_id))
+              AND (
+                  COALESCE(rp.building_id, a.building_id) IS NULL
+                  OR public.can_access_building(COALESCE(rp.building_id, a.building_id))
+              )
         )
     );
 
@@ -2860,7 +2884,11 @@ BEGIN
         RETURN jsonb_build_object('success', false, 'message', 'Bạn không phải cư dân đang cư trú tại căn hộ này.');
     END IF;
 
-    SELECT id, building_id INTO v_petition FROM public.resident_petitions WHERE id = p_petition_id;
+    SELECT rp.id, COALESCE(rp.building_id, a.building_id) AS building_id
+    INTO v_petition
+    FROM public.resident_petitions rp
+    LEFT JOIN public.apartments a ON a.id = rp.apartment_id
+    WHERE rp.id = p_petition_id;
     IF NOT FOUND THEN
         RETURN jsonb_build_object('success', false, 'message', 'Kiến nghị không tồn tại.');
     END IF;
@@ -2907,7 +2935,10 @@ BEGIN
         RAISE EXCEPTION 'Yêu cầu đăng nhập nhân sự Ban Quản Lý.' USING ERRCODE = '42501';
     END IF;
 
-    SELECT building_id INTO v_building_id FROM public.resident_petitions WHERE id = p_petition_id;
+    SELECT COALESCE(rp.building_id, a.building_id) INTO v_building_id
+    FROM public.resident_petitions rp
+    LEFT JOIN public.apartments a ON a.id = rp.apartment_id
+    WHERE rp.id = p_petition_id;
     IF NOT FOUND THEN
         RETURN jsonb_build_object('success', false, 'message', 'Kiến nghị không tồn tại.');
     END IF;
