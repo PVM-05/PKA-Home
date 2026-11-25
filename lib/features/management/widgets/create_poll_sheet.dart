@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/community_provider.dart';
@@ -147,14 +148,14 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Đã tạo thành công cuộc biểu quyết: ${newPoll.pollCode}'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppTheme.textSuccess,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi tạo biểu quyết: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.textError),
         );
       }
     } finally {
@@ -164,10 +165,11 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -187,7 +189,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -198,10 +200,10 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.how_to_vote_rounded, color: AppTheme.primary),
+                    child: Icon(Icons.how_to_vote_rounded, color: colorScheme.primary),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -238,16 +240,17 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _category,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Chuyên mục',
                         border: OutlineInputBorder(),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'general', child: Text('Lấy ý kiến chung')),
-                        DropdownMenuItem(value: 'agm', child: Text('Hội nghị chung cư')),
-                        DropdownMenuItem(value: 'finance', child: Text('Tài chính & Phí')),
-                        DropdownMenuItem(value: 'maintenance', child: Text('Bảo trì & Đầu tư')),
-                        DropdownMenuItem(value: 'rule', child: Text('Nội quy tòa nhà')),
+                        DropdownMenuItem(value: 'general', child: Text('Lấy ý kiến chung', overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(value: 'agm', child: Text('Hội nghị chung cư', overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(value: 'finance', child: Text('Tài chính & Phí', overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(value: 'maintenance', child: Text('Bảo trì & Đầu tư', overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(value: 'rule', child: Text('Nội quy tòa nhà', overflow: TextOverflow.ellipsis)),
                       ],
                       onChanged: (val) => setState(() => _category = val ?? 'general'),
                     ),
@@ -256,13 +259,14 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _voteWeightType,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Cơ chế tính quyền',
                         border: OutlineInputBorder(),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'per_apartment', child: Text('1 Căn hộ = 1 Phiếu')),
-                        DropdownMenuItem(value: 'by_area', child: Text('Theo diện tích m² (Luật Nhà ở)')),
+                        DropdownMenuItem(value: 'per_apartment', child: Text('1 Căn hộ = 1 Phiếu', overflow: TextOverflow.ellipsis)),
+                        DropdownMenuItem(value: 'by_area', child: Text('Theo diện tích m² (Luật Nhà ở)', overflow: TextOverflow.ellipsis)),
                       ],
                       onChanged: (val) => setState(() => _voteWeightType = val ?? 'per_apartment'),
                     ),
@@ -274,14 +278,15 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
               // Hình thức lựa chọn
               DropdownButtonFormField<String>(
                 initialValue: _choiceType,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Hình thức lựa chọn',
                   border: OutlineInputBorder(),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'single_choice', child: Text('Chọn 1 phương án duy nhất')),
-                  DropdownMenuItem(value: 'multiple_choice', child: Text('Chọn nhiều phương án')),
-                  DropdownMenuItem(value: 'yes_no_abstain', child: Text('Tán thành / Không / Ý kiến khác')),
+                  DropdownMenuItem(value: 'single_choice', child: Text('Chọn 1 phương án duy nhất', overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(value: 'multiple_choice', child: Text('Chọn nhiều phương án', overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(value: 'yes_no_abstain', child: Text('Tán thành / Không / Ý kiến khác', overflow: TextOverflow.ellipsis)),
                 ],
                 onChanged: (val) => setState(() => _choiceType = val ?? 'single_choice'),
               ),
@@ -294,10 +299,10 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                       shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.grey[300]!),
+                        side: BorderSide(color: colorScheme.outlineVariant),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      title: Text('Bắt đầu', style: context.bodySmall?.copyWith(color: Colors.grey)),
+                      title: Text('Bắt đầu', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                       subtitle: Text(_dateFormat.format(_startTime), style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                       trailing: const Icon(Icons.calendar_today_outlined, size: 18),
                       onTap: () => _pickDateTime(isStart: true),
@@ -308,10 +313,10 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                       shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.grey[300]!),
+                        side: BorderSide(color: colorScheme.outlineVariant),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      title: Text('Kết thúc', style: context.bodySmall?.copyWith(color: Colors.grey)),
+                      title: Text('Kết thúc', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                       subtitle: Text(_dateFormat.format(_endTime), style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                       trailing: const Icon(Icons.event_available_outlined, size: 18),
                       onTap: () => _pickDateTime(isStart: false),
@@ -325,8 +330,11 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Danh Sách Phương Án Lựa Chọn *', style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Expanded(
+                    child: Text('Danh Sách Phương Án Lựa Chọn *', style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  ),
                   TextButton.icon(
+                    style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                     onPressed: _addOption,
                     icon: const Icon(Icons.add_rounded, size: 18),
                     label: const Text('Thêm'),
@@ -342,8 +350,8 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                     children: [
                       CircleAvatar(
                         radius: 12,
-                        backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-                        child: Text('${idx + 1}', style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                        backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                        child: Text('${idx + 1}', style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary)),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -363,7 +371,8 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                        icon: Icon(Icons.remove_circle_outline, color: colorScheme.error),
                         onPressed: () => _removeOption(idx),
                       ),
                     ],
@@ -390,6 +399,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -398,7 +408,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
                     : const Icon(Icons.publish_rounded),
                 label: Text(
                   _isLoading ? 'Đang tạo cuộc biểu quyết...' : 'Phát Hành Cuộc Biểu Quyết',
-                  style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ],

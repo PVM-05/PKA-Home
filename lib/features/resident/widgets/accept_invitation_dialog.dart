@@ -53,6 +53,7 @@ class _AcceptInvitationDialogState extends ConsumerState<AcceptInvitationDialog>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
@@ -60,10 +61,10 @@ class _AcceptInvitationDialogState extends ConsumerState<AcceptInvitationDialog>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.key_rounded, color: AppTheme.primary, size: 22),
+            child: Icon(Icons.key_rounded, color: colorScheme.primary, size: 22),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -74,58 +75,67 @@ class _AcceptInvitationDialogState extends ConsumerState<AcceptInvitationDialog>
           ),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Nhập mã mời được Ban Quản Lý hoặc Chủ hộ cung cấp để tự động liên kết vào căn hộ của bạn.',
-            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _codeController,
-            textCapitalization: TextCapitalization.characters,
-            decoration: InputDecoration(
-              labelText: 'Mã kích hoạt',
-              hintText: 'Ví dụ: PKA12345',
-              prefixIcon: const Icon(Icons.vpn_key_outlined, size: 20),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            ),
-          ),
-          if (_errorMessage != null) ...[
-            const SizedBox(height: 10),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              _errorMessage!,
-              style: context.bodySmall?.copyWith(color: AppTheme.error),
+              'Nhập mã mời được Ban Quản Lý hoặc Chủ hộ cung cấp để tự động liên kết vào căn hộ của bạn.',
+              style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
-          ],
-          if (_successMessage != null) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(Icons.check_circle, color: AppTheme.success, size: 18),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    _successMessage!,
-                    style: context.bodySmall?.copyWith(color: AppTheme.success, fontWeight: FontWeight.w600),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _codeController,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                labelText: 'Mã kích hoạt',
+                hintText: 'Ví dụ: VIV12345',
+                prefixIcon: const Icon(Icons.vpn_key_outlined, size: 20),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              ),
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                _errorMessage!,
+                style: context.bodySmall?.copyWith(color: AppTheme.getSemanticError(context)),
+              ),
+            ],
+            if (_successMessage != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.check_circle, color: AppTheme.getSemanticSuccess(context), size: 18),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      _successMessage!,
+                      style: context.bodySmall?.copyWith(
+                        color: AppTheme.getSemanticSuccess(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
           onPressed: () => Navigator.pop(context),
           child: const Text('Đóng'),
         ),
         FilledButton(
           onPressed: _isLoading ? null : _handleAccept,
-          style: FilledButton.styleFrom(backgroundColor: AppTheme.primary),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppTheme.primary,
+            minimumSize: const Size(0, 48),
+          ),
           child: _isLoading
               ? const SizedBox(
                   width: 16,

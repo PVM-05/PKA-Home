@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/debt_risk_score_model.dart';
 import '../../../data/providers/debt_prediction_provider.dart';
 
@@ -117,8 +118,8 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi gửi thông báo: $e'),
-            backgroundColor: AppTheme.error,
+            content: Text(formatErrorMessage(e)),
+            backgroundColor: AppTheme.textError,
           ),
         );
       }
@@ -129,6 +130,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
@@ -146,7 +148,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: _selectedTier.color.withValues(alpha: 0.1),
+                        color: _selectedTier.color.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
@@ -164,19 +166,20 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                             'Thực Thi Đôn Đốc Đa Tầng',
                             style: context.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                           Text(
                             'Căn hộ: ${widget.apartmentCode} - ${widget.ownerName}',
                             style: context.bodySmall?.copyWith(
-                              color: AppTheme.textSecondary,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                       icon: const Icon(Icons.close_rounded, size: 20),
                       onPressed: () => Navigator.of(context).pop(false),
                     ),
@@ -189,46 +192,48 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface,
+                    color: colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.border),
+                    border: Border.all(color: colorScheme.outlineVariant),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceAround,
+                    spacing: 12,
+                    runSpacing: 8,
                     children: [
                       Column(
                         children: [
-                          Text('Tổng nợ quá hạn', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                          Text('Tổng nợ quá hạn', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                           const SizedBox(height: 4),
                           Text(
                             '${_moneyFormat.format(widget.unpaidAmount)} đ',
-                            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.error),
+                            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.getSemanticError(context)),
                           ),
                         ],
                       ),
-                      Container(height: 30, width: 1, color: AppTheme.border),
                       Column(
                         children: [
-                          Text('Số ngày trễ', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                          Text('Số ngày trễ', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                           const SizedBox(height: 4),
                           Text(
                             '${widget.overdueDays} ngày',
-                            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                            style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                           ),
                         ],
                       ),
-                      Container(height: 30, width: 1, color: AppTheme.border),
                       Column(
                         children: [
-                          Text('Điểm rủi ro', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                          Text('Điểm rủi ro', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                           const SizedBox(height: 4),
                           Text(
                             '${widget.riskScore} / 100',
                             style: context.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: widget.riskScore >= 70
-                                  ? AppTheme.error
-                                  : (widget.riskScore >= 40 ? AppTheme.warning : AppTheme.success),
+                                  ? AppTheme.getSemanticError(context)
+                                  : (widget.riskScore >= 40
+                                      ? AppTheme.getSemanticWarning(context)
+                                      : AppTheme.getSemanticSuccess(context)),
                             ),
                           ),
                         ],
@@ -242,7 +247,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                 // Chọn tầng đôn đốc
                 Text(
                   'Chọn cấp độ chiến lược đôn đốc:',
-                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
                 ),
                 const SizedBox(height: 8),
 
@@ -258,10 +263,10 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isSelected ? tier.color.withValues(alpha: 0.15) : AppTheme.surface,
+                          color: isSelected ? tier.color.withValues(alpha: 0.15) : colorScheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isSelected ? tier.color : AppTheme.border,
+                            color: isSelected ? tier.color : colorScheme.outlineVariant,
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
@@ -271,7 +276,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                             Icon(
                               isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
                               size: 16,
-                              color: isSelected ? tier.color : AppTheme.textSecondary,
+                              color: isSelected ? tier.color : colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 6),
                             Flexible(
@@ -279,7 +284,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                                 tier.label,
                                 style: context.bodyMedium?.copyWith(
                                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                  color: isSelected ? tier.color : AppTheme.textPrimary,
+                                  color: isSelected ? tier.color : colorScheme.onSurface,
                                 ),
                               ),
                             ),
@@ -288,12 +293,12 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primary.withValues(alpha: 0.15),
+                                  color: colorScheme.primary.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   'Đề xuất AI',
-                                  style: context.labelSmall?.copyWith(color: AppTheme.primary, fontWeight: FontWeight.bold),
+                                  style: context.labelSmall?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -309,7 +314,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                 // Tiêu đề thông báo
                 Text(
                   'Tiêu đề thông báo:',
-                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
                 ),
                 const SizedBox(height: 6),
                 TextField(
@@ -326,7 +331,7 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                 // Nội dung thông báo
                 Text(
                   'Nội dung gửi Quý cư dân:',
-                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                  style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
                 ),
                 const SizedBox(height: 6),
                 TextField(
@@ -342,18 +347,21 @@ class _ExecuteDunningDialogState extends ConsumerState<ExecuteDunningDialog> {
                 const SizedBox(height: 20),
 
                 // Hành động
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     TextButton(
+                      style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                       onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(false),
                       child: const Text('Hủy'),
                     ),
-                    const SizedBox(width: 8),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _selectedTier.color,
                         foregroundColor: Colors.white,
+                        minimumSize: const Size(0, 48),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),

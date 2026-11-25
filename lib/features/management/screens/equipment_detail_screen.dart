@@ -217,7 +217,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
           AccountingVoucherDialog.show(
             context,
             transaction: dummyTx,
-            buildingName: activeBuilding?.name ?? 'Tòa nhà Landmark PKA',
+            buildingName: activeBuilding?.name ?? 'Tòa nhà Vivona',
           );
         } else {
           AppSnackBar.showError(
@@ -242,6 +242,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
               onPressed: () => Navigator.of(ctx).pop(false),
               child: const Text('Hủy'),
             ),
@@ -249,7 +250,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: errorColor,
                 foregroundColor: dialogScheme.onError,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               onPressed: () => Navigator.of(ctx).pop(true),
               child: const Text('Xóa thiết bị'),

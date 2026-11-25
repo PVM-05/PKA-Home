@@ -8,6 +8,7 @@ import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/resident_activation_provider.dart';
 
 class ResidentActivationScreen extends ConsumerStatefulWidget {
@@ -981,7 +982,8 @@ class _ResidentActivationScreenState
               icon: const Icon(Icons.home),
               label: const Text('Bắt đầu trải nghiệm ngay'),
               onPressed: () {
-                context.go(AppRoutes.login);
+                ref.invalidate(authProvider);
+                context.go(AppRoutes.residentHome);
               },
             ),
           ),

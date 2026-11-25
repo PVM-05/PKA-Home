@@ -281,7 +281,7 @@ class AppTheme {
       // Cấu hình Nút Text (TextButton)
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primary,
+          foregroundColor: const Color(0xFF60A5FA),
           textStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -367,7 +367,6 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         indicatorColor: primary.withValues(alpha: 0.15),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        height: 65,
         backgroundColor: surface,
       ),
     );
@@ -398,7 +397,7 @@ class AppTheme {
         tertiaryContainer: Color(0xFF065F46),
         onTertiaryContainer: Color(0xFFD1FAE5),
         error: Color(0xFFFB7185), // Rose 400
-        onError: Color(0xFF881337),
+        onError: Colors.white,
         errorContainer: Color(0xFF9F1239),
         onErrorContainer: Color(0xFFFFE4E6),
         surface: darkSurface,
@@ -493,7 +492,7 @@ class AppTheme {
       
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primary,
+          foregroundColor: const Color(0xFF60A5FA),
           textStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -532,7 +531,7 @@ class AppTheme {
         shape: AppRadius.shapeSm,
         side: const BorderSide(color: Color(0xFF333333)),
         labelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: darkTextPrimary),
-        secondaryLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: primary),
+        secondaryLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF60A5FA)),
       ),
 
       // Cấu hình Dialog
@@ -578,7 +577,6 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         indicatorColor: primary.withValues(alpha: 0.25),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        height: 65,
         backgroundColor: darkSurface,
       ),
     );

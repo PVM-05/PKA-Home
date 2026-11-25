@@ -155,13 +155,25 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                   (b.isConfirmed || b.isWaitlist || b.isPendingPayment) &&
                   !bookingDateOnly.isBefore(today);
 
+              final colorScheme = Theme.of(context).colorScheme;
+              final successColor = AppTheme.getSemanticSuccess(context);
+              final warningColor = AppTheme.getSemanticWarning(context);
+              final errorColor = AppTheme.getSemanticError(context);
+              final depositLabel = switch (b.depositStatus) {
+                'pending' => 'Chờ nộp cọc',
+                'received' => b.isCheckedIn ? 'Chờ nghiệm thu hoàn cọc' : 'Đã nộp cọc',
+                'refunded' => 'Đã hoàn cọc',
+                'forfeited' => 'Khấu trừ cọc',
+                _ => 'Chưa phát sinh',
+              };
+
               return Card(
                 elevation: 0,
-                color: Colors.white,
+                color: colorScheme.surface,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(color: Colors.grey.shade200),
+                  side: BorderSide(color: colorScheme.outlineVariant),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -181,13 +193,14 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.12),
+                              color: statusColor.withValues(alpha: 0.14),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -211,7 +224,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               Icon(
                                 Icons.calendar_month_outlined,
                                 size: 16,
-                                color: Colors.grey.shade600,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -226,7 +239,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               Icon(
                                 Icons.schedule,
                                 size: 16,
-                                color: Colors.grey.shade600,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -267,82 +280,77 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                               ),
                             if (b.isCheckedIn)
                               Chip(
-                                avatar: const Icon(
+                                avatar: Icon(
                                   Icons.check_circle_outline,
                                   size: 14,
-                                  color: Colors.green,
+                                  color: successColor,
                                 ),
                                 label: Text(
-                                  'Đã check-in',
+                                  'Đã vào cửa',
                                   style: context.labelSmall?.copyWith(
-                                    color: Colors.green,
+                                    color: successColor,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                backgroundColor: Colors.green.shade50,
+                                backgroundColor: successColor.withValues(alpha: 0.14),
                                 padding: EdgeInsets.zero,
                                 visualDensity: VisualDensity.compact,
                               ),
                             if (b.depositAmount > 0) ...[
                               if (b.depositStatus == 'refunded')
                                 Chip(
-                                  avatar: const Icon(
+                                  avatar: Icon(
                                     Icons.verified_outlined,
                                     size: 14,
-                                    color: Colors.teal,
+                                    color: successColor,
                                   ),
                                   label: Text(
                                     'Đã hoàn cọc 100% (${currencyFormat.format(b.refundAmount > 0 ? b.refundAmount : b.depositAmount)})',
                                     style: context.labelSmall?.copyWith(
-                                      color: Colors.teal,
+                                      color: successColor,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  backgroundColor: Colors.teal.shade50,
+                                  backgroundColor: successColor.withValues(alpha: 0.14),
                                   padding: EdgeInsets.zero,
                                   visualDensity: VisualDensity.compact,
                                 )
                               else if (b.depositStatus == 'forfeited')
                                 Chip(
-                                  avatar: const Icon(
+                                  avatar: Icon(
                                     Icons.warning_amber_rounded,
                                     size: 14,
-                                    color: Colors.deepOrange,
+                                    color: errorColor,
                                   ),
                                   label: Text(
                                     'Khấu trừ cọc: ${currencyFormat.format(b.forfeitedAmount)}',
                                     style: context.labelSmall?.copyWith(
-                                      color: Colors.deepOrange,
+                                      color: errorColor,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  backgroundColor: Colors.deepOrange.shade50,
+                                  backgroundColor: errorColor.withValues(alpha: 0.14),
                                   padding: EdgeInsets.zero,
                                   visualDensity: VisualDensity.compact,
                                 )
                               else if (b.depositStatus == 'received')
                                 Chip(
                                   label: Text(
-                                    b.isCheckedIn
-                                        ? 'Cọc: ${currencyFormat.format(b.depositAmount)} (Chờ nghiệm thu hoàn cọc)'
-                                        : 'Cọc: ${currencyFormat.format(b.depositAmount)} (Đã nộp)',
+                                    'Cọc: ${currencyFormat.format(b.depositAmount)} ($depositLabel)',
                                     style: context.labelSmall?.copyWith(
-                                      color: b.isCheckedIn
-                                          ? Colors.blue.shade900
-                                          : Colors.orange.shade900,
+                                      color: b.isCheckedIn ? colorScheme.primary : warningColor,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  backgroundColor: b.isCheckedIn
-                                      ? Colors.blue.shade50
-                                      : Colors.amber.shade50,
+                                  backgroundColor: (b.isCheckedIn ? colorScheme.primary : warningColor)
+                                      .withValues(alpha: 0.14),
                                   padding: EdgeInsets.zero,
                                   visualDensity: VisualDensity.compact,
                                 )
                               else
                                 Chip(
                                   label: Text(
-                                    'Cọc: ${currencyFormat.format(b.depositAmount)} (${b.depositStatus})',
+                                    'Cọc: ${currencyFormat.format(b.depositAmount)} ($depositLabel)',
                                     style: context.labelSmall,
                                   ),
                                   padding: EdgeInsets.zero,

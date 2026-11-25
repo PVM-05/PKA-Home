@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/accounting_providers.dart';
 
 class ResidentLedgerHistorySheet extends ConsumerWidget {
@@ -19,11 +20,14 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final balanceAsync = ref.watch(apartmentBalanceProvider(apartmentId));
     final entriesAsync = ref.watch(apartmentLedgerEntriesProvider(apartmentId));
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final errorColor = AppTheme.getSemanticError(context);
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Column(
@@ -36,7 +40,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -44,11 +48,14 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Lịch Sử Đối Soát Công Nợ - $apartmentCode',
-                style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              Expanded(
+                child: Text(
+                  'Lịch Sử Đối Soát Công Nợ - $apartmentCode',
+                  style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
               IconButton(
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -63,7 +70,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                   NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(balance.abs());
               final isDebt = balance > 0;
               final isZero = balance == 0;
-              final color = isDebt ? AppTheme.error : (isZero ? AppTheme.success : AppTheme.primary);
+              final color = isDebt ? errorColor : (isZero ? successColor : colorScheme.primary);
               final text = isDebt
                   ? 'Còn nợ: $formattedMoney'
                   : (isZero ? 'Đã thanh toán đủ (0 đ)' : 'Đã nộp trước: $formattedMoney');
@@ -72,9 +79,9 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.08),
+                  color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: color.withValues(alpha: 0.3)),
+                  border: Border.all(color: color.withValues(alpha: 0.35)),
                 ),
                 child: Row(
                   children: [
@@ -112,7 +119,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                   return Center(
                     child: Text(
                       'Chưa có giao dịch sổ cái nào được ghi nhận.',
-                      style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                      style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   );
                 }
@@ -124,20 +131,23 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                     final item = entries[index];
                     final isDebit = item.isDebit;
                     final prefix = isDebit ? '+' : '-';
-                    final color = isDebit ? AppTheme.error : AppTheme.success;
+                    final color = isDebit ? errorColor : successColor;
 
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            item.entryCode,
-                            style: context.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textSecondary,
+                          Flexible(
+                            child: Text(
+                              item.entryCode,
+                              style: context.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             '$prefix${item.formattedAmount}',
                             style: context.bodyMedium?.copyWith(
@@ -153,18 +163,20 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                           const SizedBox(height: 4),
                           Text(item.description, style: context.bodyMedium),
                           const SizedBox(height: 2),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            spacing: 8,
+                            runSpacing: 2,
                             children: [
                               Text(
                                 item.formattedCreatedAtWithTime,
-                                style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                                style: context.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
                               ),
                               Text(
                                 'Dư sau GD: ${item.formattedBalanceAfter}',
                                 style: context.labelSmall?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: AppTheme.textSecondary,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -176,7 +188,7 @@ class ResidentLedgerHistorySheet extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Lỗi tải dữ liệu: $err')),
+              error: (err, stack) => Center(child: Text(formatErrorMessage(err))),
             ),
           ),
         ],

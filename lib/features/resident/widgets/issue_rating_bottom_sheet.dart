@@ -105,13 +105,17 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
     required int currentRating,
     required ValueChanged<int> onRatingChanged,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
             children: [
               Text(
                 title,
@@ -127,13 +131,15 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
                       HapticFeedback.selectionClick();
                       onRatingChanged(starIndex);
                     },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                      child: Icon(
-                        isSelected ? Icons.star_rate_rounded : Icons.star_outline_rounded,
-                        color: isSelected ? Colors.amber : Colors.grey.shade400,
-                        size: 28,
+                    borderRadius: BorderRadius.circular(24),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                      child: Center(
+                        child: Icon(
+                          isSelected ? Icons.star_rate_rounded : Icons.star_outline_rounded,
+                          color: isSelected ? Colors.amber : colorScheme.outline,
+                          size: 28,
+                        ),
                       ),
                     ),
                   );
@@ -143,7 +149,7 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
           ),
           Text(
             subtitle,
-            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+            style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -155,6 +161,8 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
     final overall = _currentOverall;
     final label = IssueRatingModel.getSatisfactionLabel(overall);
     final isEditing = widget.initialRating != null;
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -174,7 +182,7 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -187,10 +195,10 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.15),
+                    color: warningColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.star_rate_rounded, color: Colors.amber, size: 24),
+                  child: Icon(Icons.star_rate_rounded, color: warningColor, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -203,7 +211,7 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
                       ),
                       Text(
                         'Đóng góp ý kiến giúp nâng cao chất lượng phục vụ',
-                        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                        style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -216,28 +224,29 @@ class _IssueRatingBottomSheetState extends ConsumerState<IssueRatingBottomSheet>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.08),
+                color: warningColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                border: Border.all(color: warningColor.withValues(alpha: 0.35)),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 6,
+                runSpacing: 4,
                 children: [
-                  const Icon(Icons.star_rate_rounded, color: Colors.amber, size: 22),
-                  const SizedBox(width: 6),
+                  Icon(Icons.star_rate_rounded, color: warningColor, size: 22),
                   Text(
                     '${overall.toStringAsFixed(1)} / 5.0',
                     style: context.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.warning,
+                      color: warningColor,
                     ),
                   ),
-                  const SizedBox(width: 8),
                   Text(
                     '($label)',
                     style: context.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],

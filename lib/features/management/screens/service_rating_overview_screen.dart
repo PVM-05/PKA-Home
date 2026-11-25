@@ -96,13 +96,13 @@ class _ServiceRatingOverviewScreenState
             final satisfactionRate = (highSatisfactionCount / totalRatings * 100)
                 .toStringAsFixed(0);
 
-            // Áp dụng bộ lọc
+            // Áp dụng bộ lọc (đồng nhất ngưỡng 4.0 sao, không bỏ lọt khoảng 3.8 - 3.99)
             final filteredRatings = ratings.where((r) {
               if (_selectedFilter == '5_star') return r.overallRating >= 4.8;
               if (_selectedFilter == '4_star') {
-                return r.overallRating >= 3.8 && r.overallRating < 4.8;
+                return r.overallRating >= 4.0 && r.overallRating < 4.8;
               }
-              if (_selectedFilter == 'low_star') return r.overallRating < 3.8;
+              if (_selectedFilter == 'low_star') return r.overallRating < 4.0;
               return true;
             }).toList();
 
@@ -151,13 +151,13 @@ class _ServiceRatingOverviewScreenState
                             _buildFilterChip(
                               context,
                               '4_star',
-                              '4 sao (${ratings.where((r) => r.overallRating >= 3.8 && r.overallRating < 4.8).length})',
+                              '4 sao (${ratings.where((r) => r.overallRating >= 4.0 && r.overallRating < 4.8).length})',
                             ),
                             AppSpacing.w8,
                             _buildFilterChip(
                               context,
                               'low_star',
-                              'Cần cải thiện (<4★) (${ratings.where((r) => r.overallRating < 3.8).length})',
+                              'Cần cải thiện (<4 sao) (${ratings.where((r) => r.overallRating < 4.0).length})',
                             ),
                           ],
                         ),
@@ -467,11 +467,19 @@ class _ServiceRatingOverviewScreenState
 
   Widget _buildSmallChip(BuildContext context, String title, int score) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Text(
-      '$title: $score★',
-      style: context.labelSmall?.tabularFigures().copyWith(
-        color: colorScheme.onSurfaceVariant,
-      ),
+    final warningColor = AppTheme.getSemanticWarning(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$title: $score',
+          style: context.labelSmall?.tabularFigures().copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(width: 2),
+        Icon(Icons.star_rounded, size: 13, color: warningColor),
+      ],
     );
   }
 }

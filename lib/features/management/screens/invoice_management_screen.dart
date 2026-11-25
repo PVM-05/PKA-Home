@@ -55,7 +55,7 @@ class _InvoiceManagementScreenState
   Future<void> _exportExcel(List<InvoiceModel> invoices) async {
     setState(() => _isExporting = true);
     final activeBuilding = ref.read(activeBuildingProvider).value;
-    final buildingName = activeBuilding?.name ?? 'Tòa nhà PKA';
+    final buildingName = activeBuilding?.name ?? 'Tòa nhà Vivona';
     final period = invoices.isNotEmpty ? invoices.first.period : 'Tất cả';
 
     final service = AccountingExportService();
@@ -966,7 +966,7 @@ class _InvoiceManagementScreenState
     if (invoice.isPaid) {
       AppSnackBar.showWarning(
         context,
-        'Hóa đơn đã thanh toán là bất biến và đã hạch toán kế toán. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn tiền, vui lòng lập Phiếu giảm trừ (Credit Note).',
+        'Hóa đơn đã thanh toán là bất biến và đã hạch toán kế toán. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn tiền, vui lòng lập Phiếu giảm trừ công nợ.',
       );
       return;
     }

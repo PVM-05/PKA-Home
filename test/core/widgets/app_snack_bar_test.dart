@@ -28,7 +28,7 @@ void main() {
     expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
 
     final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
-    expect(snackBar.backgroundColor, AppTheme.success);
+    expect(snackBar.backgroundColor, AppTheme.textSuccess);
     expect(snackBar.behavior, SnackBarBehavior.floating);
   });
 
@@ -56,7 +56,7 @@ void main() {
     expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
 
     final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
-    expect(snackBar.backgroundColor, AppTheme.error);
+    expect(snackBar.backgroundColor, AppTheme.textError);
     expect(snackBar.behavior, SnackBarBehavior.floating);
   });
 

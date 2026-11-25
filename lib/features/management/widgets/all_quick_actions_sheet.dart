@@ -244,6 +244,18 @@ void showAllQuickActionsSheet(
                     if (canManageInvoices)
                       _buildSheetActionItem(
                         context: context,
+                        icon: Icons.price_change_outlined,
+                        title: 'Biểu giá & Chính sách phí',
+                        subtitle:
+                            'Cấu hình bậc thang điện nước, phí gửi xe và lãi phạt',
+                        color: AppTheme.primary,
+                        onTap: () => context.push(
+                          AppRoutes.managementFeePolicies,
+                        ),
+                      ),
+                    if (canManageInvoices)
+                      _buildSheetActionItem(
+                        context: context,
                         icon: Icons.analytics_outlined,
                         title: 'Báo cáo tài chính & Sổ quỹ',
                         subtitle:

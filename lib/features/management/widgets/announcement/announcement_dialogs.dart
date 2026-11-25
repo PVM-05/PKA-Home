@@ -644,7 +644,7 @@ class AnnouncementDialogs {
                               SwitchListTile.adaptive(
                                 contentPadding: EdgeInsets.zero,
                                 title: Text(
-                                  'Phát sóng thông báo tức thì (Push Broadcast)',
+                                  'Phát sóng thông báo đẩy tức thì',
                                   style: context.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),

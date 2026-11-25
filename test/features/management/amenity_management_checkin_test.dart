@@ -198,7 +198,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Check-in Tiện Ích (QR/Mã)'), findsOneWidget);
-    expect(find.text('Mã đặt chỗ (Booking ID)'), findsOneWidget);
+    expect(find.text('Mã đặt chỗ'), findsOneWidget);
   });
 
   testWidgets('Dropdown chọn tiện ích hiển thị ổn định khi danh sách thay đổi và chọn tiện ích khác', (tester) async {

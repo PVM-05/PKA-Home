@@ -134,7 +134,7 @@ class HandoverPdfBuilder {
 
     final resolvedBuilding = buildingName ?? defaultBuildingName;
     final isMoveIn = handover.handoverType == 'move_in';
-    final typeTitle = isMoveIn ? 'BÀN GIAO NHẬN NHÀ (MOVE-IN)' : 'BÀN GIAO TRẢ NHÀ (MOVE-OUT)';
+    final typeTitle = isMoveIn ? 'BÀN GIAO NHẬN NHÀ' : 'BÀN GIAO TRẢ NHÀ';
     final primaryColor = PdfColor.fromHex('#1E3A8A');
     final secondaryColor = PdfColor.fromHex('#047857');
 

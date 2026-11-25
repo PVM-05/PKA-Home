@@ -62,6 +62,7 @@ class AppRoutes {
   static const String managementVehicleApproval = '/management/vehicle-approval';
   static const String managementMeterReading = '/management/meter-readings';
   static const String managementFinancialReport = '/management/financial-report';
+  static const String managementFeePolicies = '/management/fee-policies';
   static const String managementMaintenanceFundLedger = '/management/maintenance-fund-ledger';
   static const String managementBatchImport = '/management/batch-import';
   static const String managementActivationList = '/management/activations';

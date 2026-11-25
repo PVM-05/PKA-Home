@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/constants/permissions.dart';
 import '../../../core/theme/app_radius.dart';
@@ -13,9 +12,8 @@ import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/role_guard.dart';
+import '../../../data/providers/accounting_providers.dart';
 import '../../../data/providers/accounting_workstation_provider.dart';
-import '../../../data/providers/building_provider.dart';
-import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/payment_provider.dart';
 import '../widgets/accounting/accounting_sepay_reconciliation_view.dart';
 
@@ -139,33 +137,15 @@ class _AccountingWebWorkstationScreenState
     await runAction(
       this.context,
       () async {
-        final activeBuilding = ref.read(activeBuildingProvider).value;
-        final allInvoices = ref.read(invoicesProvider).value ?? [];
-        final invMap = {for (var inv in allInvoices) inv.id: inv};
-
-        int sentCount = 0;
-        for (final row in targetRows) {
-          final inv = invMap[row.id];
-          final aptId = inv?.apartmentId;
-
-          await Supabase.instance.client.from('notifications').insert({
-            'apartment_id': ?aptId,
-            'building_id': ?activeBuilding?.id,
-            'title': 'Nhắc nợ hóa đơn kỳ ${row.period}',
-            'body':
-                'Hóa đơn căn hộ ${row.apartmentCode} kỳ ${row.period} trị giá ${row.formattedAmount} đến hạn thanh toán. Kính đề nghị Quý cư dân thanh toán sớm.',
-            'type': 'invoice_reminder',
-            'payload': {
-              'invoice_id': row.id,
-              'period': row.period,
-              'amount': row.totalAmount,
-            },
-          });
-          sentCount++;
-        }
+        final invoiceIds = targetRows.map((r) => r.id).toList();
+        final res = await ref
+            .read(accountingRepositoryProvider)
+            .sendInvoiceDunningNotifications(invoiceIds);
+        final sentCount = (res['notifications_sent'] as num?)?.toInt() ?? 0;
+        final aptCount = (res['apartments_notified'] as num?)?.toInt() ?? 0;
 
         ref.read(selectedInvoiceIdsProvider.notifier).clear();
-        return 'Đã gửi thành công $sentCount thông báo nhắc nợ đến cư dân.';
+        return 'Đã gửi thành công $sentCount thông báo nhắc nợ đến $aptCount căn hộ.';
       },
       actionName: 'Gửi thông báo nhắc nợ',
     );

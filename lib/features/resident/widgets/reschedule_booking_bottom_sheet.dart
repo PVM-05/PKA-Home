@@ -163,12 +163,15 @@ class _RescheduleBookingBottomSheetState
     );
 
     final isConfirmedBooking = widget.booking.isConfirmed;
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -191,13 +194,14 @@ class _RescheduleBookingBottomSheetState
                       Text(
                         'Tiện ích: ${widget.amenity.name}',
                         style: context.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -212,15 +216,15 @@ class _RescheduleBookingBottomSheetState
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: colorScheme.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.blue.shade200),
+                border: Border.all(color: colorScheme.primary.withValues(alpha: 0.35)),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: Colors.blue.shade700,
+                    color: colorScheme.primary,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -228,7 +232,7 @@ class _RescheduleBookingBottomSheetState
                     child: Text(
                       'Lượt đặt đã xác nhận/thanh toán sẽ giữ nguyên số người (${widget.booking.guestsCount} người) và bảo lưu toàn bộ chi phí/tiền cọc.',
                       style: context.bodySmall?.copyWith(
-                        color: AppTheme.primary,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
@@ -236,46 +240,45 @@ class _RescheduleBookingBottomSheetState
               ),
             ),
 
-          // Bộ chọn ngày
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: SizedBox(
-              height: 74,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: 7,
-                itemBuilder: (context, index) {
-                  final date = _getNext7Days()[index];
-                  final isSelected =
-                      date.year == _selectedDate.year &&
-                      date.month == _selectedDate.month &&
-                      date.day == _selectedDate.day;
+          // Bộ chọn ngày (co giãn chiều cao theo TextScaler 1.5x)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: List.generate(7, (index) {
+                final date = _getNext7Days()[index];
+                final isSelected =
+                    date.year == _selectedDate.year &&
+                    date.month == _selectedDate.month &&
+                    date.day == _selectedDate.day;
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedDate = date;
-                        _selectedSlot = null;
-                      });
-                    },
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedDate = date;
+                      _selectedSlot = null;
+                    });
+                  },
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 68, minHeight: 68),
                     child: Container(
-                      width: 60,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppTheme.primary
-                            : Colors.grey.shade50,
+                            ? colorScheme.primary
+                            : colorScheme.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
-                              ? AppTheme.primary
-                              : Colors.grey.shade200,
+                              ? colorScheme.primary
+                              : colorScheme.outlineVariant,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             index == 0
@@ -287,7 +290,7 @@ class _RescheduleBookingBottomSheetState
                                   : FontWeight.normal,
                               color: isSelected
                                   ? Colors.white70
-                                  : AppTheme.textSecondary,
+                                  : colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -297,15 +300,15 @@ class _RescheduleBookingBottomSheetState
                               fontWeight: FontWeight.bold,
                               color: isSelected
                                   ? Colors.white
-                                  : AppTheme.textPrimary,
+                                  : colorScheme.onSurface,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              }),
             ),
           ),
           const Divider(height: 1),
@@ -317,13 +320,17 @@ class _RescheduleBookingBottomSheetState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Số người tham gia:',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  Expanded(
+                    child: Text(
+                      'Số người tham gia:',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
+                    ),
                   ),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
+                        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                         icon: const Icon(Icons.remove_circle_outline, size: 22),
                         onPressed: _guestsCount > 1
                             ? () => setState(() => _guestsCount--)
@@ -336,6 +343,7 @@ class _RescheduleBookingBottomSheetState
                         ),
                       ),
                       IconButton(
+                        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                         icon: const Icon(Icons.add_circle_outline, size: 22),
                         onPressed: _guestsCount < widget.amenity.maxCapacity
                             ? () => setState(() => _guestsCount++)
@@ -395,31 +403,31 @@ class _RescheduleBookingBottomSheetState
                     final isFullyBooked = availableCapacity < _guestsCount;
                     final isSelected = _selectedSlot == slot;
 
-                    Color cardBg = Colors.white;
+                    Color cardBg = colorScheme.surfaceContainerLow;
                     BorderSide cardBorder = BorderSide(
-                      color: Colors.grey.shade200,
+                      color: colorScheme.outlineVariant,
                     );
                     String subtitleText = 'Còn trống: $availableCapacity chỗ';
-                    Color subtitleColor = AppStatusColors.paid;
+                    Color subtitleColor = successColor;
 
                     if (isSameBookingSlot) {
                       subtitleText = 'Khung giờ hiện tại của bạn';
-                      subtitleColor = Colors.blue;
+                      subtitleColor = colorScheme.primary;
                     } else if (isMaintenance) {
-                      cardBg = Colors.orange.shade50;
-                      cardBorder = BorderSide(color: Colors.orange.shade200);
+                      cardBg = warningColor.withValues(alpha: 0.12);
+                      cardBorder = BorderSide(color: warningColor.withValues(alpha: 0.35));
                       subtitleText = 'Đang bảo trì / vệ sinh định kỳ';
-                      subtitleColor = AppTheme.warning;
+                      subtitleColor = warningColor;
                     } else if (isPast) {
-                      cardBg = Colors.grey.shade100;
-                      cardBorder = BorderSide(color: Colors.grey.shade300);
+                      cardBg = colorScheme.surfaceContainerHighest.withValues(alpha: 0.45);
+                      cardBorder = BorderSide(color: colorScheme.outlineVariant);
                       subtitleText = 'Khung giờ này đã trôi qua';
-                      subtitleColor = Colors.grey;
+                      subtitleColor = colorScheme.onSurfaceVariant;
                     } else if (isFullyBooked) {
-                      cardBg = Colors.purple.shade50;
-                      cardBorder = BorderSide(color: Colors.purple.shade200);
+                      cardBg = AppTheme.getSemanticSecondary(context).withValues(alpha: 0.12);
+                      cardBorder = BorderSide(color: AppTheme.getSemanticSecondary(context).withValues(alpha: 0.35));
                       subtitleText = 'Hết chỗ (sẽ vào danh sách chờ)';
-                      subtitleColor = Colors.purple;
+                      subtitleColor = AppTheme.getSemanticSecondary(context);
                     }
 
                     final bool canSelect = !isPast && !isMaintenance;
@@ -430,8 +438,8 @@ class _RescheduleBookingBottomSheetState
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                         side: isSelected
-                            ? const BorderSide(
-                                color: AppTheme.primary,
+                            ? BorderSide(
+                                color: colorScheme.primary,
                                 width: 2,
                               )
                             : cardBorder,
@@ -443,7 +451,7 @@ class _RescheduleBookingBottomSheetState
                           slot,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: canSelect ? Colors.black87 : Colors.grey,
+                            color: canSelect ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
                           ),
                         ),
                         subtitle: Text(
@@ -458,8 +466,8 @@ class _RescheduleBookingBottomSheetState
                               ? Icons.check_circle
                               : Icons.radio_button_unchecked,
                           color: isSelected
-                              ? AppTheme.primary
-                              : Colors.grey.shade400,
+                              ? colorScheme.primary
+                              : colorScheme.outline,
                         ),
                         onTap: canSelect
                             ? () {

@@ -91,8 +91,11 @@ class VisitorParkingTicketModel {
   }
 
   Map<String, dynamic> toJson() {
+    final isUuid = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    ).hasMatch(id);
     return {
-      'id': id,
+      if (isUuid) 'id': id,
       'building_id': buildingId,
       'ticket_code': ticketCode,
       'license_plate': licensePlate,

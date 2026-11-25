@@ -210,6 +210,28 @@ class AccountingRepository {
     }
   }
 
+  /// Gửi thông báo nhắc nợ hàng loạt qua RPC nguyên tử (tuân thủ RLS & user_id NOT NULL)
+  Future<Map<String, dynamic>> sendInvoiceDunningNotifications(
+    List<String> invoiceIds,
+  ) async {
+    final client = _client;
+    if (client == null || invoiceIds.isEmpty) {
+      return {'success': true, 'notifications_sent': 0, 'apartments_notified': 0};
+    }
+
+    final response = await client.rpc(
+      'send_invoice_dunning_notifications',
+      params: {'p_invoice_ids': invoiceIds},
+    );
+    if (response is Map<String, dynamic>) {
+      return response;
+    }
+    if (response is Map) {
+      return Map<String, dynamic>.from(response);
+    }
+    return {'success': true, 'notifications_sent': 0, 'apartments_notified': 0};
+  }
+
   /// Gọi RPC get_financial_aging_report hoặc fallback tính toán cục bộ
   Future<FinancialAgingReportModel> fetchAgingReport({
     String? buildingId,

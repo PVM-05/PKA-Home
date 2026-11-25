@@ -15,13 +15,19 @@ class VisitorPassQrSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        20,
+        24,
+        20 + MediaQuery.viewPaddingOf(context).bottom,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -33,7 +39,7 @@ class VisitorPassQrSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -50,11 +56,11 @@ class VisitorPassQrSheet extends StatelessWidget {
             Text(
               'Vui lòng gửi mã này cho khách để quét tại cổng kiểm soát',
               textAlign: TextAlign.center,
-              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
 
-            // Khung mã QR
+            // Khung mã QR (giữ nền trắng để đầu đọc quang học quét chuẩn xác)
             Center(
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -68,7 +74,7 @@ class VisitorPassQrSheet extends StatelessWidget {
                       offset: const Offset(0, 4),
                     ),
                   ],
-                  border: Border.all(color: Colors.grey[200]!, width: 1.5),
+                  border: Border.all(color: colorScheme.outlineVariant, width: 1.5),
                 ),
                 child: QrImageView(
                   data: pass.qrPayload,
@@ -92,20 +98,22 @@ class VisitorPassQrSheet extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  color: colorScheme.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.qr_code_2_rounded, size: 20, color: AppTheme.primary),
+                    Icon(Icons.qr_code_2_rounded, size: 20, color: colorScheme.primary),
                     const SizedBox(width: 8),
-                    Text(
-                      pass.passCode,
-                      style: context.titleMedium?.copyWith(
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
+                    Flexible(
+                      child: Text(
+                        pass.passCode,
+                        style: context.titleMedium?.copyWith(
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -118,9 +126,9 @@ class VisitorPassQrSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: colorScheme.outlineVariant),
               ),
               child: Column(
                 children: [
@@ -159,6 +167,7 @@ class VisitorPassQrSheet extends StatelessWidget {
                     icon: const Icon(Icons.copy_rounded, size: 18),
                     label: const Text('Sao chép mã'),
                     style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
@@ -171,6 +180,7 @@ class VisitorPassQrSheet extends StatelessWidget {
                     icon: const Icon(Icons.check_rounded, size: 18),
                     label: const Text('Đóng'),
                     style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -187,10 +197,13 @@ class VisitorPassQrSheet extends StatelessWidget {
   }
 
   Widget _buildInfoRow(BuildContext context, String label, String value, {bool isBold = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+        Flexible(
+          child: Text(label, style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -198,6 +211,7 @@ class VisitorPassQrSheet extends StatelessWidget {
             textAlign: TextAlign.end,
             style: context.bodyMedium?.copyWith(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              color: colorScheme.onSurface,
             ),
           ),
         ),

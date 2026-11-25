@@ -300,26 +300,29 @@ class RevenueTrendChart extends ConsumerWidget {
                 children: [
                   const Icon(Icons.calendar_month, color: AppTheme.primary, size: 22),
                   const SizedBox(width: 8),
-                  Text(
-                    'Chi tiết kỳ hóa đơn ${item.period}',
-                    style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'Chi tiết kỳ hóa đơn ${item.period}',
+                      style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              _buildDetailRow(ctx, 'Đã thu:', currencyFormat.format(item.paidAmount), AppStatusColors.paid),
+              _buildDetailRow(ctx, 'Đã thu:', currencyFormat.format(item.paidAmount), AppStatusColors.getPaid(ctx)),
               const Divider(height: 16),
-              _buildDetailRow(ctx, 'Còn nợ:', currencyFormat.format(item.unpaidAmount), AppStatusColors.unpaid),
+              _buildDetailRow(ctx, 'Còn nợ:', currencyFormat.format(item.unpaidAmount), AppStatusColors.getUnpaid(ctx)),
               const Divider(height: 16),
-              _buildDetailRow(ctx, 'Tổng phát sinh:', currencyFormat.format(item.totalAmount), AppTheme.textPrimary),
+              _buildDetailRow(ctx, 'Tổng phát sinh:', currencyFormat.format(item.totalAmount), Theme.of(ctx).colorScheme.onSurface),
               const Divider(height: 16),
-              _buildDetailRow(ctx, 'Tỷ lệ hoàn thành:', '${(item.collectionRate * 100).toStringAsFixed(1)}%', AppTheme.primary),
+              _buildDetailRow(ctx, 'Tỷ lệ hoàn thành:', '${(item.collectionRate * 100).toStringAsFixed(1)}%', Theme.of(ctx).colorScheme.primary),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
+                    minimumSize: const Size(double.infinity, 48),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () => Navigator.pop(ctx),
@@ -334,13 +337,20 @@ class RevenueTrendChart extends ConsumerWidget {
   }
 
   Widget _buildDetailRow(BuildContext context, String label, String value, Color valueColor) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary)),
-        Text(
-          value,
-          style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: valueColor),
+        Flexible(
+          child: Text(label, style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: valueColor),
+          ),
         ),
       ],
     );

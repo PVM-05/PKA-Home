@@ -890,6 +890,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
               AppSpacing.h12,
               DropdownButtonFormField<String>(
                 initialValue: _role,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Vai trò tài khoản',
                   prefixIcon: Icon(Icons.badge_outlined),
@@ -919,6 +920,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                 AppSpacing.h12,
                 DropdownButtonFormField<String?>(
                   initialValue: _apartmentId,
+                  isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Căn hộ ban đầu (tùy chọn)',
                     prefixIcon: Icon(Icons.domain),
@@ -933,6 +935,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                         value: apt.id,
                         child: Text(
                           'Căn hộ ${apt.code} (${apt.isEmpty ? 'Trống' : 'Đang ở'})',
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
@@ -943,6 +946,7 @@ class _CreateUserDialogState extends ConsumerState<_CreateUserDialog> {
                   AppSpacing.h12,
                   DropdownButtonFormField<String>(
                     initialValue: _relationRole,
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Quan hệ với căn hộ',
                       prefixIcon: Icon(Icons.home_outlined),

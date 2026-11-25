@@ -158,12 +158,12 @@ class AdaptiveManagementScaffold extends StatelessWidget {
                                         ),
                                       ),
                                       const SizedBox(width: 5),
-                                      const Expanded(
+                                      Expanded(
                                         child: Text(
-                                          'PKA Landmark Tower',
+                                          'Hệ thống Quản lý Tòa nhà',
                                           style: TextStyle(
                                             fontSize: 11,
-                                            color: AppTheme.textSecondary,
+                                            color: isDark ? Colors.white70 : AppTheme.textSecondary,
                                             fontWeight: FontWeight.w500,
                                           ),
                                           overflow: TextOverflow.ellipsis,

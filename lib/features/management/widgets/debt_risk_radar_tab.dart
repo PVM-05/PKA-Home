@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../data/models/debt_risk_score_model.dart';
 import '../../../data/providers/debt_prediction_provider.dart';
@@ -65,11 +66,12 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppTheme.error, size: 40),
+              Icon(Icons.error_outline_rounded, color: Theme.of(context).colorScheme.error, size: 40),
               const SizedBox(height: 12),
-              Text('Không thể tải radar rủi ro nợ: $e', textAlign: TextAlign.center),
+              Text(formatErrorMessage(e), textAlign: TextAlign.center),
               const SizedBox(height: 12),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
                 onPressed: () => ref.refresh(buildingDebtRadarProvider(widget.buildingId)),
                 child: const Text('Thử lại'),
               ),
@@ -131,32 +133,32 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
           ],
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildKpiCard(
-                title: 'Tổng nợ quá hạn',
-                value: '${_moneyFormat.format(kpi.totalOverdueDebt)} đ',
-                subtitle: 'Toàn bộ danh mục nợ',
-                icon: Icons.account_balance_wallet_outlined,
-                color: AppTheme.textPrimary,
+          Row(
+            children: [
+              Expanded(
+                child: _buildKpiCard(
+                  title: 'Tổng nợ quá hạn',
+                  value: '${_moneyFormat.format(kpi.totalOverdueDebt)} đ',
+                  subtitle: 'Toàn bộ danh mục nợ',
+                  icon: Icons.account_balance_wallet_outlined,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildKpiCard(
-                title: 'Nợ rủi ro cao',
-                value: '${_moneyFormat.format(kpi.highRiskDebt)} đ',
-                subtitle: 'Nguy cơ khó thu hồi',
-                icon: Icons.trending_down_rounded,
-                color: AppTheme.error,
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildKpiCard(
+                  title: 'Nợ rủi ro cao',
+                  value: '${_moneyFormat.format(kpi.highRiskDebt)} đ',
+                  subtitle: 'Nguy cơ khó thu hồi',
+                  icon: Icons.trending_down_rounded,
+                  color: AppTheme.getSemanticError(context),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+            ],
+          ),
+        ],
+      );
+    }
 
   Widget _buildKpiCard({
     required String title,
@@ -165,6 +167,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
     required IconData icon,
     required Color color,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppCard(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -177,7 +180,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
               Expanded(
                 child: Text(
                   title,
-                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                  style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -191,7 +194,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+            style: context.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -199,6 +202,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
   }
 
   Widget _buildFilterBar(String currentFilter) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Column(
@@ -209,7 +213,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Tìm theo mã căn hộ, họ tên chủ hộ hoặc số điện thoại...',
-              hintStyle: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+              hintStyle: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               prefixIcon: const Icon(Icons.search_rounded, size: 20),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -222,7 +226,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                   : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppTheme.border),
+                borderSide: BorderSide(color: colorScheme.outlineVariant),
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
             ),
@@ -238,11 +242,11 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
               children: [
                 _buildFilterChip('Tất cả', 'all', currentFilter),
                 const SizedBox(width: 8),
-                _buildFilterChip('Rủi ro cao', 'high', currentFilter, color: AppTheme.error),
+                _buildFilterChip('Rủi ro cao', 'high', currentFilter, color: AppTheme.textError),
                 const SizedBox(width: 8),
-                _buildFilterChip('Cần chú ý', 'medium', currentFilter, color: AppTheme.warning),
+                _buildFilterChip('Cần chú ý', 'medium', currentFilter, color: AppTheme.textWarning),
                 const SizedBox(width: 8),
-                _buildFilterChip('An toàn', 'low', currentFilter, color: AppTheme.success),
+                _buildFilterChip('An toàn', 'low', currentFilter, color: AppTheme.textSuccess),
               ],
             ),
           ),
@@ -252,17 +256,18 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
   }
 
   Widget _buildFilterChip(String label, String value, String currentFilter, {Color? color}) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = currentFilter == value;
     final activeColor = color ?? AppTheme.primary;
     return ChoiceChip(
       label: Text(label),
       labelStyle: context.bodySmall?.copyWith(
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? Colors.white : AppTheme.textPrimary,
+        color: isSelected ? Colors.white : colorScheme.onSurface,
       ),
       selected: isSelected,
       selectedColor: activeColor,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       onSelected: (_) {
         ref.read(debtRiskFilterProvider.notifier).state = value;
@@ -408,11 +413,11 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Dư nợ hiện tại', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                    Text('Dư nợ hiện tại', style: context.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     const SizedBox(height: 2),
                     Text(
                       '${_moneyFormat.format(apt.unpaidAmount)} đ',
-                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.error),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.getSemanticError(context)),
                     ),
                   ],
                 ),
@@ -421,11 +426,11 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Quá hạn', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                    Text('Quá hạn', style: context.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     const SizedBox(height: 2),
                     Text(
                       '${apt.overdueDays} ngày',
-                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                     ),
                   ],
                 ),
@@ -434,11 +439,11 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Lịch sử trễ', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                    Text('Lịch sử trễ', style: context.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     const SizedBox(height: 2),
                     Text(
                       '${apt.latePaymentCount} kỳ',
-                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                     ),
                   ],
                 ),

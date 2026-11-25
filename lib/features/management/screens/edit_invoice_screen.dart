@@ -85,12 +85,24 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
   bool _isSubmitting = false;
   bool _hasModified = false;
 
+  static const Set<String> _validEditableStatuses = {
+    'pending',
+    'unpaid',
+    'overdue',
+    'pending_confirmation',
+    'under_review',
+    'cancelled',
+  };
+
   @override
   void initState() {
     super.initState();
     _periodController = TextEditingController(text: widget.invoice.period);
     _dueDate = widget.invoice.dueDate;
-    _status = widget.invoice.status;
+    _status = (widget.invoice.status == 'paid' ||
+            _validEditableStatuses.contains(widget.invoice.status))
+        ? widget.invoice.status
+        : 'unpaid';
   }
 
   @override
@@ -383,7 +395,7 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
                   AppSpacing.w10,
                   Expanded(
                     child: Text(
-                      'Hóa đơn đã thanh toán. Theo chuẩn mực kế toán, số liệu đã hạch toán là bất biến. Để điều chỉnh, vui lòng tạo Phiếu giảm trừ (Credit Note).',
+                      'Hóa đơn đã thanh toán. Theo chuẩn mực kế toán, số liệu đã hạch toán là bất biến. Để điều chỉnh, vui lòng tạo Phiếu giảm trừ công nợ.',
                       style: context.bodySmall?.copyWith(
                         color: warningColor,
                         fontWeight: FontWeight.w600,
@@ -556,12 +568,24 @@ class _EditInvoiceScreenState extends ConsumerState<EditInvoiceScreen> {
               initialValue: _status,
               items: const [
                 DropdownMenuItem(
+                  value: 'pending',
+                  child: Text('Chờ thanh toán'),
+                ),
+                DropdownMenuItem(
                   value: 'unpaid',
                   child: Text('Chưa thanh toán'),
                 ),
                 DropdownMenuItem(
+                  value: 'overdue',
+                  child: Text('Quá hạn thanh toán'),
+                ),
+                DropdownMenuItem(
                   value: 'pending_confirmation',
-                  child: Text('Chờ xác nhận'),
+                  child: Text('Chờ xác nhận chuyển khoản'),
+                ),
+                DropdownMenuItem(
+                  value: 'under_review',
+                  child: Text('Đang đối soát'),
                 ),
                 DropdownMenuItem(value: 'cancelled', child: Text('Đã hủy')),
               ],

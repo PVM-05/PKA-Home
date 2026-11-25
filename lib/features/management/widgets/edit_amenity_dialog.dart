@@ -68,6 +68,7 @@ void showEditAmenityDialog({
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: bookingType,
+                  isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Hình thức đặt chỗ *',
                     border: OutlineInputBorder(),
@@ -75,11 +76,17 @@ void showEditAmenityDialog({
                   items: const [
                     DropdownMenuItem(
                       value: 'shared',
-                      child: Text('Dùng chung (Nhiều người/slot)'),
+                      child: Text(
+                        'Dùng chung (Nhiều người/khung giờ)',
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'exclusive',
-                      child: Text('Trọn gói (1 căn hộ/slot)'),
+                      child: Text(
+                        'Trọn gói (1 căn hộ/khung giờ)',
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                   onChanged: (val) {

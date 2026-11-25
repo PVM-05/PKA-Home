@@ -649,11 +649,11 @@ class _HandoverManagementScreenState
                   items: const [
                     DropdownMenuItem(
                       value: 'move_in',
-                      child: Text('Nhận nhà (Move-in)'),
+                      child: Text('Nhận nhà'),
                     ),
                     DropdownMenuItem(
                       value: 'move_out',
-                      child: Text('Trả nhà (Move-out)'),
+                      child: Text('Trả nhà'),
                     ),
                   ],
                   onChanged: (val) {

@@ -106,7 +106,7 @@ class _CreateCreditNoteDialogState extends ConsumerState<CreateCreditNoteDialog>
                   Expanded(
                     // ignore: deprecated_member_use
                     child: RadioListTile<String>(
-                      title: const Text('Giảm nợ (Credit)'),
+                      title: const Text('Giảm nợ'),
                       value: 'CREDIT',
                       // ignore: deprecated_member_use
                       groupValue: _noteType,
@@ -120,7 +120,7 @@ class _CreateCreditNoteDialogState extends ConsumerState<CreateCreditNoteDialog>
                   Expanded(
                     // ignore: deprecated_member_use
                     child: RadioListTile<String>(
-                      title: const Text('Tăng nợ (Debit)'),
+                      title: const Text('Tăng nợ'),
                       value: 'DEBIT',
                       // ignore: deprecated_member_use
                       groupValue: _noteType,

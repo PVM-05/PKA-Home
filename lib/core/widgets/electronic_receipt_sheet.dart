@@ -31,8 +31,9 @@ class ElectronicReceiptSheet extends ConsumerWidget {
     final formatCurrency = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final formatDateTime = DateFormat('dd/MM/yyyy HH:mm');
 
+    final colorScheme = Theme.of(context).colorScheme;
     final activeBuilding = ref.watch(activeBuildingProvider).value;
-    final buildingName = activeBuilding?.name ?? 'TÒA NHÀ PKA LANDMARK';
+    final buildingName = activeBuilding?.name ?? 'TÒA NHÀ VIVONA';
     final receiptNumber = invoice.displayReceiptNumber;
     final lookupCode = invoice.displayLookupCode;
     final paidDate = invoice.paidAt ?? invoice.createdAt;
@@ -44,7 +45,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color ?? Theme.of(context).scaffoldBackgroundColor,
+        color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       constraints: BoxConstraints(
@@ -60,7 +61,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
               width: 48,
               height: 5,
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
+                color: colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -73,17 +74,22 @@ class ElectronicReceiptSheet extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
-                  children: [
-                    Icon(Icons.receipt_long, color: AppTheme.primary, size: 24),
-                    SizedBox(width: 8),
-                    Text(
-                      'BIÊN LAI THU TIỀN ĐIỆN TỬ',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.receipt_long, color: colorScheme.primary, size: 24),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'BIÊN LAI THU TIỀN ĐIỆN TỬ',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 IconButton(
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -165,16 +171,16 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                     const SizedBox(height: 20),
 
                     // Thông tin chi tiết
-                    _buildReceiptRow('Căn hộ nộp tiền', invoice.apartment?.code ?? 'Chưa xác định', isBold: true),
+                    _buildReceiptRow(context, 'Căn hộ nộp tiền', invoice.apartment?.code ?? 'Chưa xác định', isBold: true),
                     const SizedBox(height: 8),
-                    _buildReceiptRow('Kỳ thu phí', 'Tháng ${invoice.period}'),
+                    _buildReceiptRow(context, 'Kỳ thu phí', 'Tháng ${invoice.period}'),
                     const SizedBox(height: 8),
-                    _buildReceiptRow('Thời gian thanh toán', formatDateTime.format(paidDate)),
+                    _buildReceiptRow(context, 'Thời gian thanh toán', formatDateTime.format(paidDate)),
                     const SizedBox(height: 8),
-                    _buildReceiptRow('Hình thức thanh toán', paymentMethodLabel),
+                    _buildReceiptRow(context, 'Hình thức thanh toán', paymentMethodLabel),
                     if (invoice.transactionCode != null && invoice.transactionCode!.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      _buildReceiptRow('Mã giao dịch', invoice.transactionCode!),
+                      _buildReceiptRow(context, 'Mã giao dịch', invoice.transactionCode!),
                     ],
 
                     const SizedBox(height: 16),
@@ -182,10 +188,11 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     // Số tiền bằng số và bằng chữ
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         const Text(
                           'TỔNG TIỀN THU:',
@@ -193,10 +200,10 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                         ),
                         Text(
                           formatCurrency.format(invoice.totalAmount),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
-                            color: AppTheme.primary,
+                            color: colorScheme.primary,
                           ),
                         ),
                       ],
@@ -318,19 +325,26 @@ Trạng thái: ĐÃ THU TIỀN
     );
   }
 
-  Widget _buildReceiptRow(String label, String value, {bool isBold = false}) {
+  Widget _buildReceiptRow(BuildContext context, String label, String value, {bool isBold = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+          ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            ),
           ),
         ),
       ],

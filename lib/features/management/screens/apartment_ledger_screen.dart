@@ -211,7 +211,7 @@ class _ApartmentLedgerScreenState extends ConsumerState<ApartmentLedgerScreen> {
 
                 // Danh sách bút toán dòng thời gian
                 Text(
-                  'Lịch Sử Bút Toán Công Nợ (Append-Only)',
+                  'Lịch Sử Bút Toán Công Nợ Bất Biến',
                   style: context.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

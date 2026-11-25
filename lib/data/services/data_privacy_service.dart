@@ -208,7 +208,7 @@ class DataPrivacyService {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/json')],
-        subject: 'Sao kê dữ liệu cá nhân Vivona (PDPL)',
+        subject: 'Sao kê dữ liệu cá nhân Vivona',
         text: 'Bản sao kê dữ liệu cá nhân cư dân theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15.',
       ),
     );

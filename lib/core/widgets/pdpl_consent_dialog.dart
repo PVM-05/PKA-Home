@@ -11,6 +11,7 @@ class PdplConsentManager {
   static const String kConsentKey = 'pdpl_consent_v1_accepted';
   static const String kConsentTimestampKey = 'pdpl_consent_v1_accepted_at';
   static const String kConsentVersion = 'v1.0-2026';
+  static bool _isShowingDialog = false;
 
   static String _scopedKey(String base, String? userId) =>
       (userId != null && userId.isNotEmpty) ? '${base}_$userId' : base;
@@ -25,13 +26,12 @@ class PdplConsentManager {
     }
   }
 
-  /// Kiểm tra cư dân đã chấp thuận xử lý dữ liệu hay chưa
+  /// Kiểm tra cư dân đã chấp thuận xử lý dữ liệu hay chưa (cách ly theo từng userId trên thiết bị dùng chung)
   static Future<bool> hasConsented({String? userId}) async {
     final prefs = await SharedPreferences.getInstance();
     final effectiveUid = userId ?? _tryCurrentUserId();
-    if (effectiveUid != null) {
-      final scoped = prefs.getBool(_scopedKey(kConsentKey, effectiveUid));
-      if (scoped != null) return scoped;
+    if (effectiveUid != null && effectiveUid.isNotEmpty) {
+      return prefs.getBool(_scopedKey(kConsentKey, effectiveUid)) ?? false;
     }
     return prefs.getBool(kConsentKey) ?? false;
   }
@@ -99,24 +99,31 @@ class PdplConsentManager {
     return prefs.getString(kConsentTimestampKey);
   }
 
-  /// Hiển thị hộp thoại chấp thuận nếu người dùng chưa đồng ý
+  /// Hiển thị hộp thoại chấp thuận nếu người dùng chưa đồng ý (chống bật chồng nhiều hộp thoại)
   static Future<bool> showConsentDialogIfNeeded(
     BuildContext context, {
     bool force = false,
   }) async {
+    if (_isShowingDialog && !force) return false;
     if (!force) {
       final consented = await hasConsented();
       if (consented) return true;
     }
 
     if (!context.mounted) return false;
+    if (_isShowingDialog && !force) return false;
 
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => const PdplConsentDialog(),
-    );
-    return result ?? false;
+    _isShowingDialog = true;
+    try {
+      final result = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const PdplConsentDialog(),
+      );
+      return result ?? false;
+    } finally {
+      _isShowingDialog = false;
+    }
   }
 }
 
@@ -309,7 +316,7 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                 onPressed: () => showPrivacyPolicyBottomSheet(context),
                 icon: const Icon(Icons.description_outlined, size: 18),
                 label: Text(
-                  'Xem chi tiết Toàn văn Chính sách Bảo mật (PDPL 2026)',
+                  'Xem chi tiết Toàn văn Chính sách Bảo mật 2026',
                   style: textTheme.labelLarge?.copyWith(
                     color: colorScheme.primary,
                     fontWeight: FontWeight.w600,
@@ -317,6 +324,7 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                 ),
                 style: TextButton.styleFrom(
                   alignment: Alignment.centerLeft,
+                  minimumSize: const Size(0, 48),
                   padding: EdgeInsets.zero,
                 ),
               ),
@@ -484,13 +492,14 @@ void showPrivacyPolicyBottomSheet(BuildContext context) {
                   children: [
                     Expanded(
                       child: Text(
-                        'Chính Sách Bảo Mật Dữ Liệu (PDPL)',
+                        'Chính Sách Bảo Mật Dữ Liệu',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                     IconButton(
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                       icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(ctx),
                     ),
@@ -537,7 +546,7 @@ void showPrivacyPolicyBottomSheet(BuildContext context) {
                         number: '5',
                         title: 'Quyền Của Chủ Thể Dữ Liệu',
                         body:
-                            '- Quyền được biết và rút lại sự đồng thuận.\n- Quyền truy cập và chỉnh sửa hồ sơ.\n- Quyền xuất dữ liệu cá nhân (Data Portability theo Điều 15).\n- Quyền yêu cầu xóa / đóng băng dữ liệu (Right to be Forgotten theo Điều 16, 17) khi chuyển đi.',
+                            '- Quyền được biết và rút lại sự đồng thuận.\n- Quyền truy cập và chỉnh sửa hồ sơ.\n- Quyền xuất dữ liệu cá nhân theo Điều 15.\n- Quyền yêu cầu xóa / đóng băng dữ liệu theo Điều 16, 17 khi chuyển đi.',
                       ),
                       _PolicySectionCard(
                         number: '6',
@@ -547,7 +556,7 @@ void showPrivacyPolicyBottomSheet(BuildContext context) {
                       ),
                       _PolicySectionCard(
                         number: '7',
-                        title: 'Liên Hệ Bộ Phận Bảo Vệ Dữ Liệu (DPO)',
+                        title: 'Liên Hệ Bộ Phận Bảo Vệ Dữ Liệu',
                         body:
                             'Email tiếp nhận: security@vivona.vn\nĐơn vị vận hành: Ban Quản Trị & Giải Pháp PropTech Vivona.',
                       ),

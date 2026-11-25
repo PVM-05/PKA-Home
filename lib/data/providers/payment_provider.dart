@@ -5,7 +5,10 @@ import '../models/payment_transaction_model.dart';
 import '../services/payment_service.dart';
 import 'resident_invoice_provider.dart';
 import 'amenity_booking_provider.dart';
+import 'auth_provider.dart';
+import 'building_provider.dart';
 import 'management_provider.dart';
+import 'resident_apartment_provider.dart';
 
 final paymentServiceProvider = Provider<PaymentService>((ref) {
   return const PaymentService();
@@ -58,32 +61,61 @@ final paymentControllerProvider = Provider<PaymentController>((ref) {
   return PaymentController(ref, ref.watch(paymentServiceProvider));
 });
 
-/// Stream Realtime lắng nghe giao dịch mới
+/// Stream Realtime lắng nghe giao dịch mới (phụ thuộc phiên đăng nhập để chống rò rỉ cache)
 final _paymentTransactionsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
-  final user = SupabaseConfig.client.auth.currentUser;
-  if (user == null) {
+  final authUser = ref.watch(authProvider).valueOrNull;
+  final userId = authUser?.id ?? (SupabaseConfig.isConfigured ? SupabaseConfig.client.auth.currentUser?.id : null);
+  if (userId == null) {
     return const Stream.empty();
+  }
+  if (authUser != null && authUser.isManagement) {
+    return SupabaseConfig.client
+        .from('payment_transactions')
+        .stream(primaryKey: ['id']);
   }
   return SupabaseConfig.client
       .from('payment_transactions')
       .stream(primaryKey: ['id'])
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 });
 
-/// Provider tải danh sách lịch sử giao dịch (Hóa đơn & Dịch vụ gom chung)
+/// Provider tải danh sách lịch sử giao dịch (Hóa đơn & Dịch vụ gom chung, lọc theo ngữ cảnh căn hộ / tòa nhà)
 final paymentTransactionsProvider = FutureProvider<List<PaymentTransactionModel>>((ref) async {
-  // Lắng nghe stream realtime để tự động cập nhật UI khi có giao dịch mới
+  final authUser = ref.watch(authProvider).valueOrNull;
   ref.watch(_paymentTransactionsStreamProvider);
 
-  final user = SupabaseConfig.client.auth.currentUser;
-  if (user == null) return [];
+  final userId = authUser?.id ?? (SupabaseConfig.isConfigured ? SupabaseConfig.client.auth.currentUser?.id : null);
+  if (userId == null) return [];
 
+  if (authUser != null && !authUser.isManagement) {
+    final selectedAptId = ref.watch(selectedApartmentIdProvider);
+    var query = SupabaseConfig.client.from('payment_transactions').select();
+    if (selectedAptId != null && selectedAptId.isNotEmpty) {
+      query = query.eq('apartment_id', selectedAptId);
+    }
+    final response = await query.order('created_at', ascending: false);
+    return (response as List)
+        .map((item) => PaymentTransactionModel.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  // Luồng Ban Quản Lý / Kế toán: lắng nghe tòa nhà đang chọn
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
   final response = await SupabaseConfig.client
       .from('payment_transactions')
-      .select()
+      .select('*, apartments(building_id)')
       .order('created_at', ascending: false);
 
-  return (response as List)
-      .map((item) => PaymentTransactionModel.fromJson(item as Map<String, dynamic>))
+  final rawList = List<Map<String, dynamic>>.from(response as List);
+  final hasBuildingInfo = rawList.any((r) => (r['apartments'] as Map?)?['building_id'] != null);
+  final filtered = hasBuildingInfo
+      ? rawList.where((r) {
+          final bId = (r['apartments'] as Map?)?['building_id'] as String?;
+          return bId == null || bId == activeBuildingId;
+        })
+      : rawList;
+
+  return filtered
+      .map((item) => PaymentTransactionModel.fromJson(item))
       .toList();
 });

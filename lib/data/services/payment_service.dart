@@ -201,7 +201,7 @@ class PaymentService {
     if (isMockMode) {
       final code = txnRef ?? invoiceId;
       final host = isSandbox ? 'sandbox.vnpayment.vn' : 'pay.vnpayment.vn';
-      return 'https://$host/paymentv2/vpcpay.html?vnp_Amount=180000000&vnp_Command=pay&vnp_CreateDate=20261117000000&vnp_CurrCode=VND&vnp_IpAddr=127.0.0.1&vnp_Locale=vn&vnp_OrderInfo=Thanh+toan+hoa+don+$code&vnp_OrderType=billpayment&vnp_ReturnUrl=https%3A%2F%2Fvivona.web.app%2Fpayment-result&vnp_TmnCode=PKASUNRISE01&vnp_TxnRef=$code&vnp_Version=2.1.0&vnp_SecureHash=mockhash128chars';
+      return 'https://$host/paymentv2/vpcpay.html?vnp_Amount=180000000&vnp_Command=pay&vnp_CreateDate=20261117000000&vnp_CurrCode=VND&vnp_IpAddr=127.0.0.1&vnp_Locale=vn&vnp_OrderInfo=Thanh+toan+hoa+don+$code&vnp_OrderType=billpayment&vnp_ReturnUrl=https%3A%2F%2Fvivona.web.app%2Fpayment-result&vnp_TmnCode=VIVONASUN01&vnp_TxnRef=$code&vnp_Version=2.1.0&vnp_SecureHash=mockhash128chars';
     }
 
     try {

@@ -112,6 +112,7 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
   @override
   Widget build(BuildContext context) {
     final apartmentsAsync = ref.watch(apartmentsStreamProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: EdgeInsets.only(
@@ -120,9 +121,9 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
         right: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Form(
         key: _formKey,
@@ -136,7 +137,7 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -144,11 +145,13 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Icon(Icons.inventory_2_outlined, color: AppTheme.primary, size: 24),
+                  Icon(Icons.inventory_2_outlined, color: colorScheme.primary, size: 24),
                   const SizedBox(width: 8),
-                  Text(
-                    'Tiếp Nhận Bưu Kiện Từ Shipper',
-                    style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'Tiếp Nhận Bưu Kiện Từ Shipper',
+                      style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
@@ -158,6 +161,7 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
               apartmentsAsync.when(
                 data: (apartments) {
                   return DropdownButtonFormField<String>(
+                    isExpanded: true,
                     decoration: const InputDecoration(
                       labelText: 'Căn hộ nhận hàng *',
                       prefixIcon: Icon(Icons.apartment),
@@ -165,10 +169,13 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
                     ),
                     items: apartments.map((apt) {
                       final aptId = apt['id'] as String? ?? '';
-                      final code = apt['code'] as String? ?? 'N/A';
+                      final code = apt['code'] as String? ?? 'Chưa rõ';
                       return DropdownMenuItem<String>(
                         value: aptId,
-                        child: Text('Căn hộ $code'),
+                        child: Text(
+                          'Căn hộ $code',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       );
                     }).toList(),
                     onChanged: (val) => setState(() => _selectedApartmentId = val),
@@ -198,12 +205,18 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _carrier,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Hãng vận chuyển',
                         prefixIcon: Icon(Icons.local_shipping_outlined),
                         border: OutlineInputBorder(),
                       ),
-                      items: _carriers.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                      items: _carriers
+                          .map((c) => DropdownMenuItem(
+                                value: c,
+                                child: Text(c, overflow: TextOverflow.ellipsis),
+                              ))
+                          .toList(),
                       onChanged: (val) {
                         if (val != null) setState(() => _carrier = val);
                       },
@@ -213,12 +226,18 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _shelfLocation,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Vị trí kệ',
                         prefixIcon: Icon(Icons.shelves),
                         border: OutlineInputBorder(),
                       ),
-                      items: _shelves.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                      items: _shelves
+                          .map((s) => DropdownMenuItem(
+                                value: s,
+                                child: Text(s, overflow: TextOverflow.ellipsis),
+                              ))
+                          .toList(),
                       onChanged: (val) {
                         if (val != null) setState(() => _shelfLocation = val);
                       },
@@ -261,6 +280,7 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),

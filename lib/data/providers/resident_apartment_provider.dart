@@ -41,6 +41,15 @@ final selectedApartmentIdProvider =
     StateNotifierProvider<SelectedApartmentNotifier, String?>((ref) {
   final notifier = SelectedApartmentNotifier();
 
+  // Xóa ngay căn hộ đã chọn khi người dùng đăng xuất hoặc đổi sang tài khoản khác
+  ref.listen(authProvider, (previous, next) {
+    final prevId = previous?.valueOrNull?.id;
+    final nextId = next.valueOrNull?.id;
+    if (nextId == null || (prevId != null && prevId != nextId)) {
+      notifier.clear();
+    }
+  });
+
   // Tự động gán căn hộ đầu tiên khi danh sách căn hộ tải xong (nếu chưa chọn)
   ref.listen<AsyncValue<List<Map<String, dynamic>>>>(
     residentApartmentsProvider,

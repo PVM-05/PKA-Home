@@ -801,7 +801,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   RadioListTile<String>(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    title: const Text('Tiền mặt (CASH)'),
+                    title: const Text('Tiền mặt'),
                     value: 'CASH',
                     // ignore: deprecated_member_use
                     groupValue: selectedMethod,
@@ -816,7 +816,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
                   RadioListTile<String>(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    title: const Text('Chuyển khoản (BANK_TRANSFER)'),
+                    title: const Text('Chuyển khoản ngân hàng'),
                     value: 'BANK_TRANSFER',
                     // ignore: deprecated_member_use
                     groupValue: selectedMethod,
@@ -1047,7 +1047,7 @@ class ManagementInvoiceDetailScreen extends ConsumerWidget {
     if (invoice.isPaid) {
       AppSnackBar.showWarning(
         context,
-        'Hóa đơn đã thanh toán là bất biến. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn phí, vui lòng tạo Phiếu giảm trừ (Credit Note).',
+        'Hóa đơn đã thanh toán là bất biến. Không được phép xóa. Để điều chỉnh số tiền hoặc hoàn phí, vui lòng tạo Phiếu giảm trừ công nợ.',
       );
       return;
     }

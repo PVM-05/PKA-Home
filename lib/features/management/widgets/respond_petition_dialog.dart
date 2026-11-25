@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/petition_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/community_provider.dart';
@@ -16,6 +17,7 @@ class RespondPetitionDialog extends ConsumerStatefulWidget {
 }
 
 class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
+  static const _validStatuses = {'in_progress', 'resolved', 'rejected', 'acknowledged'};
   final _formKey = GlobalKey<FormState>();
   late String _status;
   late TextEditingController _responseController;
@@ -24,7 +26,8 @@ class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
   @override
   void initState() {
     super.initState();
-    _status = widget.petition.status == 'pending' ? 'in_progress' : widget.petition.status;
+    final rawStatus = widget.petition.status == 'pending' ? 'in_progress' : widget.petition.status;
+    _status = _validStatuses.contains(rawStatus) ? rawStatus : 'in_progress';
     _responseController = TextEditingController(text: widget.petition.officialResponse ?? '');
   }
 
@@ -59,21 +62,21 @@ class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Đã cập nhật phản hồi chính thức của Ban Quản Lý'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppTheme.textSuccess,
             ),
           );
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(res['message'] ?? 'Thao tác thất bại'), backgroundColor: AppTheme.error),
+            SnackBar(content: Text(res['message'] ?? 'Thao tác thất bại'), backgroundColor: AppTheme.textError),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppTheme.error),
+          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: AppTheme.textError),
         );
       }
     } finally {
@@ -83,6 +86,7 @@ class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
@@ -91,129 +95,135 @@ class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
           padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.rate_review_outlined, color: colorScheme.primary),
                       ),
-                      child: const Icon(Icons.rate_review_outlined, color: AppTheme.primary),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.petition.petitionCode,
-                            style: context.bodySmall?.copyWith(
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primary,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.petition.petitionCode,
+                              style: context.bodySmall?.copyWith(
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Phản Hồi & Xử Lý Kiến Nghị',
-                            style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                            Text(
+                              'Phản Hồi & Xử Lý Kiến Nghị',
+                              style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const Divider(height: 20),
-
-                // Tiêu đề kiến nghị
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    widget.petition.title,
-                    style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Trạng thái mới
-                DropdownButtonFormField<String>(
-                  initialValue: _status,
-                  decoration: const InputDecoration(
-                    labelText: 'Cập nhật trạng thái xử lý',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'in_progress', child: Text('Đang xử lý')),
-                    DropdownMenuItem(value: 'resolved', child: Text('Đã giải quyết')),
-                    DropdownMenuItem(value: 'rejected', child: Text('Từ chối / Không phù hợp')),
-                    DropdownMenuItem(value: 'acknowledged', child: Text('Đã ghi nhận tiếp nhận')),
-                  ],
-                  onChanged: (val) => setState(() => _status = val ?? _status),
-                ),
-                const SizedBox(height: 14),
-
-                // Nội dung phản hồi chính thức
-                TextFormField(
-                  controller: _responseController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Phản hồi chính thức của Ban Quản Lý *',
-                    hintText: 'Nhập nội dung giải trình hoặc phương án khắc phục gửi cư dân...',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Vui lòng nhập nội dung phản hồi cho cư dân';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Nút lưu
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
+                      IconButton(
+                        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                        icon: const Icon(Icons.close),
                         onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: const Text('Hủy'),
                       ),
+                    ],
+                  ),
+                  const Divider(height: 20),
+
+                  // Tiêu đề kiến nghị
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    child: Text(
+                      widget.petition.title,
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Trạng thái mới
+                  DropdownButtonFormField<String>(
+                    initialValue: _status,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Cập nhật trạng thái xử lý',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'in_progress', child: Text('Đang xử lý')),
+                      DropdownMenuItem(value: 'resolved', child: Text('Đã giải quyết')),
+                      DropdownMenuItem(value: 'rejected', child: Text('Từ chối / Không phù hợp')),
+                      DropdownMenuItem(value: 'acknowledged', child: Text('Đã ghi nhận tiếp nhận')),
+                    ],
+                    onChanged: (val) => setState(() => _status = val ?? _status),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Nội dung phản hồi chính thức
+                  TextFormField(
+                    controller: _responseController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(
+                      labelText: 'Phản hồi chính thức của Ban Quản Lý *',
+                      hintText: 'Nhập nội dung giải trình hoặc phương án khắc phục gửi cư dân...',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Vui lòng nhập nội dung phản hồi cho cư dân';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Nút lưu
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text('Hủy'),
                         ),
-                        icon: _isLoading
-                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Icon(Icons.check_rounded, size: 18),
-                        label: Text(_isLoading ? 'Đang lưu...' : 'Lưu Phản Hồi'),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primary,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(0, 48),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          icon: _isLoading
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Icon(Icons.check_rounded, size: 18),
+                          label: Text(_isLoading ? 'Đang lưu...' : 'Lưu Phản Hồi'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

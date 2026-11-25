@@ -49,15 +49,15 @@ void main() {
       mockPrivacyService = MockDataPrivacyService();
     });
 
-    testWidgets('Hiển thị mục Quyền riêng tư & Dữ liệu (PDPL) và mở chính sách bảo mật', (tester) async {
+    testWidgets('Hiển thị mục Quyền riêng tư & Dữ liệu và mở chính sách bảo mật', (tester) async {
       await tester.pumpWidget(createWidget(privacyService: mockPrivacyService));
       await tester.pumpAndSettle();
 
       // Kiểm tra tiêu đề mục PDPL
-      expect(find.text('Quyền riêng tư & Dữ liệu (PDPL)'), findsOneWidget);
+      expect(find.text('Quyền riêng tư & Dữ liệu cá nhân'), findsOneWidget);
       expect(find.text('Chính sách quyền riêng tư'), findsOneWidget);
-      expect(find.text('Thỏa thuận xử lý dữ liệu (Consent)'), findsOneWidget);
-      expect(find.text('Xuất dữ liệu cá nhân (Data Portability)'), findsOneWidget);
+      expect(find.text('Thỏa thuận xử lý dữ liệu'), findsOneWidget);
+      expect(find.text('Xuất sao kê dữ liệu cá nhân'), findsOneWidget);
       expect(find.text('Yêu cầu xóa / đóng băng dữ liệu'), findsOneWidget);
 
       // Cuộn tới và bấm vào Chính sách quyền riêng tư
@@ -66,17 +66,17 @@ void main() {
       await tester.pumpAndSettle();
 
       // Kiểm tra sheet mở ra
-      expect(find.text('Chính Sách Bảo Mật Dữ Liệu (PDPL)'), findsOneWidget);
+      expect(find.text('Chính Sách Bảo Mật Dữ Liệu'), findsOneWidget);
       expect(find.text('Tôn Chỉ & Phạm Vi Áp Dụng'), findsOneWidget);
     });
 
-    testWidgets('Mở hộp thoại Thỏa thuận xử lý dữ liệu (Consent) ở chế độ xem lại', (tester) async {
+    testWidgets('Mở hộp thoại Thỏa thuận xử lý dữ liệu ở chế độ xem lại', (tester) async {
       await tester.pumpWidget(createWidget(privacyService: mockPrivacyService));
       await tester.pumpAndSettle();
 
       // Cuộn tới và bấm vào Thỏa thuận xử lý dữ liệu
-      await tester.ensureVisible(find.text('Thỏa thuận xử lý dữ liệu (Consent)'));
-      await tester.tap(find.text('Thỏa thuận xử lý dữ liệu (Consent)'));
+      await tester.ensureVisible(find.text('Thỏa thuận xử lý dữ liệu'));
+      await tester.tap(find.text('Thỏa thuận xử lý dữ liệu'));
       await tester.pumpAndSettle();
 
       // Kiểm tra dialog mở ra với tiêu đề và nút Đóng (Review mode)

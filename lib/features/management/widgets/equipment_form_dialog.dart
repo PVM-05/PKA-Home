@@ -59,9 +59,15 @@ class _EquipmentFormDialogState extends ConsumerState<EquipmentFormDialog> {
     _specController = TextEditingController(text: eq?.specifications ?? '');
 
     if (eq != null) {
-      _selectedCategory = eq.category;
-      _selectedBuilding = eq.building;
-      _selectedStatus = eq.status;
+      if (_categories.any((c) => c['value'] == eq.category)) {
+        _selectedCategory = eq.category;
+      }
+      if (_buildings.contains(eq.building)) {
+        _selectedBuilding = eq.building;
+      }
+      if (_statuses.any((s) => s['value'] == eq.status)) {
+        _selectedStatus = eq.status;
+      }
     }
   }
 
@@ -201,6 +207,7 @@ class _EquipmentFormDialogState extends ConsumerState<EquipmentFormDialog> {
                               flex: 3,
                               child: DropdownButtonFormField<String>(
                                 initialValue: _selectedCategory,
+                                isExpanded: true,
                                 decoration: const InputDecoration(
                                   labelText: 'Phân loại',
                                 ),
@@ -208,7 +215,10 @@ class _EquipmentFormDialogState extends ConsumerState<EquipmentFormDialog> {
                                     .map(
                                       (c) => DropdownMenuItem(
                                         value: c['value'],
-                                        child: Text(c['label']!),
+                                        child: Text(
+                                          c['label']!,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     )
                                     .toList(),
@@ -235,10 +245,17 @@ class _EquipmentFormDialogState extends ConsumerState<EquipmentFormDialog> {
                             Expanded(
                               child: DropdownButtonFormField<String>(
                                 initialValue: _selectedBuilding,
+                                isExpanded: true,
                                 decoration: const InputDecoration(labelText: 'Tòa nhà'),
                                 items: _buildings
                                     .map(
-                                      (b) => DropdownMenuItem(value: b, child: Text(b)),
+                                      (b) => DropdownMenuItem(
+                                        value: b,
+                                        child: Text(
+                                          b,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
                                     )
                                     .toList(),
                                 onChanged: (val) {
@@ -279,12 +296,16 @@ class _EquipmentFormDialogState extends ConsumerState<EquipmentFormDialog> {
                         if (isEdit) ...[
                           DropdownButtonFormField<String>(
                             initialValue: _selectedStatus,
+                            isExpanded: true,
                             decoration: const InputDecoration(labelText: 'Trạng thái hoạt động'),
                             items: _statuses
                                 .map(
                                   (s) => DropdownMenuItem(
                                     value: s['value'],
-                                    child: Text(s['label']!),
+                                    child: Text(
+                                      s['label']!,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 )
                                 .toList(),

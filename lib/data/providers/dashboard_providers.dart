@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/supabase_config.dart';
+import 'building_provider.dart';
 
 /// Helper tạo Stream có khả năng chịu lỗi (resilient):
 /// 1. Tải nhanh dữ liệu ban đầu qua HTTP để hiển thị ngay lập tức (không chờ handshake WebSocket).
@@ -98,8 +99,14 @@ final pendingLinkRequestsCountProvider = StreamProvider<int>((ref) async* {
 });
 
 /// Shared Stream cho bảng invoices, kết hợp nạp nhanh qua HTTP và đồng bộ Realtime,
-/// tự động khôi phục và xử lý lỗi Realtime (như RealtimeSubscribeException code 1002).
+/// tự động lọc theo ngữ cảnh tòa nhà đang chọn (activeBuildingIdProvider).
 final rawInvoicesStream = Provider<Stream<List<Map<String, dynamic>>>>((ref) {
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
+  final aptList = ref.watch(apartmentsStreamProvider).valueOrNull;
+  final allowedAptIds = aptList != null && aptList.isNotEmpty
+      ? aptList.map((a) => a['id']?.toString()).whereType<String>().toSet()
+      : null;
+
   return createResilientTableStream(
     debugLabel: 'Invoices',
     httpFetch: () async {
@@ -109,7 +116,13 @@ final rawInvoicesStream = Provider<Stream<List<Map<String, dynamic>>>>((ref) {
       return List<Map<String, dynamic>>.from(res as List);
     },
     realtimeStream: () => SupabaseConfig.client.from('invoices').stream(primaryKey: ['id']),
-  ).asBroadcastStream();
+  ).map((list) {
+    if (allowedAptIds == null || activeBuildingId.isEmpty) return list;
+    return list.where((inv) {
+      final aptId = inv['apartment_id']?.toString();
+      return aptId == null || allowedAptIds.contains(aptId);
+    }).toList();
+  }).asBroadcastStream();
 });
 
 final rawInvoicesStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
@@ -128,16 +141,21 @@ final unpaidInvoicesTotalProvider = Provider<AsyncValue<double>>((ref) {
 });
 
 final apartmentsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
   return createResilientTableStream(
     debugLabel: 'Apartments',
     httpFetch: () async {
       final res = await SupabaseConfig.client
           .from('apartments')
-          .select('id, code, area, is_empty, building_code, floor_number');
+          .select('id, code, area, is_empty, building_code, floor_number, building_id');
       return List<Map<String, dynamic>>.from(res as List);
     },
     realtimeStream: () => SupabaseConfig.client.from('apartments').stream(primaryKey: ['id']),
-  );
+  ).map((list) {
+    final hasBuildingId = list.any((a) => a['building_id'] != null);
+    if (!hasBuildingId || activeBuildingId.isEmpty) return list;
+    return list.where((a) => a['building_id'] == null || a['building_id'] == activeBuildingId).toList();
+  });
 });
 
 final totalApartmentsProvider = Provider<AsyncValue<int>>((ref) {
@@ -222,40 +240,58 @@ class FinancialStats {
 }
 
 final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
+  DateTime? parsePeriodDate(String? raw) {
+    final p = raw?.trim();
+    if (p == null || p.isEmpty) return null;
+    if (p.contains('/')) {
+      final parts = p.split('/');
+      if (parts.length == 2) {
+        final m = int.tryParse(parts[0]);
+        final y = int.tryParse(parts[1]);
+        if (m != null && y != null) return DateTime(y, m);
+      }
+    } else if (p.contains('-')) {
+      final parts = p.split('-');
+      if (parts.length == 2) {
+        final y = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        if (m != null && y != null) return DateTime(y, m);
+      }
+    }
+    return null;
+  }
+
   return ref.watch(rawInvoicesStream).map((invoices) {
-    // Đếm số căn hộ duy nhất đã đóng / chưa đóng trong kỳ hiện tại
+    // Đếm số căn hộ duy nhất đã đóng / chưa đóng trong kỳ hiện tại (hỗ trợ cả MM/YYYY và YYYY-MM)
     final now = DateTime.now();
     final curMm = now.month.toString().padLeft(2, '0');
-    final curPeriod = '$curMm/${now.year}';
-    final curSinglePeriod = '${now.month}/${now.year}';
+    final curPeriodSlash = '$curMm/${now.year}';
+    final curSingleSlash = '${now.month}/${now.year}';
+    final curPeriodDash = '${now.year}-$curMm';
+    final curSingleDash = '${now.year}-${now.month}';
 
     var currentInvoices = invoices.where((inv) {
       final p = (inv['period'] as String?)?.trim();
-      return p == curPeriod || p == curSinglePeriod;
+      return p == curPeriodSlash ||
+          p == curSingleSlash ||
+          p == curPeriodDash ||
+          p == curSingleDash;
     }).toList();
 
     // Nếu kỳ hiện tại chưa lập hóa đơn, lấy kỳ gần nhất có dữ liệu theo ngày tháng
     if (currentInvoices.isEmpty && invoices.isNotEmpty) {
-      String? latestPeriod;
       DateTime? latestDate;
       for (final inv in invoices) {
-        final p = (inv['period'] as String?)?.trim();
-        if (p == null || !p.contains('/')) continue;
-        final parts = p.split('/');
-        if (parts.length == 2) {
-          final m = int.tryParse(parts[0]);
-          final y = int.tryParse(parts[1]);
-          if (m != null && y != null) {
-            final dt = DateTime(y, m);
-            if (latestDate == null || dt.isAfter(latestDate)) {
-              latestDate = dt;
-              latestPeriod = p;
-            }
-          }
+        final dt = parsePeriodDate(inv['period'] as String?);
+        if (dt != null && (latestDate == null || dt.isAfter(latestDate))) {
+          latestDate = dt;
         }
       }
-      if (latestPeriod != null) {
-        currentInvoices = invoices.where((inv) => (inv['period'] as String?)?.trim() == latestPeriod).toList();
+      if (latestDate != null) {
+        currentInvoices = invoices.where((inv) {
+          final dt = parsePeriodDate(inv['period'] as String?);
+          return dt != null && dt.year == latestDate!.year && dt.month == latestDate.month;
+        }).toList();
       } else {
         currentInvoices = invoices;
       }
@@ -279,13 +315,13 @@ final financialStatsProvider = StreamProvider<FinancialStats>((ref) {
       if (status == 'paid') {
         paid += amt;
         paidApartments.add(aptId);
-      } else if (status == 'pending_confirmation') {
+      } else if (status == 'pending_confirmation' || status == 'under_review') {
         pendingConfirmation += amt;
         pendingConfirmationApartments.add(aptId);
       } else if (status == 'cancelled' || status == 'void') {
         cancelled += amt;
         cancelledApartments.add(aptId);
-      } else if (status == 'unpaid' || status == 'overdue') {
+      } else if (status == 'unpaid' || status == 'overdue' || status == 'pending') {
         unpaid += amt;
         unpaidApartments.add(aptId);
       }
@@ -343,6 +379,8 @@ final monthlyRevenueTrendProvider = StreamProvider<List<MonthlyRevenueItem>>((re
       final yyyy = m.year.toString();
       final periodKey1 = '$mm/$yyyy';
       final periodKey2 = '$mSingle/$yyyy';
+      final periodKey3 = '$yyyy-$mm';
+      final periodKey4 = '$yyyy-$mSingle';
       final shortLabel = 'T${m.month}';
 
       double paid = 0.0;
@@ -353,7 +391,10 @@ final monthlyRevenueTrendProvider = StreamProvider<List<MonthlyRevenueItem>>((re
         final amt = (inv['total_amount'] as num?)?.toDouble() ?? 0.0;
         final status = inv['status'];
 
-        bool isMatch = invPeriod == periodKey1 || invPeriod == periodKey2;
+        bool isMatch = invPeriod == periodKey1 ||
+            invPeriod == periodKey2 ||
+            invPeriod == periodKey3 ||
+            invPeriod == periodKey4;
         // Chỉ fallback sang created_at nếu invPeriod rỗng (không xác định được chu kỳ)
         if (!isMatch && invPeriod.isEmpty && inv['created_at'] != null) {
           final created = DateTime.tryParse(inv['created_at'] as String);
@@ -366,7 +407,11 @@ final monthlyRevenueTrendProvider = StreamProvider<List<MonthlyRevenueItem>>((re
           final s = status?.toString().toLowerCase();
           if (s == 'paid') {
             paid += amt;
-          } else if (s == 'unpaid' || s == 'overdue' || s == 'pending_confirmation') {
+          } else if (s == 'unpaid' ||
+              s == 'overdue' ||
+              s == 'pending' ||
+              s == 'pending_confirmation' ||
+              s == 'under_review') {
             unpaid += amt;
           }
         }

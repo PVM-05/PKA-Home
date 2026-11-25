@@ -282,10 +282,12 @@ class _AppQrScannerSheetState extends State<AppQrScannerSheet> {
   }
 
   Widget _buildManualInputView(BuildContext context, {String? notice}) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (notice != null || _cameraErrorMessage != null) ...[
             Container(
@@ -338,11 +340,12 @@ class _AppQrScannerSheetState extends State<AppQrScannerSheet> {
               }
             },
           ),
-          const Spacer(),
-          SizedBox(
-            height: 48,
+          const SizedBox(height: 20),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
                 backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(

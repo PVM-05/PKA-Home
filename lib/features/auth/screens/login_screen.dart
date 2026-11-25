@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/route_names.dart';
+import '../../../core/security/auth_rate_limiter.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../data/providers/auth_provider.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -24,23 +24,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  String? _resolveAuthEmail(String rawInput) {
+    final cleaned = rawInput.trim();
+    // Hỗ trợ đăng nhập bằng số điện thoại cư dân đã kích hoạt (VD: 0901234567 hoặc +84901234567)
+    final digitsAndPlus = cleaned.replaceAll(RegExp(r'[\s\-\.]'), '');
+    if (RegExp(r'^(\+?84|0)\d{8,10}$').hasMatch(digitsAndPlus)) {
+      String normalizedPhone = digitsAndPlus;
+      if (normalizedPhone.startsWith('+84')) {
+        normalizedPhone = '0${normalizedPhone.substring(3)}';
+      } else if (normalizedPhone.startsWith('84') && normalizedPhone.length >= 11) {
+        normalizedPhone = '0${normalizedPhone.substring(2)}';
+      }
+      return '$normalizedPhone@vivona.vn';
+    }
+
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (emailRegex.hasMatch(cleaned)) {
+      return cleaned;
+    }
+    return null;
+  }
+
   void _login() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    if (email.isEmpty || password.isEmpty) {
+    final rawIdentifier = _emailController.text.trim();
+    final password = _passwordController.text;
+    if (rawIdentifier.isEmpty || password.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng nhập Email và mật khẩu'),
+          content: Text('Vui lòng nhập Email hoặc Số điện thoại và mật khẩu'),
           backgroundColor: AppTheme.textWarning,
         ),
       );
       return;
     }
 
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
+    final resolvedEmail = _resolveAuthEmail(rawIdentifier);
+    if (resolvedEmail == null) {
       setState(() {
-        _errorMessage = 'Định dạng Email không hợp lệ.';
+        _errorMessage = 'Định dạng Email hoặc Số điện thoại không hợp lệ.';
+      });
+      return;
+    }
+
+    final rateLimiter = ref.read(authRateLimiterProvider);
+    final limitCheck = rateLimiter.checkLoginAllowed(resolvedEmail);
+    if (!limitCheck.isAllowed) {
+      setState(() {
+        _errorMessage = limitCheck.message ??
+            'Tài khoản tạm thời bị khóa do nhập sai nhiều lần. Vui lòng thử lại sau.';
       });
       return;
     }
@@ -50,13 +88,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
     try {
-      await ref.read(authProvider.notifier).login(email, password);
+      await ref.read(authProvider.notifier).login(resolvedEmail, password);
+      rateLimiter.resetLoginAttempts(resolvedEmail);
     } catch (e) {
+      rateLimiter.recordLoginFailure(resolvedEmail);
       if (mounted) {
         setState(() {
           _errorMessage = formatErrorMessage(
             e,
-            fallback: 'Đăng nhập thất bại. Vui lòng kiểm tra lại.',
+            fallback: 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.',
           );
         });
       }
@@ -489,8 +529,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               AppTextField(
                 controller: _emailController,
-                labelText: 'Thư điện tử',
-                prefixIcon: const Icon(Icons.email_outlined),
+                labelText: 'Email hoặc Số điện thoại',
+                prefixIcon: const Icon(Icons.person_outline),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
               ),
@@ -664,9 +704,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               minimumSize: const Size(48, 48),
             ),
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const RegisterScreen()),
-              );
+              context.push(AppRoutes.register);
             },
             child: RichText(
               text: TextSpan(
@@ -687,12 +725,5 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 }

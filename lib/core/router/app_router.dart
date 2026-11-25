@@ -7,8 +7,10 @@ import '../../features/management/screens/accounting_web_workstation_screen.dart
 import '../../features/management/screens/subscription_management_screen.dart';
 import '../../features/management/screens/batch_import_center_screen.dart';
 import '../../features/management/screens/financial_report_screen.dart';
+import '../../features/management/screens/fee_policy_management_screen.dart';
 import '../../features/management/screens/handover_management_screen.dart';
 import '../../features/management/screens/inspection_workstation_screen.dart';
+import '../../features/management/widgets/resident_activation_management_sheet.dart';
 import '../../features/resident/screens/resident_handover_screen.dart';
 import '../../features/resident/screens/resident_handover_detail_screen.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +96,9 @@ final Map<String, PermissionItem> _managementRoutePermissions = {
   AppRoutes.managementAccountingWorkstation: AppPermissions.accountingWorkstation,
   AppRoutes.managementMaintenanceFundLedger: AppPermissions.maintenanceFundLedger,
   AppRoutes.managementFinancialReport: AppPermissions.financialReport,
+  AppRoutes.managementFeePolicies: AppPermissions.invoiceManagement,
   AppRoutes.managementMeterReading: AppPermissions.meterReadingManagement,
+  AppRoutes.managementActivationList: AppPermissions.residentManagement,
 
   AppRoutes.managementIssues: AppPermissions.issueManagement,
   AppRoutes.managementEquipment: AppPermissions.equipmentManagement,
@@ -145,11 +149,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = user != null;
       final isAuthRoute = state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.register ||
-          state.matchedLocation == AppRoutes.residentActivation ||
           state.matchedLocation == AppRoutes.forgotPassword;
       final isPublicRoute = state.matchedLocation == AppRoutes.documentLookup;
       final isRecoveryRoute = state.matchedLocation == AppRoutes.verifyOtp ||
-          state.matchedLocation == AppRoutes.resetPassword;
+          state.matchedLocation == AppRoutes.resetPassword ||
+          state.matchedLocation == AppRoutes.residentActivation;
       final needsMfa = ref.read(mfaChallengeRequiredProvider);
 
       // Đang loading auth state → không redirect
@@ -737,6 +741,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
+            path: 'fee-policies',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: const FeePolicyManagementScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'activations',
+            pageBuilder: (context, state) =>
+                AppPageTransitions.slideFromRight(
+              state: state,
+              child: Scaffold(
+                appBar: AppBar(title: const Text('Quản lý kích hoạt cư dân')),
+                body: const ResidentActivationManagementSheet(),
+              ),
+            ),
+          ),
+          GoRoute(
             path: 'batch-import',
             pageBuilder: (context, state) =>
                 AppPageTransitions.slideFromRight(
@@ -852,7 +875,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => context.go(AppRoutes.login),
+                onPressed: () {
+                  final currentUser = ref.read(authProvider).valueOrNull;
+                  if (currentUser != null) {
+                    context.go(
+                      currentUser.isManagement
+                          ? AppRoutes.managementHome
+                          : AppRoutes.residentHome,
+                    );
+                  } else {
+                    context.go(AppRoutes.login);
+                  }
+                },
                 child: const Text('Về trang chủ'),
               ),
             ],

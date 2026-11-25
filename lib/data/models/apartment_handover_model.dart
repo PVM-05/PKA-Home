@@ -81,9 +81,9 @@ class ApartmentHandoverModel {
   String get handoverTypeDisplayName {
     switch (handoverType) {
       case 'move_in':
-        return 'Nhận nhà (Move-in)';
+        return 'Nhận nhà';
       case 'move_out':
-        return 'Trả nhà (Move-out)';
+        return 'Trả nhà';
       default:
         return 'Bàn giao';
     }

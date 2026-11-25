@@ -68,16 +68,22 @@ class BuildingSwitcherDropdown extends ConsumerWidget {
               // Làm mới danh sách dữ liệu theo tòa nhà mới
               ref.invalidate(apartmentsProvider);
               ref.invalidate(invoicesProvider);
+              ref.invalidate(residentsProvider);
+              ref.invalidate(allIssuesProvider);
+              final selectedName = buildings
+                  .where((b) => b.id == newBuildingId)
+                  .map((b) => b.name)
+                  .firstOrNull ?? activeBuilding.name;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Đã chuyển sang quản lý: ${buildings.firstWhere((b) => b.id == newBuildingId).name}'),
+                  content: Text('Đã chuyển sang quản lý: $selectedName'),
                   duration: const Duration(seconds: 2),
                 ),
               );
             }
           },
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 130),
+            constraints: const BoxConstraints(maxWidth: 140, minHeight: 48),
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),

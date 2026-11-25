@@ -252,7 +252,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
       logs.add(
         AuditLogItem(
           title: 'Đổi vai trò: $targetName',
-          subtitle: '$oldRoleName ➔ $newRoleName (Bởi $changerName)',
+          subtitle: 'Từ $oldRoleName sang $newRoleName (Bởi $changerName)',
           updatedAt: DateTime.parse(row['changed_at']).toLocal(),
           icon: Icons.admin_panel_settings_outlined,
           color: AppTheme.primary,
@@ -289,7 +289,7 @@ final auditTrailProvider = FutureProvider.autoDispose<List<AuditLogItem>>((
       logs.add(
         AuditLogItem(
           title: 'Ủy quyền tạm thời: $role',
-          subtitle: '$delegatorName ➔ $delegateName',
+          subtitle: 'Từ $delegatorName cho $delegateName',
           updatedAt: DateTime.parse(row['created_at']).toLocal(),
           icon: Icons.vpn_key_outlined,
           color: AppTheme.secondary,

@@ -120,6 +120,7 @@ class _MaintenanceFundLedgerScreenState
                       AppSpacing.h16,
                       DropdownButtonFormField<String>(
                         initialValue: category,
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Danh mục giao dịch',
                           border: OutlineInputBorder(),

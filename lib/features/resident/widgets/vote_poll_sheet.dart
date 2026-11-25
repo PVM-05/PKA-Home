@@ -123,10 +123,13 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
     final isBlockedByHousingLaw =
         widget.poll.isOfficialAssembly && relationRole != 'owner';
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -144,7 +147,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -155,12 +158,12 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    color: colorScheme.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.how_to_vote_rounded,
-                    color: AppTheme.primary,
+                    color: colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -173,7 +176,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                         style: context.labelSmall?.copyWith(
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
+                          color: colorScheme.primary,
                         ),
                       ),
                       Text(
@@ -202,13 +205,13 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(color: colorScheme.outlineVariant),
                 ),
                 child: Text(
                   widget.poll.description!,
-                  style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                  style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
               ),
             ],
@@ -218,15 +221,15 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
+                color: colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.info_outline,
                     size: 16,
-                    color: AppTheme.primary,
+                    color: colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -234,7 +237,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                       'Cơ chế tính: ${widget.poll.voteWeightDisplayName} • ${widget.poll.choiceTypeDisplayName}',
                       style: context.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.primary,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
@@ -246,24 +249,24 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
+                  color: warningColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.amber.shade400),
+                  border: Border.all(color: warningColor.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
                       Icons.gavel_rounded,
-                      color: Colors.amber.shade900,
+                      color: warningColor,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Theo Điều 102 Luật Nhà ở 2023, chỉ Chủ sở hữu căn hộ (owner) mới có quyền biểu quyết tại Hội nghị nhà chung cư. Khách thuê chỉ có thể tham gia các cuộc khảo sát ý kiến cộng đồng.',
+                        'Theo Điều 102 Luật Nhà ở 2023, chỉ Chủ sở hữu căn hộ mới có quyền biểu quyết tại Hội nghị nhà chung cư. Khách thuê chỉ có thể tham gia các cuộc khảo sát ý kiến cộng đồng.',
                         style: context.bodySmall?.copyWith(
-                          color: Colors.amber.shade900,
+                          color: warningColor,
                           height: 1.35,
                           fontWeight: FontWeight.w500,
                         ),
@@ -288,11 +291,11 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primary.withValues(alpha: 0.08)
-                      : Colors.white,
+                      ? colorScheme.primary.withValues(alpha: 0.12)
+                      : colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isSelected ? AppTheme.primary : Colors.grey[300]!,
+                    color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
                     width: isSelected ? 1.5 : 1,
                   ),
                 ),
@@ -314,7 +317,7 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                               : (isSelected
                                     ? Icons.radio_button_checked
                                     : Icons.radio_button_off),
-                          color: isSelected ? AppTheme.primary : Colors.grey,
+                          color: isSelected ? colorScheme.primary : colorScheme.outline,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -325,8 +328,8 @@ class _VotePollSheetState extends ConsumerState<VotePollSheet> {
                                   ? FontWeight.bold
                                   : FontWeight.normal,
                               color: isSelected
-                                  ? AppTheme.primary
-                                  : Colors.black87,
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurface,
                             ),
                           ),
                         ),

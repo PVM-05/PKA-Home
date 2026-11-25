@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 
 /// Hộp thoại xác thực 2 yếu tố khi đăng nhập tài khoản quản trị
 class MfaVerificationDialog extends StatefulWidget {
@@ -67,7 +68,7 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Đã có lỗi xảy ra khi xác thực: $e';
+        _errorMessage = formatErrorMessage(e, fallback: 'Đã có lỗi xảy ra khi xác thực mã 2 yếu tố.');
         _isLoading = false;
       });
     }
@@ -75,6 +76,8 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
@@ -82,10 +85,10 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
+              color: colorScheme.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.security, color: AppTheme.primary),
+            child: Icon(Icons.security, color: colorScheme.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -102,9 +105,9 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Tài khoản quản trị của bạn được bảo vệ bằng lớp bảo mật hai yếu tố (TOTP). '
+              'Tài khoản quản trị của bạn được bảo vệ bằng lớp xác thực hai yếu tố. '
               'Vui lòng mở ứng dụng Google Authenticator hoặc Microsoft Authenticator để lấy mã 6 chữ số.',
-              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary, height: 1.4),
+              style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant, height: 1.4),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -115,6 +118,7 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
               style: context.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 8,
+                color: colorScheme.onSurface,
               ),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -123,19 +127,19 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
                 hintText: '000000',
                 counterText: '',
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: colorScheme.surfaceContainerLow,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
               ),
               onSubmitted: (_) => _handleConfirm(),
@@ -144,12 +148,12 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 16, color: AppTheme.error),
+                  Icon(Icons.error_outline, size: 16, color: errorColor),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: context.labelSmall?.copyWith(color: AppTheme.error),
+                      style: context.labelSmall?.copyWith(color: errorColor),
                     ),
                   ),
                 ],
@@ -160,12 +164,14 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
           child: const Text('Hủy bỏ'),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _handleConfirm,
           style: ElevatedButton.styleFrom(
+            minimumSize: const Size(0, 48),
             backgroundColor: AppTheme.primary,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

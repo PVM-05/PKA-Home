@@ -45,111 +45,118 @@ class RoleOnboardingDialog {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: const EdgeInsets.all(24),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: roleColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(roleIcon, color: roleColor, size: 36),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Chào mừng ${user.fullName}!',
-              style: context.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: roleColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                user.roleDisplayName,
-                style: context.bodySmall?.copyWith(
-                  color: roleColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              roleDesc,
-              textAlign: TextAlign.center,
-              style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Quyền hạn chính của bạn:',
-                    style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          contentPadding: const EdgeInsets.all(24),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: roleColor.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 6),
-                  ...keyFeatures.map((feat) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.check_circle, color: roleColor, size: 14),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                feat,
-                                style: context.bodySmall,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Nếu cần thêm quyền hạn, vui lòng liên hệ Quản trị viên để được cấp hoặc ủy quyền tạm thời.',
-              textAlign: TextAlign.center,
-              style: context.labelSmall?.copyWith(fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: roleColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Icon(roleIcon, color: roleColor, size: 36),
                 ),
-                onPressed: () async {
-                  await prefs.setBool(key, true);
-                  if (ctx.mounted) Navigator.of(ctx).pop();
-                },
-                child: const Text('ĐÃ HIỂU & BẮT ĐẦU', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+                const SizedBox(height: 16),
+                Text(
+                  'Chào mừng ${user.fullName}!',
+                  style: ctx.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: roleColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    user.roleDisplayName,
+                    style: ctx.bodySmall?.copyWith(
+                      color: roleColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  roleDesc,
+                  textAlign: TextAlign.center,
+                  style: ctx.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colorScheme.outlineVariant),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Quyền hạn chính của bạn:',
+                        style: ctx.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      ...keyFeatures.map((feat) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Icons.check_circle, color: roleColor, size: 14),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    feat,
+                                    style: ctx.bodySmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Nếu cần thêm quyền hạn, vui lòng liên hệ Quản trị viên để được cấp hoặc ủy quyền tạm thời.',
+                  textAlign: TextAlign.center,
+                  style: ctx.labelSmall?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: roleColor,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 48),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () async {
+                      await prefs.setBool(key, true);
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                    },
+                    child: const Text('ĐÃ HIỂU & BẮT ĐẦU', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -346,12 +346,11 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                       Icons.notifications_active_outlined,
                       size: 18,
                     ),
-                    tooltip: 'Phát lại thông báo đẩy (Re-broadcast)',
+                    tooltip: 'Phát lại thông báo đẩy',
                     color: colorScheme.primary,
-                    padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
                     onPressed: () => AnnouncementDialogs.handleRebroadcast(
                       context,
@@ -363,10 +362,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                     icon: const Icon(Icons.edit_outlined, size: 18),
                     tooltip: 'Chỉnh sửa',
                     color: colorScheme.primary,
-                    padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
                     onPressed: () => AnnouncementDialogs.showEditDialog(
                       context,
@@ -378,10 +376,9 @@ class AnnouncementManagementScreen extends ConsumerWidget {
                     icon: const Icon(Icons.delete_outline, size: 18),
                     tooltip: 'Xóa thông báo',
                     color: errorColor,
-                    padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
                     onPressed: () => AnnouncementDialogs.confirmDelete(
                       context,

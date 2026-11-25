@@ -87,20 +87,36 @@ class DebtAgingBucketModel {
         countOver90: 0,
       );
     }
-    final b030 = json['bucket_0_30'] as Map<String, dynamic>?;
-    final b3160 = json['bucket_31_60'] as Map<String, dynamic>?;
-    final b6190 = json['bucket_61_90'] as Map<String, dynamic>?;
-    final bOver = json['bucket_over_90'] as Map<String, dynamic>?;
+    final b030 = json['bucket_0_30'] is Map ? Map<String, dynamic>.from(json['bucket_0_30'] as Map) : null;
+    final b3160 = json['bucket_31_60'] is Map ? Map<String, dynamic>.from(json['bucket_31_60'] as Map) : null;
+    final b6190 = json['bucket_61_90'] is Map ? Map<String, dynamic>.from(json['bucket_61_90'] as Map) : null;
+    final bOver = json['bucket_over_90'] is Map ? Map<String, dynamic>.from(json['bucket_over_90'] as Map) : null;
 
     return DebtAgingBucketModel(
-      amount0To30: (b030?['amount'] as num?)?.toDouble() ?? 0.0,
-      count0To30: (b030?['count'] as num?)?.toInt() ?? 0,
-      amount31To60: (b3160?['amount'] as num?)?.toDouble() ?? 0.0,
-      count31To60: (b3160?['count'] as num?)?.toInt() ?? 0,
-      amount61To90: (b6190?['amount'] as num?)?.toDouble() ?? 0.0,
-      count61To90: (b6190?['count'] as num?)?.toInt() ?? 0,
-      amountOver90: (bOver?['amount'] as num?)?.toDouble() ?? 0.0,
-      countOver90: (bOver?['count'] as num?)?.toInt() ?? 0,
+      amount0To30: (b030?['amount'] as num?)?.toDouble() ??
+          (json['amount_0_to_30'] as num?)?.toDouble() ??
+          0.0,
+      count0To30: (b030?['count'] as num?)?.toInt() ??
+          (json['count_0_to_30'] as num?)?.toInt() ??
+          0,
+      amount31To60: (b3160?['amount'] as num?)?.toDouble() ??
+          (json['amount_31_to_60'] as num?)?.toDouble() ??
+          0.0,
+      count31To60: (b3160?['count'] as num?)?.toInt() ??
+          (json['count_31_to_60'] as num?)?.toInt() ??
+          0,
+      amount61To90: (b6190?['amount'] as num?)?.toDouble() ??
+          (json['amount_61_to_90'] as num?)?.toDouble() ??
+          0.0,
+      count61To90: (b6190?['count'] as num?)?.toInt() ??
+          (json['count_61_to_90'] as num?)?.toInt() ??
+          0,
+      amountOver90: (bOver?['amount'] as num?)?.toDouble() ??
+          (json['amount_over_90'] as num?)?.toDouble() ??
+          0.0,
+      countOver90: (bOver?['count'] as num?)?.toInt() ??
+          (json['count_over_90'] as num?)?.toInt() ??
+          0,
     );
   }
 
@@ -132,12 +148,21 @@ class BlockCollectionRateModel {
   });
 
   factory BlockCollectionRateModel.fromJson(Map<String, dynamic> json) {
+    final billed = (json['block_billed'] as num?)?.toDouble() ??
+        (json['billed'] as num?)?.toDouble() ??
+        0.0;
+    final collected = (json['block_collected'] as num?)?.toDouble() ??
+        (json['collected'] as num?)?.toDouble() ??
+        0.0;
     return BlockCollectionRateModel(
-      blockName: json['block_name']?.toString() ?? 'Chung',
-      blockBilled: (json['block_billed'] as num?)?.toDouble() ?? 0.0,
-      blockCollected: (json['block_collected'] as num?)?.toDouble() ?? 0.0,
-      blockOutstanding: (json['block_outstanding'] as num?)?.toDouble() ?? 0.0,
-      collectionRate: (json['collection_rate'] as num?)?.toDouble() ?? 0.0,
+      blockName: (json['block_name'] ?? json['block'])?.toString() ?? 'Chung',
+      blockBilled: billed,
+      blockCollected: collected,
+      blockOutstanding: (json['block_outstanding'] as num?)?.toDouble() ??
+          (billed - collected).clamp(0.0, double.infinity),
+      collectionRate: (json['collection_rate'] as num?)?.toDouble() ??
+          (json['rate'] as num?)?.toDouble() ??
+          0.0,
     );
   }
 
@@ -185,11 +210,15 @@ class DebtorApartmentModel {
       apartmentCode: json['apartment_code']?.toString() ?? '',
       ownerName: json['owner_name']?.toString() ?? 'Chưa đăng ký',
       ownerPhone: json['owner_phone']?.toString() ?? '',
-      totalDebt: (json['total_debt'] as num?)?.toDouble() ?? 0.0,
+      totalDebt: (json['total_debt'] as num?)?.toDouble() ??
+          (json['outstanding_amount'] as num?)?.toDouble() ??
+          0.0,
       maxDaysOverdue: (json['max_days_overdue'] as num?)?.toInt() ?? 0,
-      unpaidInvoicesCount: (json['unpaid_invoices_count'] as num?)?.toInt() ?? 0,
+      unpaidInvoicesCount: (json['unpaid_invoices_count'] as num?)?.toInt() ??
+          (json['unpaid_invoice_count'] as num?)?.toInt() ??
+          0,
       oldestDueDate: parsedDate,
-      riskLevel: json['risk_level']?.toString() ?? '0_30',
+      riskLevel: (json['risk_level'] ?? json['bucket'])?.toString() ?? '0_30',
     );
   }
 
@@ -247,13 +276,15 @@ class FinancialAgingReportModel {
       genAt = DateTime.tryParse(json['generated_at'].toString());
     }
 
-    final blockList = (json['collection_by_block'] as List<dynamic>?)
-            ?.map((e) => BlockCollectionRateModel.fromJson(e as Map<String, dynamic>))
+    final rawBlocks = (json['collection_by_block'] ?? json['block_collection_rates']) as List<dynamic>?;
+    final blockList = rawBlocks
+            ?.map((e) => BlockCollectionRateModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList() ??
         [];
 
-    final debtorList = (json['debtors'] as List<dynamic>?)
-            ?.map((e) => DebtorApartmentModel.fromJson(e as Map<String, dynamic>))
+    final rawDebtors = (json['debtors'] ?? json['top_debtors']) as List<dynamic>?;
+    final debtorList = rawDebtors
+            ?.map((e) => DebtorApartmentModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList() ??
         [];
 

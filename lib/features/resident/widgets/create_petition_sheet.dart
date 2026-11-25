@@ -91,10 +91,11 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -114,7 +115,7 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -125,12 +126,12 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.rate_review_outlined,
-                      color: AppTheme.primary,
+                      color: colorScheme.primary,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -166,6 +167,7 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
 
               // Chuyên mục
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: _category,
                 decoration: const InputDecoration(
                   labelText: 'Phân loại chuyên mục',
@@ -221,21 +223,21 @@ class _CreatePetitionSheetState extends ConsumerState<CreatePetitionSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.08),
+                  color: colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.lightbulb_outline,
                       size: 18,
-                      color: Colors.blue,
+                      color: colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Kiến nghị sẽ được hiển thị công khai trên ứng dụng để các cư dân cùng bấm Đồng thuận ủng hộ.',
-                        style: context.bodySmall?.copyWith(color: AppTheme.primary),
+                        style: context.bodySmall?.copyWith(color: colorScheme.primary),
                       ),
                     ),
                   ],

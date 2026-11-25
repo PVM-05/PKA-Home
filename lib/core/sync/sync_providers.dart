@@ -18,7 +18,8 @@ final syncStateProvider = StreamProvider<SyncState>((ref) {
   return manager.stateStream;
 });
 
-final currentSyncStateProvider = StateProvider<SyncState>((ref) {
+final currentSyncStateProvider = Provider<SyncState>((ref) {
   final manager = ref.watch(offlineSyncManagerProvider);
-  return manager.currentState;
+  final streamVal = ref.watch(syncStateProvider).valueOrNull;
+  return streamVal ?? manager.currentState;
 });

@@ -336,106 +336,104 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          SliverAppBar(
-            expandedHeight: 140,
-            floating: false,
-            pinned: true,
-            elevation: 0,
-            backgroundColor: AppTheme.primary,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppTheme.primary, AppTheme.secondary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+          SliverToBoxAdapter(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppTheme.primary, AppTheme.secondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: SafeArea(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1400),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 12.0,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Bounceable(
-                                  onTap: () => _onItemTapped(3),
-                                  child: AppAvatar(
-                                    name: fullName,
-                                    size: 40,
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                                child: Center(
+                                  child: Bounceable(
+                                    onTap: () => _onItemTapped(3),
+                                    child: AppAvatar(
+                                      name: fullName,
+                                      size: 40,
+                                    ),
                                   ),
                                 ),
-                                AppSpacing.w8,
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Xin chào,',
-                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                          color: Colors.white70,
-                                        ),
+                              ),
+                              AppSpacing.w8,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Xin chào,',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: Colors.white70,
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        fullName,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      fullName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                Consumer(
-                                  builder: (context, ref, _) {
-                                    final unreadCount = ref.watch(
-                                      unreadNotificationsCountProvider,
-                                    );
-                                    return IconButton(
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(
-                                        minWidth: 48,
-                                        minHeight: 48,
+                              ),
+                              const SizedBox(width: 8),
+                              Consumer(
+                                builder: (context, ref, _) {
+                                  final unreadCount = ref.watch(
+                                    unreadNotificationsCountProvider,
+                                  );
+                                  return IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 48,
+                                      minHeight: 48,
+                                    ),
+                                    icon: Badge(
+                                      isLabelVisible: unreadCount > 0,
+                                      label: Text('$unreadCount'),
+                                      backgroundColor: AppStatusColors.unpaid,
+                                      child: const Icon(
+                                        Icons.notifications_outlined,
+                                        color: Colors.white,
+                                        size: 22,
                                       ),
-                                      icon: Badge(
-                                        isLabelVisible: unreadCount > 0,
-                                        label: Text('$unreadCount'),
-                                        backgroundColor: AppStatusColors.unpaid,
-                                        child: const Icon(
-                                          Icons.notifications_outlined,
-                                          color: Colors.white,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      tooltip: 'Thông báo',
-                                      onPressed: () {
-                                        context.push(
-                                          AppRoutes.residentNotifications,
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            const ApartmentSwitcherChip(),
-                          ],
-                        ),
+                                    ),
+                                    tooltip: 'Thông báo',
+                                    onPressed: () {
+                                      context.push(
+                                        AppRoutes.residentNotifications,
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const ApartmentSwitcherChip(),
+                        ],
                       ),
                     ),
                   ),

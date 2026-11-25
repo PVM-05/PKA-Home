@@ -53,7 +53,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.cloud_off_rounded), findsOneWidget);
-      expect(find.text('Đang làm việc ngoại tuyến (Offline) • 3 tác vụ chờ gửi'), findsOneWidget);
+      expect(find.text('Đang làm việc ngoại tuyến • 3 tác vụ chờ gửi'), findsOneWidget);
       expect(find.text('Đồng bộ ngay'), findsOneWidget);
     });
 

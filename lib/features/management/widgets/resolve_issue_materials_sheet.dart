@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/maintenance_material_model.dart';
 import '../../../data/providers/management_provider.dart';
@@ -230,7 +231,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Đã hoàn tất nghiệm thu và xuất kho vật tư thành công!'),
-            backgroundColor: AppTheme.success,
+            backgroundColor: AppTheme.textSuccess,
           ),
         );
       }
@@ -238,7 +239,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
       if (mounted) {
         setState(() {
           _isSubmitting = false;
-          _errorMessage = e.toString();
+          _errorMessage = formatErrorMessage(e);
         });
       }
     }
@@ -247,6 +248,10 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
   @override
   Widget build(BuildContext context) {
     final materialsAsync = ref.watch(maintenanceMaterialsProvider(null));
+    final colorScheme = Theme.of(context).colorScheme;
+    final shortIssueId = widget.issue.id.length >= 6
+        ? widget.issue.id.substring(0, 6)
+        : widget.issue.id;
 
     double totalChargeableAmount = 0;
     for (final m in _selectedMaterials) {
@@ -262,7 +267,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: ListView(
@@ -274,7 +279,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -292,13 +297,14 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Căn hộ: ${widget.issue.apartment?.code ?? "Chung"} • Sự cố #${widget.issue.id.substring(0, 6)}',
-                          style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                          'Căn hộ: ${widget.issue.apartment?.code ?? "Chung"} • Sự cố #$shortIssueId',
+                          style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
+                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -310,10 +316,10 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.error.withValues(alpha: 0.1),
+                    color: colorScheme.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(_errorMessage!, style: context.bodyMedium?.copyWith(color: AppTheme.error)),
+                  child: Text(_errorMessage!, style: context.bodyMedium?.copyWith(color: colorScheme.error)),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -326,6 +332,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
               const SizedBox(height: 8),
               if (_proofFiles.isEmpty)
                 OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
                   onPressed: _pickProofImages,
                   icon: const Icon(Icons.add_a_photo_outlined),
                   label: const Text('Chọn ảnh nghiệm thu từ máy'),
@@ -361,10 +368,10 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400, style: BorderStyle.solid),
+                          border: Border.all(color: colorScheme.outlineVariant),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.add_photo_alternate_outlined, color: AppTheme.primary),
+                        child: Icon(Icons.add_photo_alternate_outlined, color: colorScheme.primary),
                       ),
                     ),
                   ],
@@ -377,12 +384,15 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '2. Vật tư tiêu hao sửa chữa',
-                    style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      '2. Vật tư tiêu hao sửa chữa',
+                      style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
                   ),
                   materialsAsync.when(
                     data: (mats) => TextButton.icon(
+                      style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                       onPressed: () => _addMaterialDialog(mats),
                       icon: const Icon(Icons.add, size: 16),
                       label: const Text('Xuất vật tư'),
@@ -398,14 +408,14 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
                     child: Text(
                       'Chưa có vật tư nào được xuất kho cho sự cố này.\nBấm "Xuất vật tư" nếu có thay thế linh kiện.',
                       textAlign: TextAlign.center,
-                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                      style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   ),
                 )
@@ -421,13 +431,13 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: entry.isChargeable
-                            ? AppTheme.primary.withValues(alpha: 0.05)
-                            : Colors.grey.shade50,
+                            ? colorScheme.primary.withValues(alpha: 0.08)
+                            : colorScheme.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: entry.isChargeable
-                              ? AppTheme.primary.withValues(alpha: 0.3)
-                              : Colors.grey.shade300,
+                              ? colorScheme.primary.withValues(alpha: 0.35)
+                              : colorScheme.outlineVariant,
                         ),
                       ),
                       child: Row(
@@ -443,21 +453,22 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                                 const SizedBox(height: 4),
                                 Text(
                                   'Số lượng: ${entry.quantity} ${entry.material.unit} • Đơn giá: ${entry.material.priceFormatted}',
-                                  style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                                  style: context.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   entry.isChargeable ? '• Tính phí căn hộ: ${_currencyFormat.format(entry.totalAmount)}' : '• Chi phí vận hành tòa nhà',
                                   style: context.labelSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: entry.isChargeable ? AppTheme.primary : Colors.grey.shade700,
+                                    color: entry.isChargeable ? colorScheme.primary : colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 20),
+                            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                            icon: Icon(Icons.delete_outline, color: colorScheme.error, size: 20),
                             onPressed: () => setState(() => _selectedMaterials.removeAt(index)),
                           ),
                         ],
@@ -470,11 +481,14 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppTheme.warning.withValues(alpha: 0.1),
+                      color: AppTheme.getSemanticWarning(context).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         Text(
                           'Tổng tiền kết chuyển hóa đơn:',
@@ -482,7 +496,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                         ),
                         Text(
                           _currencyFormat.format(totalChargeableAmount),
-                          style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                          style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary),
                         ),
                       ],
                     ),
@@ -499,8 +513,9 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
                     : const Icon(Icons.check_circle_outline),
                 label: Text(_isSubmitting ? 'Đang xử lý...' : 'Xác nhận Nghiệm thu & Hoàn tất'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.success,
+                  backgroundColor: AppTheme.textSuccess,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),

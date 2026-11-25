@@ -208,8 +208,10 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Bước 1: Thiết lập kỳ và biểu phí để hệ thống chạy tiền kiểm tra (Dry-Run) trước khi phát hành hóa đơn.',
-                style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                'Bước 1: Thiết lập kỳ và biểu phí để hệ thống kiểm tra dữ liệu trước khi phát hành hóa đơn.',
+                style: context.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(

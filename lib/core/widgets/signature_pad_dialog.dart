@@ -100,11 +100,12 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -112,7 +113,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.draw, color: Color(0xFF1E3A8A)),
+                  Icon(Icons.draw, color: colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -124,6 +125,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                     ),
                   ),
                   IconButton(
+                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
@@ -134,16 +136,16 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                 'Người ký: ${widget.signerRole}',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.grey.shade700,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 height: 180,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                  border: Border.all(color: colorScheme.outlineVariant, width: 1.5),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -160,12 +162,16 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                           child: Stack(
                             children: [
                               if (!_hasSignature)
-                                Center(
-                                  child: Text(
-                                    'Dùng ngón tay hoặc bút cảm ứng ký vào đây',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey.shade400,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Center(
+                                    child: Text(
+                                      'Dùng ngón tay hoặc bút cảm ứng ký vào đây',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey.shade500,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -194,6 +200,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                 runSpacing: 8,
                 children: [
                   TextButton.icon(
+                    style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                     onPressed: _hasSignature ? _clearSignature : null,
                     icon: const Icon(Icons.refresh, size: 18),
                     label: const Text('Ký lại'),
@@ -202,6 +209,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextButton(
+                        style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                         onPressed: () => Navigator.of(context).pop(),
                         child: const Text('Đóng'),
                       ),
@@ -213,6 +221,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF1E3A8A),
                           foregroundColor: Colors.white,
+                          minimumSize: const Size(0, 48),
                         ),
                       ),
                     ],

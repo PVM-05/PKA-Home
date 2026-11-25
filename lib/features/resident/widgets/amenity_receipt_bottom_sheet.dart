@@ -17,7 +17,6 @@ void showAmenityReceiptBottomSheet({
   final txCode =
       booking.transactionCode ??
       'SVC${booking.id.length > 8 ? booking.id.substring(0, 8).toUpperCase() : booking.id.toUpperCase()}';
-  final isDark = Theme.of(context).brightness == Brightness.dark;
   final paidTime = booking.paidAt ?? booking.updatedAt ?? booking.createdAt;
   final currencyFormat = NumberFormat.currency(
     locale: 'vi_VN',
@@ -33,6 +32,17 @@ void showAmenityReceiptBottomSheet({
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (ctx) {
+      final colorScheme = Theme.of(ctx).colorScheme;
+      final statusColor = isPaid
+          ? AppTheme.getSemanticSuccess(ctx)
+          : AppTheme.getSemanticWarning(ctx);
+      final depositStatusText = switch (booking.depositStatus) {
+        'pending' => 'Chờ nộp cọc',
+        'received' => 'Đã nộp cọc',
+        'refunded' => 'Đã hoàn cọc',
+        'forfeited' => 'Đã khấu trừ',
+        _ => 'Chưa phát sinh',
+      };
       return SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         child: Column(
@@ -42,7 +52,7 @@ void showAmenityReceiptBottomSheet({
               height: 4,
               width: 40,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -53,21 +63,23 @@ void showAmenityReceiptBottomSheet({
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: (isPaid ? AppTheme.success : AppTheme.warning)
-                        .withValues(alpha: 0.12),
+                    color: statusColor.withValues(alpha: 0.14),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     isPaid ? Icons.verified : Icons.hourglass_top,
-                    color: isPaid ? AppTheme.success : AppTheme.warning,
+                    color: statusColor,
                     size: 28,
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  isPaid ? 'BIÊN NHẬN THANH TOÁN' : 'XÁC NHẬN CHUYỂN KHOẢN',
-                  style: ctx.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    isPaid ? 'BIÊN NHẬN THANH TOÁN' : 'XÁC NHẬN CHUYỂN KHOẢN',
+                    style: ctx.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -78,7 +90,7 @@ void showAmenityReceiptBottomSheet({
                   ? 'Giao dịch đã được Ban Quản Lý phê duyệt hợp lệ'
                   : 'Đã gửi yêu cầu đối soát, BQL đang kiểm tra giao dịch',
               style: ctx.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -86,27 +98,25 @@ void showAmenityReceiptBottomSheet({
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark
-                    ? Theme.of(context).colorScheme.surface
-                    : AppTheme.background,
+                color: colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isDark ? Colors.white12 : Colors.grey.shade200,
+                  color: colorScheme.outlineVariant,
                 ),
               ),
               child: Column(
                 children: [
                   _buildReceiptRow(
-                    context,
+                    ctx,
                     label: 'Mã biên nhận',
                     value: receiptCode,
                     copyValue: receiptCode,
                   ),
                   const Divider(height: 16),
                   _buildReceiptRow(
-                    context,
+                    ctx,
                     label: 'Căn hộ',
-                    value: booking.apartmentCode ?? 'N/A',
+                    value: booking.apartmentCode ?? 'Chưa cập nhật',
                   ),
                   const Divider(height: 16),
                   _buildReceiptRow(
@@ -147,10 +157,10 @@ void showAmenityReceiptBottomSheet({
                   if (booking.depositAmount > 0) ...[
                     const Divider(height: 16),
                     _buildReceiptRow(
-                      context,
+                      ctx,
                       label: 'Tiền đặt cọc',
                       value:
-                          '${currencyFormat.format(booking.depositAmount)} (${booking.depositStatus})',
+                          '${currencyFormat.format(booking.depositAmount)} ($depositStatusText)',
                     ),
                   ],
                   const Divider(height: 16),
@@ -230,12 +240,15 @@ Widget _buildReceiptRow(
   String? copyValue,
   bool isHighlight = false,
 }) {
+  final colorScheme = Theme.of(context).colorScheme;
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(
-        label,
-        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+      Flexible(
+        child: Text(
+          label,
+          style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
       ),
       const SizedBox(width: 8),
       Flexible(
@@ -247,7 +260,7 @@ Widget _buildReceiptRow(
                 value,
                 style: (isHighlight ? context.titleMedium : context.bodySmall)?.copyWith(
                   fontWeight: isHighlight ? FontWeight.w900 : FontWeight.w600,
-                  color: isHighlight ? AppTheme.primary : null,
+                  color: isHighlight ? colorScheme.primary : colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.end,
                 overflow: TextOverflow.ellipsis,
@@ -255,15 +268,15 @@ Widget _buildReceiptRow(
             ),
             if (copyValue != null) ...[
               const SizedBox(width: 4),
-              InkWell(
-                onTap: () {
+              IconButton(
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                padding: EdgeInsets.zero,
+                tooltip: 'Sao chép',
+                onPressed: () {
                   Clipboard.setData(ClipboardData(text: copyValue));
                   AppSnackBar.showSuccess(context, 'Đã sao chép: $copyValue');
                 },
-                child: const Padding(
-                  padding: EdgeInsets.all(2),
-                  child: Icon(Icons.copy, size: 14, color: AppTheme.primary),
-                ),
+                icon: Icon(Icons.copy, size: 16, color: colorScheme.primary),
               ),
             ],
           ],

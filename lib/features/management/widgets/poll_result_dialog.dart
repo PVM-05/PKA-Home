@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/providers/community_provider.dart';
 
@@ -15,6 +16,9 @@ class PollResultDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final resultsAsync = ref.watch(pollResultsProvider(poll.id));
     final numberFormat = NumberFormat('#,##0.0');
+    final colorScheme = Theme.of(context).colorScheme;
+    final successColor = AppTheme.getSemanticSuccess(context);
+    final warningColor = AppTheme.getSemanticWarning(context);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -39,7 +43,7 @@ class PollResultDialog extends ConsumerWidget {
                           style: context.bodyMedium?.copyWith(
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
+                            color: colorScheme.primary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -53,6 +57,7 @@ class PollResultDialog extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
+                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -64,9 +69,10 @@ class PollResultDialog extends ConsumerWidget {
               Expanded(
                 child: resultsAsync.when(
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (err, _) => Center(child: Text('Lỗi khi tải kết quả: $err')),
+                  error: (err, _) => Center(child: Text(formatErrorMessage(err))),
                   data: (result) {
                     final isByArea = result.isByArea;
+                    final statusColor = result.isQuorumMet ? successColor : warningColor;
 
                     return SingleChildScrollView(
                       child: Column(
@@ -76,26 +82,29 @@ class PollResultDialog extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: result.isQuorumMet
-                                  ? Colors.green.withValues(alpha: 0.08)
-                                  : Colors.orange.withValues(alpha: 0.08),
+                              color: statusColor.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: result.isQuorumMet
-                                    ? Colors.green.withValues(alpha: 0.3)
-                                    : Colors.orange.withValues(alpha: 0.3),
+                                color: statusColor.withValues(alpha: 0.35),
                               ),
                             ),
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                Wrap(
+                                  alignment: WrapAlignment.spaceBetween,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 8,
+                                  runSpacing: 6,
                                   children: [
-                                    Text('Tỷ lệ tham gia biểu quyết:', style: context.bodyMedium?.copyWith(color: Colors.grey)),
+                                    Text(
+                                      'Tỷ lệ tham gia biểu quyết:',
+                                      style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                                    ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                       decoration: BoxDecoration(
-                                        color: result.isQuorumMet ? Colors.green : Colors.orange,
+                                        color: result.isQuorumMet ? AppTheme.textSuccess : AppTheme.textWarning,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
@@ -113,7 +122,7 @@ class PollResultDialog extends ConsumerWidget {
                                       '${result.participationRate}%',
                                       style: context.headlineLarge?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: result.isQuorumMet ? Colors.green[800] : Colors.orange[800],
+                                        color: statusColor,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
@@ -122,7 +131,7 @@ class PollResultDialog extends ConsumerWidget {
                                         isByArea
                                             ? '(${numberFormat.format(result.votedArea)} m² / ${numberFormat.format(result.totalArea)} m²)'
                                             : '(${result.votedApartments} / ${result.totalApartments} căn hộ)',
-                                        style: context.bodyMedium?.copyWith(color: Colors.grey[700]),
+                                        style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                                       ),
                                     ),
                                   ],
@@ -130,8 +139,8 @@ class PollResultDialog extends ConsumerWidget {
                                 const SizedBox(height: 8),
                                 LinearProgressIndicator(
                                   value: (result.participationRate / 100.0).clamp(0.0, 1.0),
-                                  backgroundColor: Colors.grey[200],
-                                  color: result.isQuorumMet ? Colors.green : Colors.orange,
+                                  backgroundColor: colorScheme.surfaceContainerHighest,
+                                  color: statusColor,
                                   minHeight: 6,
                                   borderRadius: BorderRadius.circular(3),
                                 ),
@@ -152,9 +161,9 @@ class PollResultDialog extends ConsumerWidget {
                               margin: const EdgeInsets.only(bottom: 12),
                               padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: Colors.grey[50],
+                                color: colorScheme.surfaceContainerLow,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.grey[200]!),
+                                border: Border.all(color: colorScheme.outlineVariant),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,30 +174,39 @@ class PollResultDialog extends ConsumerWidget {
                                       Expanded(
                                         child: Text(
                                           opt.optionText,
-                                          style: context.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                                          style: context.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: colorScheme.onSurface,
+                                          ),
                                         ),
                                       ),
+                                      const SizedBox(width: 8),
                                       Text(
                                         '${opt.percentOfVotes}%',
-                                        style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                        style: context.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: colorScheme.primary,
+                                        ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),
                                   LinearProgressIndicator(
                                     value: (opt.percentOfVotes / 100.0).clamp(0.0, 1.0),
-                                    backgroundColor: Colors.grey[200],
-                                    color: AppTheme.primary,
+                                    backgroundColor: colorScheme.surfaceContainerHighest,
+                                    color: colorScheme.primary,
                                     minHeight: 8,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   const SizedBox(height: 6),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  Wrap(
+                                    alignment: WrapAlignment.spaceBetween,
+                                    spacing: 8,
+                                    runSpacing: 2,
                                     children: [
-                                      Text('${opt.voteCount} phiếu ủng hộ', style: context.bodySmall?.copyWith(color: Colors.grey[600])),
+                                      Text('${opt.voteCount} phiếu ủng hộ', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                                       if (isByArea)
-                                        Text('${numberFormat.format(opt.voteWeightSum)} m²', style: context.bodySmall?.copyWith(color: Colors.grey[600])),
+                                        Text('${numberFormat.format(opt.voteWeightSum)} m²', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                                     ],
                                   ),
                                 ],
@@ -206,6 +224,7 @@ class PollResultDialog extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),

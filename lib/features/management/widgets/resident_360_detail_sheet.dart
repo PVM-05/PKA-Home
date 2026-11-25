@@ -232,10 +232,15 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
 
     final roles = [
       {'value': 'admin', 'label': 'Quản trị viên'},
+      {'value': 'management', 'label': 'Ban quản lý'},
       {'value': 'accountant', 'label': 'Kế toán'},
       {'value': 'technician', 'label': 'Kỹ thuật viên'},
+      {'value': 'staff', 'label': 'Nhân viên vận hành'},
       {'value': 'resident', 'label': 'Cư dân'},
     ];
+    if (!roles.any((r) => r['value'] == selectedRole)) {
+      selectedRole = 'resident';
+    }
 
     showDialog(
       context: context,
@@ -267,12 +272,16 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   initialValue: selectedRole,
+                  isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Vai trò hệ thống',
                     prefixIcon: Icon(Icons.shield_outlined),
                   ),
                   items: roles
-                      .map((r) => DropdownMenuItem(value: r['value'], child: Text(r['label']!)))
+                      .map((r) => DropdownMenuItem(
+                            value: r['value'],
+                            child: Text(r['label']!, overflow: TextOverflow.ellipsis),
+                          ))
                       .toList(),
                   onChanged: (val) {
                     if (val != null) setDlg(() => selectedRole = val);
@@ -391,13 +400,14 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final activeAptLink = _selectedApartmentLink;
     final aptId = activeAptLink?.apartmentId ?? _resident.apartment?.id;
     final aptCode = activeAptLink?.apartmentCode ?? _resident.apartment?.code;
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -410,7 +420,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -426,10 +436,10 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                   children: [
                     CircleAvatar(
                       radius: 28,
-                      backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                      backgroundColor: colorScheme.primary.withValues(alpha: 0.15),
                       child: Text(
                         _resident.fullName.isNotEmpty ? _resident.fullName[0].toUpperCase() : '?',
-                        style: context.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                        style: context.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -446,7 +456,8 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.edit_outlined, size: 20, color: AppTheme.primary),
+                                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                                icon: Icon(Icons.edit_outlined, size: 20, color: colorScheme.primary),
                                 tooltip: 'Chỉnh sửa hồ sơ',
                                 onPressed: _isActionLoading ? null : _showEditProfileDialog,
                               ),
@@ -454,12 +465,12 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                           ),
                           Text(
                             'Căn hộ: ${aptCode ?? "Chưa gán"} • ${_resident.roleDisplayName}',
-                            style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                            style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Email: ${_resident.email ?? "Chưa có"} • SĐT: ${_resident.phone ?? "Chưa có"}',
-                            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                            style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
                           const SizedBox(height: 6),
                           Wrap(
@@ -469,27 +480,29 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primary.withValues(alpha: 0.1),
+                                  color: colorScheme.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   _resident.roleDisplayName,
-                                  style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.primary),
+                                  style: context.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.primary),
                                 ),
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: (_resident.isActive && !_resident.isLocked)
-                                      ? AppTheme.success.withValues(alpha: 0.1)
-                                      : AppTheme.error.withValues(alpha: 0.1),
+                                      ? AppTheme.getSemanticSuccess(context).withValues(alpha: 0.12)
+                                      : colorScheme.error.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   _resident.statusDisplayName,
                                   style: context.bodySmall?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: (_resident.isActive && !_resident.isLocked) ? AppTheme.success : AppTheme.error,
+                                    color: (_resident.isActive && !_resident.isLocked)
+                                        ? AppTheme.getSemanticSuccess(context)
+                                        : colorScheme.error,
                                   ),
                                 ),
                               ),
@@ -510,8 +523,15 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                     OutlinedButton.icon(
                       onPressed: _isActionLoading ? null : _toggleLock,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: _resident.isLocked ? AppTheme.success : AppTheme.warning,
-                        side: BorderSide(color: _resident.isLocked ? AppTheme.success : AppTheme.warning),
+                        foregroundColor: _resident.isLocked
+                            ? AppTheme.getSemanticSuccess(context)
+                            : AppTheme.getSemanticWarning(context),
+                        side: BorderSide(
+                          color: _resident.isLocked
+                              ? AppTheme.getSemanticSuccess(context)
+                              : AppTheme.getSemanticWarning(context),
+                        ),
+                        minimumSize: const Size(0, 48),
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
                       icon: Icon(_resident.isLocked ? Icons.lock_open : Icons.lock_outline, size: 16),
@@ -520,8 +540,15 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                     OutlinedButton.icon(
                       onPressed: _isActionLoading ? null : _toggleActiveStatus,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: _resident.isActive ? AppTheme.error : AppTheme.success,
-                        side: BorderSide(color: _resident.isActive ? AppTheme.error : AppTheme.success),
+                        foregroundColor: _resident.isActive
+                            ? colorScheme.error
+                            : AppTheme.getSemanticSuccess(context),
+                        side: BorderSide(
+                          color: _resident.isActive
+                              ? colorScheme.error
+                              : AppTheme.getSemanticSuccess(context),
+                        ),
+                        minimumSize: const Size(0, 48),
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
                       icon: Icon(_resident.isActive ? Icons.person_off_outlined : Icons.person_outline, size: 16),
@@ -531,12 +558,13 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                       OutlinedButton.icon(
                         onPressed: _isActionLoading ? null : _sendPasswordReset,
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.primary,
-                          side: const BorderSide(color: AppTheme.primary),
+                          foregroundColor: colorScheme.primary,
+                          side: BorderSide(color: colorScheme.primary),
+                          minimumSize: const Size(0, 48),
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                         ),
                         icon: const Icon(Icons.lock_reset, size: 16),
-                        label: Text('Gửi link đổi mật khẩu', style: context.bodySmall),
+                        label: Text('Gửi liên kết đổi mật khẩu', style: context.bodySmall),
                       ),
                   ],
                 ),
@@ -552,7 +580,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: Row(
                 children: [
-                  const Icon(Icons.apartment, size: 16, color: AppTheme.primary),
+                  Icon(Icons.apartment, size: 16, color: colorScheme.primary),
                   const SizedBox(width: 6),
                   Text('Căn hộ liên kết:', style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(width: 8),
@@ -569,9 +597,9 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                               label: Text('${a.apartmentCode} (${a.relationRoleDisplayName})'),
                               labelStyle: context.labelSmall?.copyWith(
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Colors.white : AppTheme.textPrimary,
+                                color: isSelected ? Colors.white : colorScheme.onSurface,
                               ),
-                              backgroundColor: Colors.grey.shade100,
+                              backgroundColor: colorScheme.surfaceContainerLow,
                               selectedColor: AppTheme.primary,
                               onSelected: (_) {
                                 setState(() => _selectedApartmentId = a.apartmentId);
@@ -580,7 +608,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                                   ? null
                                   : InkWell(
                                       onTap: () => _unlinkApartment(a.apartmentId, a.apartmentCode),
-                                      child: const Icon(Icons.close, size: 14, color: Colors.grey),
+                                      child: Icon(Icons.close, size: 14, color: colorScheme.onSurfaceVariant),
                                     ),
                             ),
                           );
@@ -598,6 +626,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton.icon(
+                      style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
@@ -623,9 +652,9 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
           // Tabs: Phương tiện | Hóa đơn | Dịch vụ
           TabBar(
             controller: _tabController,
-            labelColor: AppTheme.primary,
-            unselectedLabelColor: AppTheme.textSecondary,
-            indicatorColor: AppTheme.primary,
+            labelColor: colorScheme.primary,
+            unselectedLabelColor: colorScheme.onSurfaceVariant,
+            indicatorColor: colorScheme.primary,
             tabs: const [
               Tab(icon: Icon(Icons.two_wheeler_outlined), text: 'Phương tiện'),
               Tab(icon: Icon(Icons.receipt_long_outlined), text: 'Hóa đơn'),
@@ -693,7 +722,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('$plate', style: context.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-                        Text('Loại: $type • Căn hộ: ${aptCode ?? "N/A"}', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                        Text('Loại: $type • Căn hộ: ${aptCode ?? "Chưa gán"}', style: context.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),
                   ),
@@ -844,7 +873,7 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('$amenityName', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('Lịch: $slot ngày $date • Căn hộ ${aptCode ?? "N/A"}', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                        Text('Lịch: $slot ngày $date • Căn hộ ${aptCode ?? "Chưa gán"}', style: context.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),
                   ),

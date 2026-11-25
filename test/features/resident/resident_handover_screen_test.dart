@@ -50,7 +50,7 @@ void main() {
 
       expect(find.text('Biên bản bàn giao căn hộ'), findsOneWidget);
       expect(find.text('HO-202611-00001'), findsOneWidget);
-      expect(find.text('Nhận nhà (Move-in)'), findsOneWidget);
+      expect(find.text('Nhận nhà'), findsOneWidget);
       expect(find.text('Chờ cư dân ký'), findsOneWidget);
     });
 

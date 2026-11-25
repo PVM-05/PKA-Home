@@ -134,9 +134,10 @@ class ResidentHomeServicesSection extends StatelessWidget {
           ),
         ];
 
-        final isNarrow = constraints.maxWidth < 360;
-        final childAspectRatio =
-            isNarrow ? 2.1 : (constraints.maxWidth < 600 ? 2.4 : 3.0);
+        final isSingleCol = constraints.maxWidth < 340;
+        final colCount = isSingleCol ? 1 : 2;
+        final spacing = 8.0;
+        final itemWidth = (constraints.maxWidth - (colCount - 1) * spacing) / colCount;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,14 +149,17 @@ class ResidentHomeServicesSection extends StatelessWidget {
               ),
             ),
             AppSpacing.h8,
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: childAspectRatio,
-              children: items,
+            Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: items
+                  .map(
+                    (card) => SizedBox(
+                      width: itemWidth,
+                      child: card,
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         )

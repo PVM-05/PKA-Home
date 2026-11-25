@@ -133,10 +133,11 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -157,7 +158,7 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -168,10 +169,10 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.person_add_alt_1_rounded, color: AppTheme.primary),
+                    child: Icon(Icons.person_add_alt_1_rounded, color: colorScheme.primary),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -222,6 +223,7 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
                   Expanded(
                     flex: 2,
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _vehicleType,
                       decoration: const InputDecoration(
                         labelText: 'Phương tiện',
@@ -261,6 +263,7 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
                   Expanded(
                     flex: 2,
                     child: DropdownButtonFormField<int>(
+                      isExpanded: true,
                       initialValue: _visitorCount,
                       decoration: const InputDecoration(
                         labelText: 'Số khách',
@@ -282,6 +285,7 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
 
               // Mục đích viếng thăm
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: _purpose,
                 decoration: const InputDecoration(
                   labelText: 'Mục đích viếng thăm',
@@ -302,14 +306,14 @@ class _CreateVisitorPassSheetState extends ConsumerState<CreateVisitorPassSheet>
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.grey[300]!),
+                  side: BorderSide(color: colorScheme.outlineVariant),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                leading: const Icon(Icons.event_available_outlined, color: AppTheme.primary),
-                title: Text('Dự kiến đến', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                leading: Icon(Icons.event_available_outlined, color: colorScheme.primary),
+                title: Text('Dự kiến đến', style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                 subtitle: Text(
                   _dateFormat.format(_expectedArrival),
-                  style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: context.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                 ),
                 trailing: const Icon(Icons.edit_calendar_outlined),
                 onTap: () => _pickDateTime(isArrival: true),

@@ -13,6 +13,7 @@ import '../../../core/widgets/font_size_sheet.dart';
 import '../../../core/widgets/pdpl_consent_dialog.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/resident_apartment_provider.dart';
+import '../../auth/widgets/mfa_setup_dialog.dart';
 import '../widgets/profile/resident_profile_apartments_section.dart';
 import '../widgets/profile/resident_profile_dialogs.dart';
 
@@ -177,11 +178,11 @@ class ResidentProfileScreen extends ConsumerWidget {
 
                     const SizedBox(height: 28),
 
-                    // Quyền riêng tư & Dữ liệu (PDPL)
+                    // Quyền riêng tư & Dữ liệu cá nhân
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Quyền riêng tư & Dữ liệu (PDPL)',
+                        'Quyền riêng tư & Dữ liệu cá nhân',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -214,7 +215,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                               colorScheme.primary,
                             ),
                             title: const Text(
-                              'Thỏa thuận xử lý dữ liệu (Consent)',
+                              'Thỏa thuận xử lý dữ liệu',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: const Text(
@@ -237,7 +238,7 @@ class ResidentProfileScreen extends ConsumerWidget {
                               colorScheme.primary,
                             ),
                             title: const Text(
-                              'Xuất dữ liệu cá nhân (Data Portability)',
+                              'Xuất sao kê dữ liệu cá nhân',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: const Text(
@@ -299,6 +300,17 @@ class ResidentProfileScreen extends ConsumerWidget {
                             title: const Text('Đổi mật khẩu'),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () => context.push(AppRoutes.changePassword),
+                          ),
+                          const Divider(height: 1),
+                          ListTile(
+                            leading: Icon(
+                              Icons.security_outlined,
+                              color: colorScheme.primary,
+                            ),
+                            title: const Text('Xác thực 2 yếu tố'),
+                            subtitle: const Text('Bảo vệ tài khoản bằng mã xác thực 6 số'),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () => showMfaManagementDialog(context, ref),
                           ),
                           const Divider(height: 1),
                           ListTile(

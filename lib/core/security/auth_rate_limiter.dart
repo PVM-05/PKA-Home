@@ -164,6 +164,15 @@ class AuthRateLimiter {
       );
     }
 
+    // Tự động mở khóa và đặt lại bộ đếm khi thời gian khóa đã trôi qua
+    if (record.lockedUntil != null && DateTime.now().isAfter(record.lockedUntil!)) {
+      _otpVerifyRecords.remove(key);
+      return RateLimitResult(
+        isAllowed: true,
+        remainingAttempts: maxOtpVerifyAttempts,
+      );
+    }
+
     final remaining = max(0, maxOtpVerifyAttempts - record.attempts);
     return RateLimitResult(
       isAllowed: remaining > 0,

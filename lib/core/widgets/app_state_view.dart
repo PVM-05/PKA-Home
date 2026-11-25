@@ -85,6 +85,7 @@ class AppStateView<T> extends StatelessWidget {
     if (skeletonBuilder != null) {
       return skeletonBuilder!(context);
     }
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Center(
       child: Padding(
@@ -93,19 +94,19 @@ class AppStateView<T> extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
+            SizedBox(
               width: 38,
               height: 38,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                color: AppTheme.primary,
+                color: colorScheme.primary,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               'Đang tải dữ liệu...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -116,6 +117,7 @@ class AppStateView<T> extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -126,17 +128,17 @@ class AppStateView<T> extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
+                color: colorScheme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(emptyIcon, size: 48, color: AppTheme.primary),
+              child: Icon(emptyIcon, size: 48, color: colorScheme.primary),
             ),
             const SizedBox(height: 20),
             Text(
               emptyMessage,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 15,
                 height: 1.4,
               ),
@@ -149,7 +151,8 @@ class AppStateView<T> extends StatelessWidget {
               const SizedBox(height: 24),
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppTheme.primary),
+                  side: BorderSide(color: colorScheme.primary),
+                  minimumSize: const Size(0, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -171,6 +174,8 @@ class AppStateView<T> extends StatelessWidget {
 
   Widget _buildErrorState(BuildContext context, Object error) {
     final cleanError = NetworkErrorHandler.getMessage(error);
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
 
     return Center(
       child: Padding(
@@ -182,20 +187,20 @@ class AppStateView<T> extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppTheme.error.withValues(alpha: 0.08),
+                color: errorColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.error_outline_rounded,
                 size: 48,
-                color: AppTheme.error,
+                color: errorColor,
               ),
             ),
             const SizedBox(height: 20),
             Text(
               'Không thể tải dữ liệu',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppTheme.error,
+                color: errorColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -204,7 +209,7 @@ class AppStateView<T> extends StatelessWidget {
               cleanError,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 14,
                 height: 1.4,
               ),
@@ -215,6 +220,7 @@ class AppStateView<T> extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

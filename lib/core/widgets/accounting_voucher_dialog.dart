@@ -30,6 +30,8 @@ class AccountingVoucherDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final errorColor = AppTheme.getSemanticError(context);
     final isIncome = transaction.isIncome;
     final title = isIncome ? 'PHIẾU THU' : 'PHIẾU CHI';
     final formCode = isIncome ? 'Mẫu 01-TT theo Thông tư 200/2014/TT-BTC' : 'Mẫu 02-TT theo Thông tư 200/2014/TT-BTC';
@@ -53,26 +55,30 @@ class AccountingVoucherDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
+                    flex: 5,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           buildingName.toUpperCase(),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: colorScheme.onSurface),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'Quỹ bảo trì 2% sở hữu chung',
-                          style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    formCode,
-                    style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
-                    textAlign: TextAlign.right,
+                  Flexible(
+                    flex: 4,
+                    child: Text(
+                      formCode,
+                      style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                 ],
               ),
@@ -87,19 +93,19 @@ class AccountingVoucherDialog extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: isIncome ? AppTheme.primary : AppTheme.error,
+                        color: isIncome ? colorScheme.primary : errorColor,
                         letterSpacing: 1.2,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Số: ${transaction.voucherNumber}',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: colorScheme.onSurface),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Ngày ${transaction.createdAt.day} tháng ${transaction.createdAt.month} năm ${transaction.createdAt.year}',
-                      style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.textSecondary),
+                      style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -107,39 +113,44 @@ class AccountingVoucherDialog extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Nội dung chi tiết
-              _buildInfoRow(personLabel, transaction.recipientOrPayer, isBold: true),
+              _buildInfoRow(context, personLabel, transaction.recipientOrPayer, isBold: true),
               const SizedBox(height: 8),
-              _buildInfoRow('Lý do:', transaction.description),
+              _buildInfoRow(context, 'Lý do:', transaction.description),
               const SizedBox(height: 8),
               _buildInfoRow(
+                context,
                 'Số tiền:',
                 currencyFormat.format(transaction.amount),
                 isBold: true,
-                valueColor: isIncome ? AppTheme.primary : AppTheme.error,
+                valueColor: isIncome ? colorScheme.primary : errorColor,
               ),
               const SizedBox(height: 8),
-              _buildInfoRow('Viết bằng chữ:', amountWords, isItalic: true),
+              _buildInfoRow(context, 'Viết bằng chữ:', amountWords, isItalic: true),
               const SizedBox(height: 8),
-              _buildInfoRow('Kèm theo chứng từ gốc:', transaction.referenceType ?? 'Phiếu nghiệm thu kỹ thuật'),
+              _buildInfoRow(context, 'Kèm theo chứng từ gốc:', transaction.referenceType ?? 'Phiếu nghiệm thu kỹ thuật'),
               const SizedBox(height: 24),
 
               // Chữ ký 4 bên
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildSignBox('Giám đốc BQL', 'Ký và ghi rõ họ tên'),
-                  _buildSignBox('Kế toán trưởng', 'Ký và ghi rõ họ tên'),
-                  _buildSignBox('Người lập phiếu', 'Ký và ghi rõ họ tên'),
-                  _buildSignBox(isIncome ? 'Người nộp tiền' : 'Người nhận tiền', 'Ký và ghi rõ họ tên'),
+                  _buildSignBox(context, 'Giám đốc BQL', 'Ký và ghi rõ họ tên'),
+                  _buildSignBox(context, 'Kế toán trưởng', 'Ký và ghi rõ họ tên'),
+                  _buildSignBox(context, 'Người lập phiếu', 'Ký và ghi rõ họ tên'),
+                  _buildSignBox(context, isIncome ? 'Người nộp tiền' : 'Người nhận tiền', 'Ký và ghi rõ họ tên'),
                 ],
               ),
               const SizedBox(height: 24),
 
               // Nút hành động
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
                     icon: const Icon(Icons.print_outlined, size: 18),
                     label: const Text('In chứng từ'),
                     onPressed: () {
@@ -148,8 +159,8 @@ class AccountingVoucherDialog extends StatelessWidget {
                       );
                     },
                   ),
-                  const SizedBox(width: 8),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('Đóng'),
                   ),
@@ -162,22 +173,25 @@ class AccountingVoucherDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {bool isBold = false, bool isItalic = false, Color? valueColor}) {
+  Widget _buildInfoRow(BuildContext context, String label, String value, {bool isBold = false, bool isItalic = false, Color? valueColor}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 150,
-          child: Text(label, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+        Flexible(
+          flex: 4,
+          child: Text(label, style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
         ),
+        const SizedBox(width: 8),
         Expanded(
+          flex: 6,
           child: Text(
             value,
             style: TextStyle(
               fontSize: 13,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
-              color: valueColor ?? AppTheme.textPrimary,
+              color: valueColor ?? colorScheme.onSurface,
             ),
           ),
         ),
@@ -185,13 +199,14 @@ class AccountingVoucherDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildSignBox(String title, String subtitle) {
+  Widget _buildSignBox(BuildContext context, String title, String subtitle) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: Column(
         children: [
-          Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colorScheme.onSurface), textAlign: TextAlign.center),
           const SizedBox(height: 2),
-          Text(subtitle, style: const TextStyle(fontSize: 9, fontStyle: FontStyle.italic, color: AppTheme.textSecondary), textAlign: TextAlign.center),
+          Text(subtitle, style: TextStyle(fontSize: 9, fontStyle: FontStyle.italic, color: colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
           const SizedBox(height: 40),
         ],
       ),

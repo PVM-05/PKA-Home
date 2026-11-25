@@ -177,9 +177,10 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
           .read(managementRepositoryProvider)
           .fetchAssignableStaff();
 
-      String? selectedStaffId =
-          issue.assignedStaffId ??
-          (staffList.isNotEmpty ? staffList.first['id'] as String? : null);
+      final validStaffIds = staffList.map((s) => s['id']).toSet();
+      String? selectedStaffId = validStaffIds.contains(issue.assignedStaffId)
+          ? issue.assignedStaffId
+          : (staffList.isNotEmpty ? staffList.first['id'] : null);
 
       if (!mounted) return;
 
@@ -215,13 +216,17 @@ class _IssueManagementScreenState extends ConsumerState<IssueManagementScreen> {
                     else
                       DropdownButtonFormField<String>(
                         initialValue: selectedStaffId,
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           prefixIcon: Icon(Icons.person_outline),
                         ),
                         items: staffList.map((s) {
                           return DropdownMenuItem<String>(
                             value: s['id'],
-                            child: Text(s['name']!),
+                            child: Text(
+                              s['name']!,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           );
                         }).toList(),
                         onChanged: (val) {

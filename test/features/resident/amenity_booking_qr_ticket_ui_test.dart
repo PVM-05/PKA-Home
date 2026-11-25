@@ -165,7 +165,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 5. Kiểm tra Hộp thoại Vé điện tử QR Code
-    expect(find.text('Vé Điện Tử Check-in'), findsOneWidget);
+    expect(find.text('Vé Điện Tử Tiện Ích'), findsOneWidget);
     expect(find.textContaining('TK-BBQ-987654321'), findsOneWidget);
     expect(find.textContaining('Căn hộ: A0110'), findsOneWidget);
 

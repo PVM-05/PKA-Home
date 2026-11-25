@@ -237,7 +237,7 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                                       Text(
                                         'Vị trí: ${widget.equipment!.location} (${widget.equipment!.building})',
                                         style: context.bodySmall?.copyWith(
-                                          color: AppTheme.textSecondary,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                     ],
@@ -249,12 +249,16 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                         else if (widget.equipmentList != null && widget.equipmentList!.isNotEmpty)
                           DropdownButtonFormField<String>(
                             initialValue: _selectedEquipmentId,
+                            isExpanded: true,
                             decoration: const InputDecoration(labelText: 'Thiết bị cần bảo trì *'),
                             items: widget.equipmentList!
                                 .map(
                                   (eq) => DropdownMenuItem(
                                     value: eq.id,
-                                    child: Text('${eq.code} - ${eq.name} (${eq.building})'),
+                                    child: Text(
+                                      '${eq.code} - ${eq.name} (${eq.building})',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 )
                                 .toList(),
@@ -278,12 +282,16 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                             Expanded(
                               child: DropdownButtonFormField<String>(
                                 initialValue: _taskType,
+                                isExpanded: true,
                                 decoration: const InputDecoration(labelText: 'Loại bảo trì'),
                                 items: _taskTypes
                                     .map(
                                       (t) => DropdownMenuItem(
                                         value: t['value'],
-                                        child: Text(t['label']!),
+                                        child: Text(
+                                          t['label']!,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     )
                                     .toList(),

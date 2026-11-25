@@ -285,20 +285,22 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppTheme.warningBackground,
+                  color: AppTheme.getSemanticWarning(context).withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppTheme.warningBorder),
+                  border: Border.all(
+                    color: AppTheme.getSemanticWarning(context).withValues(alpha: 0.35),
+                  ),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: AppTheme.warningText, size: 18),
-                    SizedBox(width: 8),
+                    Icon(Icons.info_outline, color: AppTheme.getSemanticWarning(context), size: 18),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Lưu ý Ban Quản lý: Mọi khoản chi từ quỹ bảo trì phải có biên bản nghiệm thu kỹ thuật và hóa đơn VAT hợp pháp.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppTheme.warningText,
+                          color: AppTheme.getSemanticWarning(context),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -311,6 +313,7 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -335,10 +338,14 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
     required String content,
     Color color = AppTheme.primary,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final effectiveColor = color == AppTheme.error
+        ? AppTheme.getSemanticError(context)
+        : colorScheme.primary;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: color),
+        Icon(icon, size: 18, color: effectiveColor),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -349,15 +356,15 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: color == AppTheme.error ? AppTheme.error : AppTheme.textPrimary,
+                  color: color == AppTheme.error ? effectiveColor : colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 content,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.35,
                 ),
               ),

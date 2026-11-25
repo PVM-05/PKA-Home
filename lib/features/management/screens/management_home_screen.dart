@@ -32,6 +32,7 @@ import '../widgets/home/management_urgent_work_section.dart';
 import '../widgets/management_theme_mode_sheet.dart';
 import '../widgets/revenue_trend_chart.dart';
 import '../widgets/role_onboarding_dialog.dart';
+import '../../auth/widgets/mfa_setup_dialog.dart';
 import 'accounting_web_workstation_screen.dart';
 import 'invoice_management_screen.dart';
 import 'issue_management_screen.dart';
@@ -84,7 +85,6 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) {
-        final colorScheme = Theme.of(ctx).colorScheme;
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: AppRadius.r16),
           title: const Text('Đăng xuất'),
@@ -98,7 +98,7 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.textError,
-                foregroundColor: colorScheme.onError,
+                foregroundColor: Colors.white,
                 minimumSize: const Size(0, 48),
               ),
               onPressed: () {
@@ -495,6 +495,8 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                   onSelected: (value) {
                     if (value == 'password') {
                       context.push(AppRoutes.changePassword);
+                    } else if (value == 'mfa') {
+                      showMfaManagementDialog(context, ref);
                     } else if (value == 'fontSize') {
                       showFontSizeBottomSheet(context, ref);
                     } else if (value == 'theme') {
@@ -518,6 +520,20 @@ class _ManagementHomeScreenState extends ConsumerState<ManagementHomeScreen> {
                             ),
                             AppSpacing.w8,
                             const Text('Cỡ chữ hiển thị'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'mfa',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.security_outlined,
+                              size: 20,
+                              color: cs.primary,
+                            ),
+                            AppSpacing.w8,
+                            const Text('Xác thực 2 yếu tố'),
                           ],
                         ),
                       ),

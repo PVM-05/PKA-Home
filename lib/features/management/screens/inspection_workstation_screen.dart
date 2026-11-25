@@ -450,8 +450,8 @@ class _InspectionWorkstationScreenState
                     ),
                     Text(
                       _handoverType == 'move_in'
-                          ? 'Nhận nhà (Move-in)'
-                          : 'Trả nhà (Move-out)',
+                          ? 'Nhận nhà'
+                          : 'Trả nhà',
                       style: context.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -475,11 +475,11 @@ class _InspectionWorkstationScreenState
             items: const [
               DropdownMenuItem(
                 value: 'move_in',
-                child: Text('Nhận nhà (Move-in)'),
+                child: Text('Nhận nhà'),
               ),
               DropdownMenuItem(
                 value: 'move_out',
-                child: Text('Trả nhà (Move-out)'),
+                child: Text('Trả nhà'),
               ),
             ],
             onChanged: _effectiveReadOnly

@@ -92,21 +92,22 @@ class RoleGuard extends ConsumerWidget {
               Text(
                 'Bạn không có quyền truy cập chức năng "${permission.name}".',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppTheme.textSecondary),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 8),
               Text(
                 'Vai trò hiện tại: ${user?.roleDisplayName ?? "Chưa xác định"}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: AppTheme.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 24),
               if (Navigator.canPop(context))
                 ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Quay lại'),

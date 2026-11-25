@@ -219,8 +219,8 @@ void main() {
         tokenField, 'PKA-TICKET:TK-BBQ-987654321:A0110:16:00 - 18:00');
     await tester.pumpAndSettle();
 
-    // Bấm nút "Xác nhận Check-in"
-    final confirmCheckInBtn = find.text('Xác nhận Check-in');
+    // Bấm nút "Xác nhận vào cửa"
+    final confirmCheckInBtn = find.text('Xác nhận vào cửa');
     expect(confirmCheckInBtn, findsOneWidget);
     await tester.tap(confirmCheckInBtn);
     await tester.pumpAndSettle();

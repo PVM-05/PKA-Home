@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/excel_export_helper.dart';
 import '../../../data/models/resident_activation_model.dart';
 import '../../../data/providers/building_provider.dart';
@@ -37,6 +38,7 @@ class _ResidentActivationManagementSheetState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final activeBuilding = ref.watch(activeBuildingProvider).value;
     final buildingId =
         activeBuilding?.id ?? BuildingRepository.kDefaultCanonicalBuildingId;
@@ -48,11 +50,10 @@ class _ResidentActivationManagementSheetState
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
+        return Material(
+          color: colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
               // Thanh kéo drag handle
@@ -62,7 +63,7 @@ class _ResidentActivationManagementSheetState
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -76,12 +77,12 @@ class _ResidentActivationManagementSheetState
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        color: colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.key_rounded,
-                        color: AppTheme.primary,
+                        color: colorScheme.primary,
                         size: 24,
                       ),
                     ),
@@ -99,15 +100,16 @@ class _ResidentActivationManagementSheetState
                           Text(
                             'Phát hành mã bàn giao căn hộ cho cư dân mới',
                             style: context.bodySmall?.copyWith(
-                              color: AppTheme.textSecondary,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.maybePop(context),
                     ),
                   ],
                 ),
@@ -124,8 +126,9 @@ class _ResidentActivationManagementSheetState
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'Lỗi khi tải danh sách: $e',
-                        style: const TextStyle(color: AppTheme.error),
+                        formatErrorMessage(e),
+                        style: TextStyle(color: colorScheme.error),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
@@ -162,38 +165,36 @@ class _ResidentActivationManagementSheetState
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                           child: Column(
                             children: [
-                              // Thống kê nhanh 4 ô
-                              Row(
+                              // Thống kê nhanh tự động xuống dòng trên màn hình hẹp
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
                                 children: [
                                   _buildStatCard(
                                     'Đã kích hoạt',
                                     '$activatedCount',
-                                    AppTheme.success,
+                                    AppTheme.getSemanticSuccess(context),
                                     Icons.verified,
                                   ),
-                                  const SizedBox(width: 6),
                                   _buildStatCard(
                                     'Chờ kích hoạt',
                                     '$pendingCount',
-                                    Colors.orange,
+                                    AppTheme.getSemanticWarning(context),
                                     Icons.pending_actions,
                                   ),
-                                  const SizedBox(width: 6),
                                   _buildStatCard(
                                     'Chưa cấp mã',
                                     '$unassignedCount',
-                                    Colors.blue,
+                                    colorScheme.primary,
                                     Icons.person_add_outlined,
                                   ),
-                                  if (lockedOrRevokedCount > 0) ...[
-                                    const SizedBox(width: 6),
+                                  if (lockedOrRevokedCount > 0)
                                     _buildStatCard(
                                       'Khóa/Thu hồi',
                                       '$lockedOrRevokedCount',
-                                      AppTheme.error,
+                                      colorScheme.error,
                                       Icons.lock_person_outlined,
                                     ),
-                                  ],
                                 ],
                               ),
                               const SizedBox(height: 12),
@@ -219,41 +220,44 @@ class _ResidentActivationManagementSheetState
                               const SizedBox(height: 12),
 
                               // Nút hành động BQL
-                              Row(
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
                                 children: [
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppTheme.primary,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 10,
-                                        ),
+                                  ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppTheme.primary,
+                                      foregroundColor: Colors.white,
+                                      minimumSize: const Size(0, 48),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 10,
                                       ),
-                                      icon: _isGenerating
-                                          ? const SizedBox(
-                                              width: 16,
-                                              height: 16,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : const Icon(Icons.auto_fix_high, size: 18),
-                                      label: Text(
-                                        'Tạo mã cho cư dân mới',
-                                        style: context.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      onPressed: _isGenerating
-                                          ? null
-                                          : () => _handleGenerateCodes(buildingId),
                                     ),
+                                    icon: _isGenerating
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Icon(Icons.auto_fix_high, size: 18),
+                                    label: Text(
+                                      'Tạo mã cho cư dân mới',
+                                      style: context.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    onPressed: _isGenerating
+                                        ? null
+                                        : () => _handleGenerateCodes(buildingId),
                                   ),
-                                  const SizedBox(width: 8),
                                   OutlinedButton.icon(
                                     style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size(0, 48),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
                                         vertical: 10,
@@ -277,11 +281,11 @@ class _ResidentActivationManagementSheetState
                         // Danh sách hiển thị
                         Expanded(
                           child: filtered.isEmpty
-                              ? const Center(
+                              ? Center(
                                   child: Text(
                                     'Không có cư dân nào phù hợp tìm kiếm',
                                     style: TextStyle(
-                                      color: AppTheme.textSecondary,
+                                      color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 )
@@ -315,64 +319,62 @@ class _ResidentActivationManagementSheetState
     Color color,
     IconData icon,
   ) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  count,
-                  style: context.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+    return Container(
+      constraints: const BoxConstraints(minWidth: 130),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                count,
+                style: context.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
                 ),
-                Text(
-                  label,
-                  style: context.labelSmall?.copyWith(
-                    color: color.withValues(alpha: 0.9),
-                  ),
+              ),
+              Text(
+                label,
+                style: context.labelSmall?.copyWith(
+                  color: color,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildActivationTile(ResidentActivationModel item, String buildingId) {
+    final colorScheme = Theme.of(context).colorScheme;
     final hasCode = item.activationCode.isNotEmpty;
     final isActivated = item.isActive;
 
-    Color statusBgColor = Colors.blue.withValues(alpha: 0.08);
-    Color statusTextColor = Colors.blue.shade700;
+    Color statusBgColor = colorScheme.primary.withValues(alpha: 0.12);
+    Color statusTextColor = colorScheme.primary;
 
     if (item.isLocked) {
-      statusBgColor = AppTheme.error.withValues(alpha: 0.12);
-      statusTextColor = AppTheme.error;
+      statusBgColor = colorScheme.error.withValues(alpha: 0.12);
+      statusTextColor = colorScheme.error;
     } else if (item.isRevoked) {
-      statusBgColor = Colors.grey.shade200;
-      statusTextColor = Colors.grey.shade700;
+      statusBgColor = colorScheme.surfaceContainerHighest;
+      statusTextColor = colorScheme.onSurfaceVariant;
     } else if (isActivated) {
-      statusBgColor = AppTheme.success.withValues(alpha: 0.12);
-      statusTextColor = AppTheme.success;
-    } else if (item.status == 'otp_sent') {
-      statusBgColor = Colors.amber.withValues(alpha: 0.15);
-      statusTextColor = Colors.amber.shade900;
-    } else if (hasCode) {
-      statusBgColor = Colors.orange.withValues(alpha: 0.12);
-      statusTextColor = Colors.orange.shade800;
+      statusBgColor = AppTheme.getSemanticSuccess(context).withValues(alpha: 0.12);
+      statusTextColor = AppTheme.getSemanticSuccess(context);
+    } else if (item.status == 'otp_sent' || hasCode) {
+      statusBgColor = AppTheme.getSemanticWarning(context).withValues(alpha: 0.14);
+      statusTextColor = AppTheme.getSemanticWarning(context);
     }
 
     return Row(
@@ -383,7 +385,7 @@ class _ResidentActivationManagementSheetState
           width: 60,
           padding: const EdgeInsets.symmetric(vertical: 6),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.1),
+            color: colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
@@ -391,7 +393,7 @@ class _ResidentActivationManagementSheetState
             item.apartmentCode,
             style: context.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AppTheme.primary,
+              color: colorScheme.primary,
             ),
           ),
         ),
@@ -435,7 +437,7 @@ class _ResidentActivationManagementSheetState
               Text(
                 'SĐT: ${item.phone} • ${item.relationRoleText}',
                 style: context.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               if (hasCode && !isActivated && !item.isRevoked) ...[
@@ -446,10 +448,14 @@ class _ResidentActivationManagementSheetState
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: item.isLocked ? Colors.red.shade50 : Colors.grey.shade100,
+                    color: item.isLocked
+                        ? colorScheme.error.withValues(alpha: 0.1)
+                        : colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: item.isLocked ? Colors.red.shade200 : Colors.grey.shade300,
+                      color: item.isLocked
+                          ? colorScheme.error.withValues(alpha: 0.35)
+                          : colorScheme.outlineVariant,
                     ),
                   ),
                   child: Row(
@@ -458,7 +464,7 @@ class _ResidentActivationManagementSheetState
                       Icon(
                         item.isLocked ? Icons.lock : Icons.key,
                         size: 14,
-                        color: item.isLocked ? AppTheme.error : AppTheme.primary,
+                        color: item.isLocked ? colorScheme.error : colorScheme.primary,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -466,7 +472,7 @@ class _ResidentActivationManagementSheetState
                         style: context.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
-                          color: item.isLocked ? AppTheme.error : AppTheme.primary,
+                          color: item.isLocked ? colorScheme.error : colorScheme.primary,
                         ),
                       ),
                     ],
@@ -480,7 +486,7 @@ class _ResidentActivationManagementSheetState
         // Action Buttons Menu
         if (!isActivated) ...[
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, size: 20, color: AppTheme.textSecondary),
+            icon: Icon(Icons.more_vert, size: 20, color: colorScheme.onSurfaceVariant),
             tooltip: 'Tùy chọn thao tác',
             onSelected: (val) {
               if (val == 'copy_message') {

@@ -50,11 +50,12 @@ class _CreateApartmentInvitationSheetState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -66,10 +67,10 @@ class _CreateApartmentInvitationSheetState
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    color: colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.qr_code_2_rounded, color: AppTheme.primary, size: 24),
+                  child: Icon(Icons.qr_code_2_rounded, color: colorScheme.primary, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -82,12 +83,13 @@ class _CreateApartmentInvitationSheetState
                       ),
                       Text(
                         'Mời cư dân / người thuê kích hoạt tự phục vụ',
-                        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                        style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -128,6 +130,7 @@ class _CreateApartmentInvitationSheetState
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
                 initialValue: _selectedHours,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -155,6 +158,7 @@ class _CreateApartmentInvitationSheetState
                 label: const Text('Tạo Mã Mời & Mã QR'),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppTheme.primary,
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
@@ -168,7 +172,7 @@ class _CreateApartmentInvitationSheetState
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppTheme.border),
+                        border: Border.all(color: colorScheme.outlineVariant),
                       ),
                       child: QrImageView(
                         data: 'https://vivona.vn/invite?code=${_createdInvite!['invite_code']}',
@@ -179,7 +183,7 @@ class _CreateApartmentInvitationSheetState
                     const SizedBox(height: 12),
                     Text(
                       'MÃ KÍCH HOẠT',
-                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary, letterSpacing: 1.2),
+                      style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant, letterSpacing: 1.2),
                     ),
                     const SizedBox(height: 4),
                     SelectableText(
@@ -187,14 +191,14 @@ class _CreateApartmentInvitationSheetState
                       style: context.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3,
-                        color: AppTheme.primary,
+                        color: colorScheme.primary,
                         fontFamily: 'monospace',
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Hiệu lực: $_selectedHours giờ • Vai trò: ${_selectedRole == 'tenant' ? 'Người thuê' : 'Thành viên'}',
-                      style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                      style: context.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -205,6 +209,7 @@ class _CreateApartmentInvitationSheetState
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: _createdInvite!['invite_code'] ?? ''));
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -226,8 +231,11 @@ class _CreateApartmentInvitationSheetState
                         );
                       },
                       icon: const Icon(Icons.share_outlined, size: 18),
-                      label: const Text('Sao chép link'),
-                      style: FilledButton.styleFrom(backgroundColor: AppTheme.primary),
+                      label: const Text('Sao chép liên kết'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        minimumSize: const Size(0, 48),
+                      ),
                     ),
                   ),
                 ],

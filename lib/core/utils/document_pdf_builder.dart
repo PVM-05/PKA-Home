@@ -33,7 +33,7 @@ class _PdfContext {
 class DocumentPdfBuilder {
   static const String defaultBuildingName = 'BAN QUẢN LÝ CHUNG CƯ VIVONA';
   static const String defaultBuildingAddress =
-      'Khu Đô Thị Sáng Tạo PKA, TP. Hà Nội';
+      'Hệ thống Quản lý Vận hành Tòa nhà Vivona';
   static const String defaultHotline = '1900 8888 - 0987 654 321';
   static const String defaultBankBin = '';
   static const String defaultBankName = '';
@@ -835,7 +835,7 @@ class DocumentPdfBuilder {
                               crossAxisAlignment: pw.CrossAxisAlignment.center,
                               children: [
                                 pw.Text(
-                                  ctx.t('★ BAN QUẢN LÝ CHUNG CƯ VIVONA ★'),
+                                  ctx.t('BAN QUẢN LÝ CHUNG CƯ VIVONA'),
                                   style: pw.TextStyle(
                                     fontSize: 8,
                                     fontWeight: pw.FontWeight.bold,

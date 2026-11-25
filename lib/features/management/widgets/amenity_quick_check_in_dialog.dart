@@ -38,8 +38,8 @@ void showAmenityQuickCheckInDialog({
               key: const Key('qr_token_input_field'),
               controller: codeController,
               decoration: const InputDecoration(
-                labelText: 'Mã đặt chỗ (Booking ID)',
-                hintText: 'Nhập UUID hoặc mã đặt chỗ / Token QR',
+                labelText: 'Mã đặt chỗ',
+                hintText: 'Nhập mã đặt chỗ hoặc mã vé điện tử',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.confirmation_number_outlined),
               ),
@@ -49,20 +49,22 @@ void showAmenityQuickCheckInDialog({
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
           onPressed: () => Navigator.pop(ctx),
           child: const Text('Đóng'),
         ),
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
+            minimumSize: const Size(0, 48),
             backgroundColor: AppStatusColors.paid,
             foregroundColor: Colors.white,
           ),
           icon: const Icon(Icons.check, size: 16),
-          label: const Text('Xác nhận Check-in'),
+          label: const Text('Xác nhận vào cửa'),
           onPressed: () async {
             String token = codeController.text.trim();
             if (token.isEmpty) return;
-            if (token.startsWith('PKA-TICKET:')) {
+            if (token.startsWith('VIVONA-TICKET:') || token.startsWith('PKA-TICKET:')) {
               final parts = token.split(':');
               if (parts.length >= 2) {
                 token = parts[1];

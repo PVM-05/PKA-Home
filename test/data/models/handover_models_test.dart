@@ -92,7 +92,7 @@ void main() {
       expect(handover.isMoveIn, isFalse);
       expect(handover.isPendingResident, isTrue);
       expect(handover.isConfirmed, isFalse);
-      expect(handover.handoverTypeDisplayName, 'Trả nhà (Move-out)');
+      expect(handover.handoverTypeDisplayName, 'Trả nhà');
       expect(handover.statusDisplayName, 'Chờ cư dân ký');
       expect(handover.depositRefundCalculated, 8500000.0);
 

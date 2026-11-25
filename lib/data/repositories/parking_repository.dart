@@ -124,8 +124,6 @@ class ParkingRepository {
 
         final updateData = <String, dynamic>{
           'status': 'occupied',
-          'license_plate': licensePlate,
-          'apartment_code': apartmentCode,
           'updated_at': DateTime.now().toIso8601String(),
         };
 
@@ -137,7 +135,8 @@ class ParkingRepository {
 
         if (isRealApartment) {
           updateData['assigned_apartment_id'] = apartmentId;
-          updateData['apartment_id'] = apartmentId;
+        } else {
+          updateData['assigned_apartment_id'] = null;
         }
 
         await _supabase
@@ -201,10 +200,10 @@ class ParkingRepository {
       '0',
     );
     final ticketCode = 'TKT-${DateFormat('yyyyMM').format(now)}-$codeSuffix';
-    final qrPayload = 'PKAPARKING:$ticketCode:$licensePlate';
+    final qrPayload = 'VIVONAPARKING:$ticketCode:$licensePlate';
 
     final ticket = VisitorParkingTicketModel(
-      id: 'tkt-${now.millisecondsSinceEpoch}',
+      id: '',
       buildingId: buildingId,
       ticketCode: ticketCode,
       licensePlate: licensePlate,

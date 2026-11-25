@@ -146,8 +146,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: AppTheme.surface,
+      color: colorScheme.surface,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -159,7 +160,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -169,19 +170,20 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               children: [
-                const Icon(Icons.calculate_outlined, color: AppTheme.primary, size: 26),
+                Icon(Icons.calculate_outlined, color: colorScheme.primary, size: 26),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Công cụ tính nhanh biểu phí',
                     style: context.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  icon: Icon(Icons.close, color: colorScheme.onSurfaceVariant),
                   onPressed: () => Navigator.of(context).maybePop(),
                   tooltip: 'Đóng',
                 ),
@@ -194,9 +196,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
             controller: _tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            labelColor: AppTheme.primary,
-            unselectedLabelColor: AppTheme.textSecondary,
-            indicatorColor: AppTheme.primary,
+            labelColor: colorScheme.primary,
+            unselectedLabelColor: colorScheme.onSurfaceVariant,
+            indicatorColor: colorScheme.primary,
             indicatorWeight: 3,
             labelStyle: context.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             tabs: const [
@@ -600,23 +602,27 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
   // --- REUSABLE WIDGETS ---
 
   Widget _buildInfoBanner(String message) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final warningColor = AppTheme.getSemanticWarning(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.warningBackground,
+        color: isDark ? warningColor.withValues(alpha: 0.14) : AppTheme.warningBackground,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.warningBorder),
+        border: Border.all(
+          color: isDark ? warningColor.withValues(alpha: 0.4) : AppTheme.warningBorder,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, color: AppTheme.warningText, size: 20),
+          Icon(Icons.info_outline, color: isDark ? warningColor : AppTheme.warningText, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
               style: context.bodyMedium?.copyWith(
-                color: AppTheme.warningText,
+                color: isDark ? Theme.of(context).colorScheme.onSurface : AppTheme.warningText,
                 height: 1.3,
               ),
             ),
@@ -632,10 +638,9 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
     required String subtitle,
     bool isError = false,
   }) {
-    final bgColor = isError
-        ? AppTheme.error.withValues(alpha: 0.1)
-        : AppTheme.primary.withValues(alpha: 0.1);
-    final primaryColor = isError ? AppTheme.error : AppTheme.primary;
+    final colorScheme = Theme.of(context).colorScheme;
+    final primaryColor = isError ? colorScheme.error : colorScheme.primary;
+    final bgColor = primaryColor.withValues(alpha: 0.1);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -666,7 +671,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
           Text(
             subtitle,
             style: context.bodyMedium?.copyWith(
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -675,11 +680,12 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
   }
 
   Widget _buildTierBreakdownTable(List<TierBreakdownItem> items, {required String unit}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade300),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: ListView.separated(
         shrinkWrap: true,
@@ -691,18 +697,18 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
           final isUsed = item.units > 0;
 
           return Container(
-            color: isUsed ? Colors.blue.withValues(alpha: 0.04) : Colors.transparent,
+            color: isUsed ? colorScheme.primary.withValues(alpha: 0.06) : Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: isUsed ? AppTheme.primary : Colors.grey.shade300,
+                  backgroundColor: isUsed ? AppTheme.primary : colorScheme.surfaceContainerHighest,
                   child: Text(
                     '${item.tier}',
                     style: context.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isUsed ? Colors.white : AppTheme.textSecondary,
+                      color: isUsed ? Colors.white : colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -715,14 +721,14 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
                         item.name,
                         style: context.bodyMedium?.copyWith(
                           fontWeight: isUsed ? FontWeight.bold : FontWeight.normal,
-                          color: isUsed ? AppTheme.textPrimary : AppTheme.textSecondary,
+                          color: isUsed ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Đơn giá: ${item.formattedRate}/$unit • Tính: ${item.formattedUnits} $unit',
                         style: context.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -732,7 +738,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
                   item.formattedAmount,
                   style: context.bodyMedium?.copyWith(
                     fontWeight: isUsed ? FontWeight.bold : FontWeight.normal,
-                    color: isUsed ? AppTheme.primary : AppTheme.textSecondary,
+                    color: isUsed ? colorScheme.primary : colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -749,18 +755,25 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
     bool isBold = false,
     Color? color,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+        Flexible(
+          child: Text(
+            label,
+            style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+          ),
         ),
-        Text(
-          value,
-          style: context.bodyMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-            color: color ?? AppTheme.textPrimary,
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: context.bodyMedium?.copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+              color: color ?? colorScheme.onSurface,
+            ),
           ),
         ),
       ],
