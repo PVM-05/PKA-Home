@@ -105,7 +105,7 @@ class ResidentInvoiceFeeItemCard extends StatelessWidget {
                       },
                       borderRadius: BorderRadius.circular(8),
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 36),
+                        constraints: const BoxConstraints(minHeight: 48),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,

@@ -62,14 +62,14 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                           title,
                           style: context.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : AppTheme.textPrimary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           result.policyName,
                           style: context.bodySmall?.copyWith(
-                            color: AppTheme.textSecondary,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -100,7 +100,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                         'TỶ LỆ PHÂN BỔ CÁC BẬC',
                         style: context.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           letterSpacing: 1.1,
                         ),
                       ),
@@ -114,7 +114,7 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                       'CHI TIẾT ĐỊNH MỨC & THÀNH TIỀN',
                       style: context.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         letterSpacing: 1.1,
                       ),
                     ),
@@ -194,7 +194,9 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
             children: [
               Text(
                 'Tổng tiêu thụ',
-                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                style: context.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -211,7 +213,9 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
             children: [
               Text(
                 'Tổng thành tiền',
-                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                style: context.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -314,15 +318,15 @@ class TieredFeeBreakdownDialog extends StatelessWidget {
                   style: context.bodyMedium?.copyWith(
                     fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
                     color: isActive
-                        ? (isDark ? Colors.white : AppTheme.textPrimary)
-                        : AppTheme.textSecondary,
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${item.formattedUnits} $unit x ${formatCurrency.format(item.rate)}',
                   style: context.bodySmall?.copyWith(
-                    color: isActive ? AppTheme.textSecondary : Colors.grey,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

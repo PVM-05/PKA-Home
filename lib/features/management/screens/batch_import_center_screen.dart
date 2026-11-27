@@ -85,7 +85,7 @@ class _BatchImportCenterScreenState
                       children: [
                         OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 44),
+                            minimumSize: const Size(0, 48),
                           ),
                           icon: const Icon(Icons.table_view),
                           label: const Text('Tải mẫu Excel (.xlsx)'),
@@ -105,7 +105,7 @@ class _BatchImportCenterScreenState
                         ),
                         OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 44),
+                            minimumSize: const Size(0, 48),
                           ),
                           icon: const Icon(Icons.description),
                           label: const Text('Tải mẫu CSV (.csv)'),
@@ -495,7 +495,7 @@ class _BatchImportCenterScreenState
                       style: OutlinedButton.styleFrom(
                         foregroundColor: errorColor,
                         side: BorderSide(color: errorColor),
-                        minimumSize: const Size(0, 44),
+                        minimumSize: const Size(0, 48),
                       ),
                       icon: const Icon(Icons.table_view_outlined),
                       label: const Text('Xuất file Excel lỗi'),
@@ -513,7 +513,7 @@ class _BatchImportCenterScreenState
                       style: OutlinedButton.styleFrom(
                         foregroundColor: errorColor,
                         side: BorderSide(color: errorColor),
-                        minimumSize: const Size(0, 44),
+                        minimumSize: const Size(0, 48),
                       ),
                       icon: const Icon(Icons.description_outlined),
                       label: const Text('Xuất file CSV lỗi'),
@@ -989,7 +989,7 @@ class _BatchImportCenterScreenState
             child: const Text('Hủy'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
             onPressed: () {
               Navigator.of(ctx).pop();
               notifier.executeImport(buildingId: buildingId);

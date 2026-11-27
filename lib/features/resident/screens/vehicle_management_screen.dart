@@ -267,16 +267,14 @@ class _VehicleManagementScreenState
       ),
       onPhotoView: vehicle.hasRegistrationImage
           ? () {
-              final repo = ref.read(vehicleRepositoryProvider);
-              final fullUrl = repo.getRegistrationImageUrl(
-                vehicle.registrationImageUrl,
-              );
-              if (fullUrl.isNotEmpty) {
+              final rawUrl = vehicle.registrationImageUrl?.trim() ?? '';
+              if (rawUrl.isNotEmpty) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => PhotoViewerScreen(
-                      imageUrls: [fullUrl],
+                      imageUrls: [rawUrl],
+                      defaultBucket: 'vehicle-docs',
                     ),
                   ),
                 );

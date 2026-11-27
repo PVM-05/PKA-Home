@@ -110,7 +110,7 @@ class AnnouncementDialogs {
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               icon: const Icon(Icons.send_rounded, size: 16),
               label: const Text('Xác nhận phát lại'),
@@ -212,7 +212,7 @@ class AnnouncementDialogs {
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               icon: const Icon(Icons.send_rounded, size: 16),
               label: const Text('Bắt đầu quét & gửi'),
@@ -261,7 +261,7 @@ class AnnouncementDialogs {
               style: ElevatedButton.styleFrom(
                 backgroundColor: errorColor,
                 foregroundColor: colorScheme.onError,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               onPressed: () async {
                 Navigator.pop(ctx);
@@ -670,7 +670,7 @@ class AnnouncementDialogs {
                 ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
+                    minimumSize: const Size(0, 48),
                   ),
                   icon: isSubmitting
                       ? SizedBox(
@@ -1271,7 +1271,7 @@ class AnnouncementDialogs {
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
+                    minimumSize: const Size(0, 48),
                   ),
                   onPressed: isSubmitting
                       ? null

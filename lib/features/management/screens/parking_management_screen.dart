@@ -242,7 +242,7 @@ class _ParkingManagementScreenState
                 Container(
                   padding: AppSpacing.p12,
                   decoration: BoxDecoration(
-                    color: AppTheme.surface,
+                    color: Colors.white,
                     borderRadius: AppRadius.r12,
                     border: Border.all(color: colorScheme.outlineVariant),
                   ),

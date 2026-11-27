@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 
 class NotificationCard extends StatelessWidget {
@@ -48,7 +47,7 @@ class NotificationCard extends StatelessWidget {
                   Text(
                     date,
                     style: context.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

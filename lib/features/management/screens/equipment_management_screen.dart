@@ -792,7 +792,7 @@ class _EquipmentManagementScreenState
                   if (task.status == 'pending') ...[
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, 44),
+                        minimumSize: const Size(0, 48),
                       ),
                       onPressed: () => _updateTaskStatus(task, 'cancelled'),
                       icon: const Icon(Icons.cancel_outlined, size: 16),
@@ -800,7 +800,7 @@ class _EquipmentManagementScreenState
                     ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(0, 44),
+                        minimumSize: const Size(0, 48),
                       ),
                       onPressed: () => _updateTaskStatus(task, 'in_progress'),
                       icon: const Icon(Icons.play_arrow, size: 16),
@@ -811,7 +811,7 @@ class _EquipmentManagementScreenState
                       style: ElevatedButton.styleFrom(
                         backgroundColor: successColor,
                         foregroundColor: colorScheme.onPrimary,
-                        minimumSize: const Size(0, 44),
+                        minimumSize: const Size(0, 48),
                       ),
                       onPressed: () => _updateTaskStatus(task, 'completed'),
                       icon: const Icon(Icons.check_circle_outline, size: 16),

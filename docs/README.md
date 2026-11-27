@@ -23,7 +23,7 @@ Toàn bộ tài liệu dự án được quy hoạch tinh gọn theo 7 nhóm chu
 | 11 | **Vận hành Chuỗi Nhà trọ / CHDV** | [BAN_GIAO_PHONG_TRO.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/BAN_GIAO_PHONG_TRO.md) | Hướng dẫn cấu hình biểu giá điện nước, hợp đồng thuê và bàn giao tài sản cho mô hình căn hộ dịch vụ. |
 | 12 | **Tích hợp Thanh toán SePay** | [SEPAY_INTEGRATION_GUIDE.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/SEPAY_INTEGRATION_GUIDE.md) | Hướng dẫn kết nối VietQR động Napas 247 & Webhook gạch nợ tự động 24/7 qua SePay. |
 | 13 | **Sổ tay Triển khai (Playbook)** | [DEPLOYMENT_PLAYBOOK.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/DEPLOYMENT_PLAYBOOK.md) | Quy trình đóng gói, cấu hình biến môi trường (`--dart-define`) và triển khai đa nền tảng. |
-| 14 | **Runbook Migration Production** | [MIGRATION_DEPLOYMENT_RUNBOOK.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/MIGRATION_DEPLOYMENT_RUNBOOK.md) | Quy trình chuẩn đẩy 49 SQL Migrations & 4 Edge Functions lên Supabase Production (`vpgimjyyechhuofjghsb`). |
+| 14 | **Runbook Migration Production** | [MIGRATION_DEPLOYMENT_RUNBOOK.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/MIGRATION_DEPLOYMENT_RUNBOOK.md) | Quy trình chuẩn đẩy 50 SQL Migrations & 4 Edge Functions lên Supabase Production (`vpgimjyyechhuofjghsb`). |
 | 15 | **Kiểm thử & Đảm bảo Chất lượng** | [TESTING_AND_QA.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/TESTING_AND_QA.md) | Chiến lược TDD, `1,372+` automated test cases (Unit, Widget, Integration, Security RLS) và CI Quality Gate. |
 | 16 | **Masterplan Thiết kế UI/UX** | [plans/2026-11-21-mobbin-redesign-masterplan.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/plans/2026-11-21-mobbin-redesign-masterplan.md) | Kiến trúc hệ thống giao diện 65/65 màn hình chuẩn SaaS 2026 (Zero Hardcoded Colors/FontSizes, Dark Mode, WCAG AA). |
 | 17 | **Pháp lý & Bảo vệ Dữ liệu (PDPL)** | [PRIVACY_POLICY.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/PRIVACY_POLICY.md) / [TERMS_OF_SERVICE.md](file:///c:/Users/ADMIN/StudioProjects/Vivona/docs/TERMS_OF_SERVICE.md) | Chính sách bảo vệ dữ liệu cá nhân theo Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP và Điều khoản sử dụng. |
@@ -32,7 +32,7 @@ Toàn bộ tài liệu dự án được quy hoạch tinh gọn theo 7 nhóm chu
 
 ## 2. Cấu Trúc Thư Mục `supabase/` Chuẩn Hóa
 
-- **`supabase/migrations/`**: Chứa **49 tệp migration chính thức** định dạng chuẩn 14 chữ số (`20261027010000_baseline_schema.sql` → `20261127020000_eliminate_legacy_global_rls_policies.sql`), đồng bộ 1:1 với bảng `supabase_migrations.schema_migrations` trên Production (`vpgimjyyechhuofjghsb`). Toàn bộ các bản nháp pre-baseline cũ (`migrations_archive`) đã được loại bỏ sau khi hợp nhất hoàn chỉnh vào baseline và các đợt hardening.
+- **`supabase/migrations/`**: Chứa **50 tệp migration chính thức** định dạng chuẩn 14 chữ số (`20261027010000_baseline_schema.sql` → `20261127030000_harden_security_definer_rpcs_and_storage_rls.sql`), đồng bộ 1:1 với bảng `supabase_migrations.schema_migrations` trên Production (`vpgimjyyechhuofjghsb`). Toàn bộ các bản nháp pre-baseline cũ (`migrations_archive`) đã được loại bỏ sau khi hợp nhất hoàn chỉnh vào baseline và các đợt hardening.
 - **`supabase/functions/`**: Chứa 4 Deno Edge Functions đang vận hành trên Production:
   - `create-vnpay-url`: Khởi tạo URL thanh toán VNPay 2.1.0 phía máy chủ (Server-Authoritative, Tenant-Scoped).
   - `vnpay-ipn`: Xác thực chữ ký số HMAC-SHA512 hằng thời gian và gạch nợ tự động chống Cross-Tenant Spoofing.

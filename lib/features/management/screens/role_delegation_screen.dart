@@ -86,7 +86,7 @@ class _RoleDelegationScreenState extends ConsumerState<RoleDelegationScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: errorColor,
                 foregroundColor: colorScheme.onError,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               onPressed: () async {
                 Navigator.of(ctx).pop();

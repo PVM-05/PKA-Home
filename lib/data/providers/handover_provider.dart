@@ -13,6 +13,7 @@ final apartmentAssetsProvider = FutureProvider.family<List<ApartmentAssetModel>,
 });
 
 final buildingHandoversProvider = FutureProvider.family<List<ApartmentHandoverModel>, String>((ref, buildingId) async {
+  if (buildingId.trim().isEmpty) return const [];
   final repo = ref.watch(handoverRepositoryProvider);
   return repo.fetchHandoversByBuilding(buildingId);
 });

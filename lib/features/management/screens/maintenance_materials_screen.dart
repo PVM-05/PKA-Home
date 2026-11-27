@@ -178,7 +178,7 @@ class _MaintenanceMaterialsScreenState
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
+                    minimumSize: const Size(0, 48),
                   ),
                   onPressed: !isValid || reasonCtrl.text.trim().isEmpty
                       ? null
@@ -748,7 +748,7 @@ class _MaintenanceMaterialsScreenState
                                             ),
                                             OutlinedButton.icon(
                                               style: OutlinedButton.styleFrom(
-                                                minimumSize: const Size(0, 40),
+                                                minimumSize: const Size(0, 48),
                                                 padding:
                                                     const EdgeInsets.symmetric(
                                                       horizontal: 10,

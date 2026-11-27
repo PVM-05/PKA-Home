@@ -2,7 +2,7 @@
 ## (Staging Trước, Production Sau — Chuẩn Bị Ngày 21/11/2026)
 
 > **MÃ NGUỒN KIỂM CHỨNG:** Nhánh `main` (Cập nhật ngày 27/11/2026)  
-> **QUY MÔ MIGRATION:** 49 tệp migration chính thức chuẩn hóa timestamp 14 chữ số (`20261027010000` → `20261127020000`, đã dọn bỏ hoàn toàn `migrations_archive` cũ)  
+> **QUY MÔ MIGRATION:** 50 tệp migration chính thức chuẩn hóa timestamp 14 chữ số (`20261027010000` → `20261127030000`, đã dọn bỏ hoàn toàn `migrations_archive` cũ)  
 > **DỰ ÁN ĐÍCH (REMOTE):** `Ứng Dụng Quản Lý Chung Cư` (Project Ref: `vpgimjyyechhuofjghsb`) — Environment: `production`  
 > **MỤC ĐÍCH TÀI LIỆU:** Cung cấp quy trình vận hành tiêu chuẩn (SOP Runbook) cho Kỹ sư Vận hành / Agent Triển khai đưa toàn bộ các bản vá bảo mật đa cơ sở (Multi-Tenant RLS), chống nâng quyền, toàn vẹn thanh toán SePay/VNPay, lưu vết PDPL 2026 và 4 Edge Functions lên cơ sở dữ liệu thực tế an toàn 100%.
 

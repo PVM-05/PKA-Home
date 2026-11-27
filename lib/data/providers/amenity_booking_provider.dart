@@ -3,6 +3,8 @@ import '../models/amenity_booking_model.dart';
 import '../models/amenity_maintenance_model.dart';
 import '../repositories/amenity_booking_repository.dart';
 import 'auth_provider.dart';
+import 'building_provider.dart';
+import 'management_provider.dart';
 
 final amenityBookingRepositoryProvider = Provider<AmenityBookingRepository>((ref) {
   return AmenityBookingRepository();
@@ -59,12 +61,24 @@ final myAmenityBookingsProvider = FutureProvider<List<AmenityBookingModel>>((ref
 /// Danh sách tất cả các lượt đặt chỗ (cho Ban quản lý theo dõi)
 final allAmenityBookingsProvider = FutureProvider<List<AmenityBookingModel>>((ref) async {
   final repo = ref.watch(amenityBookingRepositoryProvider);
-  return await repo.getAllBookings();
+  final buildingId = ref.watch(effectiveBuildingIdProvider);
+  final list = await repo.getAllBookings();
+  if (buildingId == null || buildingId.isEmpty) return list;
+
+  final apts = await ref.watch(apartmentsProvider.future);
+  final aptIds = apts.map((a) => a.id).toSet();
+  return list.where((b) => aptIds.contains(b.apartmentId)).toList();
 });
 
 /// Danh sách các ca tiện ích có tiền cọc chờ BQL nghiệm thu hiện trường
 final pendingAmenityInspectionsProvider = FutureProvider<List<AmenityBookingModel>>((ref) async {
   final repo = ref.watch(amenityBookingRepositoryProvider);
-  return await repo.getBookingsPendingInspection();
+  final buildingId = ref.watch(effectiveBuildingIdProvider);
+  final list = await repo.getBookingsPendingInspection();
+  if (buildingId == null || buildingId.isEmpty) return list;
+
+  final apts = await ref.watch(apartmentsProvider.future);
+  final aptIds = apts.map((a) => a.id).toSet();
+  return list.where((b) => aptIds.contains(b.apartmentId)).toList();
 });
 

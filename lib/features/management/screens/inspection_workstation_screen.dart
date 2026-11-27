@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,7 @@ import '../../../core/widgets/role_guard.dart';
 import '../../../core/widgets/signature_pad_dialog.dart';
 import '../../../data/models/apartment_handover_model.dart';
 import '../../../data/models/handover_item_model.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/handover_provider.dart';
 
 class InspectionWorkstationScreen extends ConsumerStatefulWidget {
@@ -52,6 +54,7 @@ class _InspectionWorkstationScreenState
   final Map<String, TextEditingController> _itemCostControllers = {};
 
   late String _handoverType;
+  late final String _draftHandoverId;
   List<HandoverItemModel> _items = [];
   Uint8List? _staffSignatureBytes;
   String? _existingStaffSigUrl;
@@ -59,12 +62,28 @@ class _InspectionWorkstationScreenState
   bool _isConfirmedOrCompleted = false;
   bool _isLoading = false;
 
+  static String _generateUuidV4() {
+    final rng = Random.secure();
+    final bytes = List<int>.generate(16, (_) => rng.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    String hex(int b) => b.toRadixString(16).padLeft(2, '0');
+    return '${hex(bytes[0])}${hex(bytes[1])}${hex(bytes[2])}${hex(bytes[3])}-'
+        '${hex(bytes[4])}${hex(bytes[5])}-'
+        '${hex(bytes[6])}${hex(bytes[7])}-'
+        '${hex(bytes[8])}${hex(bytes[9])}-'
+        '${bytes[10]}${hex(bytes[11])}${hex(bytes[12])}${hex(bytes[13])}${hex(bytes[14])}${hex(bytes[15])}';
+  }
+
+  String get _effectiveHandoverId => widget.existingHandoverId ?? _draftHandoverId;
+
   bool get _effectiveReadOnly => widget.isReadOnly || _isConfirmedOrCompleted;
 
   @override
   void initState() {
     super.initState();
     _handoverType = widget.initialType ?? 'move_in';
+    _draftHandoverId = widget.existingHandoverId ?? _generateUuidV4();
     _loadInitialData();
   }
 
@@ -117,8 +136,8 @@ class _InspectionWorkstationScreenState
       setState(() {
         _items = assets.map((a) {
           return HandoverItemModel(
-            id: 'item_${DateTime.now().microsecondsSinceEpoch}_${a.id}',
-            handoverId: widget.existingHandoverId ?? '',
+            id: _generateUuidV4(),
+            handoverId: _effectiveHandoverId,
             assetId: a.id,
             itemName: a.name,
             roomArea: a.roomArea,
@@ -198,11 +217,22 @@ class _InspectionWorkstationScreenState
       final elec = double.tryParse(elecStr) ?? 0.0;
       final water = double.tryParse(waterStr) ?? 0.0;
 
-      // P0-#2: Lấy auth.uid() thực tế và sinh mã biên bản chuẩn HO-YYYYMM-XXXXX
-      final currentUserId = SupabaseConfig.isConfigured
-          ? SupabaseConfig.client.auth.currentUser?.id
-          : null;
-      final conductedBy = currentUserId ?? 'staff-manager';
+      // Lấy auth.uid() thực tế và sinh mã biên bản chuẩn HO-YYYYMM-XXXXX
+      final authUserId = ref.read(authProvider).valueOrNull?.id;
+      final currentUserId = (authUserId != null && authUserId.isNotEmpty)
+          ? authUserId
+          : (SupabaseConfig.isConfigured
+              ? SupabaseConfig.client.auth.currentUser?.id
+              : null);
+      if (currentUserId == null || currentUserId.isEmpty) {
+        if (mounted) {
+          AppSnackBar.showWarning(
+            context,
+            'Phiên đăng nhập chưa sẵn sàng. Vui lòng đăng nhập lại trước khi ký biên bản.',
+          );
+        }
+        return;
+      }
 
       final dateStr = DateFormat('yyyyMM').format(DateTime.now());
       final randSuffix = (DateTime.now().millisecondsSinceEpoch % 100000)
@@ -211,15 +241,13 @@ class _InspectionWorkstationScreenState
       final reportCode = 'HO-$dateStr-$randSuffix';
 
       final handoverModel = ApartmentHandoverModel(
-        id:
-            widget.existingHandoverId ??
-            'ho_${DateTime.now().millisecondsSinceEpoch}',
+        id: _effectiveHandoverId,
         apartmentId: widget.apartmentId,
         buildingId: widget.buildingId,
         handoverType: _handoverType,
         reportCode: reportCode,
         handoverDate: DateTime.now(),
-        conductedBy: conductedBy,
+        conductedBy: currentUserId,
         initialElectricityReading: elec,
         initialWaterReading: water,
         depositHeld: depositHeld,
@@ -986,7 +1014,7 @@ class _InspectionWorkstationScreenState
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               onPressed: () {
                 final name = nameController.text.trim();
@@ -994,8 +1022,8 @@ class _InspectionWorkstationScreenState
                 setState(() {
                   _items.add(
                     HandoverItemModel(
-                      id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
-                      handoverId: widget.existingHandoverId ?? '',
+                      id: _generateUuidV4(),
+                      handoverId: _effectiveHandoverId,
                       itemName: name,
                       roomArea: area,
                       condition: 'good',

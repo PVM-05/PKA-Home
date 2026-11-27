@@ -23,12 +23,14 @@ class ManagementRecentTransactionsCard extends ConsumerWidget {
     return transactionsAsync.when(
       data: (transactions) {
         if (transactions.isEmpty) {
-          return const AppCard(
+          return AppCard(
             padding: AppSpacing.p16,
             child: Center(
               child: Text(
                 'Chưa có giao dịch thanh toán nào.',
-                style: TextStyle(color: AppTheme.textSecondary),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           );
@@ -68,7 +70,7 @@ class ManagementRecentTransactionsCard extends ConsumerWidget {
                   subtitle: Text(
                     '${tx.transactionCode} • ${DateFormat('dd/MM HH:mm').format(tx.createdAt)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
                   trailing: Text(

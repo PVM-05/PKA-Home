@@ -6,11 +6,13 @@ import 'app_storage_image.dart';
 class PhotoViewerScreen extends StatelessWidget {
   final List<String> imageUrls;
   final int initialIndex;
+  final String defaultBucket;
 
   const PhotoViewerScreen({
     super.key,
     required this.imageUrls,
     this.initialIndex = 0,
+    this.defaultBucket = 'issue-images',
   });
 
   @override
@@ -24,7 +26,10 @@ class PhotoViewerScreen extends StatelessWidget {
       ),
       extendBodyBehindAppBar: true,
       body: FutureBuilder<List<String>>(
-        future: AppStorageImage.resolveSignedUrlList(imageUrls),
+        future: AppStorageImage.resolveSignedUrlList(
+          imageUrls,
+          defaultBucket: defaultBucket,
+        ),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(

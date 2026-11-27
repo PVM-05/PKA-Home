@@ -429,7 +429,7 @@ class _CommunityManagementScreenState
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.onPrimary,
-                  minimumSize: const Size(0, 44),
+                  minimumSize: const Size(0, 48),
                   shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
                 ),
                 icon: const Icon(Icons.bar_chart_rounded, size: 18),
@@ -713,7 +713,7 @@ class _CommunityManagementScreenState
               label: const Text('Phản Hồi & Xử Lý'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: colorScheme.primary,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
                 shape: RoundedRectangleBorder(borderRadius: AppRadius.r8),
               ),
             ),

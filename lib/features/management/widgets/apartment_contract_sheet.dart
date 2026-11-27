@@ -31,7 +31,9 @@ class ApartmentContractSheet extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               'Hệ thống sẽ lưu vết lịch sử vĩnh viễn, chốt ngày chuyển đi và bảo toàn mọi hóa đơn cũ.',
-              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(
+                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 12),
             TextField(

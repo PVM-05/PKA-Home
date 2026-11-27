@@ -76,7 +76,7 @@ void showAmenityManagementReceiptSheet({
                   ? 'Giao dịch thanh toán dịch vụ tiện ích đã được Ban Quản Lý xác thực'
                   : 'Yêu cầu thanh toán đang chờ Ban Quản Lý đối soát hoặc thu tiền',
               style: context.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
+                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -84,9 +84,7 @@ void showAmenityManagementReceiptSheet({
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark
-                    ? Theme.of(context).colorScheme.surface
-                    : AppTheme.surface,
+                color: Theme.of(ctx).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isDark ? Colors.white12 : Colors.grey.shade200,
@@ -242,7 +240,9 @@ Widget _buildReceiptRow(
     children: [
       Text(
         label,
-        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+        style: context.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
       const SizedBox(width: 8),
       Flexible(

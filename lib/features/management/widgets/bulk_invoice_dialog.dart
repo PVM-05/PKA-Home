@@ -318,8 +318,10 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Kỳ: ${result.period} • Quét ${result.totalScanned} căn hộ (Dry-Run: Chưa ghi vào cơ sở dữ liệu)',
-                style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                'Kỳ: ${result.period} • Quét ${result.totalScanned} căn hộ (Kiểm tra nháp, chưa ghi cơ sở dữ liệu)',
+                style: context.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 14),
 
@@ -383,7 +385,12 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Tổng tiền dự thu (${'các căn hợp lệ'}):', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                        Text(
+                          'Tổng tiền dự thu (${'các căn hợp lệ'}):',
+                          style: context.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           _currencyFormat.format(result.totalEstimatedAmount),
@@ -488,8 +495,9 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
   }
 
   Widget _buildValidItemsList(List<ValidApartmentBillingItem> items) {
+    final secondaryColor = Theme.of(context).colorScheme.onSurfaceVariant;
     if (items.isEmpty) {
-      return Center(child: Text('Không có căn hộ nào đủ điều kiện tạo hóa đơn.', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)));
+      return Center(child: Text('Không có căn hộ nào đủ điều kiện tạo hóa đơn.', style: context.bodySmall?.copyWith(color: secondaryColor)));
     }
 
     return ListView.separated(
@@ -509,7 +517,7 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
                   const SizedBox(width: 6),
                   Text('Căn ${item.apartmentCode}', style: context.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(width: 6),
-                  Text('(${item.area} m²)', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                  Text('(${item.area} m²)', style: context.labelSmall?.copyWith(color: secondaryColor)),
                 ],
               ),
               Text(_currencyFormat.format(item.estimatedTotal), style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -557,7 +565,12 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(issue.typeDisplayName, style: context.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: color)),
-                    Text(issue.message, style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                    Text(
+                      issue.message,
+                      style: context.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
               ),

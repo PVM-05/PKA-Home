@@ -9,8 +9,22 @@ class _CachedUrl {
   bool get isValid => DateTime.now().isBefore(expiresAt);
 }
 
+/// Thông tin bucket và object path sau khi phân tích từ URL hoặc đường dẫn lưu trữ.
+class StorageObjectTarget {
+  final String bucket;
+  final String objectPath;
+
+  const StorageObjectTarget({
+    required this.bucket,
+    required this.objectPath,
+  });
+
+  String get cacheKey => '$bucket:$objectPath';
+}
+
 /// Widget hiển thị ảnh từ Supabase Storage thông minh:
 /// - Tự động nhận diện Object Path (vd: staffId/issueId/proof.jpg) hoặc URL công khai
+/// - Hỗ trợ đa bucket (issue-images, vehicle-docs, handover-docs)
 /// - Tự động sinh và làm mới Signed URL đối với private bucket
 /// - Có bộ nhớ đệm (cache) giúp tối ưu hiệu năng không gọi thừa API tạo Signed URL
 class AppStorageImage extends StatefulWidget {
@@ -21,6 +35,7 @@ class AppStorageImage extends StatefulWidget {
   final BorderRadius? borderRadius;
   final Widget? placeholder;
   final Widget? errorWidget;
+  final String defaultBucket;
 
   const AppStorageImage({
     super.key,
@@ -31,60 +46,132 @@ class AppStorageImage extends StatefulWidget {
     this.borderRadius,
     this.placeholder,
     this.errorWidget,
+    this.defaultBucket = 'issue-images',
   });
+
+  static const List<String> _knownBuckets = [
+    'issue-images',
+    'vehicle-docs',
+    'handover-docs',
+    'meter-readings',
+  ];
 
   static final Map<String, _CachedUrl> _cache = {};
 
-  /// Chuyển đổi một chuỗi image_url (có thể là object path hoặc URL) thành Signed URL dùng được
-  static Future<String> resolveSignedUrl(String urlOrPath, {int expiresInSeconds = 3600}) async {
+  /// Tách bucket và object path từ đường dẫn hoặc URL Supabase Storage.
+  /// Trả về null nếu là URL bên ngoài không thuộc các bucket được quản lý.
+  static StorageObjectTarget? parseStorageTarget(
+    String urlOrPath, {
+    String defaultBucket = 'issue-images',
+  }) {
     final trimmed = urlOrPath.trim();
-    if (trimmed.isEmpty) return '';
+    if (trimmed.isEmpty) return null;
 
-    // Nếu là URL bên ngoài (không thuộc issue-images, ví dụ ảnh placeholder)
-    if ((trimmed.startsWith('http://') || trimmed.startsWith('https://')) &&
-        !trimmed.contains('issue-images')) {
-      return trimmed;
-    }
-
-    // Trích xuất object path
-    String objectPath = trimmed;
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       try {
         final uri = Uri.parse(trimmed);
         final segments = uri.pathSegments;
-        final bucketIndex = segments.indexOf('issue-images');
-        if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
-          objectPath = segments.sublist(bucketIndex + 1).join('/');
+        for (final bucket in _knownBuckets) {
+          final bucketIndex = segments.indexOf(bucket);
+          if (bucketIndex != -1 && bucketIndex + 1 < segments.length) {
+            return StorageObjectTarget(
+              bucket: bucket,
+              objectPath: segments.sublist(bucketIndex + 1).join('/'),
+            );
+          }
         }
+        return null;
       } catch (_) {
-        return trimmed;
+        return null;
       }
     }
 
-    // Kiểm tra cache
-    final cached = _cache[objectPath];
+    final normalized = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
+    for (final bucket in _knownBuckets) {
+      final prefix = '$bucket/';
+      if (normalized.startsWith(prefix)) {
+        return StorageObjectTarget(
+          bucket: bucket,
+          objectPath: normalized.substring(prefix.length),
+        );
+      }
+    }
+
+    if (defaultBucket == 'issue-images' &&
+        (normalized.startsWith('signatures/') || normalized.startsWith('photos/'))) {
+      return StorageObjectTarget(
+        bucket: 'handover-docs',
+        objectPath: normalized,
+      );
+    }
+
+    return StorageObjectTarget(
+      bucket: defaultBucket,
+      objectPath: normalized,
+    );
+  }
+
+  /// Trả về Signed URL đã cache nếu còn hạn.
+  static String? getCachedSignedUrl(
+    String urlOrPath, {
+    String defaultBucket = 'issue-images',
+  }) {
+    final target = parseStorageTarget(urlOrPath, defaultBucket: defaultBucket);
+    if (target == null) return null;
+    final cached = _cache[target.cacheKey];
+    if (cached != null && cached.isValid) {
+      return cached.url;
+    }
+    return null;
+  }
+
+  /// Chuyển đổi một chuỗi image_url (có thể là object path hoặc URL) thành Signed URL dùng được
+  static Future<String> resolveSignedUrl(
+    String urlOrPath, {
+    int expiresInSeconds = 3600,
+    String defaultBucket = 'issue-images',
+  }) async {
+    final trimmed = urlOrPath.trim();
+    if (trimmed.isEmpty) return '';
+
+    final target = parseStorageTarget(trimmed, defaultBucket: defaultBucket);
+    if (target == null) {
+      return trimmed;
+    }
+
+    // Nếu đã là URL có sẵn token (đã sign) thì giữ nguyên
+    if ((trimmed.startsWith('http://') || trimmed.startsWith('https://')) &&
+        trimmed.contains('token=')) {
+      return trimmed;
+    }
+
+    final cached = _cache[target.cacheKey];
     if (cached != null && cached.isValid) {
       return cached.url;
     }
 
     try {
       final signedUrl = await Supabase.instance.client.storage
-          .from('issue-images')
-          .createSignedUrl(objectPath, expiresInSeconds);
-      _cache[objectPath] = _CachedUrl(
+          .from(target.bucket)
+          .createSignedUrl(target.objectPath, expiresInSeconds);
+      _cache[target.cacheKey] = _CachedUrl(
         signedUrl,
         DateTime.now().add(Duration(seconds: expiresInSeconds - 60)),
       );
       return signedUrl;
     } catch (_) {
-      // Fallback: nếu không tạo được signed URL, trả về chuỗi gốc
       return trimmed;
     }
   }
 
   /// Resolve danh sách URL phục vụ phóng to ảnh (PhotoViewerScreen)
-  static Future<List<String>> resolveSignedUrlList(List<String> list) async {
-    return Future.wait(list.map((item) => resolveSignedUrl(item)));
+  static Future<List<String>> resolveSignedUrlList(
+    List<String> list, {
+    String defaultBucket = 'issue-images',
+  }) async {
+    return Future.wait(
+      list.map((item) => resolveSignedUrl(item, defaultBucket: defaultBucket)),
+    );
   }
 
   @override
@@ -99,10 +186,12 @@ class _AppStorageImageState extends State<AppStorageImage> {
   @override
   void initState() {
     super.initState();
-    final trimmed = widget.imageUrl.trim();
-    final cached = AppStorageImage._cache[trimmed];
-    if (cached != null && cached.isValid) {
-      _resolvedUrl = cached.url;
+    final cachedUrl = AppStorageImage.getCachedSignedUrl(
+      widget.imageUrl,
+      defaultBucket: widget.defaultBucket,
+    );
+    if (cachedUrl != null) {
+      _resolvedUrl = cachedUrl;
       _isLoading = false;
     } else {
       _loadUrl();
@@ -112,12 +201,15 @@ class _AppStorageImageState extends State<AppStorageImage> {
   @override
   void didUpdateWidget(covariant AppStorageImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageUrl != widget.imageUrl) {
-      final trimmed = widget.imageUrl.trim();
-      final cached = AppStorageImage._cache[trimmed];
-      if (cached != null && cached.isValid) {
+    if (oldWidget.imageUrl != widget.imageUrl ||
+        oldWidget.defaultBucket != widget.defaultBucket) {
+      final cachedUrl = AppStorageImage.getCachedSignedUrl(
+        widget.imageUrl,
+        defaultBucket: widget.defaultBucket,
+      );
+      if (cachedUrl != null) {
         setState(() {
-          _resolvedUrl = cached.url;
+          _resolvedUrl = cachedUrl;
           _isLoading = false;
           _hasError = false;
         });
@@ -139,7 +231,10 @@ class _AppStorageImageState extends State<AppStorageImage> {
     }
 
     try {
-      final url = await AppStorageImage.resolveSignedUrl(widget.imageUrl);
+      final url = await AppStorageImage.resolveSignedUrl(
+        widget.imageUrl,
+        defaultBucket: widget.defaultBucket,
+      );
       if (mounted) {
         setState(() {
           _resolvedUrl = url;

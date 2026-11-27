@@ -176,7 +176,7 @@ class ResidentOnboardingDialog {
       decoration: BoxDecoration(
         color: isDark
             ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.25)
-            : AppTheme.background,
+            : Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark

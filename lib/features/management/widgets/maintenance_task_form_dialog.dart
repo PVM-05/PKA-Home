@@ -383,7 +383,9 @@ class _MaintenanceTaskFormDialogState extends ConsumerState<MaintenanceTaskFormD
                           ),
                           subtitle: Text(
                             'Hệ thống sẽ thông báo tới cư dân của tòa nhà khi bắt đầu bảo trì.',
-                            style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                            style: context.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                           ),
                           value: _affectsService,
                           onChanged: (val) => setState(() => _affectsService = val),

@@ -38,7 +38,9 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final statBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : AppTheme.background;
+    final statBgColor = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : theme.colorScheme.surfaceContainerLow;
 
     final fund = ref.watch(maintenanceFundProvider).valueOrNull;
 
@@ -95,7 +97,7 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
               IconButton(
                 icon: Icon(
                   _isExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: AppTheme.textSecondary,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: _isExpanded ? 'Thu gọn' : 'Xem chi tiết',
                 onPressed: () {
@@ -127,11 +129,11 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Số dư quỹ khả dụng hiện tại',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.textSecondary,
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -179,9 +181,9 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Tỷ lệ thu nộp',
-                        style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                        style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -207,9 +209,9 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Hình thức gửi',
-                        style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                        style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -237,9 +239,9 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Kiểm toán',
-                        style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                        style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 2),
                       const Text(

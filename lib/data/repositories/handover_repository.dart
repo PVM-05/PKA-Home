@@ -8,8 +8,15 @@ import '../models/handover_item_model.dart';
 
 class HandoverRepository {
   final SupabaseClient? _client;
+  static final RegExp _uuidPattern = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+  );
 
   HandoverRepository([this._client]);
+
+  static bool _isValidUuid(String? value) {
+    return value != null && _uuidPattern.hasMatch(value.trim());
+  }
 
   SupabaseClient get _supabase {
     final c = _client;
@@ -176,8 +183,14 @@ class HandoverRepository {
         final fileName = 'signatures/${handover.id}_staff_${DateTime.now().millisecondsSinceEpoch}.png';
         await _supabase.storage.from('handover-docs').uploadBinary(fileName, signatureBytes);
 
-        // 2. Chuẩn bị dữ liệu handover hoàn chỉnh
+        // 2. Chuẩn bị dữ liệu handover hoàn chỉnh, lọc trường UUID không hợp lệ
         final data = handover.toJson()..remove('items');
+        if (!_isValidUuid(data['id']?.toString())) {
+          data.remove('id');
+        }
+        if (!_isValidUuid(data['conducted_by']?.toString())) {
+          data.remove('conducted_by');
+        }
         data['staff_signature_url'] = fileName;
         data['staff_signed_at'] = DateTime.now().toIso8601String();
         data['status'] = 'pending_resident';
@@ -186,18 +199,29 @@ class HandoverRepository {
         }
 
         // 3. Upsert / Insert handover
-        final response = await _supabase.from('apartment_handovers').upsert(data).select().single();
+        final response = data.containsKey('id')
+            ? await _supabase.from('apartment_handovers').upsert(data).select().single()
+            : await _supabase.from('apartment_handovers').insert(data).select().single();
         final createdHandover = ApartmentHandoverModel.fromJson(Map<String, dynamic>.from(response as Map));
 
-        // 4. Insert handover items
+        // 4. Insert / Upsert handover items
         if (items.isNotEmpty) {
           final itemsData = items.map((item) {
             final itemMap = item.toJson();
             itemMap['handover_id'] = createdHandover.id;
+            if (!_isValidUuid(itemMap['id']?.toString())) {
+              itemMap.remove('id');
+            }
+            if (!_isValidUuid(itemMap['asset_id']?.toString())) {
+              itemMap.remove('asset_id');
+            }
             return itemMap;
           }).toList();
 
-          final itemsResp = await _supabase.from('handover_items').upsert(itemsData).select();
+          final hasAllIds = itemsData.every((m) => m.containsKey('id'));
+          final itemsResp = hasAllIds
+              ? await _supabase.from('handover_items').upsert(itemsData).select()
+              : await _supabase.from('handover_items').insert(itemsData).select();
           final createdItems = (itemsResp as List)
               .map((json) => HandoverItemModel.fromJson(Map<String, dynamic>.from(json as Map)))
               .toList();

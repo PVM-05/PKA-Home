@@ -17,6 +17,7 @@ import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/debt_risk_score_model.dart';
 import '../../../data/models/financial_aging_report_model.dart';
+import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/financial_report_provider.dart';
 import '../widgets/debt_risk_radar_tab.dart';
 import '../widgets/execute_dunning_dialog.dart';
@@ -78,6 +79,19 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
   }
 
   void _showReminderDialog(DebtorApartmentModel debtor, [String? buildingId]) {
+    final resolvedBuildingId = (buildingId != null && buildingId.isNotEmpty)
+        ? buildingId
+        : (ref.read(financialReportFilterProvider).buildingId ??
+            ref.read(effectiveBuildingIdProvider) ??
+            '');
+    if (resolvedBuildingId.isEmpty) {
+      AppSnackBar.showWarning(
+        context,
+        'Vui lòng chọn tòa nhà trước khi gửi thông báo nhắc nợ.',
+      );
+      return;
+    }
+
     final overdueDays = debtor.maxDaysOverdue;
     final recommendedTier = overdueDays > 45
         ? DunningTier.tier3
@@ -87,7 +101,7 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => ExecuteDunningDialog(
-        buildingId: buildingId ?? 'bld-default',
+        buildingId: resolvedBuildingId,
         apartmentId: debtor.apartmentId,
         apartmentCode: debtor.apartmentCode,
         ownerName: debtor.ownerName,
@@ -104,6 +118,8 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
     final reportAsync = ref.watch(financialAgingReportProvider);
     final filter = ref.watch(financialReportFilterProvider);
     final debtors = ref.watch(filteredDebtorsProvider);
+    final effectiveBuildingId =
+        filter.buildingId ?? ref.watch(effectiveBuildingIdProvider) ?? '';
 
     return RoleGuard(
       permission: AppPermissions.financialReport,
@@ -265,8 +281,8 @@ class _FinancialReportScreenState extends ConsumerState<FinancialReportScreen> {
               ),
               DebtRiskRadarTab(
                 buildingId: reportAsync.maybeWhen(
-                  data: (r) => r.filterBuildingId ?? 'bld-default',
-                  orElse: () => 'bld-default',
+                  data: (r) => r.filterBuildingId ?? effectiveBuildingId,
+                  orElse: () => effectiveBuildingId,
                 ),
               ),
             ],

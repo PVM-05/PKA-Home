@@ -26,7 +26,7 @@ class HandoverManagementScreen extends ConsumerStatefulWidget {
 
   const HandoverManagementScreen({
     super.key,
-    this.buildingId = 'bld-01',
+    this.buildingId = '',
   });
 
   @override
@@ -58,9 +58,12 @@ class _HandoverManagementScreenState
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final scopedBuildingId = ref.watch(effectiveBuildingIdProvider);
     final activeBuilding = ref.watch(activeBuildingProvider).valueOrNull;
     final effectiveBuildingId =
-        (activeBuilding?.id != null && activeBuilding!.id.isNotEmpty)
+        (scopedBuildingId != null && scopedBuildingId.isNotEmpty)
+        ? scopedBuildingId
+        : (activeBuilding?.id != null && activeBuilding!.id.isNotEmpty)
         ? activeBuilding.id
         : widget.buildingId;
     final handoversAsync = ref.watch(
@@ -548,7 +551,7 @@ class _HandoverManagementScreenState
                 ),
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
+                    minimumSize: const Size(0, 48),
                   ),
                   onPressed: () {
                     Navigator.of(context).push(
@@ -671,18 +674,20 @@ class _HandoverManagementScreenState
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               onPressed: () {
-                final aptId =
-                    selectedApartment?.id ??
-                    'apt-${fallbackCodeController.text.trim()}';
-                final aptCode =
-                    selectedApartment?.code ??
-                    fallbackCodeController.text.trim();
+                final aptId = selectedApartment?.id ?? '';
+                final aptCode = selectedApartment?.code ?? '';
                 final bldId =
                     selectedApartment?.buildingId ?? effectiveBuildingId;
-                if (aptCode.isEmpty) return;
+                if (aptId.isEmpty || aptCode.isEmpty) {
+                  AppSnackBar.showWarning(
+                    ctx,
+                    'Vui lòng chọn căn hộ hợp lệ trong tòa nhà trước khi khởi tạo biên bản.',
+                  );
+                  return;
+                }
 
                 Navigator.of(ctx).pop();
                 Navigator.of(context).push(

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/financial_aging_report_model.dart';
 import 'accounting_providers.dart';
+import 'building_provider.dart';
 
 /// Bộ lọc cho Báo cáo tài chính & Tuổi nợ
 class FinancialReportFilter {
@@ -35,9 +36,10 @@ final financialReportFilterProvider = StateProvider<FinancialReportFilter>((ref)
 final financialAgingReportProvider = FutureProvider<FinancialAgingReportModel>((ref) async {
   final repo = ref.watch(accountingRepositoryProvider);
   final filter = ref.watch(financialReportFilterProvider);
+  final effectiveBuildingId = filter.buildingId ?? ref.watch(effectiveBuildingIdProvider);
 
   return repo.fetchAgingReport(
-    buildingId: filter.buildingId,
+    buildingId: effectiveBuildingId,
     period: filter.period,
   );
 });

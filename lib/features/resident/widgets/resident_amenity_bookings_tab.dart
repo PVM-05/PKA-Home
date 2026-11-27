@@ -108,7 +108,9 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                   const SizedBox(height: 12),
                   Text(
                     'Chưa có lịch đặt tiện ích nào',
-                    style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                    style: context.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),

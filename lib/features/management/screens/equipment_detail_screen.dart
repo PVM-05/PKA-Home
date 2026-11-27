@@ -163,7 +163,7 @@ class _EquipmentDetailScreenState extends ConsumerState<EquipmentDetailScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: errorColor,
                 foregroundColor: dialogScheme.onError,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               onPressed: () => Navigator.of(ctx).pop(true),
               child: const Text('Xác nhận chi'),

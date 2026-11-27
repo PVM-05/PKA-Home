@@ -943,15 +943,15 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
             AppSpacing.h8,
             InkWell(
               onTap: () {
-                final repo = ref.read(vehicleRepositoryProvider);
-                final url = repo.getRegistrationImageUrl(
-                  v.registrationImageUrl,
-                );
-                if (url.isNotEmpty) {
+                final rawUrl = v.registrationImageUrl?.trim() ?? '';
+                if (rawUrl.isNotEmpty) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PhotoViewerScreen(imageUrls: [url]),
+                      builder: (_) => PhotoViewerScreen(
+                        imageUrls: [rawUrl],
+                        defaultBucket: 'vehicle-docs',
+                      ),
                     ),
                   );
                 }

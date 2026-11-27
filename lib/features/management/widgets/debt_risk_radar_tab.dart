@@ -291,7 +291,9 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
               const SizedBox(height: 4),
               Text(
                 'Các căn hộ đều duy trì tình trạng thanh toán an toàn',
-                style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                style: context.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -313,7 +315,9 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
             ),
             Text(
               'Sắp xếp theo Điểm rủi ro AI',
-              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -359,7 +363,9 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                     if (apt.ownerPhone.isNotEmpty)
                       Text(
                         apt.ownerPhone,
-                        style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                        style: context.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                   ],
                 ),
@@ -403,7 +409,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
           ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1, color: AppTheme.border),
+          Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
           const SizedBox(height: 12),
 
           // Thông tin tài chính
@@ -495,7 +501,9 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                       children: [
                         Text(
                           'Chiến lược đề xuất: ',
-                          style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                          style: context.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
                         Text(
                           apt.recommendedTier.shortName,
@@ -509,7 +517,9 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                     if (apt.dunningCount > 0)
                       Text(
                         'Đã đôn đốc ${apt.dunningCount} lần (Gần nhất: ${apt.lastDunningTier?.shortName ?? ""})',
-                        style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                        style: context.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                   ],
                 ),
@@ -518,6 +528,7 @@ class _DebtRiskRadarTabState extends ConsumerState<DebtRiskRadarTab> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: apt.recommendedTier.color,
                   foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),

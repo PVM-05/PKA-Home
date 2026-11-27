@@ -170,7 +170,7 @@ class ManagementFinancialProgressCard extends ConsumerWidget {
                           'Đã thu',
                           style:
                               Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppTheme.textSecondary,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                         ),
                         AppSpacing.h4,
@@ -197,7 +197,7 @@ class ManagementFinancialProgressCard extends ConsumerWidget {
                           'Còn nợ',
                           style:
                               Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppTheme.textSecondary,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                         ),
                         AppSpacing.h4,
@@ -224,7 +224,7 @@ class ManagementFinancialProgressCard extends ConsumerWidget {
                           'Căn đã đóng',
                           style:
                               Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppTheme.textSecondary,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                         ),
                         AppSpacing.h4,

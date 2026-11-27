@@ -57,7 +57,9 @@ class RevenueTrendChart extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               'So sánh thực thu và nợ phí theo từng kỳ hóa đơn',
-              style: context.bodySmall?.copyWith(color: AppTheme.textSecondary),
+              style: context.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -69,7 +71,9 @@ class RevenueTrendChart extends ConsumerWidget {
                     child: Center(
                       child: Text(
                         'Chưa có dữ liệu hóa đơn nào.',
-                        style: context.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+                        style: context.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   );
@@ -149,7 +153,7 @@ class RevenueTrendChart extends ConsumerWidget {
                                     Text(
                                       item.period.length >= 7 ? item.period.substring(3) : '',
                                       style: context.labelSmall?.copyWith(
-                                        color: AppTheme.textSecondary,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
@@ -169,7 +173,12 @@ class RevenueTrendChart extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Tổng thực thu', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                              Text(
+                                'Tổng thực thu',
+                                style: context.labelSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
                               const SizedBox(height: 2),
                               Text(
                                 currencyFormat.format(totalPaidAll),
@@ -187,7 +196,12 @@ class RevenueTrendChart extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('Tổng nợ tồn', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                              Text(
+                                'Tổng nợ tồn',
+                                style: context.labelSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
                               const SizedBox(height: 2),
                               Text(
                                 currencyFormat.format(totalUnpaidAll),
@@ -205,7 +219,12 @@ class RevenueTrendChart extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('Tỷ lệ thu hồi', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                              Text(
+                                'Tỷ lệ thu hồi',
+                                style: context.labelSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
                               const SizedBox(height: 2),
                               Text(
                                 '${avgRate.toStringAsFixed(1)}%',
@@ -232,7 +251,11 @@ class RevenueTrendChart extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.cloud_off_rounded, color: AppTheme.textSecondary, size: 28),
+                      Icon(
+                        Icons.cloud_off_rounded,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        size: 28,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         formatErrorMessage(err),
@@ -277,7 +300,10 @@ class RevenueTrendChart extends ConsumerWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: context.labelSmall?.copyWith(color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+          style: context.labelSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

@@ -40,11 +40,26 @@ class ActiveBuildingIdNotifier extends StateNotifier<String> {
   void setBuildingId(String buildingId) {
     state = buildingId;
   }
+
+  void reset() {
+    state = BuildingRepository.kDefaultCanonicalBuildingId;
+  }
 }
 
 final activeBuildingIdProvider =
     StateNotifierProvider<ActiveBuildingIdNotifier, String>((ref) {
-  return ActiveBuildingIdNotifier();
+  final notifier = ActiveBuildingIdNotifier();
+
+  // Tự động đặt lại ngữ cảnh tòa nhà mặc định khi đăng xuất hoặc đổi tài khoản
+  ref.listen(authProvider, (previous, next) {
+    final prevId = previous?.valueOrNull?.id;
+    final nextId = next.valueOrNull?.id;
+    if (nextId == null || (prevId != null && prevId != nextId)) {
+      notifier.reset();
+    }
+  });
+
+  return notifier;
 });
 
 /// Thông tin chi tiết tòa nhà đang được chọn

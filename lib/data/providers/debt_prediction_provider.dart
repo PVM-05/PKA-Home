@@ -15,6 +15,20 @@ final debtRiskSearchQueryProvider = StateProvider<String>((ref) => '');
 /// Radar dữ liệu nợ xấu thời gian thực của tòa nhà
 final buildingDebtRadarProvider =
     FutureProvider.family<DebtRadarDataModel, String>((ref, buildingId) async {
+  if (buildingId.trim().isEmpty) {
+    return const DebtRadarDataModel(
+      buildingId: '',
+      kpi: DebtRadarKpiModel(
+        totalAtRiskApartments: 0,
+        highRiskCount: 0,
+        mediumRiskCount: 0,
+        lowRiskCount: 0,
+        totalOverdueDebt: 0,
+        highRiskDebt: 0,
+      ),
+      apartments: [],
+    );
+  }
   final repo = ref.watch(debtPredictionRepositoryProvider);
   return repo.getBuildingDebtRadar(buildingId);
 });

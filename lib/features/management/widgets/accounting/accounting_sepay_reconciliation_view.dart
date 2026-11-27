@@ -585,7 +585,7 @@ class AccountingSepayReconciliationView extends ConsumerWidget {
                                                   tx,
                                                 ),
                                             style: FilledButton.styleFrom(
-                                              minimumSize: const Size(0, 40),
+                                              minimumSize: const Size(0, 48),
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                     horizontal: 12,

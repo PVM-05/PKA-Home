@@ -685,7 +685,10 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
       data: (vehicles) {
         if (vehicles.isEmpty) {
           return Center(
-            child: Text('Căn hộ ${aptCode ?? ""} chưa có phương tiện đăng ký.', style: const TextStyle(color: AppTheme.textSecondary)),
+            child: Text(
+              'Căn hộ ${aptCode ?? ""} chưa có phương tiện đăng ký.',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
           );
         }
         return ListView.builder(
@@ -754,7 +757,10 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
       data: (invoices) {
         if (invoices.isEmpty) {
           return Center(
-            child: Text('Căn hộ ${aptCode ?? ""} chưa có hóa đơn.', style: const TextStyle(color: AppTheme.textSecondary)),
+            child: Text(
+              'Căn hộ ${aptCode ?? ""} chưa có hóa đơn.',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
           );
         }
         return ListView.builder(
@@ -791,7 +797,12 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Kỳ: $period', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('${amount.toStringAsFixed(0)} đ', style: context.bodySmall?.copyWith(color: AppTheme.textSecondary)),
+                        Text(
+                          '${amount.toStringAsFixed(0)} đ',
+                          style: context.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -822,8 +833,11 @@ class _Resident360DetailSheetState extends ConsumerState<Resident360DetailSheet>
     return bookingsAsync.when(
       data: (bookings) {
         if (bookings.isEmpty) {
-          return const Center(
-            child: Text('Chưa có lịch đặt tiện ích.', style: TextStyle(color: AppTheme.textSecondary)),
+          return Center(
+            child: Text(
+              'Chưa có lịch đặt tiện ích.',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
           );
         }
         return ListView.builder(

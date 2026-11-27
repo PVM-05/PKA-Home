@@ -136,7 +136,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                     Text(
                       'Hệ thống Quản lý Chung cư Vivona',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 16),
 
@@ -163,7 +163,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                           ),
                           Text(
                             'Mã tra cứu: $lookupCode',
-                            style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                            style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -271,7 +271,7 @@ class ElectronicReceiptSheet extends ConsumerWidget {
                     Text(
                       'Biên lai điện tử có giá trị xác nhận nghĩa vụ tài chính hoàn tất giữa Cư dân và Ban Quản Lý.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontStyle: FontStyle.italic),
+                      style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic),
                     ),
                   ],
                 ),

@@ -692,7 +692,7 @@ class _SubscriptionManagementScreenState
               child: const Text('Hủy'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
               onPressed: () async {
                 final phone = _phoneController.text.trim();
                 if (phone.isEmpty) {

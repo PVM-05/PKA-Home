@@ -518,12 +518,14 @@ Widget _buildSheetActionItem({
         subtitle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.labelSmall?.copyWith(color: AppTheme.textSecondary),
+        style: context.labelSmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.chevron_right,
         size: 18,
-        color: AppTheme.textSecondary,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
       onTap: () {
         Navigator.of(context).pop();

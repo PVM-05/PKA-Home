@@ -197,7 +197,12 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Đã xử lý', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                                  Text(
+                                    'Đã xử lý',
+                                    style: context.labelSmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
                                   Text(
                                     '${item.resolvedCount}/${item.totalAssigned} ($completionRate%)',
                                     style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.success),
@@ -207,7 +212,12 @@ class TechnicianPerformanceCard extends ConsumerWidget {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text('TG trung bình', style: context.labelSmall?.copyWith(color: AppTheme.textSecondary)),
+                                  Text(
+                                    'TG trung bình',
+                                    style: context.labelSmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
                                   Text(
                                     item.avgResolutionHours < 1
                                         ? '${(item.avgResolutionHours * 60).toStringAsFixed(0)} phút'
