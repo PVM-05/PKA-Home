@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/building_equipment_model.dart';
+import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/equipment_provider.dart';
 import '../../../core/utils/error_formatter.dart';
 
@@ -103,6 +104,10 @@ class _EquipmentFormDialogState extends ConsumerState<EquipmentFormDialog> {
     try {
       final repo = ref.read(equipmentRepositoryProvider);
       if (widget.equipment == null) {
+        final activeBuildingId = ref.read(activeBuildingIdProvider);
+        if (activeBuildingId.isNotEmpty) {
+          payload['building_id'] = activeBuildingId;
+        }
         // Thiết bị mới: gán ngày bảo dưỡng đầu tiên là sau chu kỳ
         payload['next_maintenance_date'] =
             DateTime.now().add(Duration(days: interval)).toIso8601String();

@@ -1,6 +1,7 @@
 /// Model cấu hình biểu giá tiện ích (điện, nước) của tòa nhà
 class BuildingUtilityRateModel {
   final String id;
+  final String? buildingId;
   final String utilityType; // 'electricity' | 'water'
   final String pricingModel; // 'fixed' | 'tiered_evn' | 'tiered_water'
   final double baseUnitPrice;
@@ -12,6 +13,7 @@ class BuildingUtilityRateModel {
 
   const BuildingUtilityRateModel({
     required this.id,
+    this.buildingId,
     required this.utilityType,
     this.pricingModel = 'fixed',
     required this.baseUnitPrice,
@@ -57,6 +59,7 @@ class BuildingUtilityRateModel {
   factory BuildingUtilityRateModel.fromJson(Map<String, dynamic> json) {
     return BuildingUtilityRateModel(
       id: json['id'] as String? ?? '',
+      buildingId: json['building_id'] as String?,
       utilityType: json['utility_type'] as String? ?? 'electricity',
       pricingModel: json['pricing_model'] as String? ?? 'fixed',
       baseUnitPrice: (json['base_unit_price'] as num?)?.toDouble() ?? 0.0,
@@ -72,6 +75,7 @@ class BuildingUtilityRateModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      if (buildingId != null) 'building_id': buildingId,
       'utility_type': utilityType,
       'pricing_model': pricingModel,
       'base_unit_price': baseUnitPrice,

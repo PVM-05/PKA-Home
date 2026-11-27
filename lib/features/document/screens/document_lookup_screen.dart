@@ -5,6 +5,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
 import '../../../data/models/document_lookup_result_model.dart';
@@ -91,7 +92,7 @@ class _DocumentLookupScreenState extends ConsumerState<DocumentLookupScreen> {
       if (mounted) {
         setState(() {
           _result = DocumentLookupResultModel.invalid(
-            'Lỗi trong quá trình tra cứu: $e',
+            formatErrorMessage(e),
             lookupCode: code,
           );
           _isLoading = false;

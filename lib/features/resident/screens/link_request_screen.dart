@@ -214,7 +214,7 @@ class _LinkRequestScreenState extends ConsumerState<LinkRequestScreen> {
                 if (mounted) {
                   AppSnackBar.showError(
                     context,
-                    e.toString().replaceAll('Exception: ', ''),
+                    formatErrorMessage(e),
                   );
                 }
               } finally {

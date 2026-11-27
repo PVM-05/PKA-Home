@@ -7,8 +7,9 @@ import '../models/petition_model.dart';
 
 class CommunityRepository {
   final SupabaseClient? _client;
+  final String? _defaultBuildingId;
 
-  CommunityRepository([this._client]);
+  CommunityRepository([this._client, this._defaultBuildingId]);
 
   SupabaseClient? get _supabase {
     if (_client != null) return _client;
@@ -31,6 +32,9 @@ class CommunityRepository {
         final client = _supabase;
         if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         var query = client.from('polls').select('*, poll_options(*)');
+        if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty) {
+          query = query.or('building_id.eq.$_defaultBuildingId,building_id.is.null');
+        }
         if (status != null && status.isNotEmpty) {
           query = query.eq('status', status);
         }
@@ -87,7 +91,9 @@ class CommunityRepository {
           'start_time': startTime.toIso8601String(),
           'end_time': endTime.toIso8601String(),
           'created_by': createdBy,
-          'building_id': buildingId,
+          'building_id': (buildingId != null && buildingId.isNotEmpty)
+              ? buildingId
+              : _defaultBuildingId,
         };
         final pollRes = await client
             .from('polls')
@@ -179,6 +185,9 @@ class CommunityRepository {
             .select(
               '*, apartments(code), users!resident_petitions_author_user_id_fkey(full_name)',
             );
+        if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty) {
+          query = query.or('building_id.eq.$_defaultBuildingId,building_id.is.null');
+        }
         if (status != null && status.isNotEmpty) {
           query = query.eq('status', status);
         }
@@ -223,6 +232,8 @@ class CommunityRepository {
         final client = _supabase;
         if (client == null) throw const AppException('Supabase chưa sẵn sàng');
         final payload = {
+          if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+            'building_id': _defaultBuildingId,
           'apartment_id': apartmentId,
           'author_user_id': authorUserId,
           'title': title,

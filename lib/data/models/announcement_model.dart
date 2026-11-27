@@ -1,5 +1,6 @@
 class AnnouncementModel {
   final String id;
+  final String? buildingId;
   final String title;
   final String content;
   final bool isUrgent;
@@ -17,6 +18,7 @@ class AnnouncementModel {
 
   AnnouncementModel({
     required this.id,
+    this.buildingId,
     required this.title,
     required this.content,
     required this.isUrgent,
@@ -85,6 +87,7 @@ class AnnouncementModel {
 
   AnnouncementModel copyWith({
     String? id,
+    String? buildingId,
     String? title,
     String? content,
     bool? isUrgent,
@@ -102,6 +105,7 @@ class AnnouncementModel {
   }) {
     return AnnouncementModel(
       id: id ?? this.id,
+      buildingId: buildingId ?? this.buildingId,
       title: title ?? this.title,
       content: content ?? this.content,
       isUrgent: isUrgent ?? this.isUrgent,
@@ -122,6 +126,7 @@ class AnnouncementModel {
   factory AnnouncementModel.fromJson(Map<String, dynamic> json) {
     return AnnouncementModel(
       id: json['id'] as String? ?? '',
+      buildingId: json['building_id'] as String?,
       title: json['title'] as String? ?? '',
       content: json['content'] as String? ?? '',
       isUrgent: json['is_urgent'] ?? false,
@@ -148,6 +153,7 @@ class AnnouncementModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      if (buildingId != null) 'building_id': buildingId,
       'title': title,
       'content': content,
       'is_urgent': isUrgent,

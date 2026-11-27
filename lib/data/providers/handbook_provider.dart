@@ -3,9 +3,11 @@ import '../repositories/handbook_repository.dart';
 import '../models/emergency_contact_model.dart';
 import '../models/building_rule_model.dart';
 import '../models/building_amenity_model.dart';
+import 'building_provider.dart';
 
 final handbookRepositoryProvider = Provider<HandbookRepository>((ref) {
-  return HandbookRepository();
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
+  return HandbookRepository(effectiveBuildingId);
 });
 
 // Realtime Stream Triggers

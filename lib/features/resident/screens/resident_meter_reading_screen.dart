@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/network_error_handler.dart';
 import '../../../core/utils/utility_anomaly_detector.dart';
 import '../../../core/utils/validators.dart';
@@ -152,7 +153,7 @@ class _ResidentMeterReadingScreenState
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Không thể chụp/chọn ảnh: $e'),
+          content: Text(formatErrorMessage(e)),
           backgroundColor: AppTheme.textError,
         ),
       );

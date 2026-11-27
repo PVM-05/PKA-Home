@@ -7,32 +7,40 @@ import '../models/building_rule_model.dart';
 import '../models/building_amenity_model.dart';
 
 class HandbookRepository {
-  final SupabaseClient _client = SupabaseConfig.client;
-  
-  // Cache keys
+  final SupabaseClient _client;
+  final String? _defaultBuildingId;
+
+  HandbookRepository([this._defaultBuildingId, SupabaseClient? client])
+      : _client = client ?? SupabaseConfig.client;
+
+  // Cache keys tách theo tòa nhà tránh rò rỉ dữ liệu offline
   static const String _contactsCacheKey = 'handbook_contacts_cache';
   static const String _rulesCacheKey = 'handbook_rules_cache';
   static const String _amenitiesCacheKey = 'handbook_amenities_cache';
+
+  String _scopedCacheKey(String base) => '${base}_${_defaultBuildingId ?? 'all'}';
 
   // ==========================================
   // 1. Emergency Contacts (Đường dây nóng)
   // ==========================================
   Future<List<EmergencyContactModel>> fetchEmergencyContacts() async {
     final prefs = await SharedPreferences.getInstance();
+    final cacheKey = _scopedCacheKey(_contactsCacheKey);
     try {
-      final response = await _client
-          .from('emergency_contacts')
-          .select()
-          .order('display_order', ascending: true);
+      var query = _client.from('emergency_contacts').select();
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty) {
+        query = query.or('building_id.eq.$_defaultBuildingId,building_id.is.null');
+      }
+      final response = await query.order('display_order', ascending: true);
 
       final data = (response as List).cast<Map<String, dynamic>>();
       // Cache data
-      await prefs.setString(_contactsCacheKey, jsonEncode(data));
+      await prefs.setString(cacheKey, jsonEncode(data));
 
       return data.map((e) => EmergencyContactModel.fromJson(e)).toList();
     } catch (e) {
       // Load from cache if network fails
-      final cachedStr = prefs.getString(_contactsCacheKey);
+      final cachedStr = prefs.getString(cacheKey);
       if (cachedStr != null) {
         final cachedData = jsonDecode(cachedStr) as List;
         return cachedData.map((e) => EmergencyContactModel.fromJson(e as Map<String, dynamic>)).toList();
@@ -52,6 +60,8 @@ class HandbookRepository {
     int displayOrder = 0,
   }) async {
     await _client.from('emergency_contacts').insert({
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+        'building_id': _defaultBuildingId,
       'name': name,
       'phone': phone,
       'contact_type': contactType,
@@ -83,20 +93,22 @@ class HandbookRepository {
   // ==========================================
   Future<List<BuildingRuleModel>> fetchBuildingRules() async {
     final prefs = await SharedPreferences.getInstance();
+    final cacheKey = _scopedCacheKey(_rulesCacheKey);
     try {
-      final response = await _client
-          .from('building_rules')
-          .select()
-          .order('display_order', ascending: true);
+      var query = _client.from('building_rules').select();
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty) {
+        query = query.or('building_id.eq.$_defaultBuildingId,building_id.is.null');
+      }
+      final response = await query.order('display_order', ascending: true);
 
       final data = (response as List).cast<Map<String, dynamic>>();
       // Cache data
-      await prefs.setString(_rulesCacheKey, jsonEncode(data));
+      await prefs.setString(cacheKey, jsonEncode(data));
 
       return data.map((e) => BuildingRuleModel.fromJson(e)).toList();
     } catch (e) {
       // Load from cache if network fails
-      final cachedStr = prefs.getString(_rulesCacheKey);
+      final cachedStr = prefs.getString(cacheKey);
       if (cachedStr != null) {
         final cachedData = jsonDecode(cachedStr) as List;
         return cachedData.map((e) => BuildingRuleModel.fromJson(e as Map<String, dynamic>)).toList();
@@ -115,6 +127,8 @@ class HandbookRepository {
     int displayOrder = 0,
   }) async {
     await _client.from('building_rules').insert({
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+        'building_id': _defaultBuildingId,
       'title': title,
       'content': content,
       'display_order': displayOrder,
@@ -143,20 +157,22 @@ class HandbookRepository {
   // ==========================================
   Future<List<BuildingAmenityModel>> fetchBuildingAmenities() async {
     final prefs = await SharedPreferences.getInstance();
+    final cacheKey = _scopedCacheKey(_amenitiesCacheKey);
     try {
-      final response = await _client
-          .from('building_amenities')
-          .select()
-          .order('display_order', ascending: true);
+      var query = _client.from('building_amenities').select();
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty) {
+        query = query.or('building_id.eq.$_defaultBuildingId,building_id.is.null');
+      }
+      final response = await query.order('display_order', ascending: true);
 
       final data = (response as List).cast<Map<String, dynamic>>();
       // Cache data
-      await prefs.setString(_amenitiesCacheKey, jsonEncode(data));
+      await prefs.setString(cacheKey, jsonEncode(data));
 
       return data.map((e) => BuildingAmenityModel.fromJson(e)).toList();
     } catch (e) {
       // Load from cache if network fails
-      final cachedStr = prefs.getString(_amenitiesCacheKey);
+      final cachedStr = prefs.getString(cacheKey);
       if (cachedStr != null) {
         final cachedData = jsonDecode(cachedStr) as List;
         return cachedData.map((e) => BuildingAmenityModel.fromJson(e as Map<String, dynamic>)).toList();
@@ -183,6 +199,8 @@ class HandbookRepository {
     bool isActive = true,
   }) async {
     await _client.from('building_amenities').insert({
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+        'building_id': _defaultBuildingId,
       'name': name,
       'description': description,
       'open_hours': openHours,

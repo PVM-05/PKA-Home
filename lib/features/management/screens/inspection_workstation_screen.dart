@@ -8,6 +8,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_snack_bar.dart';
@@ -252,7 +253,7 @@ class _InspectionWorkstationScreenState
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.showError(context, 'Lỗi lưu biên bản: $e');
+        AppSnackBar.showError(context, formatErrorMessage(e));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -1,14 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/announcement_model.dart';
 import '../repositories/announcement_repository.dart';
+import 'building_provider.dart';
 import 'resident_apartment_provider.dart';
 
 final announcementsStreamProvider = StreamProvider<List<AnnouncementModel>>((ref) {
   final repo = ref.watch(announcementRepositoryProvider);
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
   return repo.streamAnnouncements().map((list) {
     final sortedList = List<Map<String, dynamic>>.from(list);
     sortedList.sort((a, b) => DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
-    return sortedList.map((e) => AnnouncementModel.fromJson(e)).toList();
+    final models = sortedList.map((e) => AnnouncementModel.fromJson(e)).toList();
+    if (effectiveBuildingId == null || effectiveBuildingId.isEmpty) {
+      return models;
+    }
+    final hasAnyBuilding = models.any((a) => a.buildingId != null && a.buildingId!.isNotEmpty);
+    if (!hasAnyBuilding) return models;
+    return models
+        .where((a) => a.buildingId == null || a.buildingId == effectiveBuildingId)
+        .toList();
   });
 });
 
@@ -17,6 +27,7 @@ final residentAnnouncementsProvider = Provider<AsyncValue<List<AnnouncementModel
   final announcementsAsync = ref.watch(announcementsStreamProvider);
   final aptsAsync = ref.watch(residentApartmentsProvider);
   final selectedApt = ref.watch(currentSelectedApartmentProvider);
+  final residentBldId = ref.watch(residentBuildingIdProvider);
 
   return announcementsAsync.whenData((allAnnouncements) {
     final residentApts = aptsAsync.valueOrNull ?? [];
@@ -53,7 +64,20 @@ final residentAnnouncementsProvider = Provider<AsyncValue<List<AnnouncementModel
       }
     }
 
+    final hasBuildingScoped = allAnnouncements.any(
+      (a) => a.buildingId != null && a.buildingId!.isNotEmpty,
+    );
+
     return allAnnouncements.where((announcement) {
+      if (hasBuildingScoped &&
+          residentBldId != null &&
+          residentBldId.isNotEmpty &&
+          announcement.buildingId != null &&
+          announcement.buildingId!.isNotEmpty &&
+          announcement.buildingId != residentBldId) {
+        return false;
+      }
+
       // 1. Dành cho toàn bộ cư dân
       if (announcement.targetType == 'all') return true;
 

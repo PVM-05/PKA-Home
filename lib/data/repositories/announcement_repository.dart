@@ -2,15 +2,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase_config.dart';
 import '../../core/utils/guard_helper.dart';
+import '../providers/building_provider.dart';
 
 final announcementRepositoryProvider = Provider<AnnouncementRepository>((ref) {
-  return AnnouncementRepository();
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
+  return AnnouncementRepository(null, effectiveBuildingId);
 });
 
 class AnnouncementRepository {
   final SupabaseClient? _customClient;
+  final String? _defaultBuildingId;
 
-  AnnouncementRepository([SupabaseClient? client]) : _customClient = client;
+  AnnouncementRepository([SupabaseClient? client, this._defaultBuildingId])
+      : _customClient = client;
 
   SupabaseClient? get _clientSafe {
     if (_customClient != null) return _customClient;
@@ -50,6 +54,8 @@ class AnnouncementRepository {
   }) async {
     final effectiveValue = targetValue ?? targetApartment;
     final payload = <String, dynamic>{
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+        'building_id': _defaultBuildingId,
       'title': title,
       'content': content,
       'is_urgent': isUrgent,
@@ -139,6 +145,8 @@ class AnnouncementRepository {
   }) async {
     final effectiveValue = targetValue ?? targetApartment;
     final payload = <String, dynamic>{
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+        'building_id': _defaultBuildingId,
       'title': title,
       'content': content,
       'is_urgent': isUrgent,

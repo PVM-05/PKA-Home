@@ -6,6 +6,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/poll_model.dart';
 import '../../../data/providers/auth_provider.dart';
+import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/community_provider.dart';
 
 class CreatePollSheet extends ConsumerStatefulWidget {
@@ -134,6 +135,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
     setState(() => _isLoading = true);
     try {
       final repo = ref.read(communityRepositoryProvider);
+      final activeBuildingId = ref.read(activeBuildingIdProvider);
       final newPoll = await repo.createPoll(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
@@ -146,6 +148,7 @@ class _CreatePollSheetState extends ConsumerState<CreatePollSheet> {
         endTime: _endTime,
         options: validOptions,
         createdBy: staffId,
+        buildingId: activeBuildingId.isNotEmpty ? activeBuildingId : null,
       );
 
       ref.invalidate(pollsProvider((status: null, apartmentId: null)));

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/supabase_config.dart';
+import '../../core/utils/error_formatter.dart';
 import '../models/resident_activation_model.dart';
 import '../repositories/resident_activation_repository.dart';
 
@@ -142,7 +143,7 @@ class ResidentActivationNotifier extends StateNotifier<ResidentActivationState> 
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Lỗi khi kiểm tra mã kích hoạt: $e',
+        errorMessage: formatErrorMessage(e),
       );
       return false;
     }
@@ -187,7 +188,7 @@ class ResidentActivationNotifier extends StateNotifier<ResidentActivationState> 
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Lỗi xác thực OTP: $e',
+        errorMessage: formatErrorMessage(e),
       );
       return false;
     }
@@ -209,7 +210,7 @@ class ResidentActivationNotifier extends StateNotifier<ResidentActivationState> 
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Lỗi khi gửi lại OTP: $e',
+        errorMessage: formatErrorMessage(e),
       );
     }
   }
@@ -333,7 +334,7 @@ class ResidentActivationNotifier extends StateNotifier<ResidentActivationState> 
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Lỗi hoàn tất kích hoạt: $e',
+        errorMessage: formatErrorMessage(e),
       );
       return false;
     }

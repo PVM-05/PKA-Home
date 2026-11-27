@@ -6,12 +6,15 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
 import '../../../core/widgets/app_error_card.dart';
 import '../../../core/widgets/app_skeleton_shimmer.dart';
+import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/role_guard.dart';
 import '../../../data/models/maintenance_material_model.dart';
+import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/material_provider.dart';
 
 class MaintenanceMaterialsScreen extends ConsumerStatefulWidget {
@@ -329,33 +332,48 @@ class _MaintenanceMaterialsScreenState
               ),
               actions: [
                 TextButton(
+                  style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
                   onPressed: () => Navigator.pop(ctx),
                   child: const Text('Hủy'),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(0, 44),
+                    minimumSize: const Size(0, 48),
                   ),
                   onPressed: () async {
                     if (nameCtrl.text.trim().isEmpty) return;
+                    final bldId = ref.read(activeBuildingIdProvider);
                     Navigator.pop(ctx);
-                    final repo = ref.read(materialRepositoryProvider);
-                    await repo.createMaterial(
-                      MaintenanceMaterialModel(
-                        id: 'mat-${DateTime.now().millisecondsSinceEpoch}',
-                        code: codeCtrl.text.trim(),
-                        name: nameCtrl.text.trim(),
-                        category: category,
-                        unit: unitCtrl.text.trim().isNotEmpty
-                            ? unitCtrl.text.trim()
-                            : 'cái',
-                        unitPrice: double.tryParse(priceCtrl.text) ?? 0.0,
-                        stockQuantity: int.tryParse(stockCtrl.text) ?? 0,
-                        minStockAlert: int.tryParse(minStockCtrl.text) ?? 5,
-                        createdAt: DateTime.now(),
-                      ),
-                    );
-                    ref.invalidate(maintenanceMaterialsProvider);
+                    try {
+                      final repo = ref.read(materialRepositoryProvider);
+                      await repo.createMaterial(
+                        MaintenanceMaterialModel(
+                          id: '',
+                          buildingId: bldId.isNotEmpty ? bldId : null,
+                          code: codeCtrl.text.trim(),
+                          name: nameCtrl.text.trim(),
+                          category: category,
+                          unit: unitCtrl.text.trim().isNotEmpty
+                              ? unitCtrl.text.trim()
+                              : 'cái',
+                          unitPrice: double.tryParse(priceCtrl.text) ?? 0.0,
+                          stockQuantity: int.tryParse(stockCtrl.text) ?? 0,
+                          minStockAlert: int.tryParse(minStockCtrl.text) ?? 5,
+                          createdAt: DateTime.now(),
+                        ),
+                      );
+                      ref.invalidate(maintenanceMaterialsProvider);
+                      if (mounted) {
+                        AppSnackBar.showSuccess(
+                          context,
+                          'Đã thêm vật tư mới vào kho!',
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        AppSnackBar.showError(context, formatErrorMessage(e));
+                      }
+                    }
                   },
                   child: const Text('Lưu vật tư'),
                 ),

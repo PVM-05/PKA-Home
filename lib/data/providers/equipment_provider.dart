@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/building_equipment_model.dart';
 import '../models/equipment_maintenance_task_model.dart';
 import '../repositories/equipment_repository.dart';
+import 'building_provider.dart';
 export '../repositories/equipment_repository.dart';
 
 /// Bộ lọc tòa nhà
@@ -19,12 +20,21 @@ final equipmentListProvider = FutureProvider<List<BuildingEquipmentModel>>((ref)
   final building = ref.watch(equipmentFilterBuildingProvider);
   final category = ref.watch(equipmentFilterCategoryProvider);
   final status = ref.watch(equipmentFilterStatusProvider);
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
 
-  return repo.getEquipments(
+  final list = await repo.getEquipments(
     building: building,
     category: category,
     status: status,
   );
+  if (effectiveBuildingId == null ||
+      effectiveBuildingId.isEmpty ||
+      !list.any((e) => e.buildingId != null && e.buildingId!.isNotEmpty)) {
+    return list;
+  }
+  return list
+      .where((e) => e.buildingId == null || e.buildingId == effectiveBuildingId)
+      .toList();
 });
 
 /// Danh sách phiếu bảo trì (có thể lọc theo equipmentId hoặc toàn bộ)
@@ -49,7 +59,16 @@ final equipmentDetailProvider =
 final upcomingMaintenanceEquipmentsProvider =
     FutureProvider<List<BuildingEquipmentModel>>((ref) async {
   final repo = ref.watch(equipmentRepositoryProvider);
-  return repo.getUpcomingMaintenanceEquipments(daysAhead: 7);
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
+  final list = await repo.getUpcomingMaintenanceEquipments(daysAhead: 7);
+  if (effectiveBuildingId == null ||
+      effectiveBuildingId.isEmpty ||
+      !list.any((e) => e.buildingId != null && e.buildingId!.isNotEmpty)) {
+    return list;
+  }
+  return list
+      .where((e) => e.buildingId == null || e.buildingId == effectiveBuildingId)
+      .toList();
 });
 
 /// Danh sách thiết bị đang bảo trì gián đoạn dịch vụ thuộc tòa nhà của cư dân

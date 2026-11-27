@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase_config.dart';
+import 'building_provider.dart';
 import 'dashboard_providers.dart' show pendingLinkRequestsCountProvider, apartmentsStreamProvider;
 import 'management_provider.dart' show residentsProvider;
 
 final linkRequestManagementProvider = StateNotifierProvider<LinkRequestManagementNotifier, AsyncValue<List<Map<String, dynamic>>>>((ref) {
+  ref.watch(effectiveBuildingIdProvider);
   return LinkRequestManagementNotifier(ref);
 });
 
@@ -52,12 +54,22 @@ class LinkRequestManagementNotifier extends StateNotifier<AsyncValue<List<Map<St
             requested_relation_role,
             created_at,
             users ( id, full_name, phone ),
-            apartments ( id, code )
+            apartments ( id, code, building_id )
           ''')
           .eq('status', 'pending')
           .order('created_at');
-          
-      state = AsyncValue.data(List<Map<String, dynamic>>.from(res));
+
+      final effectiveBuildingId = ref.read(effectiveBuildingIdProvider);
+      final rawList = List<Map<String, dynamic>>.from(res);
+      final filtered = effectiveBuildingId == null
+          ? rawList
+          : rawList.where((row) {
+              final apt = row['apartments'] as Map<String, dynamic>?;
+              final aptBld = apt?['building_id']?.toString();
+              return aptBld == effectiveBuildingId;
+            }).toList();
+
+      state = AsyncValue.data(filtered);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

@@ -360,7 +360,7 @@ class _HandbookManagementScreenState
               child: const Text('Hủy'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   Navigator.pop(ctx);
@@ -597,7 +597,7 @@ class _HandbookManagementScreenState
             child: const Text('Hủy'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
                 Navigator.pop(ctx);
@@ -1082,7 +1082,7 @@ class _HandbookManagementScreenState
               child: const Text('Hủy'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   Navigator.pop(ctx);
@@ -1174,7 +1174,7 @@ class _HandbookManagementScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: errorColor,
                 foregroundColor: colorScheme.onError,
-                minimumSize: const Size(0, 44),
+                minimumSize: const Size(0, 48),
               ),
               onPressed: () async {
                 Navigator.pop(ctx);

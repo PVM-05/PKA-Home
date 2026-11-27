@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/supabase_config.dart';
 import '../models/building_model.dart';
 import '../repositories/building_repository.dart';
+import 'auth_provider.dart';
 import 'resident_apartment_provider.dart';
 
 final buildingRepositoryProvider = Provider<BuildingRepository>((ref) {
@@ -66,4 +67,16 @@ final buildingByIdProvider = FutureProvider.family<BuildingModel?, String>((ref,
   if (buildingId.isEmpty) return null;
   final repo = ref.watch(buildingRepositoryProvider);
   return repo.getBuildingById(buildingId);
+});
+
+/// Ngữ cảnh building_id hiệu lực theo vai trò hiện tại (trả về null khi chưa đăng nhập / unit test)
+final effectiveBuildingIdProvider = Provider<String?>((ref) {
+  final user = ref.watch(authProvider).valueOrNull;
+  if (user == null) return null;
+  if (user.isManagement) {
+    final id = ref.watch(activeBuildingIdProvider);
+    return id.isNotEmpty ? id : null;
+  }
+  final resBldId = ref.watch(residentBuildingIdProvider);
+  return (resBldId != null && resBldId.isNotEmpty) ? resBldId : null;
 });

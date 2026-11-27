@@ -73,9 +73,12 @@ class MaintenanceMaterialModel {
   }
 
   Map<String, dynamic> toJson() {
+    final isUuid = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    ).hasMatch(id);
     return {
-      'id': id,
-      'building_id': buildingId,
+      if (isUuid) 'id': id,
+      if (buildingId != null && buildingId!.isNotEmpty) 'building_id': buildingId,
       'code': code,
       'name': name,
       'category': category,
@@ -84,7 +87,7 @@ class MaintenanceMaterialModel {
       'stock_quantity': stockQuantity,
       'min_stock_alert': minStockAlert,
       'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
     };
   }
 

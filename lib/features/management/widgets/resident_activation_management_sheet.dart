@@ -589,7 +589,7 @@ class _ResidentActivationManagementSheetState
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Lỗi cấp lại mã: $e'),
+                      content: Text(formatErrorMessage(e)),
                       backgroundColor: AppTheme.error,
                     ),
                   );
@@ -652,7 +652,7 @@ class _ResidentActivationManagementSheetState
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Lỗi thu hồi mã: $e'),
+                      content: Text(formatErrorMessage(e)),
                       backgroundColor: AppTheme.error,
                     ),
                   );
@@ -689,7 +689,7 @@ class _ResidentActivationManagementSheetState
         setState(() => _isGenerating = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi sinh mã kích hoạt: $e'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -728,7 +728,7 @@ class _ResidentActivationManagementSheetState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi xuất file CSV: $e'),
+            content: Text(formatErrorMessage(e)),
             backgroundColor: AppTheme.error,
           ),
         );

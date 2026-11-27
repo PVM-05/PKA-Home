@@ -3,6 +3,7 @@ import '../models/parking_slot_model.dart';
 import '../models/parking_capacity_stats_model.dart';
 import '../models/visitor_parking_ticket_model.dart';
 import '../repositories/parking_repository.dart';
+import 'building_provider.dart';
 
 final parkingRepositoryProvider = Provider<ParkingRepository>((ref) {
   return ParkingRepository();
@@ -44,8 +45,10 @@ final parkingFilterProvider = StateProvider<ParkingFilter>((ref) {
 final parkingSlotsProvider = FutureProvider<List<ParkingSlotModel>>((ref) async {
   final repo = ref.watch(parkingRepositoryProvider);
   final filter = ref.watch(parkingFilterProvider);
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
 
   final slots = await repo.fetchSlots(
+    buildingId: effectiveBuildingId,
     zone: filter.zone,
     slotType: filter.type,
     status: filter.status,
@@ -67,12 +70,14 @@ final parkingSlotsProvider = FutureProvider<List<ParkingSlotModel>>((ref) async 
 /// Provider thống kê sức chứa bãi xe
 final parkingCapacityStatsProvider = FutureProvider<ParkingCapacityStatsModel>((ref) async {
   final repo = ref.watch(parkingRepositoryProvider);
-  return repo.fetchCapacityStats();
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
+  return repo.fetchCapacityStats(buildingId: effectiveBuildingId);
 });
 
 /// Provider danh sách vé xe vãng lai đang đỗ
 final activeVisitorTicketsProvider = FutureProvider<List<VisitorParkingTicketModel>>((ref) async {
   final repo = ref.watch(parkingRepositoryProvider);
-  return repo.fetchActiveVisitorTickets();
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
+  return repo.fetchActiveVisitorTickets(buildingId: effectiveBuildingId);
 });
 

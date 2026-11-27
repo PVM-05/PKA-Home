@@ -89,7 +89,9 @@ void showAmenityInspectionDialog({
                       ? '• Hoàn trả ${currencyFormat.format(deposit)} cho cư dân'
                       : '• Khấu trừ một phần hoặc toàn bộ tiền cọc để đền bù',
                   style: context.bodySmall?.copyWith(
-                    color: isPassed ? Colors.teal.shade800 : AppTheme.error,
+                    color: isPassed
+                        ? AppTheme.getSemanticSuccess(ctx)
+                        : AppTheme.getSemanticError(ctx),
                     fontWeight: FontWeight.w500,
                   ),
                 ),

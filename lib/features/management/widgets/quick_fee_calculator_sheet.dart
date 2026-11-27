@@ -479,7 +479,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
+                side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -566,7 +566,7 @@ class _QuickFeeCalculatorSheetState extends ConsumerState<QuickFeeCalculatorShee
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
+                side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),

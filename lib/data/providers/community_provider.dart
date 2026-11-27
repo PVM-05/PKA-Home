@@ -3,9 +3,11 @@ import '../models/poll_model.dart';
 import '../models/poll_result_model.dart';
 import '../models/petition_model.dart';
 import '../repositories/community_repository.dart';
+import 'building_provider.dart';
 
 final communityRepositoryProvider = Provider<CommunityRepository>((ref) {
-  return CommunityRepository();
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
+  return CommunityRepository(null, effectiveBuildingId);
 });
 
 /// Danh sách cuộc biểu quyết / khảo sát

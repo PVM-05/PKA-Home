@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/action_runner.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_snack_bar.dart';
 import '../../../core/widgets/app_state_view.dart';
@@ -334,6 +335,7 @@ class _CreateDelegationSheetState
   DateTime _startsAt = DateTime.now();
   DateTime _endsAt = DateTime.now().add(const Duration(days: 3));
   final _noteController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -569,29 +571,52 @@ class _CreateDelegationSheetState
                     foregroundColor: colorScheme.onPrimary,
                     minimumSize: const Size.fromHeight(48),
                   ),
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    await runAction(
-                      context,
-                      () async {
-                        await ref
-                            .read(managementRepositoryProvider)
-                            .createDelegation(
-                              delegateId: _selectedUserId,
-                              delegatedRole: _selectedRole,
-                              startsAt: _startsAt,
-                              endsAt: _endsAt,
-                              note: _noteController.text.trim().isEmpty
-                                  ? null
-                                  : _noteController.text.trim(),
-                            );
-                        ref.invalidate(delegationsListProvider);
-                        return 'Tạo ủy quyền vai trò thành công!';
-                      },
-                      actionName: 'Tạo ủy quyền vai trò',
-                    );
-                  },
-                  child: const Text('XÁC NHẬN ỦY QUYỀN'),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () async {
+                          setState(() => _isSubmitting = true);
+                          try {
+                            await ref
+                                .read(managementRepositoryProvider)
+                                .createDelegation(
+                                  delegateId: _selectedUserId,
+                                  delegatedRole: _selectedRole,
+                                  startsAt: _startsAt,
+                                  endsAt: _endsAt,
+                                  note: _noteController.text.trim().isEmpty
+                                      ? null
+                                      : _noteController.text.trim(),
+                                );
+                            ref.invalidate(delegationsListProvider);
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                              AppSnackBar.showSuccess(
+                                context,
+                                'Tạo ủy quyền vai trò thành công!',
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              setState(() => _isSubmitting = false);
+                            }
+                            if (context.mounted) {
+                              AppSnackBar.showError(
+                                context,
+                                formatErrorMessage(e),
+                              );
+                            }
+                          }
+                        },
+                  child: _isSubmitting
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colorScheme.onPrimary,
+                          ),
+                        )
+                      : const Text('XÁC NHẬN ỦY QUYỀN'),
                 ),
               ),
             ],

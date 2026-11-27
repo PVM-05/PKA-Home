@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/accounting_providers.dart';
 
 class CreateCreditNoteDialog extends ConsumerStatefulWidget {
@@ -59,6 +61,8 @@ class _CreateCreditNoteDialogState extends ConsumerState<CreateCreditNoteDialog>
       );
 
       if (mounted) {
+        final successColor = AppTheme.getSemanticSuccess(context);
+        final errorColor = AppTheme.getSemanticError(context);
         setState(() => _isLoading = false);
         if (result != null && result['success'] == true) {
           ref.invalidate(apartmentBalanceProvider(widget.apartmentId));
@@ -67,23 +71,24 @@ class _CreateCreditNoteDialogState extends ConsumerState<CreateCreditNoteDialog>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Đã lập thành công phiếu điều chỉnh ${result['credit_note_code']}'),
-              backgroundColor: Colors.green,
+              backgroundColor: successColor,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result?['error']?.toString() ?? 'Lỗi khi lập phiếu điều chỉnh'),
-              backgroundColor: Colors.red,
+              backgroundColor: errorColor,
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
+        final errorColor = AppTheme.getSemanticError(context);
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: errorColor),
         );
       }
     }
@@ -169,17 +174,19 @@ class _CreateCreditNoteDialogState extends ConsumerState<CreateCreditNoteDialog>
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
           child: const Text('Hủy'),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _submit,
           style: ElevatedButton.styleFrom(
+            minimumSize: const Size(0, 48),
             backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
           ),
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2))
               : const Text('Lập Phiếu'),
         ),
       ],

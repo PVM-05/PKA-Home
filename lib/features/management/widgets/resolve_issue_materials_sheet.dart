@@ -60,7 +60,7 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
         });
       }
     } catch (e) {
-      setState(() => _errorMessage = 'Không thể chọn ảnh: $e');
+      setState(() => _errorMessage = formatErrorMessage(e));
     }
   }
 

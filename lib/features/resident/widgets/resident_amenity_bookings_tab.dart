@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:vivona/core/theme/app_theme.dart';
 import 'package:vivona/core/theme/app_typography.dart';
+import 'package:vivona/core/utils/error_formatter.dart';
 import 'package:vivona/core/widgets/app_error_card.dart';
 import 'package:vivona/core/widgets/app_skeleton_shimmer.dart';
 import 'package:vivona/core/widgets/app_snack_bar.dart';
@@ -69,7 +70,7 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  AppSnackBar.showError(context, 'Lỗi hủy lịch: $e');
+                  AppSnackBar.showError(context, formatErrorMessage(e));
                 }
               }
             },
@@ -436,9 +437,9 @@ class ResidentAmenityBookingsTab extends ConsumerWidget {
                                 b.paymentStatus == 'PENDING')
                               OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.orange.shade800,
+                                  foregroundColor: AppTheme.getSemanticWarning(context),
                                   side: BorderSide(
-                                    color: Colors.orange.shade400,
+                                    color: AppTheme.getSemanticWarning(context).withValues(alpha: 0.6),
                                   ),
                                   visualDensity: VisualDensity.compact,
                                 ),

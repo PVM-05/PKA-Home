@@ -6,7 +6,10 @@ import '../../../data/models/invoice_model.dart';
 import '../../../data/models/issue_model.dart';
 import 'building_provider.dart';
 
-final managementRepositoryProvider = Provider((ref) => ManagementRepository());
+final managementRepositoryProvider = Provider((ref) {
+  final effectiveBuildingId = ref.watch(effectiveBuildingIdProvider);
+  return ManagementRepository(null, effectiveBuildingId);
+});
 
 final apartmentsProvider = FutureProvider.autoDispose<List<ApartmentModel>>((ref) async {
   final activeBuildingId = ref.watch(activeBuildingIdProvider);

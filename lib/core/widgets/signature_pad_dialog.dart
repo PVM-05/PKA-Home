@@ -170,7 +170,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: Colors.grey.shade500,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -181,7 +181,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                                 right: 16,
                                 child: Container(
                                   height: 1,
-                                  color: Colors.grey.shade300,
+                                  color: Theme.of(context).colorScheme.outlineVariant,
                                 ),
                               ),
                             ],

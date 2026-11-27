@@ -6,6 +6,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/security/mfa_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../widgets/auth_security_card_layout.dart';
 
@@ -85,7 +86,7 @@ class _MfaChallengeScreenState extends ConsumerState<MfaChallengeScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Lỗi xác thực: $e';
+        _errorMessage = formatErrorMessage(e);
         _isLoading = false;
       });
     }

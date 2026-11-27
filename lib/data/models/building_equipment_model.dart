@@ -1,6 +1,7 @@
 /// Model biểu diễn Hồ sơ thiết bị kỹ thuật toàn tòa nhà (Building Equipment)
 class BuildingEquipmentModel {
   final String id;
+  final String? buildingId;
   final String code;
   final String name;
   final String category;
@@ -18,6 +19,7 @@ class BuildingEquipmentModel {
 
   const BuildingEquipmentModel({
     required this.id,
+    this.buildingId,
     required this.code,
     required this.name,
     required this.category,
@@ -37,6 +39,7 @@ class BuildingEquipmentModel {
   factory BuildingEquipmentModel.fromJson(Map<String, dynamic> json) {
     return BuildingEquipmentModel(
       id: json['id'] as String? ?? '',
+      buildingId: json['building_id'] as String?,
       code: json['code'] as String? ?? '',
       name: json['name'] as String? ?? '',
       category: json['category'] as String? ?? 'other',
@@ -69,6 +72,7 @@ class BuildingEquipmentModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      if (buildingId != null) 'building_id': buildingId,
       'code': code,
       'name': name,
       'category': category,
@@ -86,6 +90,7 @@ class BuildingEquipmentModel {
 
   BuildingEquipmentModel copyWith({
     String? id,
+    String? buildingId,
     String? code,
     String? name,
     String? category,
@@ -103,6 +108,7 @@ class BuildingEquipmentModel {
   }) {
     return BuildingEquipmentModel(
       id: id ?? this.id,
+      buildingId: buildingId ?? this.buildingId,
       code: code ?? this.code,
       name: name ?? this.name,
       category: category ?? this.category,

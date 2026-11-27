@@ -423,7 +423,9 @@ class _BulkInvoiceDialogState extends ConsumerState<BulkInvoiceDialog> {
               Container(
                 height: 180,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: _selectedListTab == 0

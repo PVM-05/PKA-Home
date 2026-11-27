@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/route_names.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../widgets/auth_security_card_layout.dart';
@@ -74,7 +75,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _errorMessage = formatErrorMessage(e);
       });
     } finally {
       if (mounted) {

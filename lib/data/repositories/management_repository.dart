@@ -23,8 +23,9 @@ import '../../../data/models/bulk_invoice_validation_model.dart';
 
 class ManagementRepository {
   final SupabaseClient _client;
+  final String? _defaultBuildingId;
 
-  ManagementRepository([SupabaseClient? client])
+  ManagementRepository([SupabaseClient? client, this._defaultBuildingId])
     : _client = client ?? SupabaseConfig.client;
 
   Future<List<ResidentModel>> fetchResidents({String? role}) async {
@@ -79,6 +80,8 @@ class ManagementRepository {
             : 1);
 
     await _client.from('apartments').insert({
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+        'building_id': _defaultBuildingId,
       'code': normalizedCode,
 
       'area': area,
@@ -542,6 +545,8 @@ class ManagementRepository {
     if (currentUserId == null) throw Exception('Người dùng chưa đăng nhập');
 
     await _client.from('role_delegations').insert({
+      if (_defaultBuildingId != null && _defaultBuildingId.isNotEmpty)
+        'building_id': _defaultBuildingId,
       'delegator_id': currentUserId,
 
       'delegate_id': delegateId,

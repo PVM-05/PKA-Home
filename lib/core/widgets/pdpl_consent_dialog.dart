@@ -292,7 +292,7 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'Dữ liệu được mã hóa AES-256 trên cơ sở dữ liệu và cách ly phân quyền bằng Supabase Row Level Security (RLS). Cư dân có toàn quyền xuất bản sao kê hoặc yêu cầu đóng băng dữ liệu bất cứ lúc nào.',
+                                'Dữ liệu được mã hóa AES-256 trên cơ sở dữ liệu và cách ly phân quyền chặt chẽ theo từng tòa nhà và căn hộ. Cư dân có toàn quyền xuất bản sao kê hoặc yêu cầu đóng băng dữ liệu bất cứ lúc nào.',
                                 style: textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                   height: 1.4,
@@ -335,8 +335,8 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: 24,
-                      height: 24,
+                      width: 48,
+                      height: 48,
                       child: Checkbox(
                         value: _agreed,
                         onChanged: (val) {
@@ -344,17 +344,20 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                         },
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
                           setState(() => _agreed = !_agreed);
                         },
-                        child: Text(
-                          'Tôi đã đọc, hiểu rõ quyền chủ thể dữ liệu và tự nguyện đồng ý cho phép Vivona thu thập, xử lý thông tin cá nhân phục vụ vận hành tòa nhà.',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface,
-                            height: 1.4,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Text(
+                            'Tôi đã đọc, hiểu rõ quyền chủ thể dữ liệu và tự nguyện đồng ý cho phép Vivona thu thập, xử lý thông tin cá nhân phục vụ vận hành tòa nhà.',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface,
+                              height: 1.4,
+                            ),
                           ),
                         ),
                       ),
@@ -370,6 +373,9 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                   if (widget.isReviewMode) ...[
                     Expanded(
                       child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 48),
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
                         child: const Text('Đóng'),
                       ),
@@ -381,6 +387,7 @@ class _PdplConsentDialogState extends State<PdplConsentDialog> {
                             ? _handleConfirm
                             : null,
                         style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, 48),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           backgroundColor: colorScheme.primary,
                           foregroundColor: colorScheme.onPrimary,
@@ -522,13 +529,13 @@ void showPrivacyPolicyBottomSheet(BuildContext context) {
                         number: '1',
                         title: 'Tôn Chỉ & Phạm Vi Áp Dụng',
                         body:
-                            'Vivona cam kết bảo vệ an toàn tính riêng tư dữ liệu cá nhân cho Ban Quản Lý, Chủ căn hộ, Cư dân và Khách thuê theo nguyên tắc đặc quyền tối thiểu (Least Privilege) và bảo mật theo thiết kế (Privacy by Design).',
+                            'Vivona cam kết bảo vệ an toàn tính riêng tư dữ liệu cá nhân cho Ban Quản Lý, Chủ căn hộ, Cư dân và Khách thuê theo nguyên tắc đặc quyền tối thiểu và bảo mật mặc định ngay từ thiết kế.',
                       ),
                       _PolicySectionCard(
                         number: '2',
                         title: 'Danh Mục Dữ Liệu Thu Thập',
                         body:
-                            '- Định danh cá nhân: Họ tên, SĐT, CCCD/Hộ chiếu, email.\n- Cư trú & Bất động sản: Mã căn hộ A0110, diện tích m², vai trò cư dân.\n- Phương tiện & Gửi xe: Biển số xe, loại xe.\n- Tiêu thụ năng lượng: Ảnh công tơ, chỉ số điện nước.\n- Lễ tân & Khách thăm: QR Token, thời gian check-in/out.\n- Tài chính: Hóa đơn dịch vụ, chuyển khoản VietQR, quỹ bảo trì 2%.',
+                            '- Định danh cá nhân: Họ tên, SĐT, CCCD/Hộ chiếu, email.\n- Cư trú & Bất động sản: Mã căn hộ A0110, diện tích m², vai trò cư dân.\n- Phương tiện & Gửi xe: Biển số xe, loại xe.\n- Tiêu thụ năng lượng: Ảnh công tơ, chỉ số điện nước.\n- Lễ tân & Khách thăm: Mã QR, thời gian vào ra.\n- Tài chính: Hóa đơn dịch vụ, chuyển khoản VietQR, quỹ bảo trì 2%.',
                       ),
                       _PolicySectionCard(
                         number: '3',
@@ -540,7 +547,7 @@ void showPrivacyPolicyBottomSheet(BuildContext context) {
                         number: '4',
                         title: 'Biện Pháp Kỹ Thuật Bảo Vệ',
                         body:
-                            '- Mã hóa toàn trình TLS 1.3/HTTPS và AES-256 cho dữ liệu lưu trữ.\n- Phân quyền hàng dữ liệu Supabase Row Level Security (RLS) - cách ly tuyệt đối căn hộ A và B.\n- Fail-Closed: Khóa truy cập khi phát hiện bất thường kết nối.\n- Nhật ký kiểm toán bất biến (Immutable Audit Logs) có dấu thời gian.',
+                            '- Mã hóa toàn trình TLS 1.3/HTTPS và AES-256 cho dữ liệu lưu trữ.\n- Phân quyền hàng dữ liệu bảo mật nhiều tầng, cách ly tuyệt đối từng căn hộ và tòa nhà.\n- Tự động khóa truy cập khi phát hiện kết nối bất thường.\n- Nhật ký kiểm toán bất biến có dấu thời gian.',
                       ),
                       _PolicySectionCard(
                         number: '5',

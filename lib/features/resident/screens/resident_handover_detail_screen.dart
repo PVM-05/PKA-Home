@@ -7,6 +7,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../core/utils/handover_pdf_builder.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_empty_state.dart';
@@ -58,7 +59,7 @@ class _ResidentHandoverDetailScreenState
         }
       } catch (e) {
         if (mounted) {
-          AppSnackBar.showError(context, 'Lỗi ký xác nhận: $e');
+          AppSnackBar.showError(context, formatErrorMessage(e));
         }
       } finally {
         if (mounted) setState(() => _isActionLoading = false);
@@ -137,7 +138,7 @@ class _ResidentHandoverDetailScreenState
         }
       } catch (e) {
         if (mounted) {
-          AppSnackBar.showError(context, 'Lỗi gửi khiếu nại: $e');
+          AppSnackBar.showError(context, formatErrorMessage(e));
         }
       } finally {
         if (mounted) setState(() => _isActionLoading = false);
@@ -176,7 +177,7 @@ class _ResidentHandoverDetailScreenState
                   );
                 } catch (e) {
                   if (context.mounted) {
-                    AppSnackBar.showError(context, 'Lỗi tạo PDF: $e');
+                    AppSnackBar.showError(context, formatErrorMessage(e));
                   }
                 }
               },

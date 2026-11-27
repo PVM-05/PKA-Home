@@ -19,6 +19,7 @@ import '../../../data/models/apartment_model.dart';
 import '../../../data/models/parking_slot_model.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/visitor_parking_ticket_model.dart';
+import '../../../data/providers/building_provider.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/parking_provider.dart';
 import '../../../data/providers/vehicle_provider.dart';
@@ -177,10 +178,12 @@ class _ParkingManagementScreenState
                   if (plate.isEmpty) return;
                   Navigator.pop(dialogCtx);
 
+                  final bldId = ref.read(activeBuildingIdProvider);
                   final repo = ref.read(parkingRepositoryProvider);
                   final res = await repo.createVisitorTicket(
                     licensePlate: plate,
                     vehicleType: selectedType,
+                    buildingId: bldId.isNotEmpty ? bldId : null,
                     note: noteController.text.trim(),
                   );
 

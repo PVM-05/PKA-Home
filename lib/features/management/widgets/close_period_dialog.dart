@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/providers/accounting_providers.dart';
 
 class ClosePeriodDialog extends ConsumerStatefulWidget {
@@ -52,6 +54,8 @@ class _ClosePeriodDialogState extends ConsumerState<ClosePeriodDialog> {
       );
 
       if (mounted) {
+        final successColor = AppTheme.getSemanticSuccess(context);
+        final errorColor = AppTheme.getSemanticError(context);
         setState(() => _isLoading = false);
         if (result != null && result['success'] == true) {
           ref.invalidate(accountingPeriodsProvider(widget.buildingId));
@@ -59,23 +63,24 @@ class _ClosePeriodDialogState extends ConsumerState<ClosePeriodDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Đã khóa sổ thành công kỳ kế toán $period'),
-              backgroundColor: Colors.green,
+              backgroundColor: successColor,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result?['error']?.toString() ?? 'Lỗi khi khóa sổ kỳ kế toán'),
-              backgroundColor: Colors.red,
+              backgroundColor: errorColor,
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
+        final errorColor = AppTheme.getSemanticError(context);
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(formatErrorMessage(e)), backgroundColor: errorColor),
         );
       }
     }
@@ -83,12 +88,14 @@ class _ClosePeriodDialogState extends ConsumerState<ClosePeriodDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final warningColor = AppTheme.getSemanticWarning(context);
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.lock_clock_outlined, color: Colors.orange),
-          SizedBox(width: 8),
-          Text('Khóa Sổ Kỳ Kế Toán'),
+          Icon(Icons.lock_clock_outlined, color: warningColor),
+          const SizedBox(width: 8),
+          const Expanded(child: Text('Khóa Sổ Kỳ Kế Toán')),
         ],
       ),
       content: SingleChildScrollView(
@@ -98,7 +105,7 @@ class _ClosePeriodDialogState extends ConsumerState<ClosePeriodDialog> {
           children: [
             Text(
               'Lưu ý: Sau khi khóa sổ, toàn bộ hóa đơn và số liệu sổ cái trong kỳ này sẽ bị khóa cứng (bất biến) để đảm bảo tính toàn vẹn kiểm toán.',
-              style: context.bodyMedium?.copyWith(color: Colors.black87),
+              style: context.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -126,13 +133,15 @@ class _ClosePeriodDialogState extends ConsumerState<ClosePeriodDialog> {
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
           child: const Text('Hủy'),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _submit,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange.shade800,
+            minimumSize: const Size(0, 48),
+            backgroundColor: warningColor,
             foregroundColor: Colors.white,
           ),
           child: _isLoading
