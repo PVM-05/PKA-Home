@@ -32,7 +32,8 @@ class ElectronicReceiptSheet extends ConsumerWidget {
     final formatDateTime = DateFormat('dd/MM/yyyy HH:mm');
 
     final colorScheme = Theme.of(context).colorScheme;
-    final activeBuilding = ref.watch(activeBuildingProvider).value;
+    final activeBuilding = ref.watch(residentBuildingProvider).valueOrNull ??
+        ref.watch(activeBuildingProvider).valueOrNull;
     final buildingName = activeBuilding?.name ?? 'TÒA NHÀ VIVONA';
     final receiptNumber = invoice.displayReceiptNumber;
     final lookupCode = invoice.displayLookupCode;

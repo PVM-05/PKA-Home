@@ -30,7 +30,9 @@ class SubscriptionRepository {
     try {
       final response = await client.rpc(
         'get_organization_subscription_status',
-        params: {'p_building_id': buildingId},
+        params: {
+          'p_building_id': buildingId.trim().isEmpty ? null : buildingId,
+        },
       );
 
       if (response is Map<String, dynamic>) {

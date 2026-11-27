@@ -207,7 +207,7 @@ class PushNotificationService {
 
         // 7. Lắng nghe sự kiện click thông báo khi app ở background
         _onMessageOpenedAppSub = FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-          debugPrint('🔔 [FCM onMessageOpenedApp] Click thông báo từ background: ${message.data}');
+          debugPrint('[FCM onMessageOpenedApp] Click thông báo từ background: ${message.data}');
           final route = resolveRouteFromNotification(message.data);
           _onSelectRouteCallback?.call(route);
         });
@@ -215,7 +215,7 @@ class PushNotificationService {
         // 8. Xử lý click thông báo khi app ở trạng thái terminated (khởi động app từ notification)
         fcm.getInitialMessage().then((RemoteMessage? initialMessage) {
           if (initialMessage != null) {
-            debugPrint('🔔 [FCM getInitialMessage] Mở app từ terminated: ${initialMessage.data}');
+            debugPrint('[FCM getInitialMessage] Mở app từ terminated: ${initialMessage.data}');
             final route = resolveRouteFromNotification(initialMessage.data);
             _onSelectRouteCallback?.call(route);
           }
@@ -282,7 +282,7 @@ class PushNotificationService {
       await ensureLocalNotificationsInitialized();
 
       final android = message.notification?.android;
-      debugPrint('🔔 [FCM Foreground] Nhận thông báo: "${notification.title}" - "${notification.body}"');
+      debugPrint('[FCM Foreground] Nhận thông báo: "${notification.title}" - "${notification.body}"');
 
       await _localNotifications.show(
         notification.hashCode,
@@ -313,9 +313,9 @@ class PushNotificationService {
         ),
         payload: jsonEncode(message.data),
       );
-      debugPrint('✅ [FCM Foreground] Đã phát thông báo hệ thống Android thành công');
+      debugPrint('[FCM Foreground] Đã phát thông báo hệ thống Android thành công');
     } catch (e, stack) {
-      debugPrint('❌ [FCM Foreground] Lỗi hiển thị thông báo foreground: $e\n$stack');
+      debugPrint('[FCM Foreground] Lỗi hiển thị thông báo foreground: $e\n$stack');
     }
   }
 
@@ -332,7 +332,7 @@ class PushNotificationService {
 
       await ensureLocalNotificationsInitialized();
 
-      debugPrint('🔔 [Hệ thống] Đang phát thông báo Android: "$title" - "$body"');
+      debugPrint('[Hệ thống] Đang phát thông báo Android: "$title" - "$body"');
 
       await _localNotifications.show(
         id,
@@ -361,9 +361,9 @@ class PushNotificationService {
         ),
         payload: payload != null ? jsonEncode(payload) : null,
       );
-      debugPrint('✅ [Hệ thống] Đã gửi thông báo Android thành công (id: $id)');
+      debugPrint('[Hệ thống] Đã gửi thông báo Android thành công (id: $id)');
     } catch (e, stack) {
-      debugPrint('❌ [Hệ thống] Lỗi hiển thị thông báo hệ thống: $e\n$stack');
+      debugPrint('[Hệ thống] Lỗi hiển thị thông báo hệ thống: $e\n$stack');
     }
   }
 

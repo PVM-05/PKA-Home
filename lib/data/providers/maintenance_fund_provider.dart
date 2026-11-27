@@ -10,8 +10,8 @@ final maintenanceFundRepositoryProvider = Provider<MaintenanceFundRepository>((r
 
 final activeMaintenanceFundProvider = FutureProvider<MaintenanceFundModel?>((ref) async {
   final repo = ref.watch(maintenanceFundRepositoryProvider);
-  final activeBuilding = ref.watch(activeBuildingProvider).valueOrNull;
-  return repo.fetchFundByBuilding(activeBuilding?.id);
+  final buildingId = ref.watch(effectiveBuildingIdProvider);
+  return repo.fetchFundByBuilding(buildingId);
 });
 
 // Giữ lại maintenanceFundProvider để tương thích ngược 100%
@@ -24,11 +24,11 @@ final maintenanceFundLedgerFilterProvider = StateProvider<String>((ref) => 'ALL'
 final maintenanceFundLedgerProvider =
     FutureProvider<List<MaintenanceFundTransactionModel>>((ref) async {
   final repo = ref.watch(maintenanceFundRepositoryProvider);
-  final activeBuilding = ref.watch(activeBuildingProvider).valueOrNull;
+  final buildingId = ref.watch(effectiveBuildingIdProvider);
   final filter = ref.watch(maintenanceFundLedgerFilterProvider);
 
   return repo.fetchTransactions(
-    buildingId: activeBuilding?.id,
+    buildingId: buildingId,
     transactionType: filter,
   );
 });

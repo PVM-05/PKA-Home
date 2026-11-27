@@ -31,8 +31,11 @@ class _MaintenanceFundCardState extends ConsumerState<MaintenanceFundCard> {
   @override
   Widget build(BuildContext context) {
     // Nếu cơ sở đang chọn là nhà trọ / phòng trọ, tự động ẩn Quỹ bảo trì 2% chung cư
-    final activeBuilding = ref.watch(activeBuildingProvider).valueOrNull;
-    if (activeBuilding?.isBoardingHouse == true) {
+    final targetBuilding = widget.isManagement
+        ? ref.watch(activeBuildingProvider).valueOrNull
+        : (ref.watch(residentBuildingProvider).valueOrNull ??
+            ref.watch(activeBuildingProvider).valueOrNull);
+    if (targetBuilding?.isBoardingHouse == true) {
       return const SizedBox.shrink();
     }
 

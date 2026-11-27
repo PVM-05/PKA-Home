@@ -150,7 +150,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             // Trường hợp 1: Có hóa đơn mới vừa được tạo cho chính căn hộ này
             if (isBrandNew) {
               debugPrint(
-                '🔔 [ResidentHome] Phát hiện hóa đơn mới kỳ: ${nextInv.period}',
+                '[ResidentHome] Phát hiện hóa đơn mới kỳ: ${nextInv.period}',
               );
               _showNotificationToast(
                 icon: Icons.receipt_long,
@@ -168,7 +168,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
                   prevInv.status != nextInv.status &&
                   nextInv.status == 'paid') {
                 debugPrint(
-                  '🔔 [ResidentHome] Hóa đơn kỳ ${nextInv.period} đã được thanh toán',
+                  '[ResidentHome] Hóa đơn kỳ ${nextInv.period} đã được thanh toán',
                 );
                 _showNotificationToast(
                   icon: Icons.check_circle,
@@ -200,7 +200,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
           if (prevIssue != null && prevIssue.status != nextIssue.status) {
             if (nextIssue.status == 'in_progress') {
               debugPrint(
-                '🔔 [ResidentHome] Cập nhật sự cố đang xử lý: ${nextIssue.description}',
+                '[ResidentHome] Cập nhật sự cố đang xử lý: ${nextIssue.description}',
               );
               _showNotificationToast(
                 icon: Icons.engineering,
@@ -210,7 +210,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
               );
             } else if (nextIssue.status == 'resolved') {
               debugPrint(
-                '🔔 [ResidentHome] Cập nhật sự cố đã giải quyết: ${nextIssue.description}',
+                '[ResidentHome] Cập nhật sự cố đã giải quyết: ${nextIssue.description}',
               );
               _showNotificationToast(
                 icon: Icons.verified,
@@ -235,7 +235,7 @@ class _ResidentHomeScreenState extends ConsumerState<ResidentHomeScreen> {
             .toList();
         for (final newest in newlyAdded) {
           debugPrint(
-            '📣 [ResidentHome] Phát hiện thông báo bảng tin mới: "${newest.title}"',
+            '[ResidentHome] Phát hiện thông báo bảng tin mới: "${newest.title}"',
           );
           _showNotificationToast(
             icon: newest.isUrgent
