@@ -99,7 +99,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Bảng Ma Trận Phân Quyền'), findsOneWidget);
-      expect(find.text('Kiến Trúc Bảo Mật 2 Lớp (Defense-in-Depth)'), findsOneWidget);
+      expect(find.text('Kiến Trúc Bảo Mật Phòng Thủ 2 Lớp'), findsOneWidget);
     });
 
     testWidgets('PermissionMatrixScreen renders centered on 1200dp desktop width', (tester) async {

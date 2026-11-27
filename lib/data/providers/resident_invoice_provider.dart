@@ -136,7 +136,13 @@ final residentUnpaidInvoicesProvider = FutureProvider<List<InvoiceModel>>((ref) 
       .from('invoices')
       .select('*, apartments(*)')
       .eq('apartment_id', selectedAptId)
-      .inFilter('status', ['unpaid', 'pending_confirmation'])
+      .inFilter('status', [
+        'unpaid',
+        'overdue',
+        'pending',
+        'pending_confirmation',
+        'under_review',
+      ])
       .order('due_date', ascending: true);
 
   return (response as List).map((e) => InvoiceModel.fromJson(e)).toList();

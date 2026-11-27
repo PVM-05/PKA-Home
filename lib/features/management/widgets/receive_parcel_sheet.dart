@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/dashboard_providers.dart';
 import '../../../data/providers/front_desk_provider.dart';
 
@@ -70,6 +71,17 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
       return;
     }
 
+    final staffId = ref.read(authProvider).valueOrNull?.id;
+    if (staffId == null || staffId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -81,7 +93,7 @@ class _ReceiveParcelSheetState extends ConsumerState<ReceiveParcelSheet> {
         trackingNumber: _trackingCtrl.text.trim().isNotEmpty ? _trackingCtrl.text.trim() : null,
         description: _descCtrl.text.trim().isNotEmpty ? _descCtrl.text.trim() : null,
         shelfLocation: _shelfLocation,
-        staffId: 'staff-current',
+        staffId: staffId,
       );
 
       ref.invalidate(parcelsProvider);

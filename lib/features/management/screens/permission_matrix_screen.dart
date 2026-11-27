@@ -63,7 +63,7 @@ class PermissionMatrixScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Kiến Trúc Bảo Mật 2 Lớp (Defense-in-Depth)',
+                                'Kiến Trúc Bảo Mật Phòng Thủ 2 Lớp',
                                 style: context.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.primary,
@@ -71,7 +71,7 @@ class PermissionMatrixScreen extends StatelessWidget {
                               ),
                               AppSpacing.h4,
                               Text(
-                                'Hệ thống áp dụng nghiêm ngặt nguyên tắc Đặc quyền tối thiểu (Least Privilege). Quyền hạn được bảo vệ 2 lớp: Tầng CSDL (Supabase RLS) và Tầng Giao diện (Flutter RoleGuard).',
+                                'Hệ thống áp dụng nghiêm ngặt nguyên tắc Đặc quyền tối thiểu. Quyền hạn được bảo vệ 2 lớp tại Tầng Cơ sở dữ liệu và Tầng Giao diện.',
                                 style: context.bodySmall?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                   height: 1.3,

@@ -117,7 +117,7 @@ class _FrontDeskWorkstationScreenState
     final statsAsync = ref.watch(frontDeskStatsProvider);
 
     return RoleGuard(
-      permission: AppPermissions.residentManagement,
+      permission: AppPermissions.frontDeskWorkstation,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Trạm Lễ Tân & An Ninh'),

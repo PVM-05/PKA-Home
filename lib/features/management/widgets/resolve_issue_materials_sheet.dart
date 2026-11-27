@@ -8,6 +8,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/issue_model.dart';
 import '../../../data/models/maintenance_material_model.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/management_provider.dart';
 import '../../../data/providers/material_provider.dart';
 
@@ -186,7 +187,17 @@ class _ResolveIssueMaterialsSheetState extends ConsumerState<ResolveIssueMateria
     });
 
     try {
-      final staffId = widget.issue.assignedStaffId ?? 'staff-admin';
+      final currentUserId = ref.read(authProvider).valueOrNull?.id;
+      final staffId = widget.issue.assignedStaffId ?? currentUserId;
+      if (staffId == null || staffId.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+            _errorMessage = 'Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại.';
+          });
+        }
+        return;
+      }
 
       // 1. Ghi nhận vật tư xuất kho nếu có
       if (_selectedMaterials.isNotEmpty) {

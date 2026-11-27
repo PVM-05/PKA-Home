@@ -43,13 +43,33 @@ Stream<List<Map<String, dynamic>>> createResilientTableStream({
 }
 
 final pendingIssuesCountProvider = StreamProvider<int>((ref) async* {
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
+  final aptList = ref.watch(apartmentsStreamProvider).valueOrNull;
+  final allowedAptIds = aptList
+      ?.map((a) => a['id']?.toString())
+      .whereType<String>()
+      .toSet();
+
+  if (activeBuildingId.isNotEmpty && (allowedAptIds == null || allowedAptIds.isEmpty)) {
+    yield 0;
+    return;
+  }
+
+  bool matchesBuilding(Map<String, dynamic> row) {
+    if (activeBuildingId.isEmpty) return true;
+    final aptId = row['apartment_id']?.toString();
+    return aptId != null && (allowedAptIds?.contains(aptId) ?? false);
+  }
+
   int lastCount = 0;
   try {
     final initial = await SupabaseConfig.client
         .from('issue_reports')
-        .select('id')
+        .select('id, apartment_id')
         .eq('status', 'pending');
-    lastCount = (initial as List).length;
+    lastCount = (initial as List)
+        .where((row) => matchesBuilding(Map<String, dynamic>.from(row as Map)))
+        .length;
     yield lastCount;
   } catch (e) {
     debugPrint('[PendingIssues] Lỗi nạp phản ánh ban đầu: $e');
@@ -59,7 +79,9 @@ final pendingIssuesCountProvider = StreamProvider<int>((ref) async* {
     final stream = SupabaseConfig.client
         .from('issue_reports')
         .stream(primaryKey: ['id'])
-        .map((list) => list.where((issue) => issue['status'] == 'pending').length);
+        .map((list) => list
+            .where((issue) => issue['status'] == 'pending' && matchesBuilding(issue))
+            .length);
     await for (final count in stream) {
       lastCount = count;
       yield count;
@@ -71,13 +93,33 @@ final pendingIssuesCountProvider = StreamProvider<int>((ref) async* {
 });
 
 final pendingLinkRequestsCountProvider = StreamProvider<int>((ref) async* {
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
+  final aptList = ref.watch(apartmentsStreamProvider).valueOrNull;
+  final allowedAptIds = aptList
+      ?.map((a) => a['id']?.toString())
+      .whereType<String>()
+      .toSet();
+
+  if (activeBuildingId.isNotEmpty && (allowedAptIds == null || allowedAptIds.isEmpty)) {
+    yield 0;
+    return;
+  }
+
+  bool matchesBuilding(Map<String, dynamic> row) {
+    if (activeBuildingId.isEmpty) return true;
+    final aptId = row['apartment_id']?.toString();
+    return aptId != null && (allowedAptIds?.contains(aptId) ?? false);
+  }
+
   int lastCount = 0;
   try {
     final initial = await SupabaseConfig.client
         .from('apartment_link_requests')
-        .select('id')
+        .select('id, apartment_id')
         .eq('status', 'pending');
-    lastCount = (initial as List).length;
+    lastCount = (initial as List)
+        .where((row) => matchesBuilding(Map<String, dynamic>.from(row as Map)))
+        .length;
     yield lastCount;
   } catch (e) {
     debugPrint('[PendingLinkRequests] Lỗi nạp yêu cầu liên kết ban đầu: $e');
@@ -87,7 +129,9 @@ final pendingLinkRequestsCountProvider = StreamProvider<int>((ref) async* {
     final stream = SupabaseConfig.client
         .from('apartment_link_requests')
         .stream(primaryKey: ['id'])
-        .map((list) => list.where((req) => req['status'] == 'pending').length);
+        .map((list) => list
+            .where((req) => req['status'] == 'pending' && matchesBuilding(req))
+            .length);
     await for (final count in stream) {
       lastCount = count;
       yield count;
@@ -103,9 +147,14 @@ final pendingLinkRequestsCountProvider = StreamProvider<int>((ref) async* {
 final rawInvoicesStream = Provider<Stream<List<Map<String, dynamic>>>>((ref) {
   final activeBuildingId = ref.watch(activeBuildingIdProvider);
   final aptList = ref.watch(apartmentsStreamProvider).valueOrNull;
-  final allowedAptIds = aptList != null && aptList.isNotEmpty
-      ? aptList.map((a) => a['id']?.toString()).whereType<String>().toSet()
-      : null;
+  final allowedAptIds = aptList
+      ?.map((a) => a['id']?.toString())
+      .whereType<String>()
+      .toSet();
+
+  if (activeBuildingId.isNotEmpty && (allowedAptIds == null || allowedAptIds.isEmpty)) {
+    return Stream.value(const <Map<String, dynamic>>[]).asBroadcastStream();
+  }
 
   return createResilientTableStream(
     debugLabel: 'Invoices',
@@ -117,10 +166,10 @@ final rawInvoicesStream = Provider<Stream<List<Map<String, dynamic>>>>((ref) {
     },
     realtimeStream: () => SupabaseConfig.client.from('invoices').stream(primaryKey: ['id']),
   ).map((list) {
-    if (allowedAptIds == null || activeBuildingId.isEmpty) return list;
+    if (activeBuildingId.isEmpty) return list;
     return list.where((inv) {
       final aptId = inv['apartment_id']?.toString();
-      return aptId == null || allowedAptIds.contains(aptId);
+      return aptId != null && (allowedAptIds?.contains(aptId) ?? false);
     }).toList();
   }).asBroadcastStream();
 });
@@ -154,7 +203,7 @@ final apartmentsStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref
   ).map((list) {
     final hasBuildingId = list.any((a) => a['building_id'] != null);
     if (!hasBuildingId || activeBuildingId.isEmpty) return list;
-    return list.where((a) => a['building_id'] == null || a['building_id'] == activeBuildingId).toList();
+    return list.where((a) => a['building_id'] == activeBuildingId).toList();
   });
 });
 
@@ -163,6 +212,56 @@ final totalApartmentsProvider = Provider<AsyncValue<int>>((ref) {
 });
 
 final totalResidentsProvider = StreamProvider<int>((ref) async* {
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
+  final aptList = ref.watch(apartmentsStreamProvider).valueOrNull;
+  final allowedAptIds = aptList
+      ?.map((a) => a['id']?.toString())
+      .whereType<String>()
+      .toSet();
+
+  if (activeBuildingId.isNotEmpty) {
+    if (allowedAptIds == null || allowedAptIds.isEmpty) {
+      yield 0;
+      return;
+    }
+
+    int lastCount = 0;
+    try {
+      final initial = await SupabaseConfig.client
+          .from('residents_apartments')
+          .select('user_id, apartment_id');
+      lastCount = (initial as List)
+          .where((row) => allowedAptIds.contains(row['apartment_id']?.toString()))
+          .map((row) => row['user_id']?.toString())
+          .whereType<String>()
+          .toSet()
+          .length;
+      yield lastCount;
+    } catch (e) {
+      debugPrint('[TotalResidents] Lỗi nạp số lượng cư dân theo tòa nhà: $e');
+    }
+
+    try {
+      final stream = SupabaseConfig.client
+          .from('residents_apartments')
+          .stream(primaryKey: ['id'])
+          .map((list) => list
+              .where((row) => allowedAptIds.contains(row['apartment_id']?.toString()))
+              .map((row) => row['user_id']?.toString())
+              .whereType<String>()
+              .toSet()
+              .length);
+      await for (final count in stream) {
+        lastCount = count;
+        yield count;
+      }
+    } catch (e) {
+      debugPrint('[TotalResidents] Bắt lỗi stream cư dân theo tòa nhà: $e');
+      yield lastCount;
+    }
+    return;
+  }
+
   int lastCount = 0;
   try {
     final initial = await SupabaseConfig.client

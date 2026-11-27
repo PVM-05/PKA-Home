@@ -867,7 +867,7 @@ class _InvoiceManagementScreenState
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerRight,
                           child: Text(
-                            isPending ? 'Duyệt →' : 'Xem >',
+                            isPending ? 'Duyệt >' : 'Xem >',
                             style: context.labelSmall?.copyWith(
                               color: isPending
                                   ? pendingConfirmColor

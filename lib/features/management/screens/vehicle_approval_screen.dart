@@ -156,6 +156,7 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                     if (availableCarSlots.isNotEmpty) ...[
                       DropdownButtonFormField<ParkingSlotModel>(
                         initialValue: selectedSlot,
+                        isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Chọn ô đỗ ô tô còn trống',
                           prefixIcon: Icon(
@@ -173,7 +174,10 @@ class _VehicleApprovalScreenState extends ConsumerState<VehicleApprovalScreen>
                         items: availableCarSlots.map((s) {
                           return DropdownMenuItem(
                             value: s,
-                            child: Text('${s.slotNumber} (Tầng ${s.zone})'),
+                            child: Text(
+                              '${s.slotNumber} (Tầng ${s.zone})',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           );
                         }).toList(),
                         onChanged: (val) {

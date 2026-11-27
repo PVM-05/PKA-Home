@@ -547,8 +547,8 @@ class _CreateIssueScreenState extends ConsumerState<CreateIssueScreen> {
                           child: IconButton(
                             tooltip: 'Xóa ảnh',
                             constraints: const BoxConstraints(
-                              minWidth: 40,
-                              minHeight: 40,
+                              minWidth: 48,
+                              minHeight: 48,
                             ),
                             padding: EdgeInsets.zero,
                             onPressed: () {

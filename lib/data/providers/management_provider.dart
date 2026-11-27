@@ -14,14 +14,20 @@ final apartmentsProvider = FutureProvider.autoDispose<List<ApartmentModel>>((ref
   final list = await repo.fetchApartments();
   final hasBuildingId = list.any((a) => a.buildingId != null && a.buildingId!.isNotEmpty);
   if (!hasBuildingId || activeBuildingId.isEmpty) return list;
-  return list.where((a) => a.buildingId == null || a.buildingId == activeBuildingId).toList();
+  return list.where((a) => a.buildingId == activeBuildingId).toList();
 });
 
 final residentsProvider = FutureProvider.autoDispose<List<ResidentModel>>((ref) async {
-  ref.watch(activeBuildingIdProvider);
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
   final repo = ref.watch(managementRepositoryProvider);
   final apts = await ref.watch(apartmentsProvider.future);
   final residents = await repo.fetchResidents();
+  if (activeBuildingId.isNotEmpty && apts.isEmpty) {
+    // Tòa nhà mới chưa có căn hộ: không hiển thị cư dân thuộc tòa nhà khác
+    return residents
+        .where((r) => r.apartments.isEmpty && r.apartment == null)
+        .toList();
+  }
   final hasBuildingApts = apts.any((a) => a.buildingId != null && a.buildingId!.isNotEmpty);
   if (!hasBuildingApts) return residents;
   final allowedAptIds = apts.map((a) => a.id).toSet();
@@ -34,9 +40,12 @@ final residentsProvider = FutureProvider.autoDispose<List<ResidentModel>>((ref) 
 });
 
 final invoicesProvider = FutureProvider.autoDispose<List<InvoiceModel>>((ref) async {
-  ref.watch(activeBuildingIdProvider);
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
   final repo = ref.watch(managementRepositoryProvider);
   final apts = await ref.watch(apartmentsProvider.future);
+  if (activeBuildingId.isNotEmpty && apts.isEmpty) {
+    return const [];
+  }
   final invoices = await repo.fetchInvoices();
   final hasBuildingApts = apts.any((a) => a.buildingId != null && a.buildingId!.isNotEmpty);
   if (!hasBuildingApts) return invoices;
@@ -50,10 +59,13 @@ final rawIssuesStreamProvider = StreamProvider<List<Map<String, dynamic>>>((ref)
 });
 
 final allIssuesProvider = FutureProvider.autoDispose<List<IssueModel>>((ref) async {
-  ref.watch(activeBuildingIdProvider);
+  final activeBuildingId = ref.watch(activeBuildingIdProvider);
   ref.watch(rawIssuesStreamProvider);
   final repo = ref.watch(managementRepositoryProvider);
   final apts = await ref.watch(apartmentsProvider.future);
+  if (activeBuildingId.isNotEmpty && apts.isEmpty) {
+    return const [];
+  }
   final issues = await repo.fetchIssues();
   final hasBuildingApts = apts.any((a) => a.buildingId != null && a.buildingId!.isNotEmpty);
   if (!hasBuildingApts) return issues;

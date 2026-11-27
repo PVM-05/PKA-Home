@@ -211,8 +211,8 @@ class _HandbookManagementScreenState
                               ),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(
-                                minWidth: 32,
-                                minHeight: 32,
+                                minWidth: 48,
+                                minHeight: 48,
                               ),
                               onPressed: () =>
                                   _showContactDialog(contact: contact),
@@ -226,8 +226,8 @@ class _HandbookManagementScreenState
                               ),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(
-                                minWidth: 32,
-                                minHeight: 32,
+                                minWidth: 48,
+                                minHeight: 48,
                               ),
                               onPressed: () => _confirmDelete(
                                 title: 'Xóa đường dây nóng',
@@ -470,8 +470,8 @@ class _HandbookManagementScreenState
                                   ),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
+                                    minWidth: 48,
+                                    minHeight: 48,
                                   ),
                                   onPressed: () => _showRuleDialog(rule: rule),
                                   tooltip: 'Chỉnh sửa',
@@ -484,8 +484,8 @@ class _HandbookManagementScreenState
                                   ),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
+                                    minWidth: 48,
+                                    minHeight: 48,
                                   ),
                                   onPressed: () => _confirmDelete(
                                     title: 'Xóa nội quy',
@@ -708,8 +708,8 @@ class _HandbookManagementScreenState
                                   ),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
+                                    minWidth: 48,
+                                    minHeight: 48,
                                   ),
                                   onPressed: () =>
                                       _showAmenityDialog(amenity: amenity),
@@ -723,8 +723,8 @@ class _HandbookManagementScreenState
                                   ),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
+                                    minWidth: 48,
+                                    minHeight: 48,
                                   ),
                                   onPressed: () => _confirmDelete(
                                     title: 'Xóa tiện ích',

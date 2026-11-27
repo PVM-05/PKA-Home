@@ -47,7 +47,14 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
       body: invoiceState.when(
         data: (invoices) {
           final unpaidInvoices =
-              invoices.where((i) => i.status != 'paid').toList()..sort((
+              invoices
+                  .where(
+                    (i) =>
+                        i.status != 'paid' &&
+                        i.status != 'cancelled' &&
+                        i.status != 'void',
+                  )
+                  .toList()..sort((
                 a,
                 b,
               ) {
@@ -64,9 +71,13 @@ class _ResidentInvoiceScreenState extends ConsumerState<ResidentInvoiceScreen> {
                   b.dueDate.day,
                 );
                 final aOverdue =
-                    a.status == 'unpaid' && today.difference(aDue).inDays > 0;
+                    a.status == 'overdue' ||
+                    ((a.status == 'unpaid' || a.status == 'pending') &&
+                        today.difference(aDue).inDays > 0);
                 final bOverdue =
-                    b.status == 'unpaid' && today.difference(bDue).inDays > 0;
+                    b.status == 'overdue' ||
+                    ((b.status == 'unpaid' || b.status == 'pending') &&
+                        today.difference(bDue).inDays > 0);
                 if (aOverdue && !bOverdue) return -1;
                 if (!aOverdue && bOverdue) return 1;
                 return a.dueDate.compareTo(b.dueDate);

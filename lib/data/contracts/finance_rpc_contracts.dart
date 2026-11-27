@@ -5,13 +5,15 @@
 // -------------------------------------------------------------
 class RecordMaintenanceTransactionRequestDto {
   final String buildingId;
-  final String transactionType; // 'THU' | 'CHI'
+  final String transactionType; // 'INCOME' | 'EXPENSE' (hoặc 'THU' | 'CHI')
   final double amount;
   final String category;
   final String description;
   final String? receiptUrl;
   final String? referenceId;
   final String? createdBy;
+  final String? recipientOrPayer;
+  final String? referenceType;
 
   const RecordMaintenanceTransactionRequestDto({
     required this.buildingId,
@@ -22,6 +24,8 @@ class RecordMaintenanceTransactionRequestDto {
     this.receiptUrl,
     this.referenceId,
     this.createdBy,
+    this.recipientOrPayer,
+    this.referenceType,
   });
 
   Map<String, dynamic> toRpcParams() {
@@ -34,6 +38,8 @@ class RecordMaintenanceTransactionRequestDto {
       'p_receipt_url': receiptUrl,
       'p_reference_id': referenceId,
       'p_created_by': createdBy,
+      if (recipientOrPayer != null) 'p_recipient_or_payer': recipientOrPayer,
+      if (referenceType != null) 'p_reference_type': referenceType,
     };
   }
 }

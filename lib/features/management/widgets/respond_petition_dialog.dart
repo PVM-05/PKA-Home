@@ -41,7 +41,16 @@ class _RespondPetitionDialogState extends ConsumerState<RespondPetitionDialog> {
     if (!_formKey.currentState!.validate()) return;
 
     final authUser = ref.read(authProvider).valueOrNull;
-    final staffId = authUser?.id ?? 'usr-admin';
+    final staffId = authUser?.id;
+    if (staffId == null || staffId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại'),
+          backgroundColor: AppTheme.textError,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
     try {

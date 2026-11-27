@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/error_formatter.dart';
 import '../../../data/models/parcel_model.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/front_desk_provider.dart';
 
 class HandoverParcelDialog extends ConsumerStatefulWidget {
@@ -41,6 +43,12 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
       return;
     }
 
+    final staffId = ref.read(authProvider).valueOrNull?.id;
+    if (staffId == null || staffId.isEmpty) {
+      setState(() => _errorMessage = 'Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại');
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
       _errorMessage = null;
@@ -51,7 +59,7 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
       final res = await repo.collectParcel(
         parcelId: widget.parcel.id,
         pickupPin: pin,
-        staffId: 'staff-current',
+        staffId: staffId,
         collectedBy: _collectorCtrl.text.trim(),
       );
 
@@ -59,11 +67,12 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
         ref.invalidate(parcelsProvider);
         ref.invalidate(frontDeskStatsProvider);
         if (mounted) {
+          final successColor = AppTheme.getSemanticSuccess(context);
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Bàn giao bưu kiện thành công cho cư dân!'),
-              backgroundColor: AppTheme.success,
+            SnackBar(
+              content: const Text('Bàn giao bưu kiện thành công cho cư dân!'),
+              backgroundColor: successColor,
             ),
           );
         }
@@ -71,7 +80,7 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
         setState(() => _errorMessage = res['message'] as String? ?? 'Mã PIN không khớp');
       }
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      setState(() => _errorMessage = formatErrorMessage(e));
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -81,10 +90,11 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Row(
         children: [
-          const Icon(Icons.outbox_rounded, color: AppTheme.primary),
+          Icon(Icons.outbox_rounded, color: colorScheme.primary),
           const SizedBox(width: 8),
           Expanded(child: Text('Bàn giao kiện ${widget.parcel.parcelCode}')),
         ],
@@ -97,15 +107,15 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: colorScheme.primaryContainer.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.blue.shade200),
+                border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Căn hộ: ${widget.parcel.apartmentCode ?? widget.parcel.apartmentId}',
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                      style: context.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text('Hãng: ${widget.parcel.carrierDisplayName} - ${widget.parcel.shelfLocation}'),
                   if (widget.parcel.description != null) ...[
@@ -144,17 +154,19 @@ class _HandoverParcelDialogState extends ConsumerState<HandoverParcelDialog> {
             ),
             if (_errorMessage != null) ...[
               const SizedBox(height: 8),
-              Text(_errorMessage!, style: context.bodySmall?.copyWith(color: AppTheme.error)),
+              Text(_errorMessage!, style: context.bodySmall?.copyWith(color: colorScheme.error)),
             ],
           ],
         ),
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
           onPressed: () => Navigator.pop(context),
           child: const Text('Hủy'),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48)),
           onPressed: _isSubmitting ? null : _handover,
           child: Text(_isSubmitting ? 'Đang kiểm tra...' : 'Xác Nhận Bàn Giao'),
         ),

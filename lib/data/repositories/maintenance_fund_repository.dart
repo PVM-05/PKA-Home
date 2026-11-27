@@ -24,9 +24,7 @@ class MaintenanceFundRepository {
       }
       final response = await query.order('created_at', ascending: false).limit(1).maybeSingle();
       if (response == null) {
-        // Fallback lấy quỹ mặc định nếu tòa nhà chưa tạo bản ghi riêng
-        final fallback = await client.from('maintenance_funds').select().order('created_at', ascending: false).limit(1).maybeSingle();
-        return fallback != null ? MaintenanceFundModel.fromJson(fallback) : null;
+        return null;
       }
       return MaintenanceFundModel.fromJson(response);
     } catch (_) {
@@ -104,6 +102,8 @@ class MaintenanceFundRepository {
       receiptUrl: null,
       referenceId: referenceId,
       createdBy: null,
+      recipientOrPayer: recipientOrPayer,
+      referenceType: referenceType,
     );
 
     final resDto = await recordTransactionContract(req);

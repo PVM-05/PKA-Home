@@ -47,7 +47,10 @@ class ResidentHomeUpcomingInvoiceCard extends StatelessWidget {
                 .where(
                   (i) =>
                       i.status == 'unpaid' ||
-                      i.status == 'pending_confirmation',
+                      i.status == 'overdue' ||
+                      i.status == 'pending' ||
+                      i.status == 'pending_confirmation' ||
+                      i.status == 'under_review',
                 )
                 .toList();
             final totalUnpaid = unpaidInvoices.fold<double>(

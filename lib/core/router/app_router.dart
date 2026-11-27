@@ -13,6 +13,7 @@ import '../../features/management/screens/inspection_workstation_screen.dart';
 import '../../features/management/widgets/resident_activation_management_sheet.dart';
 import '../../features/resident/screens/resident_handover_screen.dart';
 import '../../features/resident/screens/resident_handover_detail_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +22,7 @@ import '../constants/permissions.dart';
 import '../widgets/pdpl_consent_dialog.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/link_request_provider.dart';
+import '../../data/providers/role_delegation_provider.dart';
 import '../../data/models/invoice_model.dart';
 import '../../data/models/issue_model.dart';
 import '../../data/models/announcement_model.dart';
@@ -141,7 +143,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.login,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     refreshListenable: GoRouterAuthNotifier(ref),
     redirect: (context, state) {
       final authState = ref.read(authProvider);
@@ -190,10 +192,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.residentHome;
       }
 
-      // Quản lý/Nhân viên: Kiểm tra quyền hạn chi tiết (RBAC) theo tuyến đường
+      // Quản lý/Nhân viên: Kiểm tra quyền hạn chi tiết (RBAC + Ủy quyền vai trò tạm thời) theo tuyến đường
       if (isLoggedIn && user.isManagement && state.matchedLocation.startsWith('/management')) {
         final requiredPerm = _findRoutePermission(state.matchedLocation);
-        if (requiredPerm != null && !requiredPerm.allows(user.role)) {
+        final activeDelegations =
+            ref.read(activeDelegationsProvider).valueOrNull ?? const [];
+        if (requiredPerm != null &&
+            !requiredPerm.allows(
+              user.role,
+              activeDelegations: activeDelegations,
+            )) {
           return AppRoutes.managementHome;
         }
       }

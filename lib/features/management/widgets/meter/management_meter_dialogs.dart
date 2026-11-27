@@ -547,14 +547,14 @@ Future<void> showMeterApproveDialog({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '• Tiêu thụ điện: ${_formatConsumed(elecConsumed)} kWh (Chỉ số: ${item.previousElectricReading ?? 0} → ${item.electricReading})',
+                          '• Tiêu thụ điện: ${_formatConsumed(elecConsumed)} kWh (Chỉ số: ${item.previousElectricReading ?? 0} đến ${item.electricReading})',
                           style: theme.textTheme.bodyMedium
                               ?.copyWith(fontWeight: FontWeight.w600)
                               .tabularFigures(),
                         ),
                         AppSpacing.h6,
                         Text(
-                          '• Tiêu thụ nước: ${_formatConsumed(waterConsumed)} m³ (Chỉ số: ${item.previousWaterReading ?? 0} → ${item.waterReading})',
+                          '• Tiêu thụ nước: ${_formatConsumed(waterConsumed)} m³ (Chỉ số: ${item.previousWaterReading ?? 0} đến ${item.waterReading})',
                           style: theme.textTheme.bodyMedium
                               ?.copyWith(fontWeight: FontWeight.w600)
                               .tabularFigures(),

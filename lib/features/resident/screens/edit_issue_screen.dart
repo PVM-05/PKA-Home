@@ -390,8 +390,8 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                             child: IconButton(
                               tooltip: 'Xóa ảnh',
                               constraints: const BoxConstraints(
-                                minWidth: 40,
-                                minHeight: 40,
+                                minWidth: 48,
+                                minHeight: 48,
                               ),
                               padding: EdgeInsets.zero,
                               onPressed: () {
@@ -438,8 +438,8 @@ class _EditIssueScreenState extends ConsumerState<EditIssueScreen> {
                             child: IconButton(
                               tooltip: 'Xóa ảnh',
                               constraints: const BoxConstraints(
-                                minWidth: 40,
-                                minHeight: 40,
+                                minWidth: 48,
+                                minHeight: 48,
                               ),
                               padding: EdgeInsets.zero,
                               onPressed: () {
